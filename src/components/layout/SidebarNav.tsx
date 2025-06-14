@@ -1,4 +1,3 @@
-
 import { Link, NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -81,9 +80,8 @@ const menuItems = [
       },
     ],
   },
-  { title: "Cadastros", href: "/cadastros", icon: ClipboardList },
   { title: "Agentes de IA", href: "/agentes-ia", icon: Bot },
-  { title: "Nossos Cursos", href: "/nossos-cursos", icon: School },
+  { title: "Nossos Cursos", href: "/nossos-cursos", icon: School, highlighted: true },
 ];
 
 export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
@@ -95,7 +93,11 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
       key={item.href}
       to={item.href}
       className={({ isActive }) =>
-        cn(baseClassName, isActive && activeClassName)
+        cn(
+          baseClassName,
+          isActive && activeClassName,
+          item.highlighted && "my-1 bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary !font-semibold shadow-lg shadow-primary/30"
+        )
       }
     >
       <item.icon className="mr-2 h-4 w-4" />
@@ -109,7 +111,7 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
         <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
         <span className="font-bold">Portal do Aluno</span>
       </Link>
-      <Accordion type="multiple" className="w-full" defaultValue={['item-0', 'item-1', 'item-2']}>
+      <Accordion type="multiple" className="w-full" defaultValue={['item-0', 'item-1', 'item-2', 'item-3']}>
         {menuItems.map((item, index) =>
           item.subItems ? (
             <AccordionItem value={`item-${index}`} key={item.title} className="border-b-0">
