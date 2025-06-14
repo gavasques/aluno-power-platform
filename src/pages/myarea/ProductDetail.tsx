@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,7 +33,8 @@ const mockProduct: Product = {
       otherPct: 3,
       otherValue: 0,
       adsPct: 5,
-      salePrice: 699.90
+      salePrice: 699.90,
+      gatewayPct: 2.5
     },
     amazonFBM: {
       enabled: true,

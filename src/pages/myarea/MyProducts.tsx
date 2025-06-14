@@ -34,7 +34,8 @@ const mockProducts: Product[] = [
         otherPct: 2,
         otherValue: 0,
         adsPct: 8,
-        salePrice: 1299
+        salePrice: 1299,
+        gatewayPct: 3.5
       },
       amazonFBA: {
         enabled: true,
