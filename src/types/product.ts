@@ -44,7 +44,7 @@ export interface BaseChannel {
 }
 
 export interface SiteProprioChannel extends BaseChannel {
-  // Herda costItem e packCost do produto base
+  gatewayPct: number; // Custo de Gateway de pagamento
 }
 
 export interface AmazonFBMChannel extends BaseChannel {
@@ -95,6 +95,7 @@ export interface ChannelInput {
   otherPct?: number;
   otherValue?: number;
   flexRevenue?: number;
+  gatewayPct?: number;
 }
 
 export interface ChannelResult {

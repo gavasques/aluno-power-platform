@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -30,7 +29,8 @@ export const useProductForm = () => {
       otherPct: 0,
       otherValue: 0,
       adsPct: 0,
-      salePrice: 0
+      salePrice: 0,
+      gatewayPct: 0
     },
     amazonFBM: {
       enabled: false,

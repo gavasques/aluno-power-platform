@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { FormattedInput } from "@/components/ui/formatted-input";
 import { ProductChannels } from "@/types/product";
 
 interface ChannelFormProps {
@@ -35,61 +35,73 @@ export const ChannelForm = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Comissão (%)</Label>
-            <Input
-              type="number"
-              value={channelData.commissionPct}
-              onChange={(e) => onChannelInputChange(channelType, 'commissionPct', Number(e.target.value))}
+            <FormattedInput
+              type="percentage"
+              value={channelData.commissionPct || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'commissionPct', value)}
             />
           </div>
           <div>
             <Label>Taxa Fixa (R$)</Label>
-            <Input
-              type="number"
-              value={channelData.fixedFee}
-              onChange={(e) => onChannelInputChange(channelType, 'fixedFee', Number(e.target.value))}
+            <FormattedInput
+              type="currency"
+              value={channelData.fixedFee || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'fixedFee', value)}
             />
           </div>
           <div>
             <Label>Outro Custo (%)</Label>
-            <Input
-              type="number"
-              value={channelData.otherPct}
-              onChange={(e) => onChannelInputChange(channelType, 'otherPct', Number(e.target.value))}
+            <FormattedInput
+              type="percentage"
+              value={channelData.otherPct || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'otherPct', value)}
             />
           </div>
           <div>
             <Label>Outro Custo (R$)</Label>
-            <Input
-              type="number"
-              value={channelData.otherValue}
-              onChange={(e) => onChannelInputChange(channelType, 'otherValue', Number(e.target.value))}
+            <FormattedInput
+              type="currency"
+              value={channelData.otherValue || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'otherValue', value)}
             />
           </div>
           <div>
             <Label>Custo com Ads (%)</Label>
-            <Input
-              type="number"
-              value={channelData.adsPct}
-              onChange={(e) => onChannelInputChange(channelType, 'adsPct', Number(e.target.value))}
+            <FormattedInput
+              type="percentage"
+              value={channelData.adsPct || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'adsPct', value)}
             />
           </div>
           <div>
             <Label>Preço de Venda (R$)</Label>
-            <Input
-              type="number"
-              value={channelData.salePrice}
-              onChange={(e) => onChannelInputChange(channelType, 'salePrice', Number(e.target.value))}
+            <FormattedInput
+              type="currency"
+              value={channelData.salePrice || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'salePrice', value)}
             />
           </div>
+          
+          {/* Campo específico para Site Próprio */}
+          {channelType === 'sitePropio' && (
+            <div>
+              <Label>Gateway de Pagamento (%)</Label>
+              <FormattedInput
+                type="percentage"
+                value={channelData.gatewayPct || 0}
+                onChange={(value) => onChannelInputChange(channelType, 'gatewayPct', value)}
+              />
+            </div>
+          )}
           
           {/* Campos específicos por canal */}
           {(channelType === 'amazonFBM' || channelType === 'amazonFBAOnSite' || channelType === 'amazonDBA' || channelType === 'mlFlex' || channelType === 'mlEnvios') && (
             <div>
               <Label>Frete Outbound (R$)</Label>
-              <Input
-                type="number"
+              <FormattedInput
+                type="currency"
                 value={channelData.outboundFreight || 0}
-                onChange={(e) => onChannelInputChange(channelType, 'outboundFreight', Number(e.target.value))}
+                onChange={(value) => onChannelInputChange(channelType, 'outboundFreight', value)}
               />
             </div>
           )}
@@ -98,18 +110,18 @@ export const ChannelForm = ({
             <>
               <div>
                 <Label>Frete Inbound (R$)</Label>
-                <Input
-                  type="number"
+                <FormattedInput
+                  type="currency"
                   value={channelData.inboundFreight || 0}
-                  onChange={(e) => onChannelInputChange(channelType, 'inboundFreight', Number(e.target.value))}
+                  onChange={(value) => onChannelInputChange(channelType, 'inboundFreight', value)}
                 />
               </div>
               <div>
                 <Label>Prep Center (R$)</Label>
-                <Input
-                  type="number"
+                <FormattedInput
+                  type="currency"
                   value={channelData.prepCenter || 0}
-                  onChange={(e) => onChannelInputChange(channelType, 'prepCenter', Number(e.target.value))}
+                  onChange={(value) => onChannelInputChange(channelType, 'prepCenter', value)}
                 />
               </div>
             </>
@@ -118,10 +130,10 @@ export const ChannelForm = ({
           {channelType === 'mlFlex' && (
             <div>
               <Label>Receita ML Flex (R$)</Label>
-              <Input
-                type="number"
+              <FormattedInput
+                type="currency"
                 value={channelData.flexRevenue || 0}
-                onChange={(e) => onChannelInputChange(channelType, 'flexRevenue', Number(e.target.value))}
+                onChange={(value) => onChannelInputChange(channelType, 'flexRevenue', value)}
               />
             </div>
           )}

@@ -5,7 +5,7 @@ export function calcChannel(input: ChannelInput, taxPct: number = 0): ChannelRes
   const P = input.price;
   const pct = (p: number | undefined) => (p ?? 0) / 100 * P;
   
-  const Cperc = pct(input.commissionPct) + pct(input.adsPct) + pct(input.otherPct) + pct(taxPct);
+  const Cperc = pct(input.commissionPct) + pct(input.adsPct) + pct(input.otherPct) + pct(input.gatewayPct) + pct(taxPct);
   const Cunit = (
     input.costItem +
     (input.packCost ?? 0) +
@@ -29,7 +29,7 @@ export function calcChannel(input: ChannelInput, taxPct: number = 0): ChannelRes
 
 export function priceForMargin(input: ChannelInput, targetMarginPct: number, taxPct: number = 0): number {
   const pct = (p: number | undefined) => (p ?? 0);
-  const varPct = pct(input.commissionPct) + pct(input.adsPct) + pct(input.otherPct) + taxPct;
+  const varPct = pct(input.commissionPct) + pct(input.adsPct) + pct(input.otherPct) + pct(input.gatewayPct) + taxPct;
   const Cunit = (
     input.costItem +
     (input.packCost ?? 0) +
@@ -58,6 +58,9 @@ export function calculateChannelResults(product: Product, channelType: string, c
 
   // Adicionar custos específicos por canal
   switch (channelType) {
+    case 'sitePropio':
+      baseInput.gatewayPct = (channel as any).gatewayPct || 0;
+      break;
     case 'amazonFBM':
     case 'amazonFBAOnSite':
     case 'amazonDBA':
