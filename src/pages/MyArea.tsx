@@ -1,12 +1,16 @@
 
 import { useParams } from "react-router-dom";
 import MySuppliers from "./myarea/MySuppliers";
+import SupplierDetail from "./myarea/SupplierDetail";
 
 const MyArea = () => {
-  const { section } = useParams();
+  const { section, id } = useParams();
 
   switch (section) {
     case "fornecedores":
+      if (id) {
+        return <SupplierDetail />;
+      }
       return <MySuppliers />;
     case "produtos":
     default:
