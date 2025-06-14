@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { Product } from "@/types/product";
 import { calculateChannelResults, formatCurrency, formatPercentage } from "@/utils/productCalculations";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
 const mockProducts: Product[] = [
   {
@@ -88,42 +89,27 @@ const MyProducts = () => {
     });
   };
 
-  const getEnabledChannels = (product: Product) => {
-    const channels = [];
-    if (product.channels.sitePropio?.enabled) {
-      const result = calculateChannelResults(product, 'sitePropio', product.channels.sitePropio);
-      channels.push({
-        name: "Site Próprio",
-        price: product.channels.sitePropio.salePrice,
-        margin: result.margin,
-        color: "bg-emerald-50 text-emerald-700 border-emerald-200"
-      });
-    }
-    if (product.channels.amazonFBA?.enabled) {
-      const result = calculateChannelResults(product, 'amazonFBA', product.channels.amazonFBA);
-      channels.push({
-        name: "Amazon FBA",
-        price: product.channels.amazonFBA.salePrice,
-        margin: result.margin,
-        color: "bg-orange-50 text-orange-700 border-orange-200"
-      });
-    }
-    if (product.channels.mlFull?.enabled) {
-      const result = calculateChannelResults(product, 'mlFull', product.channels.mlFull);
-      channels.push({
-        name: "ML Full",
-        price: product.channels.mlFull.salePrice,
-        margin: result.margin,
-        color: "bg-yellow-50 text-yellow-700 border-yellow-200"
-      });
-    }
-    return channels;
+  const channelOrder = [
+    { key: "sitePropio", label: "Site Próprio", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+    { key: "amazonFBA", label: "Amazon FBA", color: "bg-orange-50 text-orange-700 border-orange-200" },
+    { key: "mlFull", label: "ML Full", color: "bg-yellow-50 text-yellow-700 border-yellow-200" }
+  ];
+
+  const getChannelInfo = (product: Product, channelKey: keyof Product["channels"]) => {
+    const channel: any = product.channels[channelKey];
+    if (!channel?.enabled) return null;
+    const result = calculateChannelResults(product, channelKey, channel);
+    return {
+      price: channel.salePrice,
+      margin: result.margin,
+      color: channelOrder.find(ch => ch.key === channelKey)?.color ?? ""
+    };
   };
 
   const getTotalStats = () => {
     const total = filteredProducts.length;
     const activeChannels = filteredProducts.reduce((acc, product) => {
-      return acc + getEnabledChannels(product).length;
+      return acc + channelOrder.reduce((cAcc, c) => getChannelInfo(product, c.key as keyof Product["channels"]) ? cAcc + 1 : cAcc, 0);
     }, 0);
     return { total, activeChannels };
   };
@@ -228,6 +214,38 @@ const MyProducts = () => {
         </CardContent>
       </Card>
     );
+  };
+
+  const getEnabledChannels = (product: Product) => {
+    const channels = [];
+    if (product.channels.sitePropio?.enabled) {
+      const result = calculateChannelResults(product, 'sitePropio', product.channels.sitePropio);
+      channels.push({
+        name: "Site Próprio",
+        price: product.channels.sitePropio.salePrice,
+        margin: result.margin,
+        color: "bg-emerald-50 text-emerald-700 border-emerald-200"
+      });
+    }
+    if (product.channels.amazonFBA?.enabled) {
+      const result = calculateChannelResults(product, 'amazonFBA', product.channels.amazonFBA);
+      channels.push({
+        name: "Amazon FBA",
+        price: product.channels.amazonFBA.salePrice,
+        margin: result.margin,
+        color: "bg-orange-50 text-orange-700 border-orange-200"
+      });
+    }
+    if (product.channels.mlFull?.enabled) {
+      const result = calculateChannelResults(product, 'mlFull', product.channels.mlFull);
+      channels.push({
+        name: "ML Full",
+        price: product.channels.mlFull.salePrice,
+        margin: result.margin,
+        color: "bg-yellow-50 text-yellow-700 border-yellow-200"
+      });
+    }
+    return channels;
   };
 
   return (
@@ -346,7 +364,7 @@ const MyProducts = () => {
           </CardContent>
         </Card>
 
-        {/* Products Grid */}
+        {/* Products Grid/List */}
         <div className="mb-8">
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -355,26 +373,97 @@ const MyProducts = () => {
               ))}
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-          
-          {filteredProducts.length === 0 && (
-            <Card className="border-0 shadow-md">
-              <CardContent className="text-center py-12">
-                <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-lg font-medium text-gray-600 mb-2">Nenhum produto encontrado</p>
-                <p className="text-gray-500 mb-6">Tente ajustar os filtros ou adicionar um novo produto</p>
-                <Button 
-                  onClick={() => navigate("/minha-area/produtos/novo")}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Primeiro Produto
-                </Button>
+            <Card className="border-0 shadow-md overflow-x-auto">
+              <CardContent className="px-2 py-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-32"></TableHead>
+                      <TableHead>Produto</TableHead>
+                      <TableHead>Marca</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      {channelOrder.map(c => (
+                        <TableHead key={c.key} className="text-center">{c.label}</TableHead>
+                      ))}
+                      <TableHead className="text-right w-28">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProducts.map(product => (
+                      <TableRow key={product.id}>
+                        <TableCell className="align-middle text-center">
+                          <img
+                            src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop"}
+                            alt={product.name}
+                            className="w-14 h-14 object-cover rounded-lg shadow border border-gray-100 mx-auto"
+                          />
+                        </TableCell>
+                        <TableCell className="font-semibold text-gray-900">
+                          {product.name}
+                        </TableCell>
+                        <TableCell>{product.brand}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
+                            {product.category}
+                          </Badge>
+                        </TableCell>
+                        {channelOrder.map((chan) => {
+                          const info = getChannelInfo(product, chan.key as keyof Product["channels"]);
+                          return (
+                            <TableCell key={chan.key} className="text-center">
+                              {info ? (
+                                <div>
+                                  <Badge className={`mb-1 border ${chan.color}`}>{chan.label}</Badge>
+                                  <div className="font-semibold">{formatCurrency(info.price)}</div>
+                                  <div className={`text-xs ${info.margin > 0 ? "text-green-600" : "text-red-600"}`}>
+                                    {formatPercentage(info.margin)}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-gray-300 text-xs italic">-</span>
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs px-2 py-1 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
+                              onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
+                              title="Editar"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs px-2 py-1 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+                              onClick={() => handleDeleteProduct(product.id)}
+                              title="Remover"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {filteredProducts.length === 0 && (
+                  <div className="flex flex-col gap-2 items-center py-12">
+                    <Package className="h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-lg font-medium text-gray-600 mb-2">Nenhum produto encontrado</p>
+                    <Button 
+                      onClick={() => navigate("/minha-area/produtos/novo")}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar Primeiro Produto
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
