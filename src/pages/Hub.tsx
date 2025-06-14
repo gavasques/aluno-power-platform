@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import PromptsIA from "./hub/PromptsIA";
 import Materials from "./hub/Materials";
 import Templates from "./hub/Templates";
+import Tools from "./hub/Tools";
+import Suppliers from "./hub/Suppliers";
 
 const Hub = () => {
   const { section } = useParams();
@@ -15,9 +17,11 @@ const Hub = () => {
       return <Materials />;
     case "templates":
       return <Templates />;
-    case "parceiros":
-    case "fornecedores":
     case "ferramentas":
+      return <Tools />;
+    case "fornecedores":
+      return <Suppliers />;
+    case "parceiros":
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Hub de Recursos";
       return (
