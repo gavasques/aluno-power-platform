@@ -1,6 +1,7 @@
 
 import { useParams } from "react-router-dom";
 import MySuppliers from "./myarea/MySuppliers";
+import MyProducts from "./myarea/MyProducts";
 import SupplierDetail from "./myarea/SupplierDetail";
 
 const MyArea = () => {
@@ -13,6 +14,11 @@ const MyArea = () => {
       }
       return <MySuppliers />;
     case "produtos":
+      if (id) {
+        // TODO: Implementar ProductDetail
+        return <div>Detalhes do Produto - Em breve</div>;
+      }
+      return <MyProducts />;
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Minha Área";
       return (
