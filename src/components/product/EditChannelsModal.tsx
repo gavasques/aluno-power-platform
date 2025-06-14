@@ -1,10 +1,36 @@
 
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Product, ProductChannels } from "@/types/product";
 import { ChannelForm } from "./ChannelForm";
 import { toast } from "@/hooks/use-toast";
+
+const defaultChannels: ProductChannels = {
+    sitePropio: { enabled: false, commissionPct: 0, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, salePrice: 0, gatewayPct: 0 },
+    amazonFBM: { enabled: false, commissionPct: 15, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, salePrice: 0 },
+    amazonFBAOnSite: { enabled: false, commissionPct: 15, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, salePrice: 0 },
+    amazonDBA: { enabled: false, commissionPct: 15, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, salePrice: 0 },
+    amazonFBA: { enabled: false, commissionPct: 15, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, inboundFreight: 0, prepCenter: 0, salePrice: 0 },
+    mlME1: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, salePrice: 0 },
+    mlFlex: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, flexRevenue: 0, salePrice: 0 },
+    mlEnvios: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, salePrice: 0 },
+    mlFull: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, inboundFreight: 0, prepCenter: 0, salePrice: 0 }
+};
+
+const getInitialChannelsState = (productChannels: ProductChannels): ProductChannels => {
+  const initialState: Partial<ProductChannels> = {};
+  for (const key in defaultChannels) {
+    const channelKey = key as keyof ProductChannels;
+    const defaultChannelData = defaultChannels[channelKey] || {};
+    const productChannelData = productChannels[channelKey] || {};
+    initialState[channelKey] = {
+      ...defaultChannelData,
+      ...productChannelData,
+    };
+  }
+  return initialState as ProductChannels;
+};
 
 interface EditChannelsModalProps {
   product: Product;
@@ -19,7 +45,15 @@ export const EditChannelsModal = ({
   onClose, 
   onSave 
 }: EditChannelsModalProps) => {
-  const [editedChannels, setEditedChannels] = useState<ProductChannels>(product.channels);
+  const [editedChannels, setEditedChannels] = useState<ProductChannels>(
+    getInitialChannelsState(product.channels)
+  );
+
+  useEffect(() => {
+    if (product) {
+      setEditedChannels(getInitialChannelsState(product.channels));
+    }
+  }, [product, isOpen]);
 
   const handleChannelToggle = (channelType: keyof ProductChannels) => {
     setEditedChannels(prev => ({
@@ -59,6 +93,9 @@ export const EditChannelsModal = ({
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Canais de Venda</DialogTitle>
+          <DialogDescription>
+            Ative ou desative canais de venda e ajuste suas configurações.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
