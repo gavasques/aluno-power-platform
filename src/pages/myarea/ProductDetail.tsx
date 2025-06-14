@@ -4,7 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, Eye } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Edit, Eye, Power, PowerOff } from "lucide-react";
 import { Product } from "@/types/product";
 import { ProductView } from "@/components/product/ProductView";
 import { ProductMetrics } from "@/components/product/ProductMetrics";
@@ -12,6 +13,7 @@ import { EditProductModal } from "@/components/product/EditProductModal";
 import { EditBasicDataModal } from "@/components/product/EditBasicDataModal";
 import { EditChannelsModal } from "@/components/product/EditChannelsModal";
 import { mockSuppliers, mockCategories } from "@/data/mockData";
+import { toast } from "@/hooks/use-toast";
 
 // Mock product data - em um app real viria de uma API
 const mockProduct: Product = {
@@ -28,6 +30,7 @@ const mockProduct: Product = {
   costItem: 450.00,
   packCost: 15.00,
   taxPercent: 12,
+  active: true,
   channels: {
     sitePropio: {
       enabled: true,
@@ -141,6 +144,15 @@ const ProductDetail = () => {
     setIsEditChannelsModalOpen(false);
   };
 
+  const handleToggleProductStatus = () => {
+    const newStatus = !product.active;
+    setProduct(prev => ({ ...prev, active: newStatus }));
+    toast({
+      title: newStatus ? "Produto ativado" : "Produto desativado",
+      description: newStatus ? "O produto foi ativado com sucesso." : "O produto foi desativado e ocultado do sistema."
+    });
+  };
+
   const supplierName = mockSuppliers.find(s => s.id === product.supplierId)?.tradeName || "Fornecedor não encontrado";
 
   return (
@@ -157,13 +169,29 @@ const ProductDetail = () => {
         
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">{product.name}</h1>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold">{product.name}</h1>
+              <Badge variant={product.active ? "default" : "secondary"}>
+                {product.active ? "Ativo" : "Inativo"}
+              </Badge>
+            </div>
             <p className="text-muted-foreground">
               {product.brand} • {supplierName}
             </p>
           </div>
           
           <div className="flex gap-2">
+            <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg">
+              <Switch
+                checked={product.active}
+                onCheckedChange={handleToggleProductStatus}
+                className="data-[state=checked]:bg-green-600"
+              />
+              <span className="text-sm font-medium">
+                {product.active ? "Ativo" : "Inativo"}
+              </span>
+            </div>
+            
             <Button
               variant={viewMode === 'overview' ? 'default' : 'outline'}
               onClick={() => setViewMode('overview')}

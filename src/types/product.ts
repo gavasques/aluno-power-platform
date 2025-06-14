@@ -18,6 +18,7 @@ export interface Product {
   packCost: number; // Custo de embalagem
   taxPercent: number; // Imposto global %
   channels: ProductChannels;
+  active: boolean; // Nova propriedade para ativar/desativar produto
   createdAt: string;
 }
 
