@@ -121,9 +121,20 @@ const MyProducts = () => {
     const bestMargin = enabledChannels.reduce((max, channel) => 
       channel.margin > max ? channel.margin : max, -Infinity
     );
-    
+
+    // Card inteiro clicável, exceto em botões (evitamos propagação)
+    const handleCardClick = () => {
+      navigate(`/minha-area/produtos/${product.id}`);
+    };
+
     return (
-      <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-md hover:shadow-blue-100/50 hover:-translate-y-1">
+      <Card
+        className="group hover:shadow-xl transition-all duration-300 border-0 shadow-md hover:shadow-blue-100/50 hover:-translate-y-1 cursor-pointer"
+        onClick={handleCardClick}
+        tabIndex={0}
+        role="button"
+        aria-label={`Visualizar detalhes de ${product.name}`}
+      >
         <CardHeader className="pb-3">
           <div className="flex items-start gap-4">
             <div className="relative">
@@ -181,7 +192,10 @@ const MyProducts = () => {
                       variant="ghost" 
                       size="sm" 
                       className="text-xs text-blue-600 hover:text-blue-700"
-                      onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
+                      onClick={e => {
+                        e.stopPropagation();
+                        navigate(`/minha-area/produtos/${product.id}`);
+                      }}
                     >
                       <Eye className="w-3 h-3 mr-1" />
                       Ver mais {enabledChannels.length - 2} canais
@@ -195,7 +209,10 @@ const MyProducts = () => {
                 variant="outline"
                 size="sm"
                 className="flex-1 text-xs hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
-                onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
+                onClick={e => {
+                  e.stopPropagation();
+                  navigate(`/minha-area/produtos/${product.id}`);
+                }}
               >
                 <Edit className="h-3 w-3 mr-1" />
                 Editar
@@ -204,7 +221,10 @@ const MyProducts = () => {
                 variant="outline"
                 size="sm"
                 className="flex-1 text-xs hover:bg-red-50 hover:text-red-700 hover:border-red-200"
-                onClick={() => handleDeleteProduct(product.id)}
+                onClick={e => {
+                  e.stopPropagation();
+                  handleDeleteProduct(product.id);
+                }}
               >
                 <Trash2 className="h-3 w-3 mr-1" />
                 Remover
@@ -393,7 +413,14 @@ const MyProducts = () => {
                     </TableHeader>
                     <TableBody>
                       {filteredProducts.map(product => (
-                        <TableRow key={product.id} className="hover:bg-gray-50/50">
+                        <TableRow
+                          key={product.id}
+                          className="hover:bg-gray-50/50 cursor-pointer"
+                          onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`Visualizar detalhes de ${product.name}`}
+                        >
                           <TableCell className="text-center">
                             <img
                               src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop"}
@@ -427,13 +454,16 @@ const MyProducts = () => {
                               </TableCell>
                             );
                           })}
-                          <TableCell className="text-center">
+                          <TableCell className="text-center" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-center gap-1">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
-                                onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  navigate(`/minha-area/produtos/${product.id}`);
+                                }}
                                 title="Editar"
                               >
                                 <Edit className="h-3 w-3" />
@@ -442,7 +472,10 @@ const MyProducts = () => {
                                 variant="outline"
                                 size="sm"
                                 className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
-                                onClick={() => handleDeleteProduct(product.id)}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleDeleteProduct(product.id);
+                                }}
                                 title="Remover"
                               >
                                 <Trash2 className="h-3 w-3" />
