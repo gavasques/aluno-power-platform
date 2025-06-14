@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Grid, List, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Grid, List, Edit, Trash2, Filter, TrendingUp, Package, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { Product } from "@/types/product";
@@ -69,6 +68,7 @@ const MyProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
 
   const categories = ["Todas", "Eletrônicos", "Roupas e Acessórios", "Casa e Jardim", "Esportes", "Automotivo"];
@@ -96,7 +96,7 @@ const MyProducts = () => {
         name: "Site Próprio",
         price: product.channels.sitePropio.salePrice,
         margin: result.margin,
-        color: "bg-blue-100 text-blue-800"
+        color: "bg-emerald-50 text-emerald-700 border-emerald-200"
       });
     }
     if (product.channels.amazonFBA?.enabled) {
@@ -105,7 +105,7 @@ const MyProducts = () => {
         name: "Amazon FBA",
         price: product.channels.amazonFBA.salePrice,
         margin: result.margin,
-        color: "bg-orange-100 text-orange-800"
+        color: "bg-orange-50 text-orange-700 border-orange-200"
       });
     }
     if (product.channels.mlFull?.enabled) {
@@ -114,66 +114,113 @@ const MyProducts = () => {
         name: "ML Full",
         price: product.channels.mlFull.salePrice,
         margin: result.margin,
-        color: "bg-yellow-100 text-yellow-800"
+        color: "bg-yellow-50 text-yellow-700 border-yellow-200"
       });
     }
     return channels;
   };
 
+  const getTotalStats = () => {
+    const total = filteredProducts.length;
+    const activeChannels = filteredProducts.reduce((acc, product) => {
+      return acc + getEnabledChannels(product).length;
+    }, 0);
+    return { total, activeChannels };
+  };
+
+  const stats = getTotalStats();
+
   const ProductCard = ({ product }: { product: Product }) => {
     const enabledChannels = getEnabledChannels(product);
+    const bestMargin = enabledChannels.reduce((max, channel) => 
+      channel.margin > max ? channel.margin : max, -Infinity
+    );
     
     return (
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader>
+      <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-md hover:shadow-blue-100/50 hover:-translate-y-1">
+        <CardHeader className="pb-3">
           <div className="flex items-start gap-4">
-            <img
-              src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop"}
-              alt={product.name}
-              className="w-20 h-20 rounded-lg object-cover"
-            />
-            <div className="flex-1">
-              <CardTitle className="text-lg">{product.name}</CardTitle>
-              <p className="text-sm text-muted-foreground">{product.brand}</p>
-              <Badge variant="outline" className="mt-1">{product.category}</Badge>
+            <div className="relative">
+              <img
+                src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop"}
+                alt={product.name}
+                className="w-16 h-16 rounded-xl object-cover ring-2 ring-gray-100"
+              />
+              {bestMargin > 20 && (
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+                  <TrendingUp className="w-3 h-3" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-1">{product.name}</CardTitle>
+              <p className="text-sm text-gray-600 font-medium">{product.brand}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="outline" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
+                  {product.category}
+                </Badge>
+                <Badge variant="outline" className="text-xs px-2 py-1 bg-gray-50 text-gray-600">
+                  {enabledChannels.length} canais
+                </Badge>
+              </div>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+        <CardContent className="pt-0">
+          <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium mb-2">Canais Ativos:</p>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-gray-700">Canais Ativos</span>
+                <span className="text-xs text-gray-500">{enabledChannels.length} ativo(s)</span>
+              </div>
               <div className="space-y-2">
-                {enabledChannels.map((channel, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 rounded bg-muted/50">
+                {enabledChannels.slice(0, 2).map((channel, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50/50 border border-gray-100">
                     <div className="flex items-center gap-2">
-                      <Badge className={channel.color}>{channel.name}</Badge>
+                      <Badge className={`text-xs font-medium border ${channel.color}`}>
+                        {channel.name}
+                      </Badge>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{formatCurrency(channel.price)}</p>
-                      <p className={`text-sm ${channel.margin > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className="font-semibold text-sm text-gray-900">{formatCurrency(channel.price)}</p>
+                      <p className={`text-xs font-medium ${channel.margin > 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatPercentage(channel.margin)}
                       </p>
                     </div>
                   </div>
                 ))}
+                {enabledChannels.length > 2 && (
+                  <div className="text-center py-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-xs text-blue-600 hover:text-blue-700"
+                      onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      Ver mais {enabledChannels.length - 2} canais
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-2 border-t border-gray-100">
               <Button
                 variant="outline"
                 size="sm"
+                className="flex-1 text-xs hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
                 onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
               >
-                <Edit className="h-4 w-4 mr-1" />
+                <Edit className="h-3 w-3 mr-1" />
                 Editar
               </Button>
               <Button
                 variant="outline"
                 size="sm"
+                className="flex-1 text-xs hover:bg-red-50 hover:text-red-700 hover:border-red-200"
                 onClick={() => handleDeleteProduct(product.id)}
               >
-                <Trash2 className="h-4 w-4 mr-1" />
+                <Trash2 className="h-3 w-3 mr-1" />
                 Remover
               </Button>
             </div>
@@ -184,39 +231,87 @@ const MyProducts = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Meus Produtos</h1>
-        <p className="text-muted-foreground">
-          Gerencie seus produtos e analise a viabilidade financeira em diferentes canais
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      <div className="container mx-auto p-6 max-w-7xl">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">Meus Produtos</h1>
+              <p className="text-gray-600 text-lg">
+                Gerencie seus produtos e analise a viabilidade financeira em diferentes canais
+              </p>
+            </div>
+            <Button 
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={() => navigate("/minha-area/produtos/novo")}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Produto
+            </Button>
+          </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar de Filtros */}
-        <div className="lg:w-1/4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Filtros</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Buscar</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar produtos..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-blue-100/50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500 rounded-lg">
+                    <Package className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-blue-700">Total de Produtos</p>
+                    <p className="text-2xl font-bold text-blue-900">{stats.total}</p>
+                  </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-md bg-gradient-to-r from-green-50 to-green-100/50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-500 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-green-700">Canais Ativos</p>
+                    <p className="text-2xl font-bold text-green-900">{stats.activeChannels}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-md bg-gradient-to-r from-purple-50 to-purple-100/50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-500 rounded-lg">
+                    <Filter className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-purple-700">Categoria Ativa</p>
+                    <p className="text-lg font-bold text-purple-900">{selectedCategory}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">Categoria</label>
+        {/* Filters and Search */}
+        <Card className="mb-6 border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row gap-4 items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Buscar produtos por nome ou marca..."
+                  className="pl-10 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              
+              <div className="flex items-center gap-3">
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-48 h-11 border-gray-200">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -227,43 +322,34 @@ const MyProducts = () => {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">Visualização</label>
-                <div className="flex gap-2">
+                <div className="flex items-center border border-gray-200 rounded-lg p-1">
                   <Button
-                    variant={viewMode === "grid" ? "default" : "outline"}
+                    variant={viewMode === "grid" ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setViewMode("grid")}
+                    className="h-9"
                   >
                     <Grid className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant={viewMode === "list" ? "default" : "outline"}
+                    variant={viewMode === "list" ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setViewMode("list")}
+                    className="h-9"
                   >
                     <List className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Button 
-            className="w-full mt-4" 
-            onClick={() => navigate("/minha-area/produtos/novo")}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Produto
-          </Button>
-        </div>
-
-        {/* Lista de Produtos */}
-        <div className="lg:w-3/4">
+        {/* Products Grid */}
+        <div className="mb-8">
           {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -277,9 +363,20 @@ const MyProducts = () => {
           )}
           
           {filteredProducts.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Nenhum produto encontrado.</p>
-            </div>
+            <Card className="border-0 shadow-md">
+              <CardContent className="text-center py-12">
+                <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-lg font-medium text-gray-600 mb-2">Nenhum produto encontrado</p>
+                <p className="text-gray-500 mb-6">Tente ajustar os filtros ou adicionar um novo produto</p>
+                <Button 
+                  onClick={() => navigate("/minha-area/produtos/novo")}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Primeiro Produto
+                </Button>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
