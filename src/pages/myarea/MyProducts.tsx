@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,13 +97,13 @@ const MyProducts = () => {
         role="button"
         aria-label={`Visualizar detalhes de ${product.name}`}
       >
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <div className="flex items-start gap-4">
             <div className="relative">
               <img
                 src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop"}
                 alt={product.name}
-                className="w-16 h-16 rounded-xl object-cover ring-2 ring-gray-100"
+                className="w-20 h-20 rounded-xl object-cover ring-2 ring-gray-100"
               />
               {bestMargin > 20 && product.active && (
                 <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
@@ -111,16 +112,16 @@ const MyProducts = () => {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-1">{product.name}</CardTitle>
-              <p className="text-sm text-gray-600 font-medium">{product.brand}</p>
-              <div className="flex items-center gap-2 mt-2">
-                <Badge variant="outline" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
+              <CardTitle className="text-xl font-semibold text-gray-900 line-clamp-2 mb-2">{product.name}</CardTitle>
+              <p className="text-sm text-gray-600 font-medium mb-3">{product.brand}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className="text-xs px-3 py-1 bg-blue-50 text-blue-700 border-blue-200">
                   {product.category}
                 </Badge>
-                <Badge variant="outline" className="text-xs px-2 py-1 bg-gray-50 text-gray-600">
+                <Badge variant="outline" className="text-xs px-3 py-1 bg-gray-50 text-gray-600">
                   {enabledChannels.length} canais
                 </Badge>
-                <Badge variant={product.active ? "default" : "secondary"} className="text-xs px-2 py-1">
+                <Badge variant={product.active ? "default" : "secondary"} className="text-xs px-3 py-1">
                   {product.active ? "Ativo" : "Inativo"}
                 </Badge>
               </div>
@@ -130,80 +131,43 @@ const MyProducts = () => {
         <CardContent className="pt-0">
           <div className="space-y-4">
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-gray-700">Canais Ativos</span>
-                <span className="text-xs text-gray-500">{enabledChannels.length} ativo(s)</span>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-semibold text-gray-700">Canais Ativos</span>
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{enabledChannels.length} ativo(s)</span>
               </div>
-              <div className="space-y-2">
-                {enabledChannels.slice(0, 2).map((channel, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50/50 border border-gray-100">
-                    <div className="flex items-center gap-2">
+              <div className="space-y-3">
+                {enabledChannels.slice(0, 3).map((channel, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-gray-50/70 border border-gray-100 hover:bg-gray-100/70 transition-colors">
+                    <div className="flex items-center gap-3">
                       <Badge className={`text-xs font-medium border ${channel.color}`}>
                         {channel.name}
                       </Badge>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-sm text-gray-900">{formatCurrency(channel.price)}</p>
-                      <p className={`text-xs font-medium ${channel.margin > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className="font-bold text-base text-gray-900">{formatCurrency(channel.price)}</p>
+                      <p className={`text-sm font-semibold ${channel.margin > 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatPercentage(channel.margin)}
                       </p>
                     </div>
                   </div>
                 ))}
-                {enabledChannels.length > 2 && (
-                  <div className="text-center py-2">
+                {enabledChannels.length > 3 && (
+                  <div className="text-center py-3">
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-xs text-blue-600 hover:text-blue-700"
+                      className="text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       onClick={e => {
                         e.stopPropagation();
                         navigate(`/minha-area/produtos/${product.id}`);
                       }}
                     >
-                      <Eye className="w-3 h-3 mr-1" />
-                      Ver mais {enabledChannels.length - 2} canais
+                      <Eye className="w-4 h-4 mr-2" />
+                      Ver mais {enabledChannels.length - 3} canais
                     </Button>
                   </div>
                 )}
               </div>
-            </div>
-            <div className="flex gap-2 pt-2 border-t border-gray-100">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 text-xs hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
-                onClick={e => {
-                  e.stopPropagation();
-                  navigate(`/minha-area/produtos/${product.id}`);
-                }}
-              >
-                <Edit className="h-3 w-3 mr-1" />
-                Editar
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className={`text-xs ${product.active ? 'hover:bg-red-50 hover:text-red-700 hover:border-red-200' : 'hover:bg-green-50 hover:text-green-700 hover:border-green-200'}`}
-                onClick={e => {
-                  e.stopPropagation();
-                  handleToggleProductStatus(product.id);
-                }}
-              >
-                {product.active ? <PowerOff className="h-3 w-3 mr-1" /> : <Power className="h-3 w-3 mr-1" />}
-                {product.active ? "Desativar" : "Ativar"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs hover:bg-red-50 hover:text-red-700 hover:border-red-200"
-                onClick={e => {
-                  e.stopPropagation();
-                  handleDeleteProduct(product.id);
-                }}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -375,7 +339,7 @@ const MyProducts = () => {
           {/* Products Grid/List */}
           <div className="mb-4 px-2">
             {viewMode === "grid" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                 {filteredProducts.map(product => (
                   <ProductCard key={product.id} product={product} />
                 ))}
