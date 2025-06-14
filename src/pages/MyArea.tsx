@@ -2,6 +2,7 @@
 import { useParams } from "react-router-dom";
 import MySuppliers from "./myarea/MySuppliers";
 import MyProducts from "./myarea/MyProducts";
+import ProductForm from "./myarea/ProductForm";
 import SupplierDetail from "./myarea/SupplierDetail";
 
 const MyArea = () => {
@@ -14,6 +15,9 @@ const MyArea = () => {
       }
       return <MySuppliers />;
     case "produtos":
+      if (id === "novo") {
+        return <ProductForm />;
+      }
       if (id) {
         // TODO: Implementar ProductDetail
         return <div>Detalhes do Produto - Em breve</div>;
