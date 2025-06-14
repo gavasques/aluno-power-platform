@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -19,17 +18,24 @@ const defaultChannels: ProductChannels = {
 };
 
 const getInitialChannelsState = (productChannels: ProductChannels): ProductChannels => {
-  const initialState: Partial<ProductChannels> = {};
+  const initialState: ProductChannels = {};
+  
   for (const key in defaultChannels) {
     const channelKey = key as keyof ProductChannels;
-    const defaultChannelData = defaultChannels[channelKey] || {};
-    const productChannelData = productChannels[channelKey] || {};
-    initialState[channelKey] = {
-      ...defaultChannelData,
-      ...productChannelData,
-    };
+    const defaultChannelData = defaultChannels[channelKey];
+    const productChannelData = productChannels[channelKey];
+    
+    if (defaultChannelData && productChannelData) {
+      initialState[channelKey] = {
+        ...defaultChannelData,
+        ...productChannelData,
+      } as any;
+    } else if (defaultChannelData) {
+      initialState[channelKey] = { ...defaultChannelData } as any;
+    }
   }
-  return initialState as ProductChannels;
+  
+  return initialState;
 };
 
 interface EditChannelsModalProps {
