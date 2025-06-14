@@ -96,7 +96,7 @@ export function SidebarNav({ isMobile = false }: { isMobile?: boolean }) {
         cn(
           baseClassName,
           isActive && activeClassName,
-          item.highlighted && "my-1 bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary !font-semibold shadow-lg shadow-primary/30"
+          item.highlighted && "mt-4 bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary !font-semibold shadow-lg shadow-primary/30"
         )
       }
     >
