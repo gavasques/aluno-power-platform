@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -251,9 +250,9 @@ const MyProducts = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      <div className="w-full px-4 py-4">
+      <div className="w-full py-4">
         {/* Header Section */}
-        <div className="mb-6">
+        <div className="mb-6 px-2">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-1">Meus Produtos</h1>
@@ -315,58 +314,60 @@ const MyProducts = () => {
         </div>
 
         {/* Filters and Search */}
-        <Card className="mb-4 border-0 shadow-md">
-          <CardContent className="p-4">
-            <div className="flex flex-col lg:flex-row gap-3 items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Buscar produtos por nome ou marca..."
-                  className="pl-10 h-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-44 h-10 border-gray-200">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <div className="mb-4 px-2">
+          <Card className="mb-4 border-0 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex flex-col lg:flex-row gap-3 items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar produtos por nome ou marca..."
+                    className="pl-10 h-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-44 h-10 border-gray-200">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                <div className="flex items-center border border-gray-200 rounded-lg p-1">
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                    className="h-8 w-8 p-0"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center border border-gray-200 rounded-lg p-1">
+                    <Button
+                      variant={viewMode === "grid" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("grid")}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Grid className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === "list" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("list")}
+                      className="h-8 w-8 p-0"
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Products Grid/List */}
-        <div className="mb-4">
+        <div className="mb-4 px-2">
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
               {filteredProducts.map(product => (
@@ -385,9 +386,9 @@ const MyProducts = () => {
                         <TableHead className="w-32">Marca</TableHead>
                         <TableHead className="w-32">Categoria</TableHead>
                         {channelOrder.map(c => (
-                          <TableHead key={c.key} className="text-center min-w-[140px]">{c.label}</TableHead>
+                          <TableHead key={c.key} className="text-center min-w-[160px]">{c.label}</TableHead>
                         ))}
-                        <TableHead className="text-center w-24">Ações</TableHead>
+                        <TableHead className="text-center w-32">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
