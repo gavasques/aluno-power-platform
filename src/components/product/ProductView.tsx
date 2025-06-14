@@ -1,15 +1,25 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
 import { Product } from "@/types/product";
 import { formatCurrency } from "@/utils/productCalculations";
+import { ChannelDetails } from "./ChannelDetails";
 
 interface ProductViewProps {
   product: Product;
   supplierName: string;
+  onEditBasicData?: () => void;
+  onEditChannels?: () => void;
 }
 
-export const ProductView = ({ product, supplierName }: ProductViewProps) => {
+export const ProductView = ({ 
+  product, 
+  supplierName, 
+  onEditBasicData, 
+  onEditChannels 
+}: ProductViewProps) => {
   const enabledChannels = Object.entries(product.channels)
     .filter(([_, channel]) => channel?.enabled)
     .length;
@@ -31,7 +41,19 @@ export const ProductView = ({ product, supplierName }: ProductViewProps) => {
       {/* Informações Principais */}
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle>Informações do Produto</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Informações do Produto</CardTitle>
+            {onEditBasicData && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEditBasicData}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Editar Dados
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex gap-6">
@@ -128,7 +150,19 @@ export const ProductView = ({ product, supplierName }: ProductViewProps) => {
       {/* Canais de Venda */}
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle>Canais de Venda</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Canais de Venda</CardTitle>
+            {onEditChannels && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEditChannels}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Editar Canais
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -136,30 +170,14 @@ export const ProductView = ({ product, supplierName }: ProductViewProps) => {
               if (!channel) return null;
               
               return (
-                <div 
+                <ChannelDetails
                   key={channelKey}
-                  className={`p-4 rounded-lg border ${
-                    channel.enabled 
-                      ? 'bg-green-50 border-green-200' 
-                      : 'bg-gray-50 border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">
-                      {channelNames[channelKey as keyof typeof channelNames]}
-                    </h4>
-                    <Badge variant={channel.enabled ? 'default' : 'secondary'}>
-                      {channel.enabled ? 'Ativo' : 'Inativo'}
-                    </Badge>
-                  </div>
-                  {channel.enabled && (
-                    <div className="space-y-1 text-sm">
-                      <p>Preço: {formatCurrency(channel.salePrice)}</p>
-                      <p>Comissão: {channel.commissionPct}%</p>
-                      {channel.adsPct > 0 && <p>Ads: {channel.adsPct}%</p>}
-                    </div>
-                  )}
-                </div>
+                  product={product}
+                  channelKey={channelKey as keyof typeof product.channels}
+                  channelName={channelNames[channelKey as keyof typeof channelNames]}
+                  channel={channel}
+                  onEditChannel={() => onEditChannels?.()}
+                />
               );
             })}
           </div>

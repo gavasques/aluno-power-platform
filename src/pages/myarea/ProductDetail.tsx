@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,8 @@ import { Product } from "@/types/product";
 import { ProductView } from "@/components/product/ProductView";
 import { ProductMetrics } from "@/components/product/ProductMetrics";
 import { EditProductModal } from "@/components/product/EditProductModal";
+import { EditBasicDataModal } from "@/components/product/EditBasicDataModal";
+import { EditChannelsModal } from "@/components/product/EditChannelsModal";
 import { mockSuppliers, mockCategories } from "@/data/mockData";
 
 // Mock product data - em um app real viria de uma API
@@ -126,12 +129,16 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditBasicDataModalOpen, setIsEditBasicDataModalOpen] = useState(false);
+  const [isEditChannelsModalOpen, setIsEditChannelsModalOpen] = useState(false);
   const [product, setProduct] = useState<Product>(mockProduct);
   const [viewMode, setViewMode] = useState<'overview' | 'metrics'>('overview');
 
   const handleProductUpdate = (updatedProduct: Product) => {
     setProduct(updatedProduct);
     setIsEditModalOpen(false);
+    setIsEditBasicDataModalOpen(false);
+    setIsEditChannelsModalOpen(false);
   };
 
   const supplierName = mockSuppliers.find(s => s.id === product.supplierId)?.tradeName || "Fornecedor não encontrado";
@@ -172,7 +179,7 @@ const ProductDetail = () => {
             </Button>
             <Button onClick={() => setIsEditModalOpen(true)}>
               <Edit className="h-4 w-4 mr-2" />
-              Editar
+              Editar Tudo
             </Button>
           </div>
         </div>
@@ -180,7 +187,12 @@ const ProductDetail = () => {
 
       <div className="space-y-6">
         {viewMode === 'overview' ? (
-          <ProductView product={product} supplierName={supplierName} />
+          <ProductView 
+            product={product} 
+            supplierName={supplierName}
+            onEditBasicData={() => setIsEditBasicDataModalOpen(true)}
+            onEditChannels={() => setIsEditChannelsModalOpen(true)}
+          />
         ) : (
           <ProductMetrics product={product} />
         )}
@@ -193,6 +205,22 @@ const ProductDetail = () => {
         onSave={handleProductUpdate}
         mockSuppliers={mockSuppliers}
         mockCategories={mockCategories}
+      />
+
+      <EditBasicDataModal
+        product={product}
+        isOpen={isEditBasicDataModalOpen}
+        onClose={() => setIsEditBasicDataModalOpen(false)}
+        onSave={handleProductUpdate}
+        mockSuppliers={mockSuppliers}
+        mockCategories={mockCategories}
+      />
+
+      <EditChannelsModal
+        product={product}
+        isOpen={isEditChannelsModalOpen}
+        onClose={() => setIsEditChannelsModalOpen(false)}
+        onSave={handleProductUpdate}
       />
     </div>
   );
