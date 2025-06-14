@@ -11,63 +11,10 @@ import { toast } from "@/hooks/use-toast";
 import { Product } from "@/types/product";
 import { calculateChannelResults, formatCurrency, formatPercentage } from "@/utils/productCalculations";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-
-const mockProducts: Product[] = [
-  {
-    id: "1",
-    name: "Smartphone Samsung Galaxy S23",
-    photo: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&h=200&fit=crop",
-    ean: "7899999999999",
-    dimensions: { length: 15, width: 8, height: 3 },
-    weight: 0.5,
-    brand: "Samsung",
-    category: "Eletrônicos",
-    supplierId: "1",
-    ncm: "85171200",
-    costItem: 800,
-    packCost: 15,
-    taxPercent: 18,
-    active: true,
-    channels: {
-      sitePropio: {
-        enabled: true,
-        commissionPct: 0,
-        fixedFee: 5,
-        otherPct: 2,
-        otherValue: 0,
-        adsPct: 8,
-        salePrice: 1299,
-        gatewayPct: 3.5
-      },
-      amazonFBA: {
-        enabled: true,
-        commissionPct: 15,
-        fixedFee: 0,
-        otherPct: 0,
-        otherValue: 0,
-        adsPct: 10,
-        inboundFreight: 25,
-        prepCenter: 8,
-        salePrice: 1499
-      },
-      mlFull: {
-        enabled: true,
-        commissionPct: 14,
-        fixedFee: 0,
-        otherPct: 0,
-        otherValue: 0,
-        adsPct: 12,
-        inboundFreight: 20,
-        prepCenter: 5,
-        salePrice: 1399
-      }
-    },
-    createdAt: "2024-01-15"
-  }
-];
+import { useProducts } from "@/contexts/ProductContext";
 
 const MyProducts = () => {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const { products, deleteProduct, toggleProductStatus } = useProducts();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -85,7 +32,7 @@ const MyProducts = () => {
   });
 
   const handleDeleteProduct = (productId: string) => {
-    setProducts(prev => prev.filter(p => p.id !== productId));
+    deleteProduct(productId);
     toast({
       title: "Produto removido",
       description: "O produto foi removido com sucesso."
@@ -93,17 +40,13 @@ const MyProducts = () => {
   };
 
   const handleToggleProductStatus = (productId: string) => {
-    setProducts(prev => prev.map(p => {
-      if (p.id === productId) {
-        const newStatus = !p.active;
-        toast({
-          title: newStatus ? "Produto ativado" : "Produto desativado",
-          description: newStatus ? "O produto foi ativado com sucesso." : "O produto foi desativado e ocultado do sistema."
-        });
-        return { ...p, active: newStatus };
-      }
-      return p;
-    }));
+    const product = products.find(p => p.id === productId);
+    const newStatus = !product?.active;
+    toggleProductStatus(productId);
+    toast({
+      title: newStatus ? "Produto ativado" : "Produto desativado",
+      description: newStatus ? "O produto foi ativado com sucesso." : "O produto foi desativado e ocultado do sistema."
+    });
   };
 
   const channelOrder = [

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +13,7 @@ import { EditBasicDataModal } from "@/components/product/EditBasicDataModal";
 import { EditChannelsModal } from "@/components/product/EditChannelsModal";
 import { mockSuppliers, mockCategories } from "@/data/mockData";
 import { toast } from "@/hooks/use-toast";
+import { useProducts } from "@/contexts/ProductContext";
 
 // Mock product data - em um app real viria de uma API
 const mockProduct: Product = {
@@ -131,14 +131,30 @@ const mockProduct: Product = {
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { getProductById, updateProduct, toggleProductStatus } = useProducts();
+  
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isEditBasicDataModalOpen, setIsEditBasicDataModalOpen] = useState(false);
   const [isEditChannelsModalOpen, setIsEditChannelsModalOpen] = useState(false);
-  const [product, setProduct] = useState<Product>(mockProduct);
   const [viewMode, setViewMode] = useState<'overview' | 'metrics'>('overview');
 
+  const product = getProductById(id || "");
+
+  if (!product) {
+    return (
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Produto não encontrado</h1>
+          <Button onClick={() => navigate("/minha-area/produtos")}>
+            Voltar para Produtos
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const handleProductUpdate = (updatedProduct: Product) => {
-    setProduct(updatedProduct);
+    updateProduct(product.id, updatedProduct);
     setIsEditModalOpen(false);
     setIsEditBasicDataModalOpen(false);
     setIsEditChannelsModalOpen(false);
@@ -146,7 +162,7 @@ const ProductDetail = () => {
 
   const handleToggleProductStatus = () => {
     const newStatus = !product.active;
-    setProduct(prev => ({ ...prev, active: newStatus }));
+    toggleProductStatus(product.id);
     toast({
       title: newStatus ? "Produto ativado" : "Produto desativado",
       description: newStatus ? "O produto foi ativado com sucesso." : "O produto foi desativado e ocultado do sistema."

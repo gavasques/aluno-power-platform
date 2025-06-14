@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { ProductChannels } from "@/types/product";
+import { useProducts } from "@/contexts/ProductContext";
 
 export const useProductForm = () => {
   const navigate = useNavigate();
+  const { addProduct } = useProducts();
   
   const [productData, setProductData] = useState({
     name: "",
@@ -182,7 +184,12 @@ export const useProductForm = () => {
       return;
     }
 
-    // Simular salvamento
+    // Criar o produto usando o contexto
+    addProduct({
+      ...productData,
+      channels
+    });
+
     toast({
       title: "Produto salvo",
       description: "O produto foi cadastrado com sucesso."
