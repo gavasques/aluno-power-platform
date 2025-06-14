@@ -3,450 +3,371 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2, List, Grid3X3, Eye, Heart } from "lucide-react";
 import { useState } from "react";
-
-interface Contact {
-  name: string;
-  role: string;
-  phone: string;
-  whatsapp: string;
-  email: string;
-  notes: string;
-}
-
-interface Branch {
-  name: string;
-  corporateName: string;
-  cnpj: string;
-  stateRegistration: string;
-  address: string;
-  phone: string;
-  email: string;
-}
 
 interface Supplier {
   id: string;
   tradeName: string;
-  corporateName: string;
   category: string;
   description: string;
   logo: string;
   verified: boolean;
   rating: number;
   reviewCount: number;
-  notes: string;
+  country: string;
+  city: string;
   email: string;
-  mainContact: string;
   phone: string;
-  whatsapp: string;
-  contacts: Contact[];
-  branches: Branch[];
+  specialties: string[];
+  minOrder: string;
+  paymentTerms: string;
 }
+
+const countries = [
+  { code: "BR", name: "Brasil", flag: "🇧🇷" },
+  { code: "CN", name: "China", flag: "🇨🇳" },
+  { code: "PY", name: "Paraguai", flag: "🇵🇾" },
+  { code: "UY", name: "Uruguai", flag: "🇺🇾" },
+  { code: "AR", name: "Argentina", flag: "🇦🇷" },
+  { code: "TW", name: "Taiwan", flag: "🇹🇼" },
+  { code: "HK", name: "Hong Kong", flag: "🇭🇰" },
+  { code: "TR", name: "Turquia", flag: "🇹🇷" },
+  { code: "ES", name: "Espanha", flag: "🇪🇸" },
+  { code: "DE", name: "Alemanha", flag: "🇩🇪" }
+];
 
 const mockSuppliers: Supplier[] = [
   {
     id: "1",
     tradeName: "TechSupply Brasil",
-    corporateName: "TechSupply Brasil Importação e Exportação Ltda",
     category: "Eletrônicos",
     description: "Importador especializado em eletrônicos e acessórios tech",
     logo: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=100&h=100&fit=crop",
     verified: true,
     rating: 4.5,
     reviewCount: 128,
-    notes: "Empresa confiável com histórico de 15 anos no mercado. Especializada em produtos Apple e Samsung.",
+    country: "BR",
+    city: "São Paulo",
     email: "contato@techsupplybrasil.com.br",
-    mainContact: "João Silva",
     phone: "(11) 3456-7890",
-    whatsapp: "(11) 99876-5432",
-    contacts: [
-      {
-        name: "João Silva",
-        role: "Gerente Comercial",
-        phone: "(11) 3456-7890",
-        whatsapp: "(11) 99876-5432",
-        email: "joao@techsupplybrasil.com.br",
-        notes: "Responsável por novos parceiros"
-      },
-      {
-        name: "Maria Santos",
-        role: "Analista de Produtos",
-        phone: "(11) 3456-7891",
-        whatsapp: "(11) 99876-5433",
-        email: "maria@techsupplybrasil.com.br",
-        notes: "Especialista em smartphones"
-      }
-    ],
-    branches: [
-      {
-        name: "Matriz São Paulo",
-        corporateName: "TechSupply Brasil Importação e Exportação Ltda",
-        cnpj: "12.345.678/0001-90",
-        stateRegistration: "123.456.789.123",
-        address: "Rua das Flores, 123 - São Paulo/SP",
-        phone: "(11) 3456-7890",
-        email: "sp@techsupplybrasil.com.br"
-      },
-      {
-        name: "Filial Rio de Janeiro",
-        corporateName: "TechSupply Brasil Importação e Exportação Ltda",
-        cnpj: "12.345.678/0002-71",
-        stateRegistration: "987.654.321.098",
-        address: "Av. Atlântica, 456 - Rio de Janeiro/RJ",
-        phone: "(21) 2345-6789",
-        email: "rj@techsupplybrasil.com.br"
-      }
-    ]
+    specialties: ["Smartphones", "Tablets", "Acessórios"],
+    minOrder: "R$ 5.000",
+    paymentTerms: "30 dias"
+  },
+  {
+    id: "2",
+    tradeName: "Fashion Import HK",
+    category: "Roupas e Acessórios",
+    description: "Fornecedor de roupas femininas e acessórios de moda",
+    logo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=100&h=100&fit=crop",
+    verified: true,
+    rating: 4.2,
+    reviewCount: 89,
+    country: "HK",
+    city: "Hong Kong",
+    email: "sales@fashionimport.hk",
+    phone: "+852 2345-6789",
+    specialties: ["Vestidos", "Bolsas", "Bijuterias"],
+    minOrder: "US$ 2.000",
+    paymentTerms: "T/T 30%"
+  },
+  {
+    id: "3",
+    tradeName: "Home & Garden China",
+    category: "Casa e Jardim",
+    description: "Produtos para casa, decoração e jardim",
+    logo: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=100&h=100&fit=crop",
+    verified: false,
+    rating: 3.8,
+    reviewCount: 45,
+    country: "CN",
+    city: "Guangzhou",
+    email: "info@homegarden.cn",
+    phone: "+86 20 1234-5678",
+    specialties: ["Decoração", "Utensílios", "Móveis"],
+    minOrder: "US$ 1.500",
+    paymentTerms: "L/C"
+  },
+  {
+    id: "4",
+    tradeName: "Sports Gear Turkey",
+    category: "Esportes",
+    description: "Equipamentos esportivos e roupas fitness",
+    logo: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=100&h=100&fit=crop",
+    verified: true,
+    rating: 4.7,
+    reviewCount: 156,
+    country: "TR",
+    city: "Istanbul",
+    email: "export@sportsgear.tr",
+    phone: "+90 212 345-6789",
+    specialties: ["Roupas Fitness", "Equipamentos", "Calçados"],
+    minOrder: "€ 3.000",
+    paymentTerms: "T/T 50%"
+  },
+  {
+    id: "5",
+    tradeName: "Auto Parts Germany",
+    category: "Automotivo",
+    description: "Peças automotivas e acessórios para veículos",
+    logo: "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=100&h=100&fit=crop",
+    verified: true,
+    rating: 4.6,
+    reviewCount: 203,
+    country: "DE",
+    city: "Munich",
+    email: "sales@autoparts.de",
+    phone: "+49 89 1234-5678",
+    specialties: ["Peças Motor", "Eletrônicos", "Acessórios"],
+    minOrder: "€ 5.000",
+    paymentTerms: "30 dias"
+  },
+  {
+    id: "6",
+    tradeName: "Beauty Cosmetics España",
+    category: "Beleza e Cosméticos",
+    description: "Cosméticos e produtos de beleza premium",
+    logo: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=100&h=100&fit=crop",
+    verified: true,
+    rating: 4.4,
+    reviewCount: 92,
+    country: "ES",
+    city: "Barcelona",
+    email: "export@beautycosmetics.es",
+    phone: "+34 93 456-7890",
+    specialties: ["Maquiagem", "Skincare", "Perfumes"],
+    minOrder: "€ 2.500",
+    paymentTerms: "T/T 40%"
   }
 ];
 
 const Suppliers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
-  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState("ALL");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const categories = ["Todas", "Eletrônicos", "Roupas e Acessórios", "Casa e Jardim", "Esportes", "Automotivo"];
+  const categories = ["Todas", "Eletrônicos", "Roupas e Acessórios", "Casa e Jardim", "Esportes", "Automotivo", "Beleza e Cosméticos"];
 
   const filteredSuppliers = mockSuppliers.filter(supplier => {
     const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          supplier.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Todas" || supplier.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesCountry = selectedCountry === "ALL" || supplier.country === selectedCountry;
+    return matchesSearch && matchesCategory && matchesCountry;
   });
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`h-4 w-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+        className={`h-3 w-3 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
       />
     ));
   };
 
+  const renderGridView = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {filteredSuppliers.map(supplier => {
+        const country = countries.find(c => c.code === supplier.country);
+        return (
+          <Card key={supplier.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader className="pb-3">
+              <div className="flex items-start gap-3">
+                <img
+                  src={supplier.logo}
+                  alt={supplier.tradeName}
+                  className="w-12 h-12 rounded-lg object-cover"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1 mb-1">
+                    <CardTitle className="text-sm font-semibold truncate">{supplier.tradeName}</CardTitle>
+                    {supplier.verified && (
+                      <CheckCircle className="h-3 w-3 text-green-600 flex-shrink-0" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 mb-1">
+                    {country && <span className="text-xs">{country.flag}</span>}
+                    <span className="text-xs text-muted-foreground">{supplier.city}</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">{supplier.category}</Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{supplier.description}</p>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-1">
+                  <div className="flex">{renderStars(supplier.rating)}</div>
+                  <span className="text-xs text-muted-foreground">({supplier.reviewCount})</span>
+                </div>
+                <Button size="sm" variant="ghost">
+                  <Heart className="h-3 w-3" />
+                </Button>
+              </div>
+              <div className="space-y-1 text-xs text-muted-foreground mb-3">
+                <div>Mín: {supplier.minOrder}</div>
+                <div>Pgto: {supplier.paymentTerms}</div>
+              </div>
+              <div className="flex gap-1">
+                <Button size="sm" variant="outline" className="flex-1 text-xs h-7">
+                  <Eye className="h-3 w-3 mr-1" />
+                  Ver
+                </Button>
+                <Button size="sm" className="flex-1 text-xs h-7">
+                  Contatar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+
+  const renderListView = () => (
+    <div className="space-y-3">
+      {filteredSuppliers.map(supplier => {
+        const country = countries.find(c => c.code === supplier.country);
+        return (
+          <Card key={supplier.id} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <img
+                  src={supplier.logo}
+                  alt={supplier.tradeName}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold">{supplier.tradeName}</h3>
+                    {supplier.verified && (
+                      <Badge variant="secondary" className="text-xs">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verificado
+                      </Badge>
+                    )}
+                    {country && (
+                      <Badge variant="outline" className="text-xs">
+                        {country.flag} {country.name}
+                      </Badge>
+                    )}
+                  </div>
+                  <Badge variant="outline" className="mb-2">{supplier.category}</Badge>
+                  <p className="text-sm text-muted-foreground mb-2">{supplier.description}</p>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <div className="flex">{renderStars(supplier.rating)}</div>
+                      <span>{supplier.rating} ({supplier.reviewCount})</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4" />
+                      {supplier.city}
+                    </div>
+                    <div>Mín: {supplier.minOrder}</div>
+                    <div>Pgto: {supplier.paymentTerms}</div>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button variant="outline" size="sm">
+                    <Eye className="h-4 w-4 mr-1" />
+                    Ver Perfil
+                  </Button>
+                  <Button size="sm">
+                    Contatar
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Fornecedores</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-2">Fornecedores</h1>
         <p className="text-muted-foreground">
           Diretório de fabricantes, distribuidores, importadores e representantes
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar de Filtros */}
-        <div className="lg:w-1/4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Filtros</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Buscar</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar fornecedores..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </div>
+      {/* Filtros e Controles */}
+      <div className="bg-white p-4 rounded-lg border mb-6">
+        <div className="flex flex-col lg:flex-row gap-4 items-center">
+          <div className="flex-1 max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar fornecedores..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map(category => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">Categoria</label>
-                <div className="space-y-2">
-                  {categories.map(category => (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? "default" : "ghost"}
-                      className="w-full justify-start"
-                      onClick={() => setSelectedCategory(category)}
-                    >
-                      {category}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Todos os países" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todos os países</SelectItem>
+              {countries.map(country => (
+                <SelectItem key={country.code} value={country.code}>
+                  <span className="flex items-center gap-2">
+                    <span>{country.flag}</span>
+                    <span>{country.name}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        {/* Lista de Fornecedores */}
-        <div className="lg:w-3/4">
-          <div className="grid gap-6">
-            {filteredSuppliers.map(supplier => (
-              <Card key={supplier.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start gap-4">
-                    <img
-                      src={supplier.logo}
-                      alt={supplier.tradeName}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CardTitle className="text-xl">{supplier.tradeName}</CardTitle>
-                        {supplier.verified && (
-                          <Badge variant="secondary" className="bg-green-100 text-green-800">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Verificado
-                          </Badge>
-                        )}
-                      </div>
-                      <Badge variant="outline" className="mb-2">
-                        {supplier.category}
-                      </Badge>
-                      <p className="text-muted-foreground">{supplier.description}</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Avaliação:</span>
-                        <div className="flex">{renderStars(supplier.rating)}</div>
-                        <span className="text-sm text-muted-foreground">
-                          {supplier.rating} ({supplier.reviewCount} avaliações)
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Phone className="h-4 w-4" />
-                          {supplier.phone}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Mail className="h-4 w-4" />
-                          {supplier.email}
-                        </div>
-                      </div>
-                    </div>
-                    <Button onClick={() => setSelectedSupplier(supplier)}>
-                      Ver Perfil
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex gap-1 border rounded-md p-1">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+            >
+              <List className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Modal de Detalhes */}
-      {selectedSupplier && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-background rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={selectedSupplier.logo}
-                    alt={selectedSupplier.tradeName}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-2xl font-bold">{selectedSupplier.tradeName}</h2>
-                      {selectedSupplier.verified && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Verificado
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-muted-foreground">{selectedSupplier.corporateName}</p>
-                    <Badge variant="outline">{selectedSupplier.category}</Badge>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  onClick={() => setSelectedSupplier(null)}
-                >
-                  ✕
-                </Button>
-              </div>
-            </div>
+      {/* Resultados */}
+      <div className="mb-4">
+        <p className="text-sm text-muted-foreground">
+          {filteredSuppliers.length} fornecedores encontrados
+        </p>
+      </div>
 
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-              <Tabs defaultValue="info" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="info">Informações da Empresa</TabsTrigger>
-                  <TabsTrigger value="contacts">Contatos</TabsTrigger>
-                  <TabsTrigger value="branches">Filiais</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="info" className="mt-6">
-                  <div className="grid gap-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Informações Gerais</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium">Nome Fantasia</label>
-                            <p className="text-muted-foreground">{selectedSupplier.tradeName}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Razão Social</label>
-                            <p className="text-muted-foreground">{selectedSupplier.corporateName}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Categoria Principal</label>
-                            <p className="text-muted-foreground">{selectedSupplier.category}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Contato Principal</label>
-                            <p className="text-muted-foreground">{selectedSupplier.mainContact}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="grid md:grid-cols-3 gap-4">
-                          <div>
-                            <label className="text-sm font-medium">Email</label>
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4" />
-                              <p className="text-muted-foreground">{selectedSupplier.email}</p>
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Telefone</label>
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4" />
-                              <p className="text-muted-foreground">{selectedSupplier.phone}</p>
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">WhatsApp</label>
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4" />
-                              <p className="text-muted-foreground">{selectedSupplier.whatsapp}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="text-sm font-medium">Observações</label>
-                          <p className="text-muted-foreground mt-1">{selectedSupplier.notes}</p>
-                        </div>
-
-                        <div>
-                          <label className="text-sm font-medium">Avaliação</label>
-                          <div className="flex items-center gap-2 mt-1">
-                            <div className="flex">{renderStars(selectedSupplier.rating)}</div>
-                            <span className="text-sm text-muted-foreground">
-                              {selectedSupplier.rating} ({selectedSupplier.reviewCount} avaliações)
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="contacts" className="mt-6">
-                  <div className="space-y-4">
-                    {selectedSupplier.contacts.map((contact, index) => (
-                      <Card key={index}>
-                        <CardHeader>
-                          <CardTitle className="text-lg">{contact.name}</CardTitle>
-                          <Badge variant="outline">{contact.role}</Badge>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="text-sm font-medium">Telefone</label>
-                              <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
-                                <p className="text-muted-foreground">{contact.phone}</p>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">WhatsApp</label>
-                              <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
-                                <p className="text-muted-foreground">{contact.whatsapp}</p>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Email</label>
-                              <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4" />
-                                <p className="text-muted-foreground">{contact.email}</p>
-                              </div>
-                            </div>
-                          </div>
-                          {contact.notes && (
-                            <div className="mt-4">
-                              <label className="text-sm font-medium">Observações</label>
-                              <p className="text-muted-foreground">{contact.notes}</p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="branches" className="mt-6">
-                  <div className="space-y-4">
-                    {selectedSupplier.branches.map((branch, index) => (
-                      <Card key={index}>
-                        <CardHeader>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <Building2 className="h-5 w-5" />
-                            {branch.name}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="text-sm font-medium">Razão Social</label>
-                              <p className="text-muted-foreground">{branch.corporateName}</p>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">CNPJ</label>
-                              <p className="text-muted-foreground">{branch.cnpj}</p>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Inscrição Estadual</label>
-                              <p className="text-muted-foreground">{branch.stateRegistration}</p>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Telefone</label>
-                              <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
-                                <p className="text-muted-foreground">{branch.phone}</p>
-                              </div>
-                            </div>
-                            <div className="md:col-span-2">
-                              <label className="text-sm font-medium">Endereço</label>
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                <p className="text-muted-foreground">{branch.address}</p>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Email</label>
-                              <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4" />
-                                <p className="text-muted-foreground">{branch.email}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-        </div>
-      )}
+      {viewMode === "grid" ? renderGridView() : renderListView()}
     </div>
   );
 };

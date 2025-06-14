@@ -5,6 +5,7 @@ import Materials from "./hub/Materials";
 import Templates from "./hub/Templates";
 import Tools from "./hub/Tools";
 import Suppliers from "./hub/Suppliers";
+import Partners from "./hub/Partners";
 
 const Hub = () => {
   const { section } = useParams();
@@ -22,6 +23,7 @@ const Hub = () => {
     case "fornecedores":
       return <Suppliers />;
     case "parceiros":
+      return <Partners />;
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Hub de Recursos";
       return (
