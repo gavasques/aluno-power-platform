@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,7 @@ import { Product } from "@/types/product";
 import { calculateChannelResults, formatCurrency, formatPercentage } from "@/utils/productCalculations";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { useProducts } from "@/contexts/ProductContext";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 const MyProducts = () => {
   const { products, deleteProduct, toggleProductStatus } = useProducts();
@@ -20,7 +20,14 @@ const MyProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showInactive, setShowInactive] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
+
+  const itemsPerPage = 25;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, showInactive]);
 
   const categories = ["Todas", "Eletrônicos", "Roupas e Acessórios", "Casa e Jardim", "Esportes", "Automotivo"];
 
@@ -31,6 +38,99 @@ const MyProducts = () => {
     const matchesActive = showInactive || product.active;
     return matchesSearch && matchesCategory && matchesActive;
   });
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const getPaginationGroup = () => {
+    const pageCount = totalPages;
+    const currentPageNumber = currentPage;
+    const maxPagesToShow = 5;
+
+    if (pageCount <= maxPagesToShow) {
+      return Array.from({ length: pageCount }, (_, i) => i + 1);
+    }
+
+    const pages: (number | string)[] = [];
+    const half = Math.floor(maxPagesToShow / 2);
+
+    let start = Math.max(2, currentPageNumber - half);
+    let end = Math.min(pageCount - 1, currentPageNumber + half);
+
+    if (currentPageNumber - half < 2) {
+      end = maxPagesToShow - 1;
+    }
+    
+    if (currentPageNumber + half > pageCount - 2) {
+      start = pageCount - maxPagesToShow + 2;
+    }
+
+    pages.push(1);
+    if (start > 2) {
+      pages.push('...');
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (end < pageCount - 1) {
+      pages.push('...');
+    }
+    pages.push(pageCount);
+
+    return pages;
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
+              className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+          {getPaginationGroup().map((item, index) => (
+            <PaginationItem key={`${item}-${index}`}>
+              {typeof item === 'number' ? (
+                <PaginationLink
+                  href="#"
+                  isActive={item === currentPage}
+                  onClick={(e) => { e.preventDefault(); handlePageChange(item); }}
+                >
+                  {item}
+                </PaginationLink>
+              ) : (
+                <PaginationEllipsis />
+              )}
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
+              className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
+  };
 
   const handleDeleteProduct = (productId: string) => {
     deleteProduct(productId);
@@ -338,137 +438,148 @@ const MyProducts = () => {
 
           {/* Products Grid/List */}
           <div className="mb-4 px-2">
-            {viewMode === "grid" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                {filteredProducts.map(product => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+            {filteredProducts.length > 0 ? (
+              <>
+                {viewMode === "grid" ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                    {paginatedProducts.map(product => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="border-0 shadow-md">
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-20 text-center">Foto</TableHead>
+                              <TableHead className="min-w-[200px]">Produto</TableHead>
+                              <TableHead className="w-32">Marca</TableHead>
+                              <TableHead className="w-32">Categoria</TableHead>
+                              <TableHead className="w-24 text-center">Status</TableHead>
+                              {channelOrder.map(c => (
+                                <TableHead key={c.key} className="text-center min-w-[160px]">{c.label}</TableHead>
+                              ))}
+                              <TableHead className="text-center w-40">Ações</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {paginatedProducts.map(product => (
+                              <TableRow
+                                key={product.id}
+                                className={`hover:bg-gray-50/50 cursor-pointer ${!product.active ? 'opacity-50' : ''}`}
+                                onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
+                                tabIndex={0}
+                                role="button"
+                                aria-label={`Visualizar detalhes de ${product.name}`}
+                              >
+                                <TableCell className="text-center">
+                                  <img
+                                    src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop"}
+                                    alt={product.name}
+                                    className="w-12 h-12 object-cover rounded-lg shadow border border-gray-100 mx-auto"
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
+                                </TableCell>
+                                <TableCell className="text-sm text-gray-700">{product.brand}</TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
+                                    {product.category}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <Badge variant={product.active ? "default" : "secondary"} className="text-xs">
+                                    {product.active ? "Ativo" : "Inativo"}
+                                  </Badge>
+                                </TableCell>
+                                {channelOrder.map((chan) => {
+                                  const info = getChannelInfo(product, chan.key as keyof Product["channels"]);
+                                  return (
+                                    <TableCell key={chan.key} className="text-center">
+                                      {info ? (
+                                        <div className="space-y-1">
+                                          <div className="font-semibold text-sm text-gray-900">{formatCurrency(info.price)}</div>
+                                          <div className={`text-xs font-medium px-2 py-1 rounded ${info.margin > 0 ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
+                                            {formatPercentage(info.margin)}
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <span className="text-gray-300 text-xs italic">-</span>
+                                      )}
+                                    </TableCell>
+                                  );
+                                })}
+                                <TableCell className="text-center" onClick={e => e.stopPropagation()}>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        navigate(`/minha-area/produtos/${product.id}`);
+                                      }}
+                                      title="Editar"
+                                    >
+                                      <Edit className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className={`h-8 w-8 p-0 ${product.active ? 'hover:bg-red-50 hover:text-red-700 hover:border-red-200' : 'hover:bg-green-50 hover:text-green-700 hover:border-green-200'}`}
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        handleToggleProductStatus(product.id);
+                                      }}
+                                      title={product.active ? "Desativar" : "Ativar"}
+                                    >
+                                      {product.active ? <PowerOff className="h-3 w-3" /> : <Power className="h-3 w-3" />}
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        handleDeleteProduct(product.id);
+                                      }}
+                                      title="Remover"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                <div className="mt-8">
+                  {renderPagination()}
+                </div>
+              </>
             ) : (
               <Card className="border-0 shadow-md">
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-20 text-center">Foto</TableHead>
-                          <TableHead className="min-w-[200px]">Produto</TableHead>
-                          <TableHead className="w-32">Marca</TableHead>
-                          <TableHead className="w-32">Categoria</TableHead>
-                          <TableHead className="w-24 text-center">Status</TableHead>
-                          {channelOrder.map(c => (
-                            <TableHead key={c.key} className="text-center min-w-[160px]">{c.label}</TableHead>
-                          ))}
-                          <TableHead className="text-center w-40">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredProducts.map(product => (
-                          <TableRow
-                            key={product.id}
-                            className={`hover:bg-gray-50/50 cursor-pointer ${!product.active ? 'opacity-50' : ''}`}
-                            onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
-                            tabIndex={0}
-                            role="button"
-                            aria-label={`Visualizar detalhes de ${product.name}`}
+                  <CardContent className="p-12">
+                      <div className="flex flex-col gap-2 items-center text-center">
+                          <Package className="h-12 w-12 text-gray-400 mb-4" />
+                          <p className="text-lg font-medium text-gray-600 mb-2">Nenhum produto encontrado</p>
+                          <p className="text-sm text-gray-500 mb-4">Tente ajustar seus filtros ou cadastre um novo produto.</p>
+                          <Button 
+                              onClick={() => navigate("/minha-area/produtos/novo")}
+                              className="bg-blue-600 hover:bg-blue-700"
                           >
-                            <TableCell className="text-center">
-                              <img
-                                src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop"}
-                                alt={product.name}
-                                className="w-12 h-12 object-cover rounded-lg shadow border border-gray-100 mx-auto"
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
-                            </TableCell>
-                            <TableCell className="text-sm text-gray-700">{product.brand}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
-                                {product.category}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge variant={product.active ? "default" : "secondary"} className="text-xs">
-                                {product.active ? "Ativo" : "Inativo"}
-                              </Badge>
-                            </TableCell>
-                            {channelOrder.map((chan) => {
-                              const info = getChannelInfo(product, chan.key as keyof Product["channels"]);
-                              return (
-                                <TableCell key={chan.key} className="text-center">
-                                  {info ? (
-                                    <div className="space-y-1">
-                                      <div className="font-semibold text-sm text-gray-900">{formatCurrency(info.price)}</div>
-                                      <div className={`text-xs font-medium px-2 py-1 rounded ${info.margin > 0 ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
-                                        {formatPercentage(info.margin)}
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <span className="text-gray-300 text-xs italic">-</span>
-                                  )}
-                                </TableCell>
-                              );
-                            })}
-                            <TableCell className="text-center" onClick={e => e.stopPropagation()}>
-                              <div className="flex items-center justify-center gap-1">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    navigate(`/minha-area/produtos/${product.id}`);
-                                  }}
-                                  title="Editar"
-                                >
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className={`h-8 w-8 p-0 ${product.active ? 'hover:bg-red-50 hover:text-red-700 hover:border-red-200' : 'hover:bg-green-50 hover:text-green-700 hover:border-green-200'}`}
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleToggleProductStatus(product.id);
-                                  }}
-                                  title={product.active ? "Desativar" : "Ativar"}
-                                >
-                                  {product.active ? <PowerOff className="h-3 w-3" /> : <Power className="h-3 w-3" />}
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleDeleteProduct(product.id);
-                                  }}
-                                  title="Remover"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                  {filteredProducts.length === 0 && (
-                    <div className="flex flex-col gap-2 items-center py-12">
-                      <Package className="h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-lg font-medium text-gray-600 mb-2">Nenhum produto encontrado</p>
-                      <Button 
-                        onClick={() => navigate("/minha-area/produtos/novo")}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Adicionar Primeiro Produto
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Cadastrar Produto
+                          </Button>
+                      </div>
+                  </CardContent>
               </Card>
             )}
           </div>
