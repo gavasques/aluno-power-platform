@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,9 @@ import {
   MessageSquare, 
   Paperclip,
   User,
-  Calendar
+  Calendar,
+  Save,
+  X
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -146,6 +147,15 @@ const MySuppliers = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<MySupplier | null>(null);
+  
+  // Estados para edição dentro do modal
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [isAddingContact, setIsAddingContact] = useState(false);
+  const [isEditingContact, setIsEditingContact] = useState<Contact | null>(null);
+  const [isAddingBranch, setIsAddingBranch] = useState(false);
+  const [isEditingBranch, setIsEditingBranch] = useState<Branch | null>(null);
+  const [isAddingConversation, setIsAddingConversation] = useState(false);
+  
   const { toast } = useToast();
 
   const [newSupplier, setNewSupplier] = useState({
@@ -159,6 +169,32 @@ const MySuppliers = () => {
     mainContact: "",
     phone: "",
     whatsapp: ""
+  });
+
+  const [newContact, setNewContact] = useState({
+    name: "",
+    role: "",
+    phone: "",
+    whatsapp: "",
+    email: "",
+    notes: ""
+  });
+
+  const [newBranch, setNewBranch] = useState({
+    name: "",
+    corporateName: "",
+    cnpj: "",
+    stateRegistration: "",
+    address: "",
+    phone: "",
+    email: ""
+  });
+
+  const [newConversation, setNewConversation] = useState({
+    date: new Date().toISOString().split('T')[0],
+    subject: "",
+    notes: "",
+    files: [] as string[]
   });
 
   const filteredSuppliers = suppliers.filter(supplier => {
@@ -244,6 +280,212 @@ const MySuppliers = () => {
   const getCountryName = (countryCode: string) => {
     const country = countries.find(c => c.code === countryCode);
     return country ? country.name : "Outros";
+  };
+
+  // Funções para editar informações do fornecedor no modal
+  const handleSaveSupplierInfo = () => {
+    if (!selectedSupplier) return;
+    
+    setSuppliers(suppliers.map(s => 
+      s.id === selectedSupplier.id 
+        ? { ...selectedSupplier, updatedAt: new Date().toISOString().split('T')[0] }
+        : s
+    ));
+    
+    setIsEditingInfo(false);
+    toast({
+      title: "Sucesso",
+      description: "Informações atualizadas com sucesso!"
+    });
+  };
+
+  // Funções para gerenciar contatos
+  const handleAddContact = () => {
+    if (!selectedSupplier || !newContact.name) {
+      toast({
+        title: "Erro",
+        description: "Nome do contato é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const contact: Contact = {
+      id: Date.now().toString(),
+      ...newContact
+    };
+
+    const updatedSupplier = {
+      ...selectedSupplier,
+      contacts: [...selectedSupplier.contacts, contact]
+    };
+
+    setSelectedSupplier(updatedSupplier);
+    setSuppliers(suppliers.map(s => s.id === selectedSupplier.id ? updatedSupplier : s));
+    
+    setNewContact({
+      name: "",
+      role: "",
+      phone: "",
+      whatsapp: "",
+      email: "",
+      notes: ""
+    });
+    setIsAddingContact(false);
+    
+    toast({
+      title: "Sucesso",
+      description: "Contato adicionado com sucesso!"
+    });
+  };
+
+  const handleEditContact = (contact: Contact) => {
+    if (!selectedSupplier) return;
+
+    const updatedSupplier = {
+      ...selectedSupplier,
+      contacts: selectedSupplier.contacts.map(c => c.id === contact.id ? contact : c)
+    };
+
+    setSelectedSupplier(updatedSupplier);
+    setSuppliers(suppliers.map(s => s.id === selectedSupplier.id ? updatedSupplier : s));
+    setIsEditingContact(null);
+    
+    toast({
+      title: "Sucesso",
+      description: "Contato atualizado com sucesso!"
+    });
+  };
+
+  const handleDeleteContact = (contactId: string) => {
+    if (!selectedSupplier) return;
+
+    const updatedSupplier = {
+      ...selectedSupplier,
+      contacts: selectedSupplier.contacts.filter(c => c.id !== contactId)
+    };
+
+    setSelectedSupplier(updatedSupplier);
+    setSuppliers(suppliers.map(s => s.id === selectedSupplier.id ? updatedSupplier : s));
+    
+    toast({
+      title: "Sucesso",
+      description: "Contato removido com sucesso!"
+    });
+  };
+
+  // Funções para gerenciar filiais
+  const handleAddBranch = () => {
+    if (!selectedSupplier || !newBranch.name) {
+      toast({
+        title: "Erro",
+        description: "Nome da filial é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const branch: Branch = {
+      id: Date.now().toString(),
+      ...newBranch
+    };
+
+    const updatedSupplier = {
+      ...selectedSupplier,
+      branches: [...selectedSupplier.branches, branch]
+    };
+
+    setSelectedSupplier(updatedSupplier);
+    setSuppliers(suppliers.map(s => s.id === selectedSupplier.id ? updatedSupplier : s));
+    
+    setNewBranch({
+      name: "",
+      corporateName: "",
+      cnpj: "",
+      stateRegistration: "",
+      address: "",
+      phone: "",
+      email: ""
+    });
+    setIsAddingBranch(false);
+    
+    toast({
+      title: "Sucesso",
+      description: "Filial adicionada com sucesso!"
+    });
+  };
+
+  const handleEditBranch = (branch: Branch) => {
+    if (!selectedSupplier) return;
+
+    const updatedSupplier = {
+      ...selectedSupplier,
+      branches: selectedSupplier.branches.map(b => b.id === branch.id ? branch : b)
+    };
+
+    setSelectedSupplier(updatedSupplier);
+    setSuppliers(suppliers.map(s => s.id === selectedSupplier.id ? updatedSupplier : s));
+    setIsEditingBranch(null);
+    
+    toast({
+      title: "Sucesso",
+      description: "Filial atualizada com sucesso!"
+    });
+  };
+
+  const handleDeleteBranch = (branchId: string) => {
+    if (!selectedSupplier) return;
+
+    const updatedSupplier = {
+      ...selectedSupplier,
+      branches: selectedSupplier.branches.filter(b => b.id !== branchId)
+    };
+
+    setSelectedSupplier(updatedSupplier);
+    setSuppliers(suppliers.map(s => s.id === selectedSupplier.id ? updatedSupplier : s));
+    
+    toast({
+      title: "Sucesso",
+      description: "Filial removida com sucesso!"
+    });
+  };
+
+  // Funções para gerenciar conversas
+  const handleAddConversation = () => {
+    if (!selectedSupplier || !newConversation.subject) {
+      toast({
+        title: "Erro",
+        description: "Assunto da conversa é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const conversation: Conversation = {
+      id: Date.now().toString(),
+      ...newConversation
+    };
+
+    const updatedSupplier = {
+      ...selectedSupplier,
+      conversations: [...selectedSupplier.conversations, conversation]
+    };
+
+    setSelectedSupplier(updatedSupplier);
+    setSuppliers(suppliers.map(s => s.id === selectedSupplier.id ? updatedSupplier : s));
+    
+    setNewConversation({
+      date: new Date().toISOString().split('T')[0],
+      subject: "",
+      notes: "",
+      files: []
+    });
+    setIsAddingConversation(false);
+    
+    toast({
+      title: "Sucesso",
+      description: "Conversa adicionada com sucesso!"
+    });
   };
 
   return (
@@ -498,9 +740,17 @@ const MySuppliers = () => {
         ))}
       </div>
 
-      {/* Modal de Detalhes */}
+      {/* Modal de Detalhes com funcionalidades de edição */}
       {selectedSupplier && (
-        <Dialog open={!!selectedSupplier} onOpenChange={() => setSelectedSupplier(null)}>
+        <Dialog open={!!selectedSupplier} onOpenChange={() => {
+          setSelectedSupplier(null);
+          setIsEditingInfo(false);
+          setIsAddingContact(false);
+          setIsEditingContact(null);
+          setIsAddingBranch(false);
+          setIsEditingBranch(null);
+          setIsAddingConversation(false);
+        }}>
           <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
             <DialogHeader>
               <div className="flex items-center gap-4">
@@ -527,68 +777,347 @@ const MySuppliers = () => {
                 <TabsContent value="info" className="mt-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Informações da Empresa</CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle>Informações da Empresa</CardTitle>
+                        {!isEditingInfo ? (
+                          <Button onClick={() => setIsEditingInfo(true)} size="sm">
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </Button>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button onClick={handleSaveSupplierInfo} size="sm">
+                              <Save className="h-4 w-4 mr-2" />
+                              Salvar
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setIsEditingInfo(false)} 
+                              size="sm"
+                            >
+                              <X className="h-4 w-4 mr-2" />
+                              Cancelar
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <Label className="text-sm font-medium">Nome Fantasia</Label>
-                          <p className="text-muted-foreground">{selectedSupplier.tradeName}</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Razão Social</Label>
-                          <p className="text-muted-foreground">{selectedSupplier.corporateName || "Não informado"}</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Categoria</Label>
-                          <p className="text-muted-foreground">{selectedSupplier.category || "Não informado"}</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">País</Label>
-                          <p className="text-muted-foreground">
-                            {getCountryFlag(selectedSupplier.country)} {getCountryName(selectedSupplier.country)}
-                          </p>
-                        </div>
-                      </div>
+                      {!isEditingInfo ? (
+                        <>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label className="text-sm font-medium">Nome Fantasia</Label>
+                              <p className="text-muted-foreground">{selectedSupplier.tradeName}</p>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Razão Social</Label>
+                              <p className="text-muted-foreground">{selectedSupplier.corporateName || "Não informado"}</p>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Categoria</Label>
+                              <p className="text-muted-foreground">{selectedSupplier.category || "Não informado"}</p>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">País</Label>
+                              <p className="text-muted-foreground">
+                                {getCountryFlag(selectedSupplier.country)} {getCountryName(selectedSupplier.country)}
+                              </p>
+                            </div>
+                          </div>
 
-                      <div>
-                        <Label className="text-sm font-medium">Descrição</Label>
-                        <p className="text-muted-foreground">{selectedSupplier.description || "Nenhuma descrição"}</p>
-                      </div>
+                          <div>
+                            <Label className="text-sm font-medium">Descrição</Label>
+                            <p className="text-muted-foreground">{selectedSupplier.description || "Nenhuma descrição"}</p>
+                          </div>
 
-                      <div>
-                        <Label className="text-sm font-medium">Observações</Label>
-                        <p className="text-muted-foreground">{selectedSupplier.notes || "Nenhuma observação"}</p>
-                      </div>
+                          <div>
+                            <Label className="text-sm font-medium">Observações</Label>
+                            <p className="text-muted-foreground">{selectedSupplier.notes || "Nenhuma observação"}</p>
+                          </div>
 
-                      <div className="grid md:grid-cols-3 gap-4">
-                        <div>
-                          <Label className="text-sm font-medium">Email</Label>
-                          <p className="text-muted-foreground">{selectedSupplier.email || "Não informado"}</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Telefone</Label>
-                          <p className="text-muted-foreground">{selectedSupplier.phone || "Não informado"}</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">WhatsApp</Label>
-                          <p className="text-muted-foreground">{selectedSupplier.whatsapp || "Não informado"}</p>
-                        </div>
-                      </div>
+                          <div className="grid md:grid-cols-3 gap-4">
+                            <div>
+                              <Label className="text-sm font-medium">Email</Label>
+                              <p className="text-muted-foreground">{selectedSupplier.email || "Não informado"}</p>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Telefone</Label>
+                              <p className="text-muted-foreground">{selectedSupplier.phone || "Não informado"}</p>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">WhatsApp</Label>
+                              <p className="text-muted-foreground">{selectedSupplier.whatsapp || "Não informado"}</p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="edit-info-tradeName">Nome Fantasia</Label>
+                              <Input
+                                id="edit-info-tradeName"
+                                value={selectedSupplier.tradeName}
+                                onChange={(e) => setSelectedSupplier({...selectedSupplier, tradeName: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="edit-info-corporateName">Razão Social</Label>
+                              <Input
+                                id="edit-info-corporateName"
+                                value={selectedSupplier.corporateName}
+                                onChange={(e) => setSelectedSupplier({...selectedSupplier, corporateName: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="edit-info-category">Categoria</Label>
+                              <Input
+                                id="edit-info-category"
+                                value={selectedSupplier.category}
+                                onChange={(e) => setSelectedSupplier({...selectedSupplier, category: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="edit-info-country">País</Label>
+                              <Select 
+                                value={selectedSupplier.country} 
+                                onValueChange={(value) => setSelectedSupplier({...selectedSupplier, country: value})}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {countries.map(country => (
+                                    <SelectItem key={country.code} value={country.code}>
+                                      <span className="flex items-center gap-2">
+                                        <span>{country.flag}</span>
+                                        <span>{country.name}</span>
+                                      </span>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="edit-info-description">Descrição</Label>
+                            <Textarea
+                              id="edit-info-description"
+                              value={selectedSupplier.description}
+                              onChange={(e) => setSelectedSupplier({...selectedSupplier, description: e.target.value})}
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="edit-info-notes">Observações</Label>
+                            <Textarea
+                              id="edit-info-notes"
+                              value={selectedSupplier.notes}
+                              onChange={(e) => setSelectedSupplier({...selectedSupplier, notes: e.target.value})}
+                            />
+                          </div>
+
+                          <div className="grid md:grid-cols-3 gap-4">
+                            <div>
+                              <Label htmlFor="edit-info-email">Email</Label>
+                              <Input
+                                id="edit-info-email"
+                                type="email"
+                                value={selectedSupplier.email}
+                                onChange={(e) => setSelectedSupplier({...selectedSupplier, email: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="edit-info-phone">Telefone</Label>
+                              <Input
+                                id="edit-info-phone"
+                                value={selectedSupplier.phone}
+                                onChange={(e) => setSelectedSupplier({...selectedSupplier, phone: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="edit-info-whatsapp">WhatsApp</Label>
+                              <Input
+                                id="edit-info-whatsapp"
+                                value={selectedSupplier.whatsapp}
+                                onChange={(e) => setSelectedSupplier({...selectedSupplier, whatsapp: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>
 
                 <TabsContent value="contacts" className="mt-6">
                   <div className="space-y-4">
-                    {selectedSupplier.contacts.length > 0 ? (
-                      selectedSupplier.contacts.map((contact, index) => (
-                        <Card key={index}>
-                          <CardHeader>
-                            <CardTitle className="text-lg">{contact.name}</CardTitle>
-                            <Badge variant="outline">{contact.role}</Badge>
-                          </CardHeader>
-                          <CardContent>
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-semibold">Contatos</h3>
+                      <Button onClick={() => setIsAddingContact(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Contato
+                      </Button>
+                    </div>
+
+                    {isAddingContact && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Novo Contato</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="new-contact-name">Nome *</Label>
+                              <Input
+                                id="new-contact-name"
+                                value={newContact.name}
+                                onChange={(e) => setNewContact({...newContact, name: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-contact-role">Função</Label>
+                              <Input
+                                id="new-contact-role"
+                                value={newContact.role}
+                                onChange={(e) => setNewContact({...newContact, role: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-contact-phone">Telefone</Label>
+                              <Input
+                                id="new-contact-phone"
+                                value={newContact.phone}
+                                onChange={(e) => setNewContact({...newContact, phone: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-contact-whatsapp">WhatsApp</Label>
+                              <Input
+                                id="new-contact-whatsapp"
+                                value={newContact.whatsapp}
+                                onChange={(e) => setNewContact({...newContact, whatsapp: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-contact-email">Email</Label>
+                              <Input
+                                id="new-contact-email"
+                                type="email"
+                                value={newContact.email}
+                                onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="new-contact-notes">Observações</Label>
+                            <Textarea
+                              id="new-contact-notes"
+                              value={newContact.notes}
+                              onChange={(e) => setNewContact({...newContact, notes: e.target.value})}
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button onClick={handleAddContact}>
+                              <Save className="h-4 w-4 mr-2" />
+                              Salvar
+                            </Button>
+                            <Button variant="outline" onClick={() => setIsAddingContact(false)}>
+                              <X className="h-4 w-4 mr-2" />
+                              Cancelar
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {selectedSupplier.contacts.map((contact) => (
+                      <Card key={contact.id}>
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle className="text-lg">{contact.name}</CardTitle>
+                              <Badge variant="outline">{contact.role}</Badge>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsEditingContact(contact)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteContact(contact.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          {isEditingContact?.id === contact.id ? (
+                            <div className="space-y-4">
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label>Nome</Label>
+                                  <Input
+                                    value={isEditingContact.name}
+                                    onChange={(e) => setIsEditingContact({...isEditingContact, name: e.target.value})}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Função</Label>
+                                  <Input
+                                    value={isEditingContact.role}
+                                    onChange={(e) => setIsEditingContact({...isEditingContact, role: e.target.value})}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Telefone</Label>
+                                  <Input
+                                    value={isEditingContact.phone}
+                                    onChange={(e) => setIsEditingContact({...isEditingContact, phone: e.target.value})}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>WhatsApp</Label>
+                                  <Input
+                                    value={isEditingContact.whatsapp}
+                                    onChange={(e) => setIsEditingContact({...isEditingContact, whatsapp: e.target.value})}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Email</Label>
+                                  <Input
+                                    value={isEditingContact.email}
+                                    onChange={(e) => setIsEditingContact({...isEditingContact, email: e.target.value})}
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <Label>Observações</Label>
+                                <Textarea
+                                  value={isEditingContact.notes}
+                                  onChange={(e) => setIsEditingContact({...isEditingContact, notes: e.target.value})}
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <Button onClick={() => handleEditContact(isEditingContact)}>
+                                  <Save className="h-4 w-4 mr-2" />
+                                  Salvar
+                                </Button>
+                                <Button variant="outline" onClick={() => setIsEditingContact(null)}>
+                                  <X className="h-4 w-4 mr-2" />
+                                  Cancelar
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
                             <div className="grid md:grid-cols-2 gap-4">
                               <div>
                                 <Label className="text-sm font-medium">Telefone</Label>
@@ -602,21 +1131,22 @@ const MySuppliers = () => {
                                 <Label className="text-sm font-medium">Email</Label>
                                 <p className="text-muted-foreground">{contact.email}</p>
                               </div>
+                              {contact.notes && (
+                                <div className="md:col-span-2">
+                                  <Label className="text-sm font-medium">Observações</Label>
+                                  <p className="text-muted-foreground">{contact.notes}</p>
+                                </div>
+                              )}
                             </div>
-                            {contact.notes && (
-                              <div className="mt-4">
-                                <Label className="text-sm font-medium">Observações</Label>
-                                <p className="text-muted-foreground">{contact.notes}</p>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      ))
-                    ) : (
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                    {selectedSupplier.contacts.length === 0 && !isAddingContact && (
                       <Card>
                         <CardContent className="text-center py-8">
                           <p className="text-muted-foreground">Nenhum contato cadastrado</p>
-                          <Button className="mt-4">Adicionar Contato</Button>
                         </CardContent>
                       </Card>
                     )}
@@ -625,16 +1155,185 @@ const MySuppliers = () => {
 
                 <TabsContent value="branches" className="mt-6">
                   <div className="space-y-4">
-                    {selectedSupplier.branches.length > 0 ? (
-                      selectedSupplier.branches.map((branch, index) => (
-                        <Card key={index}>
-                          <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-semibold">Filiais</h3>
+                      <Button onClick={() => setIsAddingBranch(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Filial
+                      </Button>
+                    </div>
+
+                    {isAddingBranch && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Nova Filial</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="new-branch-name">Nome da Filial *</Label>
+                              <Input
+                                id="new-branch-name"
+                                value={newBranch.name}
+                                onChange={(e) => setNewBranch({...newBranch, name: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-branch-corporateName">Razão Social</Label>
+                              <Input
+                                id="new-branch-corporateName"
+                                value={newBranch.corporateName}
+                                onChange={(e) => setNewBranch({...newBranch, corporateName: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-branch-cnpj">CNPJ</Label>
+                              <Input
+                                id="new-branch-cnpj"
+                                value={newBranch.cnpj}
+                                onChange={(e) => setNewBranch({...newBranch, cnpj: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-branch-stateRegistration">Inscrição Estadual</Label>
+                              <Input
+                                id="new-branch-stateRegistration"
+                                value={newBranch.stateRegistration}
+                                onChange={(e) => setNewBranch({...newBranch, stateRegistration: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-branch-phone">Telefone</Label>
+                              <Input
+                                id="new-branch-phone"
+                                value={newBranch.phone}
+                                onChange={(e) => setNewBranch({...newBranch, phone: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-branch-email">Email</Label>
+                              <Input
+                                id="new-branch-email"
+                                type="email"
+                                value={newBranch.email}
+                                onChange={(e) => setNewBranch({...newBranch, email: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="new-branch-address">Endereço</Label>
+                            <Textarea
+                              id="new-branch-address"
+                              value={newBranch.address}
+                              onChange={(e) => setNewBranch({...newBranch, address: e.target.value})}
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button onClick={handleAddBranch}>
+                              <Save className="h-4 w-4 mr-2" />
+                              Salvar
+                            </Button>
+                            <Button variant="outline" onClick={() => setIsAddingBranch(false)}>
+                              <X className="h-4 w-4 mr-2" />
+                              Cancelar
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {selectedSupplier.branches.map((branch) => (
+                      <Card key={branch.id}>
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
                             <CardTitle className="text-lg flex items-center gap-2">
                               <Building2 className="h-5 w-5" />
                               {branch.name}
                             </CardTitle>
-                          </CardHeader>
-                          <CardContent>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsEditingBranch(branch)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteBranch(branch.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          {isEditingBranch?.id === branch.id ? (
+                            <div className="space-y-4">
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label>Nome da Filial</Label>
+                                  <Input
+                                    value={isEditingBranch.name}
+                                    onChange={(e) => setIsEditingBranch({...isEditingBranch, name: e.target.value})}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Razão Social</Label>
+                                  <Input
+                                    value={isEditingBranch.corporateName}
+                                    onChange={(e) => setIsEditingBranch({...isEditingBranch, corporateName: e.target.value})}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>CNPJ</Label>
+                                  <Input
+                                    value={isEditingBranch.cnpj}
+                                    onChange={(e) => setIsEditingBranch({...isEditingBranch, cnpj: e.target.value})}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Inscrição Estadual</Label>
+                                  <Input
+                                    value={isEditingBranch.stateRegistration}
+                                    onChange={(e) => setIsEditingBranch({...isEditingBranch, stateRegistration: e.target.value})}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Telefone</Label>
+                                  <Input
+                                    value={isEditingBranch.phone}
+                                    onChange={(e) => setIsEditingBranch({...isEditingBranch, phone: e.target.value})}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Email</Label>
+                                  <Input
+                                    value={isEditingBranch.email}
+                                    onChange={(e) => setIsEditingBranch({...isEditingBranch, email: e.target.value})}
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <Label>Endereço</Label>
+                                <Textarea
+                                  value={isEditingBranch.address}
+                                  onChange={(e) => setIsEditingBranch({...isEditingBranch, address: e.target.value})}
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <Button onClick={() => handleEditBranch(isEditingBranch)}>
+                                  <Save className="h-4 w-4 mr-2" />
+                                  Salvar
+                                </Button>
+                                <Button variant="outline" onClick={() => setIsEditingBranch(null)}>
+                                  <X className="h-4 w-4 mr-2" />
+                                  Cancelar
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
                             <div className="grid md:grid-cols-2 gap-4">
                               <div>
                                 <Label className="text-sm font-medium">Razão Social</Label>
@@ -661,14 +1360,15 @@ const MySuppliers = () => {
                                 <p className="text-muted-foreground">{branch.email}</p>
                               </div>
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))
-                    ) : (
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                    {selectedSupplier.branches.length === 0 && !isAddingBranch && (
                       <Card>
                         <CardContent className="text-center py-8">
                           <p className="text-muted-foreground">Nenhuma filial cadastrada</p>
-                          <Button className="mt-4">Adicionar Filial</Button>
                         </CardContent>
                       </Card>
                     )}
@@ -677,45 +1377,99 @@ const MySuppliers = () => {
 
                 <TabsContent value="conversations" className="mt-6">
                   <div className="space-y-4">
-                    {selectedSupplier.conversations.length > 0 ? (
-                      selectedSupplier.conversations.map((conversation, index) => (
-                        <Card key={index}>
-                          <CardHeader>
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg flex items-center gap-2">
-                                <MessageSquare className="h-5 w-5" />
-                                {conversation.subject}
-                              </CardTitle>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Calendar className="h-4 w-4" />
-                                {new Date(conversation.date).toLocaleDateString('pt-BR')}
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-semibold">Conversas</h3>
+                      <Button onClick={() => setIsAddingConversation(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Conversa
+                      </Button>
+                    </div>
+
+                    {isAddingConversation && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Nova Conversa</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="new-conversation-date">Data</Label>
+                              <Input
+                                id="new-conversation-date"
+                                type="date"
+                                value={newConversation.date}
+                                onChange={(e) => setNewConversation({...newConversation, date: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="new-conversation-subject">Assunto *</Label>
+                              <Input
+                                id="new-conversation-subject"
+                                value={newConversation.subject}
+                                onChange={(e) => setNewConversation({...newConversation, subject: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="new-conversation-notes">Observações</Label>
+                            <Textarea
+                              id="new-conversation-notes"
+                              value={newConversation.notes}
+                              onChange={(e) => setNewConversation({...newConversation, notes: e.target.value})}
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button onClick={handleAddConversation}>
+                              <Save className="h-4 w-4 mr-2" />
+                              Salvar
+                            </Button>
+                            <Button variant="outline" onClick={() => setIsAddingConversation(false)}>
+                              <X className="h-4 w-4 mr-2" />
+                              Cancelar
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {selectedSupplier.conversations.map((conversation) => (
+                      <Card key={conversation.id}>
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                              <MessageSquare className="h-5 w-5" />
+                              {conversation.subject}
+                            </CardTitle>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Calendar className="h-4 w-4" />
+                              {new Date(conversation.date).toLocaleDateString('pt-BR')}
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted-foreground mb-4">{conversation.notes}</p>
+                          {conversation.files.length > 0 && (
+                            <div>
+                              <Label className="text-sm font-medium">Arquivos:</Label>
+                              <div className="mt-2 space-y-2">
+                                {conversation.files.map((file, fileIndex) => (
+                                  <div key={fileIndex} className="flex items-center gap-2 text-sm">
+                                    <Paperclip className="h-4 w-4" />
+                                    <span>{file}</span>
+                                    <Button variant="ghost" size="sm">Download</Button>
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground mb-4">{conversation.notes}</p>
-                            {conversation.files.length > 0 && (
-                              <div>
-                                <Label className="text-sm font-medium">Arquivos:</Label>
-                                <div className="mt-2 space-y-2">
-                                  {conversation.files.map((file, fileIndex) => (
-                                    <div key={fileIndex} className="flex items-center gap-2 text-sm">
-                                      <Paperclip className="h-4 w-4" />
-                                      <span>{file}</span>
-                                      <Button variant="ghost" size="sm">Download</Button>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      ))
-                    ) : (
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                    {selectedSupplier.conversations.length === 0 && !isAddingConversation && (
                       <Card>
                         <CardContent className="text-center py-8">
                           <p className="text-muted-foreground">Nenhuma conversa registrada</p>
-                          <Button className="mt-4">Adicionar Conversa</Button>
                         </CardContent>
                       </Card>
                     )}
