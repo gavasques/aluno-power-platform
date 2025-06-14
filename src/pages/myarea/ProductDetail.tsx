@@ -46,6 +46,37 @@ const mockProduct: Product = {
       outboundFreight: 12.50,
       salePrice: 749.90
     },
+    amazonFBAOnSite: {
+      enabled: false,
+      commissionPct: 15,
+      fixedFee: 0,
+      otherPct: 0,
+      otherValue: 0,
+      adsPct: 8,
+      outboundFreight: 0,
+      salePrice: 0
+    },
+    amazonDBA: {
+      enabled: false,
+      commissionPct: 15,
+      fixedFee: 0,
+      otherPct: 0,
+      otherValue: 0,
+      adsPct: 8,
+      outboundFreight: 0,
+      salePrice: 0
+    },
+    amazonFBA: {
+      enabled: false,
+      commissionPct: 15,
+      fixedFee: 0,
+      otherPct: 0,
+      otherValue: 0,
+      adsPct: 8,
+      inboundFreight: 0,
+      prepCenter: 0,
+      salePrice: 0
+    },
     mlME1: {
       enabled: true,
       commissionPct: 14,
@@ -54,6 +85,38 @@ const mockProduct: Product = {
       otherValue: 0,
       adsPct: 6,
       salePrice: 729.90
+    },
+    mlFlex: {
+      enabled: false,
+      commissionPct: 14,
+      fixedFee: 0,
+      otherPct: 0,
+      otherValue: 0,
+      adsPct: 6,
+      outboundFreight: 0,
+      flexRevenue: 0,
+      salePrice: 0
+    },
+    mlEnvios: {
+      enabled: false,
+      commissionPct: 14,
+      fixedFee: 0,
+      otherPct: 0,
+      otherValue: 0,
+      adsPct: 6,
+      outboundFreight: 0,
+      salePrice: 0
+    },
+    mlFull: {
+      enabled: false,
+      commissionPct: 14,
+      fixedFee: 0,
+      otherPct: 0,
+      otherValue: 0,
+      adsPct: 6,
+      inboundFreight: 0,
+      prepCenter: 0,
+      salePrice: 0
     }
   },
   createdAt: "2024-01-15T10:30:00Z"
