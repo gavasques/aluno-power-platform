@@ -139,7 +139,7 @@ const MySuppliers = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
-  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("ALL");
   const [showAddForm, setShowAddForm] = useState(false);
   const navigate = useNavigate();
 
@@ -149,7 +149,7 @@ const MySuppliers = () => {
     const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          supplier.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Todas" || supplier.category === selectedCategory;
-    const matchesCountry = !selectedCountry || supplier.country === selectedCountry;
+    const matchesCountry = selectedCountry === "ALL" || supplier.country === selectedCountry;
     return matchesSearch && matchesCategory && matchesCountry;
   });
 
@@ -227,7 +227,7 @@ const MySuppliers = () => {
                     <SelectValue placeholder="Todos os países" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os países</SelectItem>
+                    <SelectItem value="ALL">Todos os países</SelectItem>
                     {countries.map(country => (
                       <SelectItem key={country.code} value={country.code}>
                         <span className="flex items-center gap-2">
