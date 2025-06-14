@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import MySuppliers from "./myarea/MySuppliers";
 import MyProducts from "./myarea/MyProducts";
 import ProductForm from "./myarea/ProductForm";
+import ProductDetail from "./myarea/ProductDetail";
 import SupplierDetail from "./myarea/SupplierDetail";
 
 const MyArea = () => {
@@ -19,8 +20,7 @@ const MyArea = () => {
         return <ProductForm />;
       }
       if (id) {
-        // TODO: Implementar ProductDetail
-        return <div>Detalhes do Produto - Em breve</div>;
+        return <ProductDetail />;
       }
       return <MyProducts />;
     default:
