@@ -36,6 +36,14 @@ export const ProductView = ({
     mlFull: "ML Full"
   };
 
+  // Cálculo da cubagem
+  const volumeCm3 = product.dimensions.length * product.dimensions.width * product.dimensions.height;
+  const volumeM3 = volumeCm3 / 1000000; // Converter cm³ para m³
+  
+  // Cálculo do peso cubado
+  const pesoCubado167 = volumeM3 * 167;
+  const pesoCubado300 = volumeM3 * 300;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Informações Principais */}
@@ -139,6 +147,18 @@ export const ProductView = ({
           <div>
             <label className="text-sm font-medium text-muted-foreground">Peso</label>
             <p>{product.weight} kg</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">Volume</label>
+            <p>{volumeCm3.toLocaleString('pt-BR')} cm³ ({volumeM3.toFixed(6)} m³)</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">Peso Cubado (167)</label>
+            <p>{pesoCubado167.toFixed(2)} kg</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">Peso Cubado (300)</label>
+            <p>{pesoCubado300.toFixed(2)} kg</p>
           </div>
           <div>
             <label className="text-sm font-medium text-muted-foreground">Data de Cadastro</label>
