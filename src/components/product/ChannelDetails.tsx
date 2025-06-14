@@ -24,14 +24,20 @@ export const ChannelDetails = ({
 }: ChannelDetailsProps) => {
   if (!channel || !channel.enabled) {
     return (
-      <Card className="bg-gray-50 border-gray-200">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium text-gray-600">{channelName}</h4>
-            <Badge variant="secondary">Inativo</Badge>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="flex items-center gap-4">
+          <h4 className="font-medium text-gray-600 min-w-[120px]">{channelName}</h4>
+          <Badge variant="secondary">Inativo</Badge>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onEditChannel}
+          className="h-8 px-3"
+        >
+          <Edit className="h-3 w-3" />
+        </Button>
+      </div>
     );
   }
 
@@ -119,105 +125,106 @@ export const ChannelDetails = ({
   const totalCosts = costDetails.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <Card className="bg-green-50 border-green-200">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{channelName}</CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge variant="default">Ativo</Badge>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onEditChannel}
-              className="h-7 px-2"
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
-          </div>
+    <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+      <div className="flex items-center gap-6 flex-1">
+        {/* Nome do Canal */}
+        <div className="flex items-center gap-3 min-w-[140px]">
+          <h4 className="font-medium text-base">{channelName}</h4>
+          <Badge variant="default">Ativo</Badge>
         </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-2 text-sm">
-            <div>
-              <p className="text-muted-foreground">Preço</p>
-              <p className="font-semibold">{formatCurrency(channel.salePrice)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Margem</p>
-              <p className={`font-semibold ${results.margin >= 20 ? 'text-green-600' : results.margin >= 10 ? 'text-yellow-600' : 'text-red-600'}`}>
-                {formatPercentage(results.margin)}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">ROI</p>
-              <p className={`font-semibold ${results.roi >= 50 ? 'text-green-600' : results.roi >= 25 ? 'text-yellow-600' : 'text-red-600'}`}>
-                {formatPercentage(results.roi)}
-              </p>
-            </div>
+        
+        {/* Métricas */}
+        <div className="flex items-center gap-8 flex-1">
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground mb-1">Preço</p>
+            <p className="font-semibold text-sm">{formatCurrency(channel.salePrice)}</p>
           </div>
           
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Lucro</p>
-              <p className={`font-semibold ${results.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(results.profit)}
-              </p>
-            </div>
-            
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Info className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80" align="end">
-                <div className="space-y-3">
-                  <h4 className="font-semibold">Detalhamento de Custos</h4>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Receita</span>
-                      <span className="text-sm font-semibold text-green-600">
-                        {formatCurrency(channel.salePrice)}
-                      </span>
-                    </div>
-                    
-                    <div className="border-t pt-2">
-                      <p className="text-sm font-medium mb-2">Custos:</p>
-                      {costDetails.map((cost, index) => (
-                        <div key={index} className="flex justify-between items-center text-sm">
-                          <span className="text-muted-foreground">
-                            {cost.label}
-                            {cost.percentage && ` (${cost.percentage}%)`}
-                          </span>
-                          <span className={cost.value < 0 ? 'text-green-600' : 'text-red-600'}>
-                            {formatCurrency(Math.abs(cost.value))}
-                            {cost.value < 0 && ' (receita)'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="border-t pt-2">
-                      <div className="flex justify-between items-center font-semibold">
-                        <span>Total de Custos</span>
-                        <span className="text-red-600">{formatCurrency(totalCosts)}</span>
-                      </div>
-                      <div className="flex justify-between items-center font-bold">
-                        <span>Lucro Líquido</span>
-                        <span className={results.profit >= 0 ? 'text-green-600' : 'text-red-600'}>
-                          {formatCurrency(results.profit)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground mb-1">Margem</p>
+            <p className={`font-semibold text-sm ${results.margin >= 20 ? 'text-green-600' : results.margin >= 10 ? 'text-yellow-600' : 'text-red-600'}`}>
+              {formatPercentage(results.margin)}
+            </p>
+          </div>
+          
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground mb-1">ROI</p>
+            <p className={`font-semibold text-sm ${results.roi >= 50 ? 'text-green-600' : results.roi >= 25 ? 'text-yellow-600' : 'text-red-600'}`}>
+              {formatPercentage(results.roi)}
+            </p>
+          </div>
+          
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground mb-1">Lucro</p>
+            <p className={`font-semibold text-sm ${results.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(results.profit)}
+            </p>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      
+      {/* Botões de Ação */}
+      <div className="flex items-center gap-2 ml-4">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Info className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80" align="end">
+            <div className="space-y-3">
+              <h4 className="font-semibold">Detalhamento de Custos</h4>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Receita</span>
+                  <span className="text-sm font-semibold text-green-600">
+                    {formatCurrency(channel.salePrice)}
+                  </span>
+                </div>
+                
+                <div className="border-t pt-2">
+                  <p className="text-sm font-medium mb-2">Custos:</p>
+                  {costDetails.map((cost, index) => (
+                    <div key={index} className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">
+                        {cost.label}
+                        {cost.percentage && ` (${cost.percentage}%)`}
+                      </span>
+                      <span className={cost.value < 0 ? 'text-green-600' : 'text-red-600'}>
+                        {formatCurrency(Math.abs(cost.value))}
+                        {cost.value < 0 && ' (receita)'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="border-t pt-2">
+                  <div className="flex justify-between items-center font-semibold">
+                    <span>Total de Custos</span>
+                    <span className="text-red-600">{formatCurrency(totalCosts)}</span>
+                  </div>
+                  <div className="flex justify-between items-center font-bold">
+                    <span>Lucro Líquido</span>
+                    <span className={results.profit >= 0 ? 'text-green-600' : 'text-red-600'}>
+                      {formatCurrency(results.profit)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+        
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onEditChannel}
+          className="h-8 px-3"
+        >
+          <Edit className="h-3 w-3" />
+        </Button>
+      </div>
+    </div>
   );
 };

@@ -147,7 +147,7 @@ export const ProductView = ({
         </CardContent>
       </Card>
 
-      {/* Canais de Venda */}
+      {/* Canais de Venda - Formato Lista */}
       <Card className="lg:col-span-2">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -165,7 +165,7 @@ export const ProductView = ({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-3">
             {Object.entries(product.channels).map(([channelKey, channel]) => {
               if (!channel) return null;
               
