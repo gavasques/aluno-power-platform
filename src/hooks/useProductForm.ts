@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -184,10 +185,11 @@ export const useProductForm = () => {
       return;
     }
 
-    // Criar o produto usando o contexto
+    // Criar o produto usando o contexto - incluindo a propriedade active
     addProduct({
       ...productData,
-      channels
+      channels,
+      active: true
     });
 
     toast({
