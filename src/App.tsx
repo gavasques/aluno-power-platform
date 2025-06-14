@@ -32,7 +32,7 @@ const App = () => (
               <Route path="/" element={<Dashboard />} />
               <Route path="/hub/:section" element={<Hub />} />
               <Route path="/minha-area/:section" element={<MyArea />} />
-              <Route path="/simuladores" element={<Simulators />} />
+              <Route path="/simuladores/:section?" element={<Simulators />} />
               <Route path="/cadastros" element={<Registrations />} />
               <Route path="/agentes-ia" element={<AIAgents />} />
               <Route path="/nossos-cursos" element={<Courses />} />

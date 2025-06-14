@@ -1,3 +1,4 @@
+
 import { Link, NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -22,6 +23,10 @@ import {
   Bot,
   School,
   ClipboardList,
+  FileDigit,
+  Ship,
+  Building,
+  ClipboardCheck,
 } from "lucide-react";
 
 const menuItems = [
@@ -50,7 +55,32 @@ const menuItems = [
       { title: "Meus Produtos", href: "/minha-area/produtos", icon: Package },
     ],
   },
-  { title: "Simuladores", href: "/simuladores", icon: Calculator },
+  {
+    title: "Simuladores",
+    icon: Calculator,
+    subItems: [
+      {
+        title: "Simples Nacional",
+        href: "/simuladores/simples-nacional",
+        icon: FileDigit,
+      },
+      {
+        title: "Importação Simplificada",
+        href: "/simuladores/importacao-simplificada",
+        icon: Ship,
+      },
+      {
+        title: "Importação Formal",
+        href: "/simuladores/importacao-formal",
+        icon: Building,
+      },
+      {
+        title: "Viabilidade de Produto",
+        href: "/simuladores/viabilidade-de-produto",
+        icon: ClipboardCheck,
+      },
+    ],
+  },
   { title: "Cadastros", href: "/cadastros", icon: ClipboardList },
   { title: "Agentes de IA", href: "/agentes-ia", icon: Bot },
   { title: "Nossos Cursos", href: "/nossos-cursos", icon: School },
