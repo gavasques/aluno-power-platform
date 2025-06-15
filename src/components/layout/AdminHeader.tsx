@@ -1,6 +1,4 @@
-
 import { Link } from "react-router-dom";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminNav } from "@/components/layout/AdminNav";
 import {
   NavigationMenu,
@@ -134,7 +132,6 @@ export function AdminHeader() {
           </NavigationMenu>
         </div>
         <div className="flex items-center space-x-4">
-          <ThemeToggle />
           <AdminNav />
         </div>
       </div>
