@@ -79,16 +79,16 @@ const initialProducts: Product[] = [
     }
   },
   {
-    id: "3",
-    name: "T-shirt Algodão",
-    photo: "https://picsum.photos/seed/3/200/200",
-    ean: "2345678901234",
+    id: '3',
+    name: 'T-shirt Algodão',
+    photo: 'https://picsum.photos/seed/3/200/200',
+    ean: '2345678901234',
     dimensions: { length: 30, width: 20, height: 1 },
     weight: 0.2,
-    brand: "Nike",
-    category: "Roupas e Acessórios",
-    supplierId: "2",
-    ncm: "61091000",
+    brand: 'Nike',
+    category: 'Roupas e Acessórios',
+    supplierId: '2',
+    ncm: '61091000',
     costItem: 45,
     packCost: 3,
     taxPercent: 15,
@@ -97,19 +97,19 @@ const initialProducts: Product[] = [
       sitePropio: { enabled: true, salePrice: 89.9, commissionPct: 0, fixedFee: 2, otherPct: 1, otherValue: 0, adsPct: 10, gatewayPct: 4 },
       mlFull: { enabled: true, salePrice: 99.9, commissionPct: 14, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 15, inboundFreight: 5, outboundFreight: 0, prepCenter: 2 }
     },
-    createdAt: "2024-03-10"
+    createdAt: '2024-03-10'
   },
   {
-    id: "4",
-    name: "Furadeira de Impacto",
-    photo: "https://picsum.photos/seed/4/200/200",
-    ean: "3456789012345",
+    id: '4',
+    name: 'Furadeira de Impacto',
+    photo: 'https://picsum.photos/seed/4/200/200',
+    ean: '3456789012345',
     dimensions: { length: 25, width: 20, height: 8 },
     weight: 2.5,
-    brand: "Bosch",
-    category: "Casa e Jardim",
-    supplierId: "3",
-    ncm: "84672100",
+    brand: 'Bosch',
+    category: 'Casa e Jardim',
+    supplierId: '3',
+    ncm: '84672100',
     costItem: 250,
     packCost: 15,
     taxPercent: 18,
@@ -117,7 +117,7 @@ const initialProducts: Product[] = [
     channels: {
       amazonFBA: { enabled: true, salePrice: 449, commissionPct: 12, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 8, inboundFreight: 15, outboundFreight: 0, prepCenter: 5 }
     },
-    createdAt: "2024-04-05"
+    createdAt: '2024-04-05'
   },
   {
     id: '5',
@@ -178,7 +178,7 @@ const initialProducts: Product[] = [
     createdAt: "2023-12-15",
     channels: {
       sitePropio: { enabled: true, salePrice: 499, commissionPct: 0, fixedFee: 5, otherPct: 2, otherValue: 0, adsPct: 10, gatewayPct: 3.5 },
-      amazonFBA: { enabled: true, salePrice: 549, commissionPct: 15, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 15, inboundFreight: 15, prepCenter: 7 },
+      amazonFBA: { enabled: true, salePrice: 549, commissionPct: 15, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 15, inboundFreight: 15, outboundFreight: 0, prepCenter: 7 },
       mlFull: { enabled: true, salePrice: 529, commissionPct: 17, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 12, inboundFreight: 12, outboundFreight: 0, prepCenter: 5 }
     }
   },
