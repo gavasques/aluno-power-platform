@@ -43,6 +43,18 @@ export const ChannelForm = ({
           />
         </div>
 
+        {/* Campo FNSKU específico para Amazon FBA */}
+        {channelType === 'amazonFBA' && (
+          <div className="col-span-2">
+            <Label>Código FNSKU</Label>
+            <Input
+              placeholder="Ex: X001ABC123DEF"
+              value={channelData.fnsku || ""}
+              onChange={(e) => onChannelInputChange(channelType, 'fnsku', e.target.value)}
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Comissão (%)</Label>

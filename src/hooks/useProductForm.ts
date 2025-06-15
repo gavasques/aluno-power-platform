@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -84,7 +83,8 @@ export const useProductForm = () => {
       inboundFreight: 0,
       prepCenter: 0,
       salePrice: 0,
-      productCode: ""
+      productCode: "",
+      fnsku: ""
     },
     mlME1: {
       enabled: false,

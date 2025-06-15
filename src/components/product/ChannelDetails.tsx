@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -130,14 +131,23 @@ export const ChannelDetails = ({
   return (
     <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
       <div className="flex items-center gap-6 flex-1">
-        {/* Nome do Canal e Código */}
+        {/* Nome do Canal e Códigos */}
         <div className="flex items-center gap-3 min-w-[140px]">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h4 className="font-medium text-base">{channelName}</h4>
               <Badge variant="default">Ativo</Badge>
             </div>
-            <ProductCodeDisplay code={channel.productCode} />
+            <div className="space-y-1">
+              <ProductCodeDisplay code={channel.productCode} />
+              {/* Mostrar FNSKU para Amazon FBA */}
+              {channelKey === 'amazonFBA' && (channel as any).fnsku && (
+                <div>
+                  <span className="text-xs text-muted-foreground mr-1">FNSKU:</span>
+                  <ProductCodeDisplay code={(channel as any).fnsku} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
         

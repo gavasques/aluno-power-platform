@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -77,6 +76,7 @@ export interface AmazonDBAChannel extends BaseChannel {
 export interface AmazonFBAChannel extends BaseChannel {
   inboundFreight: number;
   prepCenter: number;
+  fnsku?: string; // Novo campo FNSKU
 }
 
 export interface MLMEChannel extends BaseChannel {
