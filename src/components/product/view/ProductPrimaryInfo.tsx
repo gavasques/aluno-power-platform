@@ -7,6 +7,9 @@ interface ProductPrimaryInfoProps {
 }
 
 export const ProductPrimaryInfo = ({ product, supplierName }: ProductPrimaryInfoProps) => {
+  // Buscar o fornecedor principal dos suppliers se existir
+  const mainSupplier = product.suppliers?.find(supplier => supplier.isMain);
+  
   return (
     <div className="flex gap-6">
       {product.photo && (
@@ -33,9 +36,21 @@ export const ProductPrimaryInfo = ({ product, supplierName }: ProductPrimaryInfo
           <p>{product.category}</p>
         </div>
         <div>
-          <label className="text-sm font-medium text-muted-foreground">Fornecedor</label>
+          <label className="text-sm font-medium text-muted-foreground">Fornecedor Principal</label>
           <p>{supplierName}</p>
         </div>
+        {product.sku && (
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">SKU</label>
+            <p className="font-mono">{product.sku}</p>
+          </div>
+        )}
+        {product.internalCode && (
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">Código Interno</label>
+            <p className="font-mono">{product.internalCode}</p>
+          </div>
+        )}
         {product.ean && (
           <div>
             <label className="text-sm font-medium text-muted-foreground">EAN</label>

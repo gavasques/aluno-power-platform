@@ -169,7 +169,20 @@ const ProductDetail = () => {
     });
   };
 
-  const supplierName = mockSuppliers.find(s => s.id === product.supplierId)?.tradeName || "Fornecedor não encontrado";
+  // Buscar fornecedor principal
+  const getMainSupplierName = () => {
+    if (product.suppliers && product.suppliers.length > 0) {
+      const mainSupplier = product.suppliers.find(s => s.isMain);
+      if (mainSupplier) {
+        const supplierData = mockSuppliers.find(ms => ms.id === mainSupplier.supplierId);
+        return supplierData?.tradeName || "Fornecedor não encontrado";
+      }
+    }
+    // Fallback para o fornecedor antigo
+    return mockSuppliers.find(s => s.id === product.supplierId)?.tradeName || "Fornecedor não encontrado";
+  };
+
+  const supplierName = getMainSupplierName();
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
