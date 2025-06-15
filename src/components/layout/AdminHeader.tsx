@@ -18,7 +18,8 @@ import {
   MessageSquare,
   Settings,
   Database,
-  Shield
+  Shield,
+  Bot
 } from "lucide-react";
 
 // Corrigindo os itens do menu para refletir "Departamentos", "Tipos de Templates", etc.
@@ -41,6 +42,7 @@ const adminMenuItems = [
       { title: "Ferramentas", href: "/admin/conteudo/ferramentas", icon: Settings },
       { title: "Templates", href: "/admin/conteudo/templates", icon: FileText },
       { title: "Materiais", href: "/admin/conteudo/materiais", icon: FileText },
+      { title: "Prompts de IA", href: "/admin/conteudo/prompts-ia", icon: Bot },
       { title: "Selos", href: "/admin/conteudo/selos", icon: Shield },
     ],
   },
