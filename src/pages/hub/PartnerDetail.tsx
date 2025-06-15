@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import {
   Star,
@@ -17,13 +18,17 @@ import {
   Instagram,
   Linkedin,
   ArrowLeft,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  Download,
+  Upload,
+  X
 } from 'lucide-react';
 
 const PartnerDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getPartnerById, addReview } = usePartners();
+  const { getPartnerById, addReview, addMaterial, deleteMaterial } = usePartners();
   const { toast } = useToast();
   
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -31,6 +36,9 @@ const PartnerDetail = () => {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showMaterialForm, setShowMaterialForm] = useState(false);
+  const [materialName, setMaterialName] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const partner = id ? getPartnerById(id) : null;
 
@@ -98,6 +106,61 @@ const PartnerDetail = () => {
     }
   };
 
+  const handleAddMaterial = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!materialName.trim() || !selectedFile) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha o nome e selecione um arquivo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Em uma implementação real, você faria upload do arquivo aqui
+      const fileUrl = `/uploads/${selectedFile.name}`;
+      
+      addMaterial(partner.id, {
+        name: materialName.trim(),
+        fileUrl,
+        fileType: selectedFile.type,
+        fileSize: selectedFile.size,
+      });
+
+      toast({
+        title: "Material adicionado!",
+        description: "O material foi adicionado com sucesso.",
+      });
+
+      setShowMaterialForm(false);
+      setMaterialName('');
+      setSelectedFile(null);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o material. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteMaterial = (materialId: string) => {
+    deleteMaterial(partner.id, materialId);
+    toast({
+      title: "Material removido",
+      description: "O material foi removido com sucesso.",
+    });
+  };
+
+  const formatFileSize = (bytes: number) => {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    if (bytes === 0) return '0 Bytes';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
   const approvedReviews = partner.reviews.filter(review => review.isApproved);
 
   const getContactIcon = (type: string) => {
@@ -116,7 +179,7 @@ const PartnerDetail = () => {
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
-      <div className="w-full px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-8">
           <Button 
@@ -373,24 +436,107 @@ const PartnerDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Certificações */}
-            {partner.certifications.length > 0 && (
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl">Certificações</CardTitle>
-                </CardHeader>
-                <CardContent>
+            {/* Materiais */}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-xl">Materiais</CardTitle>
+                  <Button 
+                    onClick={() => setShowMaterialForm(true)}
+                    size="sm"
+                    disabled={showMaterialForm}
+                  >
+                    <Upload className="h-4 w-4 mr-1" />
+                    Adicionar
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Formulário de Adicionar Material */}
+                {showMaterialForm && (
+                  <form onSubmit={handleAddMaterial} className="space-y-4 p-4 border rounded-lg bg-gray-50">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Nome do Material
+                      </label>
+                      <Input
+                        placeholder="Ex: Guia de procedimentos"
+                        value={materialName}
+                        onChange={(e) => setMaterialName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Arquivo
+                      </label>
+                      <Input
+                        type="file"
+                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                        required
+                        accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setShowMaterialForm(false);
+                          setMaterialName('');
+                          setSelectedFile(null);
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button type="submit" size="sm">
+                        Adicionar
+                      </Button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Lista de Materiais */}
+                {partner.materials.length > 0 ? (
                   <div className="space-y-3">
-                    {partner.certifications.map((cert, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <Shield className="h-5 w-5 text-green-500" />
-                        <span className="text-base">{cert}</span>
+                    {partner.materials.map((material) => (
+                      <div key={material.id} className="flex items-center gap-3 p-3 border rounded-lg bg-white">
+                        <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{material.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatFileSize(material.fileSize)}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => window.open(material.fileUrl, '_blank')}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteMaterial(material.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <p className="text-gray-500 text-center py-6 text-sm">
+                    Nenhum material disponível
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Partner, Review, PartnerContact } from '@/types/partner';
+import { Partner, Review, PartnerMaterial } from '@/types/partner';
 
 interface PartnersContextType {
   partners: Partner[];
@@ -11,6 +11,8 @@ interface PartnersContextType {
   deletePartner: (id: string) => void;
   addReview: (partnerId: string, review: Omit<Review, 'id' | 'createdAt' | 'isApproved'>) => void;
   approveReview: (partnerId: string, reviewId: string) => void;
+  addMaterial: (partnerId: string, material: Omit<PartnerMaterial, 'id' | 'uploadedAt'>) => void;
+  deleteMaterial: (partnerId: string, materialId: string) => void;
   getPartnerById: (id: string) => Partner | undefined;
   getPartnersByCategory: (categoryId: string) => Partner[];
   searchPartners: (query: string) => Partner[];
@@ -50,7 +52,16 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
         website: 'https://silvacontabil.com.br',
         instagram: '@silvacontabil',
         linkedin: 'silva-contabilidade',
-        certifications: ['CRC-SP 123456', 'Certificação Digital'],
+        materials: [
+          {
+            id: '1',
+            name: 'Guia de Abertura de Empresa',
+            fileUrl: '/docs/guia-abertura-empresa.pdf',
+            fileType: 'application/pdf',
+            fileSize: 2048000,
+            uploadedAt: '2024-01-15'
+          }
+        ],
         isVerified: true,
         averageRating: 4.8,
         totalReviews: 24,
@@ -90,7 +101,7 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
           zipCode: '01234-890'
         },
         website: 'https://machadoadvocacia.com.br',
-        certifications: ['OAB-SP 123456'],
+        materials: [],
         isVerified: true,
         averageRating: 4.6,
         totalReviews: 18,
@@ -182,6 +193,36 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const addMaterial = (partnerId: string, materialData: Omit<PartnerMaterial, 'id' | 'uploadedAt'>) => {
+    const newMaterial: PartnerMaterial = {
+      ...materialData,
+      id: Date.now().toString(),
+      uploadedAt: new Date().toISOString(),
+    };
+
+    setPartners(prev => prev.map(partner => 
+      partner.id === partnerId 
+        ? { 
+            ...partner, 
+            materials: [...partner.materials, newMaterial],
+            updatedAt: new Date().toISOString()
+          }
+        : partner
+    ));
+  };
+
+  const deleteMaterial = (partnerId: string, materialId: string) => {
+    setPartners(prev => prev.map(partner => 
+      partner.id === partnerId 
+        ? { 
+            ...partner, 
+            materials: partner.materials.filter(m => m.id !== materialId),
+            updatedAt: new Date().toISOString()
+          }
+        : partner
+    ));
+  };
+
   const getPartnerById = (id: string) => {
     return partners.find(partner => partner.id === id);
   };
@@ -210,6 +251,8 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
       deletePartner,
       addReview,
       approveReview,
+      addMaterial,
+      deleteMaterial,
       getPartnerById,
       getPartnersByCategory,
       searchPartners,

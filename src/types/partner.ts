@@ -19,7 +19,7 @@ export interface Partner {
   website?: string;
   instagram?: string;
   linkedin?: string;
-  certifications: string[];
+  materials: PartnerMaterial[];
   isVerified: boolean;
   averageRating: number;
   totalReviews: number;
@@ -40,6 +40,15 @@ export interface PartnerContact {
   type: 'phone' | 'email' | 'whatsapp' | 'website';
   value: string;
   label?: string;
+}
+
+export interface PartnerMaterial {
+  id: string;
+  name: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  uploadedAt: string;
 }
 
 export interface Review {
