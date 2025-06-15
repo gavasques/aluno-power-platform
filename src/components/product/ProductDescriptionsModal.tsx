@@ -42,12 +42,12 @@ export const ProductDescriptionsModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[95vh] h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Descrições do Produto</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="description" className="space-y-6">
+        <Tabs defaultValue="description" className="space-y-6 flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="description" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -67,8 +67,8 @@ export const ProductDescriptionsModal = ({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="description" className="space-y-4">
-            <div>
+          <TabsContent value="description" className="space-y-4 flex-1">
+            <div className="h-full flex flex-col">
               <Label className="text-sm font-medium">Descrição do Produto</Label>
               <p className="text-sm text-muted-foreground mb-2">
                 Descreva o produto de forma clara e detalhada para seus clientes.
@@ -77,13 +77,13 @@ export const ProductDescriptionsModal = ({
                 value={editedDescriptions.description || ''}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder="Digite a descrição do produto..."
-                className="min-h-[200px]"
+                className="min-h-[400px] flex-1"
               />
             </div>
           </TabsContent>
 
-          <TabsContent value="html" className="space-y-4">
-            <div>
+          <TabsContent value="html" className="space-y-4 flex-1">
+            <div className="h-full flex flex-col">
               <Label className="text-sm font-medium">Descrição em HTML</Label>
               <p className="text-sm text-muted-foreground mb-2">
                 Use HTML para formatar a descrição com estilos personalizados.
@@ -92,13 +92,13 @@ export const ProductDescriptionsModal = ({
                 value={editedDescriptions.htmlDescription || ''}
                 onChange={(e) => handleInputChange('htmlDescription', e.target.value)}
                 placeholder="<p>Digite a descrição com tags HTML...</p>"
-                className="min-h-[200px] font-mono text-sm"
+                className="min-h-[400px] flex-1 font-mono text-sm"
               />
             </div>
           </TabsContent>
 
-          <TabsContent value="bullets" className="space-y-4">
-            <div>
+          <TabsContent value="bullets" className="space-y-4 flex-1">
+            <div className="h-full flex flex-col">
               <Label className="text-sm font-medium">Bullet Points</Label>
               <p className="text-sm text-muted-foreground mb-2">
                 Liste os principais benefícios e características do produto.
@@ -107,13 +107,13 @@ export const ProductDescriptionsModal = ({
                 value={editedDescriptions.bulletPoints || ''}
                 onChange={(e) => handleInputChange('bulletPoints', e.target.value)}
                 placeholder="• Característica 1&#10;• Característica 2&#10;• Característica 3"
-                className="min-h-[200px]"
+                className="min-h-[400px] flex-1"
               />
             </div>
           </TabsContent>
 
-          <TabsContent value="technical" className="space-y-4">
-            <div>
+          <TabsContent value="technical" className="space-y-4 flex-1">
+            <div className="h-full flex flex-col">
               <Label className="text-sm font-medium">Ficha Técnica</Label>
               <p className="text-sm text-muted-foreground mb-2">
                 Especificações técnicas detalhadas do produto.
@@ -122,13 +122,13 @@ export const ProductDescriptionsModal = ({
                 value={editedDescriptions.technicalSpecs || ''}
                 onChange={(e) => handleInputChange('technicalSpecs', e.target.value)}
                 placeholder="Dimensões: 10x20x30cm&#10;Peso: 1kg&#10;Material: Plástico ABS&#10;Cor: Preto"
-                className="min-h-[200px]"
+                className="min-h-[400px] flex-1"
               />
             </div>
           </TabsContent>
         </Tabs>
 
-        <div className="flex gap-4 pt-6 border-t">
+        <div className="flex gap-4 pt-6 border-t mt-auto">
           <Button onClick={handleSave} size="lg">
             Salvar Descrições
           </Button>
