@@ -74,23 +74,23 @@ const PartnersManager = () => {
     return (
       <div className="text-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-        <p className="mt-2 text-slate-400">Carregando parceiros...</p>
+        <p className="mt-2 text-muted-foreground">Carregando parceiros...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-white border-border shadow-sm">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-slate-100">Gerenciar Parceiros</CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardTitle className="text-foreground">Gerenciar Parceiros</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Administre os parceiros verificados da plataforma
               </CardDescription>
             </div>
-            <Button onClick={handleAdd} className="bg-red-600 hover:bg-red-700">
+            <Button onClick={handleAdd} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               <Plus className="h-4 w-4 mr-2" />
               Novo Parceiro
             </Button>
@@ -100,92 +100,92 @@ const PartnersManager = () => {
           <div className="space-y-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Buscar parceiros..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400"
+                className="pl-10 bg-white border-input text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card className="bg-slate-700 border-slate-600">
+              <Card className="bg-white border-border shadow-sm">
                 <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-slate-100">{partners.length}</div>
-                  <p className="text-slate-400 text-sm">Total de Parceiros</p>
+                  <div className="text-2xl font-bold text-foreground">{partners.length}</div>
+                  <p className="text-muted-foreground text-sm">Total de Parceiros</p>
                 </CardContent>
               </Card>
-              <Card className="bg-slate-700 border-slate-600">
+              <Card className="bg-white border-border shadow-sm">
                 <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-green-400">
+                  <div className="text-2xl font-bold text-green-600">
                     {partners.filter(p => p.isVerified).length}
                   </div>
-                  <p className="text-slate-400 text-sm">Verificados</p>
+                  <p className="text-muted-foreground text-sm">Verificados</p>
                 </CardContent>
               </Card>
-              <Card className="bg-slate-700 border-slate-600">
+              <Card className="bg-white border-border shadow-sm">
                 <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-yellow-400">
+                  <div className="text-2xl font-bold text-yellow-600">
                     {partners.reduce((acc, p) => acc + p.totalReviews, 0)}
                   </div>
-                  <p className="text-slate-400 text-sm">Total de Avaliações</p>
+                  <p className="text-muted-foreground text-sm">Total de Avaliações</p>
                 </CardContent>
               </Card>
-              <Card className="bg-slate-700 border-slate-600">
+              <Card className="bg-white border-border shadow-sm">
                 <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-blue-400">
+                  <div className="text-2xl font-bold text-blue-600">
                     {partners.reduce((acc, p) => acc + p.materials.length, 0)}
                   </div>
-                  <p className="text-slate-400 text-sm">Total de Materiais</p>
+                  <p className="text-muted-foreground text-sm">Total de Materiais</p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Partners Table */}
-            <div className="border border-slate-600 rounded-lg overflow-hidden">
+            <div className="border border-border rounded-lg overflow-hidden bg-white">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-slate-600">
-                    <TableHead className="text-slate-300">Nome</TableHead>
-                    <TableHead className="text-slate-300">Categoria</TableHead>
-                    <TableHead className="text-slate-300">Status</TableHead>
-                    <TableHead className="text-slate-300">Avaliações</TableHead>
-                    <TableHead className="text-slate-300">Materiais</TableHead>
-                    <TableHead className="text-slate-300">Localização</TableHead>
-                    <TableHead className="text-slate-300">Ações</TableHead>
+                  <TableRow className="border-border bg-muted/50">
+                    <TableHead className="text-foreground font-medium">Nome</TableHead>
+                    <TableHead className="text-foreground font-medium">Categoria</TableHead>
+                    <TableHead className="text-foreground font-medium">Status</TableHead>
+                    <TableHead className="text-foreground font-medium">Avaliações</TableHead>
+                    <TableHead className="text-foreground font-medium">Materiais</TableHead>
+                    <TableHead className="text-foreground font-medium">Localização</TableHead>
+                    <TableHead className="text-foreground font-medium">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredPartners.map((partner) => {
                     const pendingReviews = partner.reviews.filter(r => !r.isApproved).length;
                     return (
-                      <TableRow key={partner.id} className="border-slate-600">
-                        <TableCell className="text-slate-100">
+                      <TableRow key={partner.id} className="border-border hover:bg-muted/50">
+                        <TableCell className="text-foreground">
                           <div>
                             <div className="font-medium">{partner.name}</div>
-                            <div className="text-sm text-slate-400">{partner.email}</div>
+                            <div className="text-sm text-muted-foreground">{partner.email}</div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-slate-300">
-                          <Badge variant="outline" className="border-slate-500 text-slate-300">
+                        <TableCell className="text-foreground">
+                          <Badge variant="outline" className="border-border text-foreground">
                             {partner.category.name}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           {partner.isVerified ? (
-                            <Badge className="bg-green-600 text-white">
+                            <Badge className="bg-green-100 text-green-800 border-green-200">
                               <Shield className="h-3 w-3 mr-1" />
                               Verificado
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="border-yellow-500 text-yellow-500">
+                            <Badge variant="outline" className="border-yellow-500 text-yellow-600">
                               Pendente
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-slate-300">
+                        <TableCell className="text-foreground">
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1">
                               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -193,19 +193,19 @@ const PartnersManager = () => {
                             </div>
                             <span>({partner.totalReviews})</span>
                             {pendingReviews > 0 && (
-                              <Badge variant="secondary" className="bg-orange-600 text-white">
+                              <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
                                 {pendingReviews} pendentes
                               </Badge>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-slate-300">
+                        <TableCell className="text-foreground">
                           <div className="flex items-center gap-1">
                             <FileText className="h-4 w-4" />
                             <span>{partner.materials.length}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-slate-300">
+                        <TableCell className="text-foreground">
                           {partner.address.city}, {partner.address.state}
                         </TableCell>
                         <TableCell>
@@ -214,7 +214,7 @@ const PartnersManager = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => setShowMaterials(partner)}
-                              className="text-slate-300 hover:text-white hover:bg-slate-700"
+                              className="text-foreground hover:text-primary hover:bg-primary/10"
                             >
                               <FileText className="h-4 w-4" />
                             </Button>
@@ -222,7 +222,7 @@ const PartnersManager = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => setShowReviews(partner.id)}
-                              className="text-slate-300 hover:text-white hover:bg-slate-700"
+                              className="text-foreground hover:text-primary hover:bg-primary/10"
                             >
                               <MessageSquare className="h-4 w-4" />
                             </Button>
@@ -230,7 +230,7 @@ const PartnersManager = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(partner)}
-                              className="text-slate-300 hover:text-white hover:bg-slate-700"
+                              className="text-foreground hover:text-primary hover:bg-primary/10"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -238,7 +238,7 @@ const PartnersManager = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDelete(partner.id)}
-                              className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -253,7 +253,7 @@ const PartnersManager = () => {
 
             {filteredPartners.length === 0 && (
               <div className="text-center py-8">
-                <p className="text-slate-400">Nenhum parceiro encontrado.</p>
+                <p className="text-muted-foreground">Nenhum parceiro encontrado.</p>
               </div>
             )}
           </div>
