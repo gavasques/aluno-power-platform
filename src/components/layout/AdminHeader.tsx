@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { AdminNav } from "@/components/layout/AdminNav";
 import {
@@ -18,7 +17,6 @@ import {
   MessageSquare,
   Settings,
   Database,
-  Shield,
   Bot
 } from "lucide-react";
 
@@ -43,7 +41,6 @@ const adminMenuItems = [
       { title: "Templates", href: "/admin/conteudo/templates", icon: FileText },
       { title: "Materiais", href: "/admin/conteudo/materiais", icon: FileText },
       { title: "Prompts de IA", href: "/admin/conteudo/prompts-ia", icon: Bot },
-      { title: "Selos", href: "/admin/conteudo/selos", icon: Shield },
     ],
   },
   {
