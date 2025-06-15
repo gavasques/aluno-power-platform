@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Product, ProductChannels } from "@/types/product";
 import { BasicProductForm } from "./BasicProductForm";
 import { ChannelForm } from "./ChannelForm";
 import { toast } from "@/hooks/use-toast";
+import { channelNames } from "@/config/channels";
 
 interface EditProductModalProps {
   product: Product;
@@ -155,7 +155,7 @@ export const EditProductModal = ({
                 <ChannelForm
                   channelType="sitePropio"
                   channelData={editedProduct.channels.sitePropio}
-                  title="Site Próprio"
+                  title={channelNames.sitePropio}
                   onChannelToggle={handleChannelToggle}
                   onChannelInputChange={handleChannelInputChange}
                 />
@@ -163,7 +163,7 @@ export const EditProductModal = ({
                 <ChannelForm
                   channelType="amazonFBM"
                   channelData={editedProduct.channels.amazonFBM}
-                  title="Amazon FBM"
+                  title={channelNames.amazonFBM}
                   onChannelToggle={handleChannelToggle}
                   onChannelInputChange={handleChannelInputChange}
                 />
@@ -171,7 +171,7 @@ export const EditProductModal = ({
                 <ChannelForm
                   channelType="amazonFBAOnSite"
                   channelData={editedProduct.channels.amazonFBAOnSite}
-                  title="Amazon FBA On Site"
+                  title={channelNames.amazonFBAOnSite}
                   onChannelToggle={handleChannelToggle}
                   onChannelInputChange={handleChannelInputChange}
                 />
@@ -179,7 +179,7 @@ export const EditProductModal = ({
                 <ChannelForm
                   channelType="amazonDBA"
                   channelData={editedProduct.channels.amazonDBA}
-                  title="Amazon DBA"
+                  title={channelNames.amazonDBA}
                   onChannelToggle={handleChannelToggle}
                   onChannelInputChange={handleChannelInputChange}
                 />
@@ -187,7 +187,7 @@ export const EditProductModal = ({
                 <ChannelForm
                   channelType="amazonFBA"
                   channelData={editedProduct.channels.amazonFBA}
-                  title="Amazon FBA"
+                  title={channelNames.amazonFBA}
                   onChannelToggle={handleChannelToggle}
                   onChannelInputChange={handleChannelInputChange}
                 />
@@ -195,7 +195,7 @@ export const EditProductModal = ({
                 <ChannelForm
                   channelType="mlME1"
                   channelData={editedProduct.channels.mlME1}
-                  title="ML ME1"
+                  title={channelNames.mlME1}
                   onChannelToggle={handleChannelToggle}
                   onChannelInputChange={handleChannelInputChange}
                 />
@@ -203,7 +203,7 @@ export const EditProductModal = ({
                 <ChannelForm
                   channelType="mlFlex"
                   channelData={editedProduct.channels.mlFlex}
-                  title="ML Flex"
+                  title={channelNames.mlFlex}
                   onChannelToggle={handleChannelToggle}
                   onChannelInputChange={handleChannelInputChange}
                 />
@@ -211,7 +211,7 @@ export const EditProductModal = ({
                 <ChannelForm
                   channelType="mlEnvios"
                   channelData={editedProduct.channels.mlEnvios}
-                  title="ML Envios"
+                  title={channelNames.mlEnvios}
                   onChannelToggle={handleChannelToggle}
                   onChannelInputChange={handleChannelInputChange}
                 />
@@ -219,7 +219,7 @@ export const EditProductModal = ({
                 <ChannelForm
                   channelType="mlFull"
                   channelData={editedProduct.channels.mlFull}
-                  title="ML Full"
+                  title={channelNames.mlFull}
                   onChannelToggle={handleChannelToggle}
                   onChannelInputChange={handleChannelInputChange}
                 />

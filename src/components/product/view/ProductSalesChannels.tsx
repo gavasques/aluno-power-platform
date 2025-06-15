@@ -1,18 +1,6 @@
-
 import { Product } from "@/types/product";
 import { ChannelDetails } from "../ChannelDetails";
-
-const channelNames = {
-  sitePropio: "Site Próprio",
-  amazonFBM: "Amazon FBM",
-  amazonFBAOnSite: "Amazon FBA On Site",
-  amazonDBA: "Amazon DBA",
-  amazonFBA: "Amazon FBA",
-  mlME1: "ML ME1",
-  mlFlex: "ML Flex",
-  mlEnvios: "ML Envios",
-  mlFull: "ML Full"
-};
+import { channelNames } from "@/config/channels";
 
 interface ProductSalesChannelsProps {
   product: Product;

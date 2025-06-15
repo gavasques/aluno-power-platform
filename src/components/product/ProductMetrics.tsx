@@ -1,26 +1,14 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/types/product";
 import { calculateChannelResults, formatCurrency, formatPercentage } from "@/utils/productCalculations";
+import { channelNames } from "@/config/channels";
 
 interface ProductMetricsProps {
   product: Product;
 }
 
 export const ProductMetrics = ({ product }: ProductMetricsProps) => {
-  const channelNames = {
-    sitePropio: "Site Próprio",
-    amazonFBM: "Amazon FBM",
-    amazonFBAOnSite: "Amazon FBA On Site",
-    amazonDBA: "Amazon DBA",
-    amazonFBA: "Amazon FBA",
-    mlME1: "ML ME1",
-    mlFlex: "ML Flex",
-    mlEnvios: "ML Envios",
-    mlFull: "ML Full"
-  };
-
   const enabledChannels = Object.entries(product.channels).filter(([_, channel]) => channel?.enabled);
 
   return (

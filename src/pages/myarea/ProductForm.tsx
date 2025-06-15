@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +6,7 @@ import { BasicProductForm } from "@/components/product/BasicProductForm";
 import { ChannelForm } from "@/components/product/ChannelForm";
 import { useProductForm } from "@/hooks/useProductForm";
 import { mockSuppliers, mockCategories } from "@/data/mockData";
+import { channelNames } from "@/config/channels";
 
 const ProductForm = () => {
   const {
@@ -66,7 +66,7 @@ const ProductForm = () => {
               <ChannelForm
                 channelType="sitePropio"
                 channelData={channels.sitePropio}
-                title="Site Próprio"
+                title={channelNames.sitePropio}
                 onChannelToggle={handleChannelToggle}
                 onChannelInputChange={handleChannelInputChange}
               />
@@ -74,7 +74,7 @@ const ProductForm = () => {
               <ChannelForm
                 channelType="amazonFBM"
                 channelData={channels.amazonFBM}
-                title="Amazon FBM"
+                title={channelNames.amazonFBM}
                 onChannelToggle={handleChannelToggle}
                 onChannelInputChange={handleChannelInputChange}
               />
@@ -82,7 +82,7 @@ const ProductForm = () => {
               <ChannelForm
                 channelType="amazonFBAOnSite"
                 channelData={channels.amazonFBAOnSite}
-                title="Amazon FBA On Site"
+                title={channelNames.amazonFBAOnSite}
                 onChannelToggle={handleChannelToggle}
                 onChannelInputChange={handleChannelInputChange}
               />
@@ -90,7 +90,7 @@ const ProductForm = () => {
               <ChannelForm
                 channelType="amazonDBA"
                 channelData={channels.amazonDBA}
-                title="Amazon DBA"
+                title={channelNames.amazonDBA}
                 onChannelToggle={handleChannelToggle}
                 onChannelInputChange={handleChannelInputChange}
               />
@@ -98,7 +98,7 @@ const ProductForm = () => {
               <ChannelForm
                 channelType="amazonFBA"
                 channelData={channels.amazonFBA}
-                title="Amazon FBA"
+                title={channelNames.amazonFBA}
                 onChannelToggle={handleChannelToggle}
                 onChannelInputChange={handleChannelInputChange}
               />
@@ -106,7 +106,7 @@ const ProductForm = () => {
               <ChannelForm
                 channelType="mlME1"
                 channelData={channels.mlME1}
-                title="ML ME1"
+                title={channelNames.mlME1}
                 onChannelToggle={handleChannelToggle}
                 onChannelInputChange={handleChannelInputChange}
               />
@@ -114,7 +114,7 @@ const ProductForm = () => {
               <ChannelForm
                 channelType="mlFlex"
                 channelData={channels.mlFlex}
-                title="ML Flex"
+                title={channelNames.mlFlex}
                 onChannelToggle={handleChannelToggle}
                 onChannelInputChange={handleChannelInputChange}
               />
@@ -122,7 +122,7 @@ const ProductForm = () => {
               <ChannelForm
                 channelType="mlEnvios"
                 channelData={channels.mlEnvios}
-                title="ML Envios"
+                title={channelNames.mlEnvios}
                 onChannelToggle={handleChannelToggle}
                 onChannelInputChange={handleChannelInputChange}
               />
@@ -130,7 +130,7 @@ const ProductForm = () => {
               <ChannelForm
                 channelType="mlFull"
                 channelData={channels.mlFull}
-                title="ML Full"
+                title={channelNames.mlFull}
                 onChannelToggle={handleChannelToggle}
                 onChannelInputChange={handleChannelInputChange}
               />

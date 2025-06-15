@@ -4,18 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Product, ProductChannels } from "@/types/product";
 import { ChannelForm } from "./ChannelForm";
 import { toast } from "@/hooks/use-toast";
-
-const defaultChannels: ProductChannels = {
-    sitePropio: { enabled: false, commissionPct: 0, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, salePrice: 0, gatewayPct: 0 },
-    amazonFBM: { enabled: false, commissionPct: 15, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, salePrice: 0 },
-    amazonFBAOnSite: { enabled: false, commissionPct: 15, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, salePrice: 0 },
-    amazonDBA: { enabled: false, commissionPct: 15, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, salePrice: 0 },
-    amazonFBA: { enabled: false, commissionPct: 15, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, inboundFreight: 0, prepCenter: 0, salePrice: 0 },
-    mlME1: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, salePrice: 0 },
-    mlFlex: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, flexRevenue: 0, salePrice: 0 },
-    mlEnvios: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, salePrice: 0 },
-    mlFull: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, inboundFreight: 0, prepCenter: 0, salePrice: 0 }
-};
+import { defaultChannels, channelNames } from "@/config/channels";
 
 const getInitialChannelsState = (productChannels: ProductChannels): ProductChannels => {
   const initialState: ProductChannels = {};
@@ -109,7 +98,7 @@ export const EditChannelsModal = ({
             <ChannelForm
               channelType="sitePropio"
               channelData={editedChannels.sitePropio}
-              title="Site Próprio"
+              title={channelNames.sitePropio}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -117,7 +106,7 @@ export const EditChannelsModal = ({
             <ChannelForm
               channelType="amazonFBM"
               channelData={editedChannels.amazonFBM}
-              title="Amazon FBM"
+              title={channelNames.amazonFBM}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -125,7 +114,7 @@ export const EditChannelsModal = ({
             <ChannelForm
               channelType="amazonFBAOnSite"
               channelData={editedChannels.amazonFBAOnSite}
-              title="Amazon FBA On Site"
+              title={channelNames.amazonFBAOnSite}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -133,7 +122,7 @@ export const EditChannelsModal = ({
             <ChannelForm
               channelType="amazonDBA"
               channelData={editedChannels.amazonDBA}
-              title="Amazon DBA"
+              title={channelNames.amazonDBA}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -141,7 +130,7 @@ export const EditChannelsModal = ({
             <ChannelForm
               channelType="amazonFBA"
               channelData={editedChannels.amazonFBA}
-              title="Amazon FBA"
+              title={channelNames.amazonFBA}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -149,7 +138,7 @@ export const EditChannelsModal = ({
             <ChannelForm
               channelType="mlME1"
               channelData={editedChannels.mlME1}
-              title="ML ME1"
+              title={channelNames.mlME1}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -157,7 +146,7 @@ export const EditChannelsModal = ({
             <ChannelForm
               channelType="mlFlex"
               channelData={editedChannels.mlFlex}
-              title="ML Flex"
+              title={channelNames.mlFlex}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -165,7 +154,7 @@ export const EditChannelsModal = ({
             <ChannelForm
               channelType="mlEnvios"
               channelData={editedChannels.mlEnvios}
-              title="ML Envios"
+              title={channelNames.mlEnvios}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -173,7 +162,7 @@ export const EditChannelsModal = ({
             <ChannelForm
               channelType="mlFull"
               channelData={editedChannels.mlFull}
-              title="ML Full"
+              title={channelNames.mlFull}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
