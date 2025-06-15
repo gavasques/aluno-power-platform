@@ -43,24 +43,23 @@ const DepartmentsManager = () => {
   }
 
   return (
-    <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+    <Card className="bg-white border border-border shadow-sm">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <CardTitle className="text-slate-100">Gerenciar Departamentos</CardTitle>
+            <CardTitle className="text-foreground">Gerenciar Departamentos</CardTitle>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30"
-                variant="outline"
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={() => setIsDialogOpen(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Departamento
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white">
               <DialogHeader>
                 <DialogTitle>Novo Departamento</DialogTitle>
                 <DialogDescription>Informe o nome do novo departamento.</DialogDescription>
@@ -72,7 +71,7 @@ const DepartmentsManager = () => {
                   placeholder="Nome do Departamento"
                   value={newDepartment}
                   onChange={e => setNewDepartment(e.target.value)}
-                  className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
+                  className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
                 />
                 <DialogFooter>
                   <DialogClose asChild>
@@ -80,7 +79,7 @@ const DepartmentsManager = () => {
                       Cancelar
                     </Button>
                   </DialogClose>
-                  <Button type="submit" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                  <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
                     Adicionar
                   </Button>
                 </DialogFooter>
@@ -96,25 +95,25 @@ const DepartmentsManager = () => {
               placeholder="Buscar departamentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
+              className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div className="space-y-3">
             {filteredDepartments.length === 0 && (
-              <div className="text-slate-400 px-4 py-8 text-center">
+              <div className="text-muted-foreground px-4 py-8 text-center">
                 Nenhum departamento encontrado.
               </div>
             )}
             {filteredDepartments.map((department) => (
               <div
                 key={department}
-                className="flex items-center justify-between p-4 bg-slate-600/30 border border-red-500/20 rounded-lg"
+                className="flex items-center justify-between p-4 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <span className="font-medium text-slate-100">{department}</span>
+                <span className="font-medium text-foreground">{department}</span>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30"
+                  className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => handleDeleteDepartment(department)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -127,5 +126,5 @@ const DepartmentsManager = () => {
     </Card>
   );
 };
-export default DepartmentsManager;
 
+export default DepartmentsManager;
