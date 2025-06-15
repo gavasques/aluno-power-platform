@@ -6,113 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2 } from "lucide-react";
 import { useState } from "react";
-
-interface Contact {
-  name: string;
-  role: string;
-  phone: string;
-  whatsapp: string;
-  email: string;
-  notes: string;
-}
-
-interface Branch {
-  name: string;
-  corporateName: string;
-  cnpj: string;
-  stateRegistration: string;
-  address: string;
-  phone: string;
-  email: string;
-}
-
-interface Supplier {
-  id: string;
-  tradeName: string;
-  corporateName: string;
-  category: string;
-  description: string;
-  logo: string;
-  verified: boolean;
-  rating: number;
-  reviewCount: number;
-  notes: string;
-  email: string;
-  mainContact: string;
-  phone: string;
-  whatsapp: string;
-  contacts: Contact[];
-  branches: Branch[];
-}
-
-const mockSuppliers: Supplier[] = [
-  {
-    id: "1",
-    tradeName: "TechSupply Brasil",
-    corporateName: "TechSupply Brasil Importação e Exportação Ltda",
-    category: "Eletrônicos",
-    description: "Importador especializado em eletrônicos e acessórios tech",
-    logo: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=100&h=100&fit=crop",
-    verified: true,
-    rating: 4.5,
-    reviewCount: 128,
-    notes: "Empresa confiável com histórico de 15 anos no mercado. Especializada em produtos Apple e Samsung.",
-    email: "contato@techsupplybrasil.com.br",
-    mainContact: "João Silva",
-    phone: "(11) 3456-7890",
-    whatsapp: "(11) 99876-5432",
-    contacts: [
-      {
-        name: "João Silva",
-        role: "Gerente Comercial",
-        phone: "(11) 3456-7890",
-        whatsapp: "(11) 99876-5432",
-        email: "joao@techsupplybrasil.com.br",
-        notes: "Responsável por novos parceiros"
-      },
-      {
-        name: "Maria Santos",
-        role: "Analista de Produtos",
-        phone: "(11) 3456-7891",
-        whatsapp: "(11) 99876-5433",
-        email: "maria@techsupplybrasil.com.br",
-        notes: "Especialista em smartphones"
-      }
-    ],
-    branches: [
-      {
-        name: "Matriz São Paulo",
-        corporateName: "TechSupply Brasil Importação e Exportação Ltda",
-        cnpj: "12.345.678/0001-90",
-        stateRegistration: "123.456.789.123",
-        address: "Rua das Flores, 123 - São Paulo/SP",
-        phone: "(11) 3456-7890",
-        email: "sp@techsupplybrasil.com.br"
-      },
-      {
-        name: "Filial Rio de Janeiro",
-        corporateName: "TechSupply Brasil Importação e Exportação Ltda",
-        cnpj: "12.345.678/0002-71",
-        stateRegistration: "987.654.321.098",
-        address: "Av. Atlântica, 456 - Rio de Janeiro/RJ",
-        phone: "(21) 2345-6789",
-        email: "rj@techsupplybrasil.com.br"
-      }
-    ]
-  }
-];
+import { useSuppliers } from "@/contexts/SuppliersContext";
+import { Supplier } from "@/types/supplier";
 
 const Suppliers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const { suppliers, loading } = useSuppliers();
 
-  const categories = ["Todas", "Eletrônicos", "Roupas e Acessórios", "Casa e Jardim", "Esportes", "Automotivo"];
+  const categories = ["Todas", "Fabricantes", "Distribuidores", "Importadores", "Representantes", "Atacadistas", "Dropshipping"];
 
-  const filteredSuppliers = mockSuppliers.filter(supplier => {
+  const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         supplier.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "Todas" || supplier.category === selectedCategory;
+                         supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "Todas" || supplier.category.name === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -124,6 +32,16 @@ const Suppliers = () => {
       />
     ));
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Carregando fornecedores...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -181,15 +99,17 @@ const Suppliers = () => {
               <Card key={supplier.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-start gap-4">
-                    <img
-                      src={supplier.logo}
-                      alt={supplier.tradeName}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
+                    {supplier.logo && (
+                      <img
+                        src={supplier.logo}
+                        alt={supplier.tradeName}
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                    )}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <CardTitle className="text-xl">{supplier.tradeName}</CardTitle>
-                        {supplier.verified && (
+                        {supplier.isVerified && (
                           <Badge variant="secondary" className="bg-green-100 text-green-800">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Verificado
@@ -197,9 +117,9 @@ const Suppliers = () => {
                         )}
                       </div>
                       <Badge variant="outline" className="mb-2">
-                        {supplier.category}
+                        {supplier.category.name}
                       </Badge>
-                      <p className="text-muted-foreground">{supplier.description}</p>
+                      <p className="text-muted-foreground">{supplier.notes}</p>
                     </div>
                   </div>
                 </CardHeader>
@@ -208,9 +128,9 @@ const Suppliers = () => {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">Avaliação:</span>
-                        <div className="flex">{renderStars(supplier.rating)}</div>
+                        <div className="flex">{renderStars(supplier.averageRating)}</div>
                         <span className="text-sm text-muted-foreground">
-                          {supplier.rating} ({supplier.reviewCount} avaliações)
+                          {supplier.averageRating.toFixed(1)} ({supplier.totalReviews} avaliações)
                         </span>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -242,15 +162,17 @@ const Suppliers = () => {
             <div className="p-6 border-b">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-4">
-                  <img
-                    src={selectedSupplier.logo}
-                    alt={selectedSupplier.tradeName}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
+                  {selectedSupplier.logo && (
+                    <img
+                      src={selectedSupplier.logo}
+                      alt={selectedSupplier.tradeName}
+                      className="w-16 h-16 rounded-lg object-cover"
+                    />
+                  )}
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-2xl font-bold">{selectedSupplier.tradeName}</h2>
-                      {selectedSupplier.verified && (
+                      {selectedSupplier.isVerified && (
                         <Badge variant="secondary" className="bg-green-100 text-green-800">
                           <CheckCircle className="h-3 w-3 mr-1" />
                           Verificado
@@ -258,7 +180,7 @@ const Suppliers = () => {
                       )}
                     </div>
                     <p className="text-muted-foreground">{selectedSupplier.corporateName}</p>
-                    <Badge variant="outline">{selectedSupplier.category}</Badge>
+                    <Badge variant="outline">{selectedSupplier.category.name}</Badge>
                   </div>
                 </div>
                 <Button
@@ -272,10 +194,11 @@ const Suppliers = () => {
 
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
               <Tabs defaultValue="info" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="info">Informações da Empresa</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="info">Informações</TabsTrigger>
                   <TabsTrigger value="contacts">Contatos</TabsTrigger>
                   <TabsTrigger value="branches">Filiais</TabsTrigger>
+                  <TabsTrigger value="reviews">Avaliações</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="info" className="mt-6">
@@ -296,7 +219,7 @@ const Suppliers = () => {
                           </div>
                           <div>
                             <label className="text-sm font-medium">Categoria Principal</label>
-                            <p className="text-muted-foreground">{selectedSupplier.category}</p>
+                            <p className="text-muted-foreground">{selectedSupplier.category.name}</p>
                           </div>
                           <div>
                             <label className="text-sm font-medium">Contato Principal</label>
@@ -328,17 +251,30 @@ const Suppliers = () => {
                           </div>
                         </div>
 
-                        <div>
-                          <label className="text-sm font-medium">Observações</label>
-                          <p className="text-muted-foreground mt-1">{selectedSupplier.notes}</p>
-                        </div>
+                        {selectedSupplier.notes && (
+                          <div>
+                            <label className="text-sm font-medium">Observações</label>
+                            <p className="text-muted-foreground mt-1">{selectedSupplier.notes}</p>
+                          </div>
+                        )}
+
+                        {selectedSupplier.commercialTerms && (
+                          <div>
+                            <label className="text-sm font-medium">Termos Comerciais</label>
+                            <div className="mt-1 p-3 bg-gray-50 rounded-md">
+                              <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                {selectedSupplier.commercialTerms}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
 
                         <div>
                           <label className="text-sm font-medium">Avaliação</label>
                           <div className="flex items-center gap-2 mt-1">
-                            <div className="flex">{renderStars(selectedSupplier.rating)}</div>
+                            <div className="flex">{renderStars(selectedSupplier.averageRating)}</div>
                             <span className="text-sm text-muted-foreground">
-                              {selectedSupplier.rating} ({selectedSupplier.reviewCount} avaliações)
+                              {selectedSupplier.averageRating.toFixed(1)} ({selectedSupplier.totalReviews} avaliações)
                             </span>
                           </div>
                         </div>
@@ -412,15 +348,12 @@ const Suppliers = () => {
                               <p className="text-muted-foreground">{branch.cnpj}</p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium">Inscrição Estadual</label>
-                              <p className="text-muted-foreground">{branch.stateRegistration}</p>
+                              <label className="text-sm font-medium">Inscrição Municipal</label>
+                              <p className="text-muted-foreground">{branch.municipalRegistration}</p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium">Telefone</label>
-                              <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
-                                <p className="text-muted-foreground">{branch.phone}</p>
-                              </div>
+                              <label className="text-sm font-medium">Inscrição Estadual</label>
+                              <p className="text-muted-foreground">{branch.stateRegistration}</p>
                             </div>
                             <div className="md:col-span-2">
                               <label className="text-sm font-medium">Endereço</label>
@@ -429,17 +362,58 @@ const Suppliers = () => {
                                 <p className="text-muted-foreground">{branch.address}</p>
                               </div>
                             </div>
-                            <div>
-                              <label className="text-sm font-medium">Email</label>
-                              <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4" />
-                                <p className="text-muted-foreground">{branch.email}</p>
-                              </div>
-                            </div>
                           </div>
+                          {branch.notes && (
+                            <div className="mt-4">
+                              <label className="text-sm font-medium">Observações</label>
+                              <p className="text-muted-foreground">{branch.notes}</p>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="reviews" className="mt-6">
+                  <div className="space-y-4">
+                    {selectedSupplier.reviews.filter(review => review.isApproved).map((review, index) => (
+                      <Card key={index}>
+                        <CardContent className="pt-6">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h4 className="font-medium">{review.userName}</h4>
+                              <div className="flex items-center gap-2">
+                                <div className="flex">{renderStars(review.rating)}</div>
+                                <span className="text-sm text-muted-foreground">
+                                  {new Date(review.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-muted-foreground">{review.comment}</p>
+                          {review.photos.length > 0 && (
+                            <div className="mt-4 flex gap-2">
+                              {review.photos.map((photo, photoIndex) => (
+                                <img
+                                  key={photoIndex}
+                                  src={photo}
+                                  alt={`Foto ${photoIndex + 1}`}
+                                  className="w-20 h-20 object-cover rounded-md"
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {selectedSupplier.reviews.filter(review => review.isApproved).length === 0 && (
+                      <Card>
+                        <CardContent className="text-center py-8">
+                          <p className="text-muted-foreground">Ainda não há avaliações para este fornecedor.</p>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>

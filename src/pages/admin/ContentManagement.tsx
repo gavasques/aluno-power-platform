@@ -7,9 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, Users, Wrench, Package } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { usePartners } from "@/contexts/PartnersContext";
+import { useSuppliers } from "@/contexts/SuppliersContext";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import ToolsManager from "@/components/admin/conteudo/ToolsManager";
 import MaterialsManager from "@/components/admin/conteudo/MaterialsManager";
+import SuppliersManager from "@/components/admin/conteudo/SuppliersManager";
 import MaterialFormAdmin from "./conteudo/MaterialFormAdmin";
 import MaterialDetailAdmin from "./conteudo/MaterialDetailAdmin";
 
@@ -17,6 +19,7 @@ const ContentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const { partners } = usePartners();
+  const { suppliers } = useSuppliers();
   const { subsection, id } = useParams();
   const { pathname } = useLocation();
 
@@ -30,6 +33,10 @@ const ContentManagement = () => {
   // Se estiver na subseção específica, renderiza o componente específico
   if (subsection === 'parceiros') {
     return <PartnersManager />;
+  }
+  
+  if (subsection === 'fornecedores') {
+    return <SuppliersManager />;
   }
   
   if (subsection === 'ferramentas') {
@@ -79,7 +86,10 @@ const ContentManagement = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+        <Card 
+          className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => navigate('/admin/conteudo/fornecedores')}
+        >
           <CardHeader>
             <div className="flex items-center space-x-2">
               <Package className="h-5 w-5 text-primary" />
@@ -89,7 +99,7 @@ const ContentManagement = () => {
           <CardContent>
             <p className="text-muted-foreground text-sm mb-4">Cadastro e gestão de fornecedores</p>
             <div className="flex justify-between items-center">
-              <Badge className="bg-green-100 text-green-800 border-green-200">128 fornecedores</Badge>
+              <Badge className="bg-green-100 text-green-800 border-green-200">{suppliers.length} fornecedores</Badge>
               <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Gerenciar
               </Button>
