@@ -8,10 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Edit, Trash2, Search, Database, Bot, FileText, Package, Building } from "lucide-react";
-import { useParams } from "react-router-dom";
 
-const AdminCadastros = () => {
-  const { subsection } = useParams();
+interface AdminCadastrosProps {
+  subsection?: string;
+}
+
+const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Mock data for different registration types
