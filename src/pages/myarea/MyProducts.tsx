@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -167,16 +168,6 @@ const MyProducts = () => {
     };
   };
 
-  const getTotalStats = () => {
-    const total = filteredProducts.length;
-    const activeChannels = filteredProducts.reduce((acc, product) => {
-      return acc + channelOrder.reduce((cAcc, c) => getChannelInfo(product, c.key as keyof Product["channels"]) ? cAcc + 1 : cAcc, 0);
-    }, 0);
-    return { total, activeChannels };
-  };
-
-  const stats = getTotalStats();
-
   const ProductCard = ({ product }: { product: Product }) => {
     const enabledChannels = getEnabledChannels(product);
     const bestMargin = enabledChannels.reduce((max, channel) => 
@@ -328,49 +319,6 @@ const MyProducts = () => {
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Produto
               </Button>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-              <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-blue-100/50">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500 rounded-lg">
-                      <Package className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-blue-700">Total de Produtos</p>
-                      <p className="text-xl font-bold text-blue-900">{stats.total}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-md bg-gradient-to-r from-green-50 to-green-100/50">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-500 rounded-lg">
-                      <TrendingUp className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-green-700">Canais Ativos</p>
-                      <p className="text-xl font-bold text-green-900">{stats.activeChannels}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-md bg-gradient-to-r from-purple-50 to-purple-100/50">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-500 rounded-lg">
-                      <Filter className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-purple-700">Categoria Ativa</p>
-                      <p className="text-sm font-bold text-purple-900">{selectedCategory}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
 
