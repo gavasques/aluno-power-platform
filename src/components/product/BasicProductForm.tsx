@@ -129,7 +129,7 @@ export const BasicProductForm = ({
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Fornecedor *</Label>
+              <Label className="text-sm font-medium">Fornecedor Principal *</Label>
               <Select value={productData.supplierId} onValueChange={(value) => onInputChange('supplierId', value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecione um fornecedor" />
