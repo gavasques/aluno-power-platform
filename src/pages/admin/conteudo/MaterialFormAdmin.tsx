@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +14,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Material, MaterialType } from '@/types/material';
+
+const fileTypesWithUpload = [
+  "PDF",
+  "Vídeos",
+  "Planilhas",
+  "Documentos",
+  "Imagens",
+];
+
+const fileAcceptMapping: Record<string, string> = {
+  PDF: ".pdf",
+  Vídeos: "video/*",
+  Planilhas: ".xls,.xlsx,.ods,.csv",
+  Documentos: ".doc,.docx,.pdf,.odt,.txt",
+  Imagens: "image/*",
+};
 
 const materialSchema = z.object({
   title: z.string().min(3, { message: "O título deve ter pelo menos 3 caracteres." }),
@@ -35,6 +50,7 @@ const MaterialFormAdmin = () => {
   const { toast } = useToast();
   const { materials, addMaterial, updateMaterial, materialTypes } = useMaterials();
   const [selectedType, setSelectedType] = useState<MaterialType | null>(null);
+  const [tempFileUrl, setTempFileUrl] = useState<string | null>(null);
 
   const isEditing = Boolean(id && id !== 'novo');
   const materialToEdit = isEditing ? materials.find(m => m.id === id) : undefined;
@@ -73,10 +89,24 @@ const MaterialFormAdmin = () => {
     const subscription = form.watch((value, { name }) => {
       if (name === 'typeId') {
         setSelectedType(materialTypes.find(t => t.id === value.typeId) || null);
+        form.setValue("fileUrl", "");
+        setTempFileUrl(null);
       }
     });
     return () => subscription.unsubscribe();
   }, [form, materialTypes]);
+
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      if (tempFileUrl) {
+        URL.revokeObjectURL(tempFileUrl);
+      }
+      const url = URL.createObjectURL(file);
+      setTempFileUrl(url);
+      form.setValue("fileUrl", url, { shouldValidate: true });
+    }
+  }
 
   const onSubmit = (data: MaterialFormValues) => {
     const materialData = {
@@ -173,6 +203,26 @@ const MaterialFormAdmin = () => {
                 </FormItem>
               )}
             />
+            
+            {/* UPLOAD DE ARQUIVO LOCAL */}
+            {selectedType && fileTypesWithUpload.includes(selectedType.name) && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Upload do arquivo {selectedType.name.toLowerCase()}
+                </label>
+                <input
+                  type="file"
+                  accept={fileAcceptMapping[selectedType.name] || "*"}
+                  onChange={handleFileUpload}
+                  className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer"
+                />
+                {form.getValues("fileUrl") && (
+                  <p className="text-xs text-muted-foreground mt-2 break-all">
+                    Arquivo selecionado: {form.getValues("fileUrl")}
+                  </p>
+                )}
+              </div>
+            )}
             
             {selectedType?.allowsUrl && (
               <FormField
