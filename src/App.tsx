@@ -17,6 +17,7 @@ const Support = lazy(() => import("@/pages/Support"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Registrations = lazy(() => import("@/pages/Registrations"));
+const Admin = lazy(() => import("@/pages/Admin"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ function App() {
                   <Route path="/configuracoes" element={<Settings />} />
                   <Route path="/perfil" element={<Profile />} />
                   <Route path="/inscricoes" element={<Registrations />} />
+                  <Route path="/admin/:section?/:subsection?/:id?" element={<Admin />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
