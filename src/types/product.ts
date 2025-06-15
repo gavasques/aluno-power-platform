@@ -78,10 +78,12 @@ export interface AmazonFBMChannel extends BaseChannel {
 
 export interface AmazonFBAOnSiteChannel extends BaseChannel {
   outboundFreight: number;
+  averageFreightIfFree?: number; // Novo campo: Frete Médio (Se Frete Grátis)
 }
 
 export interface AmazonDBAChannel extends BaseChannel {
   outboundFreight: number;
+  averageFreightIfFree?: number; // Novo campo: Frete Médio (Se Frete Grátis)
 }
 
 export interface AmazonFBAChannel extends BaseChannel {
@@ -91,7 +93,7 @@ export interface AmazonFBAChannel extends BaseChannel {
 }
 
 export interface MLMEChannel extends BaseChannel {
-  // Usa apenas os custos base
+  averageFreightIfFree?: number; // Novo campo: Frete Médio (Se Frete Grátis)
 }
 
 export interface MLFlexChannel extends BaseChannel {

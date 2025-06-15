@@ -141,8 +141,8 @@ export const ChannelForm = ({
             </div>
           )}
 
-          {/* Campo específico para Amazon FBM - Frete Médio (Se Frete Grátis) */}
-          {channelType === 'amazonFBM' && (
+          {/* Campo específico para Amazon FBM, Amazon FBA On Site, Amazon DBA e ML ME1 - Frete Médio (Se Frete Grátis) */}
+          {(channelType === 'amazonFBM' || channelType === 'amazonFBAOnSite' || channelType === 'amazonDBA' || channelType === 'mlME1') && (
             <div>
               <Label>Frete Médio (Se Frete Grátis) (R$)</Label>
               <FormattedInput
