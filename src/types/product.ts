@@ -107,6 +107,7 @@ export interface MLEnviosChannel extends BaseChannel {
 
 export interface MLFullChannel extends BaseChannel {
   inboundFreight: number;
+  outboundFreight: number; // Novo campo: Frete Outbound
   prepCenter: number;
 }
 
