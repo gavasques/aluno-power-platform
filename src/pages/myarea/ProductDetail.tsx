@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,8 @@ const mockProduct: Product = {
   id: "1",
   name: "Smartphone Samsung Galaxy A54",
   photo: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=580&q=80",
+  sku: "SAM-GS23-A54",
+  internalCode: "PROD-001",
   ean: "7891234567890",
   dimensions: { length: 15, width: 7, height: 2 },
   weight: 0.2,
