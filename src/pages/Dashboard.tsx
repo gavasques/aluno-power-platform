@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { BrainCircuit, Package, Rss, Truck, Youtube } from "lucide-react";
-import React from "react";
+import React, { memo } from "react";
 
 interface StatCardProps {
   title: string;
@@ -14,7 +14,7 @@ interface StatCardProps {
   icon: React.ElementType;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon }) => (
+const StatCard: React.FC<StatCardProps> = memo(({ title, value, icon: Icon }) => (
   <Card>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium">{title}</CardTitle>
@@ -24,7 +24,8 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon }) => (
       <div className="text-2xl font-bold">{value}</div>
     </CardContent>
   </Card>
-);
+));
+StatCard.displayName = 'StatCard';
 
 const Dashboard = () => {
   return (

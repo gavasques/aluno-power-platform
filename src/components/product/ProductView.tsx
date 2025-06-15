@@ -6,6 +6,7 @@ import { Edit } from "lucide-react";
 import { Product } from "@/types/product";
 import { formatCurrency } from "@/utils/productCalculations";
 import { ChannelDetails } from "./ChannelDetails";
+import { useMemo } from "react";
 
 interface ProductViewProps {
   product: Product;
@@ -36,13 +37,16 @@ export const ProductView = ({
     mlFull: "ML Full"
   };
 
-  // Cálculo da cubagem
-  const volumeCm3 = product.dimensions.length * product.dimensions.width * product.dimensions.height;
-  const volumeM3 = volumeCm3 / 1000000; // Converter cm³ para m³
-  
-  // Cálculo do peso cubado
-  const pesoCubado167 = volumeM3 * 167;
-  const pesoCubado300 = volumeM3 * 300;
+  const volumeM3 = useMemo(() => {
+    const { length, width, height } = product.dimensions;
+    if (!length || !width || !height) return 0;
+    const volumeCm3 = length * width * height;
+    return volumeCm3 / 1000000;
+  }, [product.dimensions]);
+
+  const volumeCm3 = useMemo(() => volumeM3 * 1000000, [volumeM3]);
+  const pesoCubado167 = useMemo(() => volumeM3 * 167, [volumeM3]);
+  const pesoCubado300 = useMemo(() => volumeM3 * 300, [volumeM3]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

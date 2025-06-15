@@ -5,17 +5,19 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { ProductProvider } from "@/contexts/ProductContext";
 import Layout from "@/components/layout/Layout";
-import Dashboard from "@/pages/Dashboard";
-import MyArea from "@/pages/MyArea";
-import Hub from "@/pages/Hub";
-import Simulators from "@/pages/Simulators";
-import AIAgents from "@/pages/AIAgents";
-import Courses from "@/pages/Courses";
-import Support from "@/pages/Support";
-import Settings from "@/pages/Settings";
-import Profile from "@/pages/Profile";
-import Registrations from "@/pages/Registrations";
-import NotFound from "@/pages/NotFound";
+import { lazy, Suspense } from "react";
+
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const MyArea = lazy(() => import("@/pages/MyArea"));
+const Hub = lazy(() => import("@/pages/Hub"));
+const Simulators = lazy(() => import("@/pages/Simulators"));
+const AIAgents = lazy(() => import("@/pages/AIAgents"));
+const Courses = lazy(() => import("@/pages/Courses"));
+const Support = lazy(() => import("@/pages/Support"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Registrations = lazy(() => import("@/pages/Registrations"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -26,19 +28,21 @@ function App() {
         <ProductProvider>
           <Router>
             <Layout>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/minha-area/:section?/:id?" element={<MyArea />} />
-                <Route path="/hub/:section?" element={<Hub />} />
-                <Route path="/simuladores" element={<Simulators />} />
-                <Route path="/agentes-ia" element={<AIAgents />} />
-                <Route path="/cursos" element={<Courses />} />
-                <Route path="/suporte" element={<Support />} />
-                <Route path="/configuracoes" element={<Settings />} />
-                <Route path="/perfil" element={<Profile />} />
-                <Route path="/inscricoes" element={<Registrations />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Carregando...</div>}>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/minha-area/:section?/:id?" element={<MyArea />} />
+                  <Route path="/hub/:section?" element={<Hub />} />
+                  <Route path="/simuladores" element={<Simulators />} />
+                  <Route path="/agentes-ia" element={<AIAgents />} />
+                  <Route path="/cursos" element={<Courses />} />
+                  <Route path="/suporte" element={<Support />} />
+                  <Route path="/configuracoes" element={<Settings />} />
+                  <Route path="/perfil" element={<Profile />} />
+                  <Route path="/inscricoes" element={<Registrations />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
             </Layout>
             <Toaster />
           </Router>
