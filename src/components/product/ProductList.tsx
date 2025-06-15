@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Product } from "@/types/product";
 import { calculateChannelResults, formatCurrency, formatPercentage } from "@/utils/productCalculations";
 import { channelNames } from "@/config/channels";
-import { ColumnManager } from "./ColumnManager";
+import { ColumnPreferencesManager } from "./ColumnPreferencesManager";
 import { useColumnPreferences } from "@/hooks/useColumnPreferences";
 
 interface ProductListProps {
@@ -19,7 +19,7 @@ interface ProductListProps {
 
 export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }: ProductListProps) => {
   const navigate = useNavigate();
-  const { visibleChannels, setVisibleChannels } = useColumnPreferences();
+  const { columnPreferences, updateColumnVisibility, updateChannelVisibility } = useColumnPreferences();
 
   const allChannels = [
     { key: "sitePropio", label: "Site Próprio", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -33,7 +33,7 @@ export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }
     { key: "mlFull", label: "ML Full", color: "bg-yellow-50 text-yellow-700 border-yellow-200" }
   ];
 
-  const visibleChannelData = allChannels.filter(channel => visibleChannels.includes(channel.key));
+  const visibleChannelData = allChannels.filter(channel => columnPreferences.channels.includes(channel.key));
 
   const getChannelInfo = (product: Product, channelKey: keyof Product["channels"]) => {
     const channel: any = product.channels[channelKey];
@@ -49,9 +49,10 @@ export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <ColumnManager
-          visibleChannels={visibleChannels}
-          onVisibleChannelsChange={setVisibleChannels}
+        <ColumnPreferencesManager
+          columnPreferences={columnPreferences}
+          onColumnVisibilityChange={updateColumnVisibility}
+          onChannelVisibilityChange={updateChannelVisibility}
         />
       </div>
       
@@ -61,11 +62,13 @@ export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-20 text-center">Foto</TableHead>
-                  <TableHead className="min-w-[200px]">Produto</TableHead>
-                  <TableHead className="w-32">Marca</TableHead>
-                  <TableHead className="w-32">Categoria</TableHead>
-                  <TableHead className="w-24 text-center">Status</TableHead>
+                  {columnPreferences.photo && <TableHead className="w-20 text-center">Foto</TableHead>}
+                  {columnPreferences.name && <TableHead className="min-w-[200px]">Produto</TableHead>}
+                  {columnPreferences.brand && <TableHead className="w-32">Marca</TableHead>}
+                  {columnPreferences.category && <TableHead className="w-32">Categoria</TableHead>}
+                  {columnPreferences.sku && <TableHead className="w-24 text-center">SKU</TableHead>}
+                  {columnPreferences.internalCode && <TableHead className="w-32 text-center">Código Interno</TableHead>}
+                  {columnPreferences.status && <TableHead className="w-24 text-center">Status</TableHead>}
                   {visibleChannelData.map(c => (
                     <TableHead key={c.key} className="text-center min-w-[160px]">{c.label}</TableHead>
                   ))}
@@ -82,27 +85,47 @@ export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }
                     role="button"
                     aria-label={`Visualizar detalhes de ${product.name}`}
                   >
-                    <TableCell className="text-center">
-                      <img
-                        src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop"}
-                        alt={product.name}
-                        className="w-12 h-12 object-cover rounded-lg shadow border border-gray-100 mx-auto"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-700">{product.brand}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
-                        {product.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={product.active ? "default" : "secondary"} className="text-xs">
-                        {product.active ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
+                    {columnPreferences.photo && (
+                      <TableCell className="text-center">
+                        <img
+                          src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop"}
+                          alt={product.name}
+                          className="w-12 h-12 object-cover rounded-lg shadow border border-gray-100 mx-auto"
+                        />
+                      </TableCell>
+                    )}
+                    {columnPreferences.name && (
+                      <TableCell>
+                        <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
+                      </TableCell>
+                    )}
+                    {columnPreferences.brand && (
+                      <TableCell className="text-sm text-gray-700">{product.brand}</TableCell>
+                    )}
+                    {columnPreferences.category && (
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
+                          {product.category}
+                        </Badge>
+                      </TableCell>
+                    )}
+                    {columnPreferences.sku && (
+                      <TableCell className="text-center text-sm text-gray-600">
+                        {product.sku || '-'}
+                      </TableCell>
+                    )}
+                    {columnPreferences.internalCode && (
+                      <TableCell className="text-center text-sm text-gray-600">
+                        {product.internalCode || '-'}
+                      </TableCell>
+                    )}
+                    {columnPreferences.status && (
+                      <TableCell className="text-center">
+                        <Badge variant={product.active ? "default" : "secondary"} className="text-xs">
+                          {product.active ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </TableCell>
+                    )}
                     {visibleChannelData.map((chan) => {
                       const info = getChannelInfo(product, chan.key as keyof Product["channels"]);
                       return (

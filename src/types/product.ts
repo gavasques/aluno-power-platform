@@ -1,8 +1,9 @@
-
 export interface Product {
   id: string;
   name: string;
   photo?: string;
+  sku?: string; // Novo campo SKU
+  internalCode?: string; // Novo campo Código Interno
   ean?: string;
   dimensions: {
     length: number;
@@ -13,6 +14,8 @@ export interface Product {
   brand: string;
   category: string;
   supplierId: string;
+  supplierProductCode?: string; // Novo campo Código do Produto no Fornecedor
+  suppliers?: ProductSupplier[]; // Novo campo para múltiplos fornecedores
   ncm?: string;
   costItem: number; // Custo FOB
   packCost: number; // Custo de embalagem
@@ -20,6 +23,15 @@ export interface Product {
   channels: ProductChannels;
   active: boolean; // Nova propriedade para ativar/desativar produto
   createdAt: string;
+}
+
+// Novo tipo para fornecedores do produto
+export interface ProductSupplier {
+  id: string;
+  supplierId: string;
+  supplierProductCode: string;
+  cost: number;
+  isMain: boolean; // Indica se é o fornecedor principal
 }
 
 export interface ProductChannels {

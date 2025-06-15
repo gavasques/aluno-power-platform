@@ -82,7 +82,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <div className="flex-1 min-w-0">
             <CardTitle className="text-xl font-semibold text-gray-900 line-clamp-2 mb-2">{product.name}</CardTitle>
             <p className="text-sm text-gray-600 font-medium mb-3">{product.brand}</p>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap mb-2">
               <Badge variant="outline" className="text-xs px-3 py-1 bg-blue-50 text-blue-700 border-blue-200">
                 {product.category}
               </Badge>
@@ -92,6 +92,15 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               <Badge variant={product.active ? "default" : "secondary"} className="text-xs px-3 py-1">
                 {product.active ? "Ativo" : "Inativo"}
               </Badge>
+            </div>
+            {/* Novos campos SKU e Código Interno */}
+            <div className="flex items-center gap-4 text-xs text-gray-500">
+              {product.sku && (
+                <span><strong>SKU:</strong> {product.sku}</span>
+              )}
+              {product.internalCode && (
+                <span><strong>Código:</strong> {product.internalCode}</span>
+              )}
             </div>
           </div>
         </div>

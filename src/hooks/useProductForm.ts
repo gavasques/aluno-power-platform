@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import { ProductChannels } from "@/types/product";
+import { ProductChannels, ProductSupplier } from "@/types/product";
 import { useProducts } from "@/contexts/ProductContext";
 
 export const useProductForm = () => {
@@ -12,17 +12,22 @@ export const useProductForm = () => {
   const [productData, setProductData] = useState({
     name: "",
     photo: "",
+    sku: "",
+    internalCode: "",
     ean: "",
     dimensions: { length: 0, width: 0, height: 0 },
     weight: 0,
     brand: "",
     category: "",
     supplierId: "",
+    supplierProductCode: "",
     ncm: "",
     costItem: 0,
     packCost: 0,
     taxPercent: 0
   });
+
+  const [productSuppliers, setProductSuppliers] = useState<ProductSupplier[]>([]);
 
   const [channels, setChannels] = useState<ProductChannels>({
     sitePropio: {
@@ -154,6 +159,10 @@ export const useProductForm = () => {
     }));
   };
 
+  const handleSuppliersChange = (suppliers: ProductSupplier[]) => {
+    setProductSuppliers(suppliers);
+  };
+
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -185,9 +194,10 @@ export const useProductForm = () => {
       return;
     }
 
-    // Criar o produto usando o contexto - incluindo a propriedade active
+    // Criar o produto usando o contexto - incluindo a propriedade active e os novos campos
     addProduct({
       ...productData,
+      suppliers: productSuppliers,
       channels,
       active: true
     });
@@ -203,9 +213,11 @@ export const useProductForm = () => {
   return {
     productData,
     channels,
+    productSuppliers,
     handleInputChange,
     handleChannelToggle,
     handleChannelInputChange,
+    handleSuppliersChange,
     handlePhotoUpload,
     handleSubmit,
     navigate
