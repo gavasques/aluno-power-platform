@@ -76,13 +76,13 @@ export function AdminBreadcrumbs() {
   const canGoBack = location.pathname !== "/admin" && location.pathname !== "/admin/dashboard";
 
   return (
-    <div className="flex items-center space-x-4 py-4 px-6 bg-slate-900/50 border-b border-red-500/20">
+    <div className="flex items-center space-x-4 py-4 px-6 bg-gray-50 border-b border-border">
       {canGoBack && (
         <Button
           variant="ghost"
           size="sm"
           onClick={handleGoBack}
-          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+          className="text-primary hover:text-primary/80 hover:bg-primary/10"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
@@ -94,21 +94,21 @@ export function AdminBreadcrumbs() {
           {breadcrumbs.map((breadcrumb, index) => (
             <BreadcrumbItem key={breadcrumb.path}>
               {breadcrumb.isLast ? (
-                <BreadcrumbPage className="text-red-400 font-medium">
+                <BreadcrumbPage className="text-primary font-medium">
                   {breadcrumb.label}
                 </BreadcrumbPage>
               ) : (
                 <>
                   <BreadcrumbLink 
                     asChild
-                    className="text-slate-300 hover:text-red-400 transition-colors"
+                    className="text-muted-foreground hover:text-primary transition-colors"
                   >
                     <Link to={breadcrumb.path}>
                       {breadcrumb.label}
                     </Link>
                   </BreadcrumbLink>
                   <BreadcrumbSeparator>
-                    <ChevronRight className="h-4 w-4 text-slate-500" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </BreadcrumbSeparator>
                 </>
               )}
