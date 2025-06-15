@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserNav } from "@/components/layout/UserNav";
@@ -81,12 +80,11 @@ const menuItems = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="flex h-16 items-center justify-between w-full px-4 sm:px-6">
         <div className="flex items-center space-x-6">
           <Link to="/" className="flex items-center space-x-2">
-            <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
-            <span className="font-bold">Portal do Aluno</span>
+            <img src="/lovable-uploads/65475935-e163-4901-b637-8076c0c36804.png" alt="Guilherme Vasques Logo" className="h-8" />
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
