@@ -11,6 +11,7 @@ import { lazy, Suspense } from "react";
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const MyArea = lazy(() => import("@/pages/MyArea"));
 const Hub = lazy(() => import("@/pages/Hub"));
+const PartnerDetail = lazy(() => import("@/pages/hub/PartnerDetail"));
 const Simulators = lazy(() => import("@/pages/Simulators"));
 const AIAgents = lazy(() => import("@/pages/AIAgents"));
 const Courses = lazy(() => import("@/pages/Courses"));
@@ -26,7 +27,7 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme" attribute="class">
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme" attribute="class">
         <ProductProvider>
           <PartnersProvider>
             <Router>
@@ -36,6 +37,7 @@ function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/minha-area/:section?/:id?" element={<MyArea />} />
                     <Route path="/hub/:section?" element={<Hub />} />
+                    <Route path="/hub/parceiros/:id" element={<PartnerDetail />} />
                     <Route path="/simuladores" element={<Simulators />} />
                     <Route path="/agentes-ia" element={<AIAgents />} />
                     <Route path="/cursos" element={<Courses />} />

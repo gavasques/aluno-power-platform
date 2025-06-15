@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePartners } from '@/contexts/PartnersContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,13 +17,12 @@ import {
   Filter
 } from 'lucide-react';
 import { PARTNER_CATEGORIES } from '@/types/partner';
-import PartnerDetailModal from '@/components/partners/PartnerDetailModal';
 
 const Partners = () => {
+  const navigate = useNavigate();
   const { partners, loading, searchPartners } = usePartners();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedPartner, setSelectedPartner] = useState<string | null>(null);
 
   const filteredPartners = React.useMemo(() => {
     let result = searchQuery ? searchPartners(searchQuery) : partners;
@@ -157,23 +157,10 @@ const Partners = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-1">
-                {partner.specialties.slice(0, 3).map((specialty, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {specialty}
-                  </Badge>
-                ))}
-                {partner.specialties.length > 3 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{partner.specialties.length - 3}
-                  </Badge>
-                )}
-              </div>
-
               <div className="flex gap-2">
                 <Button 
                   className="flex-1"
-                  onClick={() => setSelectedPartner(partner.id)}
+                  onClick={() => navigate(`/hub/parceiros/${partner.id}`)}
                 >
                   Ver Perfil
                 </Button>
@@ -202,14 +189,6 @@ const Partners = () => {
             Tente ajustar os filtros ou buscar por outros termos.
           </p>
         </div>
-      )}
-
-      {/* Partner Detail Modal */}
-      {selectedPartner && (
-        <PartnerDetailModal
-          partnerId={selectedPartner}
-          onClose={() => setSelectedPartner(null)}
-        />
       )}
     </div>
   );

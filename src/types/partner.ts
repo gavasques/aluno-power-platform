@@ -5,10 +5,11 @@ export interface Partner {
   email: string;
   phone: string;
   category: PartnerCategory;
-  specialties: string[];
+  specialties: string;
   description: string;
   about: string;
-  services: PartnerService[];
+  services: string;
+  contacts: PartnerContact[];
   address: {
     street: string;
     city: string;
@@ -18,7 +19,6 @@ export interface Partner {
   website?: string;
   instagram?: string;
   linkedin?: string;
-  portfolio: PortfolioItem[];
   certifications: string[];
   isVerified: boolean;
   averageRating: number;
@@ -35,20 +35,11 @@ export interface PartnerCategory {
   description: string;
 }
 
-export interface PartnerService {
+export interface PartnerContact {
   id: string;
-  name: string;
-  description: string;
-  price?: string;
-  duration?: string;
-}
-
-export interface PortfolioItem {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  category: string;
+  type: 'phone' | 'email' | 'whatsapp' | 'website';
+  value: string;
+  label?: string;
 }
 
 export interface Review {

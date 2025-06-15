@@ -1,0 +1,394 @@
+
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { usePartners } from '@/contexts/PartnersContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Star,
+  Shield,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Instagram,
+  Linkedin,
+  ArrowLeft,
+  MessageSquare
+} from 'lucide-react';
+
+const PartnerDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { getPartnerById, addReview } = usePartners();
+  const { toast } = useToast();
+  
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const partner = id ? getPartnerById(id) : null;
+
+  if (!partner) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Parceiro não encontrado</h1>
+          <Button onClick={() => navigate('/hub/parceiros')}>
+            Voltar aos Parceiros
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (rating === 0) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione uma avaliação.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (comment.trim().length < 10) {
+      toast({
+        title: "Erro",
+        description: "O comentário deve ter pelo menos 10 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      addReview(partner.id, {
+        partnerId: partner.id,
+        userId: 'current-user',
+        userName: 'Usuário Atual',
+        rating,
+        comment: comment.trim(),
+      });
+
+      toast({
+        title: "Avaliação enviada!",
+        description: "Sua avaliação foi enviada com sucesso.",
+      });
+
+      setShowReviewForm(false);
+      setRating(0);
+      setComment('');
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível enviar sua avaliação. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const approvedReviews = partner.reviews.filter(review => review.isApproved);
+
+  const getContactIcon = (type: string) => {
+    switch (type) {
+      case 'phone':
+      case 'whatsapp':
+        return <Phone className="h-4 w-4" />;
+      case 'email':
+        return <Mail className="h-4 w-4" />;
+      case 'website':
+        return <Globe className="h-4 w-4" />;
+      default:
+        return <Phone className="h-4 w-4" />;
+    }
+  };
+
+  return (
+    <div className="container mx-auto p-6 max-w-4xl">
+      {/* Header */}
+      <div className="mb-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/hub/parceiros')}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar aos Parceiros
+        </Button>
+        
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold">{partner.name}</h1>
+              {partner.isVerified && (
+                <Badge variant="default" className="bg-green-500">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Verificado
+                </Badge>
+              )}
+            </div>
+            <Badge variant="secondary" className="mb-2">
+              {partner.category.name}
+            </Badge>
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`h-5 w-5 ${
+                    i < Math.floor(partner.averageRating)
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-gray-300'
+                  }`}
+                />
+              ))}
+              <span className="ml-2 text-gray-600">
+                {partner.averageRating.toFixed(1)} ({partner.totalReviews} avaliações)
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Coluna Principal */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Sobre */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Sobre</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700">{partner.about}</p>
+            </CardContent>
+          </Card>
+
+          {/* Especialidades */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Especialidades</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700">{partner.specialties}</p>
+            </CardContent>
+          </Card>
+
+          {/* Serviços */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Serviços</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700">{partner.services}</p>
+            </CardContent>
+          </Card>
+
+          {/* Avaliações */}
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Avaliações</CardTitle>
+                <Button 
+                  onClick={() => setShowReviewForm(true)}
+                  disabled={showReviewForm}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Deixar Avaliação
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Formulário de Avaliação */}
+              {showReviewForm && (
+                <form onSubmit={handleSubmitReview} className="space-y-4 p-4 border rounded-lg bg-gray-50">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Sua avaliação
+                    </label>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className="focus:outline-none"
+                          onMouseEnter={() => setHoveredRating(value)}
+                          onMouseLeave={() => setHoveredRating(0)}
+                          onClick={() => setRating(value)}
+                        >
+                          <Star
+                            className={`h-8 w-8 transition-colors ${
+                              value <= (hoveredRating || rating)
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-gray-300 hover:text-yellow-300'
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Comentário
+                    </label>
+                    <Textarea
+                      placeholder="Conte sua experiência com este parceiro..."
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      rows={4}
+                      required
+                      minLength={10}
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowReviewForm(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
+                    </Button>
+                  </div>
+                </form>
+              )}
+
+              {/* Lista de Avaliações */}
+              {approvedReviews.length > 0 ? (
+                <div className="space-y-4">
+                  {approvedReviews.map((review) => (
+                    <div key={review.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold">{review.userName}</span>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-700">{review.comment}</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {new Date(review.createdAt).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">
+                  Nenhuma avaliação disponível. Seja o primeiro a avaliar!
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar - Contato */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Contato</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Endereço */}
+              <div className="flex items-start gap-2">
+                <MapPin className="h-4 w-4 mt-1" />
+                <div>
+                  <p className="text-sm">
+                    {partner.address.street}
+                  </p>
+                  <p className="text-sm">
+                    {partner.address.city} - {partner.address.state}
+                  </p>
+                  <p className="text-sm">
+                    CEP: {partner.address.zipCode}
+                  </p>
+                </div>
+              </div>
+
+              {/* Contatos */}
+              {partner.contacts.map((contact) => (
+                <div key={contact.id} className="flex items-center gap-2">
+                  {getContactIcon(contact.type)}
+                  <div>
+                    <p className="text-sm font-medium">{contact.label}</p>
+                    <p className="text-sm text-gray-600">{contact.value}</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Redes Sociais */}
+              {partner.website && (
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  <a 
+                    href={partner.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    Website
+                  </a>
+                </div>
+              )}
+
+              {partner.instagram && (
+                <div className="flex items-center gap-2">
+                  <Instagram className="h-4 w-4" />
+                  <span className="text-sm">{partner.instagram}</span>
+                </div>
+              )}
+
+              {partner.linkedin && (
+                <div className="flex items-center gap-2">
+                  <Linkedin className="h-4 w-4" />
+                  <span className="text-sm">{partner.linkedin}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Certificações */}
+          {partner.certifications.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Certificações</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {partner.certifications.map((cert, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">{cert}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PartnerDetail;

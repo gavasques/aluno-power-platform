@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Partner, Review } from '@/types/partner';
+import { Partner, Review, PartnerContact } from '@/types/partner';
 
 interface PartnersContextType {
   partners: Partner[];
@@ -32,12 +32,14 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
         email: 'contato@silvacontabil.com.br',
         phone: '(11) 99999-9999',
         category: { id: '1', name: 'Contadores', icon: 'Calculator', description: 'Serviços de contabilidade e consultoria fiscal' },
-        specialties: ['Simples Nacional', 'Lucro Presumido', 'Importação'],
+        specialties: 'Simples Nacional, Lucro Presumido, Importação, E-commerce',
         description: 'Escritório de contabilidade especializado em e-commerce',
-        about: 'Com mais de 15 anos de experiência no mercado, oferecemos soluções completas em contabilidade para empresas de todos os portes.',
-        services: [
-          { id: '1', name: 'Abertura de Empresa', description: 'Abertura de CNPJ completa', price: 'R$ 500,00', duration: '15 dias' },
-          { id: '2', name: 'Contabilidade Mensal', description: 'Serviços contábeis mensais', price: 'R$ 300,00/mês', duration: 'Mensal' }
+        about: 'Com mais de 15 anos de experiência no mercado, oferecemos soluções completas em contabilidade para empresas de todos os portes, com foco especial em negócios digitais e e-commerce.',
+        services: 'Abertura de empresa, Contabilidade mensal, Consultoria fiscal, Planejamento tributário, Declaração de Imposto de Renda',
+        contacts: [
+          { id: '1', type: 'phone', value: '(11) 99999-9999', label: 'Telefone principal' },
+          { id: '2', type: 'email', value: 'contato@silvacontabil.com.br', label: 'E-mail comercial' },
+          { id: '3', type: 'whatsapp', value: '(11) 98888-8888', label: 'WhatsApp' }
         ],
         address: {
           street: 'Rua das Flores, 123',
@@ -48,9 +50,6 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
         website: 'https://silvacontabil.com.br',
         instagram: '@silvacontabil',
         linkedin: 'silva-contabilidade',
-        portfolio: [
-          { id: '1', title: 'Abertura E-commerce', description: 'Abertura de empresa de e-commerce', image: '/placeholder.svg', category: 'Abertura' }
-        ],
         certifications: ['CRC-SP 123456', 'Certificação Digital'],
         isVerified: true,
         averageRating: 4.8,
@@ -62,7 +61,7 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
             userId: 'user1',
             userName: 'João Silva',
             rating: 5,
-            comment: 'Excelente atendimento e profissionalismo!',
+            comment: 'Excelente atendimento e profissionalismo! Recomendo muito.',
             createdAt: '2024-01-15',
             isApproved: true
           }
@@ -76,11 +75,13 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
         email: 'contato@machadoadvocacia.com.br',
         phone: '(11) 88888-8888',
         category: { id: '2', name: 'Advogados', icon: 'Scales', description: 'Consultoria jurídica empresarial' },
-        specialties: ['Direito Empresarial', 'Contratos', 'Propriedade Intelectual'],
+        specialties: 'Direito Empresarial, Contratos, Propriedade Intelectual, Direito Digital',
         description: 'Escritório especializado em direito empresarial e e-commerce',
-        about: 'Atuamos há 10 anos no mercado jurídico, com foco em empresas digitais e e-commerce.',
-        services: [
-          { id: '1', name: 'Revisão de Contratos', description: 'Análise e revisão de contratos comerciais', price: 'R$ 800,00', duration: '5 dias' }
+        about: 'Atuamos há 10 anos no mercado jurídico, com foco em empresas digitais e e-commerce. Nossa equipe é especializada em questões jurídicas do mundo digital.',
+        services: 'Revisão de contratos, Registro de marca, Consultoria jurídica, Defesa em processos',
+        contacts: [
+          { id: '1', type: 'phone', value: '(11) 88888-8888', label: 'Telefone comercial' },
+          { id: '2', type: 'email', value: 'contato@machadoadvocacia.com.br', label: 'E-mail principal' }
         ],
         address: {
           street: 'Av. Paulista, 456',
@@ -89,7 +90,6 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
           zipCode: '01234-890'
         },
         website: 'https://machadoadvocacia.com.br',
-        portfolio: [],
         certifications: ['OAB-SP 123456'],
         isVerified: true,
         averageRating: 4.6,
@@ -136,7 +136,7 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
       ...reviewData,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
-      isApproved: false,
+      isApproved: true, // Aprova automaticamente para demonstração
     };
 
     setPartners(prev => prev.map(partner => {
@@ -195,7 +195,7 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
     return partners.filter(partner => 
       partner.name.toLowerCase().includes(lowercaseQuery) ||
       partner.description.toLowerCase().includes(lowercaseQuery) ||
-      partner.specialties.some(specialty => specialty.toLowerCase().includes(lowercaseQuery)) ||
+      partner.specialties.toLowerCase().includes(lowercaseQuery) ||
       partner.category.name.toLowerCase().includes(lowercaseQuery)
     );
   };
