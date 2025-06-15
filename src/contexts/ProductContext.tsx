@@ -178,7 +178,7 @@ const initialProducts: Product[] = [
     channels: {
       sitePropio: { enabled: true, salePrice: 499, commissionPct: 0, fixedFee: 5, otherPct: 2, otherValue: 0, adsPct: 10, gatewayPct: 3.5 },
       amazonFBA: { enabled: true, salePrice: 549, commissionPct: 15, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 15, inboundFreight: 15, prepCenter: 7 },
-      mlFull: { enabled: true, salePrice: 529, commissionPct: 17, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 12, inboundFreight: 12, prepCenter: 5 }
+      mlFull: { enabled: true, salePrice: 529, commissionPct: 17, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 12, inboundFreight: 12, outboundFreight: 0, prepCenter: 5 }
     }
   },
   {
