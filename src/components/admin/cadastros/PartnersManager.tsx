@@ -37,10 +37,12 @@ import {
   MessageSquare,
   CheckCircle,
   XCircle,
+  FileText,
 } from 'lucide-react';
 import { Partner } from '@/types/partner';
 import PartnerForm from './PartnerForm';
 import ReviewsManager from './ReviewsManager';
+import PartnerMaterialsManager from './PartnerMaterialsManager';
 
 const PartnersManager = () => {
   const { partners, loading, deletePartner, searchPartners } = usePartners();
@@ -48,6 +50,7 @@ const PartnersManager = () => {
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showReviews, setShowReviews] = useState<string | null>(null);
+  const [showMaterials, setShowMaterials] = useState<Partner | null>(null);
 
   const filteredPartners = searchQuery ? searchPartners(searchQuery) : partners;
 
@@ -133,9 +136,9 @@ const PartnersManager = () => {
               <Card className="bg-slate-700 border-slate-600">
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold text-blue-400">
-                    {partners.reduce((acc, p) => acc + p.reviews.filter(r => !r.isApproved).length, 0)}
+                    {partners.reduce((acc, p) => acc + p.materials.length, 0)}
                   </div>
-                  <p className="text-slate-400 text-sm">Avaliações Pendentes</p>
+                  <p className="text-slate-400 text-sm">Total de Materiais</p>
                 </CardContent>
               </Card>
             </div>
@@ -149,6 +152,7 @@ const PartnersManager = () => {
                     <TableHead className="text-slate-300">Categoria</TableHead>
                     <TableHead className="text-slate-300">Status</TableHead>
                     <TableHead className="text-slate-300">Avaliações</TableHead>
+                    <TableHead className="text-slate-300">Materiais</TableHead>
                     <TableHead className="text-slate-300">Localização</TableHead>
                     <TableHead className="text-slate-300">Ações</TableHead>
                   </TableRow>
@@ -196,10 +200,24 @@ const PartnersManager = () => {
                           </div>
                         </TableCell>
                         <TableCell className="text-slate-300">
+                          <div className="flex items-center gap-1">
+                            <FileText className="h-4 w-4" />
+                            <span>{partner.materials.length}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-300">
                           {partner.address.city}, {partner.address.state}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowMaterials(partner)}
+                              className="text-slate-300 hover:text-white hover:bg-slate-700"
+                            >
+                              <FileText className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -258,6 +276,14 @@ const PartnersManager = () => {
         <ReviewsManager
           partnerId={showReviews}
           onClose={() => setShowReviews(null)}
+        />
+      )}
+
+      {/* Materials Manager Modal */}
+      {showMaterials && (
+        <PartnerMaterialsManager
+          partner={showMaterials}
+          onClose={() => setShowMaterials(null)}
         />
       )}
     </div>

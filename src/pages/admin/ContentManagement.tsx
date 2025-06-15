@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, FileText, Users, Wrench, Package, Award } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { usePartners } from "@/contexts/PartnersContext";
+import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 
 interface ContentManagementProps {
   subsection?: string;
@@ -13,6 +16,13 @@ interface ContentManagementProps {
 
 const ContentManagement = ({ subsection }: ContentManagementProps) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+  const { partners } = usePartners();
+
+  // Se estiver na subseção de parceiros, renderiza o componente específico
+  if (subsection === 'parceiros') {
+    return <PartnersManager />;
+  }
 
   return (
     <div className="space-y-6">
@@ -41,7 +51,10 @@ const ContentManagement = ({ subsection }: ContentManagementProps) => {
 
         <TabsContent value="hub">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+            <Card 
+              className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer"
+              onClick={() => navigate('/admin/conteudo/parceiros')}
+            >
               <CardHeader>
                 <div className="flex items-center space-x-2">
                   <Users className="h-5 w-5 text-red-400" />
@@ -51,7 +64,7 @@ const ContentManagement = ({ subsection }: ContentManagementProps) => {
               <CardContent>
                 <p className="text-slate-400 text-sm mb-4">Gerencie parceiros e suas informações</p>
                 <div className="flex justify-between items-center">
-                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">45 parceiros</Badge>
+                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">{partners.length} parceiros</Badge>
                   <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
                     Gerenciar
                   </Button>
