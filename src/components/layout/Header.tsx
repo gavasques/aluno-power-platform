@@ -84,7 +84,12 @@ export function Header() {
       <div className="flex h-16 items-center justify-between w-full px-4 sm:px-6">
         <div className="flex items-center space-x-6">
           <Link to="/" className="flex items-center space-x-2">
-            <img src="/lovable-uploads/65475935-e163-4901-b637-8076c0c36804.png" alt="Guilherme Vasques Logo" className="h-8" />
+            <img
+              src="/lovable-uploads/65475935-e163-4901-b637-8076c0c36804.png"
+              alt="Guilherme Vasques Logo"
+              className="h-8 w-auto object-contain"
+              style={{ maxWidth: "180px" }}
+            />
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
