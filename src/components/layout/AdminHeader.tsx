@@ -57,34 +57,40 @@ const adminMenuItems = [
 
 export function AdminHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full bg-slate-900 border-b border-red-500/30 shadow-lg shadow-red-500/20 backdrop-blur supports-[backdrop-filter]:bg-slate-900/95">
       <div className="flex h-16 items-center justify-between w-full px-4 sm:px-6">
         <div className="flex items-center space-x-6">
-          <Link to="/admin" className="flex items-center space-x-2">
-            <Shield className="h-8 w-8 text-primary" />
-            <span className="font-bold">Painel Admin</span>
+          <Link to="/admin" className="flex items-center space-x-2 group">
+            <Shield className="h-8 w-8 text-red-500 drop-shadow-lg drop-shadow-red-500/50 group-hover:text-red-400 transition-colors" />
+            <span className="font-bold text-slate-100 group-hover:text-red-400 transition-colors">Painel Admin</span>
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <Link to="/admin" className={navigationMenuTriggerStyle()}>
+                <Link 
+                  to="/admin" 
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "bg-transparent text-slate-300 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  )}
+                >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
                 </Link>
               </NavigationMenuItem>
               {adminMenuItems.map((section) => (
                 <NavigationMenuItem key={section.title}>
-                  <NavigationMenuTrigger>
+                  <NavigationMenuTrigger className="bg-transparent text-slate-300 hover:text-red-400 hover:bg-red-500/10 data-[state=open]:bg-red-500/10 data-[state=open]:text-red-400 transition-colors">
                     {section.title}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-slate-800 border border-red-500/20 shadow-xl shadow-red-500/10">
                       {section.items.map((item) => (
                         <NavigationMenuLink key={item.href} asChild>
                           <Link
                             to={item.href}
                             className={cn(
-                              "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                              "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-red-500/10 hover:text-red-400 focus:bg-red-500/10 focus:text-red-400 text-slate-300"
                             )}
                           >
                             <div className="flex items-center space-x-2">
@@ -101,13 +107,25 @@ export function AdminHeader() {
                 </NavigationMenuItem>
               ))}
               <NavigationMenuItem>
-                <Link to="/admin/usuarios" className={navigationMenuTriggerStyle()}>
+                <Link 
+                  to="/admin/usuarios" 
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "bg-transparent text-slate-300 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  )}
+                >
                   <Users className="mr-2 h-4 w-4" />
                   Usuários
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link to="/admin/suporte" className={navigationMenuTriggerStyle()}>
+                <Link 
+                  to="/admin/suporte" 
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "bg-transparent text-slate-300 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  )}
+                >
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Suporte
                 </Link>
