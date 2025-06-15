@@ -37,6 +37,8 @@ export const EditProductModal = ({
   const productData = {
     name: editedProduct.name,
     photo: editedProduct.photo || "",
+    sku: editedProduct.sku || "",
+    internalCode: editedProduct.internalCode || "",
     ean: editedProduct.ean || "",
     dimensions: editedProduct.dimensions,
     weight: editedProduct.weight,

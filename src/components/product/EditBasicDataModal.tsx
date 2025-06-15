@@ -27,6 +27,8 @@ export const EditBasicDataModal = ({
   const [editedData, setEditedData] = useState({
     name: product.name,
     photo: product.photo || "",
+    sku: product.sku || "",
+    internalCode: product.internalCode || "",
     ean: product.ean || "",
     dimensions: product.dimensions,
     weight: product.weight,

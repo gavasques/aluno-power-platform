@@ -5,12 +5,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormattedInput } from "@/components/ui/formatted-input";
-import { Upload, Package, Ruler, DollarSign, Hash, Building2, Tag } from "lucide-react";
+import { Upload, Package, Ruler, DollarSign, Hash, Building2, Tag, Code } from "lucide-react";
 
 interface BasicProductFormProps {
   productData: {
     name: string;
     photo: string;
+    sku: string;
+    internalCode: string;
     ean: string;
     dimensions: { length: number; width: number; height: number };
     weight: number;
@@ -140,6 +142,32 @@ export const BasicProductForm = ({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium">SKU</Label>
+              <div className="relative mt-1">
+                <Code className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={productData.sku || ''}
+                  onChange={(e) => onInputChange('sku', e.target.value)}
+                  placeholder="Código SKU"
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium">Código Interno</Label>
+              <div className="relative mt-1">
+                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={productData.internalCode || ''}
+                  onChange={(e) => onInputChange('internalCode', e.target.value)}
+                  placeholder="Código interno"
+                  className="pl-10"
+                />
+              </div>
             </div>
 
             <div>
