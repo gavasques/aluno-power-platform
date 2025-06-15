@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Product } from '@/types/product';
 
@@ -70,12 +71,12 @@ const initialProducts: Product[] = [
     packCost: 50,
     taxPercent: 20,
     active: true,
+    createdAt: "2024-02-20",
     channels: {
       sitePropio: { enabled: true, salePrice: 5499, commissionPct: 0, fixedFee: 10, otherPct: 2, otherValue: 0, adsPct: 5, gatewayPct: 3 },
       amazonFBA: { enabled: true, salePrice: 5799, commissionPct: 15, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 12, inboundFreight: 30, prepCenter: 15 },
       mlFull: { enabled: false, salePrice: 5699, commissionPct: 16, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 10, inboundFreight: 25, outboundFreight: 0, prepCenter: 10 }
-    },
-    createdAt: "2024-02-20"
+    }
   },
   {
     id: "3",
@@ -321,7 +322,7 @@ const initialProducts: Product[] = [
     createdAt: "2024-02-15",
     channels: {
       sitePropio: { enabled: true, salePrice: 449.9, commissionPct: 0, fixedFee: 5, otherPct: 1, otherValue: 0, adsPct: 11, gatewayPct: 3.8 },
-      mlFull: { enabled: true, salePrice: 479.9, commissionPct: 17, fixedFee: 5, adsPct: 14, inboundFreight: 15, prepCenter: 6, otherPct: 0, otherValue: 0 }
+      mlFull: { enabled: true, salePrice: 479.9, commissionPct: 17, fixedFee: 5, adsPct: 14, inboundFreight: 15, outboundFreight: 0, prepCenter: 6, otherPct: 0, otherValue: 0 }
     }
   },
   {
