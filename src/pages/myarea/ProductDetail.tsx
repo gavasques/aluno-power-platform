@@ -90,6 +90,7 @@ const mockProduct: Product = {
       otherValue: 0,
       adsPct: 8,
       inboundFreight: 0,
+      outboundFreight: 0,
       prepCenter: 0,
       salePrice: 0
     },
