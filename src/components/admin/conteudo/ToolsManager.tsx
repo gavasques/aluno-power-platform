@@ -158,377 +158,350 @@ const ToolsManager = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <Wrench className="h-5 w-5 text-red-400" />
-              <CardTitle className="text-slate-100">Gestão de Ferramentas</CardTitle>
-            </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" 
-                  variant="outline"
-                  onClick={resetForm}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Ferramenta
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-slate-800 border-red-500/20 max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="text-slate-100">
-                    {editingTool ? "Editar Ferramenta" : "Nova Ferramenta"}
-                  </DialogTitle>
-                </DialogHeader>
-                
-                <form onSubmit={handleSubmit}>
-                  <Tabs defaultValue="basic" className="w-full">
-                    <TabsList className="bg-slate-700/50 border-red-500/20">
-                      <TabsTrigger value="basic" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400">
-                        Básico
-                      </TabsTrigger>
-                      <TabsTrigger value="details" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400">
-                        Detalhes
-                      </TabsTrigger>
-                      <TabsTrigger value="review" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400">
-                        Avaliação
-                      </TabsTrigger>
-                      <TabsTrigger value="pros-cons" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400">
-                        Prós/Contras
-                      </TabsTrigger>
-                    </TabsList>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Wrench className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Gestão de Ferramentas</h1>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={resetForm}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Ferramenta
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingTool ? "Editar Ferramenta" : "Nova Ferramenta"}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <form onSubmit={handleSubmit}>
+              <Tabs defaultValue="basic" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="basic">Básico</TabsTrigger>
+                  <TabsTrigger value="details">Detalhes</TabsTrigger>
+                  <TabsTrigger value="review">Avaliação</TabsTrigger>
+                  <TabsTrigger value="pros-cons">Prós/Contras</TabsTrigger>
+                </TabsList>
 
-                    <TabsContent value="basic" className="space-y-4 mt-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name" className="text-slate-300">Nome</Label>
-                          <Input
-                            id="name"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="typeId" className="text-slate-300">Tipo</Label>
-                          <Select 
-                            value={formData.typeId} 
-                            onValueChange={(value) => setFormData({ ...formData, typeId: value })}
-                          >
-                            <SelectTrigger className="bg-slate-600/50 border-red-500/20 text-slate-100">
-                              <SelectValue placeholder="Selecione um tipo" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-700 border-red-500/20">
-                              {toolTypes.map(type => (
-                                <SelectItem key={type.id} value={type.id} className="text-slate-100">
-                                  {type.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="description" className="text-slate-300">Descrição</Label>
-                        <Textarea
-                          id="description"
-                          value={formData.description}
-                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                          rows={3}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="logo" className="text-slate-300">Logo URL</Label>
-                        <Input
-                          id="logo"
-                          value={formData.logo}
-                          onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                          className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                          placeholder="https://exemplo.com/logo.png"
-                        />
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="verified"
-                          checked={formData.verified}
-                          onCheckedChange={(checked) => setFormData({ ...formData, verified: checked })}
-                        />
-                        <Label htmlFor="verified" className="text-slate-300">LV Verificado</Label>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="details" className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="overview" className="text-slate-300">Visão Geral</Label>
-                        <Textarea
-                          id="overview"
-                          value={formData.overview}
-                          onChange={(e) => setFormData({ ...formData, overview: e.target.value })}
-                          className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                          rows={4}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-slate-300">Funcionalidades</Label>
-                        <div className="flex space-x-2">
-                          <Input
-                            value={currentFeature}
-                            onChange={(e) => setCurrentFeature(e.target.value)}
-                            className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                            placeholder="Digite uma funcionalidade"
-                            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
-                          />
-                          <Button type="button" onClick={addFeature} size="sm">
-                            Adicionar
-                          </Button>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {formData.features?.map((feature, index) => (
-                            <Badge 
-                              key={index} 
-                              className="bg-blue-500/20 text-blue-400 cursor-pointer"
-                              onClick={() => removeFeature(index)}
-                            >
-                              {feature} ×
-                            </Badge>
+                <TabsContent value="basic" className="space-y-4 mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="typeId">Tipo</Label>
+                      <Select 
+                        value={formData.typeId} 
+                        onValueChange={(value) => setFormData({ ...formData, typeId: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {toolTypes.map(type => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
                           ))}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="availabilityBrazil" className="text-slate-300">Disponibilidade no Brasil</Label>
-                        <Textarea
-                          id="availabilityBrazil"
-                          value={formData.availabilityBrazil}
-                          onChange={(e) => setFormData({ ...formData, availabilityBrazil: e.target.value })}
-                          className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                          rows={3}
-                        />
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="review" className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="officialRating" className="text-slate-300">Avaliação Oficial (0-5)</Label>
-                        <Input
-                          id="officialRating"
-                          type="number"
-                          min="0"
-                          max="5"
-                          step="0.1"
-                          value={formData.officialRating}
-                          onChange={(e) => setFormData({ ...formData, officialRating: parseFloat(e.target.value) || 0 })}
-                          className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="lvRating" className="text-slate-300">Avaliação LV (0-5)</Label>
-                        <Input
-                          id="lvRating"
-                          type="number"
-                          min="0"
-                          max="5"
-                          step="0.1"
-                          value={formData.lvReview?.rating}
-                          onChange={(e) => setFormData({ 
-                            ...formData, 
-                            lvReview: { 
-                              ...formData.lvReview, 
-                              rating: parseFloat(e.target.value) || 0 
-                            }
-                          })}
-                          className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="lvReviewText" className="text-slate-300">Review LV</Label>
-                        <Textarea
-                          id="lvReviewText"
-                          value={formData.lvReview?.review}
-                          onChange={(e) => setFormData({ 
-                            ...formData, 
-                            lvReview: { 
-                              ...formData.lvReview, 
-                              review: e.target.value 
-                            }
-                          })}
-                          className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                          rows={4}
-                        />
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="pros-cons" className="space-y-4 mt-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-slate-300">Prós</Label>
-                          <div className="flex space-x-2">
-                            <Input
-                              value={currentPro}
-                              onChange={(e) => setCurrentPro(e.target.value)}
-                              className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                              placeholder="Digite um pró"
-                              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPro())}
-                            />
-                            <Button type="button" onClick={addPro} size="sm">
-                              +
-                            </Button>
-                          </div>
-                          <div className="space-y-1">
-                            {formData.prosAndCons?.pros?.map((pro, index) => (
-                              <div key={index} className="flex items-center justify-between bg-green-500/10 p-2 rounded">
-                                <span className="text-slate-300 text-sm">{pro}</span>
-                                <Button 
-                                  type="button" 
-                                  size="sm" 
-                                  variant="ghost"
-                                  onClick={() => setFormData(prev => ({
-                                    ...prev,
-                                    prosAndCons: {
-                                      ...prev.prosAndCons,
-                                      pros: prev.prosAndCons?.pros?.filter((_, i) => i !== index) || []
-                                    }
-                                  }))}
-                                >
-                                  ×
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-slate-300">Contras</Label>
-                          <div className="flex space-x-2">
-                            <Input
-                              value={currentCon}
-                              onChange={(e) => setCurrentCon(e.target.value)}
-                              className="bg-slate-600/50 border-red-500/20 text-slate-100"
-                              placeholder="Digite um contra"
-                              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCon())}
-                            />
-                            <Button type="button" onClick={addCon} size="sm">
-                              +
-                            </Button>
-                          </div>
-                          <div className="space-y-1">
-                            {formData.prosAndCons?.cons?.map((con, index) => (
-                              <div key={index} className="flex items-center justify-between bg-red-500/10 p-2 rounded">
-                                <span className="text-slate-300 text-sm">{con}</span>
-                                <Button 
-                                  type="button" 
-                                  size="sm" 
-                                  variant="ghost"
-                                  onClick={() => setFormData(prev => ({
-                                    ...prev,
-                                    prosAndCons: {
-                                      ...prev.prosAndCons,
-                                      cons: prev.prosAndCons?.cons?.filter((_, i) => i !== index) || []
-                                    }
-                                  }))}
-                                >
-                                  ×
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-
-                  <div className="flex justify-end space-x-2 mt-6">
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      onClick={() => setIsDialogOpen(false)}
-                      className="text-slate-400 hover:text-slate-300"
-                    >
-                      Cancelar
-                    </Button>
-                    <Button 
-                      type="submit"
-                      className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30"
-                      variant="outline"
-                    >
-                      {editingTool ? "Atualizar" : "Criar"}
-                    </Button>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Descrição</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="logo">Logo URL</Label>
+                    <Input
+                      id="logo"
+                      value={formData.logo}
+                      onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                      placeholder="https://exemplo.com/logo.png"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="verified"
+                      checked={formData.verified}
+                      onCheckedChange={(checked) => setFormData({ ...formData, verified: checked })}
+                    />
+                    <Label htmlFor="verified">LV Verificado</Label>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="details" className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="overview">Visão Geral</Label>
+                    <Textarea
+                      id="overview"
+                      value={formData.overview}
+                      onChange={(e) => setFormData({ ...formData, overview: e.target.value })}
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Funcionalidades</Label>
+                    <div className="flex space-x-2">
+                      <Input
+                        value={currentFeature}
+                        onChange={(e) => setCurrentFeature(e.target.value)}
+                        placeholder="Digite uma funcionalidade"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                      />
+                      <Button type="button" onClick={addFeature} size="sm">
+                        Adicionar
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.features?.map((feature, index) => (
+                        <Badge 
+                          key={index} 
+                          variant="secondary"
+                          className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => removeFeature(index)}
+                        >
+                          {feature} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="availabilityBrazil">Disponibilidade no Brasil</Label>
+                    <Textarea
+                      id="availabilityBrazil"
+                      value={formData.availabilityBrazil}
+                      onChange={(e) => setFormData({ ...formData, availabilityBrazil: e.target.value })}
+                      rows={3}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="review" className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="officialRating">Avaliação Oficial (0-5)</Label>
+                    <Input
+                      id="officialRating"
+                      type="number"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      value={formData.officialRating}
+                      onChange={(e) => setFormData({ ...formData, officialRating: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="lvRating">Avaliação LV (0-5)</Label>
+                    <Input
+                      id="lvRating"
+                      type="number"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      value={formData.lvReview?.rating}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        lvReview: { 
+                          ...formData.lvReview, 
+                          rating: parseFloat(e.target.value) || 0 
+                        }
+                      })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="lvReviewText">Review LV</Label>
+                    <Textarea
+                      id="lvReviewText"
+                      value={formData.lvReview?.review}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        lvReview: { 
+                          ...formData.lvReview, 
+                          review: e.target.value 
+                        }
+                      })}
+                      rows={4}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="pros-cons" className="space-y-4 mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Prós</Label>
+                      <div className="flex space-x-2">
+                        <Input
+                          value={currentPro}
+                          onChange={(e) => setCurrentPro(e.target.value)}
+                          placeholder="Digite um pró"
+                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPro())}
+                        />
+                        <Button type="button" onClick={addPro} size="sm">
+                          +
+                        </Button>
+                      </div>
+                      <div className="space-y-1">
+                        {formData.prosAndCons?.pros?.map((pro, index) => (
+                          <div key={index} className="flex items-center justify-between bg-green-50 border border-green-200 p-2 rounded">
+                            <span className="text-sm">{pro}</span>
+                            <Button 
+                              type="button" 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                prosAndCons: {
+                                  ...prev.prosAndCons,
+                                  pros: prev.prosAndCons?.pros?.filter((_, i) => i !== index) || []
+                                }
+                              }))}
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Contras</Label>
+                      <div className="flex space-x-2">
+                        <Input
+                          value={currentCon}
+                          onChange={(e) => setCurrentCon(e.target.value)}
+                          placeholder="Digite um contra"
+                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCon())}
+                        />
+                        <Button type="button" onClick={addCon} size="sm">
+                          +
+                        </Button>
+                      </div>
+                      <div className="space-y-1">
+                        {formData.prosAndCons?.cons?.map((con, index) => (
+                          <div key={index} className="flex items-center justify-between bg-red-50 border border-red-200 p-2 rounded">
+                            <span className="text-sm">{con}</span>
+                            <Button 
+                              type="button" 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                prosAndCons: {
+                                  ...prev.prosAndCons,
+                                  cons: prev.prosAndCons?.cons?.filter((_, i) => i !== index) || []
+                                }
+                              }))}
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="flex justify-end space-x-2 mt-6">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit">
+                  {editingTool ? "Atualizar" : "Criar"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
+        <CardHeader>
           <div className="flex space-x-4">
-            <div className="flex-1 flex items-center space-x-2">
-              <Search className="h-4 w-4 text-slate-400" />
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar ferramentas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
+                className="pl-10"
               />
             </div>
             <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="w-48 bg-slate-600/50 border-red-500/20 text-slate-100">
+              <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-700 border-red-500/20">
-                <SelectItem value="all" className="text-slate-100">Todos os tipos</SelectItem>
+              <SelectContent>
+                <SelectItem value="all">Todos os tipos</SelectItem>
                 {toolTypes.map(type => (
-                  <SelectItem key={type.id} value={type.id} className="text-slate-100">
+                  <SelectItem key={type.id} value={type.id}>
                     {type.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          
-          <div className="grid gap-4">
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
             {filteredTools.map((tool) => (
-              <Card key={tool.id} className="bg-slate-600/30 border-red-500/10">
+              <Card key={tool.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
                     <img
                       src={tool.logo}
                       alt={tool.name}
-                      className="w-16 h-16 rounded-lg object-cover"
+                      className="w-16 h-16 rounded-lg object-cover border"
                     />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-slate-100">{tool.name}</h3>
+                        <h3 className="font-semibold text-lg">{tool.name}</h3>
                         {tool.verified && (
-                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                          <Badge className="bg-green-100 text-green-700 border-green-300">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             LV Verificado
                           </Badge>
                         )}
-                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                        <Badge variant="outline">
                           {toolTypes.find(t => t.id === tool.typeId)?.name}
                         </Badge>
                       </div>
-                      <p className="text-slate-400 text-sm mb-2">{tool.description}</p>
-                      <div className="flex items-center gap-4">
+                      <p className="text-muted-foreground text-sm mb-3">{tool.description}</p>
+                      <div className="flex items-center gap-6">
                         <div className="flex items-center gap-1">
-                          <span className="text-sm text-slate-300">LV:</span>
+                          <span className="text-sm font-medium">LV:</span>
                           <div className="flex">{renderStars(tool.officialRating)}</div>
-                          <span className="text-sm text-slate-400">{tool.officialRating}</span>
+                          <span className="text-sm text-muted-foreground">{tool.officialRating}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-sm text-slate-300">Usuários:</span>
+                          <span className="text-sm font-medium">Usuários:</span>
                           <div className="flex">{renderStars(tool.userRating)}</div>
-                          <span className="text-sm text-slate-400">
+                          <span className="text-sm text-muted-foreground">
                             {tool.userRating} ({tool.reviewCount})
                           </span>
                         </div>
@@ -537,17 +510,16 @@ const ToolsManager = () => {
                     <div className="flex space-x-2">
                       <Button
                         size="sm"
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => handleEdit(tool)}
-                        className="text-slate-400 hover:text-blue-400"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => handleDelete(tool.id)}
-                        className="text-slate-400 hover:text-red-400"
+                        className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -558,9 +530,12 @@ const ToolsManager = () => {
             ))}
             
             {filteredTools.length === 0 && (
-              <div className="text-center py-8">
-                <Wrench className="h-12 w-12 text-slate-500 mx-auto mb-4" />
-                <p className="text-slate-400">Nenhuma ferramenta encontrada</p>
+              <div className="text-center py-12">
+                <Wrench className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Nenhuma ferramenta encontrada</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Tente ajustar os filtros ou adicione uma nova ferramenta
+                </p>
               </div>
             )}
           </div>
