@@ -63,77 +63,22 @@ const ProductForm = () => {
         <TabsContent value="canais">
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChannelForm
-                channelType="sitePropio"
-                channelData={channels.sitePropio}
-                title={channelNames.sitePropio}
-                onChannelToggle={handleChannelToggle}
-                onChannelInputChange={handleChannelInputChange}
-              />
+              {Object.keys(channelNames).map((channelKey) => {
+                const key = channelKey as keyof typeof channelNames;
+                const channelData = channels[key];
+                if (!channelData) return null;
 
-              <ChannelForm
-                channelType="amazonFBM"
-                channelData={channels.amazonFBM}
-                title={channelNames.amazonFBM}
-                onChannelToggle={handleChannelToggle}
-                onChannelInputChange={handleChannelInputChange}
-              />
-
-              <ChannelForm
-                channelType="amazonFBAOnSite"
-                channelData={channels.amazonFBAOnSite}
-                title={channelNames.amazonFBAOnSite}
-                onChannelToggle={handleChannelToggle}
-                onChannelInputChange={handleChannelInputChange}
-              />
-
-              <ChannelForm
-                channelType="amazonDBA"
-                channelData={channels.amazonDBA}
-                title={channelNames.amazonDBA}
-                onChannelToggle={handleChannelToggle}
-                onChannelInputChange={handleChannelInputChange}
-              />
-
-              <ChannelForm
-                channelType="amazonFBA"
-                channelData={channels.amazonFBA}
-                title={channelNames.amazonFBA}
-                onChannelToggle={handleChannelToggle}
-                onChannelInputChange={handleChannelInputChange}
-              />
-
-              <ChannelForm
-                channelType="mlME1"
-                channelData={channels.mlME1}
-                title={channelNames.mlME1}
-                onChannelToggle={handleChannelToggle}
-                onChannelInputChange={handleChannelInputChange}
-              />
-
-              <ChannelForm
-                channelType="mlFlex"
-                channelData={channels.mlFlex}
-                title={channelNames.mlFlex}
-                onChannelToggle={handleChannelToggle}
-                onChannelInputChange={handleChannelInputChange}
-              />
-
-              <ChannelForm
-                channelType="mlEnvios"
-                channelData={channels.mlEnvios}
-                title={channelNames.mlEnvios}
-                onChannelToggle={handleChannelToggle}
-                onChannelInputChange={handleChannelInputChange}
-              />
-
-              <ChannelForm
-                channelType="mlFull"
-                channelData={channels.mlFull}
-                title={channelNames.mlFull}
-                onChannelToggle={handleChannelToggle}
-                onChannelInputChange={handleChannelInputChange}
-              />
+                return (
+                  <ChannelForm
+                    key={key}
+                    channelType={key}
+                    channelData={channelData}
+                    title={channelNames[key]}
+                    onChannelToggle={handleChannelToggle}
+                    onChannelInputChange={handleChannelInputChange}
+                  />
+                );
+              })}
             </div>
           </div>
         </TabsContent>

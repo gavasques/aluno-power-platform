@@ -1,12 +1,12 @@
-import { useState } from "react";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Product, ProductChannels } from "@/types/product";
+import { Product } from "@/types/product";
 import { BasicProductForm } from "./BasicProductForm";
 import { ChannelForm } from "./ChannelForm";
-import { toast } from "@/hooks/use-toast";
 import { channelNames } from "@/config/channels";
+import { useEditProductForm } from "@/hooks/useEditProductForm";
 
 interface EditProductModalProps {
   product: Product;
@@ -25,89 +25,14 @@ export const EditProductModal = ({
   mockSuppliers, 
   mockCategories 
 }: EditProductModalProps) => {
-  const [editedProduct, setEditedProduct] = useState<Product>(product);
-
-  const handleInputChange = (field: string, value: any) => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      setEditedProduct(prev => ({
-        ...prev,
-        [parent]: {
-          ...(prev[parent as keyof typeof prev] as object),
-          [child]: value
-        }
-      }));
-    } else {
-      setEditedProduct(prev => ({ ...prev, [field]: value }));
-    }
-  };
-
-  const handleChannelToggle = (channelType: keyof ProductChannels) => {
-    setEditedProduct(prev => ({
-      ...prev,
-      channels: {
-        ...prev.channels,
-        [channelType]: {
-          ...prev.channels[channelType]!,
-          enabled: !prev.channels[channelType]!.enabled
-        }
-      }
-    }));
-  };
-
-  const handleChannelInputChange = (channelType: keyof ProductChannels, field: string, value: number) => {
-    setEditedProduct(prev => ({
-      ...prev,
-      channels: {
-        ...prev.channels,
-        [channelType]: {
-          ...prev.channels[channelType]!,
-          [field]: value
-        }
-      }
-    }));
-  };
-
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 3 * 1024 * 1024) {
-        toast({
-          title: "Arquivo muito grande",
-          description: "A foto deve ter no máximo 3MB.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setEditedProduct(prev => ({ 
-          ...prev, 
-          photo: e.target?.result as string 
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSave = () => {
-    // Validação básica
-    if (!editedProduct.name || !editedProduct.brand || !editedProduct.supplierId) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha pelo menos nome, marca e fornecedor.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    onSave(editedProduct);
-    toast({
-      title: "Produto atualizado",
-      description: "As alterações foram salvas com sucesso."
-    });
-  };
+  const {
+    editedProduct,
+    handleInputChange,
+    handleChannelToggle,
+    handleChannelInputChange,
+    handlePhotoUpload,
+    handleSave,
+  } = useEditProductForm({ product, onSave });
 
   const productData = {
     name: editedProduct.name,
@@ -152,77 +77,22 @@ export const EditProductModal = ({
           <TabsContent value="canais">
             <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ChannelForm
-                  channelType="sitePropio"
-                  channelData={editedProduct.channels.sitePropio}
-                  title={channelNames.sitePropio}
-                  onChannelToggle={handleChannelToggle}
-                  onChannelInputChange={handleChannelInputChange}
-                />
-
-                <ChannelForm
-                  channelType="amazonFBM"
-                  channelData={editedProduct.channels.amazonFBM}
-                  title={channelNames.amazonFBM}
-                  onChannelToggle={handleChannelToggle}
-                  onChannelInputChange={handleChannelInputChange}
-                />
-
-                <ChannelForm
-                  channelType="amazonFBAOnSite"
-                  channelData={editedProduct.channels.amazonFBAOnSite}
-                  title={channelNames.amazonFBAOnSite}
-                  onChannelToggle={handleChannelToggle}
-                  onChannelInputChange={handleChannelInputChange}
-                />
-
-                <ChannelForm
-                  channelType="amazonDBA"
-                  channelData={editedProduct.channels.amazonDBA}
-                  title={channelNames.amazonDBA}
-                  onChannelToggle={handleChannelToggle}
-                  onChannelInputChange={handleChannelInputChange}
-                />
-
-                <ChannelForm
-                  channelType="amazonFBA"
-                  channelData={editedProduct.channels.amazonFBA}
-                  title={channelNames.amazonFBA}
-                  onChannelToggle={handleChannelToggle}
-                  onChannelInputChange={handleChannelInputChange}
-                />
-
-                <ChannelForm
-                  channelType="mlME1"
-                  channelData={editedProduct.channels.mlME1}
-                  title={channelNames.mlME1}
-                  onChannelToggle={handleChannelToggle}
-                  onChannelInputChange={handleChannelInputChange}
-                />
-
-                <ChannelForm
-                  channelType="mlFlex"
-                  channelData={editedProduct.channels.mlFlex}
-                  title={channelNames.mlFlex}
-                  onChannelToggle={handleChannelToggle}
-                  onChannelInputChange={handleChannelInputChange}
-                />
-
-                <ChannelForm
-                  channelType="mlEnvios"
-                  channelData={editedProduct.channels.mlEnvios}
-                  title={channelNames.mlEnvios}
-                  onChannelToggle={handleChannelToggle}
-                  onChannelInputChange={handleChannelInputChange}
-                />
-
-                <ChannelForm
-                  channelType="mlFull"
-                  channelData={editedProduct.channels.mlFull}
-                  title={channelNames.mlFull}
-                  onChannelToggle={handleChannelToggle}
-                  onChannelInputChange={handleChannelInputChange}
-                />
+                {Object.keys(channelNames).map((channelKey) => {
+                  const key = channelKey as keyof typeof channelNames;
+                  const channelData = editedProduct.channels[key];
+                  if (!channelData) return null;
+                  
+                  return (
+                    <ChannelForm
+                      key={key}
+                      channelType={key}
+                      channelData={channelData}
+                      title={channelNames[key]}
+                      onChannelToggle={handleChannelToggle}
+                      onChannelInputChange={handleChannelInputChange}
+                    />
+                  );
+                })}
               </div>
             </div>
           </TabsContent>
