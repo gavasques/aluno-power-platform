@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2 } from "lucide-react";
+import { Star, Search, CheckCircle, Phone, Mail, Download } from "lucide-react";
 import { useState } from "react";
 import { useSuppliers } from "@/contexts/SuppliersContext";
 import { Supplier } from "@/types/supplier";
@@ -31,6 +31,14 @@ const Suppliers = () => {
         className={`h-4 w-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
       />
     ));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   if (loading) {
@@ -197,7 +205,7 @@ const Suppliers = () => {
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="info">Informações</TabsTrigger>
                   <TabsTrigger value="contacts">Contatos</TabsTrigger>
-                  <TabsTrigger value="branches">Filiais</TabsTrigger>
+                  <TabsTrigger value="files">Arquivos</TabsTrigger>
                   <TabsTrigger value="reviews">Avaliações</TabsTrigger>
                 </TabsList>
 
@@ -248,6 +256,15 @@ const Suppliers = () => {
                               <Phone className="h-4 w-4" />
                               <p className="text-muted-foreground">{selectedSupplier.whatsapp}</p>
                             </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium">Departamentos</label>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {selectedSupplier.departments.map(dept => (
+                              <Badge key={dept.id} variant="outline">{dept.name}</Badge>
+                            ))}
                           </div>
                         </div>
 
@@ -327,51 +344,42 @@ const Suppliers = () => {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="branches" className="mt-6">
+                <TabsContent value="files" className="mt-6">
                   <div className="space-y-4">
-                    {selectedSupplier.branches.map((branch, index) => (
+                    {selectedSupplier.files.map((file, index) => (
                       <Card key={index}>
-                        <CardHeader>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <Building2 className="h-5 w-5" />
-                            {branch.name}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="text-sm font-medium">Razão Social</label>
-                              <p className="text-muted-foreground">{branch.corporateName}</p>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">CNPJ</label>
-                              <p className="text-muted-foreground">{branch.cnpj}</p>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Inscrição Municipal</label>
-                              <p className="text-muted-foreground">{branch.municipalRegistration}</p>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Inscrição Estadual</label>
-                              <p className="text-muted-foreground">{branch.stateRegistration}</p>
-                            </div>
-                            <div className="md:col-span-2">
-                              <label className="text-sm font-medium">Endereço</label>
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                <p className="text-muted-foreground">{branch.address}</p>
+                        <CardContent className="pt-6">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-medium text-lg">{file.name}</h4>
+                              <p className="text-muted-foreground text-sm">{file.description}</p>
+                              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                <Badge variant="outline">{file.type}</Badge>
+                                <span>Tamanho: {formatFileSize(file.size)}</span>
+                                <span>Enviado em: {new Date(file.uploadedAt).toLocaleDateString()}</span>
                               </div>
                             </div>
+                            {file.fileUrl && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(file.fileUrl, '_blank')}
+                              >
+                                <Download className="h-4 w-4 mr-2" />
+                                Download
+                              </Button>
+                            )}
                           </div>
-                          {branch.notes && (
-                            <div className="mt-4">
-                              <label className="text-sm font-medium">Observações</label>
-                              <p className="text-muted-foreground">{branch.notes}</p>
-                            </div>
-                          )}
                         </CardContent>
                       </Card>
                     ))}
+                    {selectedSupplier.files.length === 0 && (
+                      <Card>
+                        <CardContent className="text-center py-8">
+                          <p className="text-muted-foreground">Nenhum arquivo disponível para este fornecedor.</p>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 </TabsContent>
 

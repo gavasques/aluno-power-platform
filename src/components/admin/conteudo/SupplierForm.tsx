@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,11 +15,10 @@ import {
   Save, 
   ArrowLeft, 
   User, 
-  FileText,
-  Download
+  FileText
 } from "lucide-react";
 import { useSuppliers } from "@/contexts/SuppliersContext";
-import { SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS, FILE_TYPES } from "@/types/supplier";
+import { SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS, FILE_TYPES, SupplierFile } from "@/types/supplier";
 import { useToast } from "@/hooks/use-toast";
 
 const SupplierForm = () => {
@@ -51,10 +51,8 @@ const SupplierForm = () => {
     { name: '', role: '', phone: '', whatsapp: '', email: '', notes: '' }
   ]);
 
-  // Estados para arquivos
-  const [files, setFiles] = useState([
-    { name: '', description: '', type: 'catalog' as const, fileUrl: '', size: 0 }
-  ]);
+  // Estados para arquivos - corrigindo o tipo
+  const [files, setFiles] = useState<SupplierFile[]>([]);
 
   // Carregar dados do fornecedor se estiver editando
   useEffect(() => {
@@ -74,7 +72,7 @@ const SupplierForm = () => {
         logo: supplier.logo || ''
       });
       setContacts(supplier.contacts.length > 0 ? supplier.contacts : [{ name: '', role: '', phone: '', whatsapp: '', email: '', notes: '' }]);
-      setFiles(supplier.files.length > 0 ? supplier.files : [{ name: '', description: '', type: 'catalog' as const, fileUrl: '', size: 0 }]);
+      setFiles(supplier.files.length > 0 ? supplier.files : []);
     }
   }, [supplier]);
 
@@ -178,14 +176,23 @@ const SupplierForm = () => {
   };
 
   const addFile = () => {
-    setFiles([...files, { name: '', description: '', type: 'catalog', fileUrl: '', size: 0 }]);
+    const newFile: SupplierFile = {
+      id: Date.now().toString(),
+      name: '',
+      description: '',
+      type: 'catalog',
+      fileUrl: '',
+      size: 0,
+      uploadedAt: new Date().toISOString()
+    };
+    setFiles([...files, newFile]);
   };
 
   const removeFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
   };
 
-  const updateFile = (index: number, field: string, value: string | number) => {
+  const updateFile = (index: number, field: keyof SupplierFile, value: string | number) => {
     const updatedFiles = [...files];
     updatedFiles[index] = { ...updatedFiles[index], [field]: value };
     setFiles(updatedFiles);
