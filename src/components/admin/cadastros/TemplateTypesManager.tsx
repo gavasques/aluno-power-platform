@@ -28,9 +28,9 @@ const TemplateTypesManager = () => {
   }
 
   return (
-    <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+    <Card className="bg-white border border-border shadow-sm">
       <CardHeader>
-        <CardTitle className="text-slate-100">Tipos de Templates</CardTitle>
+        <CardTitle className="text-foreground">Tipos de Templates</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleAdd} className="flex gap-2 mb-4">
@@ -38,9 +38,9 @@ const TemplateTypesManager = () => {
             placeholder="Novo tipo de template..."
             value={newType}
             onChange={e => setNewType(e.target.value)}
-            className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
+            className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
           />
-          <Button type="submit" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+          <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="h-4 w-4" />Adicionar
           </Button>
         </form>
@@ -49,14 +49,14 @@ const TemplateTypesManager = () => {
             placeholder="Buscar tipos de template..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
+            className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
           />
-          {filtered.length === 0 && <div className="text-slate-400 py-6 text-center">Nenhum tipo encontrado.</div>}
+          {filtered.length === 0 && <div className="text-muted-foreground py-6 text-center">Nenhum tipo encontrado.</div>}
           {filtered.map(type => (
-            <div key={type} className="flex items-center justify-between p-3 bg-slate-600/30 border border-red-500/20 rounded-lg">
-              <span className="font-medium text-slate-100">{type}</span>
+            <div key={type} className="flex items-center justify-between p-3 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 transition-colors">
+              <span className="font-medium text-foreground">{type}</span>
               <Button size="sm" variant="outline"
-                className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30"
+                className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => handleDelete(type)}>
                 <Trash2 className="h-4 w-4" />
               </Button>

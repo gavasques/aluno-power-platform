@@ -26,58 +26,58 @@ const GeneralSettings = ({ subsection }: GeneralSettingsProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100">Configurações</h1>
-          <p className="text-slate-400">Configurações gerais da plataforma</p>
+          <h1 className="text-3xl font-bold text-foreground">Configurações</h1>
+          <p className="text-muted-foreground">Configurações gerais da plataforma</p>
         </div>
-        <Button className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" variant="outline">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Save className="h-4 w-4 mr-2" />
           Salvar
         </Button>
       </div>
 
       <Tabs defaultValue="plataforma" className="space-y-6">
-        <TabsList className="bg-slate-700/50 border-red-500/20">
-          <TabsTrigger value="plataforma" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400 text-slate-300">
+        <TabsList className="bg-white border border-border">
+          <TabsTrigger value="plataforma" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground">
             <Settings className="h-4 w-4 mr-2" />
             Plataforma
           </TabsTrigger>
-          <TabsTrigger value="creditos" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400 text-slate-300">
+          <TabsTrigger value="creditos" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground">
             <CreditCard className="h-4 w-4 mr-2" />
             Créditos IA
           </TabsTrigger>
-          <TabsTrigger value="templates" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400 text-slate-300">
+          <TabsTrigger value="templates" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground">
             <MessageSquare className="h-4 w-4 mr-2" />
             Templates
           </TabsTrigger>
-          <TabsTrigger value="noticias" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400 text-slate-300">
+          <TabsTrigger value="noticias" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground">
             <Newspaper className="h-4 w-4 mr-2" />
             Notícias
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="plataforma">
-          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+          <Card className="bg-white border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-100">Configurações da Plataforma</CardTitle>
+              <CardTitle className="text-foreground">Configurações da Plataforma</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="siteName" className="text-slate-300">Nome da Plataforma</Label>
+                <Label htmlFor="siteName" className="text-foreground">Nome da Plataforma</Label>
                 <Input 
                   id="siteName"
                   value={settings.siteName}
                   onChange={(e) => setSettings({...settings, siteName: e.target.value})}
-                  className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                  className="bg-white border border-input text-foreground"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="siteDescription" className="text-slate-300">Descrição</Label>
+                <Label htmlFor="siteDescription" className="text-foreground">Descrição</Label>
                 <Textarea 
                   id="siteDescription"
                   value={settings.siteDescription}
                   onChange={(e) => setSettings({...settings, siteDescription: e.target.value})}
-                  className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                  className="bg-white border border-input text-foreground"
                 />
               </div>
 
@@ -87,7 +87,7 @@ const GeneralSettings = ({ subsection }: GeneralSettingsProps) => {
                   checked={settings.maintenanceMode}
                   onCheckedChange={(checked) => setSettings({...settings, maintenanceMode: checked})}
                 />
-                <Label htmlFor="maintenance" className="text-slate-300">Modo de Manutenção</Label>
+                <Label htmlFor="maintenance" className="text-foreground">Modo de Manutenção</Label>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -96,41 +96,41 @@ const GeneralSettings = ({ subsection }: GeneralSettingsProps) => {
                   checked={settings.registrationEnabled}
                   onCheckedChange={(checked) => setSettings({...settings, registrationEnabled: checked})}
                 />
-                <Label htmlFor="registration" className="text-slate-300">Permitir Novos Registros</Label>
+                <Label htmlFor="registration" className="text-foreground">Permitir Novos Registros</Label>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="creditos">
-          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+          <Card className="bg-white border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-100">Configurações de Créditos IA</CardTitle>
+              <CardTitle className="text-foreground">Configurações de Créditos IA</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-slate-400">Configurações de créditos IA em desenvolvimento...</p>
+              <p className="text-muted-foreground">Configurações de créditos IA em desenvolvimento...</p>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="templates">
-          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+          <Card className="bg-white border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-100">Templates de Resposta</CardTitle>
+              <CardTitle className="text-foreground">Templates de Resposta</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-slate-400">Templates de resposta em desenvolvimento...</p>
+              <p className="text-muted-foreground">Templates de resposta em desenvolvimento...</p>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="noticias">
-          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+          <Card className="bg-white border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-100">Feed de Notícias</CardTitle>
+              <CardTitle className="text-foreground">Feed de Notícias</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-slate-400">Configurações do feed de notícias em desenvolvimento...</p>
+              <p className="text-muted-foreground">Configurações do feed de notícias em desenvolvimento...</p>
             </CardContent>
           </Card>
         </TabsContent>
