@@ -31,11 +31,49 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
     }
   };
 
+  const getTitle = () => {
+    switch (subsection) {
+      case "departamentos":
+        return "Gerenciar Departamentos";
+      case "tipos-templates":
+        return "Gerenciar Tipos de Templates";
+      case "tipos-fornecedor":
+        return "Gerenciar Tipos de Fornecedor";
+      case "tipos-prompts-ia":
+        return "Gerenciar Tipos de Prompts IA";
+      case "tipos-materiais":
+        return "Gerenciar Tipos de Materiais";
+      case "parceiros":
+        return "Gerenciar Parceiros";
+      default:
+        return "Cadastros";
+    }
+  };
+
+  const getDescription = () => {
+    switch (subsection) {
+      case "departamentos":
+        return "Gerencie os departamentos da plataforma";
+      case "tipos-templates":
+        return "Gerencie tipos de templates e categorias";
+      case "tipos-fornecedor":
+        return "Configure tipos e categorias de fornecedores";
+      case "tipos-prompts-ia":
+        return "Gerencie tipos de prompts de IA";
+      case "tipos-materiais":
+        return "Gerencie tipos padrão de materiais";
+      case "parceiros":
+        return "Gerencie os parceiros e informações";
+      default:
+        return "Gerencie os cadastros base da plataforma";
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-100">Cadastros</h1>
-        <p className="text-slate-400">Gerencie os cadastros base da plataforma</p>
+        <h1 className="text-3xl font-bold text-slate-100">{getTitle()}</h1>
+        <p className="text-slate-400">{getDescription()}</p>
       </div>
       {renderContent()}
     </div>
