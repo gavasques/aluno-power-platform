@@ -20,6 +20,8 @@ import SupportManagement from "./pages/admin/SupportManagement";
 import GeneralSettings from "./pages/admin/GeneralSettings";
 import ContentManagement from "./pages/admin/ContentManagement";
 import Suppliers from "./pages/hub/Suppliers";
+import Partners from "./pages/hub/Partners";
+import Hub from "./pages/Hub";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -50,6 +52,13 @@ function App() {
                       <Route path="/" element={<Layout><Outlet /></Layout>}>
                         <Route index element={<Dashboard />} />
                         <Route path="fornecedores" element={<Suppliers />} />
+                        
+                        {/* Rotas do Hub */}
+                        <Route path="hub">
+                          <Route path="parceiros" element={<Partners />} />
+                          <Route path="fornecedores" element={<Suppliers />} />
+                          <Route path=":section" element={<Hub />} />
+                        </Route>
                       </Route>
 
                       {/* Rotas de admin com AdminLayout */}
