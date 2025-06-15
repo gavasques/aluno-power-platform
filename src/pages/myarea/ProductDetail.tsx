@@ -33,6 +33,13 @@ const mockProduct: Product = {
   costItem: 450.00,
   packCost: 15.00,
   taxPercent: 12,
+  observations: "Produto importado, requer cuidados especiais no transporte.",
+  descriptions: {
+    description: "Smartphone Samsung Galaxy A54 com tela AMOLED de 6.4 polegadas e câmera tripla de alta qualidade.",
+    htmlDescription: "<p><strong>Smartphone Samsung Galaxy A54</strong></p><p>Tela AMOLED de 6.4 polegadas com resolução Full HD+</p>",
+    bulletPoints: "• Tela AMOLED 6.4 polegadas\n• Câmera tripla 50MP + 12MP + 5MP\n• Bateria 5000mAh\n• 128GB de armazenamento",
+    technicalSpecs: "Processador: Exynos 1380\nRAM: 6GB\nArmazenamento: 128GB\nTela: 6.4 AMOLED\nBateria: 5000mAh"
+  },
   active: true,
   channels: {
     sitePropio: {

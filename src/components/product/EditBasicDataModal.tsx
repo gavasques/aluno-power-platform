@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Product } from "@/types/product";
+import { Product, ProductDescriptions } from "@/types/product";
 import { BasicProductForm } from "./BasicProductForm";
 import { ProductSuppliersManager } from "./ProductSuppliersManager";
+import { ProductDescriptionsModal } from "./ProductDescriptionsModal";
 import { toast } from "@/hooks/use-toast";
 
 interface EditBasicDataModalProps {
@@ -24,6 +24,8 @@ export const EditBasicDataModal = ({
   mockSuppliers, 
   mockCategories 
 }: EditBasicDataModalProps) => {
+  const [isDescriptionsModalOpen, setIsDescriptionsModalOpen] = useState(false);
+  
   const [editedData, setEditedData] = useState({
     name: product.name,
     photo: product.photo || "",
@@ -38,10 +40,12 @@ export const EditBasicDataModal = ({
     ncm: product.ncm || "",
     costItem: product.costItem,
     packCost: product.packCost,
-    taxPercent: product.taxPercent
+    taxPercent: product.taxPercent,
+    observations: product.observations || ""
   });
 
   const [productSuppliers, setProductSuppliers] = useState(product.suppliers || []);
+  const [productDescriptions, setProductDescriptions] = useState<ProductDescriptions>(product.descriptions || {});
 
   const handleInputChange = (field: string, value: any) => {
     if (field.includes('.')) {
@@ -85,6 +89,10 @@ export const EditBasicDataModal = ({
     setProductSuppliers(suppliers);
   };
 
+  const handleDescriptionsChange = (descriptions: ProductDescriptions) => {
+    setProductDescriptions(descriptions);
+  };
+
   const handleSave = () => {
     // Validação básica
     if (!editedData.name || !editedData.brand || !editedData.supplierId) {
@@ -99,7 +107,8 @@ export const EditBasicDataModal = ({
     const updatedProduct = {
       ...product,
       ...editedData,
-      suppliers: productSuppliers
+      suppliers: productSuppliers,
+      descriptions: productDescriptions
     };
     
     onSave(updatedProduct);
@@ -110,39 +119,49 @@ export const EditBasicDataModal = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Editar Dados Básicos</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Dados Básicos</DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-8">
-          <BasicProductForm
-            productData={editedData}
-            onInputChange={handleInputChange}
-            onPhotoUpload={handlePhotoUpload}
-            mockSuppliers={mockSuppliers}
-            mockCategories={mockCategories}
-          />
-
-          <div className="border-t pt-6">
-            <ProductSuppliersManager
-              suppliers={productSuppliers}
-              availableSuppliers={mockSuppliers}
-              onSuppliersChange={handleSuppliersChange}
+          <div className="space-y-8">
+            <BasicProductForm
+              productData={editedData}
+              onInputChange={handleInputChange}
+              onPhotoUpload={handlePhotoUpload}
+              mockSuppliers={mockSuppliers}
+              mockCategories={mockCategories}
+              onOpenDescriptions={() => setIsDescriptionsModalOpen(true)}
             />
-          </div>
-        </div>
 
-        <div className="flex gap-4 pt-6 border-t">
-          <Button onClick={handleSave} size="lg">
-            Salvar Alterações
-          </Button>
-          <Button variant="outline" onClick={onClose} size="lg">
-            Cancelar
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <div className="border-t pt-6">
+              <ProductSuppliersManager
+                suppliers={productSuppliers}
+                availableSuppliers={mockSuppliers}
+                onSuppliersChange={handleSuppliersChange}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-6 border-t">
+            <Button onClick={handleSave} size="lg">
+              Salvar Alterações
+            </Button>
+            <Button variant="outline" onClick={onClose} size="lg">
+              Cancelar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <ProductDescriptionsModal
+        isOpen={isDescriptionsModalOpen}
+        onClose={() => setIsDescriptionsModalOpen(false)}
+        descriptions={productDescriptions}
+        onSave={handleDescriptionsChange}
+      />
+    </>
   );
 };

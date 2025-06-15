@@ -20,9 +20,19 @@ export interface Product {
   costItem: number; // Custo FOB
   packCost: number; // Custo de embalagem
   taxPercent: number; // Imposto global %
+  observations?: string; // Novo campo Observações do Produto
+  descriptions?: ProductDescriptions; // Novo campo para descrições
   channels: ProductChannels;
   active: boolean; // Nova propriedade para ativar/desativar produto
   createdAt: string;
+}
+
+// Novo tipo para descrições do produto
+export interface ProductDescriptions {
+  description?: string; // Descrição em texto
+  htmlDescription?: string; // Descrição em HTML
+  bulletPoints?: string; // Bullet Points
+  technicalSpecs?: string; // Ficha Técnica
 }
 
 // Novo tipo para fornecedores do produto

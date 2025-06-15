@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Product, ProductChannels } from "@/types/product";
+import { Product, ProductChannels, ProductDescriptions } from "@/types/product";
 import { toast } from "@/hooks/use-toast";
 
 interface UseEditProductFormProps {
@@ -28,6 +27,13 @@ export const useEditProductForm = ({ product, onSave }: UseEditProductFormProps)
     } else {
       setEditedProduct(prev => ({ ...prev, [field]: value }));
     }
+  };
+
+  const handleDescriptionsChange = (descriptions: ProductDescriptions) => {
+    setEditedProduct(prev => ({
+      ...prev,
+      descriptions
+    }));
   };
 
   const handleChannelToggle = (channelType: keyof ProductChannels) => {
@@ -102,6 +108,7 @@ export const useEditProductForm = ({ product, onSave }: UseEditProductFormProps)
     handleChannelToggle,
     handleChannelInputChange,
     handlePhotoUpload,
+    handleDescriptionsChange,
     handleSave,
   };
 };

@@ -1,11 +1,11 @@
-
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormattedInput } from "@/components/ui/formatted-input";
-import { Upload, Package, Ruler, DollarSign, Hash, Building2, Tag, Code } from "lucide-react";
+import { Upload, Package, Ruler, DollarSign, Hash, Building2, Tag, Code, FileText } from "lucide-react";
 
 interface BasicProductFormProps {
   productData: {
@@ -23,11 +23,13 @@ interface BasicProductFormProps {
     costItem: number;
     packCost: number;
     taxPercent: number;
+    observations?: string;
   };
   onInputChange: (field: string, value: any) => void;
   onPhotoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   mockSuppliers: Array<{ id: string; tradeName: string }>;
   mockCategories: Array<{ id: string; name: string }>;
+  onOpenDescriptions?: () => void;
 }
 
 export const BasicProductForm = ({ 
@@ -35,7 +37,8 @@ export const BasicProductForm = ({
   onInputChange, 
   onPhotoUpload, 
   mockSuppliers, 
-  mockCategories 
+  mockCategories,
+  onOpenDescriptions
 }: BasicProductFormProps) => {
   return (
     <div className="space-y-8">
@@ -195,6 +198,34 @@ export const BasicProductForm = ({
                 />
               </div>
             </div>
+
+            <div>
+              <Label className="text-sm font-medium">Observações do Produto</Label>
+              <Textarea
+                value={productData.observations || ''}
+                onChange={(e) => onInputChange('observations', e.target.value)}
+                placeholder="Digite observações importantes sobre o produto..."
+                className="mt-1 min-h-[100px]"
+              />
+            </div>
+
+            {onOpenDescriptions && (
+              <div>
+                <Label className="text-sm font-medium">Descrições</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onOpenDescriptions}
+                  className="w-full mt-1"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Gerenciar Descrições do Produto
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Configure descrição, HTML, bullet points e ficha técnica
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
