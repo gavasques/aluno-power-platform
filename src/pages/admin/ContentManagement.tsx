@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { usePartners } from "@/contexts/PartnersContext";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import ToolsManager from "@/components/admin/conteudo/ToolsManager";
-import { lazy } from "react";
+import MaterialsManager from "@/components/admin/conteudo/MaterialsManager";
 
 interface ContentManagementProps {
   subsection?: string;
@@ -30,7 +30,6 @@ const ContentManagement = ({ subsection }: ContentManagementProps) => {
   }
 
   if (subsection === 'materiais') {
-    const MaterialsManager = lazy(() => import('@/components/admin/conteudo/MaterialsManager'));
     return <MaterialsManager />;
   }
 
