@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { AdminNav } from "@/components/layout/AdminNav";
 import {
@@ -17,7 +18,8 @@ import {
   MessageSquare,
   Settings,
   Database,
-  Bot
+  Bot,
+  Shield
 } from "lucide-react";
 
 const adminMenuItems = [
