@@ -85,58 +85,57 @@ const ToolTypesManager = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+      <Card className="bg-white border border-border shadow-sm">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <Wrench className="h-5 w-5 text-red-400" />
-              <CardTitle className="text-slate-100">Tipos de Ferramentas</CardTitle>
+              <Wrench className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">Tipos de Ferramentas</CardTitle>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
-                  className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" 
-                  variant="outline"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90" 
                   onClick={resetForm}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Novo Tipo
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-slate-800 border-red-500/20">
+              <DialogContent className="bg-white border border-border">
                 <DialogHeader>
-                  <DialogTitle className="text-slate-100">
+                  <DialogTitle className="text-foreground">
                     {editingType ? "Editar Tipo de Ferramenta" : "Novo Tipo de Ferramenta"}
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-slate-300">Nome</Label>
+                    <Label htmlFor="name" className="text-foreground">Nome</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                      className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="description" className="text-slate-300">Descrição</Label>
+                    <Label htmlFor="description" className="text-foreground">Descrição</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                      className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
                       rows={3}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="icon" className="text-slate-300">Ícone (Lucide)</Label>
+                    <Label htmlFor="icon" className="text-foreground">Ícone (Lucide)</Label>
                     <Input
                       id="icon"
                       value={formData.icon}
                       onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                      className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
                       placeholder="ex: Search, BarChart, Bot"
                     />
                   </div>
@@ -145,14 +144,13 @@ const ToolTypesManager = () => {
                       type="button" 
                       variant="ghost" 
                       onClick={() => setIsDialogOpen(false)}
-                      className="text-slate-400 hover:text-slate-300"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       Cancelar
                     </Button>
                     <Button 
                       type="submit"
-                      className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30"
-                      variant="outline"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       {editingType ? "Atualizar" : "Criar"}
                     </Button>
@@ -164,43 +162,43 @@ const ToolTypesManager = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
-            <Search className="h-4 w-4 text-slate-400" />
+            <Search className="h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar tipos de ferramentas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
+              className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
             />
           </div>
           
           <div className="grid gap-4">
             {filteredTypes.map((type) => (
-              <Card key={type.id} className="bg-slate-600/30 border-red-500/10">
+              <Card key={type.id} className="bg-gray-50 border border-border">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="font-semibold text-slate-100">{type.name}</h3>
-                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                        <h3 className="font-semibold text-foreground">{type.name}</h3>
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-200">
                           {getToolsByType(type.id).length} ferramentas
                         </Badge>
                       </div>
-                      <p className="text-slate-400 text-sm">{type.description}</p>
+                      <p className="text-muted-foreground text-sm">{type.description}</p>
                     </div>
                     <div className="flex space-x-2">
                       <Button
                         size="sm"
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => handleEdit(type)}
-                        className="text-slate-400 hover:text-blue-400"
+                        className="text-foreground border-border hover:bg-gray-100"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => handleDelete(type.id)}
-                        className="text-slate-400 hover:text-red-400"
+                        className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -212,8 +210,8 @@ const ToolTypesManager = () => {
             
             {filteredTypes.length === 0 && (
               <div className="text-center py-8">
-                <Wrench className="h-12 w-12 text-slate-500 mx-auto mb-4" />
-                <p className="text-slate-400">Nenhum tipo de ferramenta encontrado</p>
+                <Wrench className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Nenhum tipo de ferramenta encontrado</p>
               </div>
             )}
           </div>
