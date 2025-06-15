@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Star, Edit3 } from "lucide-react";
+import { Plus, Trash2, Star, Edit3, Info } from "lucide-react";
 import { ProductSupplier, Supplier } from "@/types/product";
 import { formatCurrency } from "@/utils/productCalculations";
 import { toast } from "@/hooks/use-toast";
@@ -105,6 +105,20 @@ export const ProductSuppliersManager = ({
           <Plus className="h-4 w-4" />
           Adicionar Fornecedor
         </Button>
+      </div>
+
+      {/* Aviso informativo */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm">
+            <p className="text-blue-800 font-medium mb-1">Importante</p>
+            <p className="text-blue-700">
+              Para adicionar um fornecedor aqui, você deve primeiro cadastrá-lo na área de{" "}
+              <span className="font-semibold">"Meus Fornecedores"</span>. Apenas fornecedores já cadastrados aparecerão na lista de seleção.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Lista de fornecedores */}
