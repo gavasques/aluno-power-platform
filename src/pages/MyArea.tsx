@@ -2,9 +2,11 @@
 import { useParams } from "react-router-dom";
 import MySuppliers from "./myarea/MySuppliers";
 import MyProducts from "./myarea/MyProducts";
+import MyMaterials from "./myarea/MyMaterials";
 import ProductForm from "./myarea/ProductForm";
 import ProductDetail from "./myarea/ProductDetail";
 import SupplierDetail from "./myarea/SupplierDetail";
+import MaterialDetail from "./myarea/MaterialDetail";
 
 const MyArea = () => {
   const { section, id } = useParams();
@@ -23,6 +25,15 @@ const MyArea = () => {
         return <ProductDetail />;
       }
       return <MyProducts />;
+    case "materiais":
+      if (id === "novo") {
+        // Retornar formulário de material quando criado
+        return <div>Formulário de material em desenvolvimento</div>;
+      }
+      if (id) {
+        return <MaterialDetail />;
+      }
+      return <MyMaterials />;
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Minha Área";
       return (

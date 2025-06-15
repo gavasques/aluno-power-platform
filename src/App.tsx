@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ProductProvider } from "@/contexts/ProductContext";
 import { PartnersProvider } from "@/contexts/PartnersContext";
 import { ToolsProvider } from "@/contexts/ToolsContext";
+import { MaterialsProvider } from "@/contexts/MaterialsContext";
 import Layout from "@/components/layout/Layout";
 import { lazy, Suspense } from "react";
 
@@ -31,28 +32,30 @@ function App() {
         <ProductProvider>
           <PartnersProvider>
             <ToolsProvider>
-              <Router>
-                <Layout>
-                  <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Carregando...</div>}>
-                    <Routes>
-                      <Route path="/" element={<Dashboard />} />
-                      <Route path="/minha-area/:section?/:id?" element={<MyArea />} />
-                      <Route path="/hub/:section?" element={<Hub />} />
-                      <Route path="/hub/parceiros/:id" element={<PartnerDetail />} />
-                      <Route path="/simuladores" element={<Simulators />} />
-                      <Route path="/agentes-ia" element={<AIAgents />} />
-                      <Route path="/cursos" element={<Courses />} />
-                      <Route path="/suporte" element={<Support />} />
-                      <Route path="/configuracoes" element={<Settings />} />
-                      <Route path="/perfil" element={<Profile />} />
-                      <Route path="/inscricoes" element={<Registrations />} />
-                      <Route path="/admin/:section?/:subsection?/:id?" element={<Admin />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </Layout>
-                <Toaster />
-              </Router>
+              <MaterialsProvider>
+                <Router>
+                  <Layout>
+                    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Carregando...</div>}>
+                      <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/minha-area/:section?/:id?" element={<MyArea />} />
+                        <Route path="/hub/:section?" element={<Hub />} />
+                        <Route path="/hub/parceiros/:id" element={<PartnerDetail />} />
+                        <Route path="/simuladores" element={<Simulators />} />
+                        <Route path="/agentes-ia" element={<AIAgents />} />
+                        <Route path="/cursos" element={<Courses />} />
+                        <Route path="/suporte" element={<Support />} />
+                        <Route path="/configuracoes" element={<Settings />} />
+                        <Route path="/perfil" element={<Profile />} />
+                        <Route path="/inscricoes" element={<Registrations />} />
+                        <Route path="/admin/:section?/:subsection?/:id?" element={<Admin />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </Layout>
+                  <Toaster />
+                </Router>
+              </MaterialsProvider>
             </ToolsProvider>
           </PartnersProvider>
         </ProductProvider>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { usePartners } from "@/contexts/PartnersContext";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import ToolsManager from "@/components/admin/conteudo/ToolsManager";
+import { lazy } from "react";
 
 interface ContentManagementProps {
   subsection?: string;
@@ -27,6 +27,11 @@ const ContentManagement = ({ subsection }: ContentManagementProps) => {
   
   if (subsection === 'ferramentas') {
     return <ToolsManager />;
+  }
+
+  if (subsection === 'materiais') {
+    const MaterialsManager = lazy(() => import('@/components/admin/conteudo/MaterialsManager'));
+    return <MaterialsManager />;
   }
 
   return (
@@ -88,6 +93,27 @@ const ContentManagement = ({ subsection }: ContentManagementProps) => {
                 <p className="text-muted-foreground text-sm mb-4">Cadastro e gestão de fornecedores</p>
                 <div className="flex justify-between items-center">
                   <Badge className="bg-green-100 text-green-800 border-green-200">128 fornecedores</Badge>
+                  <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    Gerenciar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => navigate('/admin/conteudo/materiais')}
+            >
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-foreground">Materiais</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground text-sm mb-4">Repositório de conteúdos e recursos</p>
+                <div className="flex justify-between items-center">
+                  <Badge className="bg-orange-100 text-orange-800 border-orange-200">45 materiais</Badge>
                   <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                     Gerenciar
                   </Button>
