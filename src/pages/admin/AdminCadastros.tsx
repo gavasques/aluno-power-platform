@@ -1,3 +1,4 @@
+
 import DepartmentsManager from "@/components/admin/cadastros/DepartmentsManager";
 import TemplateTypesManager from "@/components/admin/cadastros/TemplateTypesManager";
 import SupplierTypesManager from "@/components/admin/cadastros/SupplierTypesManager";
@@ -78,8 +79,8 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-100">{getTitle()}</h1>
-        <p className="text-slate-400">{getDescription()}</p>
+        <h1 className="text-3xl font-bold text-foreground">{getTitle()}</h1>
+        <p className="text-muted-foreground">{getDescription()}</p>
       </div>
       {renderContent()}
     </div>

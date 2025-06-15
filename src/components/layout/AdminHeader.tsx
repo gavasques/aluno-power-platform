@@ -22,7 +22,6 @@ import {
   Bot
 } from "lucide-react";
 
-// Corrigindo os itens do menu para refletir "Departamentos", "Tipos de Templates", etc.
 const adminMenuItems = [
   {
     title: "Cadastros",
@@ -60,12 +59,12 @@ const adminMenuItems = [
 
 export function AdminHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full bg-slate-900 border-b border-red-500/30 shadow-lg shadow-red-500/20 backdrop-blur supports-[backdrop-filter]:bg-slate-900/95">
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-border shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/95">
       <div className="flex h-16 items-center justify-between w-full px-4 sm:px-6">
         <div className="flex items-center space-x-6">
           <Link to="/admin" className="flex items-center space-x-2 group">
-            <Shield className="h-8 w-8 text-red-500 drop-shadow-lg drop-shadow-red-500/50 group-hover:text-red-400 transition-colors" />
-            <span className="font-bold text-slate-100 group-hover:text-red-400 transition-colors">Painel Admin</span>
+            <Shield className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors" />
+            <span className="font-bold text-foreground group-hover:text-primary transition-colors">Painel Admin</span>
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
@@ -74,7 +73,7 @@ export function AdminHeader() {
                   to="/admin" 
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    "bg-transparent text-slate-300 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    "bg-transparent text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                   )}
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -83,17 +82,17 @@ export function AdminHeader() {
               </NavigationMenuItem>
               {adminMenuItems.map((section) => (
                 <NavigationMenuItem key={section.title}>
-                  <NavigationMenuTrigger className="bg-transparent text-slate-300 hover:text-red-400 hover:bg-red-500/10 data-[state=open]:bg-red-500/10 data-[state=open]:text-red-400 transition-colors">
+                  <NavigationMenuTrigger className="bg-transparent text-foreground hover:text-primary hover:bg-primary/10 data-[state=open]:bg-primary/10 data-[state=open]:text-primary transition-colors">
                     {section.title}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-slate-800 border border-red-500/20 shadow-xl shadow-red-500/10">
+                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-white border border-border shadow-xl">
                       {section.items.map((item) => (
                         <NavigationMenuLink key={item.href} asChild>
                           <Link
                             to={item.href}
                             className={cn(
-                              "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-red-500/10 hover:text-red-400 focus:bg-red-500/10 focus:text-red-400 text-slate-300"
+                              "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary text-foreground"
                             )}
                           >
                             <div className="flex items-center space-x-2">
@@ -114,7 +113,7 @@ export function AdminHeader() {
                   to="/admin/usuarios" 
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    "bg-transparent text-slate-300 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    "bg-transparent text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                   )}
                 >
                   <Users className="mr-2 h-4 w-4" />
@@ -126,7 +125,7 @@ export function AdminHeader() {
                   to="/admin/suporte" 
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    "bg-transparent text-slate-300 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    "bg-transparent text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                   )}
                 >
                   <MessageSquare className="mr-2 h-4 w-4" />
@@ -143,4 +142,3 @@ export function AdminHeader() {
     </header>
   );
 }
-

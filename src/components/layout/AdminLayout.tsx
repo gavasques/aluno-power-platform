@@ -8,10 +8,10 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="min-h-screen bg-slate-900 dark">
+    <div className="min-h-screen bg-background">
       <AdminHeader />
       <AdminBreadcrumbs />
-      <main className="flex-1 bg-slate-800 min-h-[calc(100vh-120px)] p-6">
+      <main className="flex-1 bg-background min-h-[calc(100vh-120px)] p-6">
         <div className="max-w-7xl mx-auto">
           {children}
         </div>
@@ -19,4 +19,3 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     </div>
   );
 }
-
