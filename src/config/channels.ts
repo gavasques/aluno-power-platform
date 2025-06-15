@@ -22,6 +22,5 @@ export const defaultChannels: ProductChannels = {
     mlME1: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, salePrice: 0 },
     mlFlex: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, flexRevenue: 0, salePrice: 0 },
     mlEnvios: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, outboundFreight: 0, salePrice: 0 },
-    mlFull: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, inboundFreight: 0, prepCenter: 0, salePrice: 0 }
+    mlFull: { enabled: false, commissionPct: 14, fixedFee: 0, otherPct: 0, otherValue: 0, adsPct: 0, inboundFreight: 0, outboundFreight: 0, prepCenter: 0, salePrice: 0 }
 };
-

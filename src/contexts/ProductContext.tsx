@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Product } from '@/types/product';
 
@@ -49,6 +48,7 @@ const initialProducts: Product[] = [
         otherValue: 0,
         adsPct: 12,
         inboundFreight: 20,
+        outboundFreight: 0,
         prepCenter: 5,
         salePrice: 1399
       }
@@ -73,7 +73,7 @@ const initialProducts: Product[] = [
     channels: {
       sitePropio: { enabled: true, salePrice: 5499, commissionPct: 0, fixedFee: 10, otherPct: 2, otherValue: 0, adsPct: 5, gatewayPct: 3 },
       amazonFBA: { enabled: true, salePrice: 5799, commissionPct: 15, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 12, inboundFreight: 30, prepCenter: 15 },
-      mlFull: { enabled: false, salePrice: 5699, commissionPct: 16, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 10, inboundFreight: 25, prepCenter: 10 }
+      mlFull: { enabled: false, salePrice: 5699, commissionPct: 16, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 10, inboundFreight: 25, outboundFreight: 0, prepCenter: 10 }
     },
     createdAt: "2024-02-20"
   },
@@ -94,7 +94,7 @@ const initialProducts: Product[] = [
     active: true,
     channels: {
       sitePropio: { enabled: true, salePrice: 89.9, commissionPct: 0, fixedFee: 2, otherPct: 1, otherValue: 0, adsPct: 10, gatewayPct: 4 },
-      mlFull: { enabled: true, salePrice: 99.9, commissionPct: 14, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 15, inboundFreight: 5, prepCenter: 2 }
+      mlFull: { enabled: true, salePrice: 99.9, commissionPct: 14, fixedFee: 5, otherPct: 0, otherValue: 0, adsPct: 15, inboundFreight: 5, outboundFreight: 0, prepCenter: 2 }
     },
     createdAt: "2024-03-10"
   },
@@ -219,7 +219,7 @@ const initialProducts: Product[] = [
     createdAt: '2024-02-18',
     channels: {
       amazonFBA: { enabled: true, salePrice: 299, commissionPct: 12, fixedFee: 5, adsPct: 10, inboundFreight: 20, prepCenter: 8, otherPct: 0, otherValue: 0 },
-      mlFull: { enabled: true, salePrice: 289, commissionPct: 14, fixedFee: 5, adsPct: 12, inboundFreight: 18, prepCenter: 7, otherPct: 0, otherValue: 0 },
+      mlFull: { enabled: true, salePrice: 289, commissionPct: 14, fixedFee: 5, adsPct: 12, inboundFreight: 18, outboundFreight: 0, prepCenter: 7, otherPct: 0, otherValue: 0 },
     }
   },
   {
@@ -544,7 +544,7 @@ const initialProducts: Product[] = [
     active: true,
     createdAt: "2023-12-01",
     channels: {
-      mlFull: { enabled: true, salePrice: 69.9, commissionPct: 18, fixedFee: 5, adsPct: 9, inboundFreight: 5, prepCenter: 2, otherPct: 0, otherValue: 0 },
+      mlFull: { enabled: true, salePrice: 69.9, commissionPct: 18, fixedFee: 5, adsPct: 9, inboundFreight: 5, outboundFreight: 0, prepCenter: 2, otherPct: 0, otherValue: 0 },
     }
   },
   {
@@ -565,7 +565,7 @@ const initialProducts: Product[] = [
     createdAt: "2024-05-15",
     channels: {
       amazonFBA: { enabled: true, salePrice: 799, commissionPct: 15, fixedFee: 5, adsPct: 14, inboundFreight: 18, prepCenter: 9, otherPct: 0, otherValue: 0 },
-      mlFull: { enabled: true, salePrice: 789, commissionPct: 16, fixedFee: 5, adsPct: 16, inboundFreight: 16, prepCenter: 8, otherPct: 0, otherValue: 0 },
+      mlFull: { enabled: true, salePrice: 789, commissionPct: 16, fixedFee: 5, adsPct: 16, inboundFreight: 16, outboundFreight: 0, prepCenter: 8, otherPct: 0, otherValue: 0 },
     }
   },
   {
