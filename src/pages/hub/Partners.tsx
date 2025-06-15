@@ -28,11 +28,12 @@ const Partners = () => {
   const navigate = useNavigate();
   const { partners, loading, searchPartners } = usePartners();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  // Use "all" instead of "" for Select's no-filter state
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const filteredPartners = React.useMemo(() => {
     let result = searchQuery ? searchPartners(searchQuery) : partners;
-    if (selectedCategory && selectedCategory !== '') {
+    if (selectedCategory && selectedCategory !== 'all') {
       result = result.filter(partner => partner.category.id === selectedCategory);
     }
     return result;
@@ -85,7 +86,7 @@ const Partners = () => {
               <SelectValue placeholder="Filtrar por categoria" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {PARTNER_CATEGORIES.map(category => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
@@ -170,4 +171,3 @@ const Partners = () => {
 };
 
 export default Partners;
-
