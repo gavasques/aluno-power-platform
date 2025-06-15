@@ -11,8 +11,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen bg-slate-900">
       <AdminHeader />
       <AdminBreadcrumbs />
-      <main className="flex-1 bg-slate-50 dark:bg-slate-900 min-h-[calc(100vh-120px)]">
-        {children}
+      <main className="flex-1 bg-slate-800 min-h-[calc(100vh-120px)] p-6">
+        <div className="max-w-7xl mx-auto">
+          {children}
+        </div>
       </main>
     </div>
   );

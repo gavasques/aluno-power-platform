@@ -6,362 +6,319 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Settings, CreditCard, MessageSquare, Rss, Plus, Edit, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useParams } from "react-router-dom";
+import { 
+  Settings, 
+  CreditCard, 
+  FileText, 
+  Newspaper, 
+  Save, 
+  Plus,
+  Edit,
+  Trash2,
+  DollarSign
+} from "lucide-react";
 
-interface GeneralSettingsProps {
-  subsection?: string;
-}
+const GeneralSettings = () => {
+  const { subsection } = useParams();
 
-const GeneralSettings = ({ subsection = "geral" }: GeneralSettingsProps) => {
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState(subsection);
+  const aiCreditPrices = [
+    { id: 1, model: "GPT-4", operation: "Texto", credits: 10, price: 0.50 },
+    { id: 2, model: "GPT-4", operation: "Análise", credits: 25, price: 1.25 },
+    { id: 3, model: "DALL-E", operation: "Imagem", credits: 50, price: 2.00 }
+  ];
 
-  // Estados para configurações
-  const [generalConfig, setGeneralConfig] = useState({
-    siteName: "Plataforma E-commerce",
-    siteDescription: "Plataforma completa para gestão de e-commerce",
-    supportEmail: "suporte@plataforma.com",
-    maxUsers: 1000,
-    enableRegistration: true,
-    maintenanceMode: false
-  });
+  const responseTemplates = [
+    { id: 1, name: "Boas-vindas", category: "Geral", usage: 450 },
+    { id: 2, name: "Problema Técnico", category: "Suporte", usage: 123 },
+    { id: 3, name: "Confirmação de Cadastro", category: "Usuário", usage: 890 }
+  ];
 
-  const [creditConfig, setCreditConfig] = useState({
-    pricePerCredit: 0.05,
-    minimumPurchase: 100,
-    bonusPercentage: 10,
-    expirationDays: 365
-  });
+  const newsItems = [
+    { id: 1, title: "Nova funcionalidade: Simulador Avançado", date: "2024-01-15", active: true },
+    { id: 2, title: "Manutenção programada - Sistema", date: "2024-01-10", active: false },
+    { id: 3, title: "Parceria com novos fornecedores", date: "2024-01-05", active: true }
+  ];
 
-  const [responseTemplates, setResponseTemplates] = useState([
-    { id: "1", name: "Boas-vindas", subject: "Bem-vindo à plataforma!", content: "Olá {nome}, seja bem-vindo...", active: true },
-    { id: "2", name: "Problema Técnico", subject: "Resolução de problema", content: "Identificamos o problema...", active: true },
-    { id: "3", name: "Solicitação Recurso", subject: "Sobre sua solicitação", content: "Recebemos sua sugestão...", active: true }
-  ]);
+  const renderContent = () => {
+    switch (subsection) {
+      case "plataforma":
+        return (
+          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Settings className="h-5 w-5 text-red-400" />
+                <CardTitle className="text-slate-100">Configurações da Plataforma</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-slate-300">Nome da Plataforma</Label>
+                    <Input 
+                      defaultValue="Portal do Aluno" 
+                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-slate-300">URL Base</Label>
+                    <Input 
+                      defaultValue="https://portal.exemplo.com" 
+                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-slate-300">Email de Suporte</Label>
+                    <Input 
+                      defaultValue="suporte@exemplo.com" 
+                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-slate-300">Registros Públicos</Label>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-slate-300">Modo Manutenção</Label>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-slate-300">Notificações por Email</Label>
+                    <Switch defaultChecked />
+                  </div>
+                  <div>
+                    <Label className="text-slate-300">Limite de Upload (MB)</Label>
+                    <Input 
+                      type="number" 
+                      defaultValue="10" 
+                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                    />
+                  </div>
+                </div>
+              </div>
+              <Button className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" variant="outline">
+                <Save className="h-4 w-4 mr-2" />
+                Salvar Configurações
+              </Button>
+            </CardContent>
+          </Card>
+        );
 
-  const [newsItems, setNewsItems] = useState([
-    { id: "1", title: "Nova funcionalidade lançada", content: "Agora você pode...", date: "2024-01-15", active: true },
-    { id: "2", title: "Manutenção programada", content: "Teremos manutenção...", date: "2024-01-20", active: true },
-    { id: "3", title: "Atualização de segurança", content: "Implementamos melhorias...", date: "2024-01-25", active: false }
-  ]);
+      case "creditos-ia":
+        return (
+          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <CreditCard className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Preços de Créditos IA</CardTitle>
+                </div>
+                <Button className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Preço
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {aiCreditPrices.map((price) => (
+                  <div key={price.id} className="flex items-center justify-between p-4 bg-slate-600/30 border border-red-500/20 rounded-lg">
+                    <div className="flex-1 grid grid-cols-4 gap-4">
+                      <div>
+                        <span className="text-sm text-slate-400">Modelo</span>
+                        <p className="font-medium text-slate-100">{price.model}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-slate-400">Operação</span>
+                        <p className="font-medium text-slate-100">{price.operation}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-slate-400">Créditos</span>
+                        <p className="font-medium text-slate-100">{price.credits}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-slate-400">Preço (R$)</span>
+                        <p className="font-medium text-slate-100">{price.price.toFixed(2)}</p>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button size="sm" variant="outline" className="bg-slate-600/50 border-slate-500/30 text-slate-300 hover:bg-slate-500/50">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
 
-  const handleSaveGeneral = () => {
-    toast({
-      title: "Configurações salvas",
-      description: "As configurações gerais foram atualizadas com sucesso.",
-    });
-  };
+      case "templates-resposta":
+        return (
+          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Templates de Resposta</CardTitle>
+                </div>
+                <Button className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Template
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {responseTemplates.map((template) => (
+                  <div key={template.id} className="p-4 bg-slate-600/30 border border-red-500/20 rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-medium text-slate-100">{template.name}</h3>
+                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">{template.category}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-400">{template.usage} usos</span>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" className="bg-slate-600/50 border-slate-500/30 text-slate-300 hover:bg-slate-500/50">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
 
-  const handleSaveCredits = () => {
-    toast({
-      title: "Configurações de créditos salvas",
-      description: "Os preços e configurações de créditos foram atualizados.",
-    });
-  };
+      case "feed-noticias":
+        return (
+          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <Newspaper className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Feed de Notícias</CardTitle>
+                </div>
+                <Button className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Notícia
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {newsItems.map((news) => (
+                  <div key={news.id} className="flex items-center justify-between p-4 bg-slate-600/30 border border-red-500/20 rounded-lg">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-slate-100">{news.title}</h3>
+                      <p className="text-sm text-slate-400">{news.date}</p>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Badge className={news.active ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}>
+                        {news.active ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" className="bg-slate-600/50 border-slate-500/30 text-slate-300 hover:bg-slate-500/50">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
 
-  const handleDeleteTemplate = (templateId: string) => {
-    setResponseTemplates(responseTemplates.filter(t => t.id !== templateId));
-    toast({
-      title: "Template removido",
-      description: "Template de resposta removido com sucesso.",
-    });
-  };
+      default:
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Settings className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Plataforma</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Configurações gerais da plataforma</p>
+                <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                  Configurar
+                </Button>
+              </CardContent>
+            </Card>
 
-  const handleDeleteNews = (newsId: string) => {
-    setNewsItems(newsItems.filter(n => n.id !== newsId));
-    toast({
-      title: "Notícia removida",
-      description: "Notícia removida do feed com sucesso.",
-    });
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <CreditCard className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Créditos IA</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Preços e configuração de créditos</p>
+                <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                  Gerenciar
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Templates de Resposta</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Templates para suporte e comunicação</p>
+                <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                  Gerenciar
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Newspaper className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Feed de Notícias</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Gerenciar notícias do dashboard</p>
+                <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                  Gerenciar
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        );
+    }
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Configurações Gerais</h1>
-        <p className="text-muted-foreground">Gerencie configurações da plataforma, preços e templates</p>
+        <h1 className="text-3xl font-bold text-slate-100">Configurações Gerais</h1>
+        <p className="text-slate-400">Configure aspectos gerais da plataforma</p>
       </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="geral" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Geral
-          </TabsTrigger>
-          <TabsTrigger value="creditos" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            Créditos IA
-          </TabsTrigger>
-          <TabsTrigger value="templates" className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Templates
-          </TabsTrigger>
-          <TabsTrigger value="noticias" className="flex items-center gap-2">
-            <Rss className="h-4 w-4" />
-            Feed Notícias
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="geral" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configurações Gerais da Plataforma</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="siteName">Nome da Plataforma</Label>
-                  <Input
-                    id="siteName"
-                    value={generalConfig.siteName}
-                    onChange={(e) => setGeneralConfig({...generalConfig, siteName: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="supportEmail">Email de Suporte</Label>
-                  <Input
-                    id="supportEmail"
-                    type="email"
-                    value={generalConfig.supportEmail}
-                    onChange={(e) => setGeneralConfig({...generalConfig, supportEmail: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="siteDescription">Descrição da Plataforma</Label>
-                <Textarea
-                  id="siteDescription"
-                  value={generalConfig.siteDescription}
-                  onChange={(e) => setGeneralConfig({...generalConfig, siteDescription: e.target.value})}
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="maxUsers">Máximo de Usuários</Label>
-                  <Input
-                    id="maxUsers"
-                    type="number"
-                    value={generalConfig.maxUsers}
-                    onChange={(e) => setGeneralConfig({...generalConfig, maxUsers: parseInt(e.target.value)})}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="enableRegistration">Permitir Novos Registros</Label>
-                    <p className="text-sm text-muted-foreground">Permite que novos usuários se registrem na plataforma</p>
-                  </div>
-                  <Switch
-                    id="enableRegistration"
-                    checked={generalConfig.enableRegistration}
-                    onCheckedChange={(checked) => setGeneralConfig({...generalConfig, enableRegistration: checked})}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="maintenanceMode">Modo de Manutenção</Label>
-                    <p className="text-sm text-muted-foreground">Ativa o modo de manutenção para a plataforma</p>
-                  </div>
-                  <Switch
-                    id="maintenanceMode"
-                    checked={generalConfig.maintenanceMode}
-                    onCheckedChange={(checked) => setGeneralConfig({...generalConfig, maintenanceMode: checked})}
-                  />
-                </div>
-              </div>
-
-              <Button onClick={handleSaveGeneral} className="w-full">
-                Salvar Configurações Gerais
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="creditos" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configurações de Créditos de IA</CardTitle>
-              <p className="text-sm text-muted-foreground">Gerencie preços e regras dos créditos de IA</p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="pricePerCredit">Preço por Crédito (R$)</Label>
-                  <Input
-                    id="pricePerCredit"
-                    type="number"
-                    step="0.01"
-                    value={creditConfig.pricePerCredit}
-                    onChange={(e) => setCreditConfig({...creditConfig, pricePerCredit: parseFloat(e.target.value)})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="minimumPurchase">Compra Mínima (créditos)</Label>
-                  <Input
-                    id="minimumPurchase"
-                    type="number"
-                    value={creditConfig.minimumPurchase}
-                    onChange={(e) => setCreditConfig({...creditConfig, minimumPurchase: parseInt(e.target.value)})}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="bonusPercentage">Bônus por Compra (%)</Label>
-                  <Input
-                    id="bonusPercentage"
-                    type="number"
-                    value={creditConfig.bonusPercentage}
-                    onChange={(e) => setCreditConfig({...creditConfig, bonusPercentage: parseInt(e.target.value)})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="expirationDays">Expiração (dias)</Label>
-                  <Input
-                    id="expirationDays"
-                    type="number"
-                    value={creditConfig.expirationDays}
-                    onChange={(e) => setCreditConfig({...creditConfig, expirationDays: parseInt(e.target.value)})}
-                  />
-                </div>
-              </div>
-
-              <div className="p-4 bg-muted rounded-lg">
-                <h4 className="font-medium mb-2">Prévia de Preços</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">100 créditos:</span>
-                    <p className="font-medium">R$ {(100 * creditConfig.pricePerCredit).toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">500 créditos:</span>
-                    <p className="font-medium">R$ {(500 * creditConfig.pricePerCredit).toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">1000 créditos:</span>
-                    <p className="font-medium">R$ {(1000 * creditConfig.pricePerCredit).toFixed(2)}</p>
-                  </div>
-                </div>
-              </div>
-
-              <Button onClick={handleSaveCredits} className="w-full">
-                Salvar Configurações de Créditos
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="templates" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Templates de Resposta</h3>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Template
-            </Button>
-          </div>
-
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Assunto</TableHead>
-                    <TableHead>Conteúdo</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-24">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {responseTemplates.map((template) => (
-                    <TableRow key={template.id}>
-                      <TableCell className="font-medium">{template.name}</TableCell>
-                      <TableCell>{template.subject}</TableCell>
-                      <TableCell className="max-w-xs truncate">{template.content}</TableCell>
-                      <TableCell>
-                        <Badge variant={template.active ? "default" : "secondary"}>
-                          {template.active ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDeleteTemplate(template.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="noticias" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Feed de Notícias do Dashboard</h3>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Notícia
-            </Button>
-          </div>
-
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Título</TableHead>
-                    <TableHead>Conteúdo</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-24">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {newsItems.map((news) => (
-                    <TableRow key={news.id}>
-                      <TableCell className="font-medium">{news.title}</TableCell>
-                      <TableCell className="max-w-xs truncate">{news.content}</TableCell>
-                      <TableCell>{news.date}</TableCell>
-                      <TableCell>
-                        <Badge variant={news.active ? "default" : "secondary"}>
-                          {news.active ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDeleteNews(news.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {renderContent()}
     </div>
   );
 };

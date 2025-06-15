@@ -4,368 +4,281 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Search, Award, Users, Wrench, Package, FileText } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useParams } from "react-router-dom";
+import { 
+  Users, 
+  Truck, 
+  Wrench, 
+  FileText, 
+  BookCopy, 
+  Shield, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Search,
+  Eye,
+  CheckCircle,
+  XCircle 
+} from "lucide-react";
 
-interface ContentManagementProps {
-  subsection?: string;
-}
-
-const ContentManagement = ({ subsection = "hub" }: ContentManagementProps) => {
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState(subsection);
+const ContentManagement = () => {
+  const { subsection } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [partners, setPartners] = useState([
-    { id: "1", name: "Amazon", type: "Marketplace", description: "Marketplace global", status: "active", seal: "verified" },
-    { id: "2", name: "Mercado Livre", type: "Marketplace", description: "Marketplace brasileiro", status: "active", seal: "premium" },
-    { id: "3", name: "Shopee", type: "Marketplace", description: "Marketplace asiático", status: "active", seal: "verified" }
-  ]);
+  const partners = [
+    { id: 1, name: "Empresa ABC", type: "Distribuidor", status: "active", content: 45, rating: 4.8 },
+    { id: 2, name: "Tech Solutions", type: "Tecnologia", status: "pending", content: 12, rating: 4.2 },
+    { id: 3, name: "Global Trade", type: "Importador", status: "active", content: 78, rating: 4.9 }
+  ];
 
-  const [suppliers, setSuppliers] = useState([
-    { id: "1", name: "Fornecedor ABC", type: "Nacional", description: "Eletrônicos e gadgets", status: "active", seal: "trusted" },
-    { id: "2", name: "Global Tech", type: "Internacional", description: "Tecnologia avançada", status: "active", seal: "premium" },
-    { id: "3", name: "Local Supplies", type: "Regional", description: "Fornecedor regional", status: "inactive", seal: "basic" }
-  ]);
+  const suppliers = [
+    { id: 1, name: "Fornecedor XYZ", category: "Eletrônicos", country: "China", products: 234, verified: true },
+    { id: 2, name: "Material Plus", category: "Têxtil", country: "Brasil", products: 89, verified: false },
+    { id: 3, name: "Steel Corp", category: "Metais", country: "Alemanha", products: 156, verified: true }
+  ];
 
-  const [tools, setTools] = useState([
-    { id: "1", name: "Jungle Scout", category: "Pesquisa", description: "Ferramenta de pesquisa de produtos", status: "active", seal: "recommended" },
-    { id: "2", name: "Helium 10", category: "SEO", description: "Suite completa para Amazon", status: "active", seal: "premium" },
-    { id: "3", name: "AMZScout", category: "Análise", description: "Análise de mercado", status: "active", seal: "verified" }
-  ]);
+  const tools = [
+    { id: 1, name: "Calculadora de Frete", category: "Logística", usage: 1250, status: "active" },
+    { id: 2, name: "Simulador de Importação", category: "Importação", usage: 890, status: "active" },
+    { id: 3, name: "Análise de Mercado", category: "Pesquisa", usage: 456, status: "maintenance" }
+  ];
 
-  const [materials, setMaterials] = useState([
-    { id: "1", name: "Guia Completo Amazon FBA", type: "PDF", description: "Manual completo sobre Amazon FBA", status: "active", downloads: 1250 },
-    { id: "2", name: "Planilha Controle Financeiro", type: "Planilha", description: "Controle financeiro para e-commerce", status: "active", downloads: 950 },
-    { id: "3", name: "Templates Anúncios", type: "Templates", description: "Templates para anúncios", status: "active", downloads: 750 }
-  ]);
+  const seals = [
+    { id: 1, name: "Produto Verificado", type: "quality", color: "green", applied: 45 },
+    { id: 2, name: "Melhor Preço", type: "price", color: "blue", applied: 23 },
+    { id: 3, name: "Entrega Rápida", type: "shipping", color: "orange", applied: 67 }
+  ];
 
-  const getSealBadge = (seal: string) => {
-    const seals = {
-      verified: <Badge className="bg-blue-500">Verificado</Badge>,
-      premium: <Badge className="bg-purple-500">Premium</Badge>,
-      trusted: <Badge className="bg-green-500">Confiável</Badge>,
-      recommended: <Badge className="bg-orange-500">Recomendado</Badge>,
-      basic: <Badge variant="secondary">Básico</Badge>
-    };
-    return seals[seal as keyof typeof seals] || <Badge variant="outline">Nenhum</Badge>;
-  };
-
-  const getStatusBadge = (status: string) => {
-    return (
-      <Badge variant={status === "active" ? "default" : "secondary"}>
-        {status === "active" ? "Ativo" : "Inativo"}
-      </Badge>
-    );
-  };
-
-  const handleDelete = (type: string, id: string) => {
-    toast({
-      title: "Item removido",
-      description: `${type} removido com sucesso.`,
-    });
-  };
-
-  const applySeal = (type: string, id: string, seal: string) => {
-    toast({
-      title: "Selo aplicado",
-      description: `Selo "${seal}" aplicado com sucesso.`,
-    });
-  };
-
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Gestão de Conteúdo</h1>
-          <p className="text-muted-foreground">Gerencie todo o Hub de Recursos e aplicação de selos</p>
-        </div>
-      </div>
-
-      {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Parceiros</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{partners.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Fornecedores</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{suppliers.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ferramentas</CardTitle>
-            <Wrench className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{tools.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Materiais</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{materials.length}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="hub" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Hub Geral
-          </TabsTrigger>
-          <TabsTrigger value="parceiros" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Parceiros
-          </TabsTrigger>
-          <TabsTrigger value="fornecedores" className="flex items-center gap-2">
-            <Package className="h-4 w-4" />
-            Fornecedores
-          </TabsTrigger>
-          <TabsTrigger value="materiais" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Materiais
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="hub" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Ferramentas do Hub</h3>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Ferramenta
-            </Button>
-          </div>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex gap-4 mb-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar ferramentas..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
+  const renderContent = () => {
+    switch (subsection) {
+      case "parceiros":
+        return (
+          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Gerenciar Parceiros</CardTitle>
+                </div>
+                <Button className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Parceiro
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Search className="h-4 w-4 text-slate-400" />
+                  <Input 
+                    placeholder="Buscar parceiros..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
+                  />
+                </div>
+                <div className="space-y-3">
+                  {partners.map((partner) => (
+                    <div key={partner.id} className="flex items-center justify-between p-4 bg-slate-600/30 border border-red-500/20 rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-slate-100">{partner.name}</h3>
+                        <div className="flex items-center space-x-4 mt-2">
+                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">{partner.type}</Badge>
+                          <span className="text-xs text-slate-500">{partner.content} conteúdos</span>
+                          <span className="text-xs text-slate-500">⭐ {partner.rating}</span>
+                          <Badge className={
+                            partner.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                            partner.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
+                            'bg-red-500/20 text-red-400 border-red-500/30'
+                          }>
+                            {partner.status === 'active' ? 'Ativo' : partner.status === 'pending' ? 'Pendente' : 'Inativo'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" className="bg-slate-600/50 border-slate-500/30 text-slate-300 hover:bg-slate-500/50">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" className="bg-slate-600/50 border-slate-500/30 text-slate-300 hover:bg-slate-500/50">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>
           </Card>
+        );
 
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Selo</TableHead>
-                    <TableHead className="w-32">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tools.map((tool) => (
-                    <TableRow key={tool.id}>
-                      <TableCell className="font-medium">{tool.name}</TableCell>
-                      <TableCell>{tool.category}</TableCell>
-                      <TableCell>{tool.description}</TableCell>
-                      <TableCell>{getStatusBadge(tool.status)}</TableCell>
-                      <TableCell>{getSealBadge(tool.seal)}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Award className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDelete("Ferramenta", tool.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+      case "selos":
+        return (
+          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <Shield className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Gerenciar Selos</CardTitle>
+                </div>
+                <Button className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Selo
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {seals.map((seal) => (
+                  <div key={seal.id} className="p-4 bg-slate-600/30 border border-red-500/20 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-medium text-slate-100">{seal.name}</h3>
+                      <div className={`w-4 h-4 rounded-full bg-${seal.color}-500`}></div>
+                    </div>
+                    <div className="space-y-2">
+                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">{seal.type}</Badge>
+                      <p className="text-sm text-slate-400">{seal.applied} aplicações</p>
+                      <div className="flex space-x-2 mt-3">
+                        <Button size="sm" variant="outline" className="bg-slate-600/50 border-slate-500/30 text-slate-300 hover:bg-slate-500/50">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        );
 
-        <TabsContent value="parceiros" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Gerenciar Parceiros</h3>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Parceiro
-            </Button>
+      default:
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Parceiros</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Gerencie parceiros e colaboradores da plataforma</p>
+                <div className="flex justify-between items-center">
+                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">45 parceiros</Badge>
+                  <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                    Gerenciar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Truck className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Fornecedores</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Base de dados de fornecedores verificados</p>
+                <div className="flex justify-between items-center">
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">234 fornecedores</Badge>
+                  <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                    Gerenciar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Wrench className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Ferramentas</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Ferramentas e calculadoras da plataforma</p>
+                <div className="flex justify-between items-center">
+                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">12 ferramentas</Badge>
+                  <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                    Gerenciar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Templates</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Templates de documentos e planilhas</p>
+                <div className="flex justify-between items-center">
+                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">28 templates</Badge>
+                  <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                    Gerenciar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <BookCopy className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Materiais</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Biblioteca de materiais educativos</p>
+                <div className="flex justify-between items-center">
+                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">89 materiais</Badge>
+                  <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                    Gerenciar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Shield className="h-5 w-5 text-red-400" />
+                  <CardTitle className="text-slate-100">Selos</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 text-sm mb-4">Sistema de selos e certificações</p>
+                <div className="flex justify-between items-center">
+                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">15 selos</Badge>
+                  <Button size="sm" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
+                    Gerenciar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+        );
+    }
+  };
 
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Selo</TableHead>
-                    <TableHead className="w-32">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {partners.map((partner) => (
-                    <TableRow key={partner.id}>
-                      <TableCell className="font-medium">{partner.name}</TableCell>
-                      <TableCell>{partner.type}</TableCell>
-                      <TableCell>{partner.description}</TableCell>
-                      <TableCell>{getStatusBadge(partner.status)}</TableCell>
-                      <TableCell>{getSealBadge(partner.seal)}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Award className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDelete("Parceiro", partner.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="fornecedores" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Gerenciar Fornecedores do Hub</h3>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Fornecedor
-            </Button>
-          </div>
-
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Selo</TableHead>
-                    <TableHead className="w-32">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {suppliers.map((supplier) => (
-                    <TableRow key={supplier.id}>
-                      <TableCell className="font-medium">{supplier.name}</TableCell>
-                      <TableCell>{supplier.type}</TableCell>
-                      <TableCell>{supplier.description}</TableCell>
-                      <TableCell>{getStatusBadge(supplier.status)}</TableCell>
-                      <TableCell>{getSealBadge(supplier.seal)}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Award className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDelete("Fornecedor", supplier.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="materiais" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Materiais do Hub</h3>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Material
-            </Button>
-          </div>
-
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Downloads</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-24">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {materials.map((material) => (
-                    <TableRow key={material.id}>
-                      <TableCell className="font-medium">{material.name}</TableCell>
-                      <TableCell>{material.type}</TableCell>
-                      <TableCell>{material.description}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{material.downloads}</Badge>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(material.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDelete("Material", material.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-100">Gestão de Conteúdo</h1>
+        <p className="text-slate-400">Gerencie todo o conteúdo do Hub de Recursos</p>
+      </div>
+      {renderContent()}
     </div>
   );
 };
