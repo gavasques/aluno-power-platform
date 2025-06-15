@@ -81,7 +81,7 @@ const menuItems = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
+    <header className="sticky top-0 z-50 w-full border-b bg-background shadow-sm">
       <div className="flex h-16 items-center justify-between w-full px-4 sm:px-6">
         <div className="flex items-center space-x-6">
           <Link to="/" className="flex items-center space-x-2">
