@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { ProductProvider } from "@/contexts/ProductContext";
+import { PartnersProvider } from "@/contexts/PartnersContext";
 import Layout from "@/components/layout/Layout";
 import { lazy, Suspense } from "react";
 
@@ -27,27 +28,29 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme" attribute="class">
         <ProductProvider>
-          <Router>
-            <Layout>
-              <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Carregando...</div>}>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/minha-area/:section?/:id?" element={<MyArea />} />
-                  <Route path="/hub/:section?" element={<Hub />} />
-                  <Route path="/simuladores" element={<Simulators />} />
-                  <Route path="/agentes-ia" element={<AIAgents />} />
-                  <Route path="/cursos" element={<Courses />} />
-                  <Route path="/suporte" element={<Support />} />
-                  <Route path="/configuracoes" element={<Settings />} />
-                  <Route path="/perfil" element={<Profile />} />
-                  <Route path="/inscricoes" element={<Registrations />} />
-                  <Route path="/admin/:section?/:subsection?/:id?" element={<Admin />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </Layout>
-            <Toaster />
-          </Router>
+          <PartnersProvider>
+            <Router>
+              <Layout>
+                <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Carregando...</div>}>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/minha-area/:section?/:id?" element={<MyArea />} />
+                    <Route path="/hub/:section?" element={<Hub />} />
+                    <Route path="/simuladores" element={<Simulators />} />
+                    <Route path="/agentes-ia" element={<AIAgents />} />
+                    <Route path="/cursos" element={<Courses />} />
+                    <Route path="/suporte" element={<Support />} />
+                    <Route path="/configuracoes" element={<Settings />} />
+                    <Route path="/perfil" element={<Profile />} />
+                    <Route path="/inscricoes" element={<Registrations />} />
+                    <Route path="/admin/:section?/:subsection?/:id?" element={<Admin />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </Layout>
+              <Toaster />
+            </Router>
+          </PartnersProvider>
         </ProductProvider>
       </ThemeProvider>
     </QueryClientProvider>

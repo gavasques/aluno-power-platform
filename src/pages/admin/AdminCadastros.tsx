@@ -1,6 +1,7 @@
 
 import CategoriesManager from "@/components/admin/cadastros/CategoriesManager";
 import PromptsManager from "@/components/admin/cadastros/PromptsManager";
+import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import CadastrosOverview from "@/components/admin/cadastros/CadastrosOverview";
 
 interface AdminCadastrosProps {
@@ -15,6 +16,9 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
       
       case "prompts-ia":
         return <PromptsManager />;
+      
+      case "parceiros":
+        return <PartnersManager />;
       
       default:
         return <CadastrosOverview />;
