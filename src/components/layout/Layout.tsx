@@ -1,13 +1,28 @@
 
-import { Header } from "./Header"
+import { useLocation } from "react-router-dom";
+import { Header } from "@/components/layout/Header";
+import { AdminLayout } from "@/components/layout/AdminLayout";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout = ({ children }: LayoutProps) => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
+  if (isAdminRoute) {
+    return <AdminLayout>{children}</AdminLayout>;
+  }
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background">
       <Header />
-      <main className="w-full px-4 py-6 bg-background">
+      <main className="flex-1">
         {children}
       </main>
     </div>
   );
-}
+};
+
+export default Layout;

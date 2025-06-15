@@ -15,11 +15,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Settings, Headset, LogOut, Shield } from "lucide-react";
+import { User, Settings, Headset, LogOut, Home } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
-export function UserNav() {
-  const { user, hasAdminAccess } = useAuth();
+export function AdminNav() {
+  const { user } = useAuth();
 
   return (
     <DropdownMenu>
@@ -60,17 +60,13 @@ export function UserNav() {
               <span>Suporte</span>
             </Link>
           </DropdownMenuItem>
-          {hasAdminAccess && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/admin">
-                  <Shield className="mr-2 h-4 w-4" />
-                  <span>Painel Administrativo</span>
-                </Link>
-              </DropdownMenuItem>
-            </>
-          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link to="/">
+              <Home className="mr-2 h-4 w-4" />
+              <span>Área do Aluno</span>
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>

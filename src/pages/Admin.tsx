@@ -1,6 +1,5 @@
 
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
 import AdminDashboard from "./admin/AdminDashboard";
 import UserManagement from "./admin/UserManagement";
 import ContentManagement from "./admin/ContentManagement";
@@ -9,22 +8,16 @@ import GeneralSettings from "./admin/GeneralSettings";
 import AdminCadastros from "./admin/AdminCadastros";
 import { Shield, ShieldX } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// Simulação de usuário logado - em produção seria do contexto de autenticação
-const getCurrentUser = () => ({
-  id: "1",
-  name: "Admin User",
-  role: "admin" // admin | support
-});
+import { useAuth } from "@/hooks/useAuth";
 
 const Admin = () => {
   const { section, subsection } = useParams();
-  const [user] = useState(getCurrentUser());
+  const { user, isAdmin, isSupport } = useAuth();
 
   // Controle de acesso
   const hasAccess = (requiredSection: string) => {
-    if (user.role === "admin") return true;
-    if (user.role === "support" && requiredSection === "support") return true;
+    if (isAdmin) return true;
+    if (isSupport && requiredSection === "suporte") return true;
     return false;
   };
 
