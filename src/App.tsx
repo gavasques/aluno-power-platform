@@ -38,7 +38,7 @@ function App() {
                     <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Carregando...</div>}>
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
-                        <Route path="/minha-area/:section?/:id?" element={<MyArea />} />
+                        <Route path="/minha-area/:section?/:id?/*" element={<MyArea />} />
                         <Route path="/hub/:section?" element={<Hub />} />
                         <Route path="/hub/parceiros/:id" element={<PartnerDetail />} />
                         <Route path="/simuladores" element={<Simulators />} />

@@ -20,7 +20,8 @@ import {
   Code2,
   Globe,
   Image,
-  ExternalLink
+  ExternalLink,
+  Edit
 } from 'lucide-react';
 import { Material } from '@/types/material';
 
@@ -348,6 +349,7 @@ const MaterialDetail = () => {
                 )}
                 <Button variant="outline" asChild className="w-full">
                   <Link to={`/minha-area/materiais/${material.id}/edit`}>
+                    <Edit className="h-4 w-4 mr-2" />
                     Editar material
                   </Link>
                 </Button>

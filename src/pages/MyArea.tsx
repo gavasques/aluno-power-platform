@@ -7,9 +7,11 @@ import ProductForm from "./myarea/ProductForm";
 import ProductDetail from "./myarea/ProductDetail";
 import SupplierDetail from "./myarea/SupplierDetail";
 import MaterialDetail from "./myarea/MaterialDetail";
+import MaterialForm from "./myarea/MaterialForm";
 
 const MyArea = () => {
   const { section, id } = useParams();
+  const fullPath = window.location.pathname;
 
   switch (section) {
     case "fornecedores":
@@ -27,8 +29,10 @@ const MyArea = () => {
       return <MyProducts />;
     case "materiais":
       if (id === "novo") {
-        // Retornar formulário de material quando criado
-        return <div>Formulário de material em desenvolvimento</div>;
+        return <MaterialForm />;
+      }
+      if (fullPath.includes("/edit")) {
+        return <MaterialForm />;
       }
       if (id) {
         return <MaterialDetail />;
