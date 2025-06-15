@@ -9,12 +9,12 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   const metrics = [
-    { title: "Usuários Ativos", value: "1,247", change: "+12%", icon: Users, color: "text-blue-400" },
-    { title: "Novos Usuários (30d)", value: "156", change: "+8%", icon: TrendingUp, color: "text-green-400" },
-    { title: "Créditos IA Usados", value: "45,231", change: "-3%", icon: CreditCard, color: "text-orange-400" },
-    { title: "Tickets Suporte", value: "23", change: "+5%", icon: MessageSquare, color: "text-red-400" },
-    { title: "Conteúdos Publicados", value: "1,834", change: "+15%", icon: FileText, color: "text-purple-400" },
-    { title: "Taxa de Engajamento", value: "78%", change: "+2%", icon: Activity, color: "text-emerald-400" }
+    { title: "Usuários Ativos", value: "1,247", change: "+12%", icon: Users, color: "text-blue-500" },
+    { title: "Novos Usuários (30d)", value: "156", change: "+8%", icon: TrendingUp, color: "text-green-500" },
+    { title: "Créditos IA Usados", value: "45,231", change: "-3%", icon: CreditCard, color: "text-orange-500" },
+    { title: "Tickets Suporte", value: "23", change: "+5%", icon: MessageSquare, color: "text-red-500" },
+    { title: "Conteúdos Publicados", value: "1,834", change: "+15%", icon: FileText, color: "text-purple-500" },
+    { title: "Taxa de Engajamento", value: "78%", change: "+2%", icon: Activity, color: "text-emerald-500" }
   ];
 
   const quickActions = [
@@ -35,11 +35,11 @@ const AdminDashboard = () => {
 
   const getActivityBadge = (type: string) => {
     const badges = {
-      create: <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Criação</Badge>,
-      support: <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Suporte</Badge>,
-      credits: <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">Créditos</Badge>,
-      course: <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Curso</Badge>,
-      login: <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">Login</Badge>
+      create: <Badge className="bg-blue-100 text-blue-600 border-blue-200">Criação</Badge>,
+      support: <Badge className="bg-red-100 text-red-600 border-red-200">Suporte</Badge>,
+      credits: <Badge className="bg-orange-100 text-orange-600 border-orange-200">Créditos</Badge>,
+      course: <Badge className="bg-green-100 text-green-600 border-green-200">Curso</Badge>,
+      login: <Badge className="bg-slate-100 text-slate-600 border-slate-200">Login</Badge>
     };
     return badges[type as keyof typeof badges];
   };
@@ -48,10 +48,10 @@ const AdminDashboard = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100">Painel Administrativo</h1>
-          <p className="text-slate-400">Visão geral da plataforma e métricas principais</p>
+          <h1 className="text-3xl font-bold text-gray-900">Painel Administrativo</h1>
+          <p className="text-gray-500">Visão geral da plataforma e métricas principais</p>
         </div>
-        <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-lg px-4 py-2">
+        <Badge className="bg-red-100 text-red-600 border-red-200 text-lg px-4 py-2">
           Administrador
         </Badge>
       </div>
@@ -59,14 +59,14 @@ const AdminDashboard = () => {
       {/* Métricas Principais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {metrics.map((metric, index) => (
-          <Card key={index} className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+          <Card key={index} className="bg-white border border-gray-200 shadow-lg shadow-red-500/10">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-300">{metric.title}</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-700">{metric.title}</CardTitle>
               <metric.icon className={`h-5 w-5 ${metric.color}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-100">{metric.value}</div>
-              <p className={`text-xs ${metric.change.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="text-2xl font-bold text-gray-900">{metric.value}</div>
+              <p className={`text-xs ${metric.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
                 {metric.change} em relação ao mês anterior
               </p>
             </CardContent>
@@ -76,25 +76,25 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Ações Rápidas */}
-        <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+        <Card className="bg-white border border-gray-200 shadow-lg shadow-red-200/30">
           <CardHeader>
-            <CardTitle className="text-slate-100">Ações Rápidas</CardTitle>
-            <p className="text-sm text-slate-400">Acesso rápido às principais funcionalidades</p>
+            <CardTitle className="text-gray-900">Ações Rápidas</CardTitle>
+            <p className="text-sm text-gray-500">Acesso rápido às principais funcionalidades</p>
           </CardHeader>
           <CardContent className="space-y-4">
             {quickActions.map((action, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border border-red-500/20 rounded-lg hover:bg-red-500/10 transition-colors">
+              <div key={index} className="flex items-center justify-between p-3 border border-red-100 rounded-lg hover:bg-red-50 transition-colors">
                 <div className="flex items-center space-x-3">
                   <action.icon className="h-5 w-5 text-red-400" />
                   <div>
-                    <h4 className="font-medium text-slate-100">{action.title}</h4>
-                    <p className="text-sm text-slate-400">{action.description}</p>
+                    <h4 className="font-medium text-gray-900">{action.title}</h4>
+                    <p className="text-sm text-gray-500">{action.description}</p>
                   </div>
                 </div>
                 <Button 
                   size="sm" 
                   onClick={action.action}
-                  className="bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:text-red-300 border-red-500/30"
+                  className="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 border-red-200"
                   variant="outline"
                 >
                   Acessar
@@ -105,20 +105,20 @@ const AdminDashboard = () => {
         </Card>
 
         {/* Atividade Recente */}
-        <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+        <Card className="bg-white border border-gray-200 shadow-lg shadow-slate-100/50">
           <CardHeader>
-            <CardTitle className="text-slate-100">Atividade Recente</CardTitle>
-            <p className="text-sm text-slate-400">Últimas ações dos usuários na plataforma</p>
+            <CardTitle className="text-gray-900">Atividade Recente</CardTitle>
+            <p className="text-sm text-gray-500">Últimas ações dos usuários na plataforma</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between py-2 border-b border-slate-600/30 last:border-b-0">
+                <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                   <div className="flex-1">
-                    <p className="text-sm text-slate-300">
-                      <span className="font-medium text-slate-100">{activity.user}</span> {activity.action}
+                    <p className="text-sm text-gray-800">
+                      <span className="font-medium text-gray-900">{activity.user}</span> {activity.action}
                     </p>
-                    <p className="text-xs text-slate-500">{activity.time}</p>
+                    <p className="text-xs text-gray-400">{activity.time}</p>
                   </div>
                   {getActivityBadge(activity.type)}
                 </div>
