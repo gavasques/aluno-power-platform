@@ -13,6 +13,7 @@ const initialTypes = [
   "Trading China",
   "Representante"
 ];
+
 const SupplierTypesManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [types, setTypes] = useState<string[]>(initialTypes);
@@ -27,48 +28,73 @@ const SupplierTypesManager = () => {
     }
     setNewType("");
   }
+  
   function handleDelete(type: string) {
     setTypes(types.filter(t => t !== type));
   }
 
   return (
-    <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+    <Card className="bg-white border border-border shadow-sm">
       <CardHeader>
-        <CardTitle className="text-slate-100">Tipos de Fornecedor</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-foreground">Tipos de Fornecedor</CardTitle>
+          <Button 
+            onClick={() => document.getElementById('new-type-input')?.focus()} 
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Tipo
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleAdd} className="flex gap-2 mb-4">
-          <Input
-            placeholder="Novo tipo de fornecedor..."
-            value={newType}
-            onChange={e => setNewType(e.target.value)}
-            className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
-          />
-          <Button type="submit" className="bg-red-500/20 text-red-400 hover:bg-red-500/30" variant="outline">
-            <Plus className="h-4 w-4" />Adicionar
-          </Button>
-        </form>
-        <div className="space-y-2">
-          <Input
-            placeholder="Buscar tipos de fornecedor..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
-          />
-          {filtered.length === 0 && <div className="text-slate-400 py-6 text-center">Nenhum tipo encontrado.</div>}
-          {filtered.map(type => (
-            <div key={type} className="flex items-center justify-between p-3 bg-slate-600/30 border border-red-500/20 rounded-lg">
-              <span className="font-medium text-slate-100">{type}</span>
-              <Button size="sm" variant="outline"
-                className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30"
-                onClick={() => handleDelete(type)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+        <div className="space-y-4">
+          <form onSubmit={handleAdd} className="flex gap-2">
+            <Input
+              id="new-type-input"
+              placeholder="Novo tipo de fornecedor..."
+              value={newType}
+              onChange={e => setNewType(e.target.value)}
+              className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
+            />
+            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
+              Adicionar
+            </Button>
+          </form>
+          
+          <div className="flex items-center space-x-2">
+            <Input
+              placeholder="Buscar tipos de fornecedor..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
+            />
+          </div>
+          
+          <div className="space-y-3">
+            {filtered.length === 0 && (
+              <div className="text-muted-foreground px-4 py-8 text-center">
+                Nenhum tipo encontrado.
+              </div>
+            )}
+            {filtered.map(type => (
+              <div key={type} className="flex items-center justify-between p-4 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 transition-colors">
+                <span className="font-medium text-foreground">{type}</span>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => handleDelete(type)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 };
+
 export default SupplierTypesManager;
