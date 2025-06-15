@@ -140,6 +140,18 @@ export const ChannelForm = ({
               />
             </div>
           )}
+
+          {/* Campo específico para Amazon FBM - Frete Médio (Se Frete Grátis) */}
+          {channelType === 'amazonFBM' && (
+            <div>
+              <Label>Frete Médio (Se Frete Grátis) (R$)</Label>
+              <FormattedInput
+                type="currency"
+                value={channelData.averageFreightIfFree || 0}
+                onChange={(value) => onChannelInputChange(channelType, 'averageFreightIfFree', value)}
+              />
+            </div>
+          )}
           
           {(channelType === 'amazonFBA' || channelType === 'mlFull') && (
             <>

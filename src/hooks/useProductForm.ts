@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -48,6 +49,7 @@ export const useProductForm = () => {
       otherValue: 0,
       adsPct: 0,
       outboundFreight: 0,
+      averageFreightIfFree: 0,
       salePrice: 0,
       productCode: ""
     },

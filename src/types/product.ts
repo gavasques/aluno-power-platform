@@ -73,6 +73,7 @@ export interface SiteProprioChannel extends BaseChannel {
 
 export interface AmazonFBMChannel extends BaseChannel {
   outboundFreight: number;
+  averageFreightIfFree?: number; // Novo campo: Frete Médio (Se Frete Grátis)
 }
 
 export interface AmazonFBAOnSiteChannel extends BaseChannel {
