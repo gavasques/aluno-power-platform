@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -97,6 +98,7 @@ export const EditProductModal = ({
                         channelType={key}
                         channelData={channelData}
                         title={channelNames[key]}
+                        productTaxPercent={editedProduct.taxPercent}
                         onChannelToggle={handleChannelToggle}
                         onChannelInputChange={handleChannelInputChange}
                       />

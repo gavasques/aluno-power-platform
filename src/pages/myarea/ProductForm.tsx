@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -114,6 +113,7 @@ const ProductForm = () => {
                         channelType={key}
                         channelData={channelData}
                         title={channelNames[key]}
+                        productTaxPercent={productData.taxPercent}
                         onChannelToggle={handleChannelToggle}
                         onChannelInputChange={handleChannelInputChange}
                       />

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,7 @@ export const EditChannelsModal = ({
               channelType="sitePropio"
               channelData={editedChannels.sitePropio}
               title={channelNames.sitePropio}
+              productTaxPercent={product.taxPercent}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -107,6 +109,7 @@ export const EditChannelsModal = ({
               channelType="amazonFBM"
               channelData={editedChannels.amazonFBM}
               title={channelNames.amazonFBM}
+              productTaxPercent={product.taxPercent}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -115,6 +118,7 @@ export const EditChannelsModal = ({
               channelType="amazonFBAOnSite"
               channelData={editedChannels.amazonFBAOnSite}
               title={channelNames.amazonFBAOnSite}
+              productTaxPercent={product.taxPercent}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -123,6 +127,7 @@ export const EditChannelsModal = ({
               channelType="amazonDBA"
               channelData={editedChannels.amazonDBA}
               title={channelNames.amazonDBA}
+              productTaxPercent={product.taxPercent}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -131,6 +136,7 @@ export const EditChannelsModal = ({
               channelType="amazonFBA"
               channelData={editedChannels.amazonFBA}
               title={channelNames.amazonFBA}
+              productTaxPercent={product.taxPercent}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -139,6 +145,7 @@ export const EditChannelsModal = ({
               channelType="mlME1"
               channelData={editedChannels.mlME1}
               title={channelNames.mlME1}
+              productTaxPercent={product.taxPercent}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -147,6 +154,7 @@ export const EditChannelsModal = ({
               channelType="mlFlex"
               channelData={editedChannels.mlFlex}
               title={channelNames.mlFlex}
+              productTaxPercent={product.taxPercent}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -155,6 +163,7 @@ export const EditChannelsModal = ({
               channelType="mlEnvios"
               channelData={editedChannels.mlEnvios}
               title={channelNames.mlEnvios}
+              productTaxPercent={product.taxPercent}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />
@@ -163,6 +172,7 @@ export const EditChannelsModal = ({
               channelType="mlFull"
               channelData={editedChannels.mlFull}
               title={channelNames.mlFull}
+              productTaxPercent={product.taxPercent}
               onChannelToggle={handleChannelToggle}
               onChannelInputChange={handleChannelInputChange}
             />

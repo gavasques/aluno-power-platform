@@ -10,6 +10,7 @@ interface ChannelFormProps {
   channelType: keyof ProductChannels;
   channelData: any;
   title: string;
+  productTaxPercent?: number;
   onChannelToggle: (channelType: keyof ProductChannels) => void;
   onChannelInputChange: (channelType: keyof ProductChannels, field: string, value: number | string) => void;
 }
@@ -18,6 +19,7 @@ export const ChannelForm = ({
   channelType, 
   channelData, 
   title, 
+  productTaxPercent = 0,
   onChannelToggle, 
   onChannelInputChange 
 }: ChannelFormProps) => (
@@ -102,6 +104,16 @@ export const ChannelForm = ({
               type="currency"
               value={channelData.salePrice || 0}
               onChange={(value) => onChannelInputChange(channelType, 'salePrice', value)}
+            />
+          </div>
+
+          {/* Campo de Impostos Global (Somente Leitura) */}
+          <div>
+            <Label>Impostos (%) - Global do Produto</Label>
+            <Input
+              value={`${productTaxPercent}%`}
+              readOnly
+              className="bg-gray-100 text-gray-600 cursor-not-allowed"
             />
           </div>
           
