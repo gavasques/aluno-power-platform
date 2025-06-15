@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider"
 import { AdminLayout } from "./components/layout/AdminLayout";
@@ -21,6 +20,7 @@ import GeneralSettings from "./pages/admin/GeneralSettings";
 import ContentManagement from "./pages/admin/ContentManagement";
 import Suppliers from "./pages/hub/Suppliers";
 import Partners from "./pages/hub/Partners";
+import PartnerDetail from "./pages/hub/PartnerDetail";
 import Hub from "./pages/Hub";
 
 // Create a simple Auth component
@@ -55,6 +55,8 @@ function App() {
                         
                         {/* Rotas do Hub */}
                         <Route path="hub">
+                          {/* Detail partner route first (dynamic route before the catch-all) */}
+                          <Route path="parceiros/:id" element={<PartnerDetail />} />
                           <Route path="parceiros" element={<Partners />} />
                           <Route path="fornecedores" element={<Suppliers />} />
                           <Route path=":section" element={<Hub />} />
