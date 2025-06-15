@@ -36,6 +36,7 @@ import {
   Globe,
   Image,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const getIcon = (iconName: string) => {
   const icons: Record<string, React.ComponentType> = {
@@ -54,6 +55,7 @@ const getIcon = (iconName: string) => {
 const MaterialsManager = () => {
   const { materials, loading, deleteMaterial, getFilteredMaterials, setFilters, filters } = useMaterials();
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   const handleDelete = (id: string) => {
     if (confirm('Tem certeza que deseja excluir este material?')) {
@@ -88,7 +90,10 @@ const MaterialsManager = () => {
                 Administre todos os materiais da plataforma
               </CardDescription>
             </div>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => navigate('/admin/conteudo/materiais/novo')}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Novo Material
             </Button>
@@ -208,6 +213,7 @@ const MaterialsManager = () => {
                             variant="ghost"
                             size="sm"
                             className="text-foreground hover:text-primary hover:bg-primary/10"
+                            onClick={() => navigate(`/admin/conteudo/materiais/${material.id}`)}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -215,6 +221,7 @@ const MaterialsManager = () => {
                             variant="ghost"
                             size="sm"
                             className="text-foreground hover:text-primary hover:bg-primary/10"
+                            onClick={() => navigate(`/admin/conteudo/materiais/${material.id}/edit`)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>

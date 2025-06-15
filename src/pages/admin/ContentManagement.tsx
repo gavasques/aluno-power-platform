@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,20 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, FileText, Users, Wrench, Package, Award } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { usePartners } from "@/contexts/PartnersContext";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import ToolsManager from "@/components/admin/conteudo/ToolsManager";
 import MaterialsManager from "@/components/admin/conteudo/MaterialsManager";
+import MaterialFormAdmin from "./conteudo/MaterialFormAdmin";
+import MaterialDetailAdmin from "./conteudo/MaterialDetailAdmin";
 
-interface ContentManagementProps {
-  subsection?: string;
-}
-
-const ContentManagement = ({ subsection }: ContentManagementProps) => {
+const ContentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const { partners } = usePartners();
+  const { subsection, id } = useParams();
+  const { pathname } = useLocation();
 
   // Se estiver na subseção específica, renderiza o componente específico
   if (subsection === 'parceiros') {
@@ -30,6 +31,9 @@ const ContentManagement = ({ subsection }: ContentManagementProps) => {
   }
 
   if (subsection === 'materiais') {
+    if (id === 'novo') return <MaterialFormAdmin />;
+    if (id && pathname.includes('/edit')) return <MaterialFormAdmin />;
+    if (id) return <MaterialDetailAdmin />;
     return <MaterialsManager />;
   }
 

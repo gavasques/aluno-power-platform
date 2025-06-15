@@ -48,7 +48,7 @@ function App() {
                         <Route path="/configuracoes" element={<Settings />} />
                         <Route path="/perfil" element={<Profile />} />
                         <Route path="/inscricoes" element={<Registrations />} />
-                        <Route path="/admin/:section?/:subsection?/:id?" element={<Admin />} />
+                        <Route path="/admin/:section?/:subsection?/:id?/*" element={<Admin />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </Suspense>

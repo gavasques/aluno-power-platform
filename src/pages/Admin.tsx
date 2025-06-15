@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import AdminDashboard from "./admin/AdminDashboard";
 import UserManagement from "./admin/UserManagement";
@@ -53,7 +52,7 @@ const Admin = () => {
     
     case "conteudo":
       if (!hasAccess("conteudo")) return renderAccessDenied();
-      return <ContentManagement subsection={subsection} />;
+      return <ContentManagement />;
     
     case "suporte":
       if (!hasAccess("suporte")) return renderAccessDenied();
