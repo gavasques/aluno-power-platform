@@ -43,7 +43,7 @@ export const useEditProductForm = ({ product, onSave }: UseEditProductFormProps)
     }));
   };
 
-  const handleChannelInputChange = (channelType: keyof ProductChannels, field: string, value: number) => {
+  const handleChannelInputChange = (channelType: keyof ProductChannels, field: string, value: number | string) => {
     setEditedProduct(prev => ({
       ...prev,
       channels: {

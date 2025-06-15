@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -54,6 +55,7 @@ export interface BaseChannel {
   otherValue: number;
   adsPct: number;
   salePrice: number;
+  productCode?: string; // Novo campo para código do produto no canal
 }
 
 export interface SiteProprioChannel extends BaseChannel {

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Edit, Info } from "lucide-react";
 import { Product, BaseChannel, ProductChannels } from "@/types/product";
 import { calculateChannelResults, formatCurrency, formatPercentage } from "@/utils/productCalculations";
+import { ProductCodeDisplay } from "./ProductCodeDisplay";
 
 interface ChannelDetailsProps {
   product: Product;
@@ -26,7 +26,10 @@ export const ChannelDetails = ({
     return (
       <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg">
         <div className="flex items-center gap-4">
-          <h4 className="font-medium text-gray-600 min-w-[120px]">{channelName}</h4>
+          <div className="min-w-[140px]">
+            <h4 className="font-medium text-gray-600">{channelName}</h4>
+            <ProductCodeDisplay placeholder="Canal inativo" />
+          </div>
           <Badge variant="secondary">Inativo</Badge>
         </div>
         <Button
@@ -127,10 +130,15 @@ export const ChannelDetails = ({
   return (
     <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
       <div className="flex items-center gap-6 flex-1">
-        {/* Nome do Canal */}
+        {/* Nome do Canal e Código */}
         <div className="flex items-center gap-3 min-w-[140px]">
-          <h4 className="font-medium text-base">{channelName}</h4>
-          <Badge variant="default">Ativo</Badge>
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h4 className="font-medium text-base">{channelName}</h4>
+              <Badge variant="default">Ativo</Badge>
+            </div>
+            <ProductCodeDisplay code={channel.productCode} />
+          </div>
         </div>
         
         {/* Métricas */}

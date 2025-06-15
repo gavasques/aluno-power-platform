@@ -38,7 +38,8 @@ export const useProductForm = () => {
       otherValue: 0,
       adsPct: 0,
       salePrice: 0,
-      gatewayPct: 0
+      gatewayPct: 0,
+      productCode: ""
     },
     amazonFBM: {
       enabled: false,
@@ -48,7 +49,8 @@ export const useProductForm = () => {
       otherValue: 0,
       adsPct: 0,
       outboundFreight: 0,
-      salePrice: 0
+      salePrice: 0,
+      productCode: ""
     },
     amazonFBAOnSite: {
       enabled: false,
@@ -58,7 +60,8 @@ export const useProductForm = () => {
       otherValue: 0,
       adsPct: 0,
       outboundFreight: 0,
-      salePrice: 0
+      salePrice: 0,
+      productCode: ""
     },
     amazonDBA: {
       enabled: false,
@@ -68,7 +71,8 @@ export const useProductForm = () => {
       otherValue: 0,
       adsPct: 0,
       outboundFreight: 0,
-      salePrice: 0
+      salePrice: 0,
+      productCode: ""
     },
     amazonFBA: {
       enabled: false,
@@ -79,7 +83,8 @@ export const useProductForm = () => {
       adsPct: 0,
       inboundFreight: 0,
       prepCenter: 0,
-      salePrice: 0
+      salePrice: 0,
+      productCode: ""
     },
     mlME1: {
       enabled: false,
@@ -88,7 +93,8 @@ export const useProductForm = () => {
       otherPct: 0,
       otherValue: 0,
       adsPct: 0,
-      salePrice: 0
+      salePrice: 0,
+      productCode: ""
     },
     mlFlex: {
       enabled: false,
@@ -99,7 +105,8 @@ export const useProductForm = () => {
       adsPct: 0,
       outboundFreight: 0,
       flexRevenue: 0,
-      salePrice: 0
+      salePrice: 0,
+      productCode: ""
     },
     mlEnvios: {
       enabled: false,
@@ -109,7 +116,8 @@ export const useProductForm = () => {
       otherValue: 0,
       adsPct: 0,
       outboundFreight: 0,
-      salePrice: 0
+      salePrice: 0,
+      productCode: ""
     },
     mlFull: {
       enabled: false,
@@ -120,7 +128,8 @@ export const useProductForm = () => {
       adsPct: 0,
       inboundFreight: 0,
       prepCenter: 0,
-      salePrice: 0
+      salePrice: 0,
+      productCode: ""
     }
   });
 
@@ -149,7 +158,7 @@ export const useProductForm = () => {
     }));
   };
 
-  const handleChannelInputChange = (channelType: keyof ProductChannels, field: string, value: number) => {
+  const handleChannelInputChange = (channelType: keyof ProductChannels, field: string, value: number | string) => {
     setChannels(prev => ({
       ...prev,
       [channelType]: {

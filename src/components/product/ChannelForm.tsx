@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { FormattedInput } from "@/components/ui/formatted-input";
 import { ProductChannels } from "@/types/product";
 
@@ -10,7 +11,7 @@ interface ChannelFormProps {
   channelData: any;
   title: string;
   onChannelToggle: (channelType: keyof ProductChannels) => void;
-  onChannelInputChange: (channelType: keyof ProductChannels, field: string, value: number) => void;
+  onChannelInputChange: (channelType: keyof ProductChannels, field: string, value: number | string) => void;
 }
 
 export const ChannelForm = ({ 
@@ -32,6 +33,16 @@ export const ChannelForm = ({
     </CardHeader>
     {channelData?.enabled && (
       <CardContent className="space-y-4">
+        {/* Código do Produto no Canal */}
+        <div className="col-span-2">
+          <Label>Código do Produto no Canal</Label>
+          <Input
+            placeholder="Ex: PROD-001-AMZ"
+            value={channelData.productCode || ""}
+            onChange={(e) => onChannelInputChange(channelType, 'productCode', e.target.value)}
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Comissão (%)</Label>
