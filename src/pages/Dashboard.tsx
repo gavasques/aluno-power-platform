@@ -33,7 +33,7 @@ StatCard.displayName = 'StatCard';
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-white">
       <div className="flex flex-col gap-8 p-6">
         {/* Header Section */}
         <div className="text-center space-y-4">
@@ -41,10 +41,10 @@ const Dashboard = () => {
             <TrendingUp className="h-4 w-4 mr-2" />
             Bem-vindo de volta!
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
             Dashboard Principal
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
             Sua visão geral e dinâmica de atividades e conteúdos. Acompanhe seu progresso e descubra novidades.
           </p>
         </div>
@@ -84,7 +84,7 @@ const Dashboard = () => {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* YouTube Feed Card */}
-          <Card className="lg:col-span-2 bg-gradient-to-br from-red-50 to-pink-50 border border-red-100 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="lg:col-span-2 bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
             <CardHeader className="bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-t-lg">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -98,12 +98,12 @@ const Dashboard = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-8 bg-white">
               <div className="text-center space-y-4">
                 <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-pink-200 rounded-full flex items-center justify-center mx-auto">
                   <Youtube className="h-10 w-10 text-red-500" />
                 </div>
-                <p className="text-gray-600 text-lg">O feed de vídeos do YouTube será implementado aqui.</p>
+                <p className="text-gray-700 text-lg">O feed de vídeos do YouTube será implementado aqui.</p>
                 <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg text-sm font-medium">
                   Em breve...
                 </div>
@@ -114,7 +114,7 @@ const Dashboard = () => {
           {/* Right Sidebar */}
           <div className="flex flex-col gap-6">
             {/* News Card */}
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -128,18 +128,18 @@ const Dashboard = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-6 bg-white">
                 <div className="text-center space-y-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto">
                     <Rss className="h-6 w-6 text-blue-500" />
                   </div>
-                  <p className="text-gray-600">Feed de notícias em desenvolvimento</p>
+                  <p className="text-gray-700">Feed de notícias em desenvolvimento</p>
                 </div>
               </CardContent>
             </Card>
 
             {/* Updates Card */}
-            <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-t-lg">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -153,12 +153,12 @@ const Dashboard = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-6 bg-white">
                 <div className="text-center space-y-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-teal-200 rounded-full flex items-center justify-center mx-auto">
                     <Users className="h-6 w-6 text-emerald-500" />
                   </div>
-                  <p className="text-gray-600">Novidades em breve</p>
+                  <p className="text-gray-700">Novidades em breve</p>
                 </div>
               </CardContent>
             </Card>
