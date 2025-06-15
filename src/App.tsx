@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider"
 import { AdminLayout } from "./components/layout/AdminLayout";
+import Layout from "./components/layout/Layout";
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PartnersProvider } from "@/contexts/PartnersContext";
@@ -19,9 +20,6 @@ import SupportManagement from "./pages/admin/SupportManagement";
 import GeneralSettings from "./pages/admin/GeneralSettings";
 import ContentManagement from "./pages/admin/ContentManagement";
 import Suppliers from "./pages/hub/Suppliers";
-
-// Create a simple Home component that redirects to Dashboard
-const Home = () => <Dashboard />;
 
 // Create a simple Auth component
 const Auth = () => (
@@ -46,10 +44,15 @@ function App() {
                 <ProductProvider>
                   <ToolsProvider>
                     <Routes>
-                      <Route path="/" element={<Home />} />
                       <Route path="/auth" element={<Auth />} />
-                      <Route path="/fornecedores" element={<Suppliers />} />
 
+                      {/* Rotas do usuário com Layout */}
+                      <Route path="/" element={<Layout><Outlet /></Layout>}>
+                        <Route index element={<Dashboard />} />
+                        <Route path="fornecedores" element={<Suppliers />} />
+                      </Route>
+
+                      {/* Rotas de admin com AdminLayout */}
                       <Route path="/admin" element={<AdminLayout><Outlet /></AdminLayout>}>
                         <Route index element={<AdminDashboard />} />
                         <Route path="cadastros/:section?" element={<AdminCadastros />} />
