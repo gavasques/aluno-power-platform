@@ -14,9 +14,15 @@ import {
   Phone, 
   Mail, 
   ExternalLink,
-  Filter
 } from 'lucide-react';
 import { PARTNER_CATEGORIES } from '@/types/partner';
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/ui/select';
 
 const Partners = () => {
   const navigate = useNavigate();
@@ -26,11 +32,9 @@ const Partners = () => {
 
   const filteredPartners = React.useMemo(() => {
     let result = searchQuery ? searchPartners(searchQuery) : partners;
-    
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== '') {
       result = result.filter(partner => partner.category.id === selectedCategory);
     }
-    
     return result;
   }, [partners, searchQuery, selectedCategory, searchPartners]);
 
@@ -61,9 +65,9 @@ const Partners = () => {
         </p>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
+      {/* Search and Category Dropdown */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative flex-1 w-full md:w-auto mb-2 md:mb-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Buscar por nome, especialidade ou categoria..."
@@ -72,50 +76,24 @@ const Partners = () => {
             className="pl-10"
           />
         </div>
-        <div className="flex gap-2 overflow-x-auto">
-          <Button
-            variant={selectedCategory === '' ? 'default' : 'outline'}
-            onClick={() => setSelectedCategory('')}
-            className="whitespace-nowrap"
+        <div className="w-full md:w-72">
+          <Select
+            value={selectedCategory}
+            onValueChange={v => setSelectedCategory(v)}
           >
-            <Filter className="h-4 w-4 mr-2" />
-            Todos
-          </Button>
-          {PARTNER_CATEGORIES.map((category) => (
-            <Button
-              key={category.id}
-              variant={selectedCategory === category.id ? 'default' : 'outline'}
-              onClick={() => setSelectedCategory(category.id)}
-              className="whitespace-nowrap"
-            >
-              {category.name}
-            </Button>
-          ))}
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos</SelectItem>
+              {PARTNER_CATEGORIES.map(category => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
-
-      {/* Categories Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {PARTNER_CATEGORIES.map((category) => {
-          const categoryCount = partners.filter(p => p.category.id === category.id).length;
-          return (
-            <Card 
-              key={category.id}
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                selectedCategory === category.id ? 'ring-2 ring-primary' : ''
-              }`}
-              onClick={() => setSelectedCategory(category.id === selectedCategory ? '' : category.id)}
-            >
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl mb-2">{category.icon}</div>
-                <h3 className="font-semibold text-sm">{category.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {categoryCount} parceiro{categoryCount !== 1 ? 's' : ''}
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
       </div>
 
       {/* Partners Grid */}
@@ -144,7 +122,6 @@ const Partners = () => {
               <p className="text-sm text-gray-600 line-clamp-2">
                 {partner.description}
               </p>
-              
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -156,7 +133,6 @@ const Partners = () => {
                   <span>{partner.address.city}, {partner.address.state}</span>
                 </div>
               </div>
-
               <div className="flex gap-2">
                 <Button 
                   className="flex-1"
@@ -180,7 +156,6 @@ const Partners = () => {
           </Card>
         ))}
       </div>
-
       {filteredPartners.length === 0 && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🔍</div>
@@ -195,3 +170,4 @@ const Partners = () => {
 };
 
 export default Partners;
+
