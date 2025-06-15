@@ -362,7 +362,7 @@ const initialProducts: Product[] = [
     createdAt: "2024-03-25",
     channels: {
       amazonFBA: { enabled: true, salePrice: 299, commissionPct: 15, fixedFee: 5, adsPct: 13, inboundFreight: 8, prepCenter: 4, otherPct: 0, otherValue: 0 },
-      mlFull: { enabled: true, salePrice: 289, commissionPct: 16, fixedFee: 5, adsPct: 15, inboundFreight: 7, prepCenter: 3, otherPct: 0, otherValue: 0 },
+      mlFull: { enabled: true, salePrice: 289, commissionPct: 16, fixedFee: 5, adsPct: 15, inboundFreight: 7, outboundFreight: 0, prepCenter: 3, otherPct: 0, otherValue: 0 },
     }
   },
   {
