@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,29 +17,29 @@ import {
 
 const DepartmentsManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categories, setCategories] = useState<string[]>([
+  const [departments, setDepartments] = useState<string[]>([
     "Eletrônicos",
     "Roupas",
     "Casa e Jardim"
   ]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newCategory, setNewCategory] = useState("");
+  const [newDepartment, setNewDepartment] = useState("");
 
-  const filteredCategories = categories.filter((cat) =>
-    cat.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDepartments = departments.filter((dept) =>
+    dept.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  function handleAddCategory(e: React.FormEvent) {
+  function handleAddDepartment(e: React.FormEvent) {
     e.preventDefault();
-    if (newCategory.trim() && !categories.includes(newCategory.trim())) {
-      setCategories([newCategory.trim(), ...categories]);
+    if (newDepartment.trim() && !departments.includes(newDepartment.trim())) {
+      setDepartments([newDepartment.trim(), ...departments]);
     }
-    setNewCategory("");
+    setNewDepartment("");
     setIsDialogOpen(false);
   }
 
-  function handleDeleteCategory(category: string) {
-    setCategories(categories.filter(c => c !== category));
+  function handleDeleteDepartment(department: string) {
+    setDepartments(departments.filter(d => d !== department));
   }
 
   return (
@@ -56,21 +57,21 @@ const DepartmentsManager = () => {
                 onClick={() => setIsDialogOpen(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Nova Categoria
+                Novo Departamento
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Nova Categoria</DialogTitle>
-                <DialogDescription>Informe o nome da nova categoria.</DialogDescription>
+                <DialogTitle>Novo Departamento</DialogTitle>
+                <DialogDescription>Informe o nome do novo departamento.</DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleAddCategory} className="space-y-4">
+              <form onSubmit={handleAddDepartment} className="space-y-4">
                 <Input
                   autoFocus
                   required
-                  placeholder="Nome da Categoria"
-                  value={newCategory}
-                  onChange={e => setNewCategory(e.target.value)}
+                  placeholder="Nome do Departamento"
+                  value={newDepartment}
+                  onChange={e => setNewDepartment(e.target.value)}
                   className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
                 />
                 <DialogFooter>
@@ -92,29 +93,29 @@ const DepartmentsManager = () => {
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
             <Input
-              placeholder="Buscar categorias..."
+              placeholder="Buscar departamentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
             />
           </div>
           <div className="space-y-3">
-            {filteredCategories.length === 0 && (
+            {filteredDepartments.length === 0 && (
               <div className="text-slate-400 px-4 py-8 text-center">
-                Nenhuma categoria encontrada.
+                Nenhum departamento encontrado.
               </div>
             )}
-            {filteredCategories.map((category, idx) => (
+            {filteredDepartments.map((department) => (
               <div
-                key={category}
+                key={department}
                 className="flex items-center justify-between p-4 bg-slate-600/30 border border-red-500/20 rounded-lg"
               >
-                <span className="font-medium text-slate-100">{category}</span>
+                <span className="font-medium text-slate-100">{department}</span>
                 <Button
                   size="sm"
                   variant="outline"
                   className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30"
-                  onClick={() => handleDeleteCategory(category)}
+                  onClick={() => handleDeleteDepartment(department)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -127,3 +128,4 @@ const DepartmentsManager = () => {
   );
 };
 export default DepartmentsManager;
+

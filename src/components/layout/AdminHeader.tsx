@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { AdminNav } from "@/components/layout/AdminNav";
 import {
@@ -20,15 +21,16 @@ import {
   Shield
 } from "lucide-react";
 
+// Corrigindo os itens do menu para refletir "Departamentos", "Tipos de Templates", etc.
 const adminMenuItems = [
   {
     title: "Cadastros",
     items: [
-      { title: "Categorias", href: "/admin/cadastros/categorias", icon: Database },
-      { title: "Prompts IA", href: "/admin/cadastros/prompts-ia", icon: Database },
-      { title: "Templates", href: "/admin/cadastros/templates", icon: Database },
-      { title: "Materiais", href: "/admin/cadastros/materiais", icon: Database },
+      { title: "Departamentos", href: "/admin/cadastros/departamentos", icon: Database },
+      { title: "Tipos de Templates", href: "/admin/cadastros/tipos-templates", icon: FileText },
       { title: "Tipos de Fornecedor", href: "/admin/cadastros/tipos-fornecedor", icon: Database },
+      { title: "Tipos de Prompts IA", href: "/admin/cadastros/tipos-prompts-ia", icon: FileText },
+      { title: "Tipos de Materiais", href: "/admin/cadastros/tipos-materiais", icon: FileText },
     ],
   },
   {
@@ -138,3 +140,4 @@ export function AdminHeader() {
     </header>
   );
 }
+
