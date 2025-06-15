@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/product";
 import { BasicProductForm } from "./BasicProductForm";
+import { ProductSuppliersManager } from "./ProductSuppliersManager";
 import { toast } from "@/hooks/use-toast";
 
 interface EditBasicDataModalProps {
@@ -37,6 +38,8 @@ export const EditBasicDataModal = ({
     packCost: product.packCost,
     taxPercent: product.taxPercent
   });
+
+  const [productSuppliers, setProductSuppliers] = useState(product.suppliers || []);
 
   const handleInputChange = (field: string, value: any) => {
     if (field.includes('.')) {
@@ -76,6 +79,10 @@ export const EditBasicDataModal = ({
     }
   };
 
+  const handleSuppliersChange = (suppliers: any[]) => {
+    setProductSuppliers(suppliers);
+  };
+
   const handleSave = () => {
     // Validação básica
     if (!editedData.name || !editedData.brand || !editedData.supplierId) {
@@ -89,7 +96,8 @@ export const EditBasicDataModal = ({
 
     const updatedProduct = {
       ...product,
-      ...editedData
+      ...editedData,
+      suppliers: productSuppliers
     };
     
     onSave(updatedProduct);
@@ -101,12 +109,12 @@ export const EditBasicDataModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Dados Básicos</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <BasicProductForm
             productData={editedData}
             onInputChange={handleInputChange}
@@ -114,6 +122,14 @@ export const EditBasicDataModal = ({
             mockSuppliers={mockSuppliers}
             mockCategories={mockCategories}
           />
+
+          <div className="border-t pt-6">
+            <ProductSuppliersManager
+              suppliers={productSuppliers}
+              availableSuppliers={mockSuppliers}
+              onSuppliersChange={handleSuppliersChange}
+            />
+          </div>
         </div>
 
         <div className="flex gap-4 pt-6 border-t">

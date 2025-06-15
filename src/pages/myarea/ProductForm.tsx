@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Package, Zap } from "lucide-react";
 import { BasicProductForm } from "@/components/product/BasicProductForm";
+import { ProductSuppliersManager } from "@/components/product/ProductSuppliersManager";
 import { ChannelForm } from "@/components/product/ChannelForm";
 import { useProductForm } from "@/hooks/useProductForm";
 import { mockSuppliers, mockCategories } from "@/data/mockData";
@@ -13,9 +14,11 @@ const ProductForm = () => {
   const {
     productData,
     channels,
+    productSuppliers,
     handleInputChange,
     handleChannelToggle,
     handleChannelInputChange,
+    handleSuppliersChange,
     handlePhotoUpload,
     handleSubmit,
     navigate
@@ -63,7 +66,7 @@ const ProductForm = () => {
             </TabsList>
           </div>
 
-          <TabsContent value="basico" className="space-y-0">
+          <TabsContent value="basico" className="space-y-8">
             <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
               <div className="p-8">
                 <BasicProductForm
@@ -72,6 +75,16 @@ const ProductForm = () => {
                   onPhotoUpload={handlePhotoUpload}
                   mockSuppliers={mockSuppliers}
                   mockCategories={mockCategories}
+                />
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
+              <div className="p-8">
+                <ProductSuppliersManager
+                  suppliers={productSuppliers}
+                  availableSuppliers={mockSuppliers}
+                  onSuppliersChange={handleSuppliersChange}
                 />
               </div>
             </div>
