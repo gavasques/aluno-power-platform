@@ -12,6 +12,8 @@ import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import ToolsManager from "@/components/admin/conteudo/ToolsManager";
 import MaterialsManager from "@/components/admin/conteudo/MaterialsManager";
 import SuppliersManager from "@/components/admin/conteudo/SuppliersManager";
+import SupplierForm from "@/components/admin/conteudo/SupplierForm";
+import SupplierDetail from "@/components/admin/conteudo/SupplierDetail";
 import MaterialFormAdmin from "./conteudo/MaterialFormAdmin";
 import MaterialDetailAdmin from "./conteudo/MaterialDetailAdmin";
 
@@ -20,7 +22,7 @@ const ContentManagement = () => {
   const navigate = useNavigate();
   const { partners } = usePartners();
   const { suppliers } = useSuppliers();
-  const { subsection, id } = useParams();
+  const { subsection, id, action } = useParams();
   const { pathname } = useLocation();
 
   // Redirecionar se estiver na rota de selos (que foi removida)
@@ -36,6 +38,9 @@ const ContentManagement = () => {
   }
   
   if (subsection === 'fornecedores') {
+    if (id === 'novo') return <SupplierForm />;
+    if (id && action === 'edit') return <SupplierForm />;
+    if (id) return <SupplierDetail />;
     return <SuppliersManager />;
   }
   

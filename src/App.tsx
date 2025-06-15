@@ -18,6 +18,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import SupportManagement from "./pages/admin/SupportManagement";
 import GeneralSettings from "./pages/admin/GeneralSettings";
 import ContentManagement from "./pages/admin/ContentManagement";
+import Suppliers from "./pages/hub/Suppliers";
 
 // Create a simple Home component that redirects to Dashboard
 const Home = () => <Dashboard />;
@@ -47,6 +48,7 @@ function App() {
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/auth" element={<Auth />} />
+                      <Route path="/fornecedores" element={<Suppliers />} />
 
                       <Route path="/admin" element={<AdminLayout><Outlet /></AdminLayout>}>
                         <Route index element={<AdminDashboard />} />
