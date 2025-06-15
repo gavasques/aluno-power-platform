@@ -53,7 +53,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     website: partner?.website || '',
     instagram: partner?.instagram || '',
     linkedin: partner?.linkedin || '',
-    certifications: partner?.certifications || [''],
+    materials: partner?.materials || [],
     isVerified: partner?.isVerified || false,
   });
 
@@ -82,7 +82,6 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     const partnerData = {
       ...formData,
       category: selectedCategory,
-      certifications: formData.certifications.filter(c => c.trim()),
       contacts: formData.contacts.filter(c => c.value.trim()),
     };
 
@@ -108,27 +107,6 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
         variant: 'destructive',
       });
     }
-  };
-
-  const addCertification = () => {
-    setFormData(prev => ({
-      ...prev,
-      certifications: [...prev.certifications, '']
-    }));
-  };
-
-  const updateCertification = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      certifications: prev.certifications.map((cert, i) => i === index ? value : cert)
-    }));
-  };
-
-  const removeCertification = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      certifications: prev.certifications.filter((_, i) => i !== index)
-    }));
   };
 
   const addContact = () => {
@@ -276,39 +254,6 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
                   rows={4}
                   placeholder="Descreva os serviços oferecidos"
                 />
-              </div>
-
-              <div>
-                <Label className="text-slate-300">Certificações</Label>
-                {formData.certifications.map((cert, index) => (
-                  <div key={index} className="flex gap-2 mt-2">
-                    <Input
-                      value={cert}
-                      onChange={(e) => updateCertification(index, e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-slate-100"
-                      placeholder="Digite uma certificação"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeCertification(index)}
-                      className="border-slate-600 text-slate-300"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addCertification}
-                  className="mt-2 border-slate-600 text-slate-300"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Certificação
-                </Button>
               </div>
             </TabsContent>
 
