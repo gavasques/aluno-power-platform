@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, FileText, Video, Youtube, FileSpreadsheet, Image, Globe, FileDown, Code2, FileWord2 } from "lucide-react";
+import { Plus, Trash2, FileText, Video, Youtube, FileSpreadsheet, Image, Globe, FileDown, Code2 } from "lucide-react";
 
 type MaterialType = {
   name: string;
@@ -19,7 +19,7 @@ const defaultTypes: MaterialType[] = [
   { name: "Planilhas", icon: <FileSpreadsheet />, description: "Planilhas para download" },
   { name: "Embed", icon: <Code2 />, description: "Código embed na tela" },
   { name: "iframe", icon: <Globe />, description: "Exibir código iFrame tela" },
-  { name: "Documentos", icon: <FileWord2 />, description: "Arquivos Word, PPT, etc" },
+  { name: "Documentos", icon: <FileText />, description: "Arquivos Word, PPT, etc" },
   { name: "Imagens", icon: <Image />, description: "Exibir e baixar imagens" },
 ];
 

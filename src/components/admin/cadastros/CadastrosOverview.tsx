@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Database, Bot, FileText, Package, Building, FolderType, Layers3, Brain } from "lucide-react";
+import { Database, Bot, FileText, Package, Building, FolderPen, Layers3, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const CadastrosOverview = () => {
@@ -31,7 +31,7 @@ const CadastrosOverview = () => {
         onClick={() => navigate('/admin/cadastros/tipos-templates')}>
         <CardHeader>
           <div className="flex items-center space-x-2">
-            <FolderType className="h-5 w-5 text-red-400" />
+            <FolderPen className="h-5 w-5 text-red-400" />
             <CardTitle className="text-slate-100">Tipos de Templates</CardTitle>
           </div>
         </CardHeader>
@@ -121,4 +121,3 @@ const CadastrosOverview = () => {
   );
 };
 export default CadastrosOverview;
-
