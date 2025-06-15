@@ -1,0 +1,226 @@
+
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Edit, Trash2, Search, Wrench } from "lucide-react";
+import { useTools } from "@/contexts/ToolsContext";
+import { useToast } from "@/hooks/use-toast";
+
+const ToolTypesManager = () => {
+  const { toolTypes, addToolType, updateToolType, deleteToolType, getToolsByType } = useTools();
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingType, setEditingType] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    icon: "Wrench",
+  });
+
+  const filteredTypes = toolTypes.filter(type =>
+    type.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    type.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingType) {
+      updateToolType(editingType, formData);
+      toast({
+        title: "Sucesso",
+        description: "Tipo de ferramenta atualizado com sucesso!",
+      });
+    } else {
+      addToolType(formData);
+      toast({
+        title: "Sucesso",
+        description: "Tipo de ferramenta criado com sucesso!",
+      });
+    }
+    
+    setFormData({ name: "", description: "", icon: "Wrench" });
+    setEditingType(null);
+    setIsDialogOpen(false);
+  };
+
+  const handleEdit = (type: any) => {
+    setFormData({
+      name: type.name,
+      description: type.description,
+      icon: type.icon,
+    });
+    setEditingType(type.id);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    const toolsCount = getToolsByType(id).length;
+    if (toolsCount > 0) {
+      toast({
+        title: "Erro",
+        description: `Não é possível excluir. Existem ${toolsCount} ferramentas usando este tipo.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    deleteToolType(id);
+    toast({
+      title: "Sucesso",
+      description: "Tipo de ferramenta excluído com sucesso!",
+    });
+  };
+
+  const resetForm = () => {
+    setFormData({ name: "", description: "", icon: "Wrench" });
+    setEditingType(null);
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <Wrench className="h-5 w-5 text-red-400" />
+              <CardTitle className="text-slate-100">Tipos de Ferramentas</CardTitle>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" 
+                  variant="outline"
+                  onClick={resetForm}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Tipo
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-slate-800 border-red-500/20">
+                <DialogHeader>
+                  <DialogTitle className="text-slate-100">
+                    {editingType ? "Editar Tipo de Ferramenta" : "Novo Tipo de Ferramenta"}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-slate-300">Nome</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-slate-300">Descrição</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                      rows={3}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="icon" className="text-slate-300">Ícone (Lucide)</Label>
+                    <Input
+                      id="icon"
+                      value={formData.icon}
+                      onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                      className="bg-slate-600/50 border-red-500/20 text-slate-100"
+                      placeholder="ex: Search, BarChart, Bot"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      onClick={() => setIsDialogOpen(false)}
+                      className="text-slate-400 hover:text-slate-300"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      type="submit"
+                      className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30"
+                      variant="outline"
+                    >
+                      {editingType ? "Atualizar" : "Criar"}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Search className="h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Buscar tipos de ferramentas..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400"
+            />
+          </div>
+          
+          <div className="grid gap-4">
+            {filteredTypes.map((type) => (
+              <Card key={type.id} className="bg-slate-600/30 border-red-500/10">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <h3 className="font-semibold text-slate-100">{type.name}</h3>
+                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                          {getToolsByType(type.id).length} ferramentas
+                        </Badge>
+                      </div>
+                      <p className="text-slate-400 text-sm">{type.description}</p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEdit(type)}
+                        className="text-slate-400 hover:text-blue-400"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDelete(type.id)}
+                        className="text-slate-400 hover:text-red-400"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            
+            {filteredTypes.length === 0 && (
+              <div className="text-center py-8">
+                <Wrench className="h-12 w-12 text-slate-500 mx-auto mb-4" />
+                <p className="text-slate-400">Nenhum tipo de ferramenta encontrado</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default ToolTypesManager;

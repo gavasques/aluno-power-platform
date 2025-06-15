@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Plus, Search, FileText, Users, Wrench, Package, Award } from "lucide-re
 import { useNavigate } from "react-router-dom";
 import { usePartners } from "@/contexts/PartnersContext";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
+import ToolsManager from "@/components/admin/conteudo/ToolsManager";
 
 interface ContentManagementProps {
   subsection?: string;
@@ -19,9 +19,13 @@ const ContentManagement = ({ subsection }: ContentManagementProps) => {
   const navigate = useNavigate();
   const { partners } = usePartners();
 
-  // Se estiver na subseção de parceiros, renderiza o componente específico
+  // Se estiver na subseção específica, renderiza o componente específico
   if (subsection === 'parceiros') {
     return <PartnersManager />;
+  }
+  
+  if (subsection === 'ferramentas') {
+    return <ToolsManager />;
   }
 
   return (
