@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider"
 import { AdminLayout } from "./components/layout/AdminLayout";
@@ -9,6 +10,8 @@ import { SuppliersProvider } from "@/contexts/SuppliersContext";
 import { MaterialsProvider } from "./contexts/MaterialsContext";
 import { ProductProvider } from "./contexts/ProductContext";
 import { ToolsProvider } from "./contexts/ToolsContext";
+import { TemplatesProvider } from "./contexts/TemplatesContext";
+import { PromptsProvider } from "./contexts/PromptsContext";
 
 // Import pages that exist
 import Dashboard from "./pages/Dashboard";
@@ -45,36 +48,40 @@ function App() {
               <MaterialsProvider>
                 <ProductProvider>
                   <ToolsProvider>
-                    <Routes>
-                      <Route path="/auth" element={<Auth />} />
+                    <TemplatesProvider>
+                      <PromptsProvider>
+                        <Routes>
+                          <Route path="/auth" element={<Auth />} />
 
-                      {/* Rotas do usuário com Layout */}
-                      <Route path="/" element={<Layout><Outlet /></Layout>}>
-                        <Route index element={<Dashboard />} />
-                        <Route path="fornecedores" element={<Suppliers />} />
-                        
-                        {/* Rotas do Hub */}
-                        <Route path="hub">
-                          {/* Detail partner route first (dynamic route before the catch-all) */}
-                          <Route path="parceiros/:id" element={<PartnerDetail />} />
-                          <Route path="parceiros" element={<Partners />} />
-                          <Route path="fornecedores" element={<Suppliers />} />
-                          <Route path=":section" element={<Hub />} />
-                        </Route>
-                      </Route>
+                          {/* Rotas do usuário com Layout */}
+                          <Route path="/" element={<Layout><Outlet /></Layout>}>
+                            <Route index element={<Dashboard />} />
+                            <Route path="fornecedores" element={<Suppliers />} />
+                            
+                            {/* Rotas do Hub */}
+                            <Route path="hub">
+                              {/* Detail partner route first (dynamic route before the catch-all) */}
+                              <Route path="parceiros/:id" element={<PartnerDetail />} />
+                              <Route path="parceiros" element={<Partners />} />
+                              <Route path="fornecedores" element={<Suppliers />} />
+                              <Route path=":section" element={<Hub />} />
+                            </Route>
+                          </Route>
 
-                      {/* Rotas de admin com AdminLayout */}
-                      <Route path="/admin" element={<AdminLayout><Outlet /></AdminLayout>}>
-                        <Route index element={<AdminDashboard />} />
-                        <Route path="cadastros/:section?" element={<AdminCadastros />} />
-                        <Route path="usuarios" element={<UserManagement />} />
-                        <Route path="suporte" element={<SupportManagement />} />
-                        <Route path="configuracoes/:section?" element={<GeneralSettings />} />
-                        <Route path="conteudo/:subsection?/:id?/:action?" element={<ContentManagement />} />
-                      </Route>
+                          {/* Rotas de admin com AdminLayout */}
+                          <Route path="/admin" element={<AdminLayout><Outlet /></AdminLayout>}>
+                            <Route index element={<AdminDashboard />} />
+                            <Route path="cadastros/:section?" element={<AdminCadastros />} />
+                            <Route path="usuarios" element={<UserManagement />} />
+                            <Route path="suporte" element={<SupportManagement />} />
+                            <Route path="configuracoes/:section?" element={<GeneralSettings />} />
+                            <Route path="conteudo/:subsection?/:id?/:action?" element={<ContentManagement />} />
+                          </Route>
 
-                    </Routes>
-                    <Toaster />
+                        </Routes>
+                        <Toaster />
+                      </PromptsProvider>
+                    </TemplatesProvider>
                   </ToolsProvider>
                 </ProductProvider>
               </MaterialsProvider>

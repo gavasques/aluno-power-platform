@@ -7,6 +7,8 @@ import MaterialTypesManager from "@/components/admin/cadastros/MaterialTypesMana
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import CadastrosOverview from "@/components/admin/cadastros/CadastrosOverview";
 import ToolTypesManager from "@/components/admin/cadastros/ToolTypesManager";
+import TemplatesManager from "@/components/admin/cadastros/TemplatesManager";
+import PromptsAIManager from "@/components/admin/cadastros/PromptsAIManager";
 
 interface AdminCadastrosProps {
   subsection?: string;
@@ -29,6 +31,10 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
         return <ToolTypesManager />;
       case "parceiros":
         return <PartnersManager />;
+      case "templates":
+        return <TemplatesManager />;
+      case "prompts-ia":
+        return <PromptsAIManager />;
       default:
         return <CadastrosOverview />;
     }
@@ -50,6 +56,10 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
         return "Gerenciar Tipos de Ferramentas";
       case "parceiros":
         return "Gerenciar Parceiros";
+      case "templates":
+        return "Gerenciar Templates";
+      case "prompts-ia":
+        return "Gerenciar Prompts de IA";
       default:
         return "Cadastros";
     }
@@ -71,6 +81,10 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
         return "Gerencie tipos e categorias de ferramentas";
       case "parceiros":
         return "Gerencie os parceiros e informações";
+      case "templates":
+        return "Gerencie templates de comunicação";
+      case "prompts-ia":
+        return "Gerencie prompts de inteligência artificial";
       default:
         return "Gerencie os cadastros base da plataforma";
     }
