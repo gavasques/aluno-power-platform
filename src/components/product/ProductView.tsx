@@ -1,12 +1,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { Product } from "@/types/product";
-import { formatCurrency } from "@/utils/productCalculations";
-import { ChannelDetails } from "./ChannelDetails";
-import { useMemo } from "react";
+import { ProductPrimaryInfo } from "./view/ProductPrimaryInfo";
+import { ProductFinancialSummary } from "./view/ProductFinancialSummary";
+import { ProductTechSpecs } from "./view/ProductTechSpecs";
+import { ProductSalesChannels } from "./view/ProductSalesChannels";
 
 interface ProductViewProps {
   product: Product;
@@ -21,33 +21,6 @@ export const ProductView = ({
   onEditBasicData, 
   onEditChannels 
 }: ProductViewProps) => {
-  const enabledChannels = Object.entries(product.channels)
-    .filter(([_, channel]) => channel?.enabled)
-    .length;
-
-  const channelNames = {
-    sitePropio: "Site Próprio",
-    amazonFBM: "Amazon FBM",
-    amazonFBAOnSite: "Amazon FBA On Site",
-    amazonDBA: "Amazon DBA",
-    amazonFBA: "Amazon FBA",
-    mlME1: "ML ME1",
-    mlFlex: "ML Flex",
-    mlEnvios: "ML Envios",
-    mlFull: "ML Full"
-  };
-
-  const volumeM3 = useMemo(() => {
-    const { length, width, height } = product.dimensions;
-    if (!length || !width || !height) return 0;
-    const volumeCm3 = length * width * height;
-    return volumeCm3 / 1000000;
-  }, [product.dimensions]);
-
-  const volumeCm3 = useMemo(() => volumeM3 * 1000000, [volumeM3]);
-  const pesoCubado167 = useMemo(() => volumeM3 * 167, [volumeM3]);
-  const pesoCubado300 = useMemo(() => volumeM3 * 300, [volumeM3]);
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Informações Principais */}
@@ -67,49 +40,8 @@ export const ProductView = ({
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex gap-6">
-            {product.photo && (
-              <div className="flex-shrink-0">
-                <img 
-                  src={product.photo} 
-                  alt={product.name}
-                  className="w-32 h-32 object-cover rounded-lg border"
-                />
-              </div>
-            )}
-            
-            <div className="flex-1 grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Nome</label>
-                <p className="text-lg font-semibold">{product.name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Marca</label>
-                <p>{product.brand}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Categoria</label>
-                <p>{product.category}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Fornecedor</label>
-                <p>{supplierName}</p>
-              </div>
-              {product.ean && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">EAN</label>
-                  <p className="font-mono">{product.ean}</p>
-                </div>
-              )}
-              {product.ncm && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">NCM</label>
-                  <p className="font-mono">{product.ncm}</p>
-                </div>
-              )}
-            </div>
-          </div>
+        <CardContent>
+          <ProductPrimaryInfo product={product} supplierName={supplierName} />
         </CardContent>
       </Card>
 
@@ -119,22 +51,7 @@ export const ProductView = ({
           <CardTitle>Resumo Financeiro</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Custo do Item</label>
-            <p className="text-lg font-semibold text-green-600">{formatCurrency(product.costItem)}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Custo de Embalagem</label>
-            <p className="text-lg">{formatCurrency(product.packCost)}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Imposto Global</label>
-            <p className="text-lg">{product.taxPercent}%</p>
-          </div>
-          <div className="pt-2 border-t">
-            <label className="text-sm font-medium text-muted-foreground">Canais Ativos</label>
-            <p className="text-lg font-semibold">{enabledChannels}</p>
-          </div>
+          <ProductFinancialSummary product={product} />
         </CardContent>
       </Card>
 
@@ -144,30 +61,7 @@ export const ProductView = ({
           <CardTitle>Especificações</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Dimensões (C×L×A)</label>
-            <p>{product.dimensions.length} × {product.dimensions.width} × {product.dimensions.height} cm</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Peso</label>
-            <p>{product.weight} kg</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Volume</label>
-            <p>{volumeCm3.toLocaleString('pt-BR')} cm³ ({volumeM3.toFixed(6)} m³)</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Peso Cubado (167)</label>
-            <p>{pesoCubado167.toFixed(2)} kg</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Peso Cubado (300)</label>
-            <p>{pesoCubado300.toFixed(2)} kg</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Data de Cadastro</label>
-            <p>{new Date(product.createdAt).toLocaleDateString('pt-BR')}</p>
-          </div>
+          <ProductTechSpecs product={product} />
         </CardContent>
       </Card>
 
@@ -189,22 +83,7 @@ export const ProductView = ({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {Object.entries(product.channels).map(([channelKey, channel]) => {
-              if (!channel) return null;
-              
-              return (
-                <ChannelDetails
-                  key={channelKey}
-                  product={product}
-                  channelKey={channelKey as keyof typeof product.channels}
-                  channelName={channelNames[channelKey as keyof typeof channelNames]}
-                  channel={channel}
-                  onEditChannel={() => onEditChannels?.()}
-                />
-              );
-            })}
-          </div>
+          <ProductSalesChannels product={product} onEditChannels={onEditChannels} />
         </CardContent>
       </Card>
     </div>
