@@ -8,15 +8,15 @@ import {
   ArrowLeft, 
   Edit, 
   CheckCircle, 
-  XCircle, 
   Star, 
   Phone, 
   Mail, 
-  MapPin, 
-  Building2, 
-  User 
+  User,
+  FileText,
+  Download
 } from "lucide-react";
 import { useSuppliers } from "@/contexts/SuppliersContext";
+import { FILE_TYPES } from "@/types/supplier";
 
 const SupplierDetail = () => {
   const navigate = useNavigate();
@@ -53,6 +53,18 @@ const SupplierDetail = () => {
     ));
   };
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const getFileTypeLabel = (type: string) => {
+    return FILE_TYPES.find(ft => ft.value === type)?.label || type;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -83,7 +95,14 @@ const SupplierDetail = () => {
                 )}
               </div>
               <p className="text-muted-foreground">{supplier.corporateName}</p>
-              <Badge variant="outline">{supplier.category.name}</Badge>
+              <div className="flex gap-2 mt-1">
+                <Badge variant="outline">{supplier.category.name}</Badge>
+                {supplier.departments.map(dept => (
+                  <Badge key={dept.id} variant="secondary" className="text-xs">
+                    {dept.name}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -97,7 +116,7 @@ const SupplierDetail = () => {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="contacts">Contatos</TabsTrigger>
-          <TabsTrigger value="branches">Filiais</TabsTrigger>
+          <TabsTrigger value="files">Arquivos</TabsTrigger>
           <TabsTrigger value="reviews">Avaliações</TabsTrigger>
         </TabsList>
 
@@ -123,6 +142,17 @@ const SupplierDetail = () => {
                 <div>
                   <label className="text-sm font-medium">Contato Principal</label>
                   <p className="text-muted-foreground">{supplier.mainContact}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Departamentos que Atende</label>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {supplier.departments.map(dept => (
+                    <Badge key={dept.id} variant="outline">
+                      {dept.name}
+                    </Badge>
+                  ))}
                 </div>
               </div>
               
@@ -248,54 +278,43 @@ const SupplierDetail = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="branches" className="space-y-6">
-          {supplier.branches.map((branch, index) => (
+        <TabsContent value="files" className="space-y-6">
+          {supplier.files.map((file, index) => (
             <Card key={index}>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  {branch.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Razão Social</label>
-                    <p className="text-muted-foreground">{branch.corporateName}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">CNPJ</label>
-                    <p className="text-muted-foreground">{branch.cnpj}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Inscrição Municipal</label>
-                    <p className="text-muted-foreground">{branch.municipalRegistration}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Inscrição Estadual</label>
-                    <p className="text-muted-foreground">{branch.stateRegistration}</p>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="text-sm font-medium">Endereço</label>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      <p className="text-muted-foreground">{branch.address}</p>
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    <div>
+                      <CardTitle className="text-lg">{file.name}</CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline">{getFileTypeLabel(file.type)}</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {formatFileSize(file.size)}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <Button size="sm" variant="outline" asChild>
+                    <a href={file.fileUrl} target="_blank" rel="noopener noreferrer">
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </a>
+                  </Button>
                 </div>
-                {branch.notes && (
-                  <div className="mt-4">
-                    <label className="text-sm font-medium">Observações</label>
-                    <p className="text-muted-foreground">{branch.notes}</p>
-                  </div>
-                )}
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">{file.description}</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Enviado em: {new Date(file.uploadedAt).toLocaleDateString('pt-BR')}
+                </p>
               </CardContent>
             </Card>
           ))}
-          {supplier.branches.length === 0 && (
+          {supplier.files.length === 0 && (
             <Card>
               <CardContent className="text-center py-8">
-                <p className="text-muted-foreground">Nenhuma filial cadastrada.</p>
+                <p className="text-muted-foreground">Nenhum arquivo disponível.</p>
               </CardContent>
             </Card>
           )}

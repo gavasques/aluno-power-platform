@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Supplier, SupplierReview, SupplierContact, SupplierBranch, SUPPLIER_CATEGORIES } from '@/types/supplier';
+import { Supplier, SupplierReview, SupplierContact, SupplierFile, SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS } from '@/types/supplier';
 
 interface SuppliersContextType {
   suppliers: Supplier[];
@@ -14,11 +13,12 @@ interface SuppliersContextType {
   addContact: (supplierId: string, contact: Omit<SupplierContact, 'id'>) => void;
   updateContact: (supplierId: string, contactId: string, contact: Partial<SupplierContact>) => void;
   deleteContact: (supplierId: string, contactId: string) => void;
-  addBranch: (supplierId: string, branch: Omit<SupplierBranch, 'id'>) => void;
-  updateBranch: (supplierId: string, branchId: string, branch: Partial<SupplierBranch>) => void;
-  deleteBranch: (supplierId: string, branchId: string) => void;
+  addFile: (supplierId: string, file: Omit<SupplierFile, 'id' | 'uploadedAt'>) => void;
+  updateFile: (supplierId: string, fileId: string, file: Partial<SupplierFile>) => void;
+  deleteFile: (supplierId: string, fileId: string) => void;
   getSupplierById: (id: string) => Supplier | undefined;
   getSuppliersByCategory: (categoryId: string) => Supplier[];
+  getSuppliersByDepartment: (departmentId: string) => Supplier[];
   searchSuppliers: (query: string) => Supplier[];
 }
 
@@ -37,6 +37,7 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
         tradeName: 'TechSupply Brasil',
         corporateName: 'TechSupply Brasil Importação e Exportação Ltda',
         category: SUPPLIER_CATEGORIES[2], // Importadores
+        departments: [SUPPLIER_DEPARTMENTS[0], SUPPLIER_DEPARTMENTS[4]], // Eletrônicos e Esportes
         notes: 'Empresa confiável com histórico de 15 anos no mercado. Especializada em produtos Apple e Samsung.',
         email: 'contato@techsupplybrasil.com.br',
         mainContact: 'João Silva',
@@ -62,26 +63,24 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
             notes: 'Especialista em smartphones'
           }
         ],
-        branches: [
+        files: [
           {
             id: '1',
-            name: 'Matriz São Paulo',
-            corporateName: 'TechSupply Brasil Importação e Exportação Ltda',
-            cnpj: '12.345.678/0001-90',
-            municipalRegistration: '123456789',
-            stateRegistration: '123.456.789.123',
-            address: 'Rua das Flores, 123 - São Paulo/SP',
-            notes: 'Sede principal da empresa'
+            name: 'Catálogo Eletrônicos 2024',
+            description: 'Catálogo completo de produtos eletrônicos para 2024',
+            type: 'catalog',
+            fileUrl: '#',
+            uploadedAt: '2024-01-15',
+            size: 2048000
           },
           {
             id: '2',
-            name: 'Filial Rio de Janeiro',
-            corporateName: 'TechSupply Brasil Importação e Exportação Ltda',
-            cnpj: '12.345.678/0002-71',
-            municipalRegistration: '987654321',
-            stateRegistration: '987.654.321.098',
-            address: 'Av. Atlântica, 456 - Rio de Janeiro/RJ',
-            notes: 'Filial para atendimento da região sudeste'
+            name: 'Tabela de Preços Janeiro',
+            description: 'Planilha de preços atualizada para janeiro/2024',
+            type: 'price_sheet',
+            fileUrl: '#',
+            uploadedAt: '2024-01-10',
+            size: 512000
           }
         ],
         commercialTerms: 'Pagamento: 30 dias\nFrete: CIF\nDesconto para pedidos acima de R$ 10.000\nGarantia de 1 ano em todos os produtos',
@@ -100,17 +99,6 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
             photos: [],
             createdAt: '2024-01-15',
             isApproved: true
-          },
-          {
-            id: '2',
-            supplierId: '1',
-            userId: 'user2',
-            userName: 'Ana Costa',
-            rating: 4,
-            comment: 'Bom atendimento, mas poderia melhorar os prazos.',
-            photos: [],
-            createdAt: '2024-01-10',
-            isApproved: true
           }
         ],
         createdAt: '2024-01-01',
@@ -121,6 +109,7 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
         tradeName: 'Nacional Distribuidora',
         corporateName: 'Nacional Distribuidora de Produtos Ltda',
         category: SUPPLIER_CATEGORIES[1], // Distribuidores
+        departments: [SUPPLIER_DEPARTMENTS[1], SUPPLIER_DEPARTMENTS[7]], // Casa e Jardim, Construção
         notes: 'Distribuidora nacional com ampla rede de produtos para casa e jardim.',
         email: 'vendas@nacionaldist.com.br',
         mainContact: 'Pedro Santos',
@@ -137,18 +126,7 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
             notes: 'Contato principal para grandes volumes'
           }
         ],
-        branches: [
-          {
-            id: '1',
-            name: 'Centro de Distribuição SP',
-            corporateName: 'Nacional Distribuidora de Produtos Ltda',
-            cnpj: '98.765.432/0001-10',
-            municipalRegistration: '111222333',
-            stateRegistration: '111.222.333.444',
-            address: 'Rodovia dos Bandeirantes, Km 50 - Jundiaí/SP',
-            notes: 'Principal centro de distribuição'
-          }
-        ],
+        files: [],
         commercialTerms: 'Pagamento: 45 dias\nFrete: FOB\nDesconto progressivo por volume\nTroca garantida em caso de defeito',
         isVerified: false,
         averageRating: 3.8,
@@ -284,30 +262,31 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
     ));
   };
 
-  const addBranch = (supplierId: string, branchData: Omit<SupplierBranch, 'id'>) => {
-    const newBranch: SupplierBranch = {
-      ...branchData,
+  const addFile = (supplierId: string, fileData: Omit<SupplierFile, 'id' | 'uploadedAt'>) => {
+    const newFile: SupplierFile = {
+      ...fileData,
       id: Date.now().toString(),
+      uploadedAt: new Date().toISOString(),
     };
 
     setSuppliers(prev => prev.map(supplier => 
       supplier.id === supplierId 
         ? { 
             ...supplier, 
-            branches: [...supplier.branches, newBranch],
+            files: [...supplier.files, newFile],
             updatedAt: new Date().toISOString()
           }
         : supplier
     ));
   };
 
-  const updateBranch = (supplierId: string, branchId: string, updates: Partial<SupplierBranch>) => {
+  const updateFile = (supplierId: string, fileId: string, updates: Partial<SupplierFile>) => {
     setSuppliers(prev => prev.map(supplier => 
       supplier.id === supplierId 
         ? { 
             ...supplier, 
-            branches: supplier.branches.map(branch => 
-              branch.id === branchId ? { ...branch, ...updates } : branch
+            files: supplier.files.map(file => 
+              file.id === fileId ? { ...file, ...updates } : file
             ),
             updatedAt: new Date().toISOString()
           }
@@ -315,12 +294,12 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
     ));
   };
 
-  const deleteBranch = (supplierId: string, branchId: string) => {
+  const deleteFile = (supplierId: string, fileId: string) => {
     setSuppliers(prev => prev.map(supplier => 
       supplier.id === supplierId 
         ? { 
             ...supplier, 
-            branches: supplier.branches.filter(b => b.id !== branchId),
+            files: supplier.files.filter(f => f.id !== fileId),
             updatedAt: new Date().toISOString()
           }
         : supplier
@@ -335,13 +314,20 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
     return suppliers.filter(supplier => supplier.category.id === categoryId);
   };
 
+  const getSuppliersByDepartment = (departmentId: string) => {
+    return suppliers.filter(supplier => 
+      supplier.departments.some(dept => dept.id === departmentId)
+    );
+  };
+
   const searchSuppliers = (query: string) => {
     const lowercaseQuery = query.toLowerCase();
     return suppliers.filter(supplier => 
       supplier.tradeName.toLowerCase().includes(lowercaseQuery) ||
       supplier.corporateName.toLowerCase().includes(lowercaseQuery) ||
       supplier.notes.toLowerCase().includes(lowercaseQuery) ||
-      supplier.category.name.toLowerCase().includes(lowercaseQuery)
+      supplier.category.name.toLowerCase().includes(lowercaseQuery) ||
+      supplier.departments.some(dept => dept.name.toLowerCase().includes(lowercaseQuery))
     );
   };
 
@@ -358,11 +344,12 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
       addContact,
       updateContact,
       deleteContact,
-      addBranch,
-      updateBranch,
-      deleteBranch,
+      addFile,
+      updateFile,
+      deleteFile,
       getSupplierById,
       getSuppliersByCategory,
+      getSuppliersByDepartment,
       searchSuppliers,
     }}>
       {children}

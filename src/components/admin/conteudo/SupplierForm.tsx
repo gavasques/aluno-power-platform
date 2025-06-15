@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,20 +6,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Plus, 
   Trash2, 
   Save, 
   ArrowLeft, 
-  Building2, 
   User, 
-  Phone, 
-  Mail 
+  FileText,
+  Download
 } from "lucide-react";
 import { useSuppliers } from "@/contexts/SuppliersContext";
-import { SUPPLIER_CATEGORIES } from "@/types/supplier";
+import { SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS, FILE_TYPES } from "@/types/supplier";
 import { useToast } from "@/hooks/use-toast";
 
 const SupplierForm = () => {
@@ -37,6 +35,7 @@ const SupplierForm = () => {
     tradeName: '',
     corporateName: '',
     categoryId: '',
+    departmentIds: [] as string[],
     notes: '',
     email: '',
     mainContact: '',
@@ -52,17 +51,9 @@ const SupplierForm = () => {
     { name: '', role: '', phone: '', whatsapp: '', email: '', notes: '' }
   ]);
 
-  // Estados para filiais múltiplas
-  const [branches, setBranches] = useState([
-    { 
-      name: '', 
-      corporateName: '', 
-      cnpj: '', 
-      municipalRegistration: '', 
-      stateRegistration: '', 
-      address: '', 
-      notes: '' 
-    }
+  // Estados para arquivos
+  const [files, setFiles] = useState([
+    { name: '', description: '', type: 'catalog' as const, fileUrl: '', size: 0 }
   ]);
 
   // Carregar dados do fornecedor se estiver editando
@@ -72,6 +63,7 @@ const SupplierForm = () => {
         tradeName: supplier.tradeName,
         corporateName: supplier.corporateName,
         categoryId: supplier.category.id,
+        departmentIds: supplier.departments.map(d => d.id),
         notes: supplier.notes,
         email: supplier.email,
         mainContact: supplier.mainContact,
@@ -82,7 +74,7 @@ const SupplierForm = () => {
         logo: supplier.logo || ''
       });
       setContacts(supplier.contacts.length > 0 ? supplier.contacts : [{ name: '', role: '', phone: '', whatsapp: '', email: '', notes: '' }]);
-      setBranches(supplier.branches.length > 0 ? supplier.branches : [{ name: '', corporateName: '', cnpj: '', municipalRegistration: '', stateRegistration: '', address: '', notes: '' }]);
+      setFiles(supplier.files.length > 0 ? supplier.files : [{ name: '', description: '', type: 'catalog' as const, fileUrl: '', size: 0 }]);
     }
   }, [supplier]);
 
@@ -90,6 +82,8 @@ const SupplierForm = () => {
     e.preventDefault();
     
     const selectedCategory = SUPPLIER_CATEGORIES.find(cat => cat.id === formData.categoryId);
+    const selectedDepartments = SUPPLIER_DEPARTMENTS.filter(dept => formData.departmentIds.includes(dept.id));
+    
     if (!selectedCategory) {
       toast({
         title: "Erro",
@@ -99,17 +93,40 @@ const SupplierForm = () => {
       return;
     }
 
+    if (selectedDepartments.length === 0) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione pelo menos um departamento.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Preparar contatos com IDs se for edição
+    const contactsWithIds = contacts.filter(contact => contact.name.trim() !== '').map(contact => ({
+      ...contact,
+      id: isEditing && supplier?.contacts.find(c => c.name === contact.name)?.id || Date.now().toString() + Math.random()
+    }));
+
+    // Preparar arquivos com IDs se for edição
+    const filesWithIds = files.filter(file => file.name.trim() !== '').map(file => ({
+      ...file,
+      id: isEditing && supplier?.files.find(f => f.name === file.name)?.id || Date.now().toString() + Math.random(),
+      uploadedAt: isEditing && supplier?.files.find(f => f.name === file.name)?.uploadedAt || new Date().toISOString()
+    }));
+
     const supplierData = {
       tradeName: formData.tradeName,
       corporateName: formData.corporateName,
       category: selectedCategory,
+      departments: selectedDepartments,
       notes: formData.notes,
       email: formData.email,
       mainContact: formData.mainContact,
       phone: formData.phone,
       whatsapp: formData.whatsapp,
-      contacts: contacts.filter(contact => contact.name.trim() !== ''),
-      branches: branches.filter(branch => branch.name.trim() !== ''),
+      contacts: contactsWithIds,
+      files: filesWithIds,
       commercialTerms: formData.commercialTerms,
       logo: formData.logo,
       isVerified: formData.isVerified
@@ -132,6 +149,20 @@ const SupplierForm = () => {
     navigate('/admin/conteudo/fornecedores');
   };
 
+  const handleDepartmentChange = (departmentId: string, checked: boolean) => {
+    if (checked) {
+      setFormData(prev => ({
+        ...prev,
+        departmentIds: [...prev.departmentIds, departmentId]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        departmentIds: prev.departmentIds.filter(id => id !== departmentId)
+      }));
+    }
+  };
+
   const addContact = () => {
     setContacts([...contacts, { name: '', role: '', phone: '', whatsapp: '', email: '', notes: '' }]);
   };
@@ -146,18 +177,18 @@ const SupplierForm = () => {
     setContacts(updatedContacts);
   };
 
-  const addBranch = () => {
-    setBranches([...branches, { name: '', corporateName: '', cnpj: '', municipalRegistration: '', stateRegistration: '', address: '', notes: '' }]);
+  const addFile = () => {
+    setFiles([...files, { name: '', description: '', type: 'catalog', fileUrl: '', size: 0 }]);
   };
 
-  const removeBranch = (index: number) => {
-    setBranches(branches.filter((_, i) => i !== index));
+  const removeFile = (index: number) => {
+    setFiles(files.filter((_, i) => i !== index));
   };
 
-  const updateBranch = (index: number, field: string, value: string) => {
-    const updatedBranches = [...branches];
-    updatedBranches[index] = { ...updatedBranches[index], [field]: value };
-    setBranches(updatedBranches);
+  const updateFile = (index: number, field: string, value: string | number) => {
+    const updatedFiles = [...files];
+    updatedFiles[index] = { ...updatedFiles[index], [field]: value };
+    setFiles(updatedFiles);
   };
 
   return (
@@ -185,7 +216,7 @@ const SupplierForm = () => {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="basic">Informações Básicas</TabsTrigger>
             <TabsTrigger value="contacts">Contatos</TabsTrigger>
-            <TabsTrigger value="branches">Filiais</TabsTrigger>
+            <TabsTrigger value="files">Arquivos</TabsTrigger>
             <TabsTrigger value="commercial">Termos Comerciais</TabsTrigger>
           </TabsList>
 
@@ -240,6 +271,24 @@ const SupplierForm = () => {
                       onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
                       placeholder="https://..."
                     />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Departamentos que Atende *</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                    {SUPPLIER_DEPARTMENTS.map(department => (
+                      <div key={department.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`dept-${department.id}`}
+                          checked={formData.departmentIds.includes(department.id)}
+                          onCheckedChange={(checked) => handleDepartmentChange(department.id, checked as boolean)}
+                        />
+                        <Label htmlFor={`dept-${department.id}`} className="text-sm">
+                          {department.name}
+                        </Label>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -386,31 +435,31 @@ const SupplierForm = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="branches" className="space-y-6">
+          <TabsContent value="files" className="space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle>Filiais</CardTitle>
-                  <Button type="button" onClick={addBranch}>
+                  <CardTitle>Arquivos do Fornecedor</CardTitle>
+                  <Button type="button" onClick={addFile}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Filial
+                    Adicionar Arquivo
                   </Button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {branches.map((branch, index) => (
+                {files.map((file, index) => (
                   <Card key={index} className="p-4">
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4" />
-                        <h4 className="font-medium">Filial {index + 1}</h4>
+                        <FileText className="h-4 w-4" />
+                        <h4 className="font-medium">Arquivo {index + 1}</h4>
                       </div>
-                      {branches.length > 1 && (
+                      {files.length > 1 && (
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => removeBranch(index)}
+                          onClick={() => removeFile(index)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -419,52 +468,52 @@ const SupplierForm = () => {
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <Label>Nome da Filial</Label>
+                        <Label>Nome do Arquivo</Label>
                         <Input
-                          value={branch.name}
-                          onChange={(e) => updateBranch(index, 'name', e.target.value)}
+                          value={file.name}
+                          onChange={(e) => updateFile(index, 'name', e.target.value)}
+                          placeholder="Ex: Catálogo Produtos 2024"
                         />
                       </div>
                       <div>
-                        <Label>Razão Social</Label>
+                        <Label>Tipo de Arquivo</Label>
+                        <Select value={file.type} onValueChange={(value) => updateFile(index, 'type', value)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {FILE_TYPES.map(type => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>URL do Arquivo</Label>
                         <Input
-                          value={branch.corporateName}
-                          onChange={(e) => updateBranch(index, 'corporateName', e.target.value)}
+                          value={file.fileUrl}
+                          onChange={(e) => updateFile(index, 'fileUrl', e.target.value)}
+                          placeholder="https://..."
                         />
                       </div>
                       <div>
-                        <Label>CNPJ</Label>
+                        <Label>Tamanho (bytes)</Label>
                         <Input
-                          value={branch.cnpj}
-                          onChange={(e) => updateBranch(index, 'cnpj', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Inscrição Municipal</Label>
-                        <Input
-                          value={branch.municipalRegistration}
-                          onChange={(e) => updateBranch(index, 'municipalRegistration', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Inscrição Estadual</Label>
-                        <Input
-                          value={branch.stateRegistration}
-                          onChange={(e) => updateBranch(index, 'stateRegistration', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Endereço</Label>
-                        <Input
-                          value={branch.address}
-                          onChange={(e) => updateBranch(index, 'address', e.target.value)}
+                          type="number"
+                          value={file.size}
+                          onChange={(e) => updateFile(index, 'size', parseInt(e.target.value) || 0)}
+                          placeholder="2048000"
                         />
                       </div>
                       <div className="md:col-span-2">
-                        <Label>Observações</Label>
-                        <Input
-                          value={branch.notes}
-                          onChange={(e) => updateBranch(index, 'notes', e.target.value)}
+                        <Label>Descrição</Label>
+                        <Textarea
+                          value={file.description}
+                          onChange={(e) => updateFile(index, 'description', e.target.value)}
+                          placeholder="Descrição do arquivo..."
+                          rows={2}
                         />
                       </div>
                     </div>
