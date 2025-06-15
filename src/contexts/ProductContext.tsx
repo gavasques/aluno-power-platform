@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Product } from '@/types/product';
 
@@ -38,6 +37,7 @@ const initialProducts: Product[] = [
         otherValue: 0,
         adsPct: 10,
         inboundFreight: 25,
+        outboundFreight: 0,
         prepCenter: 8,
         salePrice: 1499
       },

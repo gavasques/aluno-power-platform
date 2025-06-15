@@ -84,6 +84,7 @@ export const useProductForm = () => {
       otherValue: 0,
       adsPct: 0,
       inboundFreight: 0,
+      outboundFreight: 0,
       prepCenter: 0,
       salePrice: 0,
       productCode: "",

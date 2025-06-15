@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -162,6 +163,17 @@ export const ChannelForm = ({
                   onChange={(value) => onChannelInputChange(channelType, 'inboundFreight', value)}
                 />
               </div>
+              {/* Frete Outbound específico para Amazon FBA */}
+              {channelType === 'amazonFBA' && (
+                <div>
+                  <Label>Frete Outbound (R$)</Label>
+                  <FormattedInput
+                    type="currency"
+                    value={channelData.outboundFreight || 0}
+                    onChange={(value) => onChannelInputChange(channelType, 'outboundFreight', value)}
+                  />
+                </div>
+              )}
               {channelType === 'mlFull' && (
                 <div>
                   <Label>Frete Outbound (R$)</Label>
