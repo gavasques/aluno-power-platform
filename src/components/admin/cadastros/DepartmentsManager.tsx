@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-const CategoriesManager = () => {
+const DepartmentsManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState<string[]>([
     "Eletrônicos",
@@ -47,7 +46,7 @@ const CategoriesManager = () => {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <CardTitle className="text-slate-100">Gerenciar Categorias</CardTitle>
+            <CardTitle className="text-slate-100">Gerenciar Departamentos</CardTitle>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -127,5 +126,4 @@ const CategoriesManager = () => {
     </Card>
   );
 };
-
-export default CategoriesManager;
+export default DepartmentsManager;

@@ -1,6 +1,9 @@
 
-import CategoriesManager from "@/components/admin/cadastros/CategoriesManager";
-import PromptsManager from "@/components/admin/cadastros/PromptsManager";
+import DepartmentsManager from "@/components/admin/cadastros/DepartmentsManager";
+import TemplateTypesManager from "@/components/admin/cadastros/TemplateTypesManager";
+import SupplierTypesManager from "@/components/admin/cadastros/SupplierTypesManager";
+import PromptTypesManager from "@/components/admin/cadastros/PromptTypesManager";
+import MaterialTypesManager from "@/components/admin/cadastros/MaterialTypesManager";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import CadastrosOverview from "@/components/admin/cadastros/CadastrosOverview";
 
@@ -11,15 +14,18 @@ interface AdminCadastrosProps {
 const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
   const renderContent = () => {
     switch (subsection) {
-      case "categorias":
-        return <CategoriesManager />;
-      
-      case "prompts-ia":
-        return <PromptsManager />;
-      
+      case "departamentos":
+        return <DepartmentsManager />;
+      case "tipos-templates":
+        return <TemplateTypesManager />;
+      case "tipos-fornecedor":
+        return <SupplierTypesManager />;
+      case "tipos-prompts-ia":
+        return <PromptTypesManager />;
+      case "tipos-materiais":
+        return <MaterialTypesManager />;
       case "parceiros":
         return <PartnersManager />;
-      
       default:
         return <CadastrosOverview />;
     }
