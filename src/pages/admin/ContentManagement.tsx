@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,13 @@ const ContentManagement = () => {
   const { partners } = usePartners();
   const { subsection, id } = useParams();
   const { pathname } = useLocation();
+
+  // Redirecionar se estiver na rota de selos (que foi removida)
+  useEffect(() => {
+    if (subsection === 'selos') {
+      navigate('/admin/conteudo', { replace: true });
+    }
+  }, [subsection, navigate]);
 
   // Se estiver na subseção específica, renderiza o componente específico
   if (subsection === 'parceiros') {
@@ -111,7 +118,10 @@ const ContentManagement = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+        <Card 
+          className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => navigate('/admin/conteudo/ferramentas')}
+        >
           <CardHeader>
             <div className="flex items-center space-x-2">
               <Wrench className="h-5 w-5 text-primary" />
