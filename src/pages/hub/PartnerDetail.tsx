@@ -36,7 +36,7 @@ const PartnerDetail = () => {
 
   if (!partner) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="w-full p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Parceiro não encontrado</h1>
           <Button onClick={() => navigate('/hub/parceiros')}>
@@ -115,276 +115,283 @@ const PartnerDetail = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      {/* Header */}
-      <div className="mb-6">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/hub/parceiros')}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar aos Parceiros
-        </Button>
-        
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold">{partner.name}</h1>
-              {partner.isVerified && (
-                <Badge variant="default" className="bg-green-500">
-                  <Shield className="h-3 w-3 mr-1" />
-                  Verificado
+    <div className="w-full min-h-screen bg-gray-50">
+      <div className="w-full px-4 py-6">
+        {/* Header */}
+        <div className="mb-8">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/hub/parceiros')}
+            className="mb-6"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar aos Parceiros
+          </Button>
+          
+          <div className="bg-white rounded-lg p-8 shadow-sm">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <h1 className="text-4xl font-bold">{partner.name}</h1>
+                  {partner.isVerified && (
+                    <Badge variant="default" className="bg-green-500 text-white">
+                      <Shield className="h-3 w-3 mr-1" />
+                      Verificado
+                    </Badge>
+                  )}
+                </div>
+                <Badge variant="secondary" className="mb-4 text-base px-3 py-1">
+                  {partner.category.name}
                 </Badge>
-              )}
-            </div>
-            <Badge variant="secondary" className="mb-2">
-              {partner.category.name}
-            </Badge>
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-5 w-5 ${
-                    i < Math.floor(partner.averageRating)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
-              <span className="ml-2 text-gray-600">
-                {partner.averageRating.toFixed(1)} ({partner.totalReviews} avaliações)
-              </span>
+                <div className="flex items-center gap-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-6 w-6 ${
+                        i < Math.floor(partner.averageRating)
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
+                  <span className="ml-3 text-lg text-gray-600">
+                    {partner.averageRating.toFixed(1)} ({partner.totalReviews} avaliações)
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Coluna Principal */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Sobre */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Sobre</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">{partner.about}</p>
-            </CardContent>
-          </Card>
-
-          {/* Especialidades */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Especialidades</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">{partner.specialties}</p>
-            </CardContent>
-          </Card>
-
-          {/* Serviços */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Serviços</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">{partner.services}</p>
-            </CardContent>
-          </Card>
-
-          {/* Avaliações */}
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Avaliações</CardTitle>
-                <Button 
-                  onClick={() => setShowReviewForm(true)}
-                  disabled={showReviewForm}
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Deixar Avaliação
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Formulário de Avaliação */}
-              {showReviewForm && (
-                <form onSubmit={handleSubmitReview} className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Sua avaliação
-                    </label>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((value) => (
-                        <button
-                          key={value}
-                          type="button"
-                          className="focus:outline-none"
-                          onMouseEnter={() => setHoveredRating(value)}
-                          onMouseLeave={() => setHoveredRating(0)}
-                          onClick={() => setRating(value)}
-                        >
-                          <Star
-                            className={`h-8 w-8 transition-colors ${
-                              value <= (hoveredRating || rating)
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300 hover:text-yellow-300'
-                            }`}
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Comentário
-                    </label>
-                    <Textarea
-                      placeholder="Conte sua experiência com este parceiro..."
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      rows={4}
-                      required
-                      minLength={10}
-                    />
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setShowReviewForm(false)}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
-                    </Button>
-                  </div>
-                </form>
-              )}
-
-              {/* Lista de Avaliações */}
-              {approvedReviews.length > 0 ? (
-                <div className="space-y-4">
-                  {approvedReviews.map((review) => (
-                    <div key={review.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold">{review.userName}</span>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < review.rating
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-gray-700">{review.comment}</p>
-                      <p className="text-xs text-gray-500 mt-2">
-                        {new Date(review.createdAt).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-8">
-                  Nenhuma avaliação disponível. Seja o primeiro a avaliar!
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar - Contato */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Contato</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Endereço */}
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-1" />
-                <div>
-                  <p className="text-sm">
-                    {partner.address.street}
-                  </p>
-                  <p className="text-sm">
-                    {partner.address.city} - {partner.address.state}
-                  </p>
-                  <p className="text-sm">
-                    CEP: {partner.address.zipCode}
-                  </p>
-                </div>
-              </div>
-
-              {/* Contatos */}
-              {partner.contacts.map((contact) => (
-                <div key={contact.id} className="flex items-center gap-2">
-                  {getContactIcon(contact.type)}
-                  <div>
-                    <p className="text-sm font-medium">{contact.label}</p>
-                    <p className="text-sm text-gray-600">{contact.value}</p>
-                  </div>
-                </div>
-              ))}
-
-              {/* Redes Sociais */}
-              {partner.website && (
-                <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  <a 
-                    href={partner.website} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    Website
-                  </a>
-                </div>
-              )}
-
-              {partner.instagram && (
-                <div className="flex items-center gap-2">
-                  <Instagram className="h-4 w-4" />
-                  <span className="text-sm">{partner.instagram}</span>
-                </div>
-              )}
-
-              {partner.linkedin && (
-                <div className="flex items-center gap-2">
-                  <Linkedin className="h-4 w-4" />
-                  <span className="text-sm">{partner.linkedin}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Certificações */}
-          {partner.certifications.length > 0 && (
-            <Card>
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+          {/* Coluna Principal - 3/4 da largura */}
+          <div className="xl:col-span-3 space-y-8">
+            {/* Sobre */}
+            <Card className="shadow-sm">
               <CardHeader>
-                <CardTitle>Certificações</CardTitle>
+                <CardTitle className="text-2xl">Sobre</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {partner.certifications.map((cert, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-green-500" />
-                      <span className="text-sm">{cert}</span>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-gray-700 text-lg leading-relaxed">{partner.about}</p>
               </CardContent>
             </Card>
-          )}
+
+            {/* Especialidades */}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-2xl">Especialidades</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 text-lg leading-relaxed">{partner.specialties}</p>
+              </CardContent>
+            </Card>
+
+            {/* Serviços */}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-2xl">Serviços</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 text-lg leading-relaxed">{partner.services}</p>
+              </CardContent>
+            </Card>
+
+            {/* Avaliações */}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-2xl">Avaliações</CardTitle>
+                  <Button 
+                    onClick={() => setShowReviewForm(true)}
+                    disabled={showReviewForm}
+                    size="lg"
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Deixar Avaliação
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Formulário de Avaliação */}
+                {showReviewForm && (
+                  <form onSubmit={handleSubmitReview} className="space-y-6 p-6 border rounded-lg bg-gray-50">
+                    <div>
+                      <label className="block text-base font-medium mb-3">
+                        Sua avaliação
+                      </label>
+                      <div className="flex gap-2">
+                        {[1, 2, 3, 4, 5].map((value) => (
+                          <button
+                            key={value}
+                            type="button"
+                            className="focus:outline-none"
+                            onMouseEnter={() => setHoveredRating(value)}
+                            onMouseLeave={() => setHoveredRating(0)}
+                            onClick={() => setRating(value)}
+                          >
+                            <Star
+                              className={`h-10 w-10 transition-colors ${
+                                value <= (hoveredRating || rating)
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-gray-300 hover:text-yellow-300'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium mb-3">
+                        Comentário
+                      </label>
+                      <Textarea
+                        placeholder="Conte sua experiência com este parceiro..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        rows={4}
+                        required
+                        minLength={10}
+                        className="text-base"
+                      />
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setShowReviewForm(false)}
+                        size="lg"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button type="submit" disabled={isSubmitting} size="lg">
+                        {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
+                      </Button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Lista de Avaliações */}
+                {approvedReviews.length > 0 ? (
+                  <div className="space-y-6">
+                    {approvedReviews.map((review) => (
+                      <div key={review.id} className="border rounded-lg p-6 bg-white">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-semibold text-lg">{review.userName}</span>
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-5 w-5 ${
+                                  i < review.rating
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-gray-700 text-base leading-relaxed">{review.comment}</p>
+                        <p className="text-sm text-gray-500 mt-3">
+                          {new Date(review.createdAt).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-12 text-lg">
+                    Nenhuma avaliação disponível. Seja o primeiro a avaliar!
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar - 1/4 da largura */}
+          <div className="xl:col-span-1 space-y-8">
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-xl">Contato</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Endereço */}
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 mt-1 text-gray-600" />
+                  <div>
+                    <p className="text-base font-medium">
+                      {partner.address.street}
+                    </p>
+                    <p className="text-base">
+                      {partner.address.city} - {partner.address.state}
+                    </p>
+                    <p className="text-base">
+                      CEP: {partner.address.zipCode}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Contatos */}
+                {partner.contacts.map((contact) => (
+                  <div key={contact.id} className="flex items-center gap-3">
+                    {getContactIcon(contact.type)}
+                    <div>
+                      <p className="text-base font-medium">{contact.label}</p>
+                      <p className="text-base text-gray-600">{contact.value}</p>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Redes Sociais */}
+                {partner.website && (
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-gray-600" />
+                    <a 
+                      href={partner.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-base text-blue-600 hover:underline"
+                    >
+                      Website
+                    </a>
+                  </div>
+                )}
+
+                {partner.instagram && (
+                  <div className="flex items-center gap-3">
+                    <Instagram className="h-5 w-5 text-gray-600" />
+                    <span className="text-base">{partner.instagram}</span>
+                  </div>
+                )}
+
+                {partner.linkedin && (
+                  <div className="flex items-center gap-3">
+                    <Linkedin className="h-5 w-5 text-gray-600" />
+                    <span className="text-base">{partner.linkedin}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Certificações */}
+            {partner.certifications.length > 0 && (
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl">Certificações</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {partner.certifications.map((cert, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <Shield className="h-5 w-5 text-green-500" />
+                        <span className="text-base">{cert}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     </div>
