@@ -29,9 +29,8 @@ export function NewsCenter() {
       return apiRequest(`/api/news/${news.id}`, {
         method: "PUT",
         body: JSON.stringify({
-          ...news,
           isPublished: !news.isPublished,
-          publishedAt: !news.isPublished ? new Date() : null,
+          publishedAt: !news.isPublished ? new Date().toISOString() : null,
         }),
       });
     },
