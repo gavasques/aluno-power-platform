@@ -14,6 +14,9 @@ import {
   promptCategories,
   departments,
   youtubeVideos,
+  news,
+  updates,
+  webhookConfigs,
   type User, 
   type InsertUser,
   type Supplier,
@@ -34,7 +37,13 @@ import {
   type Category,
   type InsertCategory,
   type YoutubeVideo,
-  type InsertYoutubeVideo
+  type InsertYoutubeVideo,
+  type News,
+  type InsertNews,
+  type Update,
+  type InsertUpdate,
+  type WebhookConfig,
+  type InsertWebhookConfig
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, ilike, and, or, desc } from "drizzle-orm";
@@ -117,6 +126,29 @@ export interface IStorage {
   deleteYoutubeVideo(id: number): Promise<void>;
   getActiveYoutubeVideos(): Promise<YoutubeVideo[]>;
   deactivateOldVideos(): Promise<void>;
+
+  // News
+  getNews(): Promise<News[]>;
+  getPublishedNews(): Promise<News[]>;
+  getNewsById(id: number): Promise<News | undefined>;
+  createNews(news: InsertNews): Promise<News>;
+  updateNews(id: number, news: Partial<InsertNews>): Promise<News>;
+  deleteNews(id: number): Promise<void>;
+
+  // Updates
+  getUpdates(): Promise<Update[]>;
+  getPublishedUpdates(): Promise<Update[]>;
+  getUpdate(id: number): Promise<Update | undefined>;
+  createUpdate(update: InsertUpdate): Promise<Update>;
+  updateUpdate(id: number, update: Partial<InsertUpdate>): Promise<Update>;
+  deleteUpdate(id: number): Promise<void>;
+
+  // Webhook Configs
+  getWebhookConfigs(): Promise<WebhookConfig[]>;
+  getWebhookConfig(id: number): Promise<WebhookConfig | undefined>;
+  createWebhookConfig(config: InsertWebhookConfig): Promise<WebhookConfig>;
+  updateWebhookConfig(id: number, config: Partial<InsertWebhookConfig>): Promise<WebhookConfig>;
+  deleteWebhookConfig(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -713,6 +745,115 @@ export class DatabaseStorage implements IStorage {
       .update(youtubeVideos)
       .set({ isActive: false })
       .where(eq(youtubeVideos.isActive, true));
+  }
+
+  // News methods
+  async getNews(): Promise<News[]> {
+    return await db.select().from(news).orderBy(desc(news.createdAt));
+  }
+
+  async getPublishedNews(): Promise<News[]> {
+    return await db
+      .select()
+      .from(news)
+      .where(eq(news.isPublished, true))
+      .orderBy(desc(news.publishedAt));
+  }
+
+  async getNewsById(id: number): Promise<News | undefined> {
+    const [newsItem] = await db.select().from(news).where(eq(news.id, id));
+    return newsItem || undefined;
+  }
+
+  async createNews(newsData: InsertNews): Promise<News> {
+    const [createdNews] = await db
+      .insert(news)
+      .values(newsData)
+      .returning();
+    return createdNews;
+  }
+
+  async updateNews(id: number, newsData: Partial<InsertNews>): Promise<News> {
+    const [updatedNews] = await db
+      .update(news)
+      .set(newsData)
+      .where(eq(news.id, id))
+      .returning();
+    return updatedNews;
+  }
+
+  async deleteNews(id: number): Promise<void> {
+    await db.delete(news).where(eq(news.id, id));
+  }
+
+  // Updates methods
+  async getUpdates(): Promise<Update[]> {
+    return await db.select().from(updates).orderBy(desc(updates.createdAt));
+  }
+
+  async getPublishedUpdates(): Promise<Update[]> {
+    return await db
+      .select()
+      .from(updates)
+      .where(eq(updates.isPublished, true))
+      .orderBy(desc(updates.publishedAt));
+  }
+
+  async getUpdate(id: number): Promise<Update | undefined> {
+    const [update] = await db.select().from(updates).where(eq(updates.id, id));
+    return update || undefined;
+  }
+
+  async createUpdate(updateData: InsertUpdate): Promise<Update> {
+    const [createdUpdate] = await db
+      .insert(updates)
+      .values(updateData)
+      .returning();
+    return createdUpdate;
+  }
+
+  async updateUpdate(id: number, updateData: Partial<InsertUpdate>): Promise<Update> {
+    const [updatedUpdate] = await db
+      .update(updates)
+      .set(updateData)
+      .where(eq(updates.id, id))
+      .returning();
+    return updatedUpdate;
+  }
+
+  async deleteUpdate(id: number): Promise<void> {
+    await db.delete(updates).where(eq(updates.id, id));
+  }
+
+  // Webhook Config methods
+  async getWebhookConfigs(): Promise<WebhookConfig[]> {
+    return await db.select().from(webhookConfigs).orderBy(desc(webhookConfigs.createdAt));
+  }
+
+  async getWebhookConfig(id: number): Promise<WebhookConfig | undefined> {
+    const [config] = await db.select().from(webhookConfigs).where(eq(webhookConfigs.id, id));
+    return config || undefined;
+  }
+
+  async createWebhookConfig(configData: InsertWebhookConfig): Promise<WebhookConfig> {
+    const [createdConfig] = await db
+      .insert(webhookConfigs)
+      .values(configData)
+      .returning();
+    return createdConfig;
+  }
+
+  async updateWebhookConfig(id: number, configData: Partial<InsertWebhookConfig>): Promise<WebhookConfig> {
+    const [updatedConfig] = await db
+      .update(webhookConfigs)
+      .set(configData)
+      .where(eq(webhookConfigs.id, id))
+      .returning();
+    return updatedConfig;
+  }
+
+  async deleteWebhookConfig(id: number): Promise<void> {
+    await db.delete(webhookConfigs).where(eq(webhookConfigs.id, id));
   }
 }
 

@@ -10,7 +10,10 @@ import {
   insertPromptSchema, 
   insertProductSchema, 
   insertCategorySchema,
-  insertYoutubeVideoSchema
+  insertYoutubeVideoSchema,
+  insertNewsSchema,
+  insertUpdateSchema,
+  insertWebhookConfigSchema
 } from "@shared/schema";
 import { youtubeService } from "./services/youtubeService";
 
