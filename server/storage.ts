@@ -749,7 +749,11 @@ export class DatabaseStorage implements IStorage {
 
   // News methods
   async getNews(): Promise<News[]> {
-    return await db.select().from(news).orderBy(desc(news.createdAt));
+    return await db
+      .select()
+      .from(news)
+      .orderBy(desc(news.createdAt))
+      .limit(50); // Limit to most recent 50 news items for better performance
   }
 
   async getPublishedNews(): Promise<News[]> {

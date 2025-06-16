@@ -17,13 +17,17 @@ interface UpdateFormProps {
 }
 
 const updateTypes = [
-  "Nova Funcionalidade",
-  "Correção de Bug",
-  "Melhoria de Performance",
-  "Atualização de Segurança",
-  "Mudança de Interface",
-  "Depreciação",
-  "Geral"
+  "feature",
+  "bugfix", 
+  "improvement",
+  "announcement"
+];
+
+const priorities = [
+  "low",
+  "normal",
+  "high", 
+  "critical"
 ];
 
 export function UpdateForm({ update, onSuccess, onCancel }: UpdateFormProps) {
@@ -32,11 +36,11 @@ export function UpdateForm({ update, onSuccess, onCancel }: UpdateFormProps) {
 
   const [formData, setFormData] = useState({
     title: update?.title || "",
-    description: update?.description || "",
+    content: update?.content || "",
     version: update?.version || "",
-    updateType: update?.updateType || "",
+    type: update?.type || "",
+    priority: update?.priority || "normal",
     isPublished: update?.isPublished || false,
-    isCritical: update?.isCritical || false,
   });
 
   const mutation = useMutation({
@@ -72,7 +76,7 @@ export function UpdateForm({ update, onSuccess, onCancel }: UpdateFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.description || !formData.version) {
+    if (!formData.title || !formData.content || !formData.version) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios.",
@@ -116,8 +120,8 @@ export function UpdateForm({ update, onSuccess, onCancel }: UpdateFormProps) {
           </div>
 
           <div>
-            <Label htmlFor="updateType">Tipo de Atualização</Label>
-            <Select value={formData.updateType} onValueChange={(value) => setFormData({ ...formData, updateType: value })}>
+            <Label htmlFor="type">Tipo de Atualização</Label>
+            <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
@@ -131,14 +135,30 @@ export function UpdateForm({ update, onSuccess, onCancel }: UpdateFormProps) {
             </Select>
           </div>
 
+          <div>
+            <Label htmlFor="priority">Prioridade</Label>
+            <Select value={formData.priority} onValueChange={(value) => setFormData({ ...formData, priority: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a prioridade" />
+              </SelectTrigger>
+              <SelectContent>
+                {priorities.map((priority) => (
+                  <SelectItem key={priority} value={priority}>
+                    {priority}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="md:col-span-2">
-            <Label htmlFor="description">Descrição *</Label>
+            <Label htmlFor="content">Descrição *</Label>
             <Textarea
-              id="description"
+              id="content"
               placeholder="Descreva as mudanças desta atualização"
               rows={6}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              value={formData.content}
+              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               required
             />
           </div>
@@ -152,15 +172,6 @@ export function UpdateForm({ update, onSuccess, onCancel }: UpdateFormProps) {
               onCheckedChange={(checked) => setFormData({ ...formData, isPublished: checked })}
             />
             <Label htmlFor="isPublished">Publicar imediatamente</Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="isCritical"
-              checked={formData.isCritical}
-              onCheckedChange={(checked) => setFormData({ ...formData, isCritical: checked })}
-            />
-            <Label htmlFor="isCritical">Atualização crítica</Label>
           </div>
         </div>
 

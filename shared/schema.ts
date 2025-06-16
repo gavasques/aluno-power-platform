@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -326,7 +326,11 @@ export const news = pgTable("news", {
   webhookData: text("webhook_data"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("news_created_at_idx").on(table.createdAt),
+  publishedIdx: index("news_published_idx").on(table.isPublished),
+  categoryIdx: index("news_category_idx").on(table.category),
+}));
 
 // Updates table
 export const updates = pgTable("updates", {
