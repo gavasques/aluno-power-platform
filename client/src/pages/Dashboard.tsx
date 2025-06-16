@@ -335,40 +335,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Advanced System Analytics */}
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-blue-600" />
-              Analytics Avançadas do Sistema
-            </h2>
-            <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
-              Ver Relatório Completo
-              <ExternalLink className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
-          <SystemAnalytics />
-        </div>
 
-        {/* Bottom Section - Quick Actions */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Ações Rápidas</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: Package, label: "Produtos", color: "from-blue-500 to-cyan-600" },
-              { icon: Truck, label: "Fornecedores", color: "from-emerald-500 to-teal-600" },
-              { icon: BrainCircuit, label: "IA", color: "from-purple-500 to-pink-600" },
-              { icon: BookOpen, label: "Cursos", color: "from-orange-500 to-red-600" }
-            ].map((item, index) => (
-              <Card key={index} className={`bg-gradient-to-r ${item.color} border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer`}>
-                <CardContent className="p-4 text-center">
-                  <item.icon className="h-8 w-8 text-white mx-auto mb-2" />
-                  <p className="text-white font-medium">{item.label}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

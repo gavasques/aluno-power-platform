@@ -1,9 +1,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, CreditCard, Activity, TrendingUp, MessageSquare, FileText, Settings, Database } from "lucide-react";
+import { Users, CreditCard, Activity, TrendingUp, MessageSquare, FileText, Settings, Database, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { SystemAnalytics } from "@/components/analytics/SystemAnalytics";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -126,6 +127,21 @@ const AdminDashboard = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Advanced System Analytics */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <TrendingUp className="h-6 w-6 text-blue-600" />
+            Analytics Avançadas do Sistema
+          </h2>
+          <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+            Ver Relatório Completo
+            <ExternalLink className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+        <SystemAnalytics />
       </div>
     </div>
   );
