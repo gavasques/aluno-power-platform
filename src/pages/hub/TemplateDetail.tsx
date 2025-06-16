@@ -26,7 +26,7 @@ const TemplateDetail = () => {
 
   if (!template) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="w-full p-6">
         <div className="text-center py-12">
           <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
           <h3 className="text-xl font-semibold mb-2">Template não encontrado</h3>
@@ -77,7 +77,7 @@ const TemplateDetail = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl space-y-6">
+    <div className="w-full p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Button 
