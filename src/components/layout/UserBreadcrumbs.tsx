@@ -69,6 +69,14 @@ export function UserBreadcrumbs() {
         isLast: i === pathSegments.length - 1
       });
     }
+    // Verifica se é uma rota de detalhes de template
+    else if (pathSegments[i-1] === "templates" && pathSegments[i-2] === "hub" && !breadcrumbMap[currentPath]) {
+      breadcrumbs.push({
+        path: currentPath,
+        label: "Detalhes do Template",
+        isLast: i === pathSegments.length - 1
+      });
+    }
     else if (breadcrumbMap[currentPath]) {
       breadcrumbs.push({
         path: currentPath,
