@@ -30,7 +30,7 @@ export function NewsCenter() {
         method: "PUT",
         body: JSON.stringify({
           isPublished: !news.isPublished,
-          publishedAt: !news.isPublished ? new Date().toISOString() : null,
+          publishedAt: !news.isPublished ? new Date() : null,
         }),
       });
     },
