@@ -1,13 +1,12 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { insertNewsSchema, type News, type InsertNews } from "@shared/schema";
+import { type News } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
 interface NewsFormProps {
@@ -20,34 +19,27 @@ export function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<InsertNews>({
-    resolver: zodResolver(insertNewsSchema),
-    defaultValues: {
-      title: news?.title || "",
-      content: news?.content || "",
-      summary: news?.summary || "",
-      imageUrl: news?.imageUrl || "",
-      category: news?.category || "",
-      tags: news?.tags || [],
-      isPublished: news?.isPublished || false,
-      isFeatured: news?.isFeatured || false,
-      seoTitle: news?.seoTitle || "",
-      seoDescription: news?.seoDescription || "",
-      seoKeywords: news?.seoKeywords || "",
-    },
+  const [formData, setFormData] = useState({
+    title: news?.title || "",
+    content: news?.content || "",
+    summary: news?.summary || "",
+    imageUrl: news?.imageUrl || "",
+    category: news?.category || "",
+    isPublished: news?.isPublished || false,
+    isFeatured: news?.isFeatured || false,
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: InsertNews) => {
+    mutationFn: async (data: any) => {
       if (news) {
         return apiRequest(`/api/news/${news.id}`, {
           method: "PUT",
-          body: data,
+          body: JSON.stringify(data),
         });
       } else {
         return apiRequest("/api/news", {
           method: "POST",
-          body: data,
+          body: JSON.stringify(data),
         });
       }
     },
@@ -68,182 +60,91 @@ export function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
     },
   });
 
-  const onSubmit = (data: InsertNews) => {
-    mutation.mutate(data);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    mutation.mutate(formData);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Título</FormLabel>
-                <FormControl>
-                  <Input placeholder="Digite o título da notícia" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="summary"
-            render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Resumo</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Digite um resumo da notícia"
-                    rows={3}
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="content"
-            render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Conteúdo</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Digite o conteúdo completo da notícia"
-                    rows={8}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoria</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Ex: Tecnologia, Negócios"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL da Imagem</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="https://exemplo.com/imagem.jpg"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="seoTitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Título SEO</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Título otimizado para SEO"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="seoDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descrição SEO</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Descrição otimizada para SEO"
-                    rows={2}
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="isPublished"
-            render={({ field }) => (
-              <FormItem className="flex items-center space-x-2">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel>Publicar imediatamente</FormLabel>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="isFeatured"
-            render={({ field }) => (
-              <FormItem className="flex items-center space-x-2">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel>Notícia em destaque</FormLabel>
-                <FormMessage />
-              </FormItem>
-            )}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="md:col-span-2">
+          <Label htmlFor="title">Título</Label>
+          <Input
+            id="title"
+            placeholder="Digite o título da notícia"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           />
         </div>
 
-        <div className="flex justify-end space-x-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "Salvando..." : news ? "Atualizar" : "Criar"}
-          </Button>
+        <div className="md:col-span-2">
+          <Label htmlFor="summary">Resumo</Label>
+          <Textarea
+            id="summary"
+            placeholder="Digite um resumo da notícia"
+            rows={3}
+            value={formData.summary || ""}
+            onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+          />
         </div>
-      </form>
-    </Form>
+
+        <div className="md:col-span-2">
+          <Label htmlFor="content">Conteúdo</Label>
+          <Textarea
+            id="content"
+            placeholder="Digite o conteúdo completo da notícia"
+            rows={8}
+            value={formData.content}
+            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="category">Categoria</Label>
+          <Input
+            id="category"
+            placeholder="Ex: Tecnologia, Negócios"
+            value={formData.category || ""}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="imageUrl">URL da Imagem</Label>
+          <Input
+            id="imageUrl"
+            placeholder="https://exemplo.com/imagem.jpg"
+            value={formData.imageUrl || ""}
+            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+          />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={formData.isPublished}
+            onCheckedChange={(checked) => setFormData({ ...formData, isPublished: checked })}
+          />
+          <Label>Publicar imediatamente</Label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={formData.isFeatured}
+            onCheckedChange={(checked) => setFormData({ ...formData, isFeatured: checked })}
+          />
+          <Label>Notícia em destaque</Label>
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={mutation.isPending}>
+          {mutation.isPending ? "Salvando..." : news ? "Atualizar" : "Criar"}
+        </Button>
+      </div>
+    </form>
   );
 }

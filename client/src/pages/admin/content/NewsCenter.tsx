@@ -27,11 +27,11 @@ export function NewsCenter() {
     mutationFn: async (news: News) => {
       return apiRequest(`/api/news/${news.id}`, {
         method: "PUT",
-        body: {
+        body: JSON.stringify({
           ...news,
           isPublished: !news.isPublished,
           publishedAt: !news.isPublished ? new Date() : null,
-        },
+        }),
       });
     },
     onSuccess: () => {
