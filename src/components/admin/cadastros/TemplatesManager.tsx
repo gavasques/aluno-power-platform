@@ -28,7 +28,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const TemplatesManager = () => {
-  const { templates, categories, searchTemplates, deleteTemplate, createTemplate } = useTemplates();
+  const { templates, categories, searchTemplates, deleteTemplate } = useTemplates();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
@@ -53,29 +53,6 @@ const TemplatesManager = () => {
       toast({
         title: "Erro",
         description: "Não foi possível excluir o template.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleCopy = async (template: any) => {
-    try {
-      await createTemplate({
-        title: `${template.title} (Cópia)`,
-        content: template.content,
-        categoryId: template.category.id,
-        description: template.description,
-        whenToUse: template.whenToUse,
-        customization: template.customization,
-      });
-      toast({
-        title: "Template copiado!",
-        description: `Uma cópia do template "${template.title}" foi criada.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o template.",
         variant: "destructive",
       });
     }
@@ -171,15 +148,6 @@ const TemplatesManager = () => {
                     title="Copiar conteúdo"
                   >
                     <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="text-foreground border-border hover:bg-gray-100"
-                    onClick={() => handleCopy(template)}
-                    title="Duplicar template"
-                  >
-                    <FileText className="h-4 w-4" />
                   </Button>
                   <Button 
                     size="sm" 
