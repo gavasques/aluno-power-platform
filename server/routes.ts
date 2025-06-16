@@ -630,7 +630,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/news/:id', async (req, res) => {
     try {
+      console.log('PUT /api/news/:id - Request body:', req.body);
       const validatedData = insertNewsSchema.partial().parse(req.body);
+      console.log('PUT /api/news/:id - Validated data:', validatedData);
       const news = await storage.updateNews(parseInt(req.params.id), validatedData);
       
       // Broadcast real-time notification
@@ -645,7 +647,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(news);
     } catch (error) {
-      res.status(400).json({ error: 'Invalid news data' });
+      console.error('PUT /api/news/:id - Error:', error);
+      res.status(400).json({ error: 'Invalid news data', details: error.message });
     }
   });
 
