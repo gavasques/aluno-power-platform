@@ -19,8 +19,9 @@ export function NewsCenter() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: newsList = [], isLoading } = useQuery<News[]>({
+  const { data: newsList = [], isLoading, refetch } = useQuery<News[]>({
     queryKey: ['/api/news'],
+    staleTime: 0,
   });
 
   const publishMutation = useMutation({
@@ -81,6 +82,7 @@ export function NewsCenter() {
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingNews(null);
+    refetch(); // Force refresh the news list
   };
 
   const handlePublishToggle = (news: News) => {
@@ -144,7 +146,7 @@ export function NewsCenter() {
       )}
 
       <div className="grid gap-4">
-        {newsList.map((news: News) => (
+        {(newsList as News[]).map((news: News) => (
           <Card key={news.id}>
             <CardContent className="p-6">
               <div className="flex justify-between items-start">
