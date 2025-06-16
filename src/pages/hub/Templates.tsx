@@ -3,15 +3,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTemplates } from '@/contexts/TemplatesContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
-  Copy, 
   FileText,
-  Eye,
-  Calendar,
 } from 'lucide-react';
 import {
   Select,
@@ -20,14 +16,12 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 
 const Templates = () => {
   const navigate = useNavigate();
   const { templates, categories, loading, searchTemplates } = useTemplates();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const { toast } = useToast();
 
   const filteredTemplates = React.useMemo(() => {
     let result = searchQuery ? searchTemplates(searchQuery) : templates;
@@ -37,20 +31,8 @@ const Templates = () => {
     return result;
   }, [templates, searchQuery, selectedCategory, searchTemplates]);
 
-  const copyToClipboard = async (content: string, title: string) => {
-    try {
-      await navigator.clipboard.writeText(content);
-      toast({
-        title: "Template copiado!",
-        description: `O template "${title}" foi copiado para a área de transferência.`,
-      });
-    } catch (err) {
-      toast({
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o template. Tente novamente.",
-        variant: "destructive",
-      });
-    }
+  const handleCardClick = (templateId: string) => {
+    navigate(`/hub/templates/${templateId}`);
   };
 
   if (loading) {
@@ -114,7 +96,11 @@ const Templates = () => {
       {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTemplates.map((template) => (
-          <Card key={template.id} className="hover:shadow-lg transition-all">
+          <Card 
+            key={template.id} 
+            className="hover:shadow-lg transition-all cursor-pointer hover:scale-105"
+            onClick={() => handleCardClick(template.id)}
+          >
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -123,38 +109,11 @@ const Templates = () => {
                     {template.category.name}
                   </Badge>
                   {template.description && (
-                    <p className="text-sm text-gray-600 mb-2">{template.description}</p>
+                    <p className="text-sm text-gray-600">{template.description}</p>
                   )}
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-sm text-gray-600 line-clamp-3">
-                  {template.content}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Calendar className="h-4 w-4" />
-                <span>{template.createdAt.toLocaleDateString('pt-BR')}</span>
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  className="flex-1"
-                  onClick={() => copyToClipboard(template.content, template.title)}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copiar Template
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate(`/hub/templates/${template.id}`)}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
           </Card>
         ))}
       </div>
