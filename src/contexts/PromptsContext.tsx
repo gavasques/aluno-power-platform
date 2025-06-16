@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Prompt, PromptCategory, CreatePromptData, UpdatePromptData, PromptImage } from '@/types/prompt';
 
@@ -33,6 +32,18 @@ const mockPrompts: Prompt[] = [
     category: mockCategories[1],
     description: 'Prompt para gerar descrições otimizadas de produtos para e-commerce',
     usageExamples: 'Use para criar descrições de produtos no Mercado Livre, Amazon, ou sua loja virtual. Substitua as variáveis pelos dados específicos do seu produto.',
+    images: [
+      {
+        id: '1',
+        url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=600&fit=crop',
+        alt: 'Exemplo de descrição de produto antes da otimização'
+      },
+      {
+        id: '2',
+        url: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=600&fit=crop',
+        alt: 'Exemplo de descrição de produto depois da otimização com IA'
+      }
+    ],
     createdAt: new Date('2024-01-10'),
     updatedAt: new Date('2024-01-10'),
   },
@@ -43,6 +54,13 @@ const mockPrompts: Prompt[] = [
     category: mockCategories[3],
     description: 'Prompt para análise completa da concorrência em um nicho específico',
     usageExamples: 'Ideal para pesquisa antes de lançar produtos ou para identificar oportunidades de mercado. Use ferramentas como ChatGPT, Claude ou Gemini.',
+    images: [
+      {
+        id: '3',
+        url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop',
+        alt: 'Dashboard de análise de concorrência gerado pela IA'
+      }
+    ],
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15'),
   },
