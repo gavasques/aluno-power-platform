@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Youtube, RefreshCw, Play, Calendar, Users, ExternalLink } from "lucide-react";
 import { VideoCard } from "./VideoCard";
 import { useYoutube } from "@/contexts/YoutubeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 
 export function VideosSection() {
   const { videos, channelInfo, loading, channelLoading, syncVideos } = useYoutube();
+  const { isAdmin } = useAuth();
   const [syncing, setSyncing] = useState(false);
 
   const handleSync = async () => {
@@ -88,15 +90,17 @@ export function VideosSection() {
               <Badge variant="outline" className="text-xs">
                 {videos.length} vídeos em cache
               </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSync}
-                disabled={syncing}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
-                {syncing ? 'Sincronizando...' : 'Atualizar'}
-              </Button>
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSync}
+                  disabled={syncing}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+                  {syncing ? 'Sincronizando...' : 'Atualizar'}
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -115,12 +119,14 @@ export function VideosSection() {
             <Youtube className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">Nenhum vídeo encontrado</h3>
             <p className="text-muted-foreground mb-4">
-              Clique em "Atualizar" para buscar novos vídeos do YouTube
+              {isAdmin ? 'Clique em "Buscar Vídeos" para sincronizar com o YouTube' : 'Os vídeos do YouTube serão sincronizados automaticamente'}
             </p>
-            <Button onClick={handleSync} disabled={syncing}>
-              <Play className="h-4 w-4 mr-2" />
-              Buscar Vídeos
-            </Button>
+            {isAdmin && (
+              <Button onClick={handleSync} disabled={syncing}>
+                <Play className="h-4 w-4 mr-2" />
+                Buscar Vídeos
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : (

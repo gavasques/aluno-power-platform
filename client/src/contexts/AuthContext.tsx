@@ -14,6 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  toggleRole: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,12 +48,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const toggleRole = () => {
+    if (user) {
+      setUser({
+        ...user,
+        role: user.role === 'admin' ? 'user' : 'admin'
+      });
+    }
+  };
+
   const value = {
     user,
     isAdmin,
     isAuthenticated,
     login,
     logout,
+    toggleRole,
   };
 
   return (

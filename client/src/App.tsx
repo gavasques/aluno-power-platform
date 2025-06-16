@@ -14,6 +14,7 @@ import { ToolsProvider } from "./contexts/ToolsContext";
 import { TemplatesProvider } from "./contexts/TemplatesContext";
 import { PromptsProvider } from "./contexts/PromptsContext";
 import { YoutubeProvider } from "./contexts/YoutubeContext";
+import { AuthProvider } from "./contexts/AuthContext";
 
 // Import pages that exist
 import Dashboard from "./pages/Dashboard";
@@ -52,7 +53,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <YoutubeProvider>
+          <AuthProvider>
+            <YoutubeProvider>
             <PartnersProvider>
               <SuppliersProvider>
                 <MaterialsProvider>
@@ -108,7 +110,8 @@ function App() {
                 </MaterialsProvider>
               </SuppliersProvider>
             </PartnersProvider>
-          </YoutubeProvider>
+            </YoutubeProvider>
+          </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>
