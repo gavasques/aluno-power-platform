@@ -82,7 +82,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     if (!query) return products;
     return products.filter(product =>
       product.name?.toLowerCase().includes(query.toLowerCase()) ||
-      product.description?.toLowerCase().includes(query.toLowerCase())
+      product.descriptions?.toLowerCase().includes(query.toLowerCase())
     );
   };
 
