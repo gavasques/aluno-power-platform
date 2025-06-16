@@ -5,12 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { BrainCircuit, Package, Rss, Truck, Youtube, TrendingUp, Users, BookOpen, ExternalLink } from "lucide-react";
+import { BrainCircuit, Package, Rss, Truck, Youtube, TrendingUp, Users, BookOpen, ExternalLink, Calendar, ArrowRight } from "lucide-react";
 import React, { memo } from "react";
 import { useYoutube } from "@/contexts/YoutubeContext";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { VideoCard } from "@/components/youtube/VideoCard";
+import { useQuery } from "@tanstack/react-query";
+import type { News } from "@shared/schema";
 
 interface StatCardProps {
   title: string;
@@ -38,6 +40,20 @@ StatCard.displayName = 'StatCard';
 const Dashboard = () => {
   const { videos, loading } = useYoutube();
   const recentVideos = videos.slice(0, 6);
+
+  // Fetch published news
+  const { data: newsData = [], isLoading: newsLoading } = useQuery<News[]>({
+    queryKey: ['/api/news/published'],
+    queryFn: async () => {
+      const response = await fetch('/api/news/published');
+      if (!response.ok) {
+        throw new Error('Failed to fetch news');
+      }
+      return response.json();
+    },
+  });
+
+  const recentNews = newsData.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-white">
@@ -164,12 +180,56 @@ const Dashboard = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-6 bg-white">
-                <div className="text-center space-y-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto">
-                    <Rss className="h-6 w-6 text-blue-500" />
+                {newsLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, index) => (
+                      <div key={index} className="animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-gray-700">Feed de notícias em desenvolvimento</p>
-                </div>
+                ) : recentNews.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentNews.map((news) => (
+                      <div key={news.id} className="border-b border-gray-100 last:border-0 pb-3 last:pb-0">
+                        <h4 className="font-medium text-gray-800 text-sm line-clamp-2 mb-1">
+                          {news.title}
+                        </h4>
+                        <p className="text-xs text-gray-500 mb-1">{news.category}</p>
+                        {news.summary && (
+                          <p className="text-xs text-gray-600 line-clamp-2">{news.summary}</p>
+                        )}
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center text-xs text-gray-400">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {new Date(news.createdAt).toLocaleDateString('pt-BR')}
+                          </div>
+                          {news.isFeatured && (
+                            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                              Destaque
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="pt-3">
+                      <Button asChild variant="outline" size="sm" className="w-full border-blue-500 text-blue-500 hover:bg-blue-50">
+                        <Link to="/noticias">
+                          Ver todas as notícias
+                          <ArrowRight className="h-3 w-3 ml-1" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto">
+                      <Rss className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <p className="text-gray-700 text-sm">Nenhuma notícia publicada</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
