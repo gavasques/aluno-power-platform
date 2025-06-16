@@ -4,7 +4,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AdminLayout } from "./components/layout/AdminLayout";
 import Layout from "./components/layout/Layout";
 import { Toaster } from "@/components/ui/toaster"
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 import { PartnersProvider } from "@/contexts/PartnersContext";
 import { SuppliersProvider } from "@/contexts/SuppliersContext";
 import { MaterialsProvider } from "./contexts/MaterialsContext";
@@ -42,7 +43,7 @@ const Auth = () => (
   </div>
 );
 
-const queryClient = new QueryClient();
+
 
 function App() {
   return (

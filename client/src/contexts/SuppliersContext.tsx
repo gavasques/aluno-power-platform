@@ -1,433 +1,106 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Supplier, SupplierReview, SupplierContact, SupplierFile, SupplierBrand, SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS } from '@/types/supplier';
+import React, { createContext, useContext } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import type { Supplier as DbSupplier, InsertSupplier } from '@shared/schema';
 
 interface SuppliersContextType {
-  suppliers: Supplier[];
+  suppliers: DbSupplier[];
   loading: boolean;
   error: string | null;
-  addSupplier: (supplier: Omit<Supplier, 'id' | 'createdAt' | 'updatedAt' | 'averageRating' | 'totalReviews' | 'reviews'>) => void;
-  updateSupplier: (id: string, supplier: Partial<Supplier>) => void;
-  deleteSupplier: (id: string) => void;
-  addReview: (supplierId: string, review: Omit<SupplierReview, 'id' | 'createdAt' | 'isApproved'>) => void;
-  approveReview: (supplierId: string, reviewId: string) => void;
-  addContact: (supplierId: string, contact: Omit<SupplierContact, 'id'>) => void;
-  updateContact: (supplierId: string, contactId: string, contact: Partial<SupplierContact>) => void;
-  deleteContact: (supplierId: string, contactId: string) => void;
-  addFile: (supplierId: string, file: Omit<SupplierFile, 'id' | 'uploadedAt'>) => void;
-  updateFile: (supplierId: string, fileId: string, file: Partial<SupplierFile>) => void;
-  deleteFile: (supplierId: string, fileId: string) => void;
-  addBrand: (supplierId: string, brand: Omit<SupplierBrand, 'id'>) => void;
-  updateBrand: (supplierId: string, brandId: string, brand: Partial<SupplierBrand>) => void;
-  deleteBrand: (supplierId: string, brandId: string) => void;
-  getSupplierById: (id: string) => Supplier | undefined;
-  getSuppliersByCategory: (categoryId: string) => Supplier[];
-  getSuppliersByDepartment: (departmentId: string) => Supplier[];
-  searchSuppliers: (query: string) => Supplier[];
+  addSupplier: (supplier: InsertSupplier) => Promise<void>;
+  updateSupplier: (id: number, supplier: Partial<InsertSupplier>) => Promise<void>;
+  deleteSupplier: (id: number) => Promise<void>;
+  getSupplierById: (id: number) => DbSupplier | undefined;
+  searchSuppliers: (query: string) => DbSupplier[];
+  refetch: () => void;
 }
 
 const SuppliersContext = createContext<SuppliersContextType | undefined>(undefined);
 
 export function SuppliersProvider({ children }: { children: React.ReactNode }) {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  // Mock data inicial
-  useEffect(() => {
-    const mockSuppliers: Supplier[] = [
-      {
-        id: '1',
-        tradeName: 'TechSupply Brasil',
-        corporateName: 'TechSupply Brasil Importação e Exportação Ltda',
-        category: SUPPLIER_CATEGORIES[2], // Importadores
-        departments: [SUPPLIER_DEPARTMENTS[0], SUPPLIER_DEPARTMENTS[4]], // Eletrônicos e Esportes
-        brands: [
-          {
-            id: '1',
-            name: 'Apple',
-            description: 'Produtos Apple originais',
-            website: 'https://apple.com',
-            category: 'Eletrônicos',
-            notes: 'Linha completa de produtos Apple'
-          },
-          {
-            id: '2',
-            name: 'Samsung',
-            description: 'Smartphones e tablets Samsung',
-            category: 'Eletrônicos',
-            notes: 'Foco em Galaxy series'
-          }
-        ],
-        notes: 'Empresa confiável com histórico de 15 anos no mercado. Especializada em produtos Apple e Samsung.',
-        email: 'contato@techsupplybrasil.com.br',
-        mainContact: 'João Silva',
-        phone: '(11) 3456-7890',
-        whatsapp: '(11) 99876-5432',
-        contacts: [
-          {
-            id: '1',
-            name: 'João Silva',
-            role: 'Gerente Comercial',
-            phone: '(11) 3456-7890',
-            whatsapp: '(11) 99876-5432',
-            email: 'joao@techsupplybrasil.com.br',
-            notes: 'Responsável por novos parceiros'
-          },
-          {
-            id: '2',
-            name: 'Maria Santos',
-            role: 'Analista de Produtos',
-            phone: '(11) 3456-7891',
-            whatsapp: '(11) 99876-5433',
-            email: 'maria@techsupplybrasil.com.br',
-            notes: 'Especialista em smartphones'
-          }
-        ],
-        files: [
-          {
-            id: '1',
-            name: 'Catálogo Eletrônicos 2024',
-            description: 'Catálogo completo de produtos eletrônicos para 2024',
-            type: 'catalog',
-            fileUrl: '#',
-            uploadedAt: '2024-01-15',
-            size: 2048000
-          },
-          {
-            id: '2',
-            name: 'Tabela de Preços Janeiro',
-            description: 'Planilha de preços atualizada para janeiro/2024',
-            type: 'price_sheet',
-            fileUrl: '#',
-            uploadedAt: '2024-01-10',
-            size: 512000
-          }
-        ],
-        commercialTerms: 'Pagamento: 30 dias\nFrete: CIF\nDesconto para pedidos acima de R$ 10.000\nGarantia de 1 ano em todos os produtos',
-        logo: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=100&h=100&fit=crop',
-        isVerified: true,
-        averageRating: 4.5,
-        totalReviews: 128,
-        reviews: [
-          {
-            id: '1',
-            supplierId: '1',
-            userId: 'user1',
-            userName: 'Carlos Silva',
-            rating: 5,
-            comment: 'Excelente fornecedor! Produtos de qualidade e entrega rápida.',
-            photos: [],
-            createdAt: '2024-01-15',
-            isApproved: true
-          }
-        ],
-        createdAt: '2024-01-01',
-        updatedAt: '2024-01-15'
-      },
-      {
-        id: '2',
-        tradeName: 'Nacional Distribuidora',
-        corporateName: 'Nacional Distribuidora de Produtos Ltda',
-        category: SUPPLIER_CATEGORIES[1], // Distribuidores
-        departments: [SUPPLIER_DEPARTMENTS[1], SUPPLIER_DEPARTMENTS[7]], // Casa e Jardim, Construção
-        brands: [
-          {
-            id: '1',
-            name: 'Tramontina',
-            description: 'Utensílios domésticos e ferramentas',
-            category: 'Casa e Jardim',
-            notes: 'Linha completa para casa'
-          }
-        ],
-        notes: 'Distribuidora nacional com ampla rede de produtos para casa e jardim.',
-        email: 'vendas@nacionaldist.com.br',
-        mainContact: 'Pedro Santos',
-        phone: '(11) 2345-6789',
-        whatsapp: '(11) 98765-4321',
-        contacts: [
-          {
-            id: '1',
-            name: 'Pedro Santos',
-            role: 'Diretor Comercial',
-            phone: '(11) 2345-6789',
-            whatsapp: '(11) 98765-4321',
-            email: 'pedro@nacionaldist.com.br',
-            notes: 'Contato principal para grandes volumes'
-          }
-        ],
-        files: [],
-        commercialTerms: 'Pagamento: 45 dias\nFrete: FOB\nDesconto progressivo por volume\nTroca garantida em caso de defeito',
-        isVerified: false,
-        averageRating: 3.8,
-        totalReviews: 45,
-        reviews: [],
-        createdAt: '2024-01-05',
-        updatedAt: '2024-01-05'
-      }
-    ];
+  const {
+    data: suppliers = [],
+    isLoading: loading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['/api/suppliers'],
+    queryFn: () => apiRequest<DbSupplier[]>('/api/suppliers'),
+  });
 
-    setTimeout(() => {
-      setSuppliers(mockSuppliers);
-      setLoading(false);
-    }, 1000);
-  }, []);
+  const addSupplierMutation = useMutation({
+    mutationFn: (supplier: InsertSupplier) =>
+      apiRequest<DbSupplier>('/api/suppliers', {
+        method: 'POST',
+        body: JSON.stringify(supplier),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/suppliers'] });
+    },
+  });
 
-  const addSupplier = (supplierData: Omit<Supplier, 'id' | 'createdAt' | 'updatedAt' | 'averageRating' | 'totalReviews' | 'reviews'>) => {
-    const newSupplier: Supplier = {
-      ...supplierData,
-      id: Date.now().toString(),
-      averageRating: 0,
-      totalReviews: 0,
-      reviews: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setSuppliers(prev => [...prev, newSupplier]);
+  const updateSupplierMutation = useMutation({
+    mutationFn: ({ id, supplier }: { id: number; supplier: Partial<InsertSupplier> }) =>
+      apiRequest<DbSupplier>(`/api/suppliers/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(supplier),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/suppliers'] });
+    },
+  });
+
+  const deleteSupplierMutation = useMutation({
+    mutationFn: (id: number) =>
+      apiRequest(`/api/suppliers/${id}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/suppliers'] });
+    },
+  });
+
+  const addSupplier = async (supplier: InsertSupplier): Promise<void> => {
+    await addSupplierMutation.mutateAsync(supplier);
   };
 
-  const updateSupplier = (id: string, updates: Partial<Supplier>) => {
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === id 
-        ? { ...supplier, ...updates, updatedAt: new Date().toISOString() }
-        : supplier
-    ));
+  const updateSupplier = async (id: number, supplier: Partial<InsertSupplier>): Promise<void> => {
+    await updateSupplierMutation.mutateAsync({ id, supplier });
   };
 
-  const deleteSupplier = (id: string) => {
-    setSuppliers(prev => prev.filter(supplier => supplier.id !== id));
+  const deleteSupplier = async (id: number): Promise<void> => {
+    await deleteSupplierMutation.mutateAsync(id);
   };
 
-  const addReview = (supplierId: string, reviewData: Omit<SupplierReview, 'id' | 'createdAt' | 'isApproved'>) => {
-    const newReview: SupplierReview = {
-      ...reviewData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      isApproved: true,
-    };
-
-    setSuppliers(prev => prev.map(supplier => {
-      if (supplier.id === supplierId) {
-        const updatedReviews = [...supplier.reviews, newReview];
-        const approvedReviews = updatedReviews.filter(r => r.isApproved);
-        const averageRating = approvedReviews.length > 0 
-          ? approvedReviews.reduce((sum, r) => sum + r.rating, 0) / approvedReviews.length 
-          : 0;
-        
-        return {
-          ...supplier,
-          reviews: updatedReviews,
-          averageRating,
-          totalReviews: approvedReviews.length,
-          updatedAt: new Date().toISOString()
-        };
-      }
-      return supplier;
-    }));
-  };
-
-  const approveReview = (supplierId: string, reviewId: string) => {
-    setSuppliers(prev => prev.map(supplier => {
-      if (supplier.id === supplierId) {
-        const updatedReviews = supplier.reviews.map(review => 
-          review.id === reviewId ? { ...review, isApproved: true } : review
-        );
-        const approvedReviews = updatedReviews.filter(r => r.isApproved);
-        const averageRating = approvedReviews.length > 0 
-          ? approvedReviews.reduce((sum, r) => sum + r.rating, 0) / approvedReviews.length 
-          : 0;
-        
-        return {
-          ...supplier,
-          reviews: updatedReviews,
-          averageRating,
-          totalReviews: approvedReviews.length,
-          updatedAt: new Date().toISOString()
-        };
-      }
-      return supplier;
-    }));
-  };
-
-  const addContact = (supplierId: string, contactData: Omit<SupplierContact, 'id'>) => {
-    const newContact: SupplierContact = {
-      ...contactData,
-      id: Date.now().toString(),
-    };
-
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === supplierId 
-        ? { 
-            ...supplier, 
-            contacts: [...supplier.contacts, newContact],
-            updatedAt: new Date().toISOString()
-          }
-        : supplier
-    ));
-  };
-
-  const updateContact = (supplierId: string, contactId: string, updates: Partial<SupplierContact>) => {
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === supplierId 
-        ? { 
-            ...supplier, 
-            contacts: supplier.contacts.map(contact => 
-              contact.id === contactId ? { ...contact, ...updates } : contact
-            ),
-            updatedAt: new Date().toISOString()
-          }
-        : supplier
-    ));
-  };
-
-  const deleteContact = (supplierId: string, contactId: string) => {
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === supplierId 
-        ? { 
-            ...supplier, 
-            contacts: supplier.contacts.filter(c => c.id !== contactId),
-            updatedAt: new Date().toISOString()
-          }
-        : supplier
-    ));
-  };
-
-  const addFile = (supplierId: string, fileData: Omit<SupplierFile, 'id' | 'uploadedAt'>) => {
-    const newFile: SupplierFile = {
-      ...fileData,
-      id: Date.now().toString(),
-      uploadedAt: new Date().toISOString(),
-    };
-
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === supplierId 
-        ? { 
-            ...supplier, 
-            files: [...supplier.files, newFile],
-            updatedAt: new Date().toISOString()
-          }
-        : supplier
-    ));
-  };
-
-  const updateFile = (supplierId: string, fileId: string, updates: Partial<SupplierFile>) => {
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === supplierId 
-        ? { 
-            ...supplier, 
-            files: supplier.files.map(file => 
-              file.id === fileId ? { ...file, ...updates } : file
-            ),
-            updatedAt: new Date().toISOString()
-          }
-        : supplier
-    ));
-  };
-
-  const deleteFile = (supplierId: string, fileId: string) => {
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === supplierId 
-        ? { 
-            ...supplier, 
-            files: supplier.files.filter(f => f.id !== fileId),
-            updatedAt: new Date().toISOString()
-          }
-        : supplier
-    ));
-  };
-
-  const addBrand = (supplierId: string, brandData: Omit<SupplierBrand, 'id'>) => {
-    const newBrand: SupplierBrand = {
-      ...brandData,
-      id: Date.now().toString(),
-    };
-
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === supplierId 
-        ? { 
-            ...supplier, 
-            brands: [...supplier.brands, newBrand],
-            updatedAt: new Date().toISOString()
-          }
-        : supplier
-    ));
-  };
-
-  const updateBrand = (supplierId: string, brandId: string, updates: Partial<SupplierBrand>) => {
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === supplierId 
-        ? { 
-            ...supplier, 
-            brands: supplier.brands.map(brand => 
-              brand.id === brandId ? { ...brand, ...updates } : brand
-            ),
-            updatedAt: new Date().toISOString()
-          }
-        : supplier
-    ));
-  };
-
-  const deleteBrand = (supplierId: string, brandId: string) => {
-    setSuppliers(prev => prev.map(supplier => 
-      supplier.id === supplierId 
-        ? { 
-            ...supplier, 
-            brands: supplier.brands.filter(b => b.id !== brandId),
-            updatedAt: new Date().toISOString()
-          }
-        : supplier
-    ));
-  };
-
-  const getSupplierById = (id: string) => {
+  const getSupplierById = (id: number): DbSupplier | undefined => {
     return suppliers.find(supplier => supplier.id === id);
   };
 
-  const getSuppliersByCategory = (categoryId: string) => {
-    return suppliers.filter(supplier => supplier.category.id === categoryId);
-  };
-
-  const getSuppliersByDepartment = (departmentId: string) => {
-    return suppliers.filter(supplier => 
-      supplier.departments.some(dept => dept.id === departmentId)
+  const searchSuppliers = (query: string): DbSupplier[] => {
+    if (!query) return suppliers;
+    return suppliers.filter(supplier =>
+      supplier.tradeName?.toLowerCase().includes(query.toLowerCase()) ||
+      supplier.corporateName?.toLowerCase().includes(query.toLowerCase()) ||
+      supplier.description?.toLowerCase().includes(query.toLowerCase())
     );
   };
 
-  const searchSuppliers = (query: string) => {
-    const lowercaseQuery = query.toLowerCase();
-    return suppliers.filter(supplier => 
-      supplier.tradeName.toLowerCase().includes(lowercaseQuery) ||
-      supplier.corporateName.toLowerCase().includes(lowercaseQuery) ||
-      supplier.notes.toLowerCase().includes(lowercaseQuery) ||
-      supplier.category.name.toLowerCase().includes(lowercaseQuery) ||
-      supplier.departments.some(dept => dept.name.toLowerCase().includes(lowercaseQuery)) ||
-      supplier.brands.some(brand => brand.name.toLowerCase().includes(lowercaseQuery) || brand.description.toLowerCase().includes(lowercaseQuery))
-    );
+  const value: SuppliersContextType = {
+    suppliers,
+    loading,
+    error: error?.message || null,
+    addSupplier,
+    updateSupplier,
+    deleteSupplier,
+    getSupplierById,
+    searchSuppliers,
+    refetch,
   };
 
   return (
-    <SuppliersContext.Provider value={{
-      suppliers,
-      loading,
-      error,
-      addSupplier,
-      updateSupplier,
-      deleteSupplier,
-      addReview,
-      approveReview,
-      addContact,
-      updateContact,
-      deleteContact,
-      addFile,
-      updateFile,
-      deleteFile,
-      addBrand,
-      updateBrand,
-      deleteBrand,
-      getSupplierById,
-      getSuppliersByCategory,
-      getSuppliersByDepartment,
-      searchSuppliers,
-    }}>
+    <SuppliersContext.Provider value={value}>
       {children}
     </SuppliersContext.Provider>
   );
@@ -435,7 +108,7 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
 
 export function useSuppliers() {
   const context = useContext(SuppliersContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useSuppliers must be used within a SuppliersProvider');
   }
   return context;
