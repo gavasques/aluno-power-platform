@@ -285,7 +285,7 @@ export class RecommendationEngine {
   }
 
   // Recommendation Generation
-  async generateRecommendations(userId: number, limit: number = 10): Promise<NewsRecommendation[]> {
+  async generateRecommendations(userId: number, limit: number = 10): Promise<void> {
     const preferences = await this.getUserPreferences(userId);
     
     // Get user's interaction history
@@ -323,8 +323,6 @@ export class RecommendationEngine {
     if (allRecommendations.length > 0) {
       await db.insert(newsRecommendations).values(allRecommendations);
     }
-
-    return allRecommendations;
   }
 
   private async generateContentBasedRecommendations(
@@ -386,7 +384,12 @@ export class RecommendationEngine {
           score: Math.min(1, score).toString(),
           algorithm: 'content-based',
           reasons,
-          context: 'dashboard'
+          context: 'dashboard',
+          isShown: false,
+          isClicked: false,
+          position: null,
+          shownAt: null,
+          clickedAt: null
         });
       }
     }
