@@ -25,6 +25,7 @@ import Suppliers from "./pages/hub/Suppliers";
 import Partners from "./pages/hub/Partners";
 import PartnerDetail from "./pages/hub/PartnerDetail";
 import Hub from "./pages/Hub";
+import MyArea from "./pages/MyArea";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -65,6 +66,11 @@ function App() {
                               <Route path="parceiros" element={<Partners />} />
                               <Route path="fornecedores" element={<Suppliers />} />
                               <Route path=":section" element={<Hub />} />
+                            </Route>
+
+                            {/* Rotas da Minha Área */}
+                            <Route path="minha-area">
+                              <Route path=":section/:id?/:action?" element={<MyArea />} />
                             </Route>
                           </Route>
 

@@ -2,6 +2,7 @@
 import { useLocation } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { AdminLayout } from "@/components/layout/AdminLayout";
+import { UserBreadcrumbs } from "@/components/layout/UserBreadcrumbs";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <UserBreadcrumbs />
       <main className="flex-1">
         {children}
       </main>
