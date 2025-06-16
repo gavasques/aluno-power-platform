@@ -17,13 +17,9 @@ import {
   insertWebhookConfigSchema
 } from "@shared/schema";
 import { youtubeService } from "./services/youtubeService";
-import { RecommendationEngine } from "./services/recommendationEngine";
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
-
-// Initialize recommendation engine
-const recommendationEngine = new RecommendationEngine();
 
 // Broadcast function for real-time notifications
 function broadcastNotification(type: string, data: any) {
@@ -783,96 +779,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete webhook config' });
-    }
-  });
-
-  // Recommendation Engine routes
-  app.post('/api/recommendations/track-interaction', async (req, res) => {
-    try {
-      const { userId, newsId, interactionType, duration, scrollDepth, deviceType, source } = req.body;
-      
-      const interaction = await recommendationEngine.trackInteraction({
-        userId: parseInt(userId),
-        newsId: parseInt(newsId),
-        interactionType,
-        duration: duration ? parseInt(duration) : undefined,
-        scrollDepth: scrollDepth ? scrollDepth.toString() : undefined,
-        deviceType,
-        source
-      });
-      
-      res.status(201).json(interaction);
-    } catch (error) {
-      console.error('Failed to track interaction:', error);
-      res.status(500).json({ error: 'Failed to track interaction' });
-    }
-  });
-
-  app.get('/api/recommendations/:userId', async (req, res) => {
-    try {
-      const userId = parseInt(req.params.userId);
-      const context = req.query.context as string || 'dashboard';
-      
-      // Get existing recommendations first
-      let recommendations = await recommendationEngine.getRecommendationsForUser(userId, context);
-      
-      // If no recommendations exist, generate new ones
-      if (recommendations.length === 0) {
-        await recommendationEngine.generateRecommendations(userId, 10);
-        recommendations = await recommendationEngine.getRecommendationsForUser(userId, context);
-      }
-      
-      // Mark as shown
-      const recommendationIds = recommendations.map(r => r.id);
-      if (recommendationIds.length > 0) {
-        await recommendationEngine.markRecommendationsAsShown(recommendationIds);
-      }
-      
-      res.json(recommendations);
-    } catch (error) {
-      console.error('Failed to get recommendations:', error);
-      res.status(500).json({ error: 'Failed to get recommendations' });
-    }
-  });
-
-  app.post('/api/recommendations/:id/click', async (req, res) => {
-    try {
-      const recommendationId = parseInt(req.params.id);
-      await recommendationEngine.markRecommendationAsClicked(recommendationId);
-      res.status(200).json({ success: true });
-    } catch (error) {
-      console.error('Failed to mark recommendation as clicked:', error);
-      res.status(500).json({ error: 'Failed to mark recommendation as clicked' });
-    }
-  });
-
-  app.get('/api/user-preferences/:userId', async (req, res) => {
-    try {
-      const userId = parseInt(req.params.userId);
-      const preferences = await recommendationEngine.getUserPreferences(userId);
-      res.json(preferences);
-    } catch (error) {
-      console.error('Failed to get user preferences:', error);
-      res.status(500).json({ error: 'Failed to get user preferences' });
-    }
-  });
-
-  app.post('/api/news/:id/analyze', async (req, res) => {
-    try {
-      const newsId = parseInt(req.params.id);
-      
-      // Get the news item
-      const newsItem = await storage.getNewsById(newsId);
-      if (!newsItem) {
-        return res.status(404).json({ error: 'News not found' });
-      }
-      
-      // Analyze content
-      const analysis = await recommendationEngine.analyzeNewsContent(newsItem);
-      res.json(analysis);
-    } catch (error) {
-      console.error('Failed to analyze news content:', error);
-      res.status(500).json({ error: 'Failed to analyze news content' });
     }
   });
 
