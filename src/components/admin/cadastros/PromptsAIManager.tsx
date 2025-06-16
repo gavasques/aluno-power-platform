@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Plus, Edit, Trash2, BrainCircuit, Search, Copy, Image } from "lucide-react";
 import { usePrompts } from "@/contexts/PromptsContext";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -12,6 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 const PromptsAIManager = () => {
@@ -19,6 +32,7 @@ const PromptsAIManager = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const filteredPrompts = React.useMemo(() => {
     let result = searchQuery ? searchPrompts(searchQuery) : prompts;
@@ -29,20 +43,18 @@ const PromptsAIManager = () => {
   }, [prompts, searchQuery, selectedCategory, searchPrompts]);
 
   const handleDelete = async (id: string, title: string) => {
-    if (confirm(`Tem certeza que deseja excluir o prompt "${title}"?`)) {
-      try {
-        await deletePrompt(id);
-        toast({
-          title: "Prompt excluído",
-          description: "O prompt foi excluído com sucesso.",
-        });
-      } catch (error) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível excluir o prompt.",
-          variant: "destructive",
-        });
-      }
+    try {
+      await deletePrompt(id);
+      toast({
+        title: "Prompt excluído",
+        description: "O prompt foi excluído com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o prompt.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -68,9 +80,12 @@ const PromptsAIManager = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <BrainCircuit className="h-5 w-5 text-primary" />
-            <CardTitle className="text-foreground">Prompts de IA</CardTitle>
+            <CardTitle className="text-foreground">Gestão de Prompts IA</CardTitle>
           </div>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button 
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            onClick={() => navigate('/admin/conteudo/prompts-ia/novo')}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Novo Prompt
           </Button>
@@ -138,20 +153,48 @@ const PromptsAIManager = () => {
                     variant="outline" 
                     className="text-foreground border-border hover:bg-gray-100"
                     onClick={() => copyToClipboard(prompt.content, prompt.title)}
+                    title="Copiar conteúdo"
                   >
                     <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" className="text-foreground border-border hover:bg-gray-100">
-                    <Edit className="h-4 w-4" />
                   </Button>
                   <Button 
                     size="sm" 
                     variant="outline" 
-                    className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => handleDelete(prompt.id, prompt.title)}
+                    className="text-foreground border-border hover:bg-gray-100"
+                    onClick={() => navigate(`/admin/conteudo/prompts-ia/${prompt.id}/edit`)}
+                    title="Editar prompt"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Edit className="h-4 w-4" />
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
+                        title="Excluir prompt"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja excluir o prompt "{prompt.title}"? Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => handleDelete(prompt.id, prompt.title)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
               {prompt.description && (

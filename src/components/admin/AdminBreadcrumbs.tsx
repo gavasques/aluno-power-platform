@@ -30,6 +30,7 @@ const breadcrumbMap: Record<string, string> = {
   "/admin/conteudo/fornecedores": "Fornecedores",
   "/admin/conteudo/ferramentas": "Ferramentas",
   "/admin/conteudo/templates": "Templates",
+  "/admin/conteudo/prompts-ia": "Prompts IA",
   "/admin/conteudo/materiais": "Materiais",
   "/admin/conteudo/selos": "Selos",
   "/admin/suporte": "Suporte",
