@@ -13,6 +13,7 @@ import { ProductProvider } from "./contexts/ProductContext";
 import { ToolsProvider } from "./contexts/ToolsContext";
 import { TemplatesProvider } from "./contexts/TemplatesContext";
 import { PromptsProvider } from "./contexts/PromptsContext";
+import { YoutubeProvider } from "./contexts/YoutubeContext";
 
 // Import pages that exist
 import Dashboard from "./pages/Dashboard";
@@ -50,13 +51,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <PartnersProvider>
-            <SuppliersProvider>
-              <MaterialsProvider>
-                <ProductProvider>
-                  <ToolsProvider>
-                    <TemplatesProvider>
-                      <PromptsProvider>
+          <YoutubeProvider>
+            <PartnersProvider>
+              <SuppliersProvider>
+                <MaterialsProvider>
+                  <ProductProvider>
+                    <ToolsProvider>
+                      <TemplatesProvider>
+                        <PromptsProvider>
                         <Routes>
                           <Route path="/auth" element={<Auth />} />
 
@@ -95,15 +97,16 @@ function App() {
                             <Route path="conteudo/:subsection?/:id?/:action?" element={<ContentManagement />} />
                           </Route>
 
-                        </Routes>
-                        <Toaster />
-                      </PromptsProvider>
-                    </TemplatesProvider>
-                  </ToolsProvider>
-                </ProductProvider>
-              </MaterialsProvider>
-            </SuppliersProvider>
-          </PartnersProvider>
+                          </Routes>
+                          <Toaster />
+                        </PromptsProvider>
+                      </TemplatesProvider>
+                    </ToolsProvider>
+                  </ProductProvider>
+                </MaterialsProvider>
+              </SuppliersProvider>
+            </PartnersProvider>
+          </YoutubeProvider>
         </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>
