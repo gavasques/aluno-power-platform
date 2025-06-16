@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Tool, ToolType, UserToolReview } from '@/types/tool';
 
@@ -12,7 +11,7 @@ interface ToolsContextType {
   addToolType: (toolType: Omit<ToolType, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateToolType: (id: string, toolType: Partial<ToolType>) => void;
   deleteToolType: (id: string) => void;
-  addUserReview: (review: Omit<UserToolReview, 'id' | 'createdAt'>) => void;
+  addUserReview: (review: Omit<UserToolReview, 'id' | 'createdAt' | 'replies'>) => void;
   updateUserReview: (reviewId: string, updates: Partial<UserToolReview>) => void;
   deleteUserReview: (reviewId: string) => void;
   addReplyToReview: (reviewId: string, reply: { userId: string; userName: string; comment: string; }) => void;
@@ -216,7 +215,7 @@ export function ToolsProvider({ children }: { children: ReactNode }) {
     setToolTypes(prev => prev.filter(type => type.id !== id));
   };
 
-  const addUserReview = (reviewData: Omit<UserToolReview, 'id' | 'createdAt'>) => {
+  const addUserReview = (reviewData: Omit<UserToolReview, 'id' | 'createdAt' | 'replies'>) => {
     const newReview: UserToolReview = {
       ...reviewData,
       id: Math.random().toString(36).substr(2, 9),
