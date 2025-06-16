@@ -111,6 +111,7 @@ export interface IStorage {
   // YouTube Videos
   getYoutubeVideos(): Promise<YoutubeVideo[]>;
   getYoutubeVideo(id: number): Promise<YoutubeVideo | undefined>;
+  getYoutubeVideoByVideoId(videoId: string): Promise<YoutubeVideo | undefined>;
   createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo>;
   updateYoutubeVideo(id: number, video: Partial<InsertYoutubeVideo>): Promise<YoutubeVideo>;
   deleteYoutubeVideo(id: number): Promise<void>;
@@ -663,6 +664,11 @@ export class DatabaseStorage implements IStorage {
 
   async getYoutubeVideo(id: number): Promise<YoutubeVideo | undefined> {
     const [video] = await db.select().from(youtubeVideos).where(eq(youtubeVideos.id, id));
+    return video || undefined;
+  }
+
+  async getYoutubeVideoByVideoId(videoId: string): Promise<YoutubeVideo | undefined> {
+    const [video] = await db.select().from(youtubeVideos).where(eq(youtubeVideos.videoId, videoId));
     return video || undefined;
   }
 

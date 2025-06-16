@@ -280,12 +280,14 @@ class YouTubeService {
           };
 
           // Check if video already exists
-          const existingVideos = await storage.getYoutubeVideos();
-          const exists = existingVideos.some(v => v.videoId === video.id.videoId);
+          const existingVideo = await storage.getYoutubeVideoByVideoId(video.id.videoId);
           
-          if (!exists) {
+          if (!existingVideo) {
             await storage.createYoutubeVideo(videoData);
             totalFetched++;
+          } else if (!existingVideo.isActive) {
+            // Reactivate existing video
+            await storage.updateYoutubeVideo(existingVideo.id, { isActive: true });
           }
         } catch (error) {
           console.error(`Error saving video ${video.id.videoId}:`, error);
