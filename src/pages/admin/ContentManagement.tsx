@@ -18,6 +18,7 @@ import SupplierDetail from "@/components/admin/conteudo/SupplierDetail";
 import MaterialFormAdmin from "./conteudo/MaterialFormAdmin";
 import MaterialDetailAdmin from "./conteudo/MaterialDetailAdmin";
 import TemplatesManager from "@/components/admin/cadastros/TemplatesManager";
+import TemplateForm from "@/components/admin/cadastros/TemplateForm";
 
 const ContentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,6 +60,8 @@ const ContentManagement = () => {
   }
 
   if (subsection === 'templates') {
+    if (id === 'novo') return <TemplateForm />;
+    if (id && action === 'edit') return <TemplateForm />;
     return <TemplatesManager />;
   }
 
