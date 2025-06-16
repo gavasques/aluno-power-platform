@@ -3,15 +3,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePrompts } from '@/contexts/PromptsContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
-  Copy, 
   BrainCircuit,
-  Eye,
-  Calendar,
   Image,
 } from 'lucide-react';
 import {
@@ -21,14 +17,12 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 
 const PromptsIA = () => {
   const navigate = useNavigate();
   const { prompts, categories, loading, searchPrompts } = usePrompts();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const { toast } = useToast();
 
   const filteredPrompts = React.useMemo(() => {
     let result = searchQuery ? searchPrompts(searchQuery) : prompts;
@@ -38,20 +32,8 @@ const PromptsIA = () => {
     return result;
   }, [prompts, searchQuery, selectedCategory, searchPrompts]);
 
-  const copyToClipboard = async (content: string, title: string) => {
-    try {
-      await navigator.clipboard.writeText(content);
-      toast({
-        title: "Prompt copiado!",
-        description: `O prompt "${title}" foi copiado para a área de transferência.`,
-      });
-    } catch (err) {
-      toast({
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o prompt. Tente novamente.",
-        variant: "destructive",
-      });
-    }
+  const handleCardClick = (promptId: string) => {
+    navigate(`/hub/prompts-ia/${promptId}`);
   };
 
   if (loading) {
@@ -115,7 +97,11 @@ const PromptsIA = () => {
       {/* Prompts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPrompts.map((prompt) => (
-          <Card key={prompt.id} className="hover:shadow-lg transition-all">
+          <Card 
+            key={prompt.id} 
+            className="hover:shadow-lg transition-all cursor-pointer hover:scale-105"
+            onClick={() => handleCardClick(prompt.id)}
+          >
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -132,38 +118,11 @@ const PromptsIA = () => {
                     )}
                   </div>
                   {prompt.description && (
-                    <p className="text-sm text-gray-600 mb-2">{prompt.description}</p>
+                    <p className="text-sm text-gray-600">{prompt.description}</p>
                   )}
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-sm text-gray-600 line-clamp-3">
-                  {prompt.content}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Calendar className="h-4 w-4" />
-                <span>{prompt.createdAt.toLocaleDateString('pt-BR')}</span>
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  className="flex-1"
-                  onClick={() => copyToClipboard(prompt.content, prompt.title)}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copiar Prompt
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate(`/hub/prompts-ia/${prompt.id}`)}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
           </Card>
         ))}
       </div>

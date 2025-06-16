@@ -28,6 +28,7 @@ import ToolDetail from "./pages/hub/ToolDetail";
 import HubMaterialDetail from "./pages/hub/MaterialDetail";
 import SupplierDetail from "./pages/hub/SupplierDetail";
 import TemplateDetail from "./pages/hub/TemplateDetail";
+import PromptDetail from "./pages/hub/PromptDetail";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
 
@@ -71,6 +72,7 @@ function App() {
                               <Route path="materiais/:id" element={<HubMaterialDetail />} />
                               <Route path="fornecedores/:id" element={<SupplierDetail />} />
                               <Route path="templates/:id" element={<TemplateDetail />} />
+                              <Route path="prompts-ia/:id" element={<PromptDetail />} />
                               <Route path="parceiros" element={<Partners />} />
                               <Route path="fornecedores" element={<Suppliers />} />
                               <Route path=":section" element={<Hub />} />

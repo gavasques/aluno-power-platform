@@ -77,6 +77,14 @@ export function UserBreadcrumbs() {
         isLast: i === pathSegments.length - 1
       });
     }
+    // Verifica se é uma rota de detalhes de prompt
+    else if (pathSegments[i-1] === "prompts-ia" && pathSegments[i-2] === "hub" && !breadcrumbMap[currentPath]) {
+      breadcrumbs.push({
+        path: currentPath,
+        label: "Detalhes do Prompt",
+        isLast: i === pathSegments.length - 1
+      });
+    }
     else if (breadcrumbMap[currentPath]) {
       breadcrumbs.push({
         path: currentPath,
