@@ -80,14 +80,8 @@ const Dashboard = () => {
         <div className="text-center space-y-4">
           <div className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white text-sm font-medium shadow-lg">
             <TrendingUp className="h-4 w-4 mr-2" />
-            Bem-vindo de volta!
+            Bem-vindo de volta, Guilherme!
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-            Dashboard Principal
-          </h1>
-          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-            Sua visão geral e dinâmica de atividades e conteúdos. Acompanhe seu progresso e descubra novidades.
-          </p>
         </div>
 
         {/* Stats Cards */}
