@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Search, CheckCircle, ExternalLink, Copy, Wrench } from "lucide-react";
+import { Star, Search, CheckCircle, ExternalLink, Copy, Wrench, Shield } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useTools } from "@/contexts/ToolsContext";
@@ -61,122 +60,115 @@ const Tools = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Ferramentas</h1>
-        <p className="text-muted-foreground">
-          Catálogo de softwares para e-commerce com análises detalhadas
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white text-sm font-medium shadow-lg">
+          <Wrench className="h-4 w-4 mr-2" />
+          Ferramentas Verificadas
+        </div>
+        <h1 className="text-4xl font-bold text-gray-900">
+          Catálogo de Ferramentas
+        </h1>
+        <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+          Softwares para e-commerce com análises detalhadas e avaliações da comunidade
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar de Filtros */}
-        <div className="lg:w-1/4">
-          <Card>
+      {/* Search and Category Dropdown */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative flex-1 w-full md:w-auto mb-2 md:mb-0">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Buscar por nome, categoria ou funcionalidade..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <div className="w-full md:w-72">
+          <Select value={selectedType} onValueChange={setSelectedType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {toolTypes.map(type => (
+                <SelectItem key={type.id} value={type.id}>
+                  {type.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Tools Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredTools.map(tool => (
+          <Card key={tool.id} className="hover:shadow-lg transition-all cursor-pointer">
             <CardHeader>
-              <CardTitle className="text-lg">Filtros</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Buscar</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar ferramentas..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+              <div className="flex items-start gap-4">
+                <img
+                  src={tool.logo}
+                  alt={tool.name}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CardTitle className="text-lg">{tool.name}</CardTitle>
+                    {tool.verified && (
+                      <Badge variant="default" className="bg-green-500">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verificado
+                      </Badge>
+                    )}
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    {toolTypes.find(t => t.id === tool.typeId)?.name || tool.category}
+                  </Badge>
                 </div>
               </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">Tipo</label>
-                <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as categorias</SelectItem>
-                    {toolTypes.map(type => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600 line-clamp-2">
+                {tool.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Avaliação LV:</span>
+                    <div className="flex">{renderStars(tool.officialRating)}</div>
+                    <span className="text-sm text-muted-foreground">
+                      {tool.officialRating}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Usuários:</span>
+                    <div className="flex">{renderStars(tool.userRating)}</div>
+                    <span className="text-sm text-muted-foreground">
+                      {tool.userRating} ({tool.reviewCount})
+                    </span>
+                  </div>
+                </div>
+                <Button onClick={() => setSelectedTool(tool)}>
+                  Ver Detalhes
+                </Button>
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Lista de Ferramentas */}
-        <div className="lg:w-3/4">
-          <div className="grid gap-6">
-            {filteredTools.map(tool => (
-              <Card key={tool.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start gap-4">
-                    <img
-                      src={tool.logo}
-                      alt={tool.name}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CardTitle className="text-xl">{tool.name}</CardTitle>
-                        {tool.verified && (
-                          <Badge variant="secondary" className="bg-green-100 text-green-800">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            LV Verificado
-                          </Badge>
-                        )}
-                      </div>
-                      <Badge variant="outline" className="mb-2">
-                        {toolTypes.find(t => t.id === tool.typeId)?.name || tool.category}
-                      </Badge>
-                      <p className="text-muted-foreground">{tool.description}</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Avaliação LV:</span>
-                        <div className="flex">{renderStars(tool.officialRating)}</div>
-                        <span className="text-sm text-muted-foreground">
-                          {tool.officialRating}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Usuários:</span>
-                        <div className="flex">{renderStars(tool.userRating)}</div>
-                        <span className="text-sm text-muted-foreground">
-                          {tool.userRating} ({tool.reviewCount} avaliações)
-                        </span>
-                      </div>
-                    </div>
-                    <Button onClick={() => setSelectedTool(tool)}>
-                      Ver Detalhes
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {filteredTools.length === 0 && (
-            <div className="text-center py-12">
-              <Wrench className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Nenhuma ferramenta encontrada</h3>
-              <p className="text-muted-foreground">
-                Tente ajustar os filtros ou termos de busca.
-              </p>
-            </div>
-          )}
-        </div>
+        ))}
       </div>
+
+      {filteredTools.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">🔍</div>
+          <h3 className="text-xl font-semibold mb-2">Nenhuma ferramenta encontrada</h3>
+          <p className="text-gray-500">
+            Tente ajustar os filtros ou buscar por outros termos.
+          </p>
+        </div>
+      )}
 
       {/* Página de Detalhes da Ferramenta */}
       {selectedTool && (
