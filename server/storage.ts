@@ -800,7 +800,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(updates)
       .where(eq(updates.isPublished, true))
-      .orderBy(desc(updates.publishedAt));
+      .orderBy(desc(updates.createdAt));
   }
 
   async getUpdate(id: number): Promise<Update | undefined> {

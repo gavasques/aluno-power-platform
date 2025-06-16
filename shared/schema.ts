@@ -346,7 +346,12 @@ export const updates = pgTable("updates", {
   authorId: integer("author_id").references(() => users.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("updates_created_at_idx").on(table.createdAt),
+  publishedIdx: index("updates_published_idx").on(table.isPublished),
+  typeIdx: index("updates_type_idx").on(table.type),
+  priorityIdx: index("updates_priority_idx").on(table.priority),
+}));
 
 // Webhook configurations
 export const webhookConfigs = pgTable("webhook_configs", {
