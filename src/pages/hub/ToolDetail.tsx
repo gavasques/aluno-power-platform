@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -165,359 +166,347 @@ const ToolDetail = () => {
 
         {/* Conteúdo Principal */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="features">Funcionalidades</TabsTrigger>
             <TabsTrigger value="guilherme-review">Avaliação Guilherme</TabsTrigger>
             <TabsTrigger value="proscons">Prós e Contras</TabsTrigger>
             <TabsTrigger value="discounts">Descontos</TabsTrigger>
+            <TabsTrigger value="reviews">Avaliações</TabsTrigger>
           </TabsList>
 
-          <div className="mt-6">
-            <Tabs defaultValue="reviews" className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-                <TabsTrigger value="features">Funcionalidades</TabsTrigger>
-                <TabsTrigger value="guilherme-review">Avaliação Guilherme</TabsTrigger>
-                <TabsTrigger value="proscons">Prós e Contras</TabsTrigger>
-                <TabsTrigger value="discounts">Descontos</TabsTrigger>
-                <TabsTrigger value="reviews">Avaliações</TabsTrigger>
-              </TabsList>
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Visão Geral</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground leading-relaxed">{tool.overview}</p>
+              </CardContent>
+            </Card>
 
-              <TabsContent value="overview" className="mt-6 space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Visão Geral</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">{tool.overview}</p>
-                  </CardContent>
-                </Card>
-
-                {tool.pricing?.plans && tool.pricing.plans.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Preços</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {tool.pricing.plans.map((plan, index) => (
-                          <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
-                            <h3 className="font-semibold text-xl mb-2">{plan.name}</h3>
-                            <p className="text-3xl font-bold text-primary mb-4">{plan.price}</p>
-                            <ul className="space-y-2">
-                              {plan.features?.map((feature, fIndex) => (
-                                <li key={fIndex} className="text-sm text-muted-foreground flex items-center gap-2">
-                                  <CheckCircle className="h-3 w-3 text-green-500" />
-                                  {feature}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
+            {tool.pricing?.plans && tool.pricing.plans.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Preços</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {tool.pricing.plans.map((plan, index) => (
+                      <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <h3 className="font-semibold text-xl mb-2">{plan.name}</h3>
+                        <p className="text-3xl font-bold text-primary mb-4">{plan.price}</p>
+                        <ul className="space-y-2">
+                          {plan.features?.map((feature, fIndex) => (
+                            <li key={fIndex} className="text-sm text-muted-foreground flex items-center gap-2">
+                              <CheckCircle className="h-3 w-3 text-green-500" />
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
-              <TabsContent value="features" className="mt-6">
-                <div className="space-y-6">
-                  {tool.features.map((feature, index) => (
-                    <Card key={index}>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                          {feature.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <p className="text-muted-foreground leading-relaxed">
-                          {feature.description}
-                        </p>
-                        {feature.photos.length > 0 && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {feature.photos.map((photo, photoIndex) => (
-                              <img
-                                key={photoIndex}
-                                src={photo}
-                                alt={`${feature.title} - Imagem ${photoIndex + 1}`}
-                                className="w-full h-48 object-cover rounded-lg border"
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="guilherme-review" className="mt-6">
-                <Card>
+          <TabsContent value="features" className="mt-6">
+            <div className="space-y-6">
+              {tool.features.map((feature, index) => (
+                <Card key={index}>
                   <CardHeader>
-                    <CardTitle>Avaliação Guilherme</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      {feature.title}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="flex">{renderStars(tool.guilhermeReview?.rating || 0)}</div>
-                      <span className="text-2xl font-semibold">{tool.guilhermeReview?.rating}</span>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">{tool.guilhermeReview?.review}</p>
-                    
-                    {tool.guilhermeReview?.photos && tool.guilhermeReview.photos.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="font-medium">Screenshots da Avaliação</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {tool.guilhermeReview.photos.map((photo, index) => (
-                            <img
-                              key={index}
-                              src={photo}
-                              alt={`Avaliação Guilherme - Imagem ${index + 1}`}
-                              className="w-full h-48 object-cover rounded-lg border"
-                            />
-                          ))}
-                        </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
+                    {feature.photos.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {feature.photos.map((photo, photoIndex) => (
+                          <img
+                            key={photoIndex}
+                            src={photo}
+                            alt={`${feature.title} - Imagem ${photoIndex + 1}`}
+                            className="w-full h-48 object-cover rounded-lg border"
+                          />
+                        ))}
                       </div>
                     )}
                   </CardContent>
                 </Card>
-              </TabsContent>
+              ))}
+            </div>
+          </TabsContent>
 
-              <TabsContent value="proscons" className="mt-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-green-600">Prós</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-3">
-                        {tool.prosAndCons?.pros?.map((pro, index) => (
-                          <li key={index} className="flex items-center gap-3">
-                            <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                            <span className="text-muted-foreground">{pro}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-red-600">Contras</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-3">
-                        {tool.prosAndCons?.cons?.map((con, index) => (
-                          <li key={index} className="flex items-center gap-3">
-                            <span className="h-5 w-5 text-red-500 flex-shrink-0 text-xl">×</span>
-                            <span className="text-muted-foreground">{con}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
+          <TabsContent value="guilherme-review" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Avaliação Guilherme</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex">{renderStars(tool.guilhermeReview?.rating || 0)}</div>
+                  <span className="text-2xl font-semibold">{tool.guilhermeReview?.rating}</span>
                 </div>
-              </TabsContent>
-
-              <TabsContent value="discounts" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Links e Descontos</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {tool.discounts?.map((discount, index) => (
-                        <div key={index} className="border rounded-lg p-4 space-y-3">
-                          <p className="font-medium">{discount.description}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {discount.link && (
-                              <Button variant="outline" asChild>
-                                <a href={discount.link} target="_blank" rel="noopener noreferrer">
-                                  <ExternalLink className="h-4 w-4 mr-2" />
-                                  Acessar Link
-                                </a>
-                              </Button>
-                            )}
-                            {discount.coupon && (
-                              <Button
-                                variant="outline"
-                                onClick={() => copyToClipboard(discount.coupon, "Cupom")}
-                              >
-                                <Copy className="h-4 w-4 mr-2" />
-                                Copiar Cupom: {discount.coupon}
-                              </Button>
-                            )}
-                          </div>
-                        </div>
+                <p className="text-muted-foreground leading-relaxed">{tool.guilhermeReview?.review}</p>
+                
+                {tool.guilhermeReview?.photos && tool.guilhermeReview.photos.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-medium">Screenshots da Avaliação</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {tool.guilhermeReview.photos.map((photo, index) => (
+                        <img
+                          key={index}
+                          src={photo}
+                          alt={`Avaliação Guilherme - Imagem ${index + 1}`}
+                          className="w-full h-48 object-cover rounded-lg border"
+                        />
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <TabsContent value="reviews" className="mt-6 space-y-6">
-                {/* Formulário para nova avaliação */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Avaliar Ferramenta</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleUserReview} className="space-y-6">
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium">Sua Avaliação</label>
-                        <Select 
-                          value={userReviewData.rating.toString()} 
-                          onValueChange={(value) => setUserReviewData({...userReviewData, rating: parseInt(value)})}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {[5, 4, 3, 2, 1].map(rating => (
-                              <SelectItem key={rating} value={rating.toString()}>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex">{renderStars(rating)}</div>
-                                  <span>{rating} estrela{rating !== 1 ? 's' : ''}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium">Comentário</label>
-                        <Textarea
-                          value={userReviewData.comment}
-                          onChange={(e) => setUserReviewData({...userReviewData, comment: e.target.value})}
-                          placeholder="Compartilhe sua experiência com esta ferramenta..."
-                          rows={4}
-                          className="w-full"
-                        />
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <ImageUpload
-                          images={userReviewData.photos}
-                          onImagesChange={(photos) => setUserReviewData({...userReviewData, photos})}
-                          label="Fotos da sua experiência (opcional)"
-                          maxImages={3}
-                        />
-                      </div>
-                      
-                      <Button type="submit" className="w-full">
-                        Enviar Avaliação
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
+          <TabsContent value="proscons" className="mt-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-green-600">Prós</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {tool.prosAndCons?.pros?.map((pro, index) => (
+                      <li key={index} className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                        <span className="text-muted-foreground">{pro}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-red-600">Contras</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {tool.prosAndCons?.cons?.map((con, index) => (
+                      <li key={index} className="flex items-center gap-3">
+                        <span className="h-5 w-5 text-red-500 flex-shrink-0 text-xl">×</span>
+                        <span className="text-muted-foreground">{con}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-                {/* Lista de avaliações */}
+          <TabsContent value="discounts" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Links e Descontos</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  <h3 className="text-xl font-semibold">Avaliações dos Usuários ({userReviews.length})</h3>
+                  {tool.discounts?.map((discount, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-3">
+                      <p className="font-medium">{discount.description}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {discount.link && (
+                          <Button variant="outline" asChild>
+                            <a href={discount.link} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Acessar Link
+                            </a>
+                          </Button>
+                        )}
+                        {discount.coupon && (
+                          <Button
+                            variant="outline"
+                            onClick={() => copyToClipboard(discount.coupon, "Cupom")}
+                          >
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copiar Cupom: {discount.coupon}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reviews" className="mt-6 space-y-6">
+            {/* Formulário para nova avaliação */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Avaliar Ferramenta</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleUserReview} className="space-y-6">
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium">Sua Avaliação</label>
+                    <Select 
+                      value={userReviewData.rating.toString()} 
+                      onValueChange={(value) => setUserReviewData({...userReviewData, rating: parseInt(value)})}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[5, 4, 3, 2, 1].map(rating => (
+                          <SelectItem key={rating} value={rating.toString()}>
+                            <div className="flex items-center gap-2">
+                              <div className="flex">{renderStars(rating)}</div>
+                              <span>{rating} estrela{rating !== 1 ? 's' : ''}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   
-                  {userReviews.map((review) => (
-                    <Card key={review.id}>
-                      <CardContent className="p-6">
-                        <div className="space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="font-medium">{review.userName}</span>
-                                <div className="flex">{renderStars(review.rating)}</div>
-                                <span className="text-sm text-muted-foreground">
-                                  {new Date(review.createdAt).toLocaleDateString('pt-BR')}
-                                </span>
-                              </div>
-                              <p className="text-muted-foreground">{review.comment}</p>
-                            </div>
-                            <div className="flex gap-2 ml-4">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button size="sm" variant="outline">
-                                    <Reply className="h-4 w-4" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Responder Avaliação</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <Textarea
-                                      value={replyData[review.id] || ''}
-                                      onChange={(e) => setReplyData(prev => ({...prev, [review.id]: e.target.value}))}
-                                      placeholder="Digite sua resposta..."
-                                      rows={3}
-                                    />
-                                    <Button 
-                                      onClick={() => handleReply(review.id)}
-                                      className="w-full"
-                                      disabled={!replyData[review.id]?.trim()}
-                                    >
-                                      Enviar Resposta
-                                    </Button>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-                              {review.userId === 'current-user' && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleDeleteReview(review.id)}
-                                  className="text-red-600 hover:text-red-700"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium">Comentário</label>
+                    <Textarea
+                      value={userReviewData.comment}
+                      onChange={(e) => setUserReviewData({...userReviewData, comment: e.target.value})}
+                      placeholder="Compartilhe sua experiência com esta ferramenta..."
+                      rows={4}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <ImageUpload
+                      images={userReviewData.photos}
+                      onImagesChange={(photos) => setUserReviewData({...userReviewData, photos})}
+                      label="Fotos da sua experiência (opcional)"
+                      maxImages={3}
+                    />
+                  </div>
+                  
+                  <Button type="submit" className="w-full">
+                    Enviar Avaliação
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Lista de avaliações */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold">Avaliações dos Usuários ({userReviews.length})</h3>
+              
+              {userReviews.map((review) => (
+                <Card key={review.id}>
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-medium">{review.userName}</span>
+                            <div className="flex">{renderStars(review.rating)}</div>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(review.createdAt).toLocaleDateString('pt-BR')}
+                            </span>
                           </div>
-
-                          {review.photos.length > 0 && (
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                              {review.photos.map((photo, index) => (
-                                <img
-                                  key={index}
-                                  src={photo}
-                                  alt={`Foto da avaliação ${index + 1}`}
-                                  className="w-full h-32 object-cover rounded border"
+                          <p className="text-muted-foreground">{review.comment}</p>
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                <Reply className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Responder Avaliação</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <Textarea
+                                  value={replyData[review.id] || ''}
+                                  onChange={(e) => setReplyData(prev => ({...prev, [review.id]: e.target.value}))}
+                                  placeholder="Digite sua resposta..."
+                                  rows={3}
                                 />
-                              ))}
-                            </div>
-                          )}
-
-                          {review.replies.length > 0 && (
-                            <div className="pl-6 border-l-2 border-muted space-y-3">
-                              {review.replies.map((reply) => (
-                                <div key={reply.id} className="bg-muted/50 rounded p-3">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-sm font-medium">{reply.userName}</span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {new Date(reply.createdAt).toLocaleDateString('pt-BR')}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">{reply.comment}</p>
-                                </div>
-                              ))}
-                            </div>
+                                <Button 
+                                  onClick={() => handleReply(review.id)}
+                                  className="w-full"
+                                  disabled={!replyData[review.id]?.trim()}
+                                >
+                                  Enviar Resposta
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                          {review.userId === 'current-user' && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDeleteReview(review.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                      </div>
 
-                  {userReviews.length === 0 && (
-                    <div className="text-center py-12">
-                      <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">Nenhuma avaliação ainda</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Seja o primeiro a avaliar esta ferramenta!
-                      </p>
+                      {review.photos.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {review.photos.map((photo, index) => (
+                            <img
+                              key={index}
+                              src={photo}
+                              alt={`Foto da avaliação ${index + 1}`}
+                              className="w-full h-32 object-cover rounded border"
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      {review.replies.length > 0 && (
+                        <div className="pl-6 border-l-2 border-muted space-y-3">
+                          {review.replies.map((reply) => (
+                            <div key={reply.id} className="bg-muted/50 rounded p-3">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-medium">{reply.userName}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(reply.createdAt).toLocaleDateString('pt-BR')}
+                                </span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{reply.comment}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </CardContent>
+                </Card>
+              ))}
+
+              {userReviews.length === 0 && (
+                <div className="text-center py-12">
+                  <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Nenhuma avaliação ainda</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Seja o primeiro a avaliar esta ferramenta!
+                  </p>
                 </div>
-              </TabsContent>
-            </Tabs>
-          </div>
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
