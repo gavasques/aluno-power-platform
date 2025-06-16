@@ -16,10 +16,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { User, Settings, Headset, LogOut, Home, Shield } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function UserNav() {
-  const { user, hasAdminAccess, isAdmin } = useAuth();
+  const { user, isAdmin, toggleRole } = useAuth();
 
   return (
     <DropdownMenu>
@@ -28,7 +28,7 @@ export function UserNav() {
           <Avatar className="h-9 w-9">
             <AvatarImage src="/placeholder.svg" alt="Avatar" />
             <AvatarFallback>
-              {(user.name || "US")
+              {(user?.name || "US")
                 .split(" ")
                 .map((n) => n[0])
                 .join("")
@@ -45,8 +45,8 @@ export function UserNav() {
       >
         <DropdownMenuLabel className="font-semibold px-4 pt-3 pb-2">
           <div className="flex flex-col">
-            <span className="text-base font-semibold leading-none">{user.name}</span>
-            <span className="text-xs leading-none text-neutral-500">{user.email}</span>
+            <span className="text-base font-semibold leading-none">{user?.name}</span>
+            <span className="text-xs leading-none text-neutral-500">{user?.email}</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -69,7 +69,7 @@ export function UserNav() {
               <span>Suporte</span>
             </Link>
           </DropdownMenuItem>
-          {hasAdminAccess ? (
+          {isAdmin ? (
             <DropdownMenuItem asChild>
               <Link to="/admin" className="flex items-center gap-3 px-4 py-2 mt-2 hover:bg-neutral-100 rounded transition relative">
                 <Shield className="h-5 w-5 text-neutral-500" />

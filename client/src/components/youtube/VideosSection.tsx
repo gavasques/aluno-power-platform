@@ -5,6 +5,7 @@ import { Youtube, RefreshCw, Play, Calendar, Users, ExternalLink } from "lucide-
 import { VideoCard } from "./VideoCard";
 import { useYoutube } from "@/contexts/YoutubeContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { RoleToggle } from "@/components/ui/role-toggle";
 import { useState } from "react";
 
 export function VideosSection() {
