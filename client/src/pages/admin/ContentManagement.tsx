@@ -22,6 +22,8 @@ import TemplatesManager from "@/components/admin/cadastros/TemplatesManager";
 import TemplateForm from "@/components/admin/cadastros/TemplateForm";
 import PromptsAIManager from "@/components/admin/cadastros/PromptsAIManager";
 import PromptForm from "@/components/admin/cadastros/PromptForm";
+import { NewsCenter } from "./content/NewsCenter";
+import { UpdatesCenter } from "./content/UpdatesCenter";
 
 const ContentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -73,6 +75,14 @@ const ContentManagement = () => {
     if (id === 'novo') return <PromptForm />;
     if (id && action === 'edit') return <PromptForm />;
     return <PromptsAIManager />;
+  }
+
+  if (subsection === 'noticias') {
+    return <NewsCenter />;
+  }
+
+  if (subsection === 'novidades') {
+    return <UpdatesCenter />;
   }
 
   // Exibe direto o hub de recursos, sem tabs

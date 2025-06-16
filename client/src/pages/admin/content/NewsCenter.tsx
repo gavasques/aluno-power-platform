@@ -19,7 +19,7 @@ export function NewsCenter() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: newsList = [], isLoading } = useQuery({
+  const { data: newsList = [], isLoading } = useQuery<News[]>({
     queryKey: ['/api/news'],
   });
 
@@ -156,7 +156,7 @@ export function NewsCenter() {
                     </Badge>
                   </div>
                   <p className="text-muted-foreground mb-3 line-clamp-2">
-                    {news.excerpt}
+                    {news.summary}
                   </p>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span>

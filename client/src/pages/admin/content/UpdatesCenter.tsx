@@ -19,7 +19,7 @@ export function UpdatesCenter() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: updatesList = [], isLoading } = useQuery({
+  const { data: updatesList = [], isLoading } = useQuery<Update[]>({
     queryKey: ['/api/updates'],
   });
 
@@ -27,11 +27,11 @@ export function UpdatesCenter() {
     mutationFn: async (update: Update) => {
       return apiRequest(`/api/updates/${update.id}`, {
         method: "PUT",
-        body: {
+        body: JSON.stringify({
           ...update,
           isPublished: !update.isPublished,
           publishedAt: !update.isPublished ? new Date() : null,
-        },
+        }),
       });
     },
     onSuccess: () => {
@@ -159,7 +159,7 @@ export function UpdatesCenter() {
                     </Badge>
                   </div>
                   <p className="text-muted-foreground mb-3 line-clamp-2">
-                    {update.description}
+                    {update.summary}
                   </p>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span>
