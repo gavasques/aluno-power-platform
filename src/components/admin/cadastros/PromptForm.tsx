@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, BrainCircuit } from "lucide-react";
+import { ArrowLeft, Save, BrainCircuit, Eye } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePrompts } from "@/contexts/PromptsContext";
 import { useToast } from "@/hooks/use-toast";
@@ -100,6 +100,25 @@ const PromptForm = () => {
     }));
   };
 
+  // Função para destacar conteúdo dentro de {} e []
+  const highlightPlaceholders = (text: string) => {
+    const parts = text.split(/(\[[^\]]*\]|\{[^}]*\})/g);
+    
+    return parts.map((part, index) => {
+      if (part.match(/^\[[^\]]*\]$/) || part.match(/^\{[^}]*\}$/)) {
+        return (
+          <span 
+            key={index} 
+            className="bg-yellow-200 text-yellow-800 px-1 rounded font-medium"
+          >
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <Card className="bg-white border border-border shadow-sm">
       <CardHeader>
@@ -177,6 +196,21 @@ const PromptForm = () => {
               required
             />
           </div>
+
+          {/* Preview do conteúdo com destaque */}
+          {formData.content && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                Preview do Conteúdo
+              </Label>
+              <div className="bg-gray-50 border rounded-lg p-4">
+                <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed">
+                  {highlightPlaceholders(formData.content)}
+                </pre>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="usageExamples">Exemplos de Uso</Label>
