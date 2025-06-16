@@ -32,7 +32,9 @@ export function VideosSection() {
   }, {} as Record<string, typeof videos>);
 
   const categories = Object.keys(groupedVideos);
-  const featuredVideos = videos.slice(0, 6);
+  const featuredVideos = videos
+    .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+    .slice(0, 6);
 
   return (
     <div className="space-y-6">
