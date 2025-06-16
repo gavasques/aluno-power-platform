@@ -32,5 +32,20 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
     throw new Error(error.error || `HTTP ${response.status}`);
   }
 
-  return response.json();
+  // Handle empty responses (like 204 No Content)
+  if (response.status === 204 || response.headers.get('content-length') === '0') {
+    return {} as T;
+  }
+
+  const text = await response.text();
+  if (!text) {
+    return {} as T;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    console.warn('Failed to parse JSON response:', text);
+    return {} as T;
+  }
 }
