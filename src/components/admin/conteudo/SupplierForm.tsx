@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,6 +117,7 @@ const SupplierForm = () => {
       corporateName: formData.corporateName,
       category: selectedCategory,
       departments: selectedDepartments,
+      brands: isEditing ? supplier?.brands || [] : [], // Adicionando a propriedade brands
       notes: formData.notes,
       email: formData.email,
       mainContact: formData.mainContact,
