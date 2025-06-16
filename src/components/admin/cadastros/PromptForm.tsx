@@ -9,6 +9,8 @@ import { ArrowLeft, Save, BrainCircuit } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePrompts } from "@/contexts/PromptsContext";
 import { useToast } from "@/hooks/use-toast";
+import { PromptImage } from "@/types/prompt";
+import { PromptImageUpload } from "@/components/admin/prompts/PromptImageUpload";
 import {
   Select,
   SelectContent,
@@ -33,6 +35,7 @@ const PromptForm = () => {
     categoryId: '',
     description: '',
     usageExamples: '',
+    images: [] as PromptImage[],
   });
 
   useEffect(() => {
@@ -43,6 +46,7 @@ const PromptForm = () => {
         categoryId: currentPrompt.category.id,
         description: currentPrompt.description || '',
         usageExamples: currentPrompt.usageExamples || '',
+        images: currentPrompt.images || [],
       });
     }
   }, [currentPrompt]);
@@ -89,7 +93,7 @@ const PromptForm = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | PromptImage[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -184,6 +188,11 @@ const PromptForm = () => {
               className="min-h-[100px]"
             />
           </div>
+
+          <PromptImageUpload
+            images={formData.images}
+            onImagesChange={(images) => handleInputChange('images', images)}
+          />
 
           <div className="flex justify-end space-x-4">
             <Button

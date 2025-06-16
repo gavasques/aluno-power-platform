@@ -9,6 +9,7 @@ export interface PromptImage {
   id: string;
   url: string;
   alt: string;
+  type: 'before' | 'after' | 'general';
 }
 
 export interface Prompt {
