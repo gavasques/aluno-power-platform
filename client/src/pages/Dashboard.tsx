@@ -5,8 +5,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { BrainCircuit, Package, Rss, Truck, Youtube, TrendingUp, Users, BookOpen } from "lucide-react";
+import { BrainCircuit, Package, Rss, Truck, Youtube, TrendingUp, Users, BookOpen, ExternalLink } from "lucide-react";
 import React, { memo } from "react";
+import { useYoutube } from "@/contexts/YoutubeContext";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { VideoCard } from "@/components/youtube/VideoCard";
 
 interface StatCardProps {
   title: string;
@@ -32,6 +36,9 @@ const StatCard: React.FC<StatCardProps> = memo(({ title, value, icon: Icon, grad
 StatCard.displayName = 'StatCard';
 
 const Dashboard = () => {
+  const { videos, isLoading } = useYoutube();
+  const recentVideos = videos.slice(0, 6);
+
   return (
     <div className="min-h-screen bg-white">
       <div className="flex flex-col gap-8 p-6">
@@ -98,16 +105,44 @@ const Dashboard = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-8 bg-white">
-              <div className="text-center space-y-4">
-                <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-pink-200 rounded-full flex items-center justify-center mx-auto">
-                  <Youtube className="h-10 w-10 text-red-500" />
+            <CardContent className="p-6 bg-white">
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[...Array(6)].map((_, index) => (
+                    <div key={index} className="animate-pulse">
+                      <div className="bg-gray-200 aspect-video rounded-lg mb-3"></div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-gray-700 text-lg">O feed de vídeos do YouTube será implementado aqui.</p>
-                <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg text-sm font-medium">
-                  Em breve...
+              ) : recentVideos.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {recentVideos.map((video) => (
+                      <VideoCard key={video.id} video={video} />
+                    ))}
+                  </div>
+                  <div className="flex justify-center pt-4">
+                    <Button asChild variant="outline" className="border-red-500 text-red-500 hover:bg-red-50">
+                      <Link to="/videos">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Ver todos os vídeos
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center space-y-4">
+                  <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-pink-200 rounded-full flex items-center justify-center mx-auto">
+                    <Youtube className="h-10 w-10 text-red-500" />
+                  </div>
+                  <p className="text-gray-700 text-lg">Nenhum vídeo encontrado</p>
+                  <p className="text-gray-500 text-sm">Os vídeos do YouTube serão sincronizados automaticamente</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

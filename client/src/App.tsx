@@ -17,6 +17,7 @@ import { YoutubeProvider } from "./contexts/YoutubeContext";
 
 // Import pages that exist
 import Dashboard from "./pages/Dashboard";
+import Videos from "./pages/Videos";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Admin from "./pages/Admin";
 import UserManagement from "./pages/admin/UserManagement";
@@ -65,6 +66,7 @@ function App() {
                           {/* Rotas do usuário com Layout */}
                           <Route path="/" element={<Layout><Outlet /></Layout>}>
                             <Route index element={<Dashboard />} />
+                            <Route path="videos" element={<Videos />} />
                             <Route path="fornecedores" element={<Suppliers />} />
                             
                             {/* Rotas do Hub */}

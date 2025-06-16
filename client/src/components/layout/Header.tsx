@@ -31,6 +31,7 @@ import {
   Ship,
   Building,
   ClipboardCheck,
+  Youtube,
 } from "lucide-react";
 
 const menuItems = [
@@ -98,6 +99,12 @@ export function Header() {
                 <Link to="/" className={navigationMenuTriggerStyle()}>
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/videos" className={navigationMenuTriggerStyle()}>
+                  <Youtube className="mr-2 h-4 w-4" />
+                  Vídeos
                 </Link>
               </NavigationMenuItem>
               {menuItems.map((section) => (
