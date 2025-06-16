@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Copy, 
   FileText,
-  Calendar,
   ArrowLeft,
   Info,
   Lightbulb,
@@ -93,10 +92,6 @@ const TemplateDetail = () => {
           <h1 className="text-3xl font-bold">{template.title}</h1>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="secondary">{template.category.name}</Badge>
-            <span className="text-sm text-muted-foreground flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              Criado em {template.createdAt.toLocaleDateString('pt-BR')}
-            </span>
           </div>
         </div>
       </div>
@@ -175,16 +170,8 @@ const TemplateDetail = () => {
       {/* Informações Adicionais */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-            <div>
-              <span className="font-medium">Categoria:</span> {template.category.name}
-            </div>
-            <div>
-              <span className="font-medium">Criado em:</span> {template.createdAt.toLocaleDateString('pt-BR')}
-            </div>
-            <div>
-              <span className="font-medium">Última atualização:</span> {template.updatedAt.toLocaleDateString('pt-BR')}
-            </div>
+          <div className="text-sm text-muted-foreground">
+            <span className="font-medium">Categoria:</span> {template.category.name}
           </div>
         </CardContent>
       </Card>
