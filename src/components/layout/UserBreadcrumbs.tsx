@@ -52,7 +52,16 @@ export function UserBreadcrumbs() {
         label: "Detalhes da Ferramenta",
         isLast: i === pathSegments.length - 1
       });
-    } else if (breadcrumbMap[currentPath]) {
+    }
+    // Verifica se é uma rota de detalhes de material do hub
+    else if (pathSegments[i-1] === "materiais" && pathSegments[i-2] === "hub" && !breadcrumbMap[currentPath]) {
+      breadcrumbs.push({
+        path: currentPath,
+        label: "Detalhes do Material",
+        isLast: i === pathSegments.length - 1
+      });
+    }
+    else if (breadcrumbMap[currentPath]) {
       breadcrumbs.push({
         path: currentPath,
         label: breadcrumbMap[currentPath],

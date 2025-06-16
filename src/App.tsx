@@ -10,7 +10,7 @@ import { SuppliersProvider } from "@/contexts/SuppliersContext";
 import { MaterialsProvider } from "./contexts/MaterialsContext";
 import { ProductProvider } from "./contexts/ProductContext";
 import { ToolsProvider } from "./contexts/ToolsContext";
-import { TemplatesProvider } from "./contexts/TemplatesContext";
+import { TemplatesProvider } from "./contexts/TemplatesProvider";
 import { PromptsProvider } from "./contexts/PromptsContext";
 
 // Import pages that exist
@@ -25,6 +25,7 @@ import Suppliers from "./pages/hub/Suppliers";
 import Partners from "./pages/hub/Partners";
 import PartnerDetail from "./pages/hub/PartnerDetail";
 import ToolDetail from "./pages/hub/ToolDetail";
+import HubMaterialDetail from "./pages/hub/MaterialDetail";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
 
@@ -65,6 +66,7 @@ function App() {
                               {/* Detail routes first (dynamic routes before the catch-all) */}
                               <Route path="parceiros/:id" element={<PartnerDetail />} />
                               <Route path="ferramentas/:id" element={<ToolDetail />} />
+                              <Route path="materiais/:id" element={<HubMaterialDetail />} />
                               <Route path="parceiros" element={<Partners />} />
                               <Route path="fornecedores" element={<Suppliers />} />
                               <Route path=":section" element={<Hub />} />
