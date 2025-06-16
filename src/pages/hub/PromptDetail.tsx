@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Copy, 
   BrainCircuit,
-  Calendar,
   ArrowLeft,
   Info,
   Lightbulb,
@@ -99,10 +98,6 @@ const PromptDetail = () => {
                 {prompt.images.length} {prompt.images.length === 1 ? 'imagem' : 'imagens'}
               </Badge>
             )}
-            <span className="text-sm text-muted-foreground flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              Criado em {prompt.createdAt.toLocaleDateString('pt-BR')}
-            </span>
           </div>
         </div>
       </div>
@@ -196,16 +191,8 @@ const PromptDetail = () => {
       {/* Informações Adicionais */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-            <div>
-              <span className="font-medium">Categoria:</span> {prompt.category.name}
-            </div>
-            <div>
-              <span className="font-medium">Criado em:</span> {prompt.createdAt.toLocaleDateString('pt-BR')}
-            </div>
-            <div>
-              <span className="font-medium">Última atualização:</span> {prompt.updatedAt.toLocaleDateString('pt-BR')}
-            </div>
+          <div className="text-sm text-muted-foreground">
+            <span className="font-medium">Categoria:</span> {prompt.category.name}
           </div>
         </CardContent>
       </Card>
