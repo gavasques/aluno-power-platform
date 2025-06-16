@@ -7,7 +7,7 @@ import { useYoutube } from "@/contexts/YoutubeContext";
 import { useState } from "react";
 
 export function VideosSection() {
-  const { videos, loading, syncVideos } = useYoutube();
+  const { videos, channelInfo, loading, channelLoading, syncVideos } = useYoutube();
   const [syncing, setSyncing] = useState(false);
 
   const handleSync = async () => {
@@ -42,10 +42,46 @@ export function VideosSection() {
                 <Youtube className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <CardTitle className="text-xl">Vídeos Recomendados</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Conteúdo atualizado automaticamente 2x por dia
-                </p>
+                {channelLoading ? (
+                  <>
+                    <CardTitle className="text-xl">Carregando canal...</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Conteúdo atualizado automaticamente 2x por dia
+                    </p>
+                  </>
+                ) : channelInfo ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-xl">{channelInfo.title}</CardTitle>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1 h-auto text-red-600 hover:text-red-700"
+                        onClick={() => window.open(`https://youtube.com/channel/${channelInfo.channelId}`, '_blank')}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>{parseInt(channelInfo.subscriberCount).toLocaleString()} seguidores</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Play className="h-4 w-4" />
+                        <span>{channelInfo.videoCount} vídeos</span>
+                      </div>
+                      <span>Atualizado automaticamente 2x por dia</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <CardTitle className="text-xl">Canal do YouTube</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Conteúdo atualizado automaticamente 2x por dia
+                    </p>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-3">

@@ -106,29 +106,54 @@ class YouTubeService {
 
   async fetchChannelInfo(channelHandle: string): Promise<any> {
     try {
-      // Search for channel by handle
-      const searchUrl = `${this.baseUrl}/search?part=snippet&type=channel&q=${encodeURIComponent(channelHandle)}&key=${this.apiKey}`;
-      const searchResponse = await fetch(searchUrl);
-      
-      if (!searchResponse.ok) {
-        throw new Error(`YouTube API error: ${searchResponse.status}`);
-      }
-      
-      const searchData = await searchResponse.json();
-      
-      if (searchData.items && searchData.items.length > 0) {
-        const channelId = searchData.items[0].id.channelId;
-        
-        // Get detailed channel info including subscriber count
-        const channelUrl = `${this.baseUrl}/channels?part=snippet,statistics&id=${channelId}&key=${this.apiKey}`;
-        const channelResponse = await fetch(channelUrl);
-        
-        if (!channelResponse.ok) {
-          throw new Error(`YouTube API error: ${channelResponse.status}`);
+      // Try multiple search approaches for better channel discovery
+      const searchQueries = [
+        channelHandle,
+        'Guilherme Vasques',
+        'Guilherme Vasques Amazon',
+        'Guilherme Vasques importação'
+      ];
+
+      for (const query of searchQueries) {
+        try {
+          const searchUrl = `${this.baseUrl}/search?part=snippet&type=channel&q=${encodeURIComponent(query)}&key=${this.apiKey}`;
+          const searchResponse = await fetch(searchUrl);
+          
+          if (!searchResponse.ok) {
+            continue;
+          }
+          
+          const searchData = await searchResponse.json();
+          
+          if (searchData.items && searchData.items.length > 0) {
+            // Look for exact match or best match
+            let bestMatch = searchData.items[0];
+            
+            // Try to find exact channel name match
+            for (const item of searchData.items) {
+              if (item.snippet.title.toLowerCase().includes('guilherme vasques')) {
+                bestMatch = item;
+                break;
+              }
+            }
+            
+            const channelId = bestMatch.id.channelId;
+            
+            // Get detailed channel info including subscriber count
+            const channelUrl = `${this.baseUrl}/channels?part=snippet,statistics&id=${channelId}&key=${this.apiKey}`;
+            const channelResponse = await fetch(channelUrl);
+            
+            if (channelResponse.ok) {
+              const channelData = await channelResponse.json();
+              if (channelData.items && channelData.items.length > 0) {
+                return channelData.items[0];
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error searching for "${query}":`, error);
+          continue;
         }
-        
-        const channelData = await channelResponse.json();
-        return channelData.items[0];
       }
       
       return null;
@@ -140,57 +165,85 @@ class YouTubeService {
 
   async fetchChannelVideos(channelHandle: string, maxResults: number = 20): Promise<YouTubeVideo[]> {
     try {
-      // First get channel ID from handle
-      const searchUrl = `${this.baseUrl}/search?part=snippet&type=channel&q=${encodeURIComponent(channelHandle)}&key=${this.apiKey}`;
-      const searchResponse = await fetch(searchUrl);
-      
-      if (!searchResponse.ok) {
-        throw new Error(`YouTube API error: ${searchResponse.status}`);
+      // Use the same search approach as fetchChannelInfo for consistency
+      const searchQueries = [
+        channelHandle,
+        'Guilherme Vasques',
+        'Guilherme Vasques Amazon',
+        'Guilherme Vasques importação'
+      ];
+
+      for (const query of searchQueries) {
+        try {
+          const searchUrl = `${this.baseUrl}/search?part=snippet&type=channel&q=${encodeURIComponent(query)}&key=${this.apiKey}`;
+          const searchResponse = await fetch(searchUrl);
+          
+          if (!searchResponse.ok) {
+            continue;
+          }
+          
+          const searchData = await searchResponse.json();
+          
+          if (searchData.items && searchData.items.length > 0) {
+            // Look for exact match or best match
+            let bestMatch = searchData.items[0];
+            
+            // Try to find exact channel name match
+            for (const item of searchData.items) {
+              if (item.snippet.title.toLowerCase().includes('guilherme vasques')) {
+                bestMatch = item;
+                break;
+              }
+            }
+            
+            const channelId = bestMatch.id.channelId;
+            
+            // Get videos from the channel
+            const videosUrl = `${this.baseUrl}/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=${maxResults}&key=${this.apiKey}`;
+            const videosResponse = await fetch(videosUrl);
+            
+            if (!videosResponse.ok) {
+              continue;
+            }
+            
+            const videosData: YouTubeSearchResponse = await videosResponse.json();
+            
+            if (!videosData.items || videosData.items.length === 0) {
+              continue;
+            }
+            
+            // Get additional details for videos
+            const videoIds = videosData.items.map(video => video.id.videoId).join(',');
+            const detailsUrl = `${this.baseUrl}/videos?part=contentDetails,statistics&id=${videoIds}&key=${this.apiKey}`;
+            const detailsResponse = await fetch(detailsUrl);
+            
+            if (detailsResponse.ok) {
+              const detailsData = await detailsResponse.json();
+              
+              // Merge video data with details
+              const videos = videosData.items.map(video => {
+                const details = detailsData.items?.find((detail: any) => detail.id === video.id.videoId);
+                return {
+                  ...video,
+                  contentDetails: details?.contentDetails,
+                  statistics: details?.statistics
+                };
+              });
+              
+              console.log(`Found ${videos.length} videos for channel: ${bestMatch.snippet.title}`);
+              return videos;
+            }
+            
+            return videosData.items;
+          }
+        } catch (error) {
+          console.error(`Error searching for "${query}":`, error);
+          continue;
+        }
       }
       
-      const searchData = await searchResponse.json();
-      
-      if (!searchData.items || searchData.items.length === 0) {
-        console.log(`No channel found for: ${channelHandle}`);
-        return [];
-      }
-      
-      const channelId = searchData.items[0].id.channelId;
-      
-      // Get videos from the channel
-      const videosUrl = `${this.baseUrl}/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=${maxResults}&key=${this.apiKey}`;
-      const videosResponse = await fetch(videosUrl);
-      
-      if (!videosResponse.ok) {
-        throw new Error(`YouTube API error: ${videosResponse.status}`);
-      }
-      
-      const videosData: YouTubeSearchResponse = await videosResponse.json();
-      
-      if (!videosData.items || videosData.items.length === 0) {
-        return [];
-      }
-      
-      // Get additional details for videos
-      const videoIds = videosData.items.map(video => video.id.videoId).join(',');
-      const detailsUrl = `${this.baseUrl}/videos?part=contentDetails,statistics&id=${videoIds}&key=${this.apiKey}`;
-      const detailsResponse = await fetch(detailsUrl);
-      
-      if (detailsResponse.ok) {
-        const detailsData = await detailsResponse.json();
-        
-        // Merge video data with details
-        return videosData.items.map(video => {
-          const details = detailsData.items?.find((detail: any) => detail.id === video.id.videoId);
-          return {
-            ...video,
-            contentDetails: details?.contentDetails,
-            statistics: details?.statistics
-          };
-        });
-      }
-      
-      return videosData.items;
+      console.log(`No videos found for any search query`);
+      return [];
     } catch (error) {
       console.error('Error fetching channel videos:', error);
       return [];
