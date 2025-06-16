@@ -16,9 +16,9 @@ const Tools = () => {
   const navigate = useNavigate();
 
   const filteredTools = tools.filter(tool => {
-    const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tool.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = selectedType === "all" || tool.typeId === selectedType;
+    const matchesSearch = tool.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         tool.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = selectedType === "all" || tool.typeId?.toString() === selectedType;
     return matchesSearch && matchesType;
   });
 
@@ -31,7 +31,7 @@ const Tools = () => {
     ));
   };
 
-  const handleToolClick = (toolId: string) => {
+  const handleToolClick = (toolId: number) => {
     navigate(`/hub/ferramentas/${toolId}`);
   };
 
