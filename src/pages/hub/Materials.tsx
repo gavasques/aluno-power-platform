@@ -14,7 +14,7 @@ type AccessLevel = "public" | "restricted" | "all";
 const Materials = () => {
   const { getFilteredMaterials, materialTypes, filters, setFilters, incrementDownload } = useMaterials();
   const [searchTerm, setSearchTerm] = useState(filters.search || "");
-  const [selectedCategory, setSelectedCategory] = useState(filters.typeId || "");
+  const [selectedCategory, setSelectedCategory] = useState(filters.typeId || "all");
   const [accessFilter, setAccessFilter] = useState<AccessLevel>(filters.accessLevel || "all");
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const Materials = () => {
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
-    setFilters({ typeId: value });
+    setFilters({ typeId: value === "all" ? "" : value });
   };
 
   const handleAccessChange = (value: string) => {
@@ -116,7 +116,7 @@ const Materials = () => {
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   {materialTypes.map(type => (
                     <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
                   ))}
@@ -134,12 +134,12 @@ const Materials = () => {
                 </SelectContent>
               </Select>
 
-              {(searchTerm || selectedCategory || accessFilter !== "all") && (
+              {(searchTerm || selectedCategory !== "all" || accessFilter !== "all") && (
                 <Button
                   variant="outline"
                   onClick={() => {
                     handleSearchChange("");
-                    handleCategoryChange("");
+                    handleCategoryChange("all");
                     handleAccessChange("all");
                   }}
                 >
