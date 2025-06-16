@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,11 +9,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useMaterials } from "@/contexts/MaterialsContext";
 import { useNavigate } from "react-router-dom";
 
+type AccessLevel = "public" | "restricted" | "all";
+
 const Materials = () => {
   const { getFilteredMaterials, materialTypes, filters, setFilters, incrementDownload } = useMaterials();
   const [searchTerm, setSearchTerm] = useState(filters.search || "");
   const [selectedCategory, setSelectedCategory] = useState(filters.typeId || "");
-  const [accessFilter, setAccessFilter] = useState(filters.accessLevel || "all");
+  const [accessFilter, setAccessFilter] = useState<AccessLevel>(filters.accessLevel || "all");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -30,8 +31,9 @@ const Materials = () => {
   };
 
   const handleAccessChange = (value: string) => {
-    setAccessFilter(value);
-    setFilters({ accessLevel: value as any });
+    const accessLevel = value as AccessLevel;
+    setAccessFilter(accessLevel);
+    setFilters({ accessLevel: accessLevel === "all" ? undefined : accessLevel });
   };
 
   const filteredMaterials = getFilteredMaterials();

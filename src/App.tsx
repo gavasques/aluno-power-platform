@@ -10,7 +10,7 @@ import { SuppliersProvider } from "@/contexts/SuppliersContext";
 import { MaterialsProvider } from "./contexts/MaterialsContext";
 import { ProductProvider } from "./contexts/ProductContext";
 import { ToolsProvider } from "./contexts/ToolsContext";
-import { TemplatesProvider } from "./contexts/TemplatesProvider";
+import { TemplatesProvider } from "./contexts/TemplatesContext";
 import { PromptsProvider } from "./contexts/PromptsContext";
 
 // Import pages that exist
