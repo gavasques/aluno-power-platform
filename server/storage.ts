@@ -1,39 +1,527 @@
-import { users, type User, type InsertUser } from "@shared/schema";
-
-// modify the interface with any CRUD methods
-// you might need
+import { 
+  users, 
+  suppliers, 
+  partners, 
+  materials, 
+  tools, 
+  templates, 
+  prompts, 
+  products,
+  categories,
+  materialTypes,
+  toolTypes,
+  templateCategories,
+  promptCategories,
+  departments,
+  type User, 
+  type InsertUser,
+  type Supplier,
+  type InsertSupplier,
+  type Partner,
+  type InsertPartner,
+  type Material,
+  type InsertMaterial,
+  type Tool,
+  type InsertTool,
+  type Template,
+  type InsertTemplate,
+  type Prompt,
+  type InsertPrompt,
+  type Product,
+  type InsertProduct,
+  type Category,
+  type InsertCategory
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, ilike, and, or } from "drizzle-orm";
 
 export interface IStorage {
+  // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+
+  // Suppliers
+  getSuppliers(): Promise<Supplier[]>;
+  getSupplier(id: number): Promise<Supplier | undefined>;
+  createSupplier(supplier: InsertSupplier): Promise<Supplier>;
+  updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier>;
+  deleteSupplier(id: number): Promise<void>;
+  searchSuppliers(query: string): Promise<Supplier[]>;
+
+  // Partners
+  getPartners(): Promise<Partner[]>;
+  getPartner(id: number): Promise<Partner | undefined>;
+  createPartner(partner: InsertPartner): Promise<Partner>;
+  updatePartner(id: number, partner: Partial<InsertPartner>): Promise<Partner>;
+  deletePartner(id: number): Promise<void>;
+  searchPartners(query: string): Promise<Partner[]>;
+
+  // Materials
+  getMaterials(): Promise<Material[]>;
+  getMaterial(id: number): Promise<Material | undefined>;
+  createMaterial(material: InsertMaterial): Promise<Material>;
+  updateMaterial(id: number, material: Partial<InsertMaterial>): Promise<Material>;
+  deleteMaterial(id: number): Promise<void>;
+  searchMaterials(query: string): Promise<Material[]>;
+
+  // Tools
+  getTools(): Promise<Tool[]>;
+  getTool(id: number): Promise<Tool | undefined>;
+  createTool(tool: InsertTool): Promise<Tool>;
+  updateTool(id: number, tool: Partial<InsertTool>): Promise<Tool>;
+  deleteTool(id: number): Promise<void>;
+  searchTools(query: string): Promise<Tool[]>;
+
+  // Templates
+  getTemplates(): Promise<Template[]>;
+  getTemplate(id: number): Promise<Template | undefined>;
+  createTemplate(template: InsertTemplate): Promise<Template>;
+  updateTemplate(id: number, template: Partial<InsertTemplate>): Promise<Template>;
+  deleteTemplate(id: number): Promise<void>;
+  searchTemplates(query: string): Promise<Template[]>;
+
+  // Prompts
+  getPrompts(): Promise<Prompt[]>;
+  getPrompt(id: number): Promise<Prompt | undefined>;
+  createPrompt(prompt: InsertPrompt): Promise<Prompt>;
+  updatePrompt(id: number, prompt: Partial<InsertPrompt>): Promise<Prompt>;
+  deletePrompt(id: number): Promise<void>;
+  searchPrompts(query: string): Promise<Prompt[]>;
+
+  // Products
+  getProducts(): Promise<Product[]>;
+  getProduct(id: number): Promise<Product | undefined>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
+  deleteProduct(id: number): Promise<void>;
+  searchProducts(query: string): Promise<Product[]>;
+
+  // Categories
+  getCategories(type?: string): Promise<Category[]>;
+  getCategory(id: number): Promise<Category | undefined>;
+  createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category>;
+  deleteCategory(id: number): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  currentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
+  // Users
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        role: insertUser.role || "student",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
     return user;
+  }
+
+  // Suppliers
+  async getSuppliers(): Promise<Supplier[]> {
+    return await db.select().from(suppliers);
+  }
+
+  async getSupplier(id: number): Promise<Supplier | undefined> {
+    const [supplier] = await db.select().from(suppliers).where(eq(suppliers.id, id));
+    return supplier || undefined;
+  }
+
+  async createSupplier(supplier: InsertSupplier): Promise<Supplier> {
+    const [created] = await db
+      .insert(suppliers)
+      .values({
+        ...supplier,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier> {
+    const [updated] = await db
+      .update(suppliers)
+      .set({
+        ...supplier,
+        updatedAt: new Date(),
+      })
+      .where(eq(suppliers.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSupplier(id: number): Promise<void> {
+    await db.delete(suppliers).where(eq(suppliers.id, id));
+  }
+
+  async searchSuppliers(query: string): Promise<Supplier[]> {
+    return await db
+      .select()
+      .from(suppliers)
+      .where(
+        or(
+          ilike(suppliers.tradeName, `%${query}%`),
+          ilike(suppliers.corporateName, `%${query}%`),
+          ilike(suppliers.description, `%${query}%`)
+        )
+      );
+  }
+
+  // Partners
+  async getPartners(): Promise<Partner[]> {
+    return await db.select().from(partners);
+  }
+
+  async getPartner(id: number): Promise<Partner | undefined> {
+    const [partner] = await db.select().from(partners).where(eq(partners.id, id));
+    return partner || undefined;
+  }
+
+  async createPartner(partner: InsertPartner): Promise<Partner> {
+    const [created] = await db
+      .insert(partners)
+      .values({
+        ...partner,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updatePartner(id: number, partner: Partial<InsertPartner>): Promise<Partner> {
+    const [updated] = await db
+      .update(partners)
+      .set({
+        ...partner,
+        updatedAt: new Date(),
+      })
+      .where(eq(partners.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePartner(id: number): Promise<void> {
+    await db.delete(partners).where(eq(partners.id, id));
+  }
+
+  async searchPartners(query: string): Promise<Partner[]> {
+    return await db
+      .select()
+      .from(partners)
+      .where(
+        or(
+          ilike(partners.name, `%${query}%`),
+          ilike(partners.specialties, `%${query}%`),
+          ilike(partners.description, `%${query}%`)
+        )
+      );
+  }
+
+  // Materials
+  async getMaterials(): Promise<Material[]> {
+    return await db.select().from(materials);
+  }
+
+  async getMaterial(id: number): Promise<Material | undefined> {
+    const [material] = await db.select().from(materials).where(eq(materials.id, id));
+    return material || undefined;
+  }
+
+  async createMaterial(material: InsertMaterial): Promise<Material> {
+    const [created] = await db
+      .insert(materials)
+      .values({
+        ...material,
+        uploadDate: new Date(),
+        lastModified: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updateMaterial(id: number, material: Partial<InsertMaterial>): Promise<Material> {
+    const [updated] = await db
+      .update(materials)
+      .set({
+        ...material,
+        lastModified: new Date(),
+      })
+      .where(eq(materials.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMaterial(id: number): Promise<void> {
+    await db.delete(materials).where(eq(materials.id, id));
+  }
+
+  async searchMaterials(query: string): Promise<Material[]> {
+    return await db
+      .select()
+      .from(materials)
+      .where(
+        or(
+          ilike(materials.title, `%${query}%`),
+          ilike(materials.description, `%${query}%`)
+        )
+      );
+  }
+
+  // Tools
+  async getTools(): Promise<Tool[]> {
+    return await db.select().from(tools);
+  }
+
+  async getTool(id: number): Promise<Tool | undefined> {
+    const [tool] = await db.select().from(tools).where(eq(tools.id, id));
+    return tool || undefined;
+  }
+
+  async createTool(tool: InsertTool): Promise<Tool> {
+    const [created] = await db
+      .insert(tools)
+      .values({
+        ...tool,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updateTool(id: number, tool: Partial<InsertTool>): Promise<Tool> {
+    const [updated] = await db
+      .update(tools)
+      .set({
+        ...tool,
+        updatedAt: new Date(),
+      })
+      .where(eq(tools.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTool(id: number): Promise<void> {
+    await db.delete(tools).where(eq(tools.id, id));
+  }
+
+  async searchTools(query: string): Promise<Tool[]> {
+    return await db
+      .select()
+      .from(tools)
+      .where(
+        or(
+          ilike(tools.name, `%${query}%`),
+          ilike(tools.description, `%${query}%`)
+        )
+      );
+  }
+
+  // Templates
+  async getTemplates(): Promise<Template[]> {
+    return await db.select().from(templates);
+  }
+
+  async getTemplate(id: number): Promise<Template | undefined> {
+    const [template] = await db.select().from(templates).where(eq(templates.id, id));
+    return template || undefined;
+  }
+
+  async createTemplate(template: InsertTemplate): Promise<Template> {
+    const [created] = await db
+      .insert(templates)
+      .values({
+        ...template,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updateTemplate(id: number, template: Partial<InsertTemplate>): Promise<Template> {
+    const [updated] = await db
+      .update(templates)
+      .set({
+        ...template,
+        updatedAt: new Date(),
+      })
+      .where(eq(templates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTemplate(id: number): Promise<void> {
+    await db.delete(templates).where(eq(templates.id, id));
+  }
+
+  async searchTemplates(query: string): Promise<Template[]> {
+    return await db
+      .select()
+      .from(templates)
+      .where(
+        or(
+          ilike(templates.title, `%${query}%`),
+          ilike(templates.description, `%${query}%`),
+          ilike(templates.content, `%${query}%`)
+        )
+      );
+  }
+
+  // Prompts
+  async getPrompts(): Promise<Prompt[]> {
+    return await db.select().from(prompts);
+  }
+
+  async getPrompt(id: number): Promise<Prompt | undefined> {
+    const [prompt] = await db.select().from(prompts).where(eq(prompts.id, id));
+    return prompt || undefined;
+  }
+
+  async createPrompt(prompt: InsertPrompt): Promise<Prompt> {
+    const [created] = await db
+      .insert(prompts)
+      .values({
+        ...prompt,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updatePrompt(id: number, prompt: Partial<InsertPrompt>): Promise<Prompt> {
+    const [updated] = await db
+      .update(prompts)
+      .set({
+        ...prompt,
+        updatedAt: new Date(),
+      })
+      .where(eq(prompts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePrompt(id: number): Promise<void> {
+    await db.delete(prompts).where(eq(prompts.id, id));
+  }
+
+  async searchPrompts(query: string): Promise<Prompt[]> {
+    return await db
+      .select()
+      .from(prompts)
+      .where(
+        or(
+          ilike(prompts.title, `%${query}%`),
+          ilike(prompts.description, `%${query}%`),
+          ilike(prompts.content, `%${query}%`)
+        )
+      );
+  }
+
+  // Products
+  async getProducts(): Promise<Product[]> {
+    return await db.select().from(products);
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product || undefined;
+  }
+
+  async createProduct(product: InsertProduct): Promise<Product> {
+    const [created] = await db
+      .insert(products)
+      .values({
+        ...product,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product> {
+    const [updated] = await db
+      .update(products)
+      .set({
+        ...product,
+        updatedAt: new Date(),
+      })
+      .where(eq(products.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteProduct(id: number): Promise<void> {
+    await db.delete(products).where(eq(products.id, id));
+  }
+
+  async searchProducts(query: string): Promise<Product[]> {
+    return await db
+      .select()
+      .from(products)
+      .where(
+        or(
+          ilike(products.name, `%${query}%`),
+          ilike(products.brand, `%${query}%`),
+          ilike(products.category, `%${query}%`)
+        )
+      );
+  }
+
+  // Categories
+  async getCategories(type?: string): Promise<Category[]> {
+    if (type) {
+      return await db.select().from(categories).where(eq(categories.type, type));
+    }
+    return await db.select().from(categories);
+  }
+
+  async getCategory(id: number): Promise<Category | undefined> {
+    const [category] = await db.select().from(categories).where(eq(categories.id, id));
+    return category || undefined;
+  }
+
+  async createCategory(category: InsertCategory): Promise<Category> {
+    const [created] = await db
+      .insert(categories)
+      .values({
+        ...category,
+        createdAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category> {
+    const [updated] = await db
+      .update(categories)
+      .set(category)
+      .where(eq(categories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCategory(id: number): Promise<void> {
+    await db.delete(categories).where(eq(categories.id, id));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
