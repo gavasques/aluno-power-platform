@@ -36,6 +36,11 @@ export function VideosSection() {
 
   return (
     <div className="space-y-6">
+      {/* Demo Controls */}
+      <div className="flex justify-end">
+        <RoleToggle />
+      </div>
+
       {/* Header */}
       <Card>
         <CardHeader>
