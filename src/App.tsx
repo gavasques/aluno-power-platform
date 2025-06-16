@@ -26,6 +26,7 @@ import Partners from "./pages/hub/Partners";
 import PartnerDetail from "./pages/hub/PartnerDetail";
 import ToolDetail from "./pages/hub/ToolDetail";
 import HubMaterialDetail from "./pages/hub/MaterialDetail";
+import SupplierDetail from "./pages/hub/SupplierDetail";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
 
@@ -67,6 +68,7 @@ function App() {
                               <Route path="parceiros/:id" element={<PartnerDetail />} />
                               <Route path="ferramentas/:id" element={<ToolDetail />} />
                               <Route path="materiais/:id" element={<HubMaterialDetail />} />
+                              <Route path="fornecedores/:id" element={<SupplierDetail />} />
                               <Route path="parceiros" element={<Partners />} />
                               <Route path="fornecedores" element={<Suppliers />} />
                               <Route path=":section" element={<Hub />} />

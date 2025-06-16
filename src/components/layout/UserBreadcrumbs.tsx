@@ -61,6 +61,14 @@ export function UserBreadcrumbs() {
         isLast: i === pathSegments.length - 1
       });
     }
+    // Verifica se é uma rota de detalhes de fornecedor do hub
+    else if (pathSegments[i-1] === "fornecedores" && pathSegments[i-2] === "hub" && !breadcrumbMap[currentPath]) {
+      breadcrumbs.push({
+        path: currentPath,
+        label: "Detalhes do Fornecedor",
+        isLast: i === pathSegments.length - 1
+      });
+    }
     else if (breadcrumbMap[currentPath]) {
       breadcrumbs.push({
         path: currentPath,
