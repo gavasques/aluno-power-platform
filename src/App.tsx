@@ -24,6 +24,7 @@ import ContentManagement from "./pages/admin/ContentManagement";
 import Suppliers from "./pages/hub/Suppliers";
 import Partners from "./pages/hub/Partners";
 import PartnerDetail from "./pages/hub/PartnerDetail";
+import ToolDetail from "./pages/hub/ToolDetail";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
 
@@ -61,8 +62,9 @@ function App() {
                             
                             {/* Rotas do Hub */}
                             <Route path="hub">
-                              {/* Detail partner route first (dynamic route before the catch-all) */}
+                              {/* Detail routes first (dynamic routes before the catch-all) */}
                               <Route path="parceiros/:id" element={<PartnerDetail />} />
+                              <Route path="ferramentas/:id" element={<ToolDetail />} />
                               <Route path="parceiros" element={<Partners />} />
                               <Route path="fornecedores" element={<Suppliers />} />
                               <Route path=":section" element={<Hub />} />

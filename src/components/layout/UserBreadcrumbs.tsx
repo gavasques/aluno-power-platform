@@ -45,7 +45,14 @@ export function UserBreadcrumbs() {
   for (let i = 0; i < pathSegments.length; i++) {
     currentPath += "/" + pathSegments[i];
     
-    if (breadcrumbMap[currentPath]) {
+    // Verifica se é uma rota de detalhes de ferramenta
+    if (pathSegments[i-1] === "ferramentas" && pathSegments[i-2] === "hub" && !breadcrumbMap[currentPath]) {
+      breadcrumbs.push({
+        path: currentPath,
+        label: "Detalhes da Ferramenta",
+        isLast: i === pathSegments.length - 1
+      });
+    } else if (breadcrumbMap[currentPath]) {
       breadcrumbs.push({
         path: currentPath,
         label: breadcrumbMap[currentPath],
