@@ -16,7 +16,7 @@ import { PromptsProvider } from "./contexts/PromptsContext";
 // Import pages that exist
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminCadastros from "./pages/admin/AdminCadastros";
+import Admin from "./pages/Admin";
 import UserManagement from "./pages/admin/UserManagement";
 import SupportManagement from "./pages/admin/SupportManagement";
 import GeneralSettings from "./pages/admin/GeneralSettings";
@@ -87,7 +87,7 @@ function App() {
                           {/* Rotas de admin com AdminLayout */}
                           <Route path="/admin" element={<AdminLayout><Outlet /></AdminLayout>}>
                             <Route index element={<AdminDashboard />} />
-                            <Route path="cadastros/:section?" element={<AdminCadastros />} />
+                            <Route path=":section/:subsection?" element={<Admin />} />
                             <Route path="usuarios" element={<UserManagement />} />
                             <Route path="suporte" element={<SupportManagement />} />
                             <Route path="configuracoes/:section?" element={<GeneralSettings />} />
