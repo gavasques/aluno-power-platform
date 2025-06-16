@@ -9,8 +9,10 @@ import {
   insertTemplateSchema, 
   insertPromptSchema, 
   insertProductSchema, 
-  insertCategorySchema 
+  insertCategorySchema,
+  insertYoutubeVideoSchema
 } from "@shared/schema";
+import { youtubeService } from "./services/youtubeService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Suppliers
@@ -490,6 +492,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete category' });
+    }
+  });
+
+  // YouTube Videos
+  app.get('/api/youtube-videos', async (req, res) => {
+    try {
+      const videos = await storage.getActiveYoutubeVideos();
+      res.json(videos);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch YouTube videos' });
+    }
+  });
+
+  app.get('/api/youtube-videos/:id', async (req, res) => {
+    try {
+      const video = await storage.getYoutubeVideo(parseInt(req.params.id));
+      if (!video) {
+        return res.status(404).json({ error: 'Video not found' });
+      }
+      res.json(video);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch video' });
+    }
+  });
+
+  app.post('/api/youtube-videos/sync', async (req, res) => {
+    try {
+      await youtubeService.fetchAndCacheVideos();
+      res.json({ message: 'YouTube videos sync completed' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to sync YouTube videos' });
+    }
+  });
+
+  app.delete('/api/youtube-videos/:id', async (req, res) => {
+    try {
+      await storage.deleteYoutubeVideo(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete video' });
     }
   });
 
