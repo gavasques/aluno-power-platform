@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { VideoCard } from "@/components/youtube/VideoCard";
 import { useQuery } from "@tanstack/react-query";
 import type { News, Update } from "@shared/schema";
+import { SystemAnalytics } from "@/components/analytics/SystemAnalytics";
 
 interface StatCardProps {
   title: string;
@@ -338,6 +339,21 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Advanced System Analytics */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-blue-600" />
+              Analytics Avançadas do Sistema
+            </h2>
+            <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+              Ver Relatório Completo
+              <ExternalLink className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+          <SystemAnalytics />
         </div>
 
         {/* Bottom Section - Quick Actions */}
