@@ -104,7 +104,7 @@ const Tools = () => {
                       )}
                     </div>
                     <Badge variant="secondary" className="text-xs">
-                      {toolTypes.find(t => t.id === tool.typeId)?.name || tool.category}
+                      {toolTypes.find(t => t.id === tool.typeId?.toString())?.name || 'Ferramenta'}
                     </Badge>
                   </div>
                 </div>
@@ -116,17 +116,10 @@ const Tools = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Avaliação LV:</span>
-                      <div className="flex">{renderStars(tool.officialRating)}</div>
+                      <span className="text-sm font-medium">Avaliação:</span>
+                      <div className="flex">{renderStars(Number(tool.averageRating) || 0)}</div>
                       <span className="text-sm text-muted-foreground">
-                        {tool.officialRating}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Usuários:</span>
-                      <div className="flex">{renderStars(tool.userRating)}</div>
-                      <span className="text-sm text-muted-foreground">
-                        {tool.userRating} ({tool.reviewCount})
+                        {tool.averageRating || '0'} ({tool.totalReviews})
                       </span>
                     </div>
                   </div>
