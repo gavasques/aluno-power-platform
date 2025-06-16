@@ -220,7 +220,6 @@ export function NewsCenter() {
         onConfirm={confirmDelete}
         title="Excluir Notícia"
         description={`Tem certeza que deseja excluir a notícia "${deletingNews?.title}"? Esta ação não pode ser desfeita.`}
-        isLoading={deleteMutation.isPending}
       />
     </div>
   );
