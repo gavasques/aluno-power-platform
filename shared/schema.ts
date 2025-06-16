@@ -289,6 +289,26 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// YouTube Videos Cache
+export const youtubeVideos = pgTable("youtube_videos", {
+  id: serial("id").primaryKey(),
+  videoId: text("video_id").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description"),
+  channelTitle: text("channel_title").notNull(),
+  channelId: text("channel_id").notNull(),
+  publishedAt: timestamp("published_at").notNull(),
+  thumbnailUrl: text("thumbnail_url").notNull(),
+  duration: text("duration"),
+  viewCount: integer("view_count"),
+  likeCount: integer("like_count"),
+  tags: text("tags").array(),
+  category: text("category"),
+  isActive: boolean("is_active").notNull().default(true),
+  fetchedAt: timestamp("fetched_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
@@ -517,6 +537,11 @@ export const insertProductSchema = createInsertSchema(products).omit({
   updatedAt: true,
 });
 
+export const insertYoutubeVideoSchema = createInsertSchema(youtubeVideos).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -553,3 +578,6 @@ export type Prompt = typeof prompts.$inferSelect;
 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
+
+export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
+export type YoutubeVideo = typeof youtubeVideos.$inferSelect;

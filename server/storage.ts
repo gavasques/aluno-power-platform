@@ -13,6 +13,7 @@ import {
   templateCategories,
   promptCategories,
   departments,
+  youtubeVideos,
   type User, 
   type InsertUser,
   type Supplier,
