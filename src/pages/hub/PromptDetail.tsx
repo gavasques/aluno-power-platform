@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { BrainCircuit } from 'lucide-react';
 import { PromptDetailHeader } from '@/components/prompts/PromptDetailHeader';
 import { PromptImages } from '@/components/prompts/PromptImages';
-import { PromptContent } from '@/components/prompts/PromptContent';
+import { PromptSteps } from '@/components/prompts/PromptSteps';
+import { PromptFiles } from '@/components/prompts/PromptFiles';
 import { PromptInfo } from '@/components/prompts/PromptInfo';
 
 const PromptDetail = () => {
@@ -39,14 +40,16 @@ const PromptDetail = () => {
       
       <PromptImages images={prompt.images || []} />
       
+      <PromptFiles files={prompt.files || []} />
+      
       <PromptInfo 
         description={prompt.description}
         usageExamples={prompt.usageExamples}
         categoryName={prompt.category.name}
       />
       
-      <PromptContent 
-        content={prompt.content}
+      <PromptSteps 
+        steps={prompt.steps || []}
         title={prompt.title}
       />
     </div>

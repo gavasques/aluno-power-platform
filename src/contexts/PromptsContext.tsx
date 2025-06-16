@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Prompt, PromptCategory, CreatePromptData, UpdatePromptData, PromptImage } from '@/types/prompt';
+import { Prompt, PromptCategory, CreatePromptData, UpdatePromptData, PromptImage, PromptStep, PromptFile } from '@/types/prompt';
 
 interface PromptsContextType {
   prompts: Prompt[];
@@ -30,6 +30,16 @@ const mockPrompts: Prompt[] = [
     id: '1',
     title: 'Descrição de Produto E-commerce',
     content: 'Crie uma descrição atrativa e persuasiva para um produto de e-commerce com as seguintes informações:\n\nNome do produto: [NOME_PRODUTO]\nCaracterísticas principais: [CARACTERÍSTICAS]\nBenefícios: [BENEFÍCIOS]\nPúblico-alvo: [PÚBLICO_ALVO]\n\nA descrição deve:\n- Ter entre 150-200 palavras\n- Usar linguagem persuasiva\n- Destacar os principais benefícios\n- Incluir call-to-action\n- Ser otimizada para SEO',
+    stepCount: 1,
+    steps: [
+      {
+        id: 'step-1',
+        title: 'Passo 1',
+        content: 'Crie uma descrição atrativa e persuasiva para um produto de e-commerce com as seguintes informações:\n\nNome do produto: [NOME_PRODUTO]\nCaracterísticas principais: [CARACTERÍSTICAS]\nBenefícios: [BENEFÍCIOS]\nPúblico-alvo: [PÚBLICO_ALVO]\n\nA descrição deve:\n- Ter entre 150-200 palavras\n- Usar linguagem persuasiva\n- Destacar os principais benefícios\n- Incluir call-to-action\n- Ser otimizada para SEO',
+        explanation: 'Execute este prompt para criar uma descrição otimizada do seu produto.',
+        order: 1
+      }
+    ],
     category: mockCategories[1],
     description: 'Prompt para gerar descrições otimizadas de produtos para e-commerce',
     usageExamples: 'Use para criar descrições de produtos no Mercado Livre, Amazon, ou sua loja virtual. Substitua as variáveis pelos dados específicos do seu produto.',
@@ -53,6 +63,7 @@ const mockPrompts: Prompt[] = [
         type: 'general'
       }
     ],
+    files: [],
     createdAt: new Date('2024-01-10'),
     updatedAt: new Date('2024-01-10'),
   },
@@ -60,6 +71,23 @@ const mockPrompts: Prompt[] = [
     id: '2',
     title: 'Análise de Concorrência',
     content: 'Analise a concorrência para o seguinte produto/nicho:\n\nProduto/Nicho: [PRODUTO_NICHO]\nMercado: [MERCADO_ALVO]\n\nPor favor, forneça:\n\n1. Lista dos 5 principais concorrentes\n2. Faixa de preços praticada\n3. Principais diferenciais de cada concorrente\n4. Oportunidades identificadas no mercado\n5. Sugestões de posicionamento\n6. Análise de pontos fortes e fracos\n\nBase a análise em dados públicos e tendências do mercado.',
+    stepCount: 2,
+    steps: [
+      {
+        id: 'step-1',
+        title: 'Passo 1',
+        content: 'Analise a concorrência para o seguinte produto/nicho:\n\nProduto/Nicho: [PRODUTO_NICHO]\nMercado: [MERCADO_ALVO]\n\nPor favor, forneça:\n\n1. Lista dos 5 principais concorrentes\n2. Faixa de preços praticada\n3. Principais diferenciais de cada concorrente',
+        explanation: 'Primeiro, faça uma análise básica dos concorrentes no seu nicho.',
+        order: 1
+      },
+      {
+        id: 'step-2',
+        title: 'Passo 2',
+        content: 'Com base na análise anterior, agora forneça:\n\n1. Oportunidades identificadas no mercado\n2. Sugestões de posicionamento\n3. Análise de pontos fortes e fracos\n4. Estratégias de diferenciação\n\nBase suas recomendações nos dados coletados no passo anterior.',
+        explanation: 'Agora aprofunde a análise com estratégias e oportunidades baseadas nos dados do primeiro passo.',
+        order: 2
+      }
+    ],
     category: mockCategories[3],
     description: 'Prompt para análise completa da concorrência em um nicho específico',
     usageExamples: 'Ideal para pesquisa antes de lançar produtos ou para identificar oportunidades de mercado. Use ferramentas como ChatGPT, Claude ou Gemini.',
@@ -69,6 +97,15 @@ const mockPrompts: Prompt[] = [
         url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop',
         alt: 'Dashboard de análise de concorrência gerado pela IA',
         type: 'general'
+      }
+    ],
+    files: [
+      {
+        id: 'file-1',
+        name: 'Template_Analise_Concorrencia.xlsx',
+        url: '#',
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        size: 25600
       }
     ],
     createdAt: new Date('2024-01-15'),
@@ -88,7 +125,11 @@ export function PromptsProvider({ children }: { children: React.ReactNode }) {
     return prompts.filter(prompt =>
       prompt.title.toLowerCase().includes(lowercaseQuery) ||
       prompt.content.toLowerCase().includes(lowercaseQuery) ||
-      prompt.category.name.toLowerCase().includes(lowercaseQuery)
+      prompt.category.name.toLowerCase().includes(lowercaseQuery) ||
+      prompt.steps.some(step => 
+        step.content.toLowerCase().includes(lowercaseQuery) ||
+        step.explanation.toLowerCase().includes(lowercaseQuery)
+      )
     );
   };
 
