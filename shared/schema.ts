@@ -614,6 +614,12 @@ export const insertNewsSchema = createInsertSchema(news).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  publishedAt: z.union([z.date(), z.string(), z.null()]).optional().transform((val) => {
+    if (!val) return null;
+    if (typeof val === 'string') return new Date(val);
+    return val;
+  }),
 });
 
 export const insertUpdateSchema = createInsertSchema(updates).omit({

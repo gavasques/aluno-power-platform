@@ -646,9 +646,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(news);
-    } catch (error) {
+    } catch (error: any) {
       console.error('PUT /api/news/:id - Error:', error);
-      res.status(400).json({ error: 'Invalid news data', details: error.message });
+      res.status(400).json({ 
+        error: 'Invalid news data', 
+        details: error?.message || String(error) 
+      });
     }
   });
 
