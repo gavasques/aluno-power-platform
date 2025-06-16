@@ -35,7 +35,10 @@ const News = () => {
   });
 
   // Get unique categories
-  const categories = [...new Set(newsData.map(news => news.category).filter(Boolean))];
+  const categories = newsData
+    .map(news => news.category)
+    .filter((category): category is string => Boolean(category))
+    .filter((category, index, array) => array.indexOf(category) === index);
 
   // Filter and sort news
   const filteredNews = newsData
