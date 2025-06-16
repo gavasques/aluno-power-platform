@@ -589,9 +589,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/news/published', async (req, res) => {
     try {
       const news = await storage.getPublishedNews();
+      // Add caching headers
+      res.set({
+        'Cache-Control': 'public, max-age=300', // 5 minutes
+        'ETag': `"news-${Date.now()}"`,
+      });
       res.json(news);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch published news' });
+    }
+  });
+
+  // Lightweight endpoint for dashboard
+  app.get('/api/news/published/preview', async (req, res) => {
+    try {
+      const news = await storage.getPublishedNewsPreview();
+      res.set({
+        'Cache-Control': 'public, max-age=180', // 3 minutes
+        'ETag': `"news-preview-${Date.now()}"`,
+      });
+      res.json(news);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch news preview' });
     }
   });
 
@@ -684,9 +703,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/updates/published', async (req, res) => {
     try {
       const updates = await storage.getPublishedUpdates();
+      // Add caching headers
+      res.set({
+        'Cache-Control': 'public, max-age=300', // 5 minutes
+        'ETag': `"updates-${Date.now()}"`,
+      });
       res.json(updates);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch published updates' });
+    }
+  });
+
+  // Lightweight endpoint for dashboard
+  app.get('/api/updates/published/preview', async (req, res) => {
+    try {
+      const updates = await storage.getPublishedUpdatesPreview();
+      res.set({
+        'Cache-Control': 'public, max-age=180', // 3 minutes
+        'ETag': `"updates-preview-${Date.now()}"`,
+      });
+      res.json(updates);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch updates preview' });
     }
   });
 

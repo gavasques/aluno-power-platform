@@ -41,30 +41,32 @@ const Dashboard = () => {
   const { videos, loading } = useYoutube();
   const recentVideos = videos.slice(0, 6);
 
-  // Fetch published news
-  const { data: newsData = [], isLoading: newsLoading } = useQuery<News[]>({
-    queryKey: ['/api/news/published'],
+  // Fetch published news preview (lightweight)
+  const { data: newsData = [], isLoading: newsLoading } = useQuery<Partial<News>[]>({
+    queryKey: ['/api/news/published/preview'],
     queryFn: async () => {
-      const response = await fetch('/api/news/published');
+      const response = await fetch('/api/news/published/preview');
       if (!response.ok) {
         throw new Error('Failed to fetch news');
       }
       return response.json();
     },
+    staleTime: 3 * 60 * 1000, // 3 minutes cache
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Fetch published updates
-  const { data: updatesData = [], isLoading: updatesLoading } = useQuery<Update[]>({
-    queryKey: ['/api/updates/published'],
+  // Fetch published updates preview (lightweight)
+  const { data: updatesData = [], isLoading: updatesLoading } = useQuery<Partial<Update>[]>({
+    queryKey: ['/api/updates/published/preview'],
     queryFn: async () => {
-      const response = await fetch('/api/updates/published');
+      const response = await fetch('/api/updates/published/preview');
       if (!response.ok) {
         throw new Error('Failed to fetch updates');
       }
       return response.json();
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    staleTime: 3 * 60 * 1000, // 3 minutes cache
+    gcTime: 10 * 60 * 1000,
   });
 
   const recentNews = newsData.slice(0, 3);

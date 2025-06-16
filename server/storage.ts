@@ -765,6 +765,23 @@ export class DatabaseStorage implements IStorage {
       .limit(50);
   }
 
+  // Lightweight dashboard version - only essential fields
+  async getPublishedNewsPreview(): Promise<Partial<News>[]> {
+    return await db
+      .select({
+        id: news.id,
+        title: news.title,
+        summary: news.summary,
+        category: news.category,
+        isFeatured: news.isFeatured,
+        createdAt: news.createdAt,
+      })
+      .from(news)
+      .where(eq(news.isPublished, true))
+      .orderBy(desc(news.createdAt))
+      .limit(10);
+  }
+
   async getNewsById(id: number): Promise<News | undefined> {
     const [newsItem] = await db.select().from(news).where(eq(news.id, id));
     return newsItem || undefined;
@@ -803,6 +820,24 @@ export class DatabaseStorage implements IStorage {
       .where(eq(updates.isPublished, true))
       .orderBy(desc(updates.createdAt))
       .limit(50);
+  }
+
+  // Lightweight dashboard version - only essential fields
+  async getPublishedUpdatesPreview(): Promise<Partial<Update>[]> {
+    return await db
+      .select({
+        id: updates.id,
+        title: updates.title,
+        summary: updates.summary,
+        version: updates.version,
+        type: updates.type,
+        priority: updates.priority,
+        createdAt: updates.createdAt,
+      })
+      .from(updates)
+      .where(eq(updates.isPublished, true))
+      .orderBy(desc(updates.createdAt))
+      .limit(10);
   }
 
   async getUpdate(id: number): Promise<Update | undefined> {
