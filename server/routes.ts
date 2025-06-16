@@ -562,6 +562,177 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // News routes
+  app.get('/api/news', async (req, res) => {
+    try {
+      const news = await storage.getNews();
+      res.json(news);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch news' });
+    }
+  });
+
+  app.get('/api/news/published', async (req, res) => {
+    try {
+      const news = await storage.getPublishedNews();
+      res.json(news);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch published news' });
+    }
+  });
+
+  app.get('/api/news/:id', async (req, res) => {
+    try {
+      const news = await storage.getNewsById(parseInt(req.params.id));
+      if (!news) {
+        return res.status(404).json({ error: 'News not found' });
+      }
+      res.json(news);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch news' });
+    }
+  });
+
+  app.post('/api/news', async (req, res) => {
+    try {
+      const validatedData = insertNewsSchema.parse(req.body);
+      const news = await storage.createNews(validatedData);
+      res.status(201).json(news);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid news data' });
+    }
+  });
+
+  app.put('/api/news/:id', async (req, res) => {
+    try {
+      const validatedData = insertNewsSchema.partial().parse(req.body);
+      const news = await storage.updateNews(parseInt(req.params.id), validatedData);
+      res.json(news);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid news data' });
+    }
+  });
+
+  app.delete('/api/news/:id', async (req, res) => {
+    try {
+      await storage.deleteNews(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete news' });
+    }
+  });
+
+  // Updates routes
+  app.get('/api/updates', async (req, res) => {
+    try {
+      const updates = await storage.getUpdates();
+      res.json(updates);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch updates' });
+    }
+  });
+
+  app.get('/api/updates/published', async (req, res) => {
+    try {
+      const updates = await storage.getPublishedUpdates();
+      res.json(updates);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch published updates' });
+    }
+  });
+
+  app.get('/api/updates/:id', async (req, res) => {
+    try {
+      const update = await storage.getUpdate(parseInt(req.params.id));
+      if (!update) {
+        return res.status(404).json({ error: 'Update not found' });
+      }
+      res.json(update);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch update' });
+    }
+  });
+
+  app.post('/api/updates', async (req, res) => {
+    try {
+      const validatedData = insertUpdateSchema.parse(req.body);
+      const update = await storage.createUpdate(validatedData);
+      res.status(201).json(update);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid update data' });
+    }
+  });
+
+  app.put('/api/updates/:id', async (req, res) => {
+    try {
+      const validatedData = insertUpdateSchema.partial().parse(req.body);
+      const update = await storage.updateUpdate(parseInt(req.params.id), validatedData);
+      res.json(update);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid update data' });
+    }
+  });
+
+  app.delete('/api/updates/:id', async (req, res) => {
+    try {
+      await storage.deleteUpdate(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete update' });
+    }
+  });
+
+  // Webhook Config routes
+  app.get('/api/webhook-configs', async (req, res) => {
+    try {
+      const configs = await storage.getWebhookConfigs();
+      res.json(configs);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch webhook configs' });
+    }
+  });
+
+  app.get('/api/webhook-configs/:id', async (req, res) => {
+    try {
+      const config = await storage.getWebhookConfig(parseInt(req.params.id));
+      if (!config) {
+        return res.status(404).json({ error: 'Webhook config not found' });
+      }
+      res.json(config);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch webhook config' });
+    }
+  });
+
+  app.post('/api/webhook-configs', async (req, res) => {
+    try {
+      const validatedData = insertWebhookConfigSchema.parse(req.body);
+      const config = await storage.createWebhookConfig(validatedData);
+      res.status(201).json(config);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid webhook config data' });
+    }
+  });
+
+  app.put('/api/webhook-configs/:id', async (req, res) => {
+    try {
+      const validatedData = insertWebhookConfigSchema.partial().parse(req.body);
+      const config = await storage.updateWebhookConfig(parseInt(req.params.id), validatedData);
+      res.json(config);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid webhook config data' });
+    }
+  });
+
+  app.delete('/api/webhook-configs/:id', async (req, res) => {
+    try {
+      await storage.deleteWebhookConfig(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete webhook config' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
