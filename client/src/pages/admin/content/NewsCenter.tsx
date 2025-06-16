@@ -58,18 +58,21 @@ export function NewsCenter() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/news'] });
+      queryClient.refetchQueries({ queryKey: ['/api/news'] });
       toast({
         title: "Sucesso",
         description: "Notícia excluída com sucesso.",
       });
       setDeletingNews(null);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Delete mutation error:', error);
       toast({
         title: "Erro",
         description: "Erro ao excluir notícia.",
         variant: "destructive",
       });
+      setDeletingNews(null);
     },
   });
 
