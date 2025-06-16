@@ -220,7 +220,7 @@ const Dashboard = () => {
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center text-xs text-gray-400">
                             <Calendar className="h-3 w-3 mr-1" />
-                            {new Date(news.createdAt).toLocaleDateString('pt-BR')}
+                            {news.createdAt ? new Date(news.createdAt).toLocaleDateString('pt-BR') : ''}
                           </div>
                           {news.isFeatured && (
                             <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
@@ -314,7 +314,7 @@ const Dashboard = () => {
                         )}
                         <div className="flex items-center text-xs text-gray-400">
                           <Calendar className="h-3 w-3 mr-1" />
-                          {new Date(update.createdAt).toLocaleDateString('pt-BR')}
+                          {update.createdAt ? new Date(update.createdAt).toLocaleDateString('pt-BR') : 'Data não disponível'}
                         </div>
                       </div>
                     ))}

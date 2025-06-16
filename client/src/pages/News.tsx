@@ -16,6 +16,7 @@ import {
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import type { News } from "@shared/schema";
+import { AdvancedSearch, SearchFilter } from "@/components/ui/advanced-search";
 
 const News = () => {
   const [searchTerm, setSearchTerm] = useState("");
