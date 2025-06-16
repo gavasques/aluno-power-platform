@@ -39,6 +39,11 @@ const Dashboard = () => {
   const { videos, loading } = useYoutube();
   const recentVideos = videos.slice(0, 6);
 
+  // Debug logs
+  console.log('Dashboard - videos:', videos);
+  console.log('Dashboard - loading:', loading);
+  console.log('Dashboard - recentVideos:', recentVideos);
+
   return (
     <div className="min-h-screen bg-white">
       <div className="flex flex-col gap-8 p-6">

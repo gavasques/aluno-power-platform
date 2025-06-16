@@ -31,6 +31,11 @@ const YoutubeContext = createContext<YoutubeContextType | undefined>(undefined);
 export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
+  // Clear cache on mount
+  React.useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
+  }, [queryClient]);
+
   const {
     data: videos = [],
     isLoading: loading,
@@ -38,8 +43,18 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
     refetch
   } = useQuery({
     queryKey: ['/api/youtube-videos'],
-    queryFn: () => apiRequest<YoutubeVideo[]>('/api/youtube-videos'),
+    queryFn: async () => {
+      console.log('Fetching videos from API...');
+      const result = await apiRequest<YoutubeVideo[]>(`/api/youtube-videos?t=${Date.now()}`);
+      console.log('API response:', result);
+      return result;
+    },
   });
+
+  // Debug log
+  console.log('YoutubeContext - videos data:', videos);
+  console.log('YoutubeContext - loading:', loading);
+  console.log('YoutubeContext - error:', error);
 
   const {
     data: channelInfo = null,
