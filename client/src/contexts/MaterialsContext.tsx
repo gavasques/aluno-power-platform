@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import type { Material as DbMaterial, InsertMaterial } from '@shared/schema';
+import type { MaterialWithType as DbMaterial, InsertMaterial } from '@shared/schema';
 
 interface MaterialFilters {
   search?: string;

@@ -53,7 +53,7 @@ const Materials = () => {
   };
 
   const handleDownload = (material: any) => {
-    if (!material.fileUrl && material.type.viewerType !== 'download') {
+    if (!material.fileUrl && material.type?.viewerType !== 'download') {
       toast({
         title: "Download não disponível",
         description: "Este material não está disponível para download.",
@@ -158,8 +158,8 @@ const Materials = () => {
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
-                  {getTypeIcon(material.type.icon)}
-                  <Badge variant="outline">{material.type.name}</Badge>
+                  {getTypeIcon(material.type?.icon || 'FileText')}
+                  <Badge variant="outline">{material.type?.name || 'Unknown'}</Badge>
                 </div>
                 <div className="flex gap-1">
                   {material.accessLevel === "restricted" ? (
@@ -180,12 +180,12 @@ const Materials = () => {
               
               <div className="flex justify-between items-center mb-4">
                 <div className="flex flex-wrap gap-1">
-                  {material.tags.slice(0, 2).map(tag => (
+                  {(material.tags || []).slice(0, 2).map(tag => (
                     <Badge key={tag} variant="secondary" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
-                  {material.tags.length > 2 && (
+                  {material.tags && material.tags.length > 2 && (
                     <Badge variant="secondary" className="text-xs">
                       +{material.tags.length - 2}
                     </Badge>
@@ -193,7 +193,6 @@ const Materials = () => {
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {material.fileSize && `${(material.fileSize / 1024 / 1024).toFixed(1)} MB`}
-                  {material.technicalInfo?.duration && material.technicalInfo.duration}
                 </div>
               </div>
 
@@ -206,7 +205,7 @@ const Materials = () => {
                   <Eye className="h-4 w-4 mr-1" />
                   Visualizar
                 </Button>
-                {(material.fileUrl || material.type.viewerType === 'download') && (
+                {(material.fileUrl || material.type?.viewerType === 'download') && (
                   <Button
                     variant="outline"
                     size="sm"
