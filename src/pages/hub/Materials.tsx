@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, Search, Eye, FileText, Video, Link, Lock, Globe } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Download, Search, Eye, FileText, Video, Link, Lock, Globe, Filter, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,6 +21,7 @@ interface Material {
   category: string;
   downloadable: boolean;
   embedCode?: string;
+  verified: boolean;
   technicalInfo: {
     format?: string;
     size?: string;
@@ -39,6 +41,7 @@ const mockMaterials: Material[] = [
     fileSize: "2.5 MB",
     category: "Importação",
     downloadable: true,
+    verified: true,
     technicalInfo: {
       format: "PDF",
       size: "2.5 MB",
@@ -55,6 +58,7 @@ const mockMaterials: Material[] = [
     duration: "15:30",
     category: "Fornecedores",
     downloadable: false,
+    verified: true,
     technicalInfo: {
       format: "MP4",
       resolution: "1080p",
@@ -70,9 +74,59 @@ const mockMaterials: Material[] = [
     accessLevel: "public",
     category: "Ferramentas",
     downloadable: false,
+    verified: false,
     embedCode: '<iframe src="https://calculator.example.com" width="100%" height="400"></iframe>',
     technicalInfo: {
       format: "Web App",
+      language: "Português"
+    }
+  },
+  {
+    id: "4",
+    title: "Templates de Email para Fornecedores",
+    description: "Modelos prontos de emails para comunicação com fornecedores",
+    type: "pdf",
+    url: "/materials/email-templates.pdf",
+    accessLevel: "public",
+    fileSize: "1.2 MB",
+    category: "Templates",
+    downloadable: true,
+    verified: true,
+    technicalInfo: {
+      format: "PDF",
+      size: "1.2 MB",
+      language: "Português"
+    }
+  },
+  {
+    id: "5",
+    title: "Curso de Marketing Digital",
+    description: "Vídeo aulas completas sobre marketing digital para e-commerce",
+    type: "video",
+    url: "https://www.youtube.com/embed/example2",
+    accessLevel: "restricted",
+    duration: "2:15:30",
+    category: "Marketing",
+    downloadable: false,
+    verified: true,
+    technicalInfo: {
+      format: "MP4",
+      resolution: "1080p",
+      language: "Português"
+    }
+  },
+  {
+    id: "6",
+    title: "Planilha de Controle de Estoque",
+    description: "Planilha avançada para controle de estoque e produtos",
+    type: "link",
+    url: "https://sheets.google.com/example",
+    accessLevel: "public",
+    category: "Ferramentas",
+    downloadable: true,
+    verified: false,
+    technicalInfo: {
+      format: "Google Sheets",
       language: "Português"
     }
   }
@@ -81,26 +135,30 @@ const mockMaterials: Material[] = [
 const Materials = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [accessFilter, setAccessFilter] = useState("Todos");
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const { toast } = useToast();
 
-  const categories = ["Todos", "Importação", "Fornecedores", "Ferramentas", "Marketing"];
+  const categories = ["Todos", "Importação", "Fornecedores", "Ferramentas", "Marketing", "Templates"];
 
   const filteredMaterials = mockMaterials.filter(material => {
     const matchesSearch = material.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          material.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Todos" || material.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesAccess = accessFilter === "Todos" || 
+                         (accessFilter === "Público" && material.accessLevel === "public") ||
+                         (accessFilter === "Restrito" && material.accessLevel === "restricted");
+    return matchesSearch && matchesCategory && matchesAccess;
   });
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "pdf": return <FileText className="h-4 w-4" />;
-      case "video": return <Video className="h-4 w-4" />;
-      case "link": return <Link className="h-4 w-4" />;
-      case "embed": return <Globe className="h-4 w-4" />;
-      case "iframe": return <Globe className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
+      case "pdf": return <FileText className="h-5 w-5" />;
+      case "video": return <Video className="h-5 w-5" />;
+      case "link": return <Link className="h-5 w-5" />;
+      case "embed": return <Globe className="h-5 w-5" />;
+      case "iframe": return <Globe className="h-5 w-5" />;
+      default: return <FileText className="h-5 w-5" />;
     }
   };
 
@@ -125,7 +183,6 @@ const Materials = () => {
       return;
     }
 
-    // Simular download
     toast({
       title: "Download iniciado",
       description: `O download de "${material.title}" foi iniciado.`,
@@ -134,109 +191,193 @@ const Materials = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Materiais</h1>
-        <p className="text-muted-foreground">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <h1 className="text-4xl font-bold">Materiais</h1>
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Verificados
+          </Badge>
+        </div>
+        <p className="text-muted-foreground text-lg">
           Repositório de conteúdos com controle de acesso
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar de Filtros */}
-        <div className="lg:w-1/4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Filtros</CardTitle>
+      {/* Filtros no Topo */}
+      <Card className="mb-8">
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {/* Barra de Busca Principal */}
+            <div className="relative max-w-2xl mx-auto">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Buscar materiais por título, descrição ou categoria..."
+                className="pl-12 h-12 text-lg"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {/* Filtros Secundários */}
+            <div className="flex flex-wrap gap-4 justify-center">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Filtros:</span>
+              </div>
+              
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={accessFilter} onValueChange={setAccessFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Acesso" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Todos">Todos</SelectItem>
+                  <SelectItem value="Público">Público</SelectItem>
+                  <SelectItem value="Restrito">Restrito</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {(searchTerm || selectedCategory !== "Todos" || accessFilter !== "Todos") && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedCategory("Todos");
+                    setAccessFilter("Todos");
+                  }}
+                >
+                  Limpar Filtros
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Estatísticas Simplificadas */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-primary">{filteredMaterials.length}</div>
+            <p className="text-sm text-muted-foreground">Materiais</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">
+              {filteredMaterials.filter(m => m.verified).length}
+            </div>
+            <p className="text-sm text-muted-foreground">Verificados</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600">
+              {filteredMaterials.filter(m => m.accessLevel === 'public').length}
+            </div>
+            <p className="text-sm text-muted-foreground">Públicos</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-orange-600">
+              {filteredMaterials.filter(m => m.downloadable).length}
+            </div>
+            <p className="text-sm text-muted-foreground">Download</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Grid de Materiais */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredMaterials.map(material => (
+          <Card key={material.id} className="hover:shadow-lg transition-shadow group">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  {getTypeIcon(material.type)}
+                  <Badge variant="outline">{getTypeName(material.type)}</Badge>
+                </div>
+                <div className="flex gap-1">
+                  {material.verified && (
+                    <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Verificado
+                    </Badge>
+                  )}
+                  {material.accessLevel === "restricted" ? (
+                    <Lock className="h-4 w-4 text-yellow-500" />
+                  ) : (
+                    <Globe className="h-4 w-4 text-green-500" />
+                  )}
+                </div>
+              </div>
+              <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                {material.title}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Buscar</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar materiais..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+            <CardContent className="pt-0">
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                {material.description}
+              </p>
+              
+              <div className="flex justify-between items-center mb-4">
+                <Badge variant="secondary" className="text-xs">
+                  {material.category}
+                </Badge>
+                <div className="text-xs text-muted-foreground">
+                  {material.fileSize && `${material.fileSize}`}
+                  {material.duration && `${material.duration}`}
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">Categoria</label>
-                <div className="space-y-2">
-                  {categories.map(category => (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? "default" : "ghost"}
-                      className="w-full justify-start"
-                      onClick={() => setSelectedCategory(category)}
-                    >
-                      {category}
-                    </Button>
-                  ))}
-                </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => setSelectedMaterial(material)}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  Visualizar
+                </Button>
+                {material.downloadable && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownload(material)}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Lista de Materiais */}
-        <div className="lg:w-3/4">
-          <div className="grid gap-4">
-            {filteredMaterials.map(material => (
-              <Card key={material.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {getTypeIcon(material.type)}
-                        <CardTitle className="text-xl">{material.title}</CardTitle>
-                        {material.accessLevel === "restricted" && (
-                          <Lock className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="flex gap-2 mb-2">
-                        <Badge variant="secondary">{material.category}</Badge>
-                        <Badge variant="outline">{getTypeName(material.type)}</Badge>
-                        <Badge variant={material.accessLevel === "public" ? "default" : "destructive"}>
-                          {material.accessLevel === "public" ? "Público" : "Restrito"}
-                        </Badge>
-                      </div>
-                      <p className="text-muted-foreground">{material.description}</p>
-                      {(material.fileSize || material.duration) && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {material.fileSize && `Tamanho: ${material.fileSize}`}
-                          {material.duration && `Duração: ${material.duration}`}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedMaterial(material)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Ver
-                      </Button>
-                      {material.downloadable && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleDownload(material)}
-                        >
-                          <Download className="h-4 w-4 mr-1" />
-                          Download
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
+
+      {filteredMaterials.length === 0 && (
+        <Card className="mt-8">
+          <CardContent className="text-center py-12">
+            <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-medium mb-2">Nenhum material encontrado</h3>
+            <p className="text-muted-foreground">
+              Tente ajustar os filtros ou termos de busca
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Modal de Detalhes */}
       {selectedMaterial && (
@@ -249,6 +390,12 @@ const Materials = () => {
                   <div className="flex gap-2">
                     <Badge variant="secondary">{selectedMaterial.category}</Badge>
                     <Badge variant="outline">{getTypeName(selectedMaterial.type)}</Badge>
+                    {selectedMaterial.verified && (
+                      <Badge className="bg-green-100 text-green-800 border-green-200">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verificado
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 <Button
