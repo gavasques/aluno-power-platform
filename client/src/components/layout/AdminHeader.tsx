@@ -43,6 +43,9 @@ const adminMenuItems = [
       { title: "Templates", href: "/admin/conteudo/templates", icon: FileText },
       { title: "Materiais", href: "/admin/conteudo/materiais", icon: FileText },
       { title: "Prompts de IA", href: "/admin/conteudo/prompts-ia", icon: Bot },
+      { title: "Central de Notícias", href: "/admin/conteudo/noticias", icon: FileText },
+      { title: "Central de Novidades", href: "/admin/conteudo/novidades", icon: FileText },
+      { title: "Configurações de Webhook", href: "/admin/conteudo/webhooks", icon: Settings },
     ],
   },
   {
@@ -51,7 +54,6 @@ const adminMenuItems = [
       { title: "Plataforma", href: "/admin/configuracoes/plataforma", icon: Settings },
       { title: "Créditos IA", href: "/admin/configuracoes/creditos-ia", icon: Settings },
       { title: "Templates de Resposta", href: "/admin/configuracoes/templates-resposta", icon: FileText },
-      { title: "Feed de Notícias", href: "/admin/configuracoes/feed-noticias", icon: FileText },
     ],
   },
 ];

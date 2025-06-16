@@ -309,12 +309,76 @@ export const youtubeVideos = pgTable("youtube_videos", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// News table
+export const news = pgTable("news", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  summary: text("summary"),
+  imageUrl: text("image_url"),
+  category: text("category"), // 'amazon', 'market', 'tools', etc.
+  tags: text("tags").array(),
+  isPublished: boolean("is_published").notNull().default(false),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  publishedAt: timestamp("published_at"),
+  authorId: integer("author_id").references(() => users.id),
+  source: text("source"), // 'manual', 'webhook'
+  webhookData: text("webhook_data"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Updates table
+export const updates = pgTable("updates", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  summary: text("summary"),
+  version: text("version"),
+  type: text("type").notNull(), // 'feature', 'bugfix', 'improvement', 'announcement'
+  priority: text("priority").notNull().default("normal"), // 'low', 'normal', 'high', 'critical'
+  isPublished: boolean("is_published").notNull().default(false),
+  publishedAt: timestamp("published_at"),
+  authorId: integer("author_id").references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Webhook configurations
+export const webhookConfigs = pgTable("webhook_configs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  secret: text("secret"),
+  isActive: boolean("is_active").notNull().default(true),
+  type: text("type").notNull(), // 'news', 'updates'
+  lastUsed: timestamp("last_used"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
   partnerReviews: many(partnerReviews),
   toolReviews: many(toolReviews),
   materials: many(materials),
+  news: many(news),
+  updates: many(updates),
+}));
+
+export const newsRelations = relations(news, ({ one }) => ({
+  author: one(users, {
+    fields: [news.authorId],
+    references: [users.id],
+  }),
+}));
+
+export const updatesRelations = relations(updates, ({ one }) => ({
+  author: one(users, {
+    fields: [updates.authorId],
+    references: [users.id],
+  }),
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
@@ -542,6 +606,24 @@ export const insertYoutubeVideoSchema = createInsertSchema(youtubeVideos).omit({
   createdAt: true,
 });
 
+export const insertNewsSchema = createInsertSchema(news).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUpdateSchema = createInsertSchema(updates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWebhookConfigSchema = createInsertSchema(webhookConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -581,3 +663,12 @@ export type Product = typeof products.$inferSelect;
 
 export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 export type YoutubeVideo = typeof youtubeVideos.$inferSelect;
+
+export type InsertNews = z.infer<typeof insertNewsSchema>;
+export type News = typeof news.$inferSelect;
+
+export type InsertUpdate = z.infer<typeof insertUpdateSchema>;
+export type Update = typeof updates.$inferSelect;
+
+export type InsertWebhookConfig = z.infer<typeof insertWebhookConfigSchema>;
+export type WebhookConfig = typeof webhookConfigs.$inferSelect;
