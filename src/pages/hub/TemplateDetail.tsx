@@ -57,6 +57,25 @@ const TemplateDetail = () => {
     }
   };
 
+  // Função para destacar conteúdo dentro de {} e []
+  const highlightPlaceholders = (text: string) => {
+    const parts = text.split(/(\[[^\]]*\]|\{[^}]*\})/g);
+    
+    return parts.map((part, index) => {
+      if (part.match(/^\[[^\]]*\]$/) || part.match(/^\{[^}]*\}$/)) {
+        return (
+          <span 
+            key={index} 
+            className="bg-yellow-200 text-yellow-800 px-1 rounded font-medium"
+          >
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-4xl space-y-6">
       {/* Header */}
@@ -146,8 +165,8 @@ const TemplateDetail = () => {
         </CardHeader>
         <CardContent>
           <div className="bg-gray-50 border rounded-lg p-4">
-            <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono">
-              {template.content}
+            <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed">
+              {highlightPlaceholders(template.content)}
             </pre>
           </div>
         </CardContent>
