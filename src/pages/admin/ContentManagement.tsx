@@ -8,6 +8,7 @@ import { Plus, FileText, Users, Wrench, Package } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { usePartners } from "@/contexts/PartnersContext";
 import { useSuppliers } from "@/contexts/SuppliersContext";
+import { useTemplates } from "@/contexts/TemplatesContext";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import ToolsManager from "@/components/admin/conteudo/ToolsManager";
 import MaterialsManager from "@/components/admin/conteudo/MaterialsManager";
@@ -16,12 +17,14 @@ import SupplierForm from "@/components/admin/conteudo/SupplierForm";
 import SupplierDetail from "@/components/admin/conteudo/SupplierDetail";
 import MaterialFormAdmin from "./conteudo/MaterialFormAdmin";
 import MaterialDetailAdmin from "./conteudo/MaterialDetailAdmin";
+import TemplatesManager from "@/components/admin/cadastros/TemplatesManager";
 
 const ContentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const { partners } = usePartners();
   const { suppliers } = useSuppliers();
+  const { templates } = useTemplates();
   const { subsection, id, action } = useParams();
   const { pathname } = useLocation();
 
@@ -53,6 +56,10 @@ const ContentManagement = () => {
     if (id && pathname.includes('/edit')) return <MaterialFormAdmin />;
     if (id) return <MaterialDetailAdmin />;
     return <MaterialsManager />;
+  }
+
+  if (subsection === 'templates') {
+    return <TemplatesManager />;
   }
 
   // Exibe direto o hub de recursos, sem tabs
@@ -147,6 +154,27 @@ const ContentManagement = () => {
             <p className="text-muted-foreground text-sm mb-4">Ferramentas disponíveis na plataforma</p>
             <div className="flex justify-between items-center">
               <Badge className="bg-purple-100 text-purple-800 border-purple-200">12 ferramentas</Badge>
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                Gerenciar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => navigate('/admin/conteudo/templates')}
+        >
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">Templates</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm mb-4">Gerencie templates e modelos de comunicação</p>
+            <div className="flex justify-between items-center">
+              <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200">{templates.length} templates</Badge>
               <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Gerenciar
               </Button>
