@@ -366,21 +366,106 @@ export const webhookConfigs = pgTable("webhook_configs", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// User News Interactions
+export const userNewsInteractions = pgTable("user_news_interactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  newsId: integer("news_id").references(() => news.id).notNull(),
+  interactionType: text("interaction_type").notNull(), // 'view', 'like', 'share', 'bookmark', 'click'
+  duration: integer("duration"), // time spent reading in seconds
+  scrollDepth: decimal("scroll_depth", { precision: 5, scale: 2 }), // percentage of article scrolled
+  deviceType: text("device_type"), // 'desktop', 'mobile', 'tablet'
+  source: text("source"), // 'dashboard', 'news-page', 'search', 'recommendation'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("user_interactions_user_idx").on(table.userId),
+  newsIdx: index("user_interactions_news_idx").on(table.newsId),
+  typeIdx: index("user_interactions_type_idx").on(table.interactionType),
+  createdAtIdx: index("user_interactions_created_at_idx").on(table.createdAt),
+}));
+
+// User Preferences
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  preferredCategories: text("preferred_categories").array(), // array of category preferences
+  interests: text("interests").array(), // extracted from reading behavior
+  readingFrequency: text("reading_frequency").default("medium"), // 'low', 'medium', 'high'
+  preferredContentLength: text("preferred_content_length").default("medium"), // 'short', 'medium', 'long'
+  notificationSettings: jsonb("notification_settings").default('{"email": true, "push": false, "sms": false}'),
+  languagePreference: text("language_preference").default("pt-BR"),
+  timezonePreference: text("timezone_preference").default("America/Sao_Paulo"),
+  lastActiveAt: timestamp("last_active_at").defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("user_preferences_user_idx").on(table.userId),
+  lastActiveIdx: index("user_preferences_last_active_idx").on(table.lastActiveAt),
+}));
+
+// News Recommendations
+export const newsRecommendations = pgTable("news_recommendations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  newsId: integer("news_id").references(() => news.id).notNull(),
+  score: decimal("score", { precision: 5, scale: 4 }).notNull(), // recommendation confidence score 0-1
+  algorithm: text("algorithm").notNull(), // 'content-based', 'collaborative', 'hybrid', 'trending'
+  reasons: text("reasons").array(), // reasons for recommendation
+  isShown: boolean("is_shown").notNull().default(false),
+  isClicked: boolean("is_clicked").notNull().default(false),
+  position: integer("position"), // position in recommendation list
+  context: text("context"), // 'dashboard', 'related-articles', 'trending'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  shownAt: timestamp("shown_at"),
+  clickedAt: timestamp("clicked_at"),
+}, (table) => ({
+  userIdx: index("news_recommendations_user_idx").on(table.userId),
+  newsIdx: index("news_recommendations_news_idx").on(table.newsId),
+  scoreIdx: index("news_recommendations_score_idx").on(table.score),
+  createdAtIdx: index("news_recommendations_created_at_idx").on(table.createdAt),
+  algorithmIdx: index("news_recommendations_algorithm_idx").on(table.algorithm),
+}));
+
+// News Content Analysis
+export const newsContentAnalysis = pgTable("news_content_analysis", {
+  id: serial("id").primaryKey(),
+  newsId: integer("news_id").references(() => news.id).notNull().unique(),
+  keywords: text("keywords").array(), // extracted keywords
+  entities: text("entities").array(), // named entities (people, places, organizations)
+  topics: text("topics").array(), // topic classification
+  sentiment: text("sentiment"), // 'positive', 'negative', 'neutral'
+  sentimentScore: decimal("sentiment_score", { precision: 3, scale: 2 }), // -1 to 1
+  readingTime: integer("reading_time"), // estimated reading time in minutes
+  contentComplexity: text("content_complexity").default("medium"), // 'low', 'medium', 'high'
+  language: text("language").default("pt-BR"),
+  analyzedAt: timestamp("analyzed_at").notNull().defaultNow(),
+}, (table) => ({
+  newsIdx: index("news_analysis_news_idx").on(table.newsId),
+  topicsIdx: index("news_analysis_topics_idx").on(table.topics),
+  sentimentIdx: index("news_analysis_sentiment_idx").on(table.sentiment),
+}));
+
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   supplierReviews: many(supplierReviews),
   partnerReviews: many(partnerReviews),
   toolReviews: many(toolReviews),
   materials: many(materials),
   news: many(news),
   updates: many(updates),
+  newsInteractions: many(userNewsInteractions),
+  newsRecommendations: many(newsRecommendations),
+  preferences: one(userPreferences),
 }));
 
-export const newsRelations = relations(news, ({ one }) => ({
+export const newsRelations = relations(news, ({ one, many }) => ({
   author: one(users, {
     fields: [news.authorId],
     references: [users.id],
   }),
+  interactions: many(userNewsInteractions),
+  recommendations: many(newsRecommendations),
+  contentAnalysis: one(newsContentAnalysis),
 }));
 
 export const updatesRelations = relations(updates, ({ one }) => ({
@@ -687,3 +772,77 @@ export type Update = typeof updates.$inferSelect;
 
 export type InsertWebhookConfig = z.infer<typeof insertWebhookConfigSchema>;
 export type WebhookConfig = typeof webhookConfigs.$inferSelect;
+
+// Recommendation engine relations
+export const userNewsInteractionsRelations = relations(userNewsInteractions, ({ one }) => ({
+  user: one(users, {
+    fields: [userNewsInteractions.userId],
+    references: [users.id],
+  }),
+  news: one(news, {
+    fields: [userNewsInteractions.newsId],
+    references: [news.id],
+  }),
+}));
+
+export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [userPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+export const newsRecommendationsRelations = relations(newsRecommendations, ({ one }) => ({
+  user: one(users, {
+    fields: [newsRecommendations.userId],
+    references: [users.id],
+  }),
+  news: one(news, {
+    fields: [newsRecommendations.newsId],
+    references: [news.id],
+  }),
+}));
+
+export const newsContentAnalysisRelations = relations(newsContentAnalysis, ({ one }) => ({
+  news: one(news, {
+    fields: [newsContentAnalysis.newsId],
+    references: [news.id],
+  }),
+}));
+
+// Recommendation engine insert schemas
+export const insertUserNewsInteractionSchema = createInsertSchema(userNewsInteractions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNewsRecommendationSchema = createInsertSchema(newsRecommendations).omit({
+  id: true,
+  createdAt: true,
+  shownAt: true,
+  clickedAt: true,
+});
+
+export const insertNewsContentAnalysisSchema = createInsertSchema(newsContentAnalysis).omit({
+  id: true,
+  analyzedAt: true,
+});
+
+// Recommendation engine types
+export type InsertUserNewsInteraction = z.infer<typeof insertUserNewsInteractionSchema>;
+export type UserNewsInteraction = typeof userNewsInteractions.$inferSelect;
+
+export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type UserPreferences = typeof userPreferences.$inferSelect;
+
+export type InsertNewsRecommendation = z.infer<typeof insertNewsRecommendationSchema>;
+export type NewsRecommendation = typeof newsRecommendations.$inferSelect;
+
+export type InsertNewsContentAnalysis = z.infer<typeof insertNewsContentAnalysisSchema>;
+export type NewsContentAnalysis = typeof newsContentAnalysis.$inferSelect;
