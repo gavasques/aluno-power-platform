@@ -5,6 +5,7 @@ export interface Supplier {
   corporateName: string; // Razão Social
   category: SupplierCategory;
   departments: SupplierDepartment[]; // Departamentos que atende
+  brands: SupplierBrand[]; // Marcas que o fornecedor trabalha
   notes: string; // Observações
   email: string;
   mainContact: string; // Contato Principal
@@ -33,6 +34,16 @@ export interface SupplierDepartment {
   id: string;
   name: string;
   description: string;
+}
+
+export interface SupplierBrand {
+  id: string;
+  name: string;
+  description: string;
+  website?: string;
+  logo?: string;
+  category: string;
+  notes: string;
 }
 
 export interface SupplierContact {
@@ -85,6 +96,19 @@ export const SUPPLIER_DEPARTMENTS: SupplierDepartment[] = [
   { id: '6', name: 'Infantil', description: 'Produtos para bebês e crianças' },
   { id: '7', name: 'Alimentício', description: 'Alimentos e bebidas' },
   { id: '8', name: 'Construção', description: 'Material de construção e ferramentas' },
+];
+
+export const BRAND_CATEGORIES = [
+  'Eletrônicos',
+  'Moda e Vestuário',
+  'Casa e Jardim',
+  'Automotivo',
+  'Esportes e Fitness',
+  'Beleza e Cuidados',
+  'Alimentício',
+  'Infantil',
+  'Construção e Ferramentas',
+  'Outros'
 ];
 
 export const FILE_TYPES = [

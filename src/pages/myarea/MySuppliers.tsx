@@ -6,71 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2, Plus, Edit, Grid2X2, List, Filter, Trash2 } from "lucide-react";
+import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2, Plus, Edit, Grid2X2, List, Filter, Trash2, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { usePagination } from "@/hooks/usePagination";
-
-interface Contact {
-  id: string;
-  name: string;
-  role: string;
-  phone: string;
-  whatsapp: string;
-  email: string;
-  notes: string;
-}
-
-interface Branch {
-  id: string;
-  name: string;
-  corporateName: string;
-  cnpj: string;
-  stateRegistration: string;
-  address: string;
-  phone: string;
-  email: string;
-}
-
-interface Conversation {
-  id: string;
-  date: string;
-  category: 'email' | 'whatsapp' | 'telefone' | 'pessoalmente' | 'outro';
-  description: string;
-  files?: File[];
-}
-
-interface SupplierFile {
-  id: string;
-  name: string;
-  size: number;
-  type: string;
-  uploadDate: string;
-  file: File;
-}
-
-interface Supplier {
-  id: string;
-  tradeName: string;
-  corporateName: string;
-  category: string;
-  description: string;
-  logo: string;
-  verified: boolean;
-  rating: number;
-  reviewCount: number;
-  notes: string;
-  email: string;
-  mainContact: string;
-  phone: string;
-  whatsapp: string;
-  country: string;
-  contacts: Contact[];
-  branches: Branch[];
-  conversations: Conversation[];
-  files: SupplierFile[];
-}
+import { useSuppliers } from "@/contexts/SuppliersContext";
 
 const countries = [
   { code: "BR", name: "Brasil", flag: "🇧🇷" },
@@ -88,65 +29,30 @@ const countries = [
 
 const categories = ["Todas", "Eletrônicos", "Roupas e Acessórios", "Casa e Jardim", "Esportes", "Automotivo", "Alimentício", "Beleza e Cosméticos"];
 
-const mockSuppliers: Supplier[] = [
-  {
-    id: "1",
-    tradeName: "TechSupply Brasil",
-    corporateName: "TechSupply Brasil Importação e Exportação Ltda",
-    category: "Eletrônicos",
-    description: "Importador especializado em eletrônicos e acessórios tech",
-    logo: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=100&h=100&fit=crop",
-    verified: true,
-    rating: 4.5,
-    reviewCount: 128,
-    notes: "Empresa confiável com histórico de 15 anos no mercado. Especializada em produtos Apple e Samsung.",
-    email: "contato@techsupplybrasil.com.br",
-    mainContact: "João Silva",
-    phone: "(11) 3456-7890",
-    whatsapp: "(11) 99876-5432",
-    country: "BR",
-    contacts: [],
-    branches: [],
-    conversations: [],
-    files: []
-  },
-  {
-    id: "2",
-    tradeName: "Fashion Import",
-    corporateName: "Fashion Import Comércio de Roupas Ltda",
-    category: "Roupas e Acessórios",
-    description: "Importadora de roupas e acessórios de moda",
-    logo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=100&h=100&fit=crop",
-    verified: false,
-    rating: 4.2,
-    reviewCount: 85,
-    notes: "Especializada em moda feminina e masculina. Boa variedade de produtos.",
-    email: "vendas@fashionimport.com.br",
-    mainContact: "Maria Santos",
-    phone: "(11) 2345-6789",
-    whatsapp: "(11) 98765-4321",
-    country: "CN",
-    contacts: [],
-    branches: [],
-    conversations: [],
-    files: []
-  }
-];
-
 const MySuppliers = () => {
-  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
+  const { suppliers, deleteSupplier, searchSuppliers } = useSuppliers();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedCountry, setSelectedCountry] = useState("ALL");
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const navigate = useNavigate();
 
+  // Busca que inclui marcas
   const filteredSuppliers = suppliers.filter(supplier => {
-    const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         supplier.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "Todas" || supplier.category === selectedCategory;
-    const matchesCountry = selectedCountry === "ALL" || supplier.country === selectedCountry;
+    const matchesSearch = searchTerm === '' || 
+      supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      supplier.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      supplier.category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      supplier.departments.some(dept => dept.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      supplier.brands.some(brand => 
+        brand.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        brand.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    
+    const matchesCategory = selectedCategory === "Todas" || supplier.category.name === selectedCategory;
+    const matchesCountry = selectedCountry === "ALL"; // Removido filtro de país do mock
+    
     return matchesSearch && matchesCategory && matchesCountry;
   });
 
@@ -169,11 +75,13 @@ const MySuppliers = () => {
   };
 
   const handleDeleteSupplier = (supplierId: string) => {
-    setSuppliers(prev => prev.filter(s => s.id !== supplierId));
-    toast({
-      title: "Fornecedor removido",
-      description: "O fornecedor foi removido com sucesso."
-    });
+    if (confirm('Tem certeza que deseja remover este fornecedor?')) {
+      deleteSupplier(supplierId);
+      toast({
+        title: "Fornecedor removido",
+        description: "O fornecedor foi removido com sucesso."
+      });
+    }
   };
 
   const clearFilters = () => {
@@ -208,7 +116,7 @@ const MySuppliers = () => {
             <div className="relative flex-1 max-w-2xl">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Buscar fornecedores por nome, razão social ou descrição..."
+                placeholder="Buscar fornecedores por nome, razão social, descrição ou marcas..."
                 className="pl-12 h-12 text-lg"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -229,23 +137,6 @@ const MySuppliers = () => {
                 <SelectContent>
                   {categories.map(category => (
                     <SelectItem key={category} value={category}>{category}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="País" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Todos os países</SelectItem>
-                  {countries.map(country => (
-                    <SelectItem key={country.code} value={country.code}>
-                      <span className="flex items-center gap-2">
-                        <span>{country.flag}</span>
-                        <span>{country.name}</span>
-                      </span>
-                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -288,87 +179,101 @@ const MySuppliers = () => {
       {/* Visualização em Cards */}
       {viewMode === 'cards' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {paginatedItems.map(supplier => {
-            const country = countries.find(c => c.code === supplier.country);
-            return (
-              <Card key={supplier.id} className="hover:shadow-lg transition-shadow group">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={supplier.logo}
-                        alt={supplier.tradeName}
-                        className="w-8 h-8 rounded object-cover"
-                      />
-                      <Badge variant="outline">{supplier.category}</Badge>
+          {paginatedItems.map(supplier => (
+            <Card key={supplier.id} className="hover:shadow-lg transition-shadow group">
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={supplier.logo}
+                      alt={supplier.tradeName}
+                      className="w-8 h-8 rounded object-cover"
+                    />
+                    <Badge variant="outline">{supplier.category.name}</Badge>
+                  </div>
+                  <div className="flex gap-1">
+                    {supplier.isVerified ? (
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verificado
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-yellow-600">
+                        Pendente
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                  {supplier.tradeName}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {supplier.corporateName}
+                </p>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  {supplier.notes}
+                </p>
+
+                {/* Marcas */}
+                {supplier.brands.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-1 mb-2">
+                      <ShoppingBag className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Marcas:</span>
                     </div>
-                    <div className="flex gap-1">
-                      {supplier.verified ? (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Verificado
+                    <div className="flex flex-wrap gap-1">
+                      {supplier.brands.slice(0, 3).map(brand => (
+                        <Badge key={brand.id} variant="secondary" className="text-xs">
+                          {brand.name}
                         </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-yellow-600">
-                          Pendente
+                      ))}
+                      {supplier.brands.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{supplier.brands.length - 3}
                         </Badge>
                       )}
-                      {country && (
-                        <Badge variant="outline">
-                          {country.flag}
-                        </Badge>
-                      )}
                     </div>
                   </div>
-                  <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                    {supplier.tradeName}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {supplier.corporateName}
-                  </p>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {supplier.description}
-                  </p>
-                  
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="flex">{renderStars(supplier.rating)}</div>
-                    <span className="text-sm text-muted-foreground">
-                      {supplier.rating.toFixed(1)} ({supplier.reviewCount} avaliações)
-                    </span>
-                  </div>
+                )}
+                
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex">{renderStars(supplier.averageRating)}</div>
+                  <span className="text-sm text-muted-foreground">
+                    {supplier.averageRating.toFixed(1)} ({supplier.totalReviews} avaliações)
+                  </span>
+                </div>
 
-                  <div className="flex gap-2 text-xs text-muted-foreground mb-4">
-                    <div className="flex items-center gap-1">
-                      <Phone className="h-3 w-3" />
-                      {supplier.phone}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Mail className="h-3 w-3" />
-                      {supplier.email.split('@')[0]}@...
-                    </div>
+                <div className="flex gap-2 text-xs text-muted-foreground mb-4">
+                  <div className="flex items-center gap-1">
+                    <Phone className="h-3 w-3" />
+                    {supplier.phone}
                   </div>
+                  <div className="flex items-center gap-1">
+                    <Mail className="h-3 w-3" />
+                    {supplier.email.split('@')[0]}@...
+                  </div>
+                </div>
 
-                  <div className="flex gap-2">
-                    <Button
-                      className="flex-1"
-                      onClick={() => handleViewSupplier(supplier.id)}
-                    >
-                      Ver Perfil
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteSupplier(supplier.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    onClick={() => handleViewSupplier(supplier.id)}
+                  >
+                    Ver Perfil
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteSupplier(supplier.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
 
@@ -380,7 +285,7 @@ const MySuppliers = () => {
               <TableRow>
                 <TableHead>Fornecedor</TableHead>
                 <TableHead>Categoria</TableHead>
-                <TableHead>País</TableHead>
+                <TableHead>Marcas</TableHead>
                 <TableHead>Avaliação</TableHead>
                 <TableHead>Contato</TableHead>
                 <TableHead>Status</TableHead>
@@ -388,89 +293,92 @@ const MySuppliers = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedItems.map(supplier => {
-                const country = countries.find(c => c.code === supplier.country);
-                return (
-                  <TableRow key={supplier.id} className="hover:bg-muted/50">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={supplier.logo}
-                          alt={supplier.tradeName}
-                          className="w-10 h-10 rounded object-cover"
-                        />
-                        <div>
-                          <div className="font-medium">{supplier.tradeName}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {supplier.corporateName}
-                          </div>
+              {paginatedItems.map(supplier => (
+                <TableRow key={supplier.id} className="hover:bg-muted/50">
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={supplier.logo}
+                        alt={supplier.tradeName}
+                        className="w-10 h-10 rounded object-cover"
+                      />
+                      <div>
+                        <div className="font-medium">{supplier.tradeName}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {supplier.corporateName}
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{supplier.category}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {country && (
-                        <div className="flex items-center gap-2">
-                          <span>{country.flag}</span>
-                          <span>{country.name}</span>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className="flex">{renderStars(supplier.rating)}</div>
-                        <span className="text-sm">
-                          {supplier.rating.toFixed(1)} ({supplier.reviewCount})
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div className="flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {supplier.phone}
-                        </div>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Mail className="h-3 w-3" />
-                          {supplier.email.split('@')[0]}@...
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {supplier.verified ? (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Verificado
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{supplier.category.name}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1 max-w-40">
+                      {supplier.brands.slice(0, 2).map(brand => (
+                        <Badge key={brand.id} variant="secondary" className="text-xs">
+                          {brand.name}
                         </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-yellow-600">
-                          Pendente
+                      ))}
+                      {supplier.brands.length > 2 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{supplier.brands.length - 2}
                         </Badge>
                       )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewSupplier(supplier.id)}
-                        >
-                          Ver
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteSupplier(supplier.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div className="flex">{renderStars(supplier.averageRating)}</div>
+                      <span className="text-sm">
+                        {supplier.averageRating.toFixed(1)} ({supplier.totalReviews})
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <div className="flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {supplier.phone}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Mail className="h-3 w-3" />
+                        {supplier.email.split('@')[0]}@...
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {supplier.isVerified ? (
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verificado
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-yellow-600">
+                        Pendente
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewSupplier(supplier.id)}
+                      >
+                        Ver
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteSupplier(supplier.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

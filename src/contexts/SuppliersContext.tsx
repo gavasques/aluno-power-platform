@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Supplier, SupplierReview, SupplierContact, SupplierFile, SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS } from '@/types/supplier';
+import { Supplier, SupplierReview, SupplierContact, SupplierFile, SupplierBrand, SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS } from '@/types/supplier';
 
 interface SuppliersContextType {
   suppliers: Supplier[];
@@ -16,6 +16,9 @@ interface SuppliersContextType {
   addFile: (supplierId: string, file: Omit<SupplierFile, 'id' | 'uploadedAt'>) => void;
   updateFile: (supplierId: string, fileId: string, file: Partial<SupplierFile>) => void;
   deleteFile: (supplierId: string, fileId: string) => void;
+  addBrand: (supplierId: string, brand: Omit<SupplierBrand, 'id'>) => void;
+  updateBrand: (supplierId: string, brandId: string, brand: Partial<SupplierBrand>) => void;
+  deleteBrand: (supplierId: string, brandId: string) => void;
   getSupplierById: (id: string) => Supplier | undefined;
   getSuppliersByCategory: (categoryId: string) => Supplier[];
   getSuppliersByDepartment: (departmentId: string) => Supplier[];
@@ -38,6 +41,23 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
         corporateName: 'TechSupply Brasil Importação e Exportação Ltda',
         category: SUPPLIER_CATEGORIES[2], // Importadores
         departments: [SUPPLIER_DEPARTMENTS[0], SUPPLIER_DEPARTMENTS[4]], // Eletrônicos e Esportes
+        brands: [
+          {
+            id: '1',
+            name: 'Apple',
+            description: 'Produtos Apple originais',
+            website: 'https://apple.com',
+            category: 'Eletrônicos',
+            notes: 'Linha completa de produtos Apple'
+          },
+          {
+            id: '2',
+            name: 'Samsung',
+            description: 'Smartphones e tablets Samsung',
+            category: 'Eletrônicos',
+            notes: 'Foco em Galaxy series'
+          }
+        ],
         notes: 'Empresa confiável com histórico de 15 anos no mercado. Especializada em produtos Apple e Samsung.',
         email: 'contato@techsupplybrasil.com.br',
         mainContact: 'João Silva',
@@ -110,6 +130,15 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
         corporateName: 'Nacional Distribuidora de Produtos Ltda',
         category: SUPPLIER_CATEGORIES[1], // Distribuidores
         departments: [SUPPLIER_DEPARTMENTS[1], SUPPLIER_DEPARTMENTS[7]], // Casa e Jardim, Construção
+        brands: [
+          {
+            id: '1',
+            name: 'Tramontina',
+            description: 'Utensílios domésticos e ferramentas',
+            category: 'Casa e Jardim',
+            notes: 'Linha completa para casa'
+          }
+        ],
         notes: 'Distribuidora nacional com ampla rede de produtos para casa e jardim.',
         email: 'vendas@nacionaldist.com.br',
         mainContact: 'Pedro Santos',
@@ -306,6 +335,49 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
     ));
   };
 
+  const addBrand = (supplierId: string, brandData: Omit<SupplierBrand, 'id'>) => {
+    const newBrand: SupplierBrand = {
+      ...brandData,
+      id: Date.now().toString(),
+    };
+
+    setSuppliers(prev => prev.map(supplier => 
+      supplier.id === supplierId 
+        ? { 
+            ...supplier, 
+            brands: [...supplier.brands, newBrand],
+            updatedAt: new Date().toISOString()
+          }
+        : supplier
+    ));
+  };
+
+  const updateBrand = (supplierId: string, brandId: string, updates: Partial<SupplierBrand>) => {
+    setSuppliers(prev => prev.map(supplier => 
+      supplier.id === supplierId 
+        ? { 
+            ...supplier, 
+            brands: supplier.brands.map(brand => 
+              brand.id === brandId ? { ...brand, ...updates } : brand
+            ),
+            updatedAt: new Date().toISOString()
+          }
+        : supplier
+    ));
+  };
+
+  const deleteBrand = (supplierId: string, brandId: string) => {
+    setSuppliers(prev => prev.map(supplier => 
+      supplier.id === supplierId 
+        ? { 
+            ...supplier, 
+            brands: supplier.brands.filter(b => b.id !== brandId),
+            updatedAt: new Date().toISOString()
+          }
+        : supplier
+    ));
+  };
+
   const getSupplierById = (id: string) => {
     return suppliers.find(supplier => supplier.id === id);
   };
@@ -327,7 +399,8 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
       supplier.corporateName.toLowerCase().includes(lowercaseQuery) ||
       supplier.notes.toLowerCase().includes(lowercaseQuery) ||
       supplier.category.name.toLowerCase().includes(lowercaseQuery) ||
-      supplier.departments.some(dept => dept.name.toLowerCase().includes(lowercaseQuery))
+      supplier.departments.some(dept => dept.name.toLowerCase().includes(lowercaseQuery)) ||
+      supplier.brands.some(brand => brand.name.toLowerCase().includes(lowercaseQuery) || brand.description.toLowerCase().includes(lowercaseQuery))
     );
   };
 
@@ -347,6 +420,9 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
       addFile,
       updateFile,
       deleteFile,
+      addBrand,
+      updateBrand,
+      deleteBrand,
       getSupplierById,
       getSuppliersByCategory,
       getSuppliersByDepartment,
