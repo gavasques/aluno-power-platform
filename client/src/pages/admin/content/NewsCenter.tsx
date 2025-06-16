@@ -24,9 +24,6 @@ export function NewsCenter() {
     staleTime: 0,
   });
 
-  // Debug logging
-  console.log('NewsCenter Debug:', { newsList, isLoading, newsListLength: newsList?.length });
-
   const publishMutation = useMutation({
     mutationFn: async (news: News) => {
       return apiRequest(`/api/news/${news.id}`, {

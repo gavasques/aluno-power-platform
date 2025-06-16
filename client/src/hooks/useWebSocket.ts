@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 export interface WebSocketMessage {
@@ -14,7 +14,7 @@ export function useWebSocket() {
   const { toast } = useToast();
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const connect = () => {
+  const connect = useCallback(() => {
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -93,9 +93,9 @@ export function useWebSocket() {
       console.error('Failed to create WebSocket connection:', error);
       setIsConnected(false);
     }
-  };
+  }, [toast]);
 
-  const disconnect = () => {
+  const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
     }
@@ -105,7 +105,7 @@ export function useWebSocket() {
       wsRef.current = null;
     }
     setIsConnected(false);
-  };
+  }, []);
 
   useEffect(() => {
     connect();

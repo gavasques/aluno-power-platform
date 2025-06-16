@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { AdminNav } from "@/components/layout/AdminNav";
+import { NotificationSystem } from "@/components/notifications/NotificationSystem";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -137,6 +138,7 @@ export function AdminHeader() {
           </NavigationMenu>
         </div>
         <div className="flex items-center space-x-4">
+          <NotificationSystem />
           <AdminNav />
         </div>
       </div>
