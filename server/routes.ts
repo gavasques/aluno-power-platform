@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { 
   insertSupplierSchema, 
@@ -16,6 +17,19 @@ import {
   insertWebhookConfigSchema
 } from "@shared/schema";
 import { youtubeService } from "./services/youtubeService";
+
+// WebSocket connections storage
+const connectedClients = new Set<WebSocket>();
+
+// Broadcast function for real-time notifications
+function broadcastNotification(type: string, data: any) {
+  const message = JSON.stringify({ type, data, timestamp: new Date().toISOString() });
+  connectedClients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Suppliers
@@ -597,6 +611,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertNewsSchema.parse(req.body);
       const news = await storage.createNews(validatedData);
+      
+      // Broadcast real-time notification
+      broadcastNotification('news_created', {
+        id: news.id,
+        title: news.title,
+        summary: news.summary,
+        category: news.category,
+        isPublished: news.isPublished,
+        isFeatured: news.isFeatured
+      });
+      
       res.status(201).json(news);
     } catch (error) {
       res.status(400).json({ error: 'Invalid news data' });
@@ -607,6 +632,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertNewsSchema.partial().parse(req.body);
       const news = await storage.updateNews(parseInt(req.params.id), validatedData);
+      
+      // Broadcast real-time notification
+      broadcastNotification('news_updated', {
+        id: news.id,
+        title: news.title,
+        summary: news.summary,
+        category: news.category,
+        isPublished: news.isPublished,
+        isFeatured: news.isFeatured
+      });
+      
       res.json(news);
     } catch (error) {
       res.status(400).json({ error: 'Invalid news data' });
@@ -615,7 +651,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/news/:id', async (req, res) => {
     try {
-      await storage.deleteNews(parseInt(req.params.id));
+      const newsId = parseInt(req.params.id);
+      await storage.deleteNews(newsId);
+      
+      // Broadcast real-time notification
+      broadcastNotification('news_deleted', {
+        id: newsId
+      });
+      
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete news' });
@@ -734,6 +777,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  // WebSocket server setup
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  wss.on('connection', (ws) => {
+    console.log('New WebSocket client connected');
+    connectedClients.add(ws);
+    
+    // Send welcome message
+    ws.send(JSON.stringify({ 
+      type: 'connection', 
+      data: { message: 'Connected to real-time notifications' },
+      timestamp: new Date().toISOString()
+    }));
+    
+    ws.on('close', () => {
+      console.log('WebSocket client disconnected');
+      connectedClients.delete(ws);
+    });
+    
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+      connectedClients.delete(ws);
+    });
+  });
 
   return httpServer;
 }
