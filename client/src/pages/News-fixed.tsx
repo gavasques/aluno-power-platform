@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { News } from "@shared/schema";
 import { AdvancedSearch, SearchFilter } from "@/components/ui/advanced-search";
 
-const News = () => {
+const NewsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "featured">("date");
@@ -103,7 +103,8 @@ const News = () => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const featuredNews = newsData.filter(news => news.isFeatured);
+  // Get featured news for the hero section
+  const featuredNews = newsData.filter(news => news.isFeatured).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -136,18 +137,19 @@ const News = () => {
         {/* Featured News Section */}
         {featuredNews.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
               <Star className="h-6 w-6 text-yellow-500" />
               Notícias em Destaque
             </h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {featuredNews.slice(0, 3).map((news) => (
-                <Card key={news.id} className="overflow-hidden hover:shadow-lg transition-shadow border-yellow-200">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2"></div>
+              {featuredNews.map((news) => (
+                <Card key={news.id} className="overflow-hidden hover:shadow-lg transition-all duration-200 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-lg line-clamp-2">{news.title}</CardTitle>
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 shrink-0">
+                      <CardTitle className="text-lg line-clamp-2">
+                        {news.title}
+                      </CardTitle>
+                      <Badge className="bg-yellow-100 text-yellow-800 shrink-0">
                         <Star className="h-3 w-3 mr-1" />
                         Destaque
                       </Badge>
@@ -225,16 +227,16 @@ const News = () => {
           {isLoading ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, index) => (
-                <Card key={index} className="animate-pulse">
-                  <CardHeader>
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <Card key={index} className="overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 rounded"></div>
-                      <div className="h-3 bg-gray-200 rounded w-4/5"></div>
-                      <div className="h-3 bg-gray-200 rounded w-3/5"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3"></div>
                     </div>
                   </CardContent>
                 </Card>
@@ -286,33 +288,30 @@ const News = () => {
               ))}
             </div>
           ) : (
-            <Card className="p-12">
-              <div className="text-center space-y-4">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto">
-                  <Rss className="h-10 w-10 text-blue-500" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800">
-                  Nenhuma notícia encontrada
-                </h3>
-                <p className="text-gray-600">
-                  {searchTerm || selectedCategory 
-                    ? "Tente ajustar os filtros de busca" 
-                    : "Nenhuma notícia foi publicada ainda"
-                  }
-                </p>
-                {(searchTerm || selectedCategory) && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setSearchTerm("");
-                      setSelectedCategory("");
-                    }}
-                  >
-                    Limpar filtros
-                  </Button>
-                )}
+            <div className="text-center py-12">
+              <div className="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <Rss className="h-8 w-8 text-gray-400" />
               </div>
-            </Card>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Nenhuma notícia encontrada
+              </h3>
+              <p className="text-gray-500 mb-4">
+                {searchTerm || activeFilters.length > 0 
+                  ? "Tente ajustar os filtros de pesquisa" 
+                  : "Não há notícias publicadas no momento"}
+              </p>
+              {(searchTerm || activeFilters.length > 0) && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setSearchTerm("");
+                    setActiveFilters([]);
+                  }}
+                >
+                  Limpar Filtros
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -320,4 +319,4 @@ const News = () => {
   );
 };
 
-export default News;
+export default NewsPage;
