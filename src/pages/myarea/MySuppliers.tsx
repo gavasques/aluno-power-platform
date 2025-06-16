@@ -4,10 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2, Plus, Edit } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2, Plus, Edit, Grid2X2, List, Filter, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { usePagination } from "@/hooks/usePagination";
 
 interface Contact {
   id: string;
@@ -83,6 +86,8 @@ const countries = [
   { code: "OTHER", name: "Outros Países", flag: "🌍" }
 ];
 
+const categories = ["Todas", "Eletrônicos", "Roupas e Acessórios", "Casa e Jardim", "Esportes", "Automotivo", "Alimentício", "Beleza e Cosméticos"];
+
 const mockSuppliers: Supplier[] = [
   {
     id: "1",
@@ -100,37 +105,30 @@ const mockSuppliers: Supplier[] = [
     phone: "(11) 3456-7890",
     whatsapp: "(11) 99876-5432",
     country: "BR",
-    contacts: [
-      {
-        id: "1",
-        name: "João Silva",
-        role: "Gerente Comercial",
-        phone: "(11) 3456-7890",
-        whatsapp: "(11) 99876-5432",
-        email: "joao@techsupplybrasil.com.br",
-        notes: "Responsável por novos parceiros"
-      }
-    ],
-    branches: [
-      {
-        id: "1",
-        name: "Matriz São Paulo",
-        corporateName: "TechSupply Brasil Importação e Exportação Ltda",
-        cnpj: "12.345.678/0001-90",
-        stateRegistration: "123.456.789.123",
-        address: "Rua das Flores, 123 - São Paulo/SP",
-        phone: "(11) 3456-7890",
-        email: "sp@techsupplybrasil.com.br"
-      }
-    ],
-    conversations: [
-      {
-        id: "1",
-        date: "2024-01-15",
-        category: "email",
-        description: "Discussão sobre novos produtos para 2024"
-      }
-    ],
+    contacts: [],
+    branches: [],
+    conversations: [],
+    files: []
+  },
+  {
+    id: "2",
+    tradeName: "Fashion Import",
+    corporateName: "Fashion Import Comércio de Roupas Ltda",
+    category: "Roupas e Acessórios",
+    description: "Importadora de roupas e acessórios de moda",
+    logo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=100&h=100&fit=crop",
+    verified: false,
+    rating: 4.2,
+    reviewCount: 85,
+    notes: "Especializada em moda feminina e masculina. Boa variedade de produtos.",
+    email: "vendas@fashionimport.com.br",
+    mainContact: "Maria Santos",
+    phone: "(11) 2345-6789",
+    whatsapp: "(11) 98765-4321",
+    country: "CN",
+    contacts: [],
+    branches: [],
+    conversations: [],
     files: []
   }
 ];
@@ -140,17 +138,21 @@ const MySuppliers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedCountry, setSelectedCountry] = useState("ALL");
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const navigate = useNavigate();
-
-  const categories = ["Todas", "Eletrônicos", "Roupas e Acessórios", "Casa e Jardim", "Esportes", "Automotivo"];
 
   const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         supplier.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         supplier.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Todas" || supplier.category === selectedCategory;
     const matchesCountry = selectedCountry === "ALL" || supplier.country === selectedCountry;
     return matchesSearch && matchesCategory && matchesCountry;
+  });
+
+  const { currentPage, totalPages, paginatedItems, handlePageChange, getPaginationGroup } = usePagination({
+    items: filteredSuppliers,
+    itemsPerPage: 25
   });
 
   const renderStars = (rating: number) => {
@@ -174,160 +176,363 @@ const MySuppliers = () => {
     });
   };
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("Todas");
+    setSelectedCountry("ALL");
+  };
+
+  const hasActiveFilters = searchTerm || selectedCategory !== "Todas" || selectedCountry !== "ALL";
+
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Meus Fornecedores</h1>
-        <p className="text-muted-foreground">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <h1 className="text-4xl font-bold">Meus Fornecedores</h1>
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+            <Building2 className="h-3 w-3 mr-1" />
+            Área Pessoal
+          </Badge>
+        </div>
+        <p className="text-muted-foreground text-lg">
           Gerencie seus fornecedores pessoais e mantenha todas as informações organizadas
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar de Filtros */}
-        <div className="lg:w-1/4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Filtros</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Buscar</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar fornecedores..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
+      {/* Filtros e Controles */}
+      <Card className="mb-8">
+        <CardContent className="p-6">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Barra de Busca */}
+            <div className="relative flex-1 max-w-2xl">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Buscar fornecedores por nome, razão social ou descrição..."
+                className="pl-12 h-12 text-lg"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {/* Filtros e Controles */}
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Filtros:</span>
+              </div>
+              
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="País" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Todos os países</SelectItem>
+                  {countries.map(country => (
+                    <SelectItem key={country.code} value={country.code}>
+                      <span className="flex items-center gap-2">
+                        <span>{country.flag}</span>
+                        <span>{country.name}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Toggle de Visualização */}
+              <div className="flex items-center border rounded-lg">
+                <Button
+                  variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('cards')}
+                  className="rounded-r-none"
+                >
+                  <Grid2X2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-l-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
               </div>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">Categoria</label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Button onClick={() => navigate('/minha-area/fornecedores/novo')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar
+              </Button>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">País</label>
-                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos os países" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">Todos os países</SelectItem>
-                    {countries.map(country => (
-                      <SelectItem key={country.code} value={country.code}>
-                        <span className="flex items-center gap-2">
-                          <span>{country.flag}</span>
-                          <span>{country.name}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
+              {hasActiveFilters && (
+                <Button variant="outline" onClick={clearFilters}>
+                  Limpar Filtros
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-          <Button 
-            className="w-full mt-4" 
-            onClick={() => setShowAddForm(!showAddForm)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Fornecedor
-          </Button>
-        </div>
-
-        {/* Lista de Fornecedores */}
-        <div className="lg:w-3/4">
-          <div className="grid gap-6">
-            {filteredSuppliers.map(supplier => {
-              const country = countries.find(c => c.code === supplier.country);
-              return (
-                <Card key={supplier.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
+      {/* Visualização em Cards */}
+      {viewMode === 'cards' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {paginatedItems.map(supplier => {
+            const country = countries.find(c => c.code === supplier.country);
+            return (
+              <Card key={supplier.id} className="hover:shadow-lg transition-shadow group">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
                       <img
                         src={supplier.logo}
                         alt={supplier.tradeName}
-                        className="w-16 h-16 rounded-lg object-cover"
+                        className="w-8 h-8 rounded object-cover"
                       />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <CardTitle className="text-xl">{supplier.tradeName}</CardTitle>
-                          {supplier.verified && (
-                            <Badge variant="secondary" className="bg-green-100 text-green-800">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Verificado
-                            </Badge>
-                          )}
-                          {country && (
-                            <Badge variant="outline">
-                              {country.flag} {country.name}
-                            </Badge>
-                          )}
-                        </div>
-                        <Badge variant="outline" className="mb-2">
-                          {supplier.category}
-                        </Badge>
-                        <p className="text-muted-foreground">{supplier.description}</p>
-                      </div>
+                      <Badge variant="outline">{supplier.category}</Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">Avaliação:</span>
-                          <div className="flex">{renderStars(supplier.rating)}</div>
-                          <span className="text-sm text-muted-foreground">
-                            {supplier.rating} ({supplier.reviewCount} avaliações)
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Phone className="h-4 w-4" />
-                            {supplier.phone}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Mail className="h-4 w-4" />
-                            {supplier.email}
+                    <div className="flex gap-1">
+                      {supplier.verified ? (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Verificado
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-yellow-600">
+                          Pendente
+                        </Badge>
+                      )}
+                      {country && (
+                        <Badge variant="outline">
+                          {country.flag}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                    {supplier.tradeName}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {supplier.corporateName}
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    {supplier.description}
+                  </p>
+                  
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex">{renderStars(supplier.rating)}</div>
+                    <span className="text-sm text-muted-foreground">
+                      {supplier.rating.toFixed(1)} ({supplier.reviewCount} avaliações)
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2 text-xs text-muted-foreground mb-4">
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      {supplier.phone}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      {supplier.email.split('@')[0]}@...
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1"
+                      onClick={() => handleViewSupplier(supplier.id)}
+                    >
+                      Ver Perfil
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteSupplier(supplier.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Visualização em Lista */}
+      {viewMode === 'list' && (
+        <div className="mb-8">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Fornecedor</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>País</TableHead>
+                <TableHead>Avaliação</TableHead>
+                <TableHead>Contato</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedItems.map(supplier => {
+                const country = countries.find(c => c.code === supplier.country);
+                return (
+                  <TableRow key={supplier.id} className="hover:bg-muted/50">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={supplier.logo}
+                          alt={supplier.tradeName}
+                          className="w-10 h-10 rounded object-cover"
+                        />
+                        <div>
+                          <div className="font-medium">{supplier.tradeName}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {supplier.corporateName}
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{supplier.category}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {country && (
+                        <div className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="flex">{renderStars(supplier.rating)}</div>
+                        <span className="text-sm">
+                          {supplier.rating.toFixed(1)} ({supplier.reviewCount})
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div className="flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {supplier.phone}
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Mail className="h-3 w-3" />
+                          {supplier.email.split('@')[0]}@...
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {supplier.verified ? (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Verificado
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-yellow-600">
+                          Pendente
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewSupplier(supplier.id)}
+                        >
+                          Ver
+                        </Button>
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleDeleteSupplier(supplier.id)}
                         >
-                          Remover
-                        </Button>
-                        <Button onClick={() => handleViewSupplier(supplier.id)}>
-                          Ver Perfil
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
-      </div>
+      )}
+
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {getPaginationGroup().map((page, index) => (
+                <PaginationItem key={index}>
+                  {page === '...' ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationLink
+                      onClick={() => handlePageChange(page as number)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+
+      {/* Estado Vazio */}
+      {filteredSuppliers.length === 0 && (
+        <Card className="mt-8">
+          <CardContent className="text-center py-12">
+            <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-medium mb-2">Nenhum fornecedor encontrado</h3>
+            <p className="text-muted-foreground mb-4">
+              {hasActiveFilters 
+                ? "Tente ajustar os filtros ou termos de busca" 
+                : "Você ainda não possui fornecedores cadastrados"}
+            </p>
+            <Button onClick={() => navigate('/minha-area/fornecedores/novo')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Primeiro Fornecedor
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
