@@ -31,11 +31,6 @@ const YoutubeContext = createContext<YoutubeContextType | undefined>(undefined);
 export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
-  // Force cache invalidation on mount
-  React.useEffect(() => {
-    queryClient.removeQueries({ queryKey: ['/api/youtube-videos'] });
-  }, [queryClient]);
-
   const {
     data: videos = [],
     isLoading: loading,
@@ -44,8 +39,6 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/youtube-videos'],
     queryFn: () => apiRequest<YoutubeVideo[]>('/api/youtube-videos'),
-    staleTime: 0,
-    refetchOnMount: 'always',
   });
 
   const {
@@ -79,6 +72,8 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
 
   const syncVideos = async (): Promise<void> => {
     await syncMutation.mutateAsync();
+    // Force page reload after sync to clear all caches
+    window.location.reload();
   };
 
   const deleteVideo = async (id: number): Promise<void> => {

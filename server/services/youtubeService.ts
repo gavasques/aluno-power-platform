@@ -258,9 +258,6 @@ class YouTubeService {
       const channelHandle = '@guilhermeavasques';
       const videos = await this.fetchChannelVideos(channelHandle, 50);
       
-      // Deactivate old videos
-      await storage.deactivateOldVideos();
-
       let totalFetched = 0;
 
       for (const video of videos) {
