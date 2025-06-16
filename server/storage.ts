@@ -235,7 +235,38 @@ export class DatabaseStorage implements IStorage {
 
   // Materials
   async getMaterials(): Promise<Material[]> {
-    return await db.select().from(materials);
+    return await db
+      .select({
+        id: materials.id,
+        title: materials.title,
+        description: materials.description,
+        typeId: materials.typeId,
+        accessLevel: materials.accessLevel,
+        fileUrl: materials.fileUrl,
+        externalUrl: materials.externalUrl,
+        embedCode: materials.embedCode,
+        fileSize: materials.fileSize,
+        fileType: materials.fileType,
+        tags: materials.tags,
+        downloadCount: materials.downloadCount,
+        viewCount: materials.viewCount,
+        uploadedBy: materials.uploadedBy,
+        technicalInfo: materials.technicalInfo,
+        uploadDate: materials.uploadDate,
+        lastModified: materials.lastModified,
+        type: {
+          id: materialTypes.id,
+          name: materialTypes.name,
+          icon: materialTypes.icon,
+          description: materialTypes.description,
+          allowsUpload: materialTypes.allowsUpload,
+          allowsUrl: materialTypes.allowsUrl,
+          viewerType: materialTypes.viewerType,
+          createdAt: materialTypes.createdAt,
+        }
+      })
+      .from(materials)
+      .leftJoin(materialTypes, eq(materials.typeId, materialTypes.id));
   }
 
   async getMaterial(id: number): Promise<Material | undefined> {

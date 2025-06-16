@@ -13,9 +13,9 @@ type AccessLevel = "public" | "restricted" | "all";
 
 const Materials = () => {
   const { getFilteredMaterials, materialTypes, filters, setFilters, incrementDownload } = useMaterials();
-  const [searchTerm, setSearchTerm] = useState(filters.search || "");
-  const [selectedCategory, setSelectedCategory] = useState(filters.typeId || "all");
-  const [accessFilter, setAccessFilter] = useState<AccessLevel>(filters.accessLevel || "all");
+  const [searchTerm, setSearchTerm] = useState(filters?.search || "");
+  const [selectedCategory, setSelectedCategory] = useState(filters?.typeId || "all");
+  const [accessFilter, setAccessFilter] = useState<AccessLevel>((filters?.accessLevel as AccessLevel) || "all");
   const { toast } = useToast();
   const navigate = useNavigate();
 
