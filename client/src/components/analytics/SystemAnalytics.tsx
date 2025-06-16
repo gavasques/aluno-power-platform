@@ -33,56 +33,53 @@ interface SystemMetrics {
 
 export const SystemAnalytics = () => {
   // Fetch all system data for analytics
-  const { data: newsData = [], isLoading: newsLoading } = useQuery({
+  const { data: newsData = [] } = useQuery<any[]>({
     queryKey: ['/api/news'], 
     staleTime: 2 * 60 * 1000
   });
   
-  const { data: updatesData = [], isLoading: updatesLoading } = useQuery({
+  const { data: updatesData = [] } = useQuery<any[]>({
     queryKey: ['/api/updates'],
     staleTime: 2 * 60 * 1000
   });
   
-  const { data: materialsData = [], isLoading: materialsLoading } = useQuery({
+  const { data: materialsData = [] } = useQuery<any[]>({
     queryKey: ['/api/materials'],
     staleTime: 5 * 60 * 1000
   });
   
-  const { data: suppliersData = [], isLoading: suppliersLoading } = useQuery({
+  const { data: suppliersData = [] } = useQuery<any[]>({
     queryKey: ['/api/suppliers'],
     staleTime: 5 * 60 * 1000
   });
   
-  const { data: partnersData = [], isLoading: partnersLoading } = useQuery({
+  const { data: partnersData = [] } = useQuery<any[]>({
     queryKey: ['/api/partners'],
     staleTime: 5 * 60 * 1000
   });
   
-  const { data: productsData = [], isLoading: productsLoading } = useQuery({
+  const { data: productsData = [] } = useQuery<any[]>({
     queryKey: ['/api/products'],
     staleTime: 5 * 60 * 1000
   });
   
-  const { data: toolsData = [], isLoading: toolsLoading } = useQuery({
+  const { data: toolsData = [] } = useQuery<any[]>({
     queryKey: ['/api/tools'],
     staleTime: 5 * 60 * 1000
   });
 
-  const isLoading = newsLoading || updatesLoading || materialsLoading || 
-                   suppliersLoading || partnersLoading || productsLoading || toolsLoading;
-
   // Calculate system metrics
   const metrics: SystemMetrics = {
-    totalNews: Array.isArray(newsData) ? newsData.length : 0,
-    publishedNews: Array.isArray(newsData) ? newsData.filter((item: any) => item.isPublished).length : 0,
-    featuredNews: Array.isArray(newsData) ? newsData.filter((item: any) => item.isFeatured).length : 0,
-    totalUpdates: Array.isArray(updatesData) ? updatesData.length : 0,
-    publishedUpdates: Array.isArray(updatesData) ? updatesData.filter((item: any) => item.isPublished).length : 0,
-    totalMaterials: Array.isArray(materialsData) ? materialsData.length : 0,
-    totalSuppliers: Array.isArray(suppliersData) ? suppliersData.length : 0,
-    totalPartners: Array.isArray(partnersData) ? partnersData.length : 0,
-    totalProducts: Array.isArray(productsData) ? productsData.length : 0,
-    totalTools: Array.isArray(toolsData) ? toolsData.length : 0,
+    totalNews: newsData.length,
+    publishedNews: newsData.filter((item: any) => item.isPublished).length,
+    featuredNews: newsData.filter((item: any) => item.isFeatured).length,
+    totalUpdates: updatesData.length,
+    publishedUpdates: updatesData.filter((item: any) => item.isPublished).length,
+    totalMaterials: materialsData.length,
+    totalSuppliers: suppliersData.length,
+    totalPartners: partnersData.length,
+    totalProducts: productsData.length,
+    totalTools: toolsData.length,
     performanceScore: 95, // Based on our optimizations
     cacheEfficiency: 89
   };
@@ -100,7 +97,8 @@ export const SystemAnalytics = () => {
   const totalEntities = metrics.totalMaterials + metrics.totalSuppliers + 
                         metrics.totalPartners + metrics.totalProducts + metrics.totalTools;
 
-  if (isLoading) {
+  // Show loading skeleton if no data available
+  if (!newsData.length && !updatesData.length && !materialsData.length) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(8)].map((_, i) => (
