@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { VideoCard } from "@/components/youtube/VideoCard";
 import { useQuery } from "@tanstack/react-query";
-import type { News } from "@shared/schema";
+import type { News, Update } from "@shared/schema";
 
 interface StatCardProps {
   title: string;
@@ -53,7 +53,20 @@ const Dashboard = () => {
     },
   });
 
+  // Fetch published updates
+  const { data: updatesData = [], isLoading: updatesLoading } = useQuery<Update[]>({
+    queryKey: ['/api/updates/published'],
+    queryFn: async () => {
+      const response = await fetch('/api/updates/published');
+      if (!response.ok) {
+        throw new Error('Failed to fetch updates');
+      }
+      return response.json();
+    },
+  });
+
   const recentNews = newsData.slice(0, 3);
+  const recentUpdates = updatesData.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-white">
@@ -249,12 +262,75 @@ const Dashboard = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-6 bg-white">
-                <div className="text-center space-y-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-teal-200 rounded-full flex items-center justify-center mx-auto">
-                    <Users className="h-6 w-6 text-emerald-500" />
+                {updatesLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, index) => (
+                      <div key={index} className="animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-gray-700">Novidades em breve</p>
-                </div>
+                ) : recentUpdates.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentUpdates.map((update) => (
+                      <div key={update.id} className="border-b border-gray-100 last:border-0 pb-3 last:pb-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h4 className="font-medium text-gray-800 text-sm line-clamp-2">
+                            {update.title}
+                          </h4>
+                          {update.version && (
+                            <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full shrink-0">
+                              v{update.version}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            update.type === 'feature' ? 'bg-blue-100 text-blue-600' :
+                            update.type === 'improvement' ? 'bg-green-100 text-green-600' :
+                            update.type === 'bugfix' ? 'bg-red-100 text-red-600' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {update.type === 'feature' ? 'Nova Funcionalidade' :
+                             update.type === 'improvement' ? 'Melhoria' :
+                             update.type === 'bugfix' ? 'Correção' : 'Atualização'}
+                          </span>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            update.priority === 'high' ? 'bg-red-100 text-red-600' :
+                            update.priority === 'medium' ? 'bg-yellow-100 text-yellow-600' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {update.priority === 'high' ? 'Alta' :
+                             update.priority === 'medium' ? 'Média' : 'Normal'}
+                          </span>
+                        </div>
+                        {update.summary && (
+                          <p className="text-xs text-gray-600 line-clamp-2 mb-2">{update.summary}</p>
+                        )}
+                        <div className="flex items-center text-xs text-gray-400">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {new Date(update.createdAt).toLocaleDateString('pt-BR')}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="pt-3">
+                      <Button asChild variant="outline" size="sm" className="w-full border-emerald-500 text-emerald-500 hover:bg-emerald-50">
+                        <Link to="/novidades">
+                          Ver todas as novidades
+                          <ArrowRight className="h-3 w-3 ml-1" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-teal-200 rounded-full flex items-center justify-center mx-auto">
+                      <Users className="h-6 w-6 text-emerald-500" />
+                    </div>
+                    <p className="text-gray-700 text-sm">Nenhuma novidade publicada</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

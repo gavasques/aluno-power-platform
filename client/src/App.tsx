@@ -20,6 +20,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Dashboard from "./pages/Dashboard";
 import Videos from "./pages/Videos";
 import News from "./pages/News";
+import Updates from "./pages/Updates";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Admin from "./pages/Admin";
 import UserManagement from "./pages/admin/UserManagement";
@@ -71,6 +72,7 @@ function App() {
                             <Route index element={<Dashboard />} />
                             <Route path="videos" element={<Videos />} />
                             <Route path="noticias" element={<News />} />
+                            <Route path="novidades" element={<Updates />} />
                             <Route path="fornecedores" element={<Suppliers />} />
                             
                             {/* Rotas do Hub */}
