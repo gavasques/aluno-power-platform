@@ -330,6 +330,8 @@ export const news = pgTable("news", {
   createdAtIdx: index("news_created_at_idx").on(table.createdAt),
   publishedIdx: index("news_published_idx").on(table.isPublished),
   categoryIdx: index("news_category_idx").on(table.category),
+  publishedCreatedIdx: index("news_published_created_idx").on(table.isPublished, table.createdAt),
+  featuredIdx: index("news_featured_idx").on(table.isFeatured),
 }));
 
 // Updates table
@@ -351,6 +353,9 @@ export const updates = pgTable("updates", {
   publishedIdx: index("updates_published_idx").on(table.isPublished),
   typeIdx: index("updates_type_idx").on(table.type),
   priorityIdx: index("updates_priority_idx").on(table.priority),
+  publishedCreatedIdx: index("updates_published_created_idx").on(table.isPublished, table.createdAt),
+  publishedPriorityIdx: index("updates_published_priority_idx").on(table.isPublished, table.priority),
+  typeCreatedIdx: index("updates_type_created_idx").on(table.type, table.createdAt),
 }));
 
 // Webhook configurations

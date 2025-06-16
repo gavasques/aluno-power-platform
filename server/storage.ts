@@ -761,7 +761,8 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(news)
       .where(eq(news.isPublished, true))
-      .orderBy(desc(news.publishedAt));
+      .orderBy(desc(news.createdAt))
+      .limit(50);
   }
 
   async getNewsById(id: number): Promise<News | undefined> {
@@ -800,7 +801,8 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(updates)
       .where(eq(updates.isPublished, true))
-      .orderBy(desc(updates.createdAt));
+      .orderBy(desc(updates.createdAt))
+      .limit(50);
   }
 
   async getUpdate(id: number): Promise<Update | undefined> {
