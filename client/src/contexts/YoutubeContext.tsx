@@ -3,13 +3,27 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import type { YoutubeVideo } from '@shared/schema';
 
+interface ChannelInfo {
+  title: string;
+  subscriberCount: string;
+  videoCount: string;
+  viewCount: string;
+  customUrl: string;
+  thumbnails: any;
+  description: string;
+  channelId: string;
+}
+
 interface YoutubeContextType {
   videos: YoutubeVideo[];
+  channelInfo: ChannelInfo | null;
   loading: boolean;
+  channelLoading: boolean;
   error: string | null;
   syncVideos: () => Promise<void>;
   deleteVideo: (id: number) => Promise<void>;
   refetch: () => void;
+  refetchChannelInfo: () => void;
 }
 
 const YoutubeContext = createContext<YoutubeContextType | undefined>(undefined);
@@ -25,6 +39,15 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/youtube-videos'],
     queryFn: () => apiRequest<YoutubeVideo[]>('/api/youtube-videos'),
+  });
+
+  const {
+    data: channelInfo = null,
+    isLoading: channelLoading,
+    refetch: refetchChannelInfo
+  } = useQuery({
+    queryKey: ['/api/youtube-channel-info'],
+    queryFn: () => apiRequest<ChannelInfo>('/api/youtube-channel-info'),
   });
 
   const syncMutation = useMutation({
@@ -57,11 +80,14 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
 
   const value: YoutubeContextType = {
     videos,
+    channelInfo,
     loading,
+    channelLoading,
     error: error?.message || null,
     syncVideos,
     deleteVideo,
     refetch,
+    refetchChannelInfo,
   };
 
   return (

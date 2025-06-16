@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Youtube, RefreshCw, Play, Calendar } from "lucide-react";
+import { Youtube, RefreshCw, Play, Calendar, Users, ExternalLink } from "lucide-react";
 import { VideoCard } from "./VideoCard";
 import { useYoutube } from "@/contexts/YoutubeContext";
 import { useState } from "react";

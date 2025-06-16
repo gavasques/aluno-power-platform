@@ -526,6 +526,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // YouTube channel info endpoint
+  app.get('/api/youtube-channel-info', async (req, res) => {
+    try {
+      const channelInfo = await youtubeService.fetchChannelInfo('@guilhermeavasques');
+      if (channelInfo) {
+        res.json({
+          title: channelInfo.snippet.title,
+          subscriberCount: channelInfo.statistics.subscriberCount,
+          videoCount: channelInfo.statistics.videoCount,
+          viewCount: channelInfo.statistics.viewCount,
+          customUrl: channelInfo.snippet.customUrl,
+          thumbnails: channelInfo.snippet.thumbnails,
+          description: channelInfo.snippet.description,
+          channelId: channelInfo.id
+        });
+      } else {
+        res.status(404).json({ error: 'Channel not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching channel info:', error);
+      res.status(500).json({ error: 'Failed to fetch channel info' });
+    }
+  });
+
   app.delete('/api/youtube-videos/:id', async (req, res) => {
     try {
       await storage.deleteYoutubeVideo(parseInt(req.params.id));

@@ -104,67 +104,141 @@ class YouTubeService {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
 
+  async fetchChannelInfo(channelHandle: string): Promise<any> {
+    try {
+      // Search for channel by handle
+      const searchUrl = `${this.baseUrl}/search?part=snippet&type=channel&q=${encodeURIComponent(channelHandle)}&key=${this.apiKey}`;
+      const searchResponse = await fetch(searchUrl);
+      
+      if (!searchResponse.ok) {
+        throw new Error(`YouTube API error: ${searchResponse.status}`);
+      }
+      
+      const searchData = await searchResponse.json();
+      
+      if (searchData.items && searchData.items.length > 0) {
+        const channelId = searchData.items[0].id.channelId;
+        
+        // Get detailed channel info including subscriber count
+        const channelUrl = `${this.baseUrl}/channels?part=snippet,statistics&id=${channelId}&key=${this.apiKey}`;
+        const channelResponse = await fetch(channelUrl);
+        
+        if (!channelResponse.ok) {
+          throw new Error(`YouTube API error: ${channelResponse.status}`);
+        }
+        
+        const channelData = await channelResponse.json();
+        return channelData.items[0];
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error fetching channel info:', error);
+      return null;
+    }
+  }
+
+  async fetchChannelVideos(channelHandle: string, maxResults: number = 20): Promise<YouTubeVideo[]> {
+    try {
+      // First get channel ID from handle
+      const searchUrl = `${this.baseUrl}/search?part=snippet&type=channel&q=${encodeURIComponent(channelHandle)}&key=${this.apiKey}`;
+      const searchResponse = await fetch(searchUrl);
+      
+      if (!searchResponse.ok) {
+        throw new Error(`YouTube API error: ${searchResponse.status}`);
+      }
+      
+      const searchData = await searchResponse.json();
+      
+      if (!searchData.items || searchData.items.length === 0) {
+        console.log(`No channel found for: ${channelHandle}`);
+        return [];
+      }
+      
+      const channelId = searchData.items[0].id.channelId;
+      
+      // Get videos from the channel
+      const videosUrl = `${this.baseUrl}/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=${maxResults}&key=${this.apiKey}`;
+      const videosResponse = await fetch(videosUrl);
+      
+      if (!videosResponse.ok) {
+        throw new Error(`YouTube API error: ${videosResponse.status}`);
+      }
+      
+      const videosData: YouTubeSearchResponse = await videosResponse.json();
+      
+      if (!videosData.items || videosData.items.length === 0) {
+        return [];
+      }
+      
+      // Get additional details for videos
+      const videoIds = videosData.items.map(video => video.id.videoId).join(',');
+      const detailsUrl = `${this.baseUrl}/videos?part=contentDetails,statistics&id=${videoIds}&key=${this.apiKey}`;
+      const detailsResponse = await fetch(detailsUrl);
+      
+      if (detailsResponse.ok) {
+        const detailsData = await detailsResponse.json();
+        
+        // Merge video data with details
+        return videosData.items.map(video => {
+          const details = detailsData.items?.find((detail: any) => detail.id === video.id.videoId);
+          return {
+            ...video,
+            contentDetails: details?.contentDetails,
+            statistics: details?.statistics
+          };
+        });
+      }
+      
+      return videosData.items;
+    } catch (error) {
+      console.error('Error fetching channel videos:', error);
+      return [];
+    }
+  }
+
   async fetchAndCacheVideos(): Promise<void> {
     try {
       console.log('Starting YouTube video fetch...');
       
-      // Define search queries relacionados ao seu negócio
-      const queries = [
-        'marketing digital',
-        'empreendedorismo',
-        'vendas online',
-        'e-commerce',
-        'redes sociais negócios',
-        'gestão empresarial',
-        'inovação tecnologia',
-        'startup brasil'
-      ];
-
+      // Fetch videos from Guilherme Vasques channel
+      const channelHandle = '@guilhermeavasques';
+      const videos = await this.fetchChannelVideos(channelHandle, 50);
+      
       // Deactivate old videos
       await storage.deactivateOldVideos();
 
       let totalFetched = 0;
 
-      for (const query of queries) {
+      for (const video of videos) {
         try {
-          const videos = await this.searchVideos(query, 10);
-          
-          for (const video of videos) {
-            try {
-              const videoData: InsertYoutubeVideo = {
-                videoId: video.id.videoId,
-                title: video.snippet.title,
-                description: video.snippet.description || '',
-                channelTitle: video.snippet.channelTitle,
-                channelId: video.snippet.channelId,
-                publishedAt: new Date(video.snippet.publishedAt),
-                thumbnailUrl: video.snippet.thumbnails.high?.url || video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default?.url,
-                duration: video.contentDetails ? this.parseDuration(video.contentDetails.duration) : null,
-                viewCount: video.statistics && !isNaN(parseInt(video.statistics.viewCount)) ? parseInt(video.statistics.viewCount) : null,
-                likeCount: video.statistics && !isNaN(parseInt(video.statistics.likeCount)) ? parseInt(video.statistics.likeCount) : null,
-                tags: video.snippet.tags || null,
-                category: query,
-                isActive: true,
-                fetchedAt: new Date()
-              };
+          const videoData: InsertYoutubeVideo = {
+            videoId: video.id.videoId,
+            title: video.snippet.title,
+            description: video.snippet.description || '',
+            channelTitle: video.snippet.channelTitle,
+            channelId: video.snippet.channelId,
+            publishedAt: new Date(video.snippet.publishedAt),
+            thumbnailUrl: video.snippet.thumbnails.high?.url || video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default?.url,
+            duration: video.contentDetails ? this.parseDuration(video.contentDetails.duration) : null,
+            viewCount: video.statistics && !isNaN(parseInt(video.statistics.viewCount)) ? parseInt(video.statistics.viewCount) : null,
+            likeCount: video.statistics && !isNaN(parseInt(video.statistics.likeCount)) ? parseInt(video.statistics.likeCount) : null,
+            tags: video.snippet.tags || null,
+            category: 'Guilherme Vasques',
+            isActive: true,
+            fetchedAt: new Date()
+          };
 
-              // Check if video already exists
-              const existingVideos = await storage.getYoutubeVideos();
-              const exists = existingVideos.some(v => v.videoId === video.id.videoId);
-              
-              if (!exists) {
-                await storage.createYoutubeVideo(videoData);
-                totalFetched++;
-              }
-            } catch (error) {
-              console.error(`Error saving video ${video.id.videoId}:`, error);
-            }
-          }
+          // Check if video already exists
+          const existingVideos = await storage.getYoutubeVideos();
+          const exists = existingVideos.some(v => v.videoId === video.id.videoId);
           
-          // Add delay between queries to respect rate limits
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          if (!exists) {
+            await storage.createYoutubeVideo(videoData);
+            totalFetched++;
+          }
         } catch (error) {
-          console.error(`Error fetching videos for query "${query}":`, error);
+          console.error(`Error saving video ${video.id.videoId}:`, error);
         }
       }
 
