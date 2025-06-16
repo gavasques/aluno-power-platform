@@ -203,7 +203,7 @@ export function NewsCenter() {
           </Card>
         ))}
 
-        {newsList.length === 0 && (
+        {(newsList as News[]).length === 0 && (
           <Card>
             <CardContent className="p-12 text-center">
               <p className="text-muted-foreground">

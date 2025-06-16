@@ -56,6 +56,7 @@ export function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/news'] });
+      queryClient.refetchQueries({ queryKey: ['/api/news'] });
       toast({
         title: "Sucesso",
         description: news ? "Notícia atualizada com sucesso." : "Notícia criada com sucesso.",
