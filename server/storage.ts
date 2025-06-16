@@ -20,6 +20,7 @@ import {
   type Partner,
   type InsertPartner,
   type Material,
+  type MaterialWithType,
   type InsertMaterial,
   type Tool,
   type InsertTool,
@@ -58,12 +59,12 @@ export interface IStorage {
   searchPartners(query: string): Promise<Partner[]>;
 
   // Materials
-  getMaterials(): Promise<Material[]>;
+  getMaterials(): Promise<MaterialWithType[]>;
   getMaterial(id: number): Promise<Material | undefined>;
   createMaterial(material: InsertMaterial): Promise<Material>;
   updateMaterial(id: number, material: Partial<InsertMaterial>): Promise<Material>;
   deleteMaterial(id: number): Promise<void>;
-  searchMaterials(query: string): Promise<Material[]>;
+  searchMaterials(query: string): Promise<MaterialWithType[]>;
 
   // Tools
   getTools(): Promise<Tool[]>;
@@ -234,8 +235,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Materials
-  async getMaterials(): Promise<Material[]> {
-    return await db
+  async getMaterials(): Promise<MaterialWithType[]> {
+    const results = await db
       .select({
         id: materials.id,
         title: materials.title,
@@ -254,19 +255,47 @@ export class DatabaseStorage implements IStorage {
         technicalInfo: materials.technicalInfo,
         uploadDate: materials.uploadDate,
         lastModified: materials.lastModified,
-        type: {
-          id: materialTypes.id,
-          name: materialTypes.name,
-          icon: materialTypes.icon,
-          description: materialTypes.description,
-          allowsUpload: materialTypes.allowsUpload,
-          allowsUrl: materialTypes.allowsUrl,
-          viewerType: materialTypes.viewerType,
-          createdAt: materialTypes.createdAt,
-        }
+        typeId_join: materialTypes.id,
+        typeName: materialTypes.name,
+        typeIcon: materialTypes.icon,
+        typeDescription: materialTypes.description,
+        typeAllowsUpload: materialTypes.allowsUpload,
+        typeAllowsUrl: materialTypes.allowsUrl,
+        typeViewerType: materialTypes.viewerType,
+        typeCreatedAt: materialTypes.createdAt,
       })
       .from(materials)
       .leftJoin(materialTypes, eq(materials.typeId, materialTypes.id));
+
+    return results.map(row => ({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      typeId: row.typeId,
+      accessLevel: row.accessLevel,
+      fileUrl: row.fileUrl,
+      externalUrl: row.externalUrl,
+      embedCode: row.embedCode,
+      fileSize: row.fileSize,
+      fileType: row.fileType,
+      tags: row.tags,
+      downloadCount: row.downloadCount,
+      viewCount: row.viewCount,
+      uploadedBy: row.uploadedBy,
+      technicalInfo: row.technicalInfo,
+      uploadDate: row.uploadDate,
+      lastModified: row.lastModified,
+      type: {
+        id: row.typeId_join || 0,
+        name: row.typeName || 'Unknown',
+        icon: row.typeIcon || 'FileText',
+        description: row.typeDescription,
+        allowsUpload: row.typeAllowsUpload || true,
+        allowsUrl: row.typeAllowsUrl || true,
+        viewerType: row.typeViewerType || 'inline',
+        createdAt: row.typeCreatedAt || new Date(),
+      }
+    }));
   }
 
   async getMaterial(id: number): Promise<Material | undefined> {
@@ -302,16 +331,73 @@ export class DatabaseStorage implements IStorage {
     await db.delete(materials).where(eq(materials.id, id));
   }
 
-  async searchMaterials(query: string): Promise<Material[]> {
-    return await db
-      .select()
+  async searchMaterials(query: string): Promise<MaterialWithType[]> {
+    const results = await db
+      .select({
+        id: materials.id,
+        title: materials.title,
+        description: materials.description,
+        typeId: materials.typeId,
+        accessLevel: materials.accessLevel,
+        fileUrl: materials.fileUrl,
+        externalUrl: materials.externalUrl,
+        embedCode: materials.embedCode,
+        fileSize: materials.fileSize,
+        fileType: materials.fileType,
+        tags: materials.tags,
+        downloadCount: materials.downloadCount,
+        viewCount: materials.viewCount,
+        uploadedBy: materials.uploadedBy,
+        technicalInfo: materials.technicalInfo,
+        uploadDate: materials.uploadDate,
+        lastModified: materials.lastModified,
+        typeId_join: materialTypes.id,
+        typeName: materialTypes.name,
+        typeIcon: materialTypes.icon,
+        typeDescription: materialTypes.description,
+        typeAllowsUpload: materialTypes.allowsUpload,
+        typeAllowsUrl: materialTypes.allowsUrl,
+        typeViewerType: materialTypes.viewerType,
+        typeCreatedAt: materialTypes.createdAt,
+      })
       .from(materials)
+      .leftJoin(materialTypes, eq(materials.typeId, materialTypes.id))
       .where(
         or(
           ilike(materials.title, `%${query}%`),
           ilike(materials.description, `%${query}%`)
         )
       );
+
+    return results.map(row => ({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      typeId: row.typeId,
+      accessLevel: row.accessLevel,
+      fileUrl: row.fileUrl,
+      externalUrl: row.externalUrl,
+      embedCode: row.embedCode,
+      fileSize: row.fileSize,
+      fileType: row.fileType,
+      tags: row.tags,
+      downloadCount: row.downloadCount,
+      viewCount: row.viewCount,
+      uploadedBy: row.uploadedBy,
+      technicalInfo: row.technicalInfo,
+      uploadDate: row.uploadDate,
+      lastModified: row.lastModified,
+      type: {
+        id: row.typeId_join || 0,
+        name: row.typeName || 'Unknown',
+        icon: row.typeIcon || 'FileText',
+        description: row.typeDescription,
+        allowsUpload: row.typeAllowsUpload || true,
+        allowsUrl: row.typeAllowsUrl || true,
+        viewerType: row.typeViewerType || 'inline',
+        createdAt: row.typeCreatedAt || new Date(),
+      }
+    }));
   }
 
   // Tools

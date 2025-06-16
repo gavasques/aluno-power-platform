@@ -536,6 +536,12 @@ export type Partner = typeof partners.$inferSelect;
 export type InsertMaterial = z.infer<typeof insertMaterialSchema>;
 export type Material = typeof materials.$inferSelect;
 
+export type MaterialType = typeof materialTypes.$inferSelect;
+
+export type MaterialWithType = Material & {
+  type: MaterialType;
+};
+
 export type InsertTool = z.infer<typeof insertToolSchema>;
 export type Tool = typeof tools.$inferSelect;
 
