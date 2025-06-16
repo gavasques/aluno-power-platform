@@ -8,6 +8,30 @@ export interface ToolType {
   updatedAt: string;
 }
 
+export interface FeatureDetail {
+  title: string;
+  description: string;
+  photos: string[];
+}
+
+export interface UserToolReview {
+  id: string;
+  toolId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  photos: string[];
+  createdAt: string;
+  replies: Array<{
+    id: string;
+    userId: string;
+    userName: string;
+    comment: string;
+    createdAt: string;
+  }>;
+}
+
 export interface Tool {
   id: string;
   name: string;
@@ -20,7 +44,7 @@ export interface Tool {
   userRating: number;
   reviewCount: number;
   overview: string;
-  features: string[];
+  features: FeatureDetail[];
   pricing: {
     plans: Array<{
       name: string;
@@ -28,10 +52,11 @@ export interface Tool {
       features: string[];
     }>;
   };
-  availabilityBrazil: string;
-  lvReview: {
+  brazilSupport: "works" | "partial" | "no";
+  guilhermeReview: {
     rating: number;
     review: string;
+    photos: string[];
   };
   prosAndCons: {
     pros: string[];
@@ -44,13 +69,4 @@ export interface Tool {
   }>;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface UserToolReview {
-  id: string;
-  toolId: string;
-  userId: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
 }

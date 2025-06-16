@@ -10,10 +10,11 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Edit, Trash2, Search, Wrench, Star, CheckCircle, ExternalLink } from "lucide-react";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { Plus, Edit, Trash2, Search, Wrench, Star, CheckCircle, X } from "lucide-react";
 import { useTools } from "@/contexts/ToolsContext";
 import { useToast } from "@/hooks/use-toast";
-import { Tool } from "@/types/tool";
+import { Tool, FeatureDetail } from "@/types/tool";
 
 const ToolsManager = () => {
   const { tools, toolTypes, addTool, updateTool, deleteTool } = useTools();
@@ -33,12 +34,16 @@ const ToolsManager = () => {
     overview: "",
     features: [],
     pricing: { plans: [] },
-    availabilityBrazil: "",
-    lvReview: { rating: 0, review: "" },
+    brazilSupport: "works",
+    guilhermeReview: { rating: 0, review: "", photos: [] },
     prosAndCons: { pros: [], cons: [] },
     discounts: []
   });
-  const [currentFeature, setCurrentFeature] = useState("");
+  const [currentFeatureData, setCurrentFeatureData] = useState<FeatureDetail>({
+    title: "",
+    description: "",
+    photos: []
+  });
   const [currentPro, setCurrentPro] = useState("");
   const [currentCon, setCurrentCon] = useState("");
 
@@ -61,11 +66,12 @@ const ToolsManager = () => {
       overview: "",
       features: [],
       pricing: { plans: [] },
-      availabilityBrazil: "",
-      lvReview: { rating: 0, review: "" },
+      brazilSupport: "works",
+      guilhermeReview: { rating: 0, review: "", photos: [] },
       prosAndCons: { pros: [], cons: [] },
       discounts: []
     });
+    setCurrentFeatureData({ title: "", description: "", photos: [] });
     setEditingTool(null);
   };
 
@@ -105,12 +111,12 @@ const ToolsManager = () => {
   };
 
   const addFeature = () => {
-    if (currentFeature.trim()) {
+    if (currentFeatureData.title.trim()) {
       setFormData(prev => ({
         ...prev,
-        features: [...(prev.features || []), currentFeature.trim()]
+        features: [...(prev.features || []), currentFeatureData]
       }));
-      setCurrentFeature("");
+      setCurrentFeatureData({ title: "", description: "", photos: [] });
     }
   };
 
@@ -156,6 +162,15 @@ const ToolsManager = () => {
     ));
   };
 
+  const getBrazilSupportLabel = (support: string) => {
+    switch (support) {
+      case 'works': return 'Funciona no Brasil';
+      case 'partial': return 'Funciona Parcialmente no Brasil';
+      case 'no': return 'Não roda no Brasil';
+      default: return 'Não informado';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -170,7 +185,7 @@ const ToolsManager = () => {
               Nova Ferramenta
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingTool ? "Editar Ferramenta" : "Nova Ferramenta"}
@@ -179,10 +194,11 @@ const ToolsManager = () => {
             
             <form onSubmit={handleSubmit}>
               <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="basic">Básico</TabsTrigger>
                   <TabsTrigger value="details">Detalhes</TabsTrigger>
-                  <TabsTrigger value="review">Avaliação</TabsTrigger>
+                  <TabsTrigger value="features">Funcionalidades</TabsTrigger>
+                  <TabsTrigger value="review">Av. Guilherme</TabsTrigger>
                   <TabsTrigger value="pros-cons">Prós/Contras</TabsTrigger>
                 </TabsList>
 
@@ -237,13 +253,31 @@ const ToolsManager = () => {
                     />
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="verified"
-                      checked={formData.verified}
-                      onCheckedChange={(checked) => setFormData({ ...formData, verified: checked })}
-                    />
-                    <Label htmlFor="verified">LV Verificado</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="verified"
+                        checked={formData.verified}
+                        onCheckedChange={(checked) => setFormData({ ...formData, verified: checked })}
+                      />
+                      <Label htmlFor="verified">LV Verificado</Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Funciona no Brasil</Label>
+                      <Select 
+                        value={formData.brazilSupport} 
+                        onValueChange={(value) => setFormData({ ...formData, brazilSupport: value as "works" | "partial" | "no" })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="works">Funciona no Brasil</SelectItem>
+                          <SelectItem value="partial">Funciona Parcialmente no Brasil</SelectItem>
+                          <SelectItem value="no">Não roda no Brasil</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -259,45 +293,6 @@ const ToolsManager = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Funcionalidades</Label>
-                    <div className="flex space-x-2">
-                      <Input
-                        value={currentFeature}
-                        onChange={(e) => setCurrentFeature(e.target.value)}
-                        placeholder="Digite uma funcionalidade"
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
-                      />
-                      <Button type="button" onClick={addFeature} size="sm">
-                        Adicionar
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {formData.features?.map((feature, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="secondary"
-                          className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                          onClick={() => removeFeature(index)}
-                        >
-                          {feature} ×
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="availabilityBrazil">Disponibilidade no Brasil</Label>
-                    <Textarea
-                      id="availabilityBrazil"
-                      value={formData.availabilityBrazil}
-                      onChange={(e) => setFormData({ ...formData, availabilityBrazil: e.target.value })}
-                      rows={3}
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="review" className="space-y-4 mt-4">
-                  <div className="space-y-2">
                     <Label htmlFor="officialRating">Avaliação Oficial (0-5)</Label>
                     <Input
                       id="officialRating"
@@ -309,20 +304,88 @@ const ToolsManager = () => {
                       onChange={(e) => setFormData({ ...formData, officialRating: parseFloat(e.target.value) || 0 })}
                     />
                   </div>
+                </TabsContent>
 
+                <TabsContent value="features" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <Label>Adicionar Nova Funcionalidade</Label>
+                    <div className="border rounded-lg p-4 space-y-4">
+                      <div className="space-y-2">
+                        <Label>Título da Funcionalidade</Label>
+                        <Input
+                          value={currentFeatureData.title}
+                          onChange={(e) => setCurrentFeatureData({...currentFeatureData, title: e.target.value})}
+                          placeholder="Ex: Pesquisa de palavras-chave"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Descrição</Label>
+                        <Textarea
+                          value={currentFeatureData.description}
+                          onChange={(e) => setCurrentFeatureData({...currentFeatureData, description: e.target.value})}
+                          placeholder="Descreva como esta funcionalidade funciona..."
+                          rows={3}
+                        />
+                      </div>
+                      <ImageUpload
+                        images={currentFeatureData.photos}
+                        onImagesChange={(photos) => setCurrentFeatureData({...currentFeatureData, photos})}
+                        label="Fotos da Funcionalidade"
+                        maxImages={5}
+                      />
+                      <Button type="button" onClick={addFeature}>
+                        Adicionar Funcionalidade
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Funcionalidades Adicionadas</Label>
+                    {formData.features?.map((feature, index) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium">{feature.title}</h4>
+                          <Button 
+                            type="button" 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => removeFeature(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{feature.description}</p>
+                        {feature.photos.length > 0 && (
+                          <div className="grid grid-cols-3 gap-2">
+                            {feature.photos.map((photo, photoIndex) => (
+                              <img
+                                key={photoIndex}
+                                src={photo}
+                                alt={`${feature.title} - ${photoIndex + 1}`}
+                                className="w-full h-16 object-cover rounded border"
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="review" className="space-y-4 mt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="lvRating">Avaliação LV (0-5)</Label>
+                    <Label htmlFor="guilhermeRating">Avaliação Guilherme (0-5)</Label>
                     <Input
-                      id="lvRating"
+                      id="guilhermeRating"
                       type="number"
                       min="0"
                       max="5"
                       step="0.1"
-                      value={formData.lvReview?.rating}
+                      value={formData.guilhermeReview?.rating}
                       onChange={(e) => setFormData({ 
                         ...formData, 
-                        lvReview: { 
-                          ...formData.lvReview, 
+                        guilhermeReview: { 
+                          ...formData.guilhermeReview, 
                           rating: parseFloat(e.target.value) || 0 
                         }
                       })}
@@ -330,20 +393,33 @@ const ToolsManager = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lvReviewText">Review LV</Label>
+                    <Label htmlFor="guilhermeReviewText">Review Guilherme</Label>
                     <Textarea
-                      id="lvReviewText"
-                      value={formData.lvReview?.review}
+                      id="guilhermeReviewText"
+                      value={formData.guilhermeReview?.review}
                       onChange={(e) => setFormData({ 
                         ...formData, 
-                        lvReview: { 
-                          ...formData.lvReview, 
+                        guilhermeReview: { 
+                          ...formData.guilhermeReview, 
                           review: e.target.value 
                         }
                       })}
                       rows={4}
                     />
                   </div>
+
+                  <ImageUpload
+                    images={formData.guilhermeReview?.photos || []}
+                    onImagesChange={(photos) => setFormData({
+                      ...formData,
+                      guilhermeReview: {
+                        ...formData.guilhermeReview,
+                        photos
+                      }
+                    })}
+                    label="Fotos da Avaliação Guilherme"
+                    maxImages={5}
+                  />
                 </TabsContent>
 
                 <TabsContent value="pros-cons" className="space-y-4 mt-4">
@@ -490,6 +566,9 @@ const ToolsManager = () => {
                         <Badge variant="outline">
                           {toolTypes.find(t => t.id === tool.typeId)?.name}
                         </Badge>
+                        <Badge variant="secondary">
+                          {getBrazilSupportLabel(tool.brazilSupport)}
+                        </Badge>
                       </div>
                       <p className="text-muted-foreground text-sm mb-3">{tool.description}</p>
                       <div className="flex items-center gap-6">
@@ -497,6 +576,11 @@ const ToolsManager = () => {
                           <span className="text-sm font-medium">LV:</span>
                           <div className="flex">{renderStars(tool.officialRating)}</div>
                           <span className="text-sm text-muted-foreground">{tool.officialRating}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-medium">Guilherme:</span>
+                          <div className="flex">{renderStars(tool.guilhermeReview?.rating || 0)}</div>
+                          <span className="text-sm text-muted-foreground">{tool.guilhermeReview?.rating || 0}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-sm font-medium">Usuários:</span>
