@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { type Update } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
@@ -16,18 +16,27 @@ interface UpdateFormProps {
   onCancel: () => void;
 }
 
+const updateTypes = [
+  "Nova Funcionalidade",
+  "Correção de Bug",
+  "Melhoria de Performance",
+  "Atualização de Segurança",
+  "Mudança de Interface",
+  "Depreciação",
+  "Geral"
+];
+
 export function UpdateForm({ update, onSuccess, onCancel }: UpdateFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
-    type: update?.type || "feature",
     title: update?.title || "",
-    content: update?.content || "",
-    summary: update?.summary || "",
-    isPublished: update?.isPublished || false,
+    description: update?.description || "",
     version: update?.version || "",
-    priority: update?.priority || "medium",
+    updateType: update?.updateType || "",
+    isPublished: update?.isPublished || false,
+    isCritical: update?.isCritical || false,
   });
 
   const mutation = useMutation({
@@ -63,108 +72,111 @@ export function UpdateForm({ update, onSuccess, onCancel }: UpdateFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.title || !formData.description || !formData.version) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
     mutation.mutate(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="md:col-span-2">
-          <Label htmlFor="title">Título</Label>
-          <Input
-            id="title"
-            placeholder="Digite o título da novidade"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="type">Tipo</Label>
-          <Select 
-            value={formData.type}
-            onValueChange={(value) => setFormData({ ...formData, type: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="feature">Nova Funcionalidade</SelectItem>
-              <SelectItem value="improvement">Melhoria</SelectItem>
-              <SelectItem value="bugfix">Correção de Bug</SelectItem>
-              <SelectItem value="security">Segurança</SelectItem>
-              <SelectItem value="performance">Performance</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="version">Versão</Label>
-          <Input
-            id="version"
-            placeholder="Ex: v1.2.0"
-            value={formData.version || ""}
-            onChange={(e) => setFormData({ ...formData, version: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="priority">Prioridade</Label>
-          <Select 
-            value={formData.priority}
-            onValueChange={(value) => setFormData({ ...formData, priority: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione a prioridade" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">Baixa</SelectItem>
-              <SelectItem value="medium">Média</SelectItem>
-              <SelectItem value="high">Alta</SelectItem>
-              <SelectItem value="critical">Crítica</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="md:col-span-2">
-          <Label htmlFor="summary">Resumo</Label>
-          <Textarea
-            id="summary"
-            placeholder="Digite um resumo da novidade"
-            rows={3}
-            value={formData.summary || ""}
-            onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-          />
-        </div>
-
-        <div className="md:col-span-2">
-          <Label htmlFor="content">Conteúdo</Label>
-          <Textarea
-            id="content"
-            placeholder="Digite o conteúdo detalhado da novidade"
-            rows={8}
-            value={formData.content}
-            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-          />
-        </div>
-
-        <div className="flex items-center space-x-2 md:col-span-2">
-          <Switch
-            checked={formData.isPublished}
-            onCheckedChange={(checked) => setFormData({ ...formData, isPublished: checked })}
-          />
-          <Label>Publicar imediatamente</Label>
-        </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">
+          {update ? "Editar Novidade" : "Nova Novidade"}
+        </h2>
       </div>
 
-      <div className="flex justify-end space-x-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Salvando..." : update ? "Atualizar" : "Criar"}
-        </Button>
-      </div>
-    </form>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="md:col-span-2">
+            <Label htmlFor="title">Título *</Label>
+            <Input
+              id="title"
+              placeholder="Digite o título da novidade"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="version">Versão *</Label>
+            <Input
+              id="version"
+              placeholder="Ex: v1.2.3"
+              value={formData.version}
+              onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="updateType">Tipo de Atualização</Label>
+            <Select value={formData.updateType} onValueChange={(value) => setFormData({ ...formData, updateType: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                {updateTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="md:col-span-2">
+            <Label htmlFor="description">Descrição *</Label>
+            <Textarea
+              id="description"
+              placeholder="Descreva as mudanças desta atualização"
+              rows={6}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              required
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="isPublished"
+              checked={formData.isPublished}
+              onCheckedChange={(checked) => setFormData({ ...formData, isPublished: checked })}
+            />
+            <Label htmlFor="isPublished">Publicar imediatamente</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="isCritical"
+              checked={formData.isCritical}
+              onCheckedChange={(checked) => setFormData({ ...formData, isCritical: checked })}
+            />
+            <Label htmlFor="isCritical">Atualização crítica</Label>
+          </div>
+        </div>
+
+        <div className="flex justify-end space-x-4">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={mutation.isPending}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            {mutation.isPending ? "Salvando..." : (update ? "Atualizar" : "Criar")}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
