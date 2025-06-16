@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { ImagePreview } from "@/components/ui/image-preview";
 import { Star, CheckCircle, ExternalLink, Copy, MessageCircle, Trash2, Reply } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -229,11 +229,11 @@ const ToolDetail = () => {
                     {feature.photos.length > 0 && (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {feature.photos.map((photo, photoIndex) => (
-                          <img
+                          <ImagePreview
                             key={photoIndex}
                             src={photo}
                             alt={`${feature.title} - Imagem ${photoIndex + 1}`}
-                            className="w-full h-48 object-cover rounded-lg border"
+                            className="w-full h-48 rounded-lg border"
                           />
                         ))}
                       </div>
@@ -261,11 +261,11 @@ const ToolDetail = () => {
                     <h4 className="font-medium">Screenshots da Avaliação</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {tool.guilhermeReview.photos.map((photo, index) => (
-                        <img
+                        <ImagePreview
                           key={index}
                           src={photo}
                           alt={`Avaliação Guilherme - Imagem ${index + 1}`}
-                          className="w-full h-48 object-cover rounded-lg border"
+                          className="w-full h-48 rounded-lg border"
                         />
                       ))}
                     </div>
@@ -466,11 +466,11 @@ const ToolDetail = () => {
                       {review.photos.length > 0 && (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           {review.photos.map((photo, index) => (
-                            <img
+                            <ImagePreview
                               key={index}
                               src={photo}
                               alt={`Foto da avaliação ${index + 1}`}
-                              className="w-full h-32 object-cover rounded border"
+                              className="w-full h-32 rounded border"
                             />
                           ))}
                         </div>
