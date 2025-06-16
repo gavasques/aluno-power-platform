@@ -654,7 +654,11 @@ export class DatabaseStorage implements IStorage {
 
   // YouTube Videos
   async getYoutubeVideos(): Promise<YoutubeVideo[]> {
-    return await db.select().from(youtubeVideos).orderBy(desc(youtubeVideos.publishedAt));
+    return await db
+      .select()
+      .from(youtubeVideos)
+      .where(eq(youtubeVideos.isActive, true))
+      .orderBy(desc(youtubeVideos.publishedAt));
   }
 
   async getYoutubeVideo(id: number): Promise<YoutubeVideo | undefined> {
