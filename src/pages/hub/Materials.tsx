@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -205,12 +204,12 @@ const Materials = () => {
         </p>
       </div>
 
-      {/* Filtros no Topo */}
+      {/* Filtros em Uma Linha */}
       <Card className="mb-8">
         <CardContent className="p-6">
-          <div className="space-y-4">
-            {/* Barra de Busca Principal */}
-            <div className="relative max-w-2xl mx-auto">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Barra de Busca */}
+            <div className="relative flex-1 max-w-2xl">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 placeholder="Buscar materiais por título, descrição ou categoria..."
@@ -220,8 +219,8 @@ const Materials = () => {
               />
             </div>
 
-            {/* Filtros Secundários */}
-            <div className="flex flex-wrap gap-4 justify-center">
+            {/* Filtros */}
+            <div className="flex flex-wrap gap-4 items-center">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Filtros:</span>
@@ -265,40 +264,6 @@ const Materials = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Estatísticas Simplificadas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">{filteredMaterials.length}</div>
-            <p className="text-sm text-muted-foreground">Materiais</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">
-              {filteredMaterials.filter(m => m.verified).length}
-            </div>
-            <p className="text-sm text-muted-foreground">Verificados</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">
-              {filteredMaterials.filter(m => m.accessLevel === 'public').length}
-            </div>
-            <p className="text-sm text-muted-foreground">Públicos</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-orange-600">
-              {filteredMaterials.filter(m => m.downloadable).length}
-            </div>
-            <p className="text-sm text-muted-foreground">Download</p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Grid de Materiais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
