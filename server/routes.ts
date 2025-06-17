@@ -17,6 +17,7 @@ import {
   insertToolTypeSchema,
   insertMaterialTypeSchema,
   insertPartnerTypeSchema,
+  insertPartnerContactSchema,
   insertYoutubeVideoSchema,
   insertNewsSchema,
   insertUpdateSchema,
@@ -1134,6 +1135,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete partner type' });
+    }
+  });
+
+  // Partner Contacts routes
+  app.get('/api/partners/:partnerId/contacts', async (req, res) => {
+    try {
+      const contacts = await storage.getPartnerContacts(parseInt(req.params.partnerId));
+      res.json(contacts);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch partner contacts' });
+    }
+  });
+
+  app.get('/api/partner-contacts/:id', async (req, res) => {
+    try {
+      const contact = await storage.getPartnerContact(parseInt(req.params.id));
+      if (!contact) {
+        return res.status(404).json({ error: 'Contact not found' });
+      }
+      res.json(contact);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch contact' });
+    }
+  });
+
+  app.post('/api/partner-contacts', async (req, res) => {
+    try {
+      const validatedData = insertPartnerContactSchema.parse(req.body);
+      const contact = await storage.createPartnerContact(validatedData);
+      res.status(201).json(contact);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid contact data' });
+    }
+  });
+
+  app.put('/api/partner-contacts/:id', async (req, res) => {
+    try {
+      const validatedData = insertPartnerContactSchema.partial().parse(req.body);
+      const contact = await storage.updatePartnerContact(parseInt(req.params.id), validatedData);
+      res.json(contact);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid contact data' });
+    }
+  });
+
+  app.delete('/api/partner-contacts/:id', async (req, res) => {
+    try {
+      await storage.deletePartnerContact(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete contact' });
     }
   });
 

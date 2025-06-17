@@ -936,6 +936,37 @@ export class DatabaseStorage implements IStorage {
     await db.delete(partnerTypes).where(eq(partnerTypes.id, id));
   }
 
+  // Partner Contacts
+  async getPartnerContacts(partnerId: number): Promise<PartnerContact[]> {
+    return await db.select().from(partnerContacts).where(eq(partnerContacts.partnerId, partnerId));
+  }
+
+  async getPartnerContact(id: number): Promise<PartnerContact | undefined> {
+    const [contact] = await db.select().from(partnerContacts).where(eq(partnerContacts.id, id));
+    return contact || undefined;
+  }
+
+  async createPartnerContact(contact: InsertPartnerContact): Promise<PartnerContact> {
+    const [created] = await db
+      .insert(partnerContacts)
+      .values(contact)
+      .returning();
+    return created;
+  }
+
+  async updatePartnerContact(id: number, contact: Partial<InsertPartnerContact>): Promise<PartnerContact> {
+    const [updated] = await db
+      .update(partnerContacts)
+      .set(contact)
+      .where(eq(partnerContacts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePartnerContact(id: number): Promise<void> {
+    await db.delete(partnerContacts).where(eq(partnerContacts.id, id));
+  }
+
   // YouTube Videos
   async getYoutubeVideos(): Promise<YoutubeVideo[]> {
     return await db

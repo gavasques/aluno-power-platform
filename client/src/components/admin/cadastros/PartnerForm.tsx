@@ -24,6 +24,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Partner as DbPartner, PartnerType } from '@shared/schema';
+import { BulletPointEditor } from './BulletPointEditor';
+import { PartnerContactsManager } from './PartnerContactsManager';
 
 interface PartnerFormProps {
   partner?: DbPartner | null;
@@ -41,7 +43,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     phone: partner?.phone || '',
     logo: partner?.logo || '',
     partnerTypeId: partner?.partnerTypeId ? partner.partnerTypeId.toString() : '',
-    specialties: partner?.specialties || '',
+    specialties: Array.isArray(partner?.specialties) ? partner.specialties : [],
     description: partner?.description || '',
     about: partner?.about || '',
     services: partner?.services || '',
@@ -69,7 +71,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
       phone: formData.phone,
       logo: formData.logo || null,
       partnerTypeId: parseInt(formData.partnerTypeId),
-      specialties: formData.specialties,
+      specialties: Array.isArray(formData.specialties) ? formData.specialties : [],
       description: formData.description,
       about: formData.about,
       services: formData.services,
