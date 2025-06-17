@@ -23,7 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Partner as DbPartner } from '@shared/schema';
+import type { Partner as DbPartner, Category } from '@shared/schema';
 
 interface PartnerFormProps {
   partner?: DbPartner | null;
@@ -104,9 +104,9 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
   };
 
   // Fetch partner types from database
-  const { data: partnerTypes = [] } = useQuery({
-    queryKey: ['/api/categories'],
-    queryFn: () => apiRequest('/api/categories?type=partner'),
+  const { data: partnerTypes = [] } = useQuery<Category[]>({
+    queryKey: ['/api/categories', 'partner'],
+    queryFn: () => apiRequest<Category[]>('/api/categories?type=partner'),
   });
 
   return (
@@ -155,7 +155,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
                       <SelectValue placeholder="Selecione um tipo" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-600">
-                      {partnerTypes.map((type: any) => (
+                      {partnerTypes.map((type) => (
                         <SelectItem 
                           key={type.id} 
                           value={type.id.toString()}

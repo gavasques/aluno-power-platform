@@ -51,7 +51,7 @@ const PartnerTypesManager = () => {
   const { toast } = useToast();
 
   const { data: partnerTypes = [], isLoading } = useQuery<Category[]>({
-    queryKey: ['/api/categories'],
+    queryKey: ['/api/categories', 'partner'],
     queryFn: () => apiRequest<Category[]>('/api/categories?type=partner'),
   });
 
@@ -66,6 +66,7 @@ const PartnerTypesManager = () => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/categories', 'partner'] });
       toast({
         title: "Sucesso",
         description: "Tipo de parceiro criado com sucesso!",
@@ -89,6 +90,7 @@ const PartnerTypesManager = () => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/categories', 'partner'] });
       toast({
         title: "Sucesso",
         description: "Tipo de parceiro removido com sucesso!",
