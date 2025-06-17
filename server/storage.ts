@@ -15,6 +15,7 @@ import {
   departments,
   partnerTypes,
   partnerContacts,
+  partnerFiles,
   youtubeVideos,
   news,
   updates,
@@ -52,6 +53,8 @@ import {
   type InsertPartnerType,
   type PartnerContact,
   type InsertPartnerContact,
+  type PartnerFile,
+  type InsertPartnerFile,
   type YoutubeVideo,
   type InsertYoutubeVideo,
   type News,
@@ -181,6 +184,13 @@ export interface IStorage {
   createPartnerContact(contact: InsertPartnerContact): Promise<PartnerContact>;
   updatePartnerContact(id: number, contact: Partial<InsertPartnerContact>): Promise<PartnerContact>;
   deletePartnerContact(id: number): Promise<void>;
+
+  // Partner Files
+  getPartnerFiles(partnerId: number): Promise<PartnerFile[]>;
+  getPartnerFile(id: number): Promise<PartnerFile | undefined>;
+  createPartnerFile(file: InsertPartnerFile): Promise<PartnerFile>;
+  updatePartnerFile(id: number, file: Partial<InsertPartnerFile>): Promise<PartnerFile>;
+  deletePartnerFile(id: number): Promise<void>;
 
   // YouTube Videos
   getYoutubeVideos(): Promise<YoutubeVideo[]>;
@@ -965,6 +975,37 @@ export class DatabaseStorage implements IStorage {
 
   async deletePartnerContact(id: number): Promise<void> {
     await db.delete(partnerContacts).where(eq(partnerContacts.id, id));
+  }
+
+  // Partner Files
+  async getPartnerFiles(partnerId: number): Promise<PartnerFile[]> {
+    return await db.select().from(partnerFiles).where(eq(partnerFiles.partnerId, partnerId));
+  }
+
+  async getPartnerFile(id: number): Promise<PartnerFile | undefined> {
+    const [file] = await db.select().from(partnerFiles).where(eq(partnerFiles.id, id));
+    return file || undefined;
+  }
+
+  async createPartnerFile(file: InsertPartnerFile): Promise<PartnerFile> {
+    const [created] = await db
+      .insert(partnerFiles)
+      .values(file)
+      .returning();
+    return created;
+  }
+
+  async updatePartnerFile(id: number, file: Partial<InsertPartnerFile>): Promise<PartnerFile> {
+    const [updated] = await db
+      .update(partnerFiles)
+      .set(file)
+      .where(eq(partnerFiles.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePartnerFile(id: number): Promise<void> {
+    await db.delete(partnerFiles).where(eq(partnerFiles.id, id));
   }
 
   // YouTube Videos

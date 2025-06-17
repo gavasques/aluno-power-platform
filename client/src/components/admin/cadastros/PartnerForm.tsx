@@ -295,6 +295,16 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
               </div>
             </TabsContent>
 
+            <TabsContent value="files" className="space-y-4">
+              {isEditing && partner ? (
+                <PartnerFilesManager partnerId={partner.id} />
+              ) : (
+                <div className="text-slate-400 text-center py-8">
+                  Salve o parceiro primeiro para gerenciar arquivos
+                </div>
+              )}
+            </TabsContent>
+
             <TabsContent value="contacts" className="space-y-4">
               {isEditing && partner ? (
                 <PartnerContactsManager partnerId={partner.id} />
