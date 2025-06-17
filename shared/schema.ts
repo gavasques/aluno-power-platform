@@ -97,8 +97,9 @@ export const supplierReviews = pgTable("supplier_reviews", {
 export const partners = pgTable("partners", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  email: text("email").notNull(),
+  email: text("email"), // Made optional
   phone: text("phone").notNull(),
+  logo: text("logo"), // Added logo field
   categoryId: integer("category_id").references(() => categories.id),
   specialties: text("specialties"),
   description: text("description"),

@@ -24,8 +24,10 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Partner, PARTNER_CATEGORIES, PartnerContact } from '@/types/partner';
 import { useToast } from '@/hooks/use-toast';
 
+import type { Partner as DbPartner } from '@shared/schema';
+
 interface PartnerFormProps {
-  partner?: Partner | null;
+  partner?: DbPartner | null;
   onClose: () => void;
 }
 
@@ -38,29 +40,28 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     name: partner?.name || '',
     email: partner?.email || '',
     phone: partner?.phone || '',
-    categoryId: partner?.category.id || '',
+    logo: partner?.logo || '',
+    categoryId: partner?.categoryId ? partner.categoryId.toString() : '',
     specialties: partner?.specialties || '',
     description: partner?.description || '',
     about: partner?.about || '',
     services: partner?.services || '',
-    address: {
-      street: partner?.address.street || '',
-      city: partner?.address.city || '',
-      state: partner?.address.state || '',
-      zipCode: partner?.address.zipCode || '',
+    address: partner?.address || {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
     },
-    contacts: partner?.contacts || [{ id: '1', type: 'phone' as const, value: '', label: 'Telefone principal' }],
     website: partner?.website || '',
     instagram: partner?.instagram || '',
     linkedin: partner?.linkedin || '',
-    materials: partner?.materials || [],
     isVerified: partner?.isVerified || false,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.email || !formData.categoryId) {
+    if (!formData.name || !formData.categoryId) {
       toast({
         title: 'Erro',
         description: 'Preencha todos os campos obrigatórios.',
@@ -80,9 +81,20 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     }
 
     const partnerData = {
-      ...formData,
-      category: selectedCategory,
-      contacts: formData.contacts.filter(c => c.value.trim()),
+      name: formData.name,
+      email: formData.email || null,
+      phone: formData.phone,
+      logo: formData.logo || null,
+      categoryId: parseInt(formData.categoryId),
+      specialties: formData.specialties,
+      description: formData.description,
+      about: formData.about,
+      services: formData.services,
+      address: formData.address,
+      website: formData.website,
+      instagram: formData.instagram,
+      linkedin: formData.linkedin,
+      isVerified: formData.isVerified,
     };
 
     try {

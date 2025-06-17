@@ -2,8 +2,9 @@
 export interface Partner {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone: string;
+  logo?: string;
   category: PartnerCategory;
   specialties: string;
   description: string;
