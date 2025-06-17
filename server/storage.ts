@@ -13,6 +13,7 @@ import {
   templateCategories,
   promptCategories,
   departments,
+  partnerTypes,
   youtubeVideos,
   news,
   updates,
@@ -46,6 +47,8 @@ import {
   type InsertToolType,
   type MaterialType,
   type InsertMaterialType,
+  type PartnerType,
+  type InsertPartnerType,
   type YoutubeVideo,
   type InsertYoutubeVideo,
   type News,
@@ -161,6 +164,13 @@ export interface IStorage {
   createMaterialType(materialType: InsertMaterialType): Promise<MaterialType>;
   updateMaterialType(id: number, materialType: Partial<InsertMaterialType>): Promise<MaterialType>;
   deleteMaterialType(id: number): Promise<void>;
+
+  // Partner Types
+  getPartnerTypes(): Promise<PartnerType[]>;
+  getPartnerType(id: number): Promise<PartnerType | undefined>;
+  createPartnerType(partnerType: InsertPartnerType): Promise<PartnerType>;
+  updatePartnerType(id: number, partnerType: Partial<InsertPartnerType>): Promise<PartnerType>;
+  deletePartnerType(id: number): Promise<void>;
 
   // YouTube Videos
   getYoutubeVideos(): Promise<YoutubeVideo[]>;
@@ -883,6 +893,37 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMaterialType(id: number): Promise<void> {
     await db.delete(materialTypes).where(eq(materialTypes.id, id));
+  }
+
+  // Partner Types
+  async getPartnerTypes(): Promise<PartnerType[]> {
+    return await db.select().from(partnerTypes).orderBy(desc(partnerTypes.createdAt));
+  }
+
+  async getPartnerType(id: number): Promise<PartnerType | undefined> {
+    const [partnerType] = await db.select().from(partnerTypes).where(eq(partnerTypes.id, id));
+    return partnerType || undefined;
+  }
+
+  async createPartnerType(partnerType: InsertPartnerType): Promise<PartnerType> {
+    const [created] = await db
+      .insert(partnerTypes)
+      .values(partnerType)
+      .returning();
+    return created;
+  }
+
+  async updatePartnerType(id: number, partnerType: Partial<InsertPartnerType>): Promise<PartnerType> {
+    const [updated] = await db
+      .update(partnerTypes)
+      .set(partnerType)
+      .where(eq(partnerTypes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePartnerType(id: number): Promise<void> {
+    await db.delete(partnerTypes).where(eq(partnerTypes.id, id));
   }
 
   // YouTube Videos

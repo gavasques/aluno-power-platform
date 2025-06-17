@@ -677,6 +677,11 @@ export const insertMaterialTypeSchema = createInsertSchema(materialTypes).omit({
   createdAt: true,
 });
 
+export const insertPartnerTypeSchema = createInsertSchema(partnerTypes).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -735,3 +740,6 @@ export type ToolType = typeof toolTypes.$inferSelect;
 
 export type InsertMaterialType = z.infer<typeof insertMaterialTypeSchema>;
 export type MaterialType = typeof materialTypes.$inferSelect;
+
+export type InsertPartnerType = z.infer<typeof insertPartnerTypeSchema>;
+export type PartnerType = typeof partnerTypes.$inferSelect;
