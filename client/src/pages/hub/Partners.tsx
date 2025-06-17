@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePartners } from '@/contexts/PartnersContext';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,18 +27,27 @@ import {
 
 const Partners = () => {
   const navigate = useNavigate();
-  const { partners, loading, searchPartners } = usePartners();
   const [searchQuery, setSearchQuery] = useState('');
-  // Use "all" instead of "" for Select's no-filter state
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+  const { data: partners = [], isLoading: loading } = useQuery({
+    queryKey: ['/api/partners'],
+  });
+
   const filteredPartners = React.useMemo(() => {
-    let result = searchQuery ? searchPartners(searchQuery) : partners;
+    let result = partners as any[];
+    if (searchQuery) {
+      result = result.filter((partner: any) => 
+        partner.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        partner.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        partner.specialties?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
     if (selectedCategory && selectedCategory !== 'all') {
-      result = result.filter(partner => partner.category?.id === selectedCategory);
+      result = result.filter((partner: any) => partner.categoryId?.toString() === selectedCategory);
     }
     return result;
-  }, [partners, searchQuery, selectedCategory, searchPartners]);
+  }, [partners, searchQuery, selectedCategory]);
 
   if (loading) {
     return (
