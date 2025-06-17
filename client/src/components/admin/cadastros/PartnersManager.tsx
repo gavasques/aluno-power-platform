@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { usePartners } from '@/contexts/PartnersContext';
 import {
@@ -20,47 +19,32 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   Plus,
   Search,
   Edit,
   Trash2,
   Star,
   Shield,
-  Eye,
-  MessageSquare,
-  CheckCircle,
-  XCircle,
-  FileText,
+  Image,
 } from 'lucide-react';
-import { Partner } from '@/types/partner';
+import type { Partner as DbPartner } from '@shared/schema';
 import PartnerForm from './PartnerForm';
-import ReviewsManager from './ReviewsManager';
-import PartnerMaterialsManager from './PartnerMaterialsManager';
 
 const PartnersManager = () => {
   const { partners, loading, deletePartner, searchPartners } = usePartners();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+  const [selectedPartner, setSelectedPartner] = useState<DbPartner | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [showReviews, setShowReviews] = useState<string | null>(null);
-  const [showMaterials, setShowMaterials] = useState<Partner | null>(null);
 
-  const filteredPartners = searchQuery ? searchPartners(searchQuery) : partners;
+  const filteredPartners = searchQuery ? searchPartners(searchQuery) : partners || [];
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     if (confirm('Tem certeza que deseja excluir este parceiro?')) {
       deletePartner(id);
     }
   };
 
-  const handleEdit = (partner: Partner) => {
+  const handleEdit = (partner: DbPartner) => {
     setSelectedPartner(partner);
     setShowForm(true);
   };
@@ -68,6 +52,18 @@ const PartnersManager = () => {
   const handleAdd = () => {
     setSelectedPartner(null);
     setShowForm(true);
+  };
+
+  const getCategoryName = (categoryId: number | null) => {
+    const categories = [
+      { id: 1, name: 'Contadores' },
+      { id: 2, name: 'Advogados' },
+      { id: 3, name: 'Fotógrafos' },
+      { id: 4, name: 'Prep Centers' },
+      { id: 5, name: 'Designers' },
+      { id: 6, name: 'Consultores' },
+    ];
+    return categories.find(cat => cat.id === categoryId)?.name || 'Não definida';
   };
 
   if (loading) {
@@ -98,169 +94,117 @@ const PartnersManager = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Buscar parceiros..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white border-input text-foreground placeholder:text-muted-foreground"
-              />
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Buscar parceiros..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card className="bg-white border-border shadow-sm">
-                <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-foreground">{partners.length}</div>
-                  <p className="text-muted-foreground text-sm">Total de Parceiros</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-border shadow-sm">
-                <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-green-600">
-                    {partners.filter(p => p.isVerified).length}
-                  </div>
-                  <p className="text-muted-foreground text-sm">Verificados</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-border shadow-sm">
-                <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {partners.reduce((acc, p) => acc + p.totalReviews, 0)}
-                  </div>
-                  <p className="text-muted-foreground text-sm">Total de Avaliações</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-border shadow-sm">
-                <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {partners.reduce((acc, p) => acc + p.materials.length, 0)}
-                  </div>
-                  <p className="text-muted-foreground text-sm">Total de Materiais</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Partners Table */}
-            <div className="border border-border rounded-lg overflow-hidden bg-white">
+            <div className="rounded-md border">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-border bg-muted/50">
-                    <TableHead className="text-foreground font-medium">Nome</TableHead>
-                    <TableHead className="text-foreground font-medium">Categoria</TableHead>
-                    <TableHead className="text-foreground font-medium">Status</TableHead>
-                    <TableHead className="text-foreground font-medium">Avaliações</TableHead>
-                    <TableHead className="text-foreground font-medium">Materiais</TableHead>
-                    <TableHead className="text-foreground font-medium">Localização</TableHead>
-                    <TableHead className="text-foreground font-medium">Ações</TableHead>
+                  <TableRow>
+                    <TableHead>Logo</TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Avaliação</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredPartners.map((partner) => {
-                    const pendingReviews = partner.reviews.filter(r => !r.isApproved).length;
-                    return (
-                      <TableRow key={partner.id} className="border-border hover:bg-muted/50">
-                        <TableCell className="text-foreground">
-                          <div>
-                            <div className="font-medium">{partner.name}</div>
-                            <div className="text-sm text-muted-foreground">{partner.email}</div>
+                  {filteredPartners.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        Nenhum parceiro encontrado
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredPartners.map((partner) => (
+                      <TableRow key={partner.id}>
+                        <TableCell>
+                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                            {partner.logo ? (
+                              <img 
+                                src={partner.logo} 
+                                alt={`${partner.name} logo`}
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                  const img = e.target as HTMLImageElement;
+                                  img.style.display = 'none';
+                                  const parent = img.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = '<div class="text-gray-400 flex items-center justify-center w-full h-full"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg></div>';
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <Image className="w-4 h-4 text-gray-400" />
+                            )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-foreground">
-                          <Badge variant="outline" className="border-border text-foreground">
-                            {partner.category.name}
+                        <TableCell className="font-medium">{partner.name}</TableCell>
+                        <TableCell>{partner.email || 'Não informado'}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {getCategoryName(partner.categoryId)}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           {partner.isVerified ? (
-                            <Badge className="bg-green-100 text-green-800 border-green-200">
+                            <Badge variant="default" className="bg-green-500">
                               <Shield className="h-3 w-3 mr-1" />
                               Verificado
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="border-yellow-500 text-yellow-600">
-                              Pendente
-                            </Badge>
+                            <Badge variant="outline">Pendente</Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-foreground">
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span>{partner.averageRating.toFixed(1)}</span>
-                            </div>
-                            <span>({partner.totalReviews})</span>
-                            {pendingReviews > 0 && (
-                              <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
-                                {pendingReviews} pendentes
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-foreground">
-                          <div className="flex items-center gap-1">
-                            <FileText className="h-4 w-4" />
-                            <span>{partner.materials.length}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-foreground">
-                          {partner.address.city}, {partner.address.state}
-                        </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="font-medium">
+                              {partner.averageRating ? Number(partner.averageRating).toFixed(1) : '0.0'}
+                            </span>
+                            <span className="text-muted-foreground">({partner.totalReviews || 0})</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setShowMaterials(partner)}
-                              className="text-foreground hover:text-primary hover:bg-primary/10"
-                            >
-                              <FileText className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setShowReviews(partner.id)}
-                              className="text-foreground hover:text-primary hover:bg-primary/10"
-                            >
-                              <MessageSquare className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
                               onClick={() => handleEdit(partner)}
-                              className="text-foreground hover:text-primary hover:bg-primary/10"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
                               onClick={() => handleDelete(partner.id)}
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              className="text-destructive hover:text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
-
-            {filteredPartners.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Nenhum parceiro encontrado.</p>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Partner Form Modal */}
       {showForm && (
         <PartnerForm
           partner={selectedPartner}
@@ -268,22 +212,6 @@ const PartnersManager = () => {
             setShowForm(false);
             setSelectedPartner(null);
           }}
-        />
-      )}
-
-      {/* Reviews Manager Modal */}
-      {showReviews && (
-        <ReviewsManager
-          partnerId={showReviews}
-          onClose={() => setShowReviews(null)}
-        />
-      )}
-
-      {/* Materials Manager Modal */}
-      {showMaterials && (
-        <PartnerMaterialsManager
-          partner={showMaterials}
-          onClose={() => setShowMaterials(null)}
         />
       )}
     </div>
