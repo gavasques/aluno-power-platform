@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { PartnerFiles } from '@/components/hub/PartnerFiles';
 import {
   Star,
   Shield,
@@ -25,7 +26,7 @@ import {
 const PartnerDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getPartnerById, addReview } = usePartners();
+  const { getPartnerById } = usePartners();
   const { toast } = useToast();
   
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -34,7 +35,7 @@ const PartnerDetail = () => {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const partner = id ? getPartnerById(id) : null;
+  const partner = id ? getPartnerById(parseInt(id)) : null;
 
   if (!partner) {
     return (
