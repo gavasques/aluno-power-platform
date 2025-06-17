@@ -44,6 +44,8 @@ import {
   type InsertPromptCategory,
   type ToolType,
   type InsertToolType,
+  type MaterialType,
+  type InsertMaterialType,
   type YoutubeVideo,
   type InsertYoutubeVideo,
   type News,
