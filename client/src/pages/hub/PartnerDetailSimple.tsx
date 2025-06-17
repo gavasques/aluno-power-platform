@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PartnerFiles } from '@/components/hub/PartnerFiles';
 import { PartnerReviews } from '@/components/hub/PartnerReviews';
+import PartnerRatingDisplay from '@/components/hub/PartnerRatingDisplay';
 import {
   Star,
   Shield,
@@ -86,10 +87,19 @@ const PartnerDetailSimple = () => {
           {/* Partner Header */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
             <div className="flex items-start gap-6">
-              <div className="bg-white rounded-xl p-4 flex-shrink-0">
-                <div className="text-2xl font-bold text-blue-600">
-                  {partner.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
-                </div>
+              {/* Logo Display */}
+              <div className="bg-white rounded-xl p-4 flex-shrink-0 w-20 h-20 flex items-center justify-center">
+                {partner.logo ? (
+                  <img 
+                    src={partner.logo} 
+                    alt={partner.name}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                ) : (
+                  <div className="text-2xl font-bold text-blue-600">
+                    {partner.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
+                  </div>
+                )}
               </div>
               
               <div className="flex-1">
@@ -111,26 +121,8 @@ const PartnerDetailSimple = () => {
                   </div>
                 )}
                 
-                {/* Rating Display */}
-                <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
-                  const reviewsSection = document.getElementById('reviews-section');
-                  reviewsSection?.scrollIntoView({ behavior: 'smooth' });
-                }}>
-                  <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-5 w-5 ${
-                          star <= Math.floor(parseFloat(partner.averageRating || '0'))
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-white/40'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-lg font-semibold">{partner.averageRating || '0.0'}</span>
-                  <span className="text-white/80">({partner.reviewCount || 0} avaliações)</span>
-                </div>
+                {/* Rating Display - Using real data from PartnerReviews */}
+                <PartnerRatingDisplay partnerId={partner.id} />
               </div>
             </div>
           </div>
