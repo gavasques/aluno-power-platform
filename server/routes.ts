@@ -15,6 +15,7 @@ import {
   insertTemplateCategorySchema,
   insertPromptCategorySchema,
   insertToolTypeSchema,
+  insertMaterialTypeSchema,
   insertYoutubeVideoSchema,
   insertNewsSchema,
   insertUpdateSchema,

@@ -153,6 +153,13 @@ export interface IStorage {
   updateToolType(id: number, toolType: Partial<InsertToolType>): Promise<ToolType>;
   deleteToolType(id: number): Promise<void>;
 
+  // Material Types
+  getMaterialTypes(): Promise<MaterialType[]>;
+  getMaterialType(id: number): Promise<MaterialType | undefined>;
+  createMaterialType(materialType: InsertMaterialType): Promise<MaterialType>;
+  updateMaterialType(id: number, materialType: Partial<InsertMaterialType>): Promise<MaterialType>;
+  deleteMaterialType(id: number): Promise<void>;
+
   // YouTube Videos
   getYoutubeVideos(): Promise<YoutubeVideo[]>;
   getYoutubeVideo(id: number): Promise<YoutubeVideo | undefined>;
@@ -843,6 +850,37 @@ export class DatabaseStorage implements IStorage {
 
   async deleteToolType(id: number): Promise<void> {
     await db.delete(toolTypes).where(eq(toolTypes.id, id));
+  }
+
+  // Material Types
+  async getMaterialTypes(): Promise<MaterialType[]> {
+    return await db.select().from(materialTypes).orderBy(desc(materialTypes.createdAt));
+  }
+
+  async getMaterialType(id: number): Promise<MaterialType | undefined> {
+    const [materialType] = await db.select().from(materialTypes).where(eq(materialTypes.id, id));
+    return materialType || undefined;
+  }
+
+  async createMaterialType(materialType: InsertMaterialType): Promise<MaterialType> {
+    const [created] = await db
+      .insert(materialTypes)
+      .values(materialType)
+      .returning();
+    return created;
+  }
+
+  async updateMaterialType(id: number, materialType: Partial<InsertMaterialType>): Promise<MaterialType> {
+    const [updated] = await db
+      .update(materialTypes)
+      .set(materialType)
+      .where(eq(materialTypes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMaterialType(id: number): Promise<void> {
+    await db.delete(materialTypes).where(eq(materialTypes.id, id));
   }
 
   // YouTube Videos
