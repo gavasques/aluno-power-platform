@@ -34,7 +34,7 @@ const Partners = () => {
   const filteredPartners = React.useMemo(() => {
     let result = searchQuery ? searchPartners(searchQuery) : partners;
     if (selectedCategory && selectedCategory !== 'all') {
-      result = result.filter(partner => partner.category.id === selectedCategory);
+      result = result.filter(partner => partner.categoryId?.toString() === selectedCategory);
     }
     return result;
   }, [partners, searchQuery, selectedCategory, searchPartners]);
@@ -104,17 +104,32 @@ const Partners = () => {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CardTitle className="text-lg">{partner.name}</CardTitle>
-                    {partner.isVerified && (
-                      <Badge variant="default" className="bg-green-500">
-                        <Shield className="h-3 w-3 mr-1" />
-                        Verificado
-                      </Badge>
+                  <div className="flex items-center gap-3 mb-2">
+                    {partner.logo && (
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                        <img 
+                          src={partner.logo} 
+                          alt={`${partner.name} logo`}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            img.style.display = 'none';
+                          }}
+                        />
+                      </div>
                     )}
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{partner.name}</CardTitle>
+                      {partner.isVerified && (
+                        <Badge variant="default" className="bg-green-500 mt-1">
+                          <Shield className="h-3 w-3 mr-1" />
+                          Verificado
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    {partner.category.name}
+                    {PARTNER_CATEGORIES.find(cat => cat.id === partner.categoryId?.toString())?.name || 'Categoria não definida'}
                   </Badge>
                 </div>
               </div>
@@ -126,12 +141,12 @@ const Partners = () => {
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{partner.averageRating.toFixed(1)}</span>
-                  <span>({partner.totalReviews})</span>
+                  <span className="font-medium">{partner.averageRating ? Number(partner.averageRating).toFixed(1) : '0.0'}</span>
+                  <span>({partner.totalReviews || 0})</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span>{partner.address.city}, {partner.address.state}</span>
+                  <span>Localização disponível</span>
                 </div>
               </div>
               <div className="flex gap-2">

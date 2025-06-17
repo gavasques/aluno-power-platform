@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { usePartners } from '@/contexts/PartnersContext';
 import {
@@ -20,10 +19,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Trash2 } from 'lucide-react';
-import { Partner, PARTNER_CATEGORIES, PartnerContact } from '@/types/partner';
+import { Upload, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
 import type { Partner as DbPartner } from '@shared/schema';
 
 interface PartnerFormProps {
@@ -46,12 +43,6 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     description: partner?.description || '',
     about: partner?.about || '',
     services: partner?.services || '',
-    address: partner?.address || {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: '',
-    },
     website: partner?.website || '',
     instagram: partner?.instagram || '',
     linkedin: partner?.linkedin || '',
@@ -70,16 +61,6 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
       return;
     }
 
-    const selectedCategory = PARTNER_CATEGORIES.find(cat => cat.id === formData.categoryId);
-    if (!selectedCategory) {
-      toast({
-        title: 'Erro',
-        description: 'Categoria inválida.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     const partnerData = {
       name: formData.name,
       email: formData.email || null,
@@ -90,7 +71,6 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
       description: formData.description,
       about: formData.about,
       services: formData.services,
-      address: formData.address,
       website: formData.website,
       instagram: formData.instagram,
       linkedin: formData.linkedin,
@@ -121,93 +101,67 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     }
   };
 
-  const addContact = () => {
-    const newContact: PartnerContact = {
-      id: Date.now().toString(),
-      type: 'phone',
-      value: '',
-      label: 'Novo contato'
-    };
-
-    setFormData(prev => ({
-      ...prev,
-      contacts: [...prev.contacts, newContact]
-    }));
-  };
-
-  const updateContact = (index: number, field: keyof PartnerContact, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      contacts: prev.contacts.map((contact, i) => 
-        i === index ? { ...contact, [field]: value } : contact
-      )
-    }));
-  };
-
-  const removeContact = (index: number) => {
-    if (formData.contacts.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        contacts: prev.contacts.filter((_, i) => i !== index)
-      }));
-    }
-  };
+  const categories = [
+    { id: 1, name: 'Contadores', description: 'Serviços de contabilidade e consultoria fiscal' },
+    { id: 2, name: 'Advogados', description: 'Consultoria jurídica empresarial' },
+    { id: 3, name: 'Fotógrafos', description: 'Fotografia de produtos e institucional' },
+    { id: 4, name: 'Prep Centers', description: 'Centros de preparação e distribuição' },
+    { id: 5, name: 'Designers', description: 'Design gráfico e identidade visual' },
+    { id: 6, name: 'Consultores', description: 'Consultoria empresarial especializada' },
+  ];
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-800 border-slate-700">
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700 text-white">
         <DialogHeader>
-          <DialogTitle className="text-slate-100">
+          <DialogTitle className="text-white">
             {isEditing ? 'Editar Parceiro' : 'Novo Parceiro'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-700">
-              <TabsTrigger value="basic" className="text-slate-300">Básico</TabsTrigger>
-              <TabsTrigger value="details" className="text-slate-300">Detalhes</TabsTrigger>
-              <TabsTrigger value="contact" className="text-slate-300">Contato</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 bg-slate-800">
+              <TabsTrigger value="basic" className="text-white data-[state=active]:bg-red-600">
+                Básico
+              </TabsTrigger>
+              <TabsTrigger value="details" className="text-white data-[state=active]:bg-red-600">
+                Detalhes
+              </TabsTrigger>
+              <TabsTrigger value="social" className="text-white data-[state=active]:bg-red-600">
+                Redes Sociais
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-slate-300">Nome *</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-white">Nome *</Label>
                   <Input
+                    id="name"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="bg-slate-700 border-slate-600 text-slate-100"
-                    required
+                    className="bg-slate-800 border-slate-600 text-white"
+                    placeholder="Nome do parceiro"
                   />
                 </div>
-                <div>
-                  <Label className="text-slate-300">Email *</Label>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="bg-slate-700 border-slate-600 text-slate-100"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label className="text-slate-300">Telefone</Label>
-                  <Input
-                    value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="bg-slate-700 border-slate-600 text-slate-100"
-                  />
-                </div>
-                <div>
-                  <Label className="text-slate-300">Categoria *</Label>
-                  <Select value={formData.categoryId} onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}>
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
+
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-white">Categoria *</Label>
+                  <Select
+                    value={formData.categoryId}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
+                  >
+                    <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
                       <SelectValue placeholder="Selecione uma categoria" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-700 border-slate-600">
-                      {PARTNER_CATEGORIES.map(category => (
-                        <SelectItem key={category.id} value={category.id} className="text-slate-100">
+                    <SelectContent className="bg-slate-800 border-slate-600">
+                      {categories.map((category) => (
+                        <SelectItem 
+                          key={category.id} 
+                          value={category.id.toString()}
+                          className="text-white hover:bg-slate-700"
+                        >
                           {category.name}
                         </SelectItem>
                       ))}
@@ -216,194 +170,152 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
                 </div>
               </div>
 
-              <div>
-                <Label className="text-slate-300">Descrição Breve</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-white">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    className="bg-slate-800 border-slate-600 text-white"
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-white">Telefone</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    className="bg-slate-800 border-slate-600 text-white"
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="logo" className="text-white">Logo (URL)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="logo"
+                    value={formData.logo}
+                    onChange={(e) => setFormData(prev => ({ ...prev, logo: e.target.value }))}
+                    className="bg-slate-800 border-slate-600 text-white flex-1"
+                    placeholder="https://exemplo.com/logo.png"
+                  />
+                  {formData.logo && (
+                    <div className="w-12 h-12 border border-slate-600 rounded flex items-center justify-center bg-slate-800">
+                      <img 
+                        src={formData.logo} 
+                        alt="Logo preview" 
+                        className="w-10 h-10 object-contain"
+                        onError={(e) => {
+                          const img = e.target as HTMLImageElement;
+                          img.style.display = 'none';
+                          const parent = img.parentElement;
+                          if (parent) {
+                            parent.innerHTML = '<div class="text-slate-400"><Image size={16} /></div>';
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="specialties" className="text-white">Especialidades</Label>
+                <Input
+                  id="specialties"
+                  value={formData.specialties}
+                  onChange={(e) => setFormData(prev => ({ ...prev, specialties: e.target.value }))}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="Especialidades do parceiro"
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="details" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-white">Descrição</Label>
                 <Textarea
+                  id="description"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="bg-slate-700 border-slate-600 text-slate-100"
-                  rows={2}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="Descrição breve do parceiro"
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="about" className="text-white">Sobre</Label>
+                <Textarea
+                  id="about"
+                  value={formData.about}
+                  onChange={(e) => setFormData(prev => ({ ...prev, about: e.target.value }))}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="Informações detalhadas sobre o parceiro"
+                  rows={4}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="services" className="text-white">Serviços</Label>
+                <Textarea
+                  id="services"
+                  value={formData.services}
+                  onChange={(e) => setFormData(prev => ({ ...prev, services: e.target.value }))}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="Serviços oferecidos pelo parceiro"
+                  rows={3}
                 />
               </div>
 
               <div className="flex items-center space-x-2">
                 <Switch
+                  id="verified"
                   checked={formData.isVerified}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isVerified: checked }))}
                 />
-                <Label className="text-slate-300">Parceiro Verificado</Label>
+                <Label htmlFor="verified" className="text-white">Parceiro Verificado</Label>
               </div>
             </TabsContent>
 
-            <TabsContent value="details" className="space-y-4">
-              <div>
-                <Label className="text-slate-300">Sobre</Label>
-                <Textarea
-                  value={formData.about}
-                  onChange={(e) => setFormData(prev => ({ ...prev, about: e.target.value }))}
-                  className="bg-slate-700 border-slate-600 text-slate-100"
-                  rows={4}
+            <TabsContent value="social" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="website" className="text-white">Website</Label>
+                <Input
+                  id="website"
+                  value={formData.website}
+                  onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="https://website.com"
                 />
               </div>
 
-              <div>
-                <Label className="text-slate-300">Especialidades</Label>
-                <Textarea
-                  value={formData.specialties}
-                  onChange={(e) => setFormData(prev => ({ ...prev, specialties: e.target.value }))}
-                  className="bg-slate-700 border-slate-600 text-slate-100"
-                  rows={3}
-                  placeholder="Digite as especialidades separadas por vírgula"
+              <div className="space-y-2">
+                <Label htmlFor="instagram" className="text-white">Instagram</Label>
+                <Input
+                  id="instagram"
+                  value={formData.instagram}
+                  onChange={(e) => setFormData(prev => ({ ...prev, instagram: e.target.value }))}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="@usuario_instagram"
                 />
               </div>
 
-              <div>
-                <Label className="text-slate-300">Serviços</Label>
-                <Textarea
-                  value={formData.services}
-                  onChange={(e) => setFormData(prev => ({ ...prev, services: e.target.value }))}
-                  className="bg-slate-700 border-slate-600 text-slate-100"
-                  rows={4}
-                  placeholder="Descreva os serviços oferecidos"
+              <div className="space-y-2">
+                <Label htmlFor="linkedin" className="text-white">LinkedIn</Label>
+                <Input
+                  id="linkedin"
+                  value={formData.linkedin}
+                  onChange={(e) => setFormData(prev => ({ ...prev, linkedin: e.target.value }))}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="https://linkedin.com/in/usuario"
                 />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="contact" className="space-y-4">
-              <div>
-                <Label className="text-slate-300">Endereço</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                  <div className="md:col-span-2">
-                    <Input
-                      placeholder="Rua, número"
-                      value={formData.address.street}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        address: { ...prev.address, street: e.target.value }
-                      }))}
-                      className="bg-slate-700 border-slate-600 text-slate-100"
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      placeholder="Cidade"
-                      value={formData.address.city}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        address: { ...prev.address, city: e.target.value }
-                      }))}
-                      className="bg-slate-700 border-slate-600 text-slate-100"
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      placeholder="Estado"
-                      value={formData.address.state}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        address: { ...prev.address, state: e.target.value }
-                      }))}
-                      className="bg-slate-700 border-slate-600 text-slate-100"
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      placeholder="CEP"
-                      value={formData.address.zipCode}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        address: { ...prev.address, zipCode: e.target.value }
-                      }))}
-                      className="bg-slate-700 border-slate-600 text-slate-100"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-slate-300">Contatos</Label>
-                {formData.contacts.map((contact, index) => (
-                  <div key={contact.id} className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2">
-                    <Select 
-                      value={contact.type} 
-                      onValueChange={(value: 'phone' | 'email' | 'whatsapp' | 'website') => 
-                        updateContact(index, 'type', value)
-                      }
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
-                        <SelectItem value="phone" className="text-slate-100">Telefone</SelectItem>
-                        <SelectItem value="email" className="text-slate-100">Email</SelectItem>
-                        <SelectItem value="whatsapp" className="text-slate-100">WhatsApp</SelectItem>
-                        <SelectItem value="website" className="text-slate-100">Website</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      placeholder="Valor do contato"
-                      value={contact.value}
-                      onChange={(e) => updateContact(index, 'value', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-slate-100"
-                    />
-                    <Input
-                      placeholder="Label (opcional)"
-                      value={contact.label || ''}
-                      onChange={(e) => updateContact(index, 'label', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-slate-100"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeContact(index)}
-                      className="border-slate-600 text-slate-300"
-                      disabled={formData.contacts.length === 1}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addContact}
-                  className="mt-2 border-slate-600 text-slate-300"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Contato
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-slate-300">Website</Label>
-                  <Input
-                    value={formData.website}
-                    onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                    className="bg-slate-700 border-slate-600 text-slate-100"
-                    placeholder="https://..."
-                  />
-                </div>
-                <div>
-                  <Label className="text-slate-300">Instagram</Label>
-                  <Input
-                    value={formData.instagram}
-                    onChange={(e) => setFormData(prev => ({ ...prev, instagram: e.target.value }))}
-                    className="bg-slate-700 border-slate-600 text-slate-100"
-                    placeholder="@usuario"
-                  />
-                </div>
-                <div>
-                  <Label className="text-slate-300">LinkedIn</Label>
-                  <Input
-                    value={formData.linkedin}
-                    onChange={(e) => setFormData(prev => ({ ...prev, linkedin: e.target.value }))}
-                    className="bg-slate-700 border-slate-600 text-slate-100"
-                    placeholder="usuario-linkedin"
-                  />
-                </div>
               </div>
             </TabsContent>
           </Tabs>
