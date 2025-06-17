@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
 import {
   Dialog,
@@ -17,38 +17,38 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Department, InsertDepartment } from "@shared/schema";
+import type { TemplateCategory, InsertTemplateCategory } from "@shared/schema";
 
-const DepartmentsManager = () => {
+const TemplateCategoryManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newDepartment, setNewDepartment] = useState("");
+  const [newCategory, setNewCategory] = useState({ name: "", description: "" });
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: departments = [], isLoading } = useQuery<Department[]>({
-    queryKey: ['/api/departments'],
+  const { data: categories = [], isLoading } = useQuery<TemplateCategory[]>({
+    queryKey: ['/api/template-categories'],
   });
 
   const createMutation = useMutation({
-    mutationFn: (department: InsertDepartment) => 
-      apiRequest('/api/departments', {
+    mutationFn: (category: InsertTemplateCategory) => 
+      apiRequest('/api/template-categories', {
         method: 'POST',
-        body: JSON.stringify(department),
+        body: JSON.stringify(category),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/departments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/template-categories'] });
       toast({
         title: "Sucesso",
-        description: "Departamento criado com sucesso!",
+        description: "Tipo de template criado com sucesso!",
       });
-      setNewDepartment("");
+      setNewCategory({ name: "", description: "" });
       setIsDialogOpen(false);
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Erro ao criar departamento.",
+        description: "Erro ao criar tipo de template.",
         variant: "destructive",
       });
     },
@@ -56,41 +56,41 @@ const DepartmentsManager = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => 
-      apiRequest(`/api/departments/${id}`, {
+      apiRequest(`/api/template-categories/${id}`, {
         method: 'DELETE',
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/departments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/template-categories'] });
       toast({
         title: "Sucesso",
-        description: "Departamento removido com sucesso!",
+        description: "Tipo de template removido com sucesso!",
       });
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Erro ao remover departamento.",
+        description: "Erro ao remover tipo de template.",
         variant: "destructive",
       });
     },
   });
 
-  const filteredDepartments = departments.filter((dept) =>
-    dept.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  function handleAddDepartment(e: React.FormEvent) {
+  function handleAddCategory(e: React.FormEvent) {
     e.preventDefault();
-    if (newDepartment.trim()) {
+    if (newCategory.name.trim()) {
       createMutation.mutate({
-        name: newDepartment.trim(),
-        description: null,
+        name: newCategory.name.trim(),
+        description: newCategory.description.trim() || null,
       });
     }
   }
 
-  function handleDeleteDepartment(department: Department) {
-    deleteMutation.mutate(department.id);
+  function handleDeleteCategory(category: TemplateCategory) {
+    deleteMutation.mutate(category.id);
   }
 
   return (
@@ -98,7 +98,7 @@ const DepartmentsManager = () => {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <CardTitle className="text-foreground">Gerenciar Departamentos</CardTitle>
+            <CardTitle className="text-foreground">Gerenciar Tipos de Templates</CardTitle>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -107,21 +107,27 @@ const DepartmentsManager = () => {
                 onClick={() => setIsDialogOpen(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Novo Departamento
+                Novo Tipo
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-white">
               <DialogHeader>
-                <DialogTitle>Novo Departamento</DialogTitle>
-                <DialogDescription>Informe o nome do novo departamento.</DialogDescription>
+                <DialogTitle>Novo Tipo de Template</DialogTitle>
+                <DialogDescription>Informe o nome e descrição do novo tipo de template.</DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleAddDepartment} className="space-y-4">
+              <form onSubmit={handleAddCategory} className="space-y-4">
                 <Input
                   autoFocus
                   required
-                  placeholder="Nome do Departamento"
-                  value={newDepartment}
-                  onChange={e => setNewDepartment(e.target.value)}
+                  placeholder="Nome do Tipo"
+                  value={newCategory.name}
+                  onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
+                  className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
+                />
+                <Textarea
+                  placeholder="Descrição (opcional)"
+                  value={newCategory.description}
+                  onChange={(e) => setNewCategory(prev => ({ ...prev, description: e.target.value }))}
                   className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
                 />
                 <DialogFooter>
@@ -130,7 +136,11 @@ const DepartmentsManager = () => {
                       Cancelar
                     </Button>
                   </DialogClose>
-                  <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Button 
+                    type="submit" 
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    disabled={createMutation.isPending}
+                  >
                     Adicionar
                   </Button>
                 </DialogFooter>
@@ -143,7 +153,7 @@ const DepartmentsManager = () => {
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
             <Input
-              placeholder="Buscar departamentos..."
+              placeholder="Buscar tipos de templates..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
@@ -152,25 +162,30 @@ const DepartmentsManager = () => {
           <div className="space-y-3">
             {isLoading && (
               <div className="text-muted-foreground px-4 py-8 text-center">
-                Carregando departamentos...
+                Carregando tipos de templates...
               </div>
             )}
-            {!isLoading && filteredDepartments.length === 0 && (
+            {!isLoading && filteredCategories.length === 0 && (
               <div className="text-muted-foreground px-4 py-8 text-center">
-                Nenhum departamento encontrado.
+                Nenhum tipo de template encontrado.
               </div>
             )}
-            {!isLoading && filteredDepartments.map((department) => (
+            {!isLoading && filteredCategories.map((category) => (
               <div
-                key={department.id}
+                key={category.id}
                 className="flex items-center justify-between p-4 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <span className="font-medium text-foreground">{department.name}</span>
+                <div className="flex-1">
+                  <span className="font-medium text-foreground">{category.name}</span>
+                  {category.description && (
+                    <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
+                  )}
+                </div>
                 <Button
                   size="sm"
                   variant="outline"
                   className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
-                  onClick={() => handleDeleteDepartment(department)}
+                  onClick={() => handleDeleteCategory(category)}
                   disabled={deleteMutation.isPending}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -184,4 +199,4 @@ const DepartmentsManager = () => {
   );
 };
 
-export default DepartmentsManager;
+export default TemplateCategoryManager;

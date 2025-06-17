@@ -11,6 +11,9 @@ import {
   insertPromptSchema, 
   insertProductSchema, 
   insertCategorySchema,
+  insertDepartmentSchema,
+  insertTemplateCategorySchema,
+  insertPromptCategorySchema,
   insertYoutubeVideoSchema,
   insertNewsSchema,
   insertUpdateSchema,
@@ -509,6 +512,162 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete category' });
+    }
+  });
+
+  // Departments
+  app.get('/api/departments', async (req, res) => {
+    try {
+      const departments = await storage.getDepartments();
+      res.json(departments);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch departments' });
+    }
+  });
+
+  app.get('/api/departments/:id', async (req, res) => {
+    try {
+      const department = await storage.getDepartment(parseInt(req.params.id));
+      if (!department) {
+        return res.status(404).json({ error: 'Department not found' });
+      }
+      res.json(department);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch department' });
+    }
+  });
+
+  app.post('/api/departments', async (req, res) => {
+    try {
+      const validatedData = insertDepartmentSchema.parse(req.body);
+      const department = await storage.createDepartment(validatedData);
+      res.status(201).json(department);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid department data' });
+    }
+  });
+
+  app.put('/api/departments/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertDepartmentSchema.partial().parse(req.body);
+      const department = await storage.updateDepartment(id, validatedData);
+      res.json(department);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to update department' });
+    }
+  });
+
+  app.delete('/api/departments/:id', async (req, res) => {
+    try {
+      await storage.deleteDepartment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete department' });
+    }
+  });
+
+  // Template Categories
+  app.get('/api/template-categories', async (req, res) => {
+    try {
+      const categories = await storage.getTemplateCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch template categories' });
+    }
+  });
+
+  app.get('/api/template-categories/:id', async (req, res) => {
+    try {
+      const category = await storage.getTemplateCategory(parseInt(req.params.id));
+      if (!category) {
+        return res.status(404).json({ error: 'Template category not found' });
+      }
+      res.json(category);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch template category' });
+    }
+  });
+
+  app.post('/api/template-categories', async (req, res) => {
+    try {
+      const validatedData = insertTemplateCategorySchema.parse(req.body);
+      const category = await storage.createTemplateCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid template category data' });
+    }
+  });
+
+  app.put('/api/template-categories/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertTemplateCategorySchema.partial().parse(req.body);
+      const category = await storage.updateTemplateCategory(id, validatedData);
+      res.json(category);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to update template category' });
+    }
+  });
+
+  app.delete('/api/template-categories/:id', async (req, res) => {
+    try {
+      await storage.deleteTemplateCategory(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete template category' });
+    }
+  });
+
+  // Prompt Categories
+  app.get('/api/prompt-categories', async (req, res) => {
+    try {
+      const categories = await storage.getPromptCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch prompt categories' });
+    }
+  });
+
+  app.get('/api/prompt-categories/:id', async (req, res) => {
+    try {
+      const category = await storage.getPromptCategory(parseInt(req.params.id));
+      if (!category) {
+        return res.status(404).json({ error: 'Prompt category not found' });
+      }
+      res.json(category);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch prompt category' });
+    }
+  });
+
+  app.post('/api/prompt-categories', async (req, res) => {
+    try {
+      const validatedData = insertPromptCategorySchema.parse(req.body);
+      const category = await storage.createPromptCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid prompt category data' });
+    }
+  });
+
+  app.put('/api/prompt-categories/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertPromptCategorySchema.partial().parse(req.body);
+      const category = await storage.updatePromptCategory(id, validatedData);
+      res.json(category);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to update prompt category' });
+    }
+  });
+
+  app.delete('/api/prompt-categories/:id', async (req, res) => {
+    try {
+      await storage.deletePromptCategory(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete prompt category' });
     }
   });
 
