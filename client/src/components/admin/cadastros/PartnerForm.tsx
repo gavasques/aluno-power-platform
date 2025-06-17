@@ -103,14 +103,11 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     }
   };
 
-  const categories = [
-    { id: 1, name: 'Contadores', description: 'Serviços de contabilidade e consultoria fiscal' },
-    { id: 2, name: 'Advogados', description: 'Consultoria jurídica empresarial' },
-    { id: 3, name: 'Fotógrafos', description: 'Fotografia de produtos e institucional' },
-    { id: 4, name: 'Prep Centers', description: 'Centros de preparação e distribuição' },
-    { id: 5, name: 'Designers', description: 'Design gráfico e identidade visual' },
-    { id: 6, name: 'Consultores', description: 'Consultoria empresarial especializada' },
-  ];
+  // Fetch partner types from database
+  const { data: partnerTypes = [] } = useQuery({
+    queryKey: ['/api/categories'],
+    queryFn: () => apiRequest('/api/categories?type=partner'),
+  });
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -149,22 +146,22 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-white">Categoria *</Label>
+                  <Label htmlFor="category" className="text-white">Tipo de Parceiro *</Label>
                   <Select
                     value={formData.categoryId}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
                   >
                     <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
-                      <SelectValue placeholder="Selecione uma categoria" />
+                      <SelectValue placeholder="Selecione um tipo" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-600">
-                      {categories.map((category) => (
+                      {partnerTypes.map((type: any) => (
                         <SelectItem 
-                          key={category.id} 
-                          value={category.id.toString()}
+                          key={type.id} 
+                          value={type.id.toString()}
                           className="text-white hover:bg-slate-700"
                         >
-                          {category.name}
+                          {type.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
