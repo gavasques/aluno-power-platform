@@ -42,6 +42,8 @@ import {
   type InsertTemplateCategory,
   type PromptCategory,
   type InsertPromptCategory,
+  type ToolType,
+  type InsertToolType,
   type YoutubeVideo,
   type InsertYoutubeVideo,
   type News,
@@ -143,6 +145,13 @@ export interface IStorage {
   createPromptCategory(category: InsertPromptCategory): Promise<PromptCategory>;
   updatePromptCategory(id: number, category: Partial<InsertPromptCategory>): Promise<PromptCategory>;
   deletePromptCategory(id: number): Promise<void>;
+
+  // Tool Types
+  getToolTypes(): Promise<ToolType[]>;
+  getToolType(id: number): Promise<ToolType | undefined>;
+  createToolType(toolType: InsertToolType): Promise<ToolType>;
+  updateToolType(id: number, toolType: Partial<InsertToolType>): Promise<ToolType>;
+  deleteToolType(id: number): Promise<void>;
 
   // YouTube Videos
   getYoutubeVideos(): Promise<YoutubeVideo[]>;
@@ -803,6 +812,37 @@ export class DatabaseStorage implements IStorage {
 
   async deletePromptCategory(id: number): Promise<void> {
     await db.delete(promptCategories).where(eq(promptCategories.id, id));
+  }
+
+  // Tool Types
+  async getToolTypes(): Promise<ToolType[]> {
+    return await db.select().from(toolTypes).orderBy(desc(toolTypes.createdAt));
+  }
+
+  async getToolType(id: number): Promise<ToolType | undefined> {
+    const [toolType] = await db.select().from(toolTypes).where(eq(toolTypes.id, id));
+    return toolType || undefined;
+  }
+
+  async createToolType(toolType: InsertToolType): Promise<ToolType> {
+    const [created] = await db
+      .insert(toolTypes)
+      .values(toolType)
+      .returning();
+    return created;
+  }
+
+  async updateToolType(id: number, toolType: Partial<InsertToolType>): Promise<ToolType> {
+    const [updated] = await db
+      .update(toolTypes)
+      .set(toolType)
+      .where(eq(toolTypes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteToolType(id: number): Promise<void> {
+    await db.delete(toolTypes).where(eq(toolTypes.id, id));
   }
 
   // YouTube Videos

@@ -14,6 +14,7 @@ import {
   insertDepartmentSchema,
   insertTemplateCategorySchema,
   insertPromptCategorySchema,
+  insertToolTypeSchema,
   insertYoutubeVideoSchema,
   insertNewsSchema,
   insertUpdateSchema,
@@ -668,6 +669,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete prompt category' });
+    }
+  });
+
+  // Tool Types
+  app.get('/api/tool-types', async (req, res) => {
+    try {
+      const toolTypes = await storage.getToolTypes();
+      res.json(toolTypes);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch tool types' });
+    }
+  });
+
+  app.get('/api/tool-types/:id', async (req, res) => {
+    try {
+      const toolType = await storage.getToolType(parseInt(req.params.id));
+      if (!toolType) {
+        return res.status(404).json({ error: 'Tool type not found' });
+      }
+      res.json(toolType);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch tool type' });
+    }
+  });
+
+  app.post('/api/tool-types', async (req, res) => {
+    try {
+      const validatedData = insertToolTypeSchema.parse(req.body);
+      const toolType = await storage.createToolType(validatedData);
+      res.status(201).json(toolType);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid tool type data' });
+    }
+  });
+
+  app.put('/api/tool-types/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertToolTypeSchema.partial().parse(req.body);
+      const toolType = await storage.updateToolType(id, validatedData);
+      res.json(toolType);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to update tool type' });
+    }
+  });
+
+  app.delete('/api/tool-types/:id', async (req, res) => {
+    try {
+      await storage.deleteToolType(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete tool type' });
     }
   });
 

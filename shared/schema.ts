@@ -654,6 +654,11 @@ export const insertPromptCategorySchema = createInsertSchema(promptCategories).o
   createdAt: true,
 });
 
+export const insertToolTypeSchema = createInsertSchema(toolTypes).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -708,3 +713,6 @@ export type TemplateCategory = typeof templateCategories.$inferSelect;
 
 export type InsertPromptCategory = z.infer<typeof insertPromptCategorySchema>;
 export type PromptCategory = typeof promptCategories.$inferSelect;
+
+export type InsertToolType = z.infer<typeof insertToolTypeSchema>;
+export type ToolType = typeof toolTypes.$inferSelect;

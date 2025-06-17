@@ -92,10 +92,6 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">{getTitle()}</h1>
-        <p className="text-muted-foreground">{getDescription()}</p>
-      </div>
       {renderContent()}
     </div>
   );
