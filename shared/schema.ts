@@ -709,6 +709,11 @@ export const insertPartnerContactSchema = createInsertSchema(partnerContacts).om
   createdAt: true,
 });
 
+export const insertPartnerFileSchema = createInsertSchema(partnerFiles).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -773,3 +778,6 @@ export type PartnerType = typeof partnerTypes.$inferSelect;
 
 export type InsertPartnerContact = z.infer<typeof insertPartnerContactSchema>;
 export type PartnerContact = typeof partnerContacts.$inferSelect;
+
+export type InsertPartnerFile = z.infer<typeof insertPartnerFileSchema>;
+export type PartnerFile = typeof partnerFiles.$inferSelect;

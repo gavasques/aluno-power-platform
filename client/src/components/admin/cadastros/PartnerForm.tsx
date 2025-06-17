@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Partner as DbPartner, PartnerType } from '@shared/schema';
 import { BulletPointEditor } from './BulletPointEditor';
 import { PartnerContactsManager } from './PartnerContactsManager';
+import { PartnerFilesManager } from './PartnerFilesManager';
 import { PhoneInput } from '@/components/ui/phone-input';
 
 interface PartnerFormProps {
@@ -46,8 +47,6 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     partnerTypeId: partner?.partnerTypeId ? partner.partnerTypeId.toString() : '',
     specialties: Array.isArray(partner?.specialties) ? partner.specialties : [],
     description: partner?.description || '',
-    about: partner?.about || '',
-    services: partner?.services || '',
     website: partner?.website || '',
     instagram: partner?.instagram || '',
     linkedin: partner?.linkedin || '',
@@ -74,8 +73,6 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
       partnerTypeId: parseInt(formData.partnerTypeId),
       specialties: Array.isArray(formData.specialties) ? formData.specialties : [],
       description: formData.description,
-      about: formData.about,
-      services: formData.services,
       website: formData.website,
       instagram: formData.instagram,
       linkedin: formData.linkedin,
@@ -123,7 +120,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-slate-800">
+            <TabsList className="grid w-full grid-cols-5 bg-slate-800">
               <TabsTrigger value="basic" className="text-white data-[state=active]:bg-red-600">
                 Básico
               </TabsTrigger>
@@ -132,6 +129,9 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
               </TabsTrigger>
               <TabsTrigger value="social" className="text-white data-[state=active]:bg-red-600">
                 Redes Sociais
+              </TabsTrigger>
+              <TabsTrigger value="files" className="text-white data-[state=active]:bg-red-600">
+                Arquivos
               </TabsTrigger>
               <TabsTrigger value="contacts" className="text-white data-[state=active]:bg-red-600">
                 Contatos
@@ -239,38 +239,14 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
 
             <TabsContent value="details" className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-white">Descrição</Label>
+                <Label htmlFor="description" className="text-white">Detalhes do Parceiro</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   className="bg-slate-800 border-slate-600 text-white"
-                  placeholder="Descrição breve do parceiro"
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="about" className="text-white">Sobre</Label>
-                <Textarea
-                  id="about"
-                  value={formData.about}
-                  onChange={(e) => setFormData(prev => ({ ...prev, about: e.target.value }))}
-                  className="bg-slate-800 border-slate-600 text-white"
-                  placeholder="Informações detalhadas sobre o parceiro"
-                  rows={4}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="services" className="text-white">Serviços</Label>
-                <Textarea
-                  id="services"
-                  value={formData.services}
-                  onChange={(e) => setFormData(prev => ({ ...prev, services: e.target.value }))}
-                  className="bg-slate-800 border-slate-600 text-white"
-                  placeholder="Serviços oferecidos pelo parceiro"
-                  rows={3}
+                  placeholder="Informações completas sobre o parceiro, incluindo serviços oferecidos, experiência, diferenciais e outras informações relevantes..."
+                  rows={8}
                 />
               </div>
 
