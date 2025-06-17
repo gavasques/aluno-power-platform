@@ -230,12 +230,118 @@ export class DatabaseStorage implements IStorage {
 
   // Partners
   async getPartners(): Promise<Partner[]> {
-    return await db.select().from(partners);
+    const results = await db
+      .select({
+        id: partners.id,
+        name: partners.name,
+        email: partners.email,
+        phone: partners.phone,
+        categoryId: partners.categoryId,
+        specialties: partners.specialties,
+        description: partners.description,
+        about: partners.about,
+        services: partners.services,
+        address: partners.address,
+        website: partners.website,
+        instagram: partners.instagram,
+        linkedin: partners.linkedin,
+        isVerified: partners.isVerified,
+        averageRating: partners.averageRating,
+        totalReviews: partners.totalReviews,
+        createdAt: partners.createdAt,
+        updatedAt: partners.updatedAt,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        categoryDescription: categories.description,
+      })
+      .from(partners)
+      .leftJoin(categories, eq(partners.categoryId, categories.id));
+
+    return results.map(row => ({
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      categoryId: row.categoryId,
+      specialties: row.specialties,
+      description: row.description,
+      about: row.about,
+      services: row.services,
+      address: row.address,
+      website: row.website,
+      instagram: row.instagram,
+      linkedin: row.linkedin,
+      isVerified: row.isVerified,
+      averageRating: row.averageRating,
+      totalReviews: row.totalReviews,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      category: row.categoryName ? {
+        id: row.categoryId?.toString() || '',
+        name: row.categoryName,
+        icon: row.categoryIcon || '',
+        description: row.categoryDescription || ''
+      } : null
+    }));
   }
 
   async getPartner(id: number): Promise<Partner | undefined> {
-    const [partner] = await db.select().from(partners).where(eq(partners.id, id));
-    return partner || undefined;
+    const [result] = await db
+      .select({
+        id: partners.id,
+        name: partners.name,
+        email: partners.email,
+        phone: partners.phone,
+        categoryId: partners.categoryId,
+        specialties: partners.specialties,
+        description: partners.description,
+        about: partners.about,
+        services: partners.services,
+        address: partners.address,
+        website: partners.website,
+        instagram: partners.instagram,
+        linkedin: partners.linkedin,
+        isVerified: partners.isVerified,
+        averageRating: partners.averageRating,
+        totalReviews: partners.totalReviews,
+        createdAt: partners.createdAt,
+        updatedAt: partners.updatedAt,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        categoryDescription: categories.description,
+      })
+      .from(partners)
+      .leftJoin(categories, eq(partners.categoryId, categories.id))
+      .where(eq(partners.id, id));
+
+    if (!result) return undefined;
+
+    return {
+      id: result.id,
+      name: result.name,
+      email: result.email,
+      phone: result.phone,
+      categoryId: result.categoryId,
+      specialties: result.specialties,
+      description: result.description,
+      about: result.about,
+      services: result.services,
+      address: result.address,
+      website: result.website,
+      instagram: result.instagram,
+      linkedin: result.linkedin,
+      isVerified: result.isVerified,
+      averageRating: result.averageRating,
+      totalReviews: result.totalReviews,
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
+      category: result.categoryName ? {
+        id: result.categoryId?.toString() || '',
+        name: result.categoryName,
+        icon: result.categoryIcon || '',
+        description: result.categoryDescription || ''
+      } : null
+    };
   }
 
   async createPartner(partner: InsertPartner): Promise<Partner> {
@@ -267,9 +373,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchPartners(query: string): Promise<Partner[]> {
-    return await db
-      .select()
+    const results = await db
+      .select({
+        id: partners.id,
+        name: partners.name,
+        email: partners.email,
+        phone: partners.phone,
+        categoryId: partners.categoryId,
+        specialties: partners.specialties,
+        description: partners.description,
+        about: partners.about,
+        services: partners.services,
+        address: partners.address,
+        website: partners.website,
+        instagram: partners.instagram,
+        linkedin: partners.linkedin,
+        isVerified: partners.isVerified,
+        averageRating: partners.averageRating,
+        totalReviews: partners.totalReviews,
+        createdAt: partners.createdAt,
+        updatedAt: partners.updatedAt,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        categoryDescription: categories.description,
+      })
       .from(partners)
+      .leftJoin(categories, eq(partners.categoryId, categories.id))
       .where(
         or(
           ilike(partners.name, `%${query}%`),
@@ -277,6 +406,33 @@ export class DatabaseStorage implements IStorage {
           ilike(partners.description, `%${query}%`)
         )
       );
+
+    return results.map(row => ({
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      categoryId: row.categoryId,
+      specialties: row.specialties,
+      description: row.description,
+      about: row.about,
+      services: row.services,
+      address: row.address,
+      website: row.website,
+      instagram: row.instagram,
+      linkedin: row.linkedin,
+      isVerified: row.isVerified,
+      averageRating: row.averageRating,
+      totalReviews: row.totalReviews,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      category: row.categoryName ? {
+        id: row.categoryId?.toString() || '',
+        name: row.categoryName,
+        icon: row.categoryIcon || '',
+        description: row.categoryDescription || ''
+      } : null
+    }));
   }
 
   // Materials

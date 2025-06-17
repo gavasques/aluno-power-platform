@@ -34,7 +34,7 @@ const Partners = () => {
   const filteredPartners = React.useMemo(() => {
     let result = searchQuery ? searchPartners(searchQuery) : partners;
     if (selectedCategory && selectedCategory !== 'all') {
-      result = result.filter(partner => partner.category.id === selectedCategory);
+      result = result.filter(partner => partner.category?.id === selectedCategory);
     }
     return result;
   }, [partners, searchQuery, selectedCategory, searchPartners]);
@@ -114,7 +114,7 @@ const Partners = () => {
                     )}
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    {partner.category.name}
+                    {partner.category?.name || 'Sem categoria'}
                   </Badge>
                 </div>
               </div>
@@ -126,12 +126,17 @@ const Partners = () => {
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{partner.averageRating.toFixed(1)}</span>
-                  <span>({partner.totalReviews})</span>
+                  <span className="font-medium">{partner.averageRating ? parseFloat(partner.averageRating).toFixed(1) : '0.0'}</span>
+                  <span>({partner.totalReviews || 0})</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span>{partner.address.city}, {partner.address.state}</span>
+                  <span>
+                    {partner.address && typeof partner.address === 'object' && partner.address !== null
+                      ? `${(partner.address as any).city || ''}, ${(partner.address as any).state || ''}`
+                      : 'Brasil'
+                    }
+                  </span>
                 </div>
               </div>
               <div className="flex gap-2">
