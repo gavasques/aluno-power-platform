@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import type { Category, InsertCategory } from '@shared/schema';
+import type { PartnerType, InsertPartnerType } from '@shared/schema';
 
 const PartnerTypesManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,23 +50,19 @@ const PartnerTypesManager = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: partnerTypes = [], isLoading } = useQuery<Category[]>({
-    queryKey: ['/api/categories', 'partner'],
-    queryFn: () => apiRequest<Category[]>('/api/categories?type=partner'),
+  const { data: partnerTypes = [], isLoading } = useQuery<PartnerType[]>({
+    queryKey: ['/api/partner-types'],
+    queryFn: () => apiRequest<PartnerType[]>('/api/partner-types'),
   });
 
   const createMutation = useMutation({
-    mutationFn: (partnerType: InsertCategory) => 
-      apiRequest('/api/categories', {
+    mutationFn: (partnerType: InsertPartnerType) => 
+      apiRequest('/api/partner-types', {
         method: 'POST',
-        body: JSON.stringify({
-          ...partnerType,
-          type: 'partner'
-        }),
+        body: JSON.stringify(partnerType),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/categories', 'partner'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/partner-types'] });
       toast({
         title: "Sucesso",
         description: "Tipo de parceiro criado com sucesso!",

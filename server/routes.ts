@@ -1086,6 +1086,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Partner Types routes
+  app.get('/api/partner-types', async (req, res) => {
+    try {
+      const partnerTypes = await storage.getPartnerTypes();
+      res.json(partnerTypes);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch partner types' });
+    }
+  });
+
+  app.get('/api/partner-types/:id', async (req, res) => {
+    try {
+      const partnerType = await storage.getPartnerType(parseInt(req.params.id));
+      if (!partnerType) {
+        return res.status(404).json({ error: 'Partner type not found' });
+      }
+      res.json(partnerType);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch partner type' });
+    }
+  });
+
+  app.post('/api/partner-types', async (req, res) => {
+    try {
+      const validatedData = insertPartnerTypeSchema.parse(req.body);
+      const partnerType = await storage.createPartnerType(validatedData);
+      res.status(201).json(partnerType);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid partner type data' });
+    }
+  });
+
+  app.put('/api/partner-types/:id', async (req, res) => {
+    try {
+      const validatedData = insertPartnerTypeSchema.partial().parse(req.body);
+      const partnerType = await storage.updatePartnerType(parseInt(req.params.id), validatedData);
+      res.json(partnerType);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid partner type data' });
+    }
+  });
+
+  app.delete('/api/partner-types/:id', async (req, res) => {
+    try {
+      await storage.deletePartnerType(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete partner type' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server setup
