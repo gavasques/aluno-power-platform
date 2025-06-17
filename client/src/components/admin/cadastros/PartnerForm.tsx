@@ -23,7 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Partner as DbPartner, Category } from '@shared/schema';
+import type { Partner as DbPartner, PartnerType } from '@shared/schema';
 
 interface PartnerFormProps {
   partner?: DbPartner | null;
@@ -40,7 +40,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     email: partner?.email || '',
     phone: partner?.phone || '',
     logo: partner?.logo || '',
-    categoryId: partner?.categoryId ? partner.categoryId.toString() : '',
+    partnerTypeId: partner?.partnerTypeId ? partner.partnerTypeId.toString() : '',
     specialties: partner?.specialties || '',
     description: partner?.description || '',
     about: partner?.about || '',
@@ -54,7 +54,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.categoryId) {
+    if (!formData.name || !formData.partnerTypeId) {
       toast({
         title: 'Erro',
         description: 'Preencha todos os campos obrigatórios.',
@@ -104,9 +104,9 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
   };
 
   // Fetch partner types from database
-  const { data: partnerTypes = [] } = useQuery<Category[]>({
-    queryKey: ['/api/categories', 'partner'],
-    queryFn: () => apiRequest<Category[]>('/api/categories?type=partner'),
+  const { data: partnerTypes = [] } = useQuery<PartnerType[]>({
+    queryKey: ['/api/partner-types'],
+    queryFn: () => apiRequest<PartnerType[]>('/api/partner-types'),
   });
 
   return (

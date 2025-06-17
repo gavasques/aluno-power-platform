@@ -81,12 +81,11 @@ const PartnerTypesManager = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => 
-      apiRequest(`/api/categories/${id}`, {
+      apiRequest(`/api/partner-types/${id}`, {
         method: 'DELETE',
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/categories', 'partner'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/partner-types'] });
       toast({
         title: "Sucesso",
         description: "Tipo de parceiro removido com sucesso!",
@@ -103,7 +102,6 @@ const PartnerTypesManager = () => {
 
   const filteredAndSortedPartnerTypes = partnerTypes
     .filter((partnerType) => 
-      partnerType.type === 'partner' && 
       partnerType.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
@@ -125,12 +123,11 @@ const PartnerTypesManager = () => {
         name: newPartnerType.name.trim(),
         description: newPartnerType.description.trim() || null,
         icon: newPartnerType.icon,
-        type: 'partner',
       });
     }
   }
 
-  function handleDeletePartnerType(partnerType: Category) {
+  function handleDeletePartnerType(partnerType: PartnerType) {
     if (confirm(`Tem certeza que deseja excluir o tipo "${partnerType.name}"?`)) {
       deleteMutation.mutate(partnerType.id);
     }
