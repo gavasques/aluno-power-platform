@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Trash2, ArrowUpDown } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +13,7 @@ import type { Category, InsertCategory } from "@shared/schema";
 const SupplierTypesManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [newType, setNewType] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "created" | "alphabetical">("alphabetical");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -64,9 +66,19 @@ const SupplierTypesManager = () => {
     },
   });
 
-  const filtered = supplierTypes.filter(type => 
-    type.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAndSortedSupplierTypes = supplierTypes
+    .filter((type) => type.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+        case "alphabetical":
+          return a.name.localeCompare(b.name, 'pt-BR');
+        case "created":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        default:
+          return a.name.localeCompare(b.name, 'pt-BR');
+      }
+    });
 
   function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -122,9 +134,31 @@ const SupplierTypesManager = () => {
               placeholder="Buscar tipos de fornecedor..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="bg-white border border-input text-foreground placeholder:text-muted-foreground"
+              className="bg-white border border-input text-foreground placeholder:text-muted-foreground flex-1"
             />
+            <Select value={sortBy} onValueChange={(value: "name" | "created" | "alphabetical") => setSortBy(value)}>
+              <SelectTrigger className="w-48 bg-white border border-input">
+                <ArrowUpDown className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-input">
+                <SelectItem value="alphabetical">Ordem Alfabética</SelectItem>
+                <SelectItem value="created">Mais Recentes</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          
+          {!isLoading && (
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">
+                {filteredAndSortedSupplierTypes.length} tipo{filteredAndSortedSupplierTypes.length !== 1 ? 's' : ''} de fornecedor{filteredAndSortedSupplierTypes.length !== 1 ? 'es' : ''}
+                {searchTerm && ` encontrado${filteredAndSortedSupplierTypes.length !== 1 ? 's' : ''} para "${searchTerm}"`}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Ordenado por {sortBy === 'alphabetical' ? 'ordem alfabética' : 'mais recentes'}
+              </span>
+            </div>
+          )}
           
           <div className="space-y-3">
             {isLoading && (
@@ -132,14 +166,19 @@ const SupplierTypesManager = () => {
                 Carregando tipos de fornecedor...
               </div>
             )}
-            {!isLoading && filtered.length === 0 && (
+            {!isLoading && filteredAndSortedSupplierTypes.length === 0 && (
               <div className="text-muted-foreground px-4 py-8 text-center">
                 Nenhum tipo encontrado.
               </div>
             )}
-            {!isLoading && filtered.map(type => (
+            {!isLoading && filteredAndSortedSupplierTypes.map(type => (
               <div key={type.id} className="flex items-center justify-between p-4 bg-gray-50 border border-border rounded-lg hover:bg-gray-100 transition-colors">
-                <span className="font-medium text-foreground">{type.name}</span>
+                <div className="flex-1">
+                  <div className="font-medium text-foreground">{type.name}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Criado em {new Date(type.createdAt).toLocaleDateString('pt-BR')}
+                  </div>
+                </div>
                 <Button 
                   size="sm" 
                   variant="outline"
