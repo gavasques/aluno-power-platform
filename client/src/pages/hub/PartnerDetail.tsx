@@ -175,33 +175,45 @@ const PartnerDetail = () => {
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
           {/* Coluna Principal - 3/4 da largura */}
           <div className="xl:col-span-3 space-y-8">
-            {/* Sobre */}
+            {/* Descrição/Detalhes */}
             <Card className="shadow-sm">
               <CardHeader>
-                <CardTitle className="text-2xl">Sobre</CardTitle>
+                <CardTitle className="text-2xl">Sobre o Parceiro</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 text-lg leading-relaxed">{partner.about}</p>
+                <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">{partner.description}</p>
               </CardContent>
             </Card>
 
             {/* Especialidades */}
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-2xl">Especialidades</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 text-lg leading-relaxed">{partner.specialties}</p>
-              </CardContent>
-            </Card>
+            {partner.specialties && Array.isArray(partner.specialties) && partner.specialties.length > 0 && (
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-2xl">Especialidades</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3">
+                    {partner.specialties.map((specialty, index) => (
+                      <div key={index} className="flex items-center text-gray-700">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                        <span className="text-lg">{specialty}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Serviços */}
+            {/* Arquivos e Documentos */}
             <Card className="shadow-sm">
               <CardHeader>
-                <CardTitle className="text-2xl">Serviços</CardTitle>
+                <CardTitle className="text-2xl flex items-center">
+                  <FileText className="h-6 w-6 mr-2" />
+                  Arquivos e Documentos
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 text-lg leading-relaxed">{partner.services}</p>
+                <PartnerFiles partnerId={partner.id} />
               </CardContent>
             </Card>
 

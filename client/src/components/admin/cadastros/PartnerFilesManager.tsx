@@ -41,7 +41,11 @@ export const PartnerFilesManager: React.FC<PartnerFilesManagerProps> = ({ partne
 
   const { data: files = [], isLoading } = useQuery<PartnerFile[]>({
     queryKey: ['/api/partners', partnerId, 'files'],
-    queryFn: () => apiRequest<PartnerFile[]>(`/api/partners/${partnerId}/files`),
+    queryFn: async () => {
+      const response = await fetch(`/api/partners/${partnerId}/files`);
+      if (!response.ok) throw new Error('Failed to fetch files');
+      return response.json();
+    },
     enabled: !!partnerId
   });
 

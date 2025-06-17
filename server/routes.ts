@@ -18,6 +18,7 @@ import {
   insertMaterialTypeSchema,
   insertPartnerTypeSchema,
   insertPartnerContactSchema,
+  insertPartnerFileSchema,
   insertYoutubeVideoSchema,
   insertNewsSchema,
   insertUpdateSchema,
@@ -1186,6 +1187,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete contact' });
+    }
+  });
+
+  // Partner Files routes
+  app.get('/api/partners/:partnerId/files', async (req, res) => {
+    try {
+      const files = await storage.getPartnerFiles(parseInt(req.params.partnerId));
+      res.json(files);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch partner files' });
+    }
+  });
+
+  app.get('/api/partner-files/:id', async (req, res) => {
+    try {
+      const file = await storage.getPartnerFile(parseInt(req.params.id));
+      if (!file) {
+        return res.status(404).json({ error: 'File not found' });
+      }
+      res.json(file);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch file' });
+    }
+  });
+
+  app.post('/api/partner-files', async (req, res) => {
+    try {
+      const validatedData = insertPartnerFileSchema.parse(req.body);
+      const file = await storage.createPartnerFile(validatedData);
+      res.status(201).json(file);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid file data' });
+    }
+  });
+
+  app.put('/api/partner-files/:id', async (req, res) => {
+    try {
+      const validatedData = insertPartnerFileSchema.partial().parse(req.body);
+      const file = await storage.updatePartnerFile(parseInt(req.params.id), validatedData);
+      res.json(file);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid file data' });
+    }
+  });
+
+  app.delete('/api/partner-files/:id', async (req, res) => {
+    try {
+      await storage.deletePartnerFile(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete file' });
     }
   });
 
