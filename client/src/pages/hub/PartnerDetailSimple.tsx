@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PartnerFiles } from '@/components/hub/PartnerFiles';
+import { PartnerReviews } from '@/components/hub/PartnerReviews';
 import {
   Star,
   Shield,
@@ -15,7 +16,8 @@ import {
   Instagram,
   Linkedin,
   ArrowLeft,
-  FileText
+  FileText,
+  MessageSquare
 } from 'lucide-react';
 import type { PartnerType } from '@shared/schema';
 
@@ -157,6 +159,19 @@ const PartnerDetailSimple = () => {
             </CardHeader>
             <CardContent>
               <PartnerFiles partnerId={partner.id} />
+            </CardContent>
+          </Card>
+
+          {/* Reviews and Ratings */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center">
+                <MessageSquare className="h-6 w-6 mr-2" />
+                Avaliações
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PartnerReviews partnerId={partner.id} />
             </CardContent>
           </Card>
         </div>
