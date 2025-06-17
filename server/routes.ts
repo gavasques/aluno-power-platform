@@ -115,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/partners/:id', async (req, res) => {
     try {
-      const partner = await storage.getPartner(parseInt(req.params.id));
+      const partner = await storage.getPartnerWithReviewStats(parseInt(req.params.id));
       if (!partner) {
         return res.status(404).json({ error: 'Partner not found' });
       }

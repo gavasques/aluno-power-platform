@@ -81,9 +81,12 @@ const ReviewForm: React.FC<{
     setIsSubmitting(true);
     
     try {
-      await apiRequest(`/api/partners/${partnerId}/reviews`, 'POST', {
-        rating,
-        comment: comment.trim(),
+      await apiRequest(`/api/partners/${partnerId}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify({
+          rating,
+          comment: comment.trim(),
+        }),
       });
 
       toast({
@@ -172,8 +175,11 @@ const ReplyForm: React.FC<{
     setIsSubmitting(true);
     
     try {
-      await apiRequest(`/api/partner-reviews/${reviewId}/replies`, 'POST', {
-        content: content.trim(),
+      await apiRequest(`/api/partner-reviews/${reviewId}/replies`, {
+        method: 'POST',
+        body: JSON.stringify({
+          content: content.trim(),
+        }),
       });
 
       toast({

@@ -90,7 +90,9 @@ export interface IStorage {
 
   // Partners
   getPartners(): Promise<Partner[]>;
+  getPartnersWithReviewStats(): Promise<Partner[]>;
   getPartner(id: number): Promise<Partner | undefined>;
+  getPartnerWithReviewStats(id: number): Promise<Partner | undefined>;
   createPartner(partner: InsertPartner): Promise<Partner>;
   updatePartner(id: number, partner: Partial<InsertPartner>): Promise<Partner>;
   deletePartner(id: number): Promise<void>;
@@ -352,6 +354,35 @@ export class DatabaseStorage implements IStorage {
   async getPartner(id: number): Promise<Partner | undefined> {
     const [partner] = await db.select().from(partners).where(eq(partners.id, id));
     return partner || undefined;
+  }
+
+  async getPartnerWithReviewStats(id: number): Promise<Partner | undefined> {
+    try {
+      const [partner] = await db.select().from(partners).where(eq(partners.id, id));
+      if (!partner) return undefined;
+      
+      const reviews = await db
+        .select()
+        .from(partnerReviews)
+        .where(and(eq(partnerReviews.partnerId, id), eq(partnerReviews.isApproved, true)));
+      
+      const totalReviews = reviews.length;
+      let averageRating = '0';
+      
+      if (totalReviews > 0) {
+        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+        averageRating = (totalRating / totalReviews).toFixed(1);
+      }
+      
+      return {
+        ...partner,
+        averageRating,
+        totalReviews
+      };
+    } catch (error) {
+      console.error('Error calculating partner review stats:', error);
+      return await this.getPartner(id);
+    }
   }
 
   async createPartner(partner: InsertPartner): Promise<Partner> {
