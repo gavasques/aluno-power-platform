@@ -29,7 +29,7 @@ import GeneralSettings from "./pages/admin/GeneralSettings";
 import ContentManagement from "./pages/admin/ContentManagement";
 import Suppliers from "./pages/hub/Suppliers";
 import Partners from "./pages/hub/Partners";
-import PartnerDetail from "./pages/hub/PartnerDetail";
+import PartnerDetail from "./pages/hub/PartnerDetailSimple";
 import ToolDetail from "./pages/hub/ToolDetail";
 import HubMaterialDetail from "./pages/hub/MaterialDetail";
 import SupplierDetail from "./pages/hub/SupplierDetail";
