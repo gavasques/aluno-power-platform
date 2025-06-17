@@ -23,6 +23,7 @@ import {
   type InsertSupplier,
   type Partner,
   type InsertPartner,
+  type PartnerWithCategory,
   type Material,
   type MaterialWithType,
   type InsertMaterial,
@@ -63,12 +64,12 @@ export interface IStorage {
   searchSuppliers(query: string): Promise<Supplier[]>;
 
   // Partners
-  getPartners(): Promise<Partner[]>;
-  getPartner(id: number): Promise<Partner | undefined>;
+  getPartners(): Promise<PartnerWithCategory[]>;
+  getPartner(id: number): Promise<PartnerWithCategory | undefined>;
   createPartner(partner: InsertPartner): Promise<Partner>;
   updatePartner(id: number, partner: Partial<InsertPartner>): Promise<Partner>;
   deletePartner(id: number): Promise<void>;
-  searchPartners(query: string): Promise<Partner[]>;
+  searchPartners(query: string): Promise<PartnerWithCategory[]>;
 
   // Materials
   getMaterials(): Promise<MaterialWithType[]>;
@@ -229,7 +230,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Partners
-  async getPartners(): Promise<Partner[]> {
+  async getPartners(): Promise<PartnerWithCategory[]> {
     const results = await db
       .select({
         id: partners.id,
@@ -285,7 +286,7 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getPartner(id: number): Promise<Partner | undefined> {
+  async getPartner(id: number): Promise<PartnerWithCategory | undefined> {
     const [result] = await db
       .select({
         id: partners.id,
@@ -372,7 +373,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(partners).where(eq(partners.id, id));
   }
 
-  async searchPartners(query: string): Promise<Partner[]> {
+  async searchPartners(query: string): Promise<PartnerWithCategory[]> {
     const results = await db
       .select({
         id: partners.id,
