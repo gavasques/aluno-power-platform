@@ -659,6 +659,11 @@ export const insertToolTypeSchema = createInsertSchema(toolTypes).omit({
   createdAt: true,
 });
 
+export const insertMaterialTypeSchema = createInsertSchema(materialTypes).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -677,8 +682,6 @@ export type Partner = typeof partners.$inferSelect;
 
 export type InsertMaterial = z.infer<typeof insertMaterialSchema>;
 export type Material = typeof materials.$inferSelect;
-
-export type MaterialType = typeof materialTypes.$inferSelect;
 
 export type MaterialWithType = Material & {
   type: MaterialType;
@@ -716,3 +719,6 @@ export type PromptCategory = typeof promptCategories.$inferSelect;
 
 export type InsertToolType = z.infer<typeof insertToolTypeSchema>;
 export type ToolType = typeof toolTypes.$inferSelect;
+
+export type InsertMaterialType = z.infer<typeof insertMaterialTypeSchema>;
+export type MaterialType = typeof materialTypes.$inferSelect;

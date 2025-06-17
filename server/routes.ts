@@ -724,6 +724,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Material Types
+  app.get('/api/material-types', async (req, res) => {
+    try {
+      const materialTypes = await storage.getMaterialTypes();
+      res.json(materialTypes);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch material types' });
+    }
+  });
+
+  app.get('/api/material-types/:id', async (req, res) => {
+    try {
+      const materialType = await storage.getMaterialType(parseInt(req.params.id));
+      if (!materialType) {
+        return res.status(404).json({ error: 'Material type not found' });
+      }
+      res.json(materialType);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch material type' });
+    }
+  });
+
+  app.post('/api/material-types', async (req, res) => {
+    try {
+      const validatedData = insertMaterialTypeSchema.parse(req.body);
+      const materialType = await storage.createMaterialType(validatedData);
+      res.status(201).json(materialType);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid material type data' });
+    }
+  });
+
+  app.put('/api/material-types/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertMaterialTypeSchema.partial().parse(req.body);
+      const materialType = await storage.updateMaterialType(id, validatedData);
+      res.json(materialType);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to update material type' });
+    }
+  });
+
+  app.delete('/api/material-types/:id', async (req, res) => {
+    try {
+      await storage.deleteMaterialType(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete material type' });
+    }
+  });
+
   // YouTube Videos
   app.get('/api/youtube-videos', async (req, res) => {
     try {
