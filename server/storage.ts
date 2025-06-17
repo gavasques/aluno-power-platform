@@ -315,6 +315,40 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(partners);
   }
 
+  async getPartnersWithReviewStats(): Promise<Partner[]> {
+    try {
+      const allPartners = await db.select().from(partners);
+      
+      const partnersWithStats = await Promise.all(
+        allPartners.map(async (partner) => {
+          const reviews = await db
+            .select()
+            .from(partnerReviews)
+            .where(and(eq(partnerReviews.partnerId, partner.id), eq(partnerReviews.isApproved, true)));
+          
+          const totalReviews = reviews.length;
+          let averageRating = '0';
+          
+          if (totalReviews > 0) {
+            const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+            averageRating = (totalRating / totalReviews).toFixed(1);
+          }
+          
+          return {
+            ...partner,
+            averageRating,
+            totalReviews
+          };
+        })
+      );
+      
+      return partnersWithStats;
+    } catch (error) {
+      console.error('Error calculating review stats:', error);
+      return await this.getPartners();
+    }
+  }
+
   async getPartner(id: number): Promise<Partner | undefined> {
     const [partner] = await db.select().from(partners).where(eq(partners.id, id));
     return partner || undefined;

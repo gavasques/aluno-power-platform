@@ -93,7 +93,10 @@ const PartnerDetailSimple = () => {
                   {partnerType.name}
                 </Badge>
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
+                const reviewsSection = document.getElementById('reviews-section');
+                reviewsSection?.scrollIntoView({ behavior: 'smooth' });
+              }}>
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
@@ -149,39 +152,10 @@ const PartnerDetailSimple = () => {
             </Card>
           )}
 
-          {/* Files and Documents */}
+          {/* Contact Information */}
           <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="text-2xl flex items-center">
-                <FileText className="h-6 w-6 mr-2" />
-                Arquivos e Documentos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PartnerFiles partnerId={partner.id} />
-            </CardContent>
-          </Card>
-
-          {/* Reviews and Ratings */}
-          <Card className="shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-2xl flex items-center">
-                <MessageSquare className="h-6 w-6 mr-2" />
-                Avaliações
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PartnerReviews partnerId={partner.id} />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Contact Info */}
-          <Card className="shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Informações de Contato</CardTitle>
+              <CardTitle className="text-2xl">Informações de Contato</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {partner.phone && (
@@ -241,6 +215,37 @@ const PartnerDetailSimple = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Files and Documents */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center">
+                <FileText className="h-6 w-6 mr-2" />
+                Arquivos e Documentos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PartnerFiles partnerId={partner.id} />
+            </CardContent>
+          </Card>
+
+          {/* Reviews and Ratings */}
+          <Card className="shadow-sm" id="reviews-section">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center">
+                <MessageSquare className="h-6 w-6 mr-2" />
+                Avaliações
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PartnerReviews partnerId={partner.id} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar - Additional Information */}
+        <div className="space-y-6">
+          {/* Can add additional sidebar content here if needed */}
         </div>
       </div>
     </div>
