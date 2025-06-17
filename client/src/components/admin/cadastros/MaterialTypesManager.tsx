@@ -1,50 +1,141 @@
 
 import { useState } from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, FileText, Video, Youtube, FileSpreadsheet, Image, Globe, FileDown, Code2 } from "lucide-react";
-
-type MaterialType = {
-  name: string;
-  icon: React.ReactNode;
-  description?: string;
-};
-
-const defaultTypes: MaterialType[] = [
-  { name: "PDF", icon: <FileText />, description: "Visualizar PDF e download" },
-  { name: "Vídeo Youtube", icon: <Youtube />, description: "Vídeo do Youtube embutido" },
-  { name: "Vídeo Panda", icon: <Video />, description: "Vídeo hospedado no Panda" },
-  { name: "Vídeos", icon: <Video />, description: "Upload/download vídeos próprios" },
-  { name: "Planilhas", icon: <FileSpreadsheet />, description: "Planilhas para download" },
-  { name: "Embed", icon: <Code2 />, description: "Código embed na tela" },
-  { name: "iframe", icon: <Globe />, description: "Exibir código iFrame tela" },
-  { name: "Documentos", icon: <FileText />, description: "Arquivos Word, PPT, etc" },
-  { name: "Imagens", icon: <Image />, description: "Exibir e baixar imagens" },
-];
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Trash2, ArrowUpDown, FileText, Video, Youtube, FileSpreadsheet, Image, Globe, Code2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import type { MaterialType, InsertMaterialType } from "@shared/schema";
 
 const MaterialTypesManager = () => {
-  const [types, setTypes] = useState<MaterialType[]>(defaultTypes);
   const [searchTerm, setSearchTerm] = useState("");
-  const [newName, setNewName] = useState("");
-  const [newDesc, setNewDesc] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newMaterialType, setNewMaterialType] = useState({ 
+    name: "", 
+    description: "", 
+    icon: "FileText",
+    allowsUpload: true,
+    allowsUrl: true,
+    viewerType: "inline" 
+  });
+  const [sortBy, setSortBy] = useState<"name" | "created" | "alphabetical">("alphabetical");
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const filtered = types.filter(t =>
-    t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (t.description?.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const { data: materialTypes = [], isLoading } = useQuery<MaterialType[]>({
+    queryKey: ['/api/material-types'],
+  });
 
-  function handleAdd(e: React.FormEvent) {
+  const createMutation = useMutation({
+    mutationFn: (materialType: InsertMaterialType) => 
+      apiRequest('/api/material-types', {
+        method: 'POST',
+        body: JSON.stringify(materialType),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/material-types'] });
+      toast({
+        title: "Sucesso",
+        description: "Tipo de material criado com sucesso!",
+      });
+      setNewMaterialType({ 
+        name: "", 
+        description: "", 
+        icon: "FileText",
+        allowsUpload: true,
+        allowsUrl: true,
+        viewerType: "inline" 
+      });
+      setIsDialogOpen(false);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao criar tipo de material.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => 
+      apiRequest(`/api/material-types/${id}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/material-types'] });
+      toast({
+        title: "Sucesso",
+        description: "Tipo de material removido com sucesso!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao remover tipo de material.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const filteredAndSortedMaterialTypes = materialTypes
+    .filter((materialType) => materialType.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+        case "alphabetical":
+          return a.name.localeCompare(b.name, 'pt-BR');
+        case "created":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        default:
+          return a.name.localeCompare(b.name, 'pt-BR');
+      }
+    });
+
+  function handleAddMaterialType(e: React.FormEvent) {
     e.preventDefault();
-    if (newName.trim() && !types.some(t => t.name === newName.trim())) {
-      setTypes([{ name: newName.trim(), icon: <FileText />, description: newDesc }, ...types]);
+    if (newMaterialType.name.trim()) {
+      createMutation.mutate({
+        name: newMaterialType.name.trim(),
+        description: newMaterialType.description.trim() || null,
+        icon: newMaterialType.icon,
+        allowsUpload: newMaterialType.allowsUpload,
+        allowsUrl: newMaterialType.allowsUrl,
+        viewerType: newMaterialType.viewerType as "inline" | "download" | "external",
+      });
     }
-    setNewName("");
-    setNewDesc("");
   }
-  function handleDelete(name: string) {
-    setTypes(types.filter(t => t.name !== name));
+
+  function handleDeleteMaterialType(materialType: MaterialType) {
+    deleteMutation.mutate(materialType.id);
   }
+
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case "FileText": return <FileText className="h-4 w-4" />;
+      case "Video": return <Video className="h-4 w-4" />;
+      case "Youtube": return <Youtube className="h-4 w-4" />;
+      case "FileSpreadsheet": return <FileSpreadsheet className="h-4 w-4" />;
+      case "Image": return <Image className="h-4 w-4" />;
+      case "Globe": return <Globe className="h-4 w-4" />;
+      case "Code2": return <Code2 className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
+    }
+  };
 
   return (
     <Card className="bg-white border border-border shadow-sm">
