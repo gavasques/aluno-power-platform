@@ -362,12 +362,12 @@ export class DatabaseStorage implements IStorage {
       if (!partner) return undefined;
       
       const reviews = await db
-        .select()
+        .select({ rating: partnerReviews.rating })
         .from(partnerReviews)
         .where(and(eq(partnerReviews.partnerId, id), eq(partnerReviews.isApproved, true)));
       
       const totalReviews = reviews.length;
-      let averageRating = '0';
+      let averageRating = '0.0';
       
       if (totalReviews > 0) {
         const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
