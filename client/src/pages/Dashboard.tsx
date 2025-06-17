@@ -78,7 +78,7 @@ const Dashboard = () => {
       <div className="flex flex-col gap-8 p-6">
         {/* Header Section */}
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-medium shadow-2xl drop-shadow-2xl text-[26px] pt-[16px] pb-[16px] pl-[28px] pr-[28px]">
+          <div className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-medium shadow-2xl drop-shadow-2xl pl-[28px] pr-[28px] pt-[5px] pb-[5px] text-[24px]">
             <TrendingUp className="h-4 w-4 mr-2" />
             Bem-vindo de volta, Guilherme!
           </div>
