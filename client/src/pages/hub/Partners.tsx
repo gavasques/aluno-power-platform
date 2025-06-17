@@ -109,7 +109,7 @@ const Partners = () => {
 
       {/* Partners Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPartners.map((partner) => (
+        {(filteredPartners as any[]).map((partner: any) => (
           <Card key={partner.id} className="hover:shadow-lg transition-all cursor-pointer">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -124,7 +124,7 @@ const Partners = () => {
                     )}
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    {partner.category?.name || 'Sem categoria'}
+                    {partner.specialties || 'Serviços gerais'}
                   </Badge>
                 </div>
               </div>
@@ -172,7 +172,7 @@ const Partners = () => {
           </Card>
         ))}
       </div>
-      {filteredPartners.length === 0 && (
+      {(filteredPartners as any[]).length === 0 && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold mb-2">Nenhum parceiro encontrado</h3>
