@@ -692,13 +692,3 @@ export type Update = typeof updates.$inferSelect;
 
 export type InsertWebhookConfig = z.infer<typeof insertWebhookConfigSchema>;
 export type WebhookConfig = typeof webhookConfigs.$inferSelect;
-
-// Extended types with relations
-export type PartnerWithCategory = Partner & {
-  category?: {
-    id: string;
-    name: string;
-    icon: string;
-    description: string;
-  } | null;
-};

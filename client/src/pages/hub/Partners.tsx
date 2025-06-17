@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePartners } from '@/contexts/PartnersContext';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,27 +26,18 @@ import {
 
 const Partners = () => {
   const navigate = useNavigate();
+  const { partners, loading, searchPartners } = usePartners();
   const [searchQuery, setSearchQuery] = useState('');
+  // Use "all" instead of "" for Select's no-filter state
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const { data: partners = [], isLoading: loading } = useQuery({
-    queryKey: ['/api/partners'],
-  });
-
   const filteredPartners = React.useMemo(() => {
-    let result = partners as any[];
-    if (searchQuery) {
-      result = result.filter((partner: any) => 
-        partner.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        partner.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        partner.specialties?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+    let result = searchQuery ? searchPartners(searchQuery) : partners;
     if (selectedCategory && selectedCategory !== 'all') {
-      result = result.filter((partner: any) => partner.categoryId?.toString() === selectedCategory);
+      result = result.filter(partner => partner.category.id === selectedCategory);
     }
     return result;
-  }, [partners, searchQuery, selectedCategory]);
+  }, [partners, searchQuery, selectedCategory, searchPartners]);
 
   if (loading) {
     return (
@@ -109,7 +99,7 @@ const Partners = () => {
 
       {/* Partners Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {(filteredPartners as any[]).map((partner: any) => (
+        {filteredPartners.map((partner) => (
           <Card key={partner.id} className="hover:shadow-lg transition-all cursor-pointer">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -124,7 +114,7 @@ const Partners = () => {
                     )}
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    {partner.specialties || 'Serviços gerais'}
+                    {partner.category.name}
                   </Badge>
                 </div>
               </div>
@@ -136,17 +126,12 @@ const Partners = () => {
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{partner.averageRating ? parseFloat(partner.averageRating).toFixed(1) : '0.0'}</span>
-                  <span>({partner.totalReviews || 0})</span>
+                  <span className="font-medium">{partner.averageRating.toFixed(1)}</span>
+                  <span>({partner.totalReviews})</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span>
-                    {partner.address && typeof partner.address === 'object' && partner.address !== null
-                      ? `${(partner.address as any).city || ''}, ${(partner.address as any).state || ''}`
-                      : 'Brasil'
-                    }
-                  </span>
+                  <span>{partner.address.city}, {partner.address.state}</span>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -172,7 +157,7 @@ const Partners = () => {
           </Card>
         ))}
       </div>
-      {(filteredPartners as any[]).length === 0 && (
+      {filteredPartners.length === 0 && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold mb-2">Nenhum parceiro encontrado</h3>

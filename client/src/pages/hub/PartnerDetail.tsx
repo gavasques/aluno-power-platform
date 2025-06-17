@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { usePartners } from '@/contexts/PartnersContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,7 @@ import {
 const PartnerDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { getPartnerById, addReview } = usePartners();
   const { toast } = useToast();
   
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -33,21 +34,7 @@ const PartnerDetail = () => {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: partner, isLoading } = useQuery({
-    queryKey: ['/api/partners', id],
-    enabled: !!id,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="w-full p-6">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Carregando parceiro...</p>
-        </div>
-      </div>
-    );
-  }
+  const partner = id ? getPartnerById(id) : null;
 
   if (!partner) {
     return (
@@ -86,7 +73,14 @@ const PartnerDetail = () => {
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement review submission API
+      addReview(partner.id, {
+        partnerId: partner.id,
+        userId: 'current-user',
+        userName: 'Usuário Atual',
+        rating,
+        comment: comment.trim(),
+      });
+
       toast({
         title: "Avaliação enviada!",
         description: "Sua avaliação foi enviada com sucesso.",
@@ -113,7 +107,21 @@ const PartnerDetail = () => {
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
 
-  const partnerData = partner as any;
+  const approvedReviews = partner.reviews.filter(review => review.isApproved);
+
+  const getContactIcon = (type: string) => {
+    switch (type) {
+      case 'phone':
+      case 'whatsapp':
+        return <Phone className="h-4 w-4" />;
+      case 'email':
+        return <Mail className="h-4 w-4" />;
+      case 'website':
+        return <Globe className="h-4 w-4" />;
+      default:
+        return <Phone className="h-4 w-4" />;
+    }
+  };
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
@@ -133,8 +141,8 @@ const PartnerDetail = () => {
             <div className="flex items-start justify-between mb-6">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
-                  <h1 className="text-4xl font-bold">{partnerData.name}</h1>
-                  {partnerData.isVerified && (
+                  <h1 className="text-4xl font-bold">{partner.name}</h1>
+                  {partner.isVerified && (
                     <Badge variant="default" className="bg-green-500 text-white">
                       <Shield className="h-3 w-3 mr-1" />
                       Verificado
@@ -142,21 +150,21 @@ const PartnerDetail = () => {
                   )}
                 </div>
                 <Badge variant="secondary" className="mb-4 text-base px-3 py-1">
-                  {partnerData.specialties || 'Serviços gerais'}
+                  {partner.category.name}
                 </Badge>
                 <div className="flex items-center gap-2">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       className={`h-6 w-6 ${
-                        i < Math.floor(parseFloat(partnerData.averageRating || '0'))
+                        i < Math.floor(partner.averageRating)
                           ? 'fill-yellow-400 text-yellow-400'
                           : 'text-gray-300'
                       }`}
                     />
                   ))}
                   <span className="ml-3 text-lg text-gray-600">
-                    {partnerData.averageRating ? parseFloat(partnerData.averageRating).toFixed(1) : '0.0'} ({partnerData.totalReviews || 0} avaliações)
+                    {partner.averageRating.toFixed(1)} ({partner.totalReviews} avaliações)
                   </span>
                 </div>
               </div>
@@ -168,52 +176,34 @@ const PartnerDetail = () => {
           {/* Coluna Principal - 3/4 da largura */}
           <div className="xl:col-span-3 space-y-8">
             {/* Sobre */}
-            {partnerData.about && (
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Sobre</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 text-lg leading-relaxed">{partnerData.about}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Descrição */}
-            {partnerData.description && (
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Descrição</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 text-lg leading-relaxed">{partnerData.description}</p>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-2xl">Sobre</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 text-lg leading-relaxed">{partner.about}</p>
+              </CardContent>
+            </Card>
 
             {/* Especialidades */}
-            {partnerData.specialties && (
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Especialidades</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 text-lg leading-relaxed">{partnerData.specialties}</p>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-2xl">Especialidades</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 text-lg leading-relaxed">{partner.specialties}</p>
+              </CardContent>
+            </Card>
 
             {/* Serviços */}
-            {partnerData.services && (
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Serviços</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 text-lg leading-relaxed">{partnerData.services}</p>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-2xl">Serviços</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 text-lg leading-relaxed">{partner.services}</p>
+              </CardContent>
+            </Card>
 
             {/* Avaliações */}
             <Card className="shadow-sm">
@@ -292,9 +282,37 @@ const PartnerDetail = () => {
                 )}
 
                 {/* Lista de Avaliações */}
-                <p className="text-gray-500 text-center py-12 text-lg">
-                  Nenhuma avaliação disponível. Seja o primeiro a avaliar!
-                </p>
+                {approvedReviews.length > 0 ? (
+                  <div className="space-y-6">
+                    {approvedReviews.map((review) => (
+                      <div key={review.id} className="border rounded-lg p-6 bg-white">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-semibold text-lg">{review.userName}</span>
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-5 w-5 ${
+                                  i < review.rating
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-gray-700 text-base leading-relaxed">{review.comment}</p>
+                        <p className="text-sm text-gray-500 mt-3">
+                          {new Date(review.createdAt).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-12 text-lg">
+                    Nenhuma avaliação disponível. Seja o primeiro a avaliar!
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -306,69 +324,94 @@ const PartnerDetail = () => {
                 <CardTitle className="text-xl">Contato</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Email */}
-                {partnerData.email && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-gray-600" />
+                {/* Endereço */}
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 mt-1 text-gray-600" />
+                  <div>
+                    <p className="text-base font-medium">
+                      {partner.address.street}
+                    </p>
+                    <p className="text-base">
+                      {partner.address.city} - {partner.address.state}
+                    </p>
+                    <p className="text-base">
+                      CEP: {partner.address.zipCode}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Contatos */}
+                {partner.contacts.map((contact) => (
+                  <div key={contact.id} className="flex items-center gap-3">
+                    {getContactIcon(contact.type)}
                     <div>
-                      <p className="text-base font-medium">Email</p>
-                      <p className="text-base text-gray-600">{partnerData.email}</p>
+                      <p className="text-base font-medium">{contact.label}</p>
+                      <p className="text-base text-gray-600">{contact.value}</p>
                     </div>
                   </div>
-                )}
+                ))}
 
-                {/* Telefone */}
-                {partnerData.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-gray-600" />
-                    <div>
-                      <p className="text-base font-medium">Telefone</p>
-                      <p className="text-base text-gray-600">{partnerData.phone}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Website */}
-                {partnerData.website && (
+                {/* Redes Sociais */}
+                {partner.website && (
                   <div className="flex items-center gap-3">
                     <Globe className="h-5 w-5 text-gray-600" />
-                    <div>
-                      <p className="text-base font-medium">Website</p>
-                      <a 
-                        href={partnerData.website} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-base text-blue-600 hover:underline"
-                      >
-                        {partnerData.website}
-                      </a>
-                    </div>
+                    <a 
+                      href={partner.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-base text-blue-600 hover:underline"
+                    >
+                      Website
+                    </a>
                   </div>
                 )}
 
-                {/* Instagram */}
-                {partnerData.instagram && (
+                {partner.instagram && (
                   <div className="flex items-center gap-3">
                     <Instagram className="h-5 w-5 text-gray-600" />
-                    <div>
-                      <p className="text-base font-medium">Instagram</p>
-                      <span className="text-base text-gray-600">{partnerData.instagram}</span>
-                    </div>
+                    <span className="text-base">{partner.instagram}</span>
                   </div>
                 )}
 
-                {/* LinkedIn */}
-                {partnerData.linkedin && (
+                {partner.linkedin && (
                   <div className="flex items-center gap-3">
                     <Linkedin className="h-5 w-5 text-gray-600" />
-                    <div>
-                      <p className="text-base font-medium">LinkedIn</p>
-                      <span className="text-base text-gray-600">{partnerData.linkedin}</span>
-                    </div>
+                    <span className="text-base">{partner.linkedin}</span>
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Materiais - Apenas visualização */}
+            {partner.materials.length > 0 && (
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl">Materiais</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    {partner.materials.map((material) => (
+                      <div key={material.id} className="flex items-center gap-3 p-3 border rounded-lg bg-white">
+                        <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{material.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatFileSize(material.fileSize)}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open(material.fileUrl, '_blank')}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
