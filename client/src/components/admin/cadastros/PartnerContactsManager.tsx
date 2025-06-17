@@ -229,11 +229,10 @@ export const PartnerContactsManager: React.FC<PartnerContactsManagerProps> = ({ 
 
               <div className="space-y-2">
                 <Label htmlFor="whatsapp" className="text-white">WhatsApp</Label>
-                <Input
+                <PhoneInput
                   id="whatsapp"
                   value={formData.whatsapp || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
-                  placeholder="+ XX XX XXXXXXXXX"
                   className="bg-slate-800 border-slate-600 text-white"
                 />
               </div>
