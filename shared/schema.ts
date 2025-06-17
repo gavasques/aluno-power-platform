@@ -22,7 +22,16 @@ export const categories = pgTable("categories", {
   name: text("name").notNull(),
   icon: text("icon").notNull(),
   description: text("description"),
-  type: text("type").notNull(), // 'supplier', 'partner', 'material', etc.
+  type: text("type").notNull(), // 'supplier', 'material', etc. (NOT partner)
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Partner Types - Separate table for partner types
+export const partnerTypes = pgTable("partner_types", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  icon: text("icon").notNull().default("Users"),
+  description: text("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -100,7 +109,7 @@ export const partners = pgTable("partners", {
   email: text("email"), // Made optional
   phone: text("phone").notNull(),
   logo: text("logo"), // Added logo field
-  categoryId: integer("category_id").references(() => categories.id),
+  partnerTypeId: integer("partner_type_id").references(() => partnerTypes.id),
   specialties: text("specialties"),
   description: text("description"),
   about: text("about"),
@@ -398,6 +407,9 @@ export const updatesRelations = relations(updates, ({ one }) => ({
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
   suppliers: many(suppliers),
+}));
+
+export const partnerTypesRelations = relations(partnerTypes, ({ many }) => ({
   partners: many(partners),
 }));
 
@@ -446,9 +458,9 @@ export const supplierReviewsRelations = relations(supplierReviews, ({ one }) => 
 }));
 
 export const partnersRelations = relations(partners, ({ one, many }) => ({
-  category: one(categories, {
-    fields: [partners.categoryId],
-    references: [categories.id],
+  partnerType: one(partnerTypes, {
+    fields: [partners.partnerTypeId],
+    references: [partnerTypes.id],
   }),
   contacts: many(partnerContacts),
   materials: many(partnerMaterials),
