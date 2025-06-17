@@ -17,9 +17,10 @@ import {
   Linkedin,
   ArrowLeft,
   FileText,
-  MessageSquare
+  MessageSquare,
+  User
 } from 'lucide-react';
-import type { PartnerType } from '@shared/schema';
+import type { PartnerType, PartnerContact } from '@shared/schema';
 
 const PartnerDetailSimple = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +37,17 @@ const PartnerDetailSimple = () => {
       if (!response.ok) throw new Error('Failed to fetch partner types');
       return response.json();
     }
+  });
+
+  // Get partner contacts
+  const { data: partnerContacts = [] } = useQuery<PartnerContact[]>({
+    queryKey: ['/api/partners', id, 'contacts'],
+    queryFn: async () => {
+      const response = await fetch(`/api/partners/${id}/contacts`);
+      if (!response.ok) throw new Error('Failed to fetch partner contacts');
+      return response.json();
+    },
+    enabled: !!id
   });
 
   if (!partner) {
@@ -158,59 +170,115 @@ const PartnerDetailSimple = () => {
               <CardTitle className="text-2xl">Informações de Contato</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {partner.phone && (
-                <div className="flex items-center">
-                  <Phone className="h-5 w-5 mr-3 text-gray-500" />
-                  <span className="text-gray-700">{partner.phone}</span>
+              {/* Partner Contacts from Admin */}
+              {partnerContacts.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Contatos da Empresa</h3>
+                  {partnerContacts.map((contact) => (
+                    <div key={contact.id} className="bg-gray-50 rounded-lg p-4 space-y-2">
+                      <div className="flex items-center">
+                        <User className="h-5 w-5 mr-3 text-gray-500" />
+                        <span className="font-medium text-gray-900">{contact.name}</span>
+                        <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          {contact.area}
+                        </span>
+                      </div>
+                      {contact.phone && (
+                        <div className="flex items-center ml-8">
+                          <Phone className="h-4 w-4 mr-2 text-gray-500" />
+                          <span className="text-gray-700">{contact.phone}</span>
+                        </div>
+                      )}
+                      {contact.whatsapp && (
+                        <div className="flex items-center ml-8">
+                          <Phone className="h-4 w-4 mr-2 text-green-500" />
+                          <span className="text-gray-700">{contact.whatsapp}</span>
+                          <span className="ml-2 text-xs text-green-600">(WhatsApp)</span>
+                        </div>
+                      )}
+                      {contact.email && (
+                        <div className="flex items-center ml-8">
+                          <Mail className="h-4 w-4 mr-2 text-gray-500" />
+                          <span className="text-gray-700">{contact.email}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
-              
-              {partner.email && (
-                <div className="flex items-center">
-                  <Mail className="h-5 w-5 mr-3 text-gray-500" />
-                  <span className="text-gray-700">{partner.email}</span>
+
+              {/* Partner General Contact Info */}
+              {(partner.phone || partner.email || partner.website || partner.instagram || partner.linkedin) && (
+                <div className="space-y-4">
+                  {partnerContacts.length > 0 && (
+                    <div className="border-t pt-4">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Informações Gerais</h3>
+                    </div>
+                  )}
+                  
+                  {partner.phone && (
+                    <div className="flex items-center">
+                      <Phone className="h-5 w-5 mr-3 text-gray-500" />
+                      <span className="text-gray-700">{partner.phone}</span>
+                    </div>
+                  )}
+                  
+                  {partner.email && (
+                    <div className="flex items-center">
+                      <Mail className="h-5 w-5 mr-3 text-gray-500" />
+                      <span className="text-gray-700">{partner.email}</span>
+                    </div>
+                  )}
+                  
+                  {partner.website && (
+                    <div className="flex items-center">
+                      <Globe className="h-5 w-5 mr-3 text-gray-500" />
+                      <a 
+                        href={partner.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Website
+                      </a>
+                    </div>
+                  )}
+                  
+                  {partner.instagram && (
+                    <div className="flex items-center">
+                      <Instagram className="h-5 w-5 mr-3 text-gray-500" />
+                      <a 
+                        href={`https://instagram.com/${partner.instagram.replace('@', '')}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {partner.instagram}
+                      </a>
+                    </div>
+                  )}
+                  
+                  {partner.linkedin && (
+                    <div className="flex items-center">
+                      <Linkedin className="h-5 w-5 mr-3 text-gray-500" />
+                      <a 
+                        href={partner.linkedin}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        LinkedIn
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
-              
-              {partner.website && (
-                <div className="flex items-center">
-                  <Globe className="h-5 w-5 mr-3 text-gray-500" />
-                  <a 
-                    href={partner.website} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    Website
-                  </a>
-                </div>
-              )}
-              
-              {partner.instagram && (
-                <div className="flex items-center">
-                  <Instagram className="h-5 w-5 mr-3 text-gray-500" />
-                  <a 
-                    href={`https://instagram.com/${partner.instagram.replace('@', '')}`}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    {partner.instagram}
-                  </a>
-                </div>
-              )}
-              
-              {partner.linkedin && (
-                <div className="flex items-center">
-                  <Linkedin className="h-5 w-5 mr-3 text-gray-500" />
-                  <a 
-                    href={partner.linkedin}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    LinkedIn
-                  </a>
+
+              {/* Empty state */}
+              {partnerContacts.length === 0 && !partner.phone && !partner.email && !partner.website && !partner.instagram && !partner.linkedin && (
+                <div className="text-center py-8">
+                  <Phone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">Nenhuma informação de contato disponível no momento</p>
                 </div>
               )}
             </CardContent>
