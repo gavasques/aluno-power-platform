@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Database, Bot, FileText, Package, Building, FolderPen, Layers3, Brain } from "lucide-react";
+import { Database, Bot, FileText, Package, Building, FolderPen, Layers3, Brain, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const CadastrosOverview = () => {
@@ -57,6 +57,24 @@ const CadastrosOverview = () => {
           <p className="text-muted-foreground text-sm mb-4">Configure tipos e categorias de fornecedores</p>
           <div className="flex justify-between items-center">
             <Badge className="bg-cyan-100 text-cyan-700 border-cyan-200">6 tipos</Badge>
+            <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" variant="default">
+              Gerenciar
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="bg-white border-gray-200 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+        onClick={() => navigate('/admin/cadastros/tipos-parceiro')}>
+        <CardHeader>
+          <div className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-primary" />
+            <CardTitle className="text-foreground">Tipos de Parceiro</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-sm mb-4">Configure tipos e categorias de parceiros</p>
+          <div className="flex justify-between items-center">
+            <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200">6 tipos</Badge>
             <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" variant="default">
               Gerenciar
             </Button>

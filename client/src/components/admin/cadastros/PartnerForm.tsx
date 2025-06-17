@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { usePartners } from '@/contexts/PartnersContext';
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import {
   Dialog,
   DialogContent,

@@ -2,6 +2,7 @@
 import DepartmentsManager from "@/components/admin/cadastros/DepartmentsManager";
 import TemplateTypesManager from "@/components/admin/cadastros/TemplateTypesManager";
 import SupplierTypesManager from "@/components/admin/cadastros/SupplierTypesManager";
+import PartnerTypesManager from "@/components/admin/cadastros/PartnerTypesManager";
 import PromptTypesManager from "@/components/admin/cadastros/PromptTypesManager";
 import MaterialTypesManager from "@/components/admin/cadastros/MaterialTypesManager";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
@@ -23,6 +24,8 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
         return <TemplateTypesManager />;
       case "tipos-fornecedor":
         return <SupplierTypesManager />;
+      case "tipos-parceiro":
+        return <PartnerTypesManager />;
       case "tipos-prompts-ia":
         return <PromptTypesManager />;
       case "tipos-materiais":
@@ -73,6 +76,8 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
         return "Gerencie tipos de templates e categorias";
       case "tipos-fornecedor":
         return "Configure tipos e categorias de fornecedores";
+      case "tipos-parceiro":
+        return "Configure tipos e categorias de parceiros";
       case "tipos-prompts-ia":
         return "Gerencie tipos de prompts de IA";
       case "tipos-materiais":

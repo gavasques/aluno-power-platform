@@ -30,6 +30,7 @@ const adminMenuItems = [
       { title: "Departamentos", href: "/admin/cadastros/departamentos", icon: Database },
       { title: "Tipos de Templates", href: "/admin/cadastros/tipos-templates", icon: FileText },
       { title: "Tipos de Fornecedor", href: "/admin/cadastros/tipos-fornecedor", icon: Database },
+      { title: "Tipos de Parceiro", href: "/admin/cadastros/tipos-parceiro", icon: Users },
       { title: "Tipos de Prompts IA", href: "/admin/cadastros/tipos-prompts-ia", icon: FileText },
       { title: "Tipos de Materiais", href: "/admin/cadastros/tipos-materiais", icon: FileText },
       { title: "Tipos de Ferramentas", href: "/admin/cadastros/tipos-ferramentas", icon: Settings },
