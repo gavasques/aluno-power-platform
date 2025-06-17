@@ -30,8 +30,8 @@ export class PartnerService
     return this.put<Partner>(`/partners/${id}`, data);
   }
 
-  async delete(id: number): Promise<void> {
-    await this.delete(`/partners/${id}`);
+  async remove(id: number): Promise<void> {
+    await super.delete(`/partners/${id}`);
   }
 
   async search(query: string): Promise<Partner[]> {

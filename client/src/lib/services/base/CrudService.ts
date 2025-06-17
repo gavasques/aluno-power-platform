@@ -7,7 +7,7 @@ export interface CrudOperations<T, CreateT = Partial<T>, UpdateT = Partial<T>> {
   getById(id: number): Promise<T>;
   create(data: CreateT): Promise<T>;
   update(id: number, data: UpdateT): Promise<T>;
-  delete(id: number): Promise<void>;
+  remove(id: number): Promise<void>;
 }
 
 export interface SearchableOperations<T> {
@@ -30,5 +30,5 @@ export abstract class CrudService<T, CreateT = Partial<T>, UpdateT = Partial<T>>
   abstract getById(id: number): Promise<T>;
   abstract create(data: CreateT): Promise<T>;
   abstract update(id: number, data: UpdateT): Promise<T>;
-  abstract delete(id: number): Promise<void>;
+  abstract remove(id: number): Promise<void>;
 }
