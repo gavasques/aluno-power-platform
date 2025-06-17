@@ -169,6 +169,17 @@ export const partnerReviews = pgTable("partner_reviews", {
   comment: text("comment").notNull(),
   isApproved: boolean("is_approved").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Partner Review Replies
+export const partnerReviewReplies = pgTable("partner_review_replies", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").references(() => partnerReviews.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Material Types
@@ -503,13 +514,25 @@ export const partnerMaterialsRelations = relations(partnerMaterials, ({ one }) =
   }),
 }));
 
-export const partnerReviewsRelations = relations(partnerReviews, ({ one }) => ({
+export const partnerReviewsRelations = relations(partnerReviews, ({ one, many }) => ({
   partner: one(partners, {
     fields: [partnerReviews.partnerId],
     references: [partners.id],
   }),
   user: one(users, {
     fields: [partnerReviews.userId],
+    references: [users.id],
+  }),
+  replies: many(partnerReviewReplies),
+}));
+
+export const partnerReviewRepliesRelations = relations(partnerReviewReplies, ({ one }) => ({
+  review: one(partnerReviews, {
+    fields: [partnerReviewReplies.reviewId],
+    references: [partnerReviews.id],
+  }),
+  user: one(users, {
+    fields: [partnerReviewReplies.userId],
     references: [users.id],
   }),
 }));
@@ -650,6 +673,19 @@ export const insertProductSchema = createInsertSchema(products).omit({
   updatedAt: true,
 });
 
+export const insertPartnerReviewSchema = createInsertSchema(partnerReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  isApproved: true,
+});
+
+export const insertPartnerReviewReplySchema = createInsertSchema(partnerReviewReplies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertYoutubeVideoSchema = createInsertSchema(youtubeVideos).omit({
   id: true,
   createdAt: true,
@@ -781,3 +817,14 @@ export type PartnerContact = typeof partnerContacts.$inferSelect;
 
 export type InsertPartnerFile = z.infer<typeof insertPartnerFileSchema>;
 export type PartnerFile = typeof partnerFiles.$inferSelect;
+
+export type InsertPartnerReview = z.infer<typeof insertPartnerReviewSchema>;
+export type PartnerReview = typeof partnerReviews.$inferSelect;
+
+export type InsertPartnerReviewReply = z.infer<typeof insertPartnerReviewReplySchema>;
+export type PartnerReviewReply = typeof partnerReviewReplies.$inferSelect;
+
+export type PartnerReviewWithUser = PartnerReview & {
+  user: User;
+  replies: (PartnerReviewReply & { user: User })[];
+};
