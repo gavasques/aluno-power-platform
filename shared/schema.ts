@@ -112,8 +112,6 @@ export const partners = pgTable("partners", {
   partnerTypeId: integer("partner_type_id").references(() => partnerTypes.id),
   specialties: text("specialties").array(),
   description: text("description"),
-  about: text("about"),
-  services: text("services"),
   address: jsonb("address"), // {street, city, state, zipCode}
   website: text("website"),
   instagram: text("instagram"),
@@ -135,6 +133,19 @@ export const partnerContacts = pgTable("partner_contacts", {
   phone: text("phone"), // Telefone
   whatsapp: text("whatsapp"), // WhatsApp
   notes: text("notes"), // Observações
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Partner Files
+export const partnerFiles = pgTable("partner_files", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  fileUrl: text("file_url").notNull(),
+  fileType: text("file_type").notNull(), // 'presentation', 'catalog', 'pricing', 'services', 'other'
+  fileName: text("file_name").notNull(),
+  fileSize: text("file_size"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -466,6 +477,7 @@ export const partnersRelations = relations(partners, ({ one, many }) => ({
     references: [partnerTypes.id],
   }),
   contacts: many(partnerContacts),
+  files: many(partnerFiles),
   materials: many(partnerMaterials),
   reviews: many(partnerReviews),
 }));
@@ -473,6 +485,13 @@ export const partnersRelations = relations(partners, ({ one, many }) => ({
 export const partnerContactsRelations = relations(partnerContacts, ({ one }) => ({
   partner: one(partners, {
     fields: [partnerContacts.partnerId],
+    references: [partners.id],
+  }),
+}));
+
+export const partnerFilesRelations = relations(partnerFiles, ({ one }) => ({
+  partner: one(partners, {
+    fields: [partnerFiles.partnerId],
     references: [partners.id],
   }),
 }));
