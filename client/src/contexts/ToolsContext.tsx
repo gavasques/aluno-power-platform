@@ -32,13 +32,13 @@ export function ToolsProvider({ children }: { children: React.ReactNode }) {
     queryFn: () => apiRequest<DbTool[]>('/api/tools'),
   });
 
-  // Mock tool types for now - should come from API
-  const toolTypes = [
-    { id: '1', name: 'Pesquisa de Produtos', icon: 'Search' },
-    { id: '2', name: 'Analytics', icon: 'BarChart' },
-    { id: '3', name: 'Automação', icon: 'Bot' },
-    { id: '4', name: 'Otimização', icon: 'Zap' },
-  ];
+  // Fetch tool types from database
+  const {
+    data: toolTypes = [],
+  } = useQuery({
+    queryKey: ['/api/tool-types'],
+    queryFn: () => apiRequest<any[]>('/api/tool-types'),
+  });
 
   const addToolMutation = useMutation({
     mutationFn: (tool: InsertTool) =>
