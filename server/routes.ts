@@ -19,6 +19,8 @@ import {
   insertPartnerTypeSchema,
   insertPartnerContactSchema,
   insertPartnerFileSchema,
+  insertPartnerReviewSchema,
+  insertPartnerReviewReplySchema,
   insertYoutubeVideoSchema,
   insertNewsSchema,
   insertUpdateSchema,
@@ -1238,6 +1240,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete file' });
+    }
+  });
+
+  // Partner Reviews routes
+  app.get('/api/partners/:partnerId/reviews', async (req, res) => {
+    try {
+      const reviews = await storage.getPartnerReviews(parseInt(req.params.partnerId));
+      res.json(reviews);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch partner reviews' });
+    }
+  });
+
+  app.post('/api/partners/:partnerId/reviews', async (req, res) => {
+    try {
+      const partnerId = parseInt(req.params.partnerId);
+      const validatedData = insertPartnerReviewSchema.parse({
+        ...req.body,
+        partnerId,
+        userId: 1 // TODO: Get from authenticated user session
+      });
+      const review = await storage.createPartnerReview(validatedData);
+      res.status(201).json(review);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid review data' });
+    }
+  });
+
+  app.put('/api/partner-reviews/:id', async (req, res) => {
+    try {
+      const validatedData = insertPartnerReviewSchema.partial().parse(req.body);
+      const review = await storage.updatePartnerReview(parseInt(req.params.id), validatedData);
+      res.json(review);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid review data' });
+    }
+  });
+
+  app.delete('/api/partner-reviews/:id', async (req, res) => {
+    try {
+      await storage.deletePartnerReview(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete review' });
+    }
+  });
+
+  // Partner Review Replies routes
+  app.get('/api/partner-reviews/:reviewId/replies', async (req, res) => {
+    try {
+      const replies = await storage.getPartnerReviewReplies(parseInt(req.params.reviewId));
+      res.json(replies);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch review replies' });
+    }
+  });
+
+  app.post('/api/partner-reviews/:reviewId/replies', async (req, res) => {
+    try {
+      const reviewId = parseInt(req.params.reviewId);
+      const validatedData = insertPartnerReviewReplySchema.parse({
+        ...req.body,
+        reviewId,
+        userId: 1 // TODO: Get from authenticated user session
+      });
+      const reply = await storage.createPartnerReviewReply(validatedData);
+      res.status(201).json(reply);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid reply data' });
+    }
+  });
+
+  app.put('/api/partner-review-replies/:id', async (req, res) => {
+    try {
+      const validatedData = insertPartnerReviewReplySchema.partial().parse(req.body);
+      const reply = await storage.updatePartnerReviewReply(parseInt(req.params.id), validatedData);
+      res.json(reply);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid reply data' });
+    }
+  });
+
+  app.delete('/api/partner-review-replies/:id', async (req, res) => {
+    try {
+      await storage.deletePartnerReviewReply(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete reply' });
     }
   });
 

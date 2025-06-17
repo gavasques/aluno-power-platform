@@ -16,6 +16,8 @@ import {
   partnerTypes,
   partnerContacts,
   partnerFiles,
+  partnerReviews,
+  partnerReviewReplies,
   youtubeVideos,
   news,
   updates,
@@ -55,6 +57,11 @@ import {
   type InsertPartnerContact,
   type PartnerFile,
   type InsertPartnerFile,
+  type PartnerReview,
+  type InsertPartnerReview,
+  type PartnerReviewReply,
+  type InsertPartnerReviewReply,
+  type PartnerReviewWithUser,
   type YoutubeVideo,
   type InsertYoutubeVideo,
   type News,
@@ -1006,6 +1013,120 @@ export class DatabaseStorage implements IStorage {
 
   async deletePartnerFile(id: number): Promise<void> {
     await db.delete(partnerFiles).where(eq(partnerFiles.id, id));
+  }
+
+  // Partner Reviews
+  async getPartnerReviews(partnerId: number): Promise<PartnerReviewWithUser[]> {
+    return await db
+      .select({
+        id: partnerReviews.id,
+        partnerId: partnerReviews.partnerId,
+        userId: partnerReviews.userId,
+        rating: partnerReviews.rating,
+        comment: partnerReviews.comment,
+        isApproved: partnerReviews.isApproved,
+        createdAt: partnerReviews.createdAt,
+        updatedAt: partnerReviews.updatedAt,
+        user: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          username: users.username,
+          role: users.role,
+          isActive: users.isActive,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+          password: users.password,
+        },
+      })
+      .from(partnerReviews)
+      .leftJoin(users, eq(partnerReviews.userId, users.id))
+      .where(and(eq(partnerReviews.partnerId, partnerId), eq(partnerReviews.isApproved, true)))
+      .orderBy(desc(partnerReviews.createdAt)) as PartnerReviewWithUser[];
+  }
+
+  async createPartnerReview(review: InsertPartnerReview): Promise<PartnerReview> {
+    const [created] = await db
+      .insert(partnerReviews)
+      .values({
+        ...review,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updatePartnerReview(id: number, review: Partial<InsertPartnerReview>): Promise<PartnerReview> {
+    const [updated] = await db
+      .update(partnerReviews)
+      .set({
+        ...review,
+        updatedAt: new Date(),
+      })
+      .where(eq(partnerReviews.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePartnerReview(id: number): Promise<void> {
+    await db.delete(partnerReviews).where(eq(partnerReviews.id, id));
+  }
+
+  // Partner Review Replies
+  async getPartnerReviewReplies(reviewId: number): Promise<(PartnerReviewReply & { user: User })[]> {
+    return await db
+      .select({
+        id: partnerReviewReplies.id,
+        reviewId: partnerReviewReplies.reviewId,
+        userId: partnerReviewReplies.userId,
+        content: partnerReviewReplies.content,
+        createdAt: partnerReviewReplies.createdAt,
+        updatedAt: partnerReviewReplies.updatedAt,
+        user: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          username: users.username,
+          role: users.role,
+          isActive: users.isActive,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+          password: users.password,
+        },
+      })
+      .from(partnerReviewReplies)
+      .leftJoin(users, eq(partnerReviewReplies.userId, users.id))
+      .where(eq(partnerReviewReplies.reviewId, reviewId))
+      .orderBy(asc(partnerReviewReplies.createdAt)) as (PartnerReviewReply & { user: User })[];
+  }
+
+  async createPartnerReviewReply(reply: InsertPartnerReviewReply): Promise<PartnerReviewReply> {
+    const [created] = await db
+      .insert(partnerReviewReplies)
+      .values({
+        ...reply,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updatePartnerReviewReply(id: number, reply: Partial<InsertPartnerReviewReply>): Promise<PartnerReviewReply> {
+    const [updated] = await db
+      .update(partnerReviewReplies)
+      .set({
+        ...reply,
+        updatedAt: new Date(),
+      })
+      .where(eq(partnerReviewReplies.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePartnerReviewReply(id: number): Promise<void> {
+    await db.delete(partnerReviewReplies).where(eq(partnerReviewReplies.id, id));
   }
 
   // YouTube Videos
