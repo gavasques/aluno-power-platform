@@ -61,9 +61,17 @@ const ToolsManager = () => {
     typeId: "",
     logo: "",
     website: "",
+    pricing: "",
+    features: [] as string[],
+    pros: [] as string[],
+    cons: [] as string[],
     brazilSupport: "works" as "works" | "partial" | "no",
     verified: false,
   });
+
+  const [currentFeature, setCurrentFeature] = useState("");
+  const [currentPro, setCurrentPro] = useState("");
+  const [currentCon, setCurrentCon] = useState("");
 
   const filteredTools = tools.filter(tool => {
     const matchesSearch = tool.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -79,9 +87,16 @@ const ToolsManager = () => {
       typeId: "",
       logo: "",
       website: "",
+      pricing: "",
+      features: [],
+      pros: [],
+      cons: [],
       brazilSupport: "works",
       verified: false,
     });
+    setCurrentFeature("");
+    setCurrentPro("");
+    setCurrentCon("");
     setEditingTool(null);
   };
 
@@ -103,6 +118,10 @@ const ToolsManager = () => {
       typeId: parseInt(formData.typeId),
       logo: formData.logo,
       website: formData.website || null,
+      pricing: formData.pricing || null,
+      features: formData.features.length > 0 ? formData.features : null,
+      pros: formData.pros.length > 0 ? formData.pros : null,
+      cons: formData.cons.length > 0 ? formData.cons : null,
       brazilSupport: formData.brazilSupport,
       verified: formData.verified,
     };
@@ -140,6 +159,10 @@ const ToolsManager = () => {
       typeId: tool.typeId.toString(),
       logo: tool.logo || "",
       website: tool.website || "",
+      pricing: tool.pricing || "",
+      features: tool.features || [],
+      pros: tool.pros || [],
+      cons: tool.cons || [],
       brazilSupport: tool.brazilSupport as "works" | "partial" | "no",
       verified: tool.verified || false,
     });
@@ -181,6 +204,57 @@ const ToolsManager = () => {
 
   const getToolTypeName = (typeId: number) => {
     return toolTypes.find(type => type.id === typeId)?.name || 'Tipo não encontrado';
+  };
+
+  const addFeature = () => {
+    if (currentFeature.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        features: [...prev.features, currentFeature.trim()]
+      }));
+      setCurrentFeature("");
+    }
+  };
+
+  const removeFeature = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addPro = () => {
+    if (currentPro.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        pros: [...prev.pros, currentPro.trim()]
+      }));
+      setCurrentPro("");
+    }
+  };
+
+  const removePro = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      pros: prev.pros.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addCon = () => {
+    if (currentCon.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        cons: [...prev.cons, currentCon.trim()]
+      }));
+      setCurrentCon("");
+    }
+  };
+
+  const removeCon = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      cons: prev.cons.filter((_, i) => i !== index)
+    }));
   };
 
   return (
@@ -333,146 +407,271 @@ const ToolsManager = () => {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingTool ? "Editar Ferramenta" : "Nova Ferramenta"}
             </DialogTitle>
           </DialogHeader>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="typeId">Tipo *</Label>
-                <Select 
-                  value={formData.typeId} 
-                  onValueChange={(value) => setFormData({ ...formData, typeId: value })}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {toolTypes.map(type => (
-                      <SelectItem key={type.id} value={type.id.toString()}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-              />
-            </div>
+          <Tabs defaultValue="basic" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="basic">Básico</TabsTrigger>
+              <TabsTrigger value="features">Funcionalidades</TabsTrigger>
+              <TabsTrigger value="pricing">Preços</TabsTrigger>
+              <TabsTrigger value="analysis">Análise</TabsTrigger>
+            </TabsList>
 
-            <div className="space-y-2">
-              <Label htmlFor="logo">Logo</Label>
-              <div className="flex gap-4 items-start">
-                <div className="flex-1">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                          setFormData({ ...formData, logo: event.target?.result as string });
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                    className="mb-2"
-                  />
-                  <Input
-                    placeholder="Ou cole uma URL da imagem"
-                    value={formData.logo}
-                    onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                  />
-                </div>
-                {formData.logo && (
-                  <div className="w-16 h-16 border border-gray-300 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
-                    <img 
-                      src={formData.logo} 
-                      alt="Preview"
-                      className="w-full h-full object-contain"
-                      onError={(e) => {
-                        const img = e.target as HTMLImageElement;
-                        img.style.display = 'none';
-                        const parent = img.parentElement;
-                        if (parent) {
-                          parent.innerHTML = '<div class="text-gray-400 text-xs">Erro ao carregar</div>';
-                        }
-                      }}
+            <form onSubmit={handleSubmit} className="mt-4">
+              <TabsContent value="basic" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nome *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
                     />
                   </div>
-                )}
-              </div>
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="typeId">Tipo *</Label>
+                    <Select 
+                      value={formData.typeId} 
+                      onValueChange={(value) => setFormData({ ...formData, typeId: value })}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {toolTypes.map(type => (
+                          <SelectItem key={type.id} value={type.id.toString()}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
+                    placeholder="Descreva brevemente o que a ferramenta faz..."
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                value={formData.website}
-                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                placeholder="https://exemplo.com"
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="logo">Logo</Label>
+                  <div className="flex gap-4 items-start">
+                    <div className="flex-1">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setFormData({ ...formData, logo: event.target?.result as string });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="mb-2"
+                      />
+                      <Input
+                        placeholder="Ou cole uma URL da imagem"
+                        value={formData.logo}
+                        onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                      />
+                    </div>
+                    {formData.logo && (
+                      <div className="w-16 h-16 border border-gray-300 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
+                        <img 
+                          src={formData.logo} 
+                          alt="Preview"
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            img.style.display = 'none';
+                            const parent = img.parentElement;
+                            if (parent) {
+                              parent.innerHTML = '<div class="text-gray-400 text-xs">Erro ao carregar</div>';
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="verified"
-                  checked={formData.verified}
-                  onCheckedChange={(checked) => setFormData({ ...formData, verified: checked })}
-                />
-                <Label htmlFor="verified">Ferramenta Verificada</Label>
-              </div>
-              <div className="space-y-2">
-                <Label>Funciona no Brasil</Label>
-                <Select 
-                  value={formData.brazilSupport} 
-                  onValueChange={(value) => setFormData({ ...formData, brazilSupport: value as "works" | "partial" | "no" })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="works">Funciona no Brasil</SelectItem>
-                    <SelectItem value="partial">Funciona Parcialmente no Brasil</SelectItem>
-                    <SelectItem value="no">Não roda no Brasil</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="website">Website</Label>
+                  <Input
+                    id="website"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    placeholder="https://exemplo.com"
+                  />
+                </div>
 
-            <div className="flex justify-end gap-2 mt-6">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit">
-                {editingTool ? 'Atualizar' : 'Criar'} Ferramenta
-              </Button>
-            </div>
-          </form>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="verified"
+                      checked={formData.verified}
+                      onCheckedChange={(checked) => setFormData({ ...formData, verified: checked })}
+                    />
+                    <Label htmlFor="verified">Ferramenta Verificada</Label>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Funciona no Brasil</Label>
+                    <Select 
+                      value={formData.brazilSupport} 
+                      onValueChange={(value) => setFormData({ ...formData, brazilSupport: value as "works" | "partial" | "no" })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="works">Funciona no Brasil</SelectItem>
+                        <SelectItem value="partial">Funciona Parcialmente no Brasil</SelectItem>
+                        <SelectItem value="no">Não roda no Brasil</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="features" className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Funcionalidades Principais</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Digite uma funcionalidade..."
+                      value={currentFeature}
+                      onChange={(e) => setCurrentFeature(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                    />
+                    <Button type="button" onClick={addFeature} size="sm">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.features.map((feature, index) => (
+                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                        {feature}
+                        <button
+                          type="button"
+                          onClick={() => removeFeature(index)}
+                          className="ml-1 hover:text-destructive"
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="pricing" className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="pricing">Informações de Preço</Label>
+                  <Textarea
+                    id="pricing"
+                    value={formData.pricing}
+                    onChange={(e) => setFormData({ ...formData, pricing: e.target.value })}
+                    rows={4}
+                    placeholder="Ex: Gratuito, Freemium, R$ 29/mês, A partir de $9.99/mês..."
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Descreva os planos de preço, versão gratuita, trials, etc.
+                  </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="analysis" className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Pontos Positivos</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Digite um ponto positivo..."
+                          value={currentPro}
+                          onChange={(e) => setCurrentPro(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPro())}
+                        />
+                        <Button type="button" onClick={addPro} size="sm">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="space-y-1">
+                        {formData.pros.map((pro, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-green-50 rounded text-sm">
+                            <span>{pro}</span>
+                            <button
+                              type="button"
+                              onClick={() => removePro(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Pontos Negativos</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Digite um ponto negativo..."
+                          value={currentCon}
+                          onChange={(e) => setCurrentCon(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCon())}
+                        />
+                        <Button type="button" onClick={addCon} size="sm">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="space-y-1">
+                        {formData.cons.map((con, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-red-50 rounded text-sm">
+                            <span>{con}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeCon(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit">
+                  {editingTool ? 'Atualizar' : 'Criar'} Ferramenta
+                </Button>
+              </div>
+            </form>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
