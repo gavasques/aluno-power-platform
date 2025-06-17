@@ -173,6 +173,31 @@ const PartnerDetailSimple = () => {
               </Card>
             )}
 
+            {/* Files Section */}
+            <Card className="shadow-sm border-0 bg-white" id="files-section">
+              <CardHeader className="flex flex-row items-center gap-2 pb-4">
+                <FileText className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-xl font-semibold text-gray-900">Arquivos</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <PartnerFiles partnerId={partner.id} />
+              </CardContent>
+            </Card>
+
+            {/* Reviews Section */}
+            <Card className="shadow-sm border-0 bg-white" id="reviews-section">
+              <CardHeader className="flex flex-row items-center gap-2 pb-4">
+                <MessageSquare className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-xl font-semibold text-gray-900">Avaliações</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <PartnerReviews partnerId={partner.id} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - 1/3 width */}
+          <div className="lg:col-span-1 space-y-6">
             {/* Contact Information */}
             <Card className="shadow-sm border-0 bg-white">
               <CardHeader className="pb-4">
@@ -296,31 +321,6 @@ const PartnerDetailSimple = () => {
                     <p className="text-gray-500">Nenhuma informação de contato disponível</p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Column - 1/3 width */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Files Section */}
-            <Card className="shadow-sm border-0 bg-white" id="files-section">
-              <CardHeader className="flex flex-row items-center gap-2 pb-4">
-                <FileText className="h-5 w-5 text-blue-600" />
-                <CardTitle className="text-xl font-semibold text-gray-900">Arquivos</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <PartnerFiles partnerId={partner.id} />
-              </CardContent>
-            </Card>
-
-            {/* Reviews Section */}
-            <Card className="shadow-sm border-0 bg-white" id="reviews-section">
-              <CardHeader className="flex flex-row items-center gap-2 pb-4">
-                <MessageSquare className="h-5 w-5 text-blue-600" />
-                <CardTitle className="text-xl font-semibold text-gray-900">Avaliações</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <PartnerReviews partnerId={partner.id} />
               </CardContent>
             </Card>
           </div>
