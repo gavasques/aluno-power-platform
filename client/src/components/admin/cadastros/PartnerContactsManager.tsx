@@ -209,7 +209,7 @@ export const PartnerContactsManager: React.FC<PartnerContactsManagerProps> = ({ 
                   <Input
                     id="email"
                     type="email"
-                    value={formData.email}
+                    value={formData.email || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="email@exemplo.com"
                     className="bg-slate-800 border-slate-600 text-white"
@@ -219,7 +219,7 @@ export const PartnerContactsManager: React.FC<PartnerContactsManagerProps> = ({ 
                   <Label htmlFor="phone" className="text-white">Telefone</Label>
                   <Input
                     id="phone"
-                    value={formData.phone}
+                    value={formData.phone || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="(11) 99999-9999"
                     className="bg-slate-800 border-slate-600 text-white"
@@ -231,7 +231,7 @@ export const PartnerContactsManager: React.FC<PartnerContactsManagerProps> = ({ 
                 <Label htmlFor="whatsapp" className="text-white">WhatsApp</Label>
                 <Input
                   id="whatsapp"
-                  value={formData.whatsapp}
+                  value={formData.whatsapp || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
                   placeholder="(11) 99999-9999"
                   className="bg-slate-800 border-slate-600 text-white"
@@ -242,7 +242,7 @@ export const PartnerContactsManager: React.FC<PartnerContactsManagerProps> = ({ 
                 <Label htmlFor="notes" className="text-white">Observações</Label>
                 <Textarea
                   id="notes"
-                  value={formData.notes}
+                  value={formData.notes || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Informações adicionais sobre o contato"
                   className="bg-slate-800 border-slate-600 text-white"

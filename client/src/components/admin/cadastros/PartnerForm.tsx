@@ -122,7 +122,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-800">
+            <TabsList className="grid w-full grid-cols-4 bg-slate-800">
               <TabsTrigger value="basic" className="text-white data-[state=active]:bg-red-600">
                 Básico
               </TabsTrigger>
@@ -131,6 +131,9 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
               </TabsTrigger>
               <TabsTrigger value="social" className="text-white data-[state=active]:bg-red-600">
                 Redes Sociais
+              </TabsTrigger>
+              <TabsTrigger value="contacts" className="text-white data-[state=active]:bg-red-600">
+                Contatos
               </TabsTrigger>
             </TabsList>
 
@@ -226,16 +229,12 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="specialties" className="text-white">Especialidades</Label>
-                <Input
-                  id="specialties"
-                  value={formData.specialties}
-                  onChange={(e) => setFormData(prev => ({ ...prev, specialties: e.target.value }))}
-                  className="bg-slate-800 border-slate-600 text-white"
-                  placeholder="Especialidades do parceiro"
-                />
-              </div>
+              <BulletPointEditor
+                label="Especialidades"
+                placeholder="Adicione uma especialidade"
+                items={formData.specialties}
+                onChange={(items) => setFormData(prev => ({ ...prev, specialties: items }))}
+              />
             </TabsContent>
 
             <TabsContent value="details" className="space-y-4">
@@ -318,6 +317,16 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
                   placeholder="https://linkedin.com/in/usuario"
                 />
               </div>
+            </TabsContent>
+
+            <TabsContent value="contacts" className="space-y-4">
+              {isEditing && partner ? (
+                <PartnerContactsManager partnerId={partner.id} />
+              ) : (
+                <div className="text-slate-400 text-center py-8">
+                  Salve o parceiro primeiro para gerenciar contatos
+                </div>
+              )}
             </TabsContent>
           </Tabs>
 
