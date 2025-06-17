@@ -644,6 +644,16 @@ export const insertWebhookConfigSchema = createInsertSchema(webhookConfigs).omit
   updatedAt: true,
 });
 
+export const insertTemplateCategorySchema = createInsertSchema(templateCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPromptCategorySchema = createInsertSchema(promptCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -692,3 +702,9 @@ export type Update = typeof updates.$inferSelect;
 
 export type InsertWebhookConfig = z.infer<typeof insertWebhookConfigSchema>;
 export type WebhookConfig = typeof webhookConfigs.$inferSelect;
+
+export type InsertTemplateCategory = z.infer<typeof insertTemplateCategorySchema>;
+export type TemplateCategory = typeof templateCategories.$inferSelect;
+
+export type InsertPromptCategory = z.infer<typeof insertPromptCategorySchema>;
+export type PromptCategory = typeof promptCategories.$inferSelect;

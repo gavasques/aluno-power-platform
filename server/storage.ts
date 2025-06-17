@@ -36,6 +36,12 @@ import {
   type InsertProduct,
   type Category,
   type InsertCategory,
+  type Department,
+  type InsertDepartment,
+  type TemplateCategory,
+  type InsertTemplateCategory,
+  type PromptCategory,
+  type InsertPromptCategory,
   type YoutubeVideo,
   type InsertYoutubeVideo,
   type News,
@@ -116,6 +122,27 @@ export interface IStorage {
   createCategory(category: InsertCategory): Promise<Category>;
   updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category>;
   deleteCategory(id: number): Promise<void>;
+
+  // Departments
+  getDepartments(): Promise<Department[]>;
+  getDepartment(id: number): Promise<Department | undefined>;
+  createDepartment(department: InsertDepartment): Promise<Department>;
+  updateDepartment(id: number, department: Partial<InsertDepartment>): Promise<Department>;
+  deleteDepartment(id: number): Promise<void>;
+
+  // Template Categories
+  getTemplateCategories(): Promise<TemplateCategory[]>;
+  getTemplateCategory(id: number): Promise<TemplateCategory | undefined>;
+  createTemplateCategory(category: InsertTemplateCategory): Promise<TemplateCategory>;
+  updateTemplateCategory(id: number, category: Partial<InsertTemplateCategory>): Promise<TemplateCategory>;
+  deleteTemplateCategory(id: number): Promise<void>;
+
+  // Prompt Categories
+  getPromptCategories(): Promise<PromptCategory[]>;
+  getPromptCategory(id: number): Promise<PromptCategory | undefined>;
+  createPromptCategory(category: InsertPromptCategory): Promise<PromptCategory>;
+  updatePromptCategory(id: number, category: Partial<InsertPromptCategory>): Promise<PromptCategory>;
+  deletePromptCategory(id: number): Promise<void>;
 
   // YouTube Videos
   getYoutubeVideos(): Promise<YoutubeVideo[]>;
@@ -683,6 +710,99 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCategory(id: number): Promise<void> {
     await db.delete(categories).where(eq(categories.id, id));
+  }
+
+  // Departments
+  async getDepartments(): Promise<Department[]> {
+    return await db.select().from(departments).orderBy(desc(departments.createdAt));
+  }
+
+  async getDepartment(id: number): Promise<Department | undefined> {
+    const [department] = await db.select().from(departments).where(eq(departments.id, id));
+    return department || undefined;
+  }
+
+  async createDepartment(department: InsertDepartment): Promise<Department> {
+    const [created] = await db
+      .insert(departments)
+      .values(department)
+      .returning();
+    return created;
+  }
+
+  async updateDepartment(id: number, department: Partial<InsertDepartment>): Promise<Department> {
+    const [updated] = await db
+      .update(departments)
+      .set(department)
+      .where(eq(departments.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDepartment(id: number): Promise<void> {
+    await db.delete(departments).where(eq(departments.id, id));
+  }
+
+  // Template Categories
+  async getTemplateCategories(): Promise<TemplateCategory[]> {
+    return await db.select().from(templateCategories).orderBy(desc(templateCategories.createdAt));
+  }
+
+  async getTemplateCategory(id: number): Promise<TemplateCategory | undefined> {
+    const [category] = await db.select().from(templateCategories).where(eq(templateCategories.id, id));
+    return category || undefined;
+  }
+
+  async createTemplateCategory(category: InsertTemplateCategory): Promise<TemplateCategory> {
+    const [created] = await db
+      .insert(templateCategories)
+      .values(category)
+      .returning();
+    return created;
+  }
+
+  async updateTemplateCategory(id: number, category: Partial<InsertTemplateCategory>): Promise<TemplateCategory> {
+    const [updated] = await db
+      .update(templateCategories)
+      .set(category)
+      .where(eq(templateCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTemplateCategory(id: number): Promise<void> {
+    await db.delete(templateCategories).where(eq(templateCategories.id, id));
+  }
+
+  // Prompt Categories
+  async getPromptCategories(): Promise<PromptCategory[]> {
+    return await db.select().from(promptCategories).orderBy(desc(promptCategories.createdAt));
+  }
+
+  async getPromptCategory(id: number): Promise<PromptCategory | undefined> {
+    const [category] = await db.select().from(promptCategories).where(eq(promptCategories.id, id));
+    return category || undefined;
+  }
+
+  async createPromptCategory(category: InsertPromptCategory): Promise<PromptCategory> {
+    const [created] = await db
+      .insert(promptCategories)
+      .values(category)
+      .returning();
+    return created;
+  }
+
+  async updatePromptCategory(id: number, category: Partial<InsertPromptCategory>): Promise<PromptCategory> {
+    const [updated] = await db
+      .update(promptCategories)
+      .set(category)
+      .where(eq(promptCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePromptCategory(id: number): Promise<void> {
+    await db.delete(promptCategories).where(eq(promptCategories.id, id));
   }
 
   // YouTube Videos
