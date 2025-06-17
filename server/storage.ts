@@ -1017,32 +1017,41 @@ export class DatabaseStorage implements IStorage {
 
   // Partner Reviews
   async getPartnerReviews(partnerId: number): Promise<PartnerReviewWithUser[]> {
-    return await db
-      .select({
-        id: partnerReviews.id,
-        partnerId: partnerReviews.partnerId,
-        userId: partnerReviews.userId,
-        rating: partnerReviews.rating,
-        comment: partnerReviews.comment,
-        isApproved: partnerReviews.isApproved,
-        createdAt: partnerReviews.createdAt,
-        updatedAt: partnerReviews.updatedAt,
-        user: {
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          username: users.username,
-          role: users.role,
-          isActive: users.isActive,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-          password: users.password,
-        },
-      })
-      .from(partnerReviews)
-      .leftJoin(users, eq(partnerReviews.userId, users.id))
-      .where(and(eq(partnerReviews.partnerId, partnerId), eq(partnerReviews.isApproved, true)))
-      .orderBy(desc(partnerReviews.createdAt)) as PartnerReviewWithUser[];
+    try {
+      const reviews = await db
+        .select()
+        .from(partnerReviews)
+        .where(and(eq(partnerReviews.partnerId, partnerId), eq(partnerReviews.isApproved, true)))
+        .orderBy(desc(partnerReviews.createdAt));
+
+      const result: PartnerReviewWithUser[] = [];
+      
+      for (const review of reviews) {
+        const [user] = await db.select().from(users).where(eq(users.id, review.userId));
+        const replies = await this.getPartnerReviewReplies(review.id);
+        
+        result.push({
+          ...review,
+          user: user || {
+            id: 0,
+            username: 'Usuário Desconhecido',
+            name: 'Usuário Desconhecido',
+            email: '',
+            password: '',
+            role: 'user',
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          replies: replies,
+        });
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching partner reviews:', error);
+      throw error;
+    }
   }
 
   async createPartnerReview(review: InsertPartnerReview): Promise<PartnerReview> {
