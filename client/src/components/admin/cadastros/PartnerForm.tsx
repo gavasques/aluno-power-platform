@@ -68,7 +68,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
       email: formData.email || null,
       phone: formData.phone,
       logo: formData.logo || null,
-      categoryId: parseInt(formData.categoryId),
+      partnerTypeId: parseInt(formData.partnerTypeId),
       specialties: formData.specialties,
       description: formData.description,
       about: formData.about,
@@ -148,8 +148,8 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
                 <div className="space-y-2">
                   <Label htmlFor="category" className="text-white">Tipo de Parceiro *</Label>
                   <Select
-                    value={formData.categoryId}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
+                    value={formData.partnerTypeId}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, partnerTypeId: value }))}
                   >
                     <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
                       <SelectValue placeholder="Selecione um tipo" />
