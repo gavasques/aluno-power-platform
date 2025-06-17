@@ -14,6 +14,7 @@ import {
   promptCategories,
   departments,
   partnerTypes,
+  partnerContacts,
   youtubeVideos,
   news,
   updates,
@@ -49,6 +50,8 @@ import {
   type InsertMaterialType,
   type PartnerType,
   type InsertPartnerType,
+  type PartnerContact,
+  type InsertPartnerContact,
   type YoutubeVideo,
   type InsertYoutubeVideo,
   type News,
@@ -171,6 +174,13 @@ export interface IStorage {
   createPartnerType(partnerType: InsertPartnerType): Promise<PartnerType>;
   updatePartnerType(id: number, partnerType: Partial<InsertPartnerType>): Promise<PartnerType>;
   deletePartnerType(id: number): Promise<void>;
+
+  // Partner Contacts
+  getPartnerContacts(partnerId: number): Promise<PartnerContact[]>;
+  getPartnerContact(id: number): Promise<PartnerContact | undefined>;
+  createPartnerContact(contact: InsertPartnerContact): Promise<PartnerContact>;
+  updatePartnerContact(id: number, contact: Partial<InsertPartnerContact>): Promise<PartnerContact>;
+  deletePartnerContact(id: number): Promise<void>;
 
   // YouTube Videos
   getYoutubeVideos(): Promise<YoutubeVideo[]>;

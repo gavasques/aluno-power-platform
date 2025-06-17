@@ -110,7 +110,7 @@ export const partners = pgTable("partners", {
   phone: text("phone").notNull(),
   logo: text("logo"), // Added logo field
   partnerTypeId: integer("partner_type_id").references(() => partnerTypes.id),
-  specialties: text("specialties"),
+  specialties: text("specialties").array(),
   description: text("description"),
   about: text("about"),
   services: text("services"),
@@ -129,9 +129,12 @@ export const partners = pgTable("partners", {
 export const partnerContacts = pgTable("partner_contacts", {
   id: serial("id").primaryKey(),
   partnerId: integer("partner_id").references(() => partners.id).notNull(),
-  type: text("type").notNull(), // 'phone', 'email', 'whatsapp', 'website'
-  value: text("value").notNull(),
-  label: text("label"),
+  area: text("area").notNull(), // Area/Departamento
+  name: text("name").notNull(), // Nome do contato
+  email: text("email"), // Email do contato
+  phone: text("phone"), // Telefone
+  whatsapp: text("whatsapp"), // WhatsApp
+  notes: text("notes"), // Observações
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -682,6 +685,11 @@ export const insertPartnerTypeSchema = createInsertSchema(partnerTypes).omit({
   createdAt: true,
 });
 
+export const insertPartnerContactSchema = createInsertSchema(partnerContacts).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -743,3 +751,6 @@ export type MaterialType = typeof materialTypes.$inferSelect;
 
 export type InsertPartnerType = z.infer<typeof insertPartnerTypeSchema>;
 export type PartnerType = typeof partnerTypes.$inferSelect;
+
+export type InsertPartnerContact = z.infer<typeof insertPartnerContactSchema>;
+export type PartnerContact = typeof partnerContacts.$inferSelect;
