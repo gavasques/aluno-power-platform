@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Edit, Trash2, User, Mail, Phone, MessageSquare, Building } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { PhoneInput } from '@/components/ui/phone-input';
 import type { PartnerContact, InsertPartnerContact } from '@shared/schema';
 
 interface PartnerContactsManagerProps {
@@ -217,11 +218,10 @@ export const PartnerContactsManager: React.FC<PartnerContactsManagerProps> = ({ 
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="text-white">Telefone</Label>
-                  <Input
+                  <PhoneInput
                     id="phone"
                     value={formData.phone || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="(11) 99999-9999"
                     className="bg-slate-800 border-slate-600 text-white"
                   />
                 </div>
@@ -233,7 +233,7 @@ export const PartnerContactsManager: React.FC<PartnerContactsManagerProps> = ({ 
                   id="whatsapp"
                   value={formData.whatsapp || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
-                  placeholder="(11) 99999-9999"
+                  placeholder="+ XX XX XXXXXXXXX"
                   className="bg-slate-800 border-slate-600 text-white"
                 />
               </div>

@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Partner as DbPartner, PartnerType } from '@shared/schema';
 import { BulletPointEditor } from './BulletPointEditor';
 import { PartnerContactsManager } from './PartnerContactsManager';
+import { PhoneInput } from '@/components/ui/phone-input';
 
 interface PartnerFormProps {
   partner?: DbPartner | null;
@@ -189,12 +190,11 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
 
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="text-white">Telefone</Label>
-                  <Input
+                  <PhoneInput
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     className="bg-slate-800 border-slate-600 text-white"
-                    placeholder="(11) 99999-9999"
                   />
                 </div>
               </div>
