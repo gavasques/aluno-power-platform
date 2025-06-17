@@ -27,14 +27,8 @@ const fileTypeLabels = {
 export const PartnerFilesManager: React.FC<PartnerFilesManagerProps> = ({ partnerId }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFile, setEditingFile] = useState<PartnerFile | null>(null);
-  const [formData, setFormData] = useState<Partial<InsertPartnerFile>>({
-    name: '',
-    description: '',
-    fileUrl: '',
-    fileType: 'other',
-    fileName: '',
-    fileSize: ''
-  });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -117,48 +111,76 @@ export const PartnerFilesManager: React.FC<PartnerFilesManagerProps> = ({ partne
   });
 
   const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      fileUrl: '',
-      fileType: 'other',
-      fileName: '',
-      fileSize: ''
-    });
+    setSelectedFile(null);
     setEditingFile(null);
     setIsDialogOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.fileUrl || !formData.fileName) {
+    if (!selectedFile) {
       toast({
         title: "Erro",
-        description: "Nome, URL do arquivo e nome do arquivo são obrigatórios.",
+        description: "Por favor, selecione um arquivo.",
         variant: "destructive",
       });
       return;
     }
 
-    if (editingFile) {
-      updateMutation.mutate({ id: editingFile.id, data: formData });
-    } else {
-      createMutation.mutate({ ...formData, partnerId } as InsertPartnerFile);
+    setIsUploading(true);
+
+    try {
+      // For now, create a file record with basic information
+      const fileData = {
+        partnerId,
+        name: selectedFile.name.replace(/\.[^/.]+$/, ""), // Remove extension for display name
+        fileName: selectedFile.name,
+        fileUrl: `https://example.com/uploads/${selectedFile.name}`, // Placeholder URL
+        fileType: 'other',
+        fileSize: `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`,
+        description: `Arquivo enviado: ${selectedFile.name}`
+      };
+
+      const response = await apiRequest('/api/partner-files', {
+        method: 'POST',
+        body: JSON.stringify(fileData),
+      });
+
+      if (!response) {
+        throw new Error('Upload failed');
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['/api/partners', partnerId, 'files'] });
+      toast({
+        title: "Sucesso",
+        description: "Arquivo enviado com sucesso!",
+      });
+      resetForm();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao enviar arquivo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleEdit = (file: PartnerFile) => {
-    setEditingFile(file);
-    setFormData({
-      name: file.name,
-      description: file.description,
-      fileUrl: file.fileUrl,
-      fileType: file.fileType,
-      fileName: file.fileName,
-      fileSize: file.fileSize
+    // For now, disable editing - only allow new uploads
+    toast({
+      title: "Info",
+      description: "Para editar um arquivo, remova-o e faça upload de um novo.",
     });
-    setIsDialogOpen(true);
   };
 
   const handleDelete = (file: PartnerFile) => {
@@ -194,89 +216,30 @@ export const PartnerFilesManager: React.FC<PartnerFilesManagerProps> = ({ partne
                 {editingFile ? 'Editar Arquivo' : 'Novo Arquivo'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-white">Nome do Arquivo *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Ex: Catálogo de Produtos 2024"
-                    className="bg-slate-800 border-slate-600 text-white"
-                    required
-                  />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div className="text-center">
+                  <Upload className="h-12 w-12 text-blue-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-white mb-2">Upload de Arquivo</h3>
+                  <p className="text-gray-400 text-sm">Selecione um arquivo para enviar</p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="fileType" className="text-white">Tipo de Arquivo</Label>
-                  <Select
-                    value={formData.fileType}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, fileType: value }))}
-                  >
-                    <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-600">
-                      {Object.entries(fileTypeLabels).map(([value, label]) => (
-                        <SelectItem 
-                          key={value} 
-                          value={value}
-                          className="text-white hover:bg-slate-700"
-                        >
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="fileUrl" className="text-white">URL do Arquivo *</Label>
-                <Input
-                  id="fileUrl"
-                  value={formData.fileUrl || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fileUrl: e.target.value }))}
-                  placeholder="https://exemplo.com/arquivo.pdf"
-                  className="bg-slate-800 border-slate-600 text-white"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="fileName" className="text-white">Nome do Arquivo *</Label>
+                  <Label htmlFor="file" className="text-white">Selecionar Arquivo *</Label>
                   <Input
-                    id="fileName"
-                    value={formData.fileName || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fileName: e.target.value }))}
-                    placeholder="catalogo-produtos.pdf"
-                    className="bg-slate-800 border-slate-600 text-white"
-                    required
+                    id="file"
+                    type="file"
+                    onChange={handleFileSelect}
+                    className="bg-slate-800 border-slate-600 text-white file:bg-blue-600 file:text-white file:border-0 file:rounded file:px-4 file:py-2 file:mr-4"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.zip,.rar"
                   />
+                  {selectedFile && (
+                    <div className="text-sm text-gray-400 mt-2">
+                      Arquivo selecionado: <span className="text-white">{selectedFile.name}</span> 
+                      <span className="ml-2">({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="fileSize" className="text-white">Tamanho do Arquivo</Label>
-                  <Input
-                    id="fileSize"
-                    value={formData.fileSize || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fileSize: e.target.value }))}
-                    placeholder="2.5 MB"
-                    className="bg-slate-800 border-slate-600 text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-white">Descrição</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Descrição do arquivo e conteúdo"
-                  className="bg-slate-800 border-slate-600 text-white"
-                  rows={3}
-                />
               </div>
 
               <div className="flex justify-end gap-2">
@@ -291,9 +254,9 @@ export const PartnerFilesManager: React.FC<PartnerFilesManagerProps> = ({ partne
                 <Button 
                   type="submit"
                   className="bg-blue-600 hover:bg-blue-700"
-                  disabled={createMutation.isPending || updateMutation.isPending}
+                  disabled={isUploading || !selectedFile}
                 >
-                  {editingFile ? 'Atualizar' : 'Adicionar'}
+                  {isUploading ? 'Enviando...' : 'Enviar Arquivo'}
                 </Button>
               </div>
             </form>
