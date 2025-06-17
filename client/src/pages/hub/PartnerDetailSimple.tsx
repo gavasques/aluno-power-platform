@@ -54,8 +54,12 @@ const PartnerDetailSimple = () => {
     return (
       <div className="w-full p-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Parceiro não encontrado</h1>
-          <Button onClick={() => navigate('/hub/parceiros')}>
+          <h2 className="text-2xl font-semibold text-gray-900">Parceiro não encontrado</h2>
+          <p className="mt-2 text-gray-600">O parceiro que você está procurando não existe.</p>
+          <Button
+            onClick={() => navigate('/hub/parceiros')}
+            className="mt-4"
+          >
             Voltar aos Parceiros
           </Button>
         </div>
@@ -66,254 +70,260 @@ const PartnerDetailSimple = () => {
   const partnerType = partnerTypes.find(type => type.id === partner.partnerTypeId);
 
   return (
-    <div className="w-full p-6 space-y-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/hub/parceiros')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar aos Parceiros
-        </Button>
-      </div>
-
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-6">
-            {partner.logo && (
-              <div className="w-24 h-24 bg-white rounded-lg p-2 flex items-center justify-center">
-                <img 
-                  src={partner.logo} 
-                  alt={partner.name}
-                  className="max-w-full max-h-full object-contain"
-                />
-              </div>
-            )}
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{partner.name}</h1>
-              {partner.isVerified && (
-                <div className="flex items-center mb-2">
-                  <Shield className="h-5 w-5 mr-2 text-green-300" />
-                  <span className="text-green-300">Parceiro Verificado</span>
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/hub/parceiros')}
+            className="mb-6 hover:bg-gray-100"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar aos Parceiros
+          </Button>
+          
+          {/* Partner Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
+            <div className="flex items-start gap-6">
+              <div className="bg-white rounded-xl p-4 flex-shrink-0">
+                <div className="text-2xl font-bold text-blue-600">
+                  {partner.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
                 </div>
-              )}
-              {partnerType && (
-                <Badge variant="secondary" className="mb-4 text-base px-3 py-1">
-                  {partnerType.name}
-                </Badge>
-              )}
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
-                const reviewsSection = document.getElementById('reviews-section');
-                reviewsSection?.scrollIntoView({ behavior: 'smooth' });
-              }}>
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-6 w-6 ${
-                      i < Math.floor(parseFloat(partner.averageRating || '0'))
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-                <span className="ml-3 text-lg">
-                  {parseFloat(partner.averageRating || '0').toFixed(1)} ({partner.totalReviews} avaliações)
-                </span>
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <h1 className="text-3xl font-bold">{partner.name}</h1>
+                  {partner.isVerified && (
+                    <div className="flex items-center gap-1 bg-green-500 text-white px-3 py-1 rounded-full text-sm">
+                      <Shield className="h-4 w-4" />
+                      Verificado
+                    </div>
+                  )}
+                </div>
+                
+                {partnerType && (
+                  <div className="mb-4">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                      {partnerType.name}
+                    </Badge>
+                  </div>
+                )}
+                
+                {/* Rating Display */}
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
+                  const reviewsSection = document.getElementById('reviews-section');
+                  reviewsSection?.scrollIntoView({ behavior: 'smooth' });
+                }}>
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-5 w-5 ${
+                          star <= Math.floor(parseFloat(partner.averageRating || '0'))
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-white/40'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-lg font-semibold">{partner.averageRating || '0.0'}</span>
+                  <span className="text-white/80">({partner.reviewCount || 0} avaliações)</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-        {/* Main Content */}
-        <div className="xl:col-span-3 space-y-8">
-          {/* Description */}
-          {partner.description && (
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-2xl">Sobre o Parceiro</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">
-                  {partner.description}
-                </p>
-              </CardContent>
-            </Card>
-          )}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - 2/3 width */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* About Section */}
+            {partner.description && (
+              <Card className="shadow-sm border-0 bg-white">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Sobre o Parceiro</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-gray-600 leading-relaxed">{partner.description}</p>
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Specialties */}
-          {partner.specialties && Array.isArray(partner.specialties) && partner.specialties.length > 0 && (
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-2xl">Especialidades</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-3">
-                  {partner.specialties.map((specialty, index) => (
-                    <div key={index} className="flex items-center text-gray-700">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                      <span className="text-lg">{specialty}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Contact Information */}
-          <Card className="shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-2xl">Informações de Contato</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Partner Contacts from Admin */}
-              {partnerContacts.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Contatos da Empresa</h3>
-                  {partnerContacts.map((contact) => (
-                    <div key={contact.id} className="bg-gray-50 rounded-lg p-4 space-y-2">
-                      <div className="flex items-center">
-                        <User className="h-5 w-5 mr-3 text-gray-500" />
-                        <span className="font-medium text-gray-900">{contact.name}</span>
-                        <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                          {contact.area}
-                        </span>
+            {/* Specialties */}
+            {partner.specialties && partner.specialties.length > 0 && (
+              <Card className="shadow-sm border-0 bg-white">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Especialidades</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-1 gap-3">
+                    {partner.specialties.map((specialty, index) => (
+                      <div key={index} className="flex items-center bg-gray-50 rounded-lg p-3">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full mr-3 flex-shrink-0"></div>
+                        <span className="text-gray-700 font-medium">{specialty}</span>
                       </div>
-                      {contact.phone && (
-                        <div className="flex items-center ml-8">
-                          <Phone className="h-4 w-4 mr-2 text-gray-500" />
-                          <span className="text-gray-700">{contact.phone}</span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Contact Information */}
+            <Card className="shadow-sm border-0 bg-white">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl font-semibold text-gray-900">Informações de Contato</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 space-y-6">
+                {/* Partner Contacts from Admin */}
+                {partnerContacts.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Contatos da Empresa</h3>
+                    <div className="space-y-4">
+                      {partnerContacts.map((contact) => (
+                        <div key={contact.id} className="bg-gray-50 rounded-xl p-4">
+                          <div className="flex items-center mb-3">
+                            <User className="h-5 w-5 mr-3 text-gray-500" />
+                            <span className="font-medium text-gray-900">{contact.name}</span>
+                            <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                              {contact.area}
+                            </span>
+                          </div>
+                          <div className="space-y-2 ml-8">
+                            {contact.phone && (
+                              <div className="flex items-center">
+                                <Phone className="h-4 w-4 mr-2 text-gray-500" />
+                                <span className="text-gray-700">{contact.phone}</span>
+                              </div>
+                            )}
+                            {contact.whatsapp && (
+                              <div className="flex items-center">
+                                <Phone className="h-4 w-4 mr-2 text-green-500" />
+                                <span className="text-gray-700">{contact.whatsapp}</span>
+                                <span className="ml-2 text-xs text-green-600 font-medium">(WhatsApp)</span>
+                              </div>
+                            )}
+                            {contact.email && (
+                              <div className="flex items-center">
+                                <Mail className="h-4 w-4 mr-2 text-gray-500" />
+                                <span className="text-gray-700">{contact.email}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Partner General Contact Info */}
+                {(partner.phone || partner.email || partner.website || partner.instagram || partner.linkedin) && (
+                  <div>
+                    {partnerContacts.length > 0 && (
+                      <div className="border-t pt-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">Informações Gerais</h3>
+                      </div>
+                    )}
+                    
+                    <div className="space-y-3">
+                      {partner.phone && (
+                        <div className="flex items-center bg-gray-50 rounded-lg p-3">
+                          <Phone className="h-5 w-5 mr-3 text-gray-500" />
+                          <span className="text-gray-700">{partner.phone}</span>
                         </div>
                       )}
-                      {contact.whatsapp && (
-                        <div className="flex items-center ml-8">
-                          <Phone className="h-4 w-4 mr-2 text-green-500" />
-                          <span className="text-gray-700">{contact.whatsapp}</span>
-                          <span className="ml-2 text-xs text-green-600">(WhatsApp)</span>
+                      
+                      {partner.email && (
+                        <div className="flex items-center bg-gray-50 rounded-lg p-3">
+                          <Mail className="h-5 w-5 mr-3 text-gray-500" />
+                          <span className="text-gray-700">{partner.email}</span>
                         </div>
                       )}
-                      {contact.email && (
-                        <div className="flex items-center ml-8">
-                          <Mail className="h-4 w-4 mr-2 text-gray-500" />
-                          <span className="text-gray-700">{contact.email}</span>
+                      
+                      {partner.website && (
+                        <div className="flex items-center bg-gray-50 rounded-lg p-3">
+                          <Globe className="h-5 w-5 mr-3 text-gray-500" />
+                          <a 
+                            href={partner.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline font-medium"
+                          >
+                            Website
+                          </a>
+                        </div>
+                      )}
+                      
+                      {partner.instagram && (
+                        <div className="flex items-center bg-gray-50 rounded-lg p-3">
+                          <Instagram className="h-5 w-5 mr-3 text-gray-500" />
+                          <a 
+                            href={`https://instagram.com/${partner.instagram.replace('@', '')}`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline font-medium"
+                          >
+                            {partner.instagram}
+                          </a>
+                        </div>
+                      )}
+                      
+                      {partner.linkedin && (
+                        <div className="flex items-center bg-gray-50 rounded-lg p-3">
+                          <Linkedin className="h-5 w-5 mr-3 text-gray-500" />
+                          <a 
+                            href={partner.linkedin}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline font-medium"
+                          >
+                            LinkedIn
+                          </a>
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                )}
 
-              {/* Partner General Contact Info */}
-              {(partner.phone || partner.email || partner.website || partner.instagram || partner.linkedin) && (
-                <div className="space-y-4">
-                  {partnerContacts.length > 0 && (
-                    <div className="border-t pt-4">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Informações Gerais</h3>
-                    </div>
-                  )}
-                  
-                  {partner.phone && (
-                    <div className="flex items-center">
-                      <Phone className="h-5 w-5 mr-3 text-gray-500" />
-                      <span className="text-gray-700">{partner.phone}</span>
-                    </div>
-                  )}
-                  
-                  {partner.email && (
-                    <div className="flex items-center">
-                      <Mail className="h-5 w-5 mr-3 text-gray-500" />
-                      <span className="text-gray-700">{partner.email}</span>
-                    </div>
-                  )}
-                  
-                  {partner.website && (
-                    <div className="flex items-center">
-                      <Globe className="h-5 w-5 mr-3 text-gray-500" />
-                      <a 
-                        href={partner.website} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        Website
-                      </a>
-                    </div>
-                  )}
-                  
-                  {partner.instagram && (
-                    <div className="flex items-center">
-                      <Instagram className="h-5 w-5 mr-3 text-gray-500" />
-                      <a 
-                        href={`https://instagram.com/${partner.instagram.replace('@', '')}`}
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        {partner.instagram}
-                      </a>
-                    </div>
-                  )}
-                  
-                  {partner.linkedin && (
-                    <div className="flex items-center">
-                      <Linkedin className="h-5 w-5 mr-3 text-gray-500" />
-                      <a 
-                        href={partner.linkedin}
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        LinkedIn
-                      </a>
-                    </div>
-                  )}
-                </div>
-              )}
+                {/* Empty state */}
+                {partnerContacts.length === 0 && !partner.phone && !partner.email && !partner.website && !partner.instagram && !partner.linkedin && (
+                  <div className="text-center py-12">
+                    <Phone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">Nenhuma informação de contato disponível</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Empty state */}
-              {partnerContacts.length === 0 && !partner.phone && !partner.email && !partner.website && !partner.instagram && !partner.linkedin && (
-                <div className="text-center py-8">
-                  <Phone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">Nenhuma informação de contato disponível no momento</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Right Column - 1/3 width */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Files Section */}
+            <Card className="shadow-sm border-0 bg-white" id="files-section">
+              <CardHeader className="flex flex-row items-center gap-2 pb-4">
+                <FileText className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-xl font-semibold text-gray-900">Arquivos</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <PartnerFiles partnerId={partner.id} />
+              </CardContent>
+            </Card>
 
-          {/* Files and Documents */}
-          <Card className="shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-2xl flex items-center">
-                <FileText className="h-6 w-6 mr-2" />
-                Arquivos e Documentos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PartnerFiles partnerId={partner.id} />
-            </CardContent>
-          </Card>
-
-          {/* Reviews and Ratings */}
-          <Card className="shadow-sm" id="reviews-section">
-            <CardHeader>
-              <CardTitle className="text-2xl flex items-center">
-                <MessageSquare className="h-6 w-6 mr-2" />
-                Avaliações
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PartnerReviews partnerId={partner.id} />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar - Additional Information */}
-        <div className="space-y-6">
-          {/* Can add additional sidebar content here if needed */}
+            {/* Reviews Section */}
+            <Card className="shadow-sm border-0 bg-white" id="reviews-section">
+              <CardHeader className="flex flex-row items-center gap-2 pb-4">
+                <MessageSquare className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-xl font-semibold text-gray-900">Avaliações</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <PartnerReviews partnerId={partner.id} />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
