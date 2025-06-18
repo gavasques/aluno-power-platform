@@ -104,7 +104,6 @@ const MaterialsPageRefactored = () => {
 
             <MaterialGrid
               materials={filteredMaterials}
-              materialTypes={materialTypes}
               onView={handleView}
               onDownload={handleDownload}
             />
