@@ -30,7 +30,7 @@ interface DashboardData {
 }
 
 export const DashboardRefactored: React.FC = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   // Fetch dashboard data from multiple endpoints
   const { data: partners = [] } = useQuery({
@@ -65,28 +65,28 @@ export const DashboardRefactored: React.FC = () => {
       title: 'Ver Parceiros',
       description: 'Explore nossos parceiros verificados',
       icon: <Users className="h-5 w-5" />,
-      action: () => navigate('/hub/parceiros'),
+      action: () => setLocation('/hub/parceiros'),
       color: 'bg-blue-500'
     },
     {
       title: 'Ferramentas',
       description: 'Acesse ferramentas especializadas',
       icon: <Wrench className="h-5 w-5" />,
-      action: () => navigate('/hub/ferramentas'),
+      action: () => setLocation('/hub/ferramentas'),
       color: 'bg-green-500'
     },
     {
       title: 'Materiais',
       description: 'Consulte materiais educativos',
       icon: <FileText className="h-5 w-5" />,
-      action: () => navigate('/hub/materiais'),
+      action: () => setLocation('/hub/materiais'),
       color: 'bg-purple-500'
     },
     {
       title: 'Fornecedores',
       description: 'Encontre fornecedores confiáveis',
       icon: <Package className="h-5 w-5" />,
-      action: () => navigate('/hub/fornecedores'),
+      action: () => setLocation('/hub/fornecedores'),
       color: 'bg-orange-500'
     }
   ];

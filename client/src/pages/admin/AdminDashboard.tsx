@@ -3,11 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, CreditCard, Activity, TrendingUp, MessageSquare, FileText, Settings, Database, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { SystemAnalytics } from "@/components/analytics/SystemAnalytics";
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const metrics = [
     { title: "Usuários Ativos", value: "1,247", change: "+12%", icon: Users, color: "text-blue-500" },
@@ -19,11 +19,11 @@ const AdminDashboard = () => {
   ];
 
   const quickActions = [
-    { title: "Gerenciar Usuários", description: "Controle de grupos e permissões", action: () => navigate("/admin/usuarios"), icon: Users },
-    { title: "Cadastros", description: "Categorias, prompts, templates", action: () => navigate("/admin/cadastros"), icon: Database },
-    { title: "Gestão de Conteúdo", description: "Hub de recursos e selos", action: () => navigate("/admin/conteudo"), icon: FileText },
-    { title: "Suporte", description: "Tickets e atendimento", action: () => navigate("/admin/suporte"), icon: MessageSquare },
-    { title: "Configurações", description: "Configurações gerais", action: () => navigate("/admin/configuracoes"), icon: Settings }
+    { title: "Gerenciar Usuários", description: "Controle de grupos e permissões", action: () => setLocation("/admin/usuarios"), icon: Users },
+    { title: "Cadastros", description: "Categorias, prompts, templates", action: () => setLocation("/admin/cadastros"), icon: Database },
+    { title: "Gestão de Conteúdo", description: "Hub de recursos e selos", action: () => setLocation("/admin/conteudo"), icon: FileText },
+    { title: "Suporte", description: "Tickets e atendimento", action: () => setLocation("/admin/suporte"), icon: MessageSquare },
+    { title: "Configurações", description: "Configurações gerais", action: () => setLocation("/admin/configuracoes"), icon: Settings }
   ];
 
   const recentActivity = [

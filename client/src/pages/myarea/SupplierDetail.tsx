@@ -1,5 +1,5 @@
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useRoute, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +10,9 @@ import { useSuppliers } from "@/contexts/SuppliersContext";
 import SupplierBrands from "@/components/supplier/SupplierBrands";
 
 const SupplierDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const [, params] = useRoute("/minha-area/fornecedores/:id");
+  const [, setLocation] = useLocation();
+  const id = params?.id;
   const { getSupplierById } = useSuppliers();
 
   const supplier = getSupplierById(id || '');
