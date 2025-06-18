@@ -5,6 +5,7 @@ import SupplierTypesManager from "@/components/admin/cadastros/SupplierTypesMana
 import PartnerTypesManager from "@/components/admin/cadastros/PartnerTypesManager";
 import PromptTypesManager from "@/components/admin/cadastros/PromptTypesManager";
 import MaterialTypesManager from "@/components/admin/cadastros/MaterialTypesManager";
+import MaterialCategoriesManager from "@/components/admin/materials/MaterialCategoriesManager";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import CadastrosOverview from "@/components/admin/cadastros/CadastrosOverview";
 import ToolTypesManager from "@/components/admin/cadastros/ToolTypesManager";
@@ -30,6 +31,8 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
         return <PromptTypesManager />;
       case "tipos-materiais":
         return <MaterialTypesManager />;
+      case "categorias-materiais":
+        return <MaterialCategoriesManager />;
       case "tipos-ferramentas":
         return <ToolTypesManager />;
       case "parceiros":
@@ -82,6 +85,8 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
         return "Gerencie tipos de prompts de IA";
       case "tipos-materiais":
         return "Gerencie tipos padrão de materiais";
+      case "categorias-materiais":
+        return "Gerencie categorias de materiais";
       case "tipos-ferramentas":
         return "Gerencie tipos e categorias de ferramentas";
       case "parceiros":

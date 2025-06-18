@@ -35,6 +35,7 @@ const materialSchema = z.object({
   title: z.string().min(3, { message: "O título deve ter pelo menos 3 caracteres." }),
   description: z.string().min(10, { message: "A descrição deve ter pelo menos 10 caracteres." }),
   typeId: z.string({ required_error: "Selecione o tipo de material." }),
+  categoryId: z.string().optional(),
   accessLevel: z.enum(['public', 'restricted'], { required_error: "Selecione o nível de acesso." }),
   tags: z.string().optional(),
   externalUrl: z.string().url({ message: "URL externa inválida." }).optional().or(z.literal('')),

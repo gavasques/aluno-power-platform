@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Database, Bot, FileText, Package, Building, FolderPen, Layers3, Brain, Users } from "lucide-react";
+import { Database, Bot, FileText, Package, Building, FolderPen, Layers3, Brain, Users, Folder } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const CadastrosOverview = () => {
@@ -111,6 +111,25 @@ const CadastrosOverview = () => {
           <p className="text-muted-foreground text-sm mb-4">Gerencie tipos padrão de materiais</p>
           <div className="flex justify-between items-center">
             <Badge className="bg-orange-100 text-orange-700 border-orange-200">9 tipos</Badge>
+            <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" variant="default">
+              Gerenciar
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card className="bg-white border-gray-200 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+        onClick={() => navigate('/admin/cadastros/categorias-materiais')}>
+        <CardHeader>
+          <div className="flex items-center space-x-2">
+            <Folder className="h-5 w-5 text-primary" />
+            <CardTitle className="text-foreground">Categorias de Materiais</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-sm mb-4">Gerencie categorias de materiais</p>
+          <div className="flex justify-between items-center">
+            <Badge className="bg-green-100 text-green-700 border-green-200">3 categorias</Badge>
             <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" variant="default">
               Gerenciar
             </Button>
