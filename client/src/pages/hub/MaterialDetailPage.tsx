@@ -12,7 +12,8 @@ import {
   FileText,
   Video,
   Code,
-  Share2
+  Share2,
+  Calendar
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import type { Material as DbMaterial, MaterialType } from '@shared/schema';
@@ -98,12 +99,25 @@ const MaterialDetailPage = () => {
       case 'pdf':
         if (material.fileUrl) {
           return (
-            <div className="w-full h-screen">
-              <iframe
-                src={`${material.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
-                className="w-full h-full border-0"
-                title={material.title}
-              />
+            <div className="bg-white">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="bg-gray-100 rounded-lg p-4 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-gray-800">Documento PDF</h2>
+                    <Button onClick={handleDownload} size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar PDF
+                    </Button>
+                  </div>
+                  <div className="w-full h-screen bg-white rounded shadow-sm">
+                    <iframe
+                      src={`${material.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                      className="w-full h-full border-0 rounded"
+                      title={material.title}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           );
         }
@@ -112,16 +126,23 @@ const MaterialDetailPage = () => {
       case 'video':
         if (material.videoUrl) {
           return (
-            <div className="w-full flex justify-center">
-              <video 
-                controls 
-                className="w-full max-w-6xl h-auto"
-                poster={material.videoThumbnail || undefined}
-                style={{ maxHeight: '80vh' }}
-              >
-                <source src={material.videoUrl} type="video/mp4" />
-                Seu navegador não suporta o elemento de vídeo.
-              </video>
+            <div className="bg-white">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="bg-gray-100 rounded-lg p-6">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-6">Conteúdo em Vídeo</h2>
+                  <div className="flex justify-center">
+                    <video 
+                      controls 
+                      className="w-full max-w-4xl h-auto rounded-lg shadow-lg"
+                      poster={material.videoThumbnail || undefined}
+                      style={{ maxHeight: '70vh' }}
+                    >
+                      <source src={material.videoUrl} type="video/mp4" />
+                      Seu navegador não suporta o elemento de vídeo.
+                    </video>
+                  </div>
+                </div>
+              </div>
             </div>
           );
         }
@@ -130,20 +151,60 @@ const MaterialDetailPage = () => {
       case 'embed':
         if (material.embedCode) {
           return (
-            <div 
-              className="w-full min-h-screen"
-              dangerouslySetInnerHTML={{ __html: material.embedCode }}
-            />
+            <div className="bg-white">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-gray-800">Conteúdo Interativo</h2>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        Embed Content
+                      </Badge>
+                      {material.externalUrl && (
+                        <Button variant="outline" size="sm" onClick={handleExternalLink}>
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Abrir Original
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div 
+                      className="w-full min-h-[600px] lg:min-h-[700px]"
+                      dangerouslySetInnerHTML={{ __html: material.embedCode }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           );
         } else if (material.embedUrl) {
           return (
-            <div className="w-full h-screen">
-              <iframe
-                src={material.embedUrl}
-                className="w-full h-full border-0"
-                title={material.title}
-                allowFullScreen
-              />
+            <div className="bg-white">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-gray-800">Conteúdo Externo</h2>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        Link Externo
+                      </Badge>
+                      <Button variant="outline" size="sm" onClick={handleExternalLink}>
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Abrir em Nova Aba
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <iframe
+                      src={material.embedUrl}
+                      className="w-full h-[600px] lg:h-[700px] border-0"
+                      title={material.title}
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           );
         }
@@ -151,42 +212,56 @@ const MaterialDetailPage = () => {
 
       case 'download':
         return (
-          <div className="flex flex-col items-center justify-center min-h-96 py-12">
-            <div className="text-center max-w-2xl">
-              <Download className="h-24 w-24 mx-auto text-blue-500 mb-6" />
-              <h2 className="text-2xl font-bold mb-4">Material para Download</h2>
-              <p className="text-gray-600 mb-6 text-lg">
-                {material.description}
-              </p>
-              <Button onClick={handleDownload} size="lg" className="mb-4">
-                <Download className="h-5 w-5 mr-2" />
-                Baixar Arquivo
-              </Button>
-              {material.fileSize && (
-                <p className="text-sm text-gray-500">
-                  Tamanho: {(material.fileSize / 1024 / 1024).toFixed(2)} MB
-                </p>
-              )}
+          <div className="bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-8">
+                <div className="text-center max-w-2xl mx-auto">
+                  <div className="bg-blue-500 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                    <Download className="h-10 w-10 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Material para Download</h2>
+                  <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+                    {material.description}
+                  </p>
+                  <div className="space-y-4">
+                    <Button onClick={handleDownload} size="lg" className="bg-blue-600 hover:bg-blue-700">
+                      <Download className="h-5 w-5 mr-2" />
+                      Baixar Arquivo
+                    </Button>
+                    {material.fileSize && (
+                      <p className="text-sm text-gray-500">
+                        Tamanho do arquivo: {(material.fileSize / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         );
 
       default:
         return (
-          <div className="flex items-center justify-center min-h-96">
-            <div className="text-center">
-              <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500">Formato de conteúdo não suportado</p>
+          <div className="bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="bg-gray-50 rounded-lg p-8 text-center">
+                <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Formato não suportado</h3>
+                <p className="text-gray-500">Este tipo de conteúdo não pode ser exibido no momento.</p>
+              </div>
             </div>
           </div>
         );
     }
 
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="text-center">
-          <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-500">Conteúdo não disponível</p>
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Conteúdo indisponível</h3>
+            <p className="text-gray-500">O conteúdo deste material não está disponível no momento.</p>
+          </div>
         </div>
       </div>
     );
@@ -289,46 +364,70 @@ const MaterialDetailPage = () => {
         {renderContent()}
       </div>
 
-      {/* Footer with material info */}
-      {materialType?.contentType !== 'embed' && (
-        <div className="bg-white border-t mt-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Sobre este material</h3>
-                <p className="text-gray-600 mb-4">{material.description}</p>
-                {material.tags && material.tags.length > 0 && (
+      {/* Footer with material info - always show for better UX */}
+      <div className="bg-white border-t">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <h3 className="text-xl font-semibold mb-4 text-gray-900">Sobre este material</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">{material.description}</p>
+              {material.tags && material.tags.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Tags relacionadas</h4>
                   <div className="flex flex-wrap gap-2">
                     {material.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
+                      <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
                         {tag}
                       </Badge>
                     ))}
                   </div>
-                )}
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Downloads:</span>
-                  <span className="font-medium">{material.downloadCount}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Visualizações:</span>
-                  <span className="font-medium">{material.viewCount}</span>
-                </div>
-                {material.fileSize && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Tamanho:</span>
-                    <span className="font-medium">
-                      {(material.fileSize / 1024 / 1024).toFixed(2)} MB
+              )}
+            </div>
+            <div className="lg:col-span-1">
+              <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                <h4 className="font-semibold text-gray-900 mb-4">Estatísticas</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 flex items-center">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Visualizações
+                    </span>
+                    <span className="font-semibold text-gray-900">{material.viewCount}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 flex items-center">
+                      <Download className="h-4 w-4 mr-2" />
+                      Downloads
+                    </span>
+                    <span className="font-semibold text-gray-900">{material.downloadCount}</span>
+                  </div>
+                  {material.fileSize && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 flex items-center">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Tamanho
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        {(material.fileSize / 1024 / 1024).toFixed(2)} MB
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <span className="text-sm text-gray-600 flex items-center">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Última modificação
+                    </span>
+                    <span className="font-semibold text-gray-900 text-sm">
+                      {new Date(material.lastModified).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
