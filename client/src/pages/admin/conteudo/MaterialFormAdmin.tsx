@@ -54,7 +54,7 @@ const MaterialFormAdmin = () => {
   const [tempFileUrl, setTempFileUrl] = useState<string | null>(null);
 
   const isEditing = Boolean(id && id !== 'novo');
-  const materialToEdit = isEditing ? materials.find(m => m.id === id) : undefined;
+  const materialToEdit = isEditing ? materials.find(m => m.id === parseInt(id as string)) : undefined;
 
   const form = useForm<MaterialFormValues>({
     resolver: zodResolver(materialSchema),
@@ -75,14 +75,25 @@ const MaterialFormAdmin = () => {
       form.reset({
         title: materialToEdit.title,
         description: materialToEdit.description,
-        typeId: materialToEdit.type.id,
-        accessLevel: materialToEdit.accessLevel,
-        tags: materialToEdit.tags.join(', '),
+        typeId: materialToEdit.type.id.toString(),
+        accessLevel: materialToEdit.accessLevel as "public" | "restricted",
+        tags: materialToEdit.tags?.join(', ') || '',
         externalUrl: materialToEdit.externalUrl || '',
         embedCode: materialToEdit.embedCode || '',
         fileUrl: materialToEdit.fileUrl || '',
       });
-      setSelectedType(materialToEdit.type);
+      setSelectedType({
+        id: materialToEdit.type.id.toString(),
+        name: materialToEdit.type.name,
+        icon: materialToEdit.type.icon,
+        description: materialToEdit.type.description,
+        contentType: materialToEdit.type.contentType,
+        allowsUpload: materialToEdit.type.allowsUpload,
+        allowsUrl: materialToEdit.type.allowsUrl,
+        allowsEmbed: materialToEdit.type.allowsEmbed,
+        viewerType: materialToEdit.type.viewerType,
+        createdAt: materialToEdit.type.createdAt,
+      });
     }
   }, [isEditing, materialToEdit, form]);
   
@@ -113,13 +124,13 @@ const MaterialFormAdmin = () => {
     const materialData = {
       title: data.title,
       description: data.description,
-      type: materialTypes.find(t => t.id === data.typeId)!,
+      typeId: parseInt(data.typeId),
       accessLevel: data.accessLevel,
       tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
       externalUrl: data.externalUrl,
       embedCode: data.embedCode,
       fileUrl: data.fileUrl,
-      uploadedBy: { id: '1', name: 'Admin' }, // Mock user
+      uploadedBy: 1, // Current user ID
     };
 
     try {
