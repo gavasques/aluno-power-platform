@@ -92,7 +92,6 @@ const MaterialFormAdmin = () => {
         icon: materialToEdit.type.icon,
         description: materialToEdit.type.description || undefined,
         viewerType: materialToEdit.type.viewerType as "download" | "inline" | "external",
-        createdAt: materialToEdit.type.createdAt,
       });
     }
   }, [isEditing, materialToEdit, form]);

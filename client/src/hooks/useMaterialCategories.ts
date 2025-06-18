@@ -22,7 +22,7 @@ export const useMaterialCategories = () => {
 
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ['/api/material-categories'],
-    queryFn: () => apiRequest('/api/material-categories'),
+    queryFn: () => apiRequest<MaterialCategory[]>('/api/material-categories'),
   });
 
   const createMutation = useMutation({
