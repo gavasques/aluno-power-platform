@@ -33,7 +33,7 @@ const PromptsIA = () => {
   }, [prompts, searchQuery, selectedCategory, searchPrompts]);
 
   const handleCardClick = (promptId: string) => {
-    navigate(`/hub/prompts-ia/${promptId}`);
+    setLocation(`/hub/prompts-ia/${promptId}`);
   };
 
   if (loading) {

@@ -32,7 +32,7 @@ const TemplateDetail = () => {
           <p className="text-muted-foreground mb-4">
             O template solicitado não existe ou foi removido.
           </p>
-          <Button onClick={() => navigate('/hub/templates')}>
+          <Button onClick={() => setLocation('/hub/templates')}>
             Voltar para Templates
           </Button>
         </div>
@@ -82,7 +82,7 @@ const TemplateDetail = () => {
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => navigate('/hub/templates')}
+          onClick={() => setLocation('/hub/templates')}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />

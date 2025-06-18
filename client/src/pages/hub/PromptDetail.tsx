@@ -26,7 +26,7 @@ const PromptDetail = () => {
           <p className="text-muted-foreground mb-4">
             O prompt solicitado não existe ou foi removido.
           </p>
-          <Button onClick={() => navigate('/hub/prompts-ia')}>
+          <Button onClick={() => setLocation('/hub/prompts-ia')}>
             Voltar para Prompts IA
           </Button>
         </div>

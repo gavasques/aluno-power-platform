@@ -61,7 +61,7 @@ const Suppliers = () => {
   };
 
   const handleViewSupplier = (supplier: any) => {
-    navigate(`/hub/fornecedores/${supplier.id}`);
+    setLocation(`/hub/fornecedores/${supplier.id}`);
   };
 
   if (loading) {

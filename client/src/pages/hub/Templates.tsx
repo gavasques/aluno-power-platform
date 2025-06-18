@@ -32,7 +32,7 @@ const Templates = () => {
   }, [templates, searchQuery, selectedCategory, searchTemplates]);
 
   const handleCardClick = (templateId: string) => {
-    navigate(`/hub/templates/${templateId}`);
+    setLocation(`/hub/templates/${templateId}`);
   };
 
   if (loading) {

@@ -37,7 +37,7 @@ const SupplierDetail = () => {
       <div className="container mx-auto p-6 max-w-7xl">
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold mb-4">Fornecedor não encontrado</h1>
-          <Button onClick={() => navigate("/hub/fornecedores")}>
+          <Button onClick={() => setLocation("/hub/fornecedores")}>
             Voltar para Fornecedores
           </Button>
         </div>
