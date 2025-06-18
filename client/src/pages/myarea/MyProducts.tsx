@@ -19,7 +19,7 @@ const MyProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [showInactive, setShowInactive] = useState(false);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,7 +110,7 @@ const MyProducts = () => {
               </div>
               <Button 
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200"
-                onClick={() => navigate("/minha-area/produtos/novo")}
+                onClick={() => setLocation("/minha-area/produtos/novo")}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Produto

@@ -35,7 +35,7 @@ const MySuppliers = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedCountry, setSelectedCountry] = useState("ALL");
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   // Busca que inclui marcas
   const filteredSuppliers = suppliers.filter(supplier => {
@@ -71,7 +71,7 @@ const MySuppliers = () => {
   };
 
   const handleViewSupplier = (supplierId: string) => {
-    navigate(`/minha-area/fornecedores/${supplierId}`);
+    setLocation(`/minha-area/fornecedores/${supplierId}`);
   };
 
   const handleDeleteSupplier = (supplierId: string) => {
