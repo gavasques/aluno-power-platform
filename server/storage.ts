@@ -85,7 +85,7 @@ import {
   type InsertWebhookConfig
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, ilike, and, or, desc, asc } from "drizzle-orm";
+import { eq, ilike, and, or, desc, asc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -491,8 +491,10 @@ export class DatabaseStorage implements IStorage {
         typeName: materialTypes.name,
         typeIcon: materialTypes.icon,
         typeDescription: materialTypes.description,
+        typeContentType: materialTypes.contentType,
         typeAllowsUpload: materialTypes.allowsUpload,
         typeAllowsUrl: materialTypes.allowsUrl,
+        typeAllowsEmbed: materialTypes.allowsEmbed,
         typeViewerType: materialTypes.viewerType,
         typeCreatedAt: materialTypes.createdAt,
       })
