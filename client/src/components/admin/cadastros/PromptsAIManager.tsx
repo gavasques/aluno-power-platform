@@ -84,7 +84,7 @@ const PromptsAIManager = () => {
           </div>
           <Button 
             className="bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={() => navigate('/admin/conteudo/prompts-ia/novo')}
+            onClick={() => setLocation('/admin/conteudo/prompts-ia/novo')}
           >
             <Plus className="h-4 w-4 mr-2" />
             Novo Prompt
@@ -161,7 +161,7 @@ const PromptsAIManager = () => {
                     size="sm" 
                     variant="outline" 
                     className="text-foreground border-border hover:bg-gray-100"
-                    onClick={() => navigate(`/admin/conteudo/prompts-ia/${prompt.id}/edit`)}
+                    onClick={() => setLocation(`/admin/conteudo/prompts-ia/${prompt.id}/edit`)}
                     title="Editar prompt"
                   >
                     <Edit className="h-4 w-4" />

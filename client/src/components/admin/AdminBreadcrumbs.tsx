@@ -42,10 +42,9 @@ const breadcrumbMap: Record<string, string> = {
 };
 
 export function AdminBreadcrumbs() {
-  const location = useLocation();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   
-  const pathSegments = location.pathname.split("/").filter(Boolean);
+  const pathSegments = location.split("/").filter(Boolean);
   const breadcrumbs = [];
   
   // Sempre adiciona o dashboard como primeiro item
@@ -72,9 +71,9 @@ export function AdminBreadcrumbs() {
   const handleGoBack = () => {
     if (breadcrumbs.length > 1) {
       const previousPath = breadcrumbs[breadcrumbs.length - 2].path;
-      navigate(previousPath);
+      setLocation(previousPath);
     } else {
-      navigate("/admin");
+      setLocation("/admin");
     }
   };
 

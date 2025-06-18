@@ -79,7 +79,7 @@ const TemplateForm = () => {
           description: "O template foi criado com sucesso.",
         });
       }
-      navigate('/admin/conteudo/templates');
+      setLocation('/admin/conteudo/templates');
     } catch (error) {
       toast({
         title: "Erro",
@@ -199,7 +199,7 @@ const TemplateForm = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate('/admin/conteudo/templates')}
+              onClick={() => setLocation('/admin/conteudo/templates')}
               disabled={loading}
             >
               Cancelar

@@ -84,7 +84,7 @@ const TemplatesManager = () => {
           </div>
           <Button 
             className="bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={() => navigate('/admin/conteudo/templates/novo')}
+            onClick={() => setLocation('/admin/conteudo/templates/novo')}
           >
             <Plus className="h-4 w-4 mr-2" />
             Novo Template
@@ -153,7 +153,7 @@ const TemplatesManager = () => {
                     size="sm" 
                     variant="outline" 
                     className="text-foreground border-border hover:bg-gray-100"
-                    onClick={() => navigate(`/admin/conteudo/templates/${template.id}/edit`)}
+                    onClick={() => setLocation(`/admin/conteudo/templates/${template.id}/edit`)}
                     title="Editar template"
                   >
                     <Edit className="h-4 w-4" />

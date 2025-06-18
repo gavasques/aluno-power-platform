@@ -165,7 +165,7 @@ const PromptForm = () => {
           description: "O prompt foi criado com sucesso.",
         });
       }
-      navigate('/admin/conteudo/prompts-ia');
+      setLocation('/admin/conteudo/prompts-ia');
     } catch (error) {
       toast({
         title: "Erro",
@@ -383,7 +383,7 @@ const PromptForm = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate('/admin/conteudo/prompts-ia')}
+              onClick={() => setLocation('/admin/conteudo/prompts-ia')}
               disabled={loading}
             >
               Cancelar
