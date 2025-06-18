@@ -277,6 +277,17 @@ export const toolDiscounts = pgTable("tool_discounts", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Tool Videos
+export const toolVideos = pgTable("tool_videos", {
+  id: serial("id").primaryKey(),
+  toolId: integer("tool_id").references(() => tools.id).notNull(),
+  title: text("title").notNull(),
+  videoId: text("video_id").notNull(), // YouTube video ID
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Template Categories
 export const templateCategories = pgTable("template_categories", {
   id: serial("id").primaryKey(),
@@ -732,6 +743,12 @@ export const insertToolDiscountSchema = createInsertSchema(toolDiscounts).omit({
   updatedAt: true,
 });
 
+export const insertToolVideoSchema = createInsertSchema(toolVideos).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertPartnerReviewSchema = createInsertSchema(partnerReviews).omit({
   id: true,
   createdAt: true,
@@ -891,6 +908,9 @@ export type ToolReviewReply = typeof toolReviewReplies.$inferSelect;
 
 export type InsertToolDiscount = z.infer<typeof insertToolDiscountSchema>;
 export type ToolDiscount = typeof toolDiscounts.$inferSelect;
+
+export type InsertToolVideo = z.infer<typeof insertToolVideoSchema>;
+export type ToolVideo = typeof toolVideos.$inferSelect;
 
 export type PartnerReviewWithUser = PartnerReview & {
   user: User;

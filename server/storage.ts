@@ -21,6 +21,7 @@ import {
   toolReviews,
   toolReviewReplies,
   toolDiscounts,
+  toolVideos,
   youtubeVideos,
   news,
   updates,
