@@ -118,6 +118,8 @@ export interface IStorage {
   updateMaterial(id: number, material: Partial<InsertMaterial>): Promise<Material>;
   deleteMaterial(id: number): Promise<void>;
   searchMaterials(query: string): Promise<MaterialWithType[]>;
+  incrementMaterialViewCount(id: number): Promise<void>;
+  incrementMaterialDownloadCount(id: number): Promise<void>;
 
   // Tools
   getTools(): Promise<Tool[]>;
@@ -469,10 +471,15 @@ export class DatabaseStorage implements IStorage {
         typeId: materials.typeId,
         accessLevel: materials.accessLevel,
         fileUrl: materials.fileUrl,
-        externalUrl: materials.externalUrl,
-        embedCode: materials.embedCode,
+        fileName: materials.fileName,
         fileSize: materials.fileSize,
         fileType: materials.fileType,
+        externalUrl: materials.externalUrl,
+        embedCode: materials.embedCode,
+        embedUrl: materials.embedUrl,
+        videoUrl: materials.videoUrl,
+        videoDuration: materials.videoDuration,
+        videoThumbnail: materials.videoThumbnail,
         tags: materials.tags,
         downloadCount: materials.downloadCount,
         viewCount: materials.viewCount,
@@ -499,10 +506,15 @@ export class DatabaseStorage implements IStorage {
       typeId: row.typeId,
       accessLevel: row.accessLevel,
       fileUrl: row.fileUrl,
-      externalUrl: row.externalUrl,
-      embedCode: row.embedCode,
+      fileName: row.fileName,
       fileSize: row.fileSize,
       fileType: row.fileType,
+      externalUrl: row.externalUrl,
+      embedCode: row.embedCode,
+      embedUrl: row.embedUrl,
+      videoUrl: row.videoUrl,
+      videoDuration: row.videoDuration,
+      videoThumbnail: row.videoThumbnail,
       tags: row.tags,
       downloadCount: row.downloadCount,
       viewCount: row.viewCount,
@@ -623,6 +635,26 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.typeCreatedAt || new Date(),
       }
     }));
+  }
+
+  async incrementMaterialViewCount(id: number): Promise<void> {
+    await db
+      .update(materials)
+      .set({
+        viewCount: sql`${materials.viewCount} + 1`,
+        lastModified: new Date(),
+      })
+      .where(eq(materials.id, id));
+  }
+
+  async incrementMaterialDownloadCount(id: number): Promise<void> {
+    await db
+      .update(materials)
+      .set({
+        downloadCount: sql`${materials.downloadCount} + 1`,
+        lastModified: new Date(),
+      })
+      .where(eq(materials.id, id));
   }
 
   // Tools

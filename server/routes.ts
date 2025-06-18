@@ -229,6 +229,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/materials/:id/view', async (req, res) => {
+    try {
+      await storage.incrementMaterialViewCount(parseInt(req.params.id));
+      res.status(200).json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to increment view count' });
+    }
+  });
+
+  app.post('/api/materials/:id/download', async (req, res) => {
+    try {
+      await storage.incrementMaterialDownloadCount(parseInt(req.params.id));
+      res.status(200).json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to increment download count' });
+    }
+  });
+
   // Tools
   app.get('/api/tools', async (req, res) => {
     try {
