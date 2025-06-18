@@ -2,32 +2,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ImageUpload } from "@/components/ui/image-upload";
-import { ImagePreview } from "@/components/ui/image-preview";
-import { Star, CheckCircle, ExternalLink, Copy, MessageCircle, Trash2, Reply } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { ExternalLink, ArrowLeft, Star } from "lucide-react";
 import { useTools } from "@/contexts/ToolsContext";
 
 const ToolDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { tools, toolTypes, getUserReviewsForTool, addUserReview, deleteUserReview, addReplyToReview } = useTools();
-  const [userReviewData, setUserReviewData] = useState({ 
-    rating: 5, 
-    comment: "", 
-    photos: [] as string[] 
-  });
-  const [replyData, setReplyData] = useState<{ [key: string]: string }>({});
-  const [showReplyDialog, setShowReplyDialog] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { tools, toolTypes } = useTools();
 
-  const tool = tools.find(t => t.id === id);
-  const userReviews = getUserReviewsForTool(id || '');
+  const tool = tools.find(t => t.id.toString() === id);
 
   if (!tool) {
     return (
@@ -42,470 +26,216 @@ const ToolDetail = () => {
     );
   }
 
-  const copyToClipboard = (text: string, type: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copiado!",
-      description: `${type} copiado para a área de transferência.`,
-    });
-  };
+  const toolType = toolTypes.find(t => t.id === tool.typeId);
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`h-4 w-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+        className={`h-4 w-4 ${
+          i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+        }`}
       />
     ));
   };
 
-  const getBrazilBadge = () => {
-    switch (tool.brazilSupport) {
-      case 'works':
-        return <Badge className="bg-green-100 text-green-700 border-green-300">Funciona no Brasil</Badge>;
-      case 'partial':
-        return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300">Funciona Parcialmente no Brasil</Badge>;
-      case 'no':
-        return <Badge className="bg-red-100 text-red-700 border-red-300">Não roda no Brasil</Badge>;
-      default:
-        return null;
-    }
-  };
-
-  const handleUserReview = (e: React.FormEvent) => {
-    e.preventDefault();
-    addUserReview({
-      toolId: tool.id,
-      userId: 'current-user',
-      userName: 'Usuário Atual',
-      rating: userReviewData.rating,
-      comment: userReviewData.comment,
-      photos: userReviewData.photos,
-    });
-    setUserReviewData({ rating: 5, comment: "", photos: [] });
-    toast({
-      title: "Sucesso!",
-      description: "Sua avaliação foi enviada com sucesso.",
-    });
-  };
-
-  const handleDeleteReview = (reviewId: string) => {
-    deleteUserReview(reviewId);
-    toast({
-      title: "Sucesso!",
-      description: "Avaliação removida com sucesso.",
-    });
-  };
-
-  const handleReply = (reviewId: string) => {
-    const comment = replyData[reviewId];
-    if (comment?.trim()) {
-      addReplyToReview(reviewId, {
-        userId: 'current-user',
-        userName: 'Usuário Atual',
-        comment: comment.trim()
-      });
-      setReplyData(prev => ({ ...prev, [reviewId]: '' }));
-      setShowReplyDialog(null);
-      toast({
-        title: "Sucesso!",
-        description: "Resposta enviada com sucesso.",
-      });
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Header da Ferramenta */}
-        <div className="bg-white rounded-lg border p-6">
-          <div className="flex items-start gap-6">
-            <img
-              src={tool.logo}
-              alt={tool.name}
-              className="w-24 h-24 rounded-lg object-cover border"
-            />
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <h1 className="text-3xl font-bold">{tool.name}</h1>
-                {tool.verified && (
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    LV Verificado
-                  </Badge>
-                )}
-                {getBrazilBadge()}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/hub/ferramentas")}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Tool Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {tool.logo && (
+              <div className="flex-shrink-0">
+                <img
+                  src={tool.logo}
+                  alt={tool.name}
+                  className="h-20 w-20 object-contain rounded-lg border"
+                />
               </div>
-              <Badge variant="outline" className="mb-4">
-                {toolTypes.find(t => t.id === tool.typeId)?.name || tool.category}
+            )}
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{tool.name}</h1>
+              <Badge variant="secondary" className="mb-4">
+                {toolType?.name || "Ferramenta"}
               </Badge>
-              <p className="text-lg text-muted-foreground mb-4">
+              <p className="text-lg text-gray-600 mb-4">
                 {tool.description}
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Avaliação LV:</span>
-                    <div className="flex">{renderStars(tool.officialRating)}</div>
-                    <span className="text-muted-foreground">
-                      {tool.officialRating}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Usuários:</span>
-                    <div className="flex">{renderStars(tool.userRating)}</div>
-                    <span className="text-muted-foreground">
-                      {tool.userRating} ({tool.reviewCount})
-                    </span>
-                  </div>
-                </div>
+              <div className="flex items-center gap-4">
+                {tool.website && (
+                  <Button asChild>
+                    <a
+                      href={tool.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Visitar Site
+                    </a>
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Conteúdo Principal */}
+        {/* Content */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="features">Funcionalidades</TabsTrigger>
-            <TabsTrigger value="guilherme-review">Avaliação Guilherme</TabsTrigger>
-            <TabsTrigger value="proscons">Prós e Contras</TabsTrigger>
-            <TabsTrigger value="discounts">Descontos</TabsTrigger>
-            <TabsTrigger value="reviews">Avaliações</TabsTrigger>
+            <TabsTrigger value="pros-cons">Prós e Contras</TabsTrigger>
+            <TabsTrigger value="pricing">Preços</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Visão Geral</CardTitle>
+                <CardTitle>Sobre a Ferramenta</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed">{tool.overview}</p>
-              </CardContent>
-            </Card>
-
-            {tool.pricing?.plans && tool.pricing.plans.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Preços</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {tool.pricing.plans.map((plan, index) => (
-                      <div key={index} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
-                        <h3 className="font-semibold text-xl mb-2">{plan.name}</h3>
-                        <p className="text-3xl font-bold text-primary mb-4">{plan.price}</p>
-                        <ul className="space-y-2">
-                          {plan.features?.map((feature, fIndex) => (
-                            <li key={fIndex} className="text-sm text-muted-foreground flex items-center gap-2">
-                              <CheckCircle className="h-3 w-3 text-green-500" />
-                              {feature}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="features" className="mt-6">
-            <div className="space-y-6">
-              {tool.features.map((feature, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      {feature.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                    {feature.photos.length > 0 && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {feature.photos.map((photo, photoIndex) => (
-                          <ImagePreview
-                            key={photoIndex}
-                            src={photo}
-                            alt={`${feature.title} - Imagem ${photoIndex + 1}`}
-                            className="w-full h-48 rounded-lg border"
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="guilherme-review" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Avaliação Guilherme</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex">{renderStars(tool.guilhermeReview?.rating || 0)}</div>
-                  <span className="text-2xl font-semibold">{tool.guilhermeReview?.rating}</span>
-                </div>
-                <p className="text-muted-foreground leading-relaxed">{tool.guilhermeReview?.review}</p>
-                
-                {tool.guilhermeReview?.photos && tool.guilhermeReview.photos.length > 0 && (
-                  <div className="space-y-3">
-                    <h4 className="font-medium">Screenshots da Avaliação</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {tool.guilhermeReview.photos.map((photo, index) => (
-                        <ImagePreview
-                          key={index}
-                          src={photo}
-                          alt={`Avaliação Guilherme - Imagem ${index + 1}`}
-                          className="w-full h-48 rounded-lg border"
-                        />
-                      ))}
-                    </div>
+                <p className="text-gray-600 leading-relaxed">{tool.description}</p>
+                {tool.website && (
+                  <div className="mt-4">
+                    <Button asChild variant="outline">
+                      <a
+                        href={tool.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Acessar Website
+                      </a>
+                    </Button>
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="proscons" className="mt-6">
+          <TabsContent value="features" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Funcionalidades</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {tool.features && tool.features.length > 0 ? (
+                  <div className="grid gap-4">
+                    {tool.features.map((feature, index) => (
+                      <div key={index} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+                        <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                        <span className="text-gray-700">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">
+                    Funcionalidades não disponíveis no momento
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pros-cons" className="mt-6">
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-green-600">Prós</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-3">
-                    {tool.prosAndCons?.pros?.map((pro, index) => (
-                      <li key={index} className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                        <span className="text-muted-foreground">{pro}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {tool.pros && tool.pros.length > 0 ? (
+                    <div className="space-y-3">
+                      {tool.pros.map((pro, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                          <span className="text-gray-700">{pro}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">
+                      Nenhum pró listado
+                    </p>
+                  )}
                 </CardContent>
               </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle className="text-red-600">Contras</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-3">
-                    {tool.prosAndCons?.cons?.map((con, index) => (
-                      <li key={index} className="flex items-center gap-3">
-                        <span className="h-5 w-5 text-red-500 flex-shrink-0 text-xl">×</span>
-                        <span className="text-muted-foreground">{con}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {tool.cons && tool.cons.length > 0 ? (
+                    <div className="space-y-3">
+                      {tool.cons.map((con, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                          <span className="text-gray-700">{con}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">
+                      Nenhum contra listado
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="discounts" className="mt-6">
+          <TabsContent value="pricing" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Links e Descontos</CardTitle>
+                <CardTitle>Informações de Preço</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {tool.discounts?.map((discount, index) => (
-                    <div key={index} className="border rounded-lg p-4 space-y-3">
-                      <p className="font-medium">{discount.description}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {discount.link && (
-                          <Button variant="outline" asChild>
-                            <a href={discount.link} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              Acessar Link
-                            </a>
-                          </Button>
-                        )}
-                        {discount.coupon && (
-                          <Button
-                            variant="outline"
-                            onClick={() => copyToClipboard(discount.coupon, "Cupom")}
-                          >
-                            <Copy className="h-4 w-4 mr-2" />
-                            Copiar Cupom: {discount.coupon}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="reviews" className="mt-6 space-y-6">
-            {/* Formulário para nova avaliação */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Avaliar Ferramenta</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleUserReview} className="space-y-6">
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium">Sua Avaliação</label>
-                    <Select 
-                      value={userReviewData.rating.toString()} 
-                      onValueChange={(value) => setUserReviewData({...userReviewData, rating: parseInt(value)})}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[5, 4, 3, 2, 1].map(rating => (
-                          <SelectItem key={rating} value={rating.toString()}>
-                            <div className="flex items-center gap-2">
-                              <div className="flex">{renderStars(rating)}</div>
-                              <span>{rating} estrela{rating !== 1 ? 's' : ''}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                {tool.pricing ? (
+                  <div className="prose max-w-none">
+                    <p className="text-gray-700">{tool.pricing}</p>
                   </div>
-                  
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium">Comentário</label>
-                    <Textarea
-                      value={userReviewData.comment}
-                      onChange={(e) => setUserReviewData({...userReviewData, comment: e.target.value})}
-                      placeholder="Compartilhe sua experiência com esta ferramenta..."
-                      rows={4}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <ImageUpload
-                      images={userReviewData.photos}
-                      onImagesChange={(photos) => setUserReviewData({...userReviewData, photos})}
-                      label="Fotos da sua experiência (opcional)"
-                      maxImages={3}
-                    />
-                  </div>
-                  
-                  <Button type="submit" className="w-full">
-                    Enviar Avaliação
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Lista de avaliações */}
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold">Avaliações dos Usuários ({userReviews.length})</h3>
-              
-              {userReviews.map((review) => (
-                <Card key={review.id}>
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium">{review.userName}</span>
-                            <div className="flex">{renderStars(review.rating)}</div>
-                            <span className="text-sm text-muted-foreground">
-                              {new Date(review.createdAt).toLocaleDateString('pt-BR')}
-                            </span>
-                          </div>
-                          <p className="text-muted-foreground">{review.comment}</p>
-                        </div>
-                        <div className="flex gap-2 ml-4">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button size="sm" variant="outline">
-                                <Reply className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Responder Avaliação</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <Textarea
-                                  value={replyData[review.id] || ''}
-                                  onChange={(e) => setReplyData(prev => ({...prev, [review.id]: e.target.value}))}
-                                  placeholder="Digite sua resposta..."
-                                  rows={3}
-                                />
-                                <Button 
-                                  onClick={() => handleReply(review.id)}
-                                  className="w-full"
-                                  disabled={!replyData[review.id]?.trim()}
-                                >
-                                  Enviar Resposta
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                          {review.userId === 'current-user' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDeleteReview(review.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-
-                      {review.photos.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {review.photos.map((photo, index) => (
-                            <ImagePreview
-                              key={index}
-                              src={photo}
-                              alt={`Foto da avaliação ${index + 1}`}
-                              className="w-full h-32 rounded border"
-                            />
-                          ))}
-                        </div>
-                      )}
-
-                      {review.replies.length > 0 && (
-                        <div className="pl-6 border-l-2 border-muted space-y-3">
-                          {review.replies.map((reply) => (
-                            <div key={reply.id} className="bg-muted/50 rounded p-3">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-medium">{reply.userName}</span>
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(reply.createdAt).toLocaleDateString('pt-BR')}
-                                </span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">{reply.comment}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {userReviews.length === 0 && (
-                <div className="text-center py-12">
-                  <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Nenhuma avaliação ainda</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Seja o primeiro a avaliar esta ferramenta!
+                ) : (
+                  <p className="text-gray-500 text-center py-8">
+                    Informações de preço não disponíveis
                   </p>
-                </div>
-              )}
-            </div>
+                )}
+                {tool.website && (
+                  <div className="mt-6">
+                    <Button asChild>
+                      <a
+                        href={tool.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Ver Preços no Site Oficial
+                      </a>
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

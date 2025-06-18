@@ -14,6 +14,10 @@ interface ToolsContextType {
   getToolById: (id: number) => DbTool | undefined;
   getToolsByType: (typeId: string) => DbTool[];
   searchTools: (query: string) => DbTool[];
+  getUserReviewsForTool: (toolId: string) => any[];
+  addUserReview: (review: any) => Promise<void>;
+  deleteUserReview: (reviewId: string) => Promise<void>;
+  addReplyToReview: (reviewId: string, reply: string) => Promise<void>;
   refetch: () => void;
 }
 
@@ -100,6 +104,23 @@ export function ToolsProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  // Mock review functions - temporary until review system is implemented
+  const getUserReviewsForTool = (toolId: string): any[] => {
+    return [];
+  };
+
+  const addUserReview = async (review: any): Promise<void> => {
+    // Placeholder for future implementation
+  };
+
+  const deleteUserReview = async (reviewId: string): Promise<void> => {
+    // Placeholder for future implementation
+  };
+
+  const addReplyToReview = async (reviewId: string, reply: string): Promise<void> => {
+    // Placeholder for future implementation
+  };
+
   const value: ToolsContextType = {
     tools,
     toolTypes,
@@ -111,6 +132,10 @@ export function ToolsProvider({ children }: { children: React.ReactNode }) {
     getToolById,
     getToolsByType,
     searchTools,
+    getUserReviewsForTool,
+    addUserReview,
+    deleteUserReview,
+    addReplyToReview,
     refetch,
   };
 
