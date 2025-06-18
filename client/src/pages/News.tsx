@@ -11,7 +11,7 @@ import {
   SortDesc,
   Clock
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { News } from "@shared/schema";
 import { AdvancedSearch, SearchFilter } from "@/components/ui/advanced-search";

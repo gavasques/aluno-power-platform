@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 import { AdminNav } from "@/components/layout/AdminNav";
 import { NotificationSystem } from "@/components/notifications/NotificationSystem";
 import {

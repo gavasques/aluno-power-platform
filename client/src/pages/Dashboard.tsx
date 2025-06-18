@@ -8,7 +8,7 @@ import {
 import { BrainCircuit, Package, Rss, Truck, Youtube, TrendingUp, Users, BookOpen, ExternalLink, Calendar, ArrowRight } from "lucide-react";
 import React, { memo } from "react";
 import { useYoutube } from "@/contexts/YoutubeContext";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { VideoCard } from "@/components/youtube/VideoCard";
 import { useQuery } from "@tanstack/react-query";

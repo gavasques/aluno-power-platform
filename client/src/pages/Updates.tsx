@@ -15,7 +15,7 @@ import {
   Bug,
   Plus
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Update } from "@shared/schema";
 
