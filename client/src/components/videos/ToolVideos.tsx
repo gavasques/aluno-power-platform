@@ -131,7 +131,7 @@ export function ToolVideos({ toolId, isAdmin = false }: ToolVideosProps) {
       toolId,
       title: data.title,
       videoId,
-      description: data.description || undefined,
+      description: data.description || null,
     };
 
     if (editingVideo) {
