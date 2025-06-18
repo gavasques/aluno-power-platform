@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { PartnerFiles } from '@/components/hub/PartnerFiles';
 import { PartnerReviews } from '@/components/hub/PartnerReviews';
 import PartnerRatingDisplay from '@/components/hub/PartnerRatingDisplay';
+import { YouTubePlayer } from '@/components/ui/youtube-player';
 import {
   Star,
   Shield,
@@ -163,6 +164,27 @@ const PartnerDetailSimple = () => {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {/* YouTube Videos Section */}
+            {(partner.presentationVideoUrl || partner.guilhermeVideoUrl) && (
+              <div className="space-y-6">
+                {partner.presentationVideoUrl && (
+                  <YouTubePlayer 
+                    url={partner.presentationVideoUrl}
+                    title="Vídeo de Apresentação"
+                    className="shadow-sm border-0 bg-white"
+                  />
+                )}
+                
+                {partner.guilhermeVideoUrl && (
+                  <YouTubePlayer 
+                    url={partner.guilhermeVideoUrl}
+                    title="Vídeo Guilherme"
+                    className="shadow-sm border-0 bg-white"
+                  />
+                )}
+              </div>
             )}
 
             {/* Files Section */}
