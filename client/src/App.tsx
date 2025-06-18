@@ -85,6 +85,7 @@ function App() {
                               <Route path="prompts-ia/:id" element={<PromptDetail />} />
                               <Route path="parceiros" element={<Partners />} />
                               <Route path="fornecedores" element={<Suppliers />} />
+                              <Route path="materiais" element={<Hub />} />
                               <Route path=":section" element={<Hub />} />
                             </Route>
 

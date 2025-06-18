@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,24 +23,68 @@ const MaterialDetailPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Validação inicial do ID
+  if (!id) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="text-center py-8">
+            <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">ID do material não encontrado</h2>
+            <p className="text-gray-600 mb-6">
+              Por favor, verifique o link e tente novamente.
+            </p>
+            <Button onClick={() => navigate('/hub/materials')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar aos Materiais
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Fetch material
   const { data: material, isLoading, error } = useQuery({
     queryKey: ['material', id],
-    queryFn: () => apiRequest<DbMaterial>(`/api/materials/${id}`),
+    queryFn: async () => {
+      try {
+        return await apiRequest<DbMaterial>(`/api/materials/${id}`);
+      } catch (err) {
+        console.error('Error fetching material:', err);
+        throw err;
+      }
+    },
     enabled: !!id,
-    retry: 1,
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Fetch material types
   const { data: materialTypes = [] } = useQuery({
     queryKey: ['material-types'],
-    queryFn: () => apiRequest<MaterialType[]>('/api/material-types'),
-    retry: 1,
+    queryFn: async () => {
+      try {
+        return await apiRequest<MaterialType[]>('/api/material-types');
+      } catch (err) {
+        console.error('Error fetching material types:', err);
+        return [];
+      }
+    },
+    retry: 2,
+    staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
   // Increment view count mutation
   const incrementViewMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/materials/${id}/view`, { method: 'POST' }),
+    mutationFn: async () => {
+      try {
+        return await apiRequest(`/api/materials/${id}/view`, { method: 'POST' });
+      } catch (err) {
+        console.warn('Failed to increment view count:', err);
+        throw err;
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['material', id] });
       queryClient.invalidateQueries({ queryKey: ['materials'] });
@@ -51,7 +96,14 @@ const MaterialDetailPage = () => {
 
   // Increment download count mutation
   const incrementDownloadMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/materials/${id}/download`, { method: 'POST' }),
+    mutationFn: async () => {
+      try {
+        return await apiRequest(`/api/materials/${id}/download`, { method: 'POST' });
+      } catch (err) {
+        console.warn('Failed to increment download count:', err);
+        throw err;
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['material', id] });
       queryClient.invalidateQueries({ queryKey: ['materials'] });
@@ -63,26 +115,34 @@ const MaterialDetailPage = () => {
 
   // Increment view count on page load
   useEffect(() => {
-    if (material && !incrementViewMutation.isPending) {
+    if (material && material.id && !incrementViewMutation.isPending) {
       incrementViewMutation.mutate();
     }
   }, [material?.id]);
 
   const getMaterialType = () => {
-    if (!material) return null;
+    if (!material || !materialTypes.length) return null;
     return materialTypes.find(t => t.id === material.typeId);
   };
 
   const handleDownload = () => {
     if (material?.fileUrl) {
-      window.open(material.fileUrl, '_blank');
-      incrementDownloadMutation.mutate();
+      try {
+        window.open(material.fileUrl, '_blank', 'noopener,noreferrer');
+        incrementDownloadMutation.mutate();
+      } catch (err) {
+        console.error('Error opening download link:', err);
+      }
     }
   };
 
   const handleExternalLink = () => {
     if (material?.externalUrl) {
-      window.open(material.externalUrl, '_blank');
+      try {
+        window.open(material.externalUrl, '_blank', 'noopener,noreferrer');
+      } catch (err) {
+        console.error('Error opening external link:', err);
+      }
     }
   };
 
@@ -101,94 +161,118 @@ const MaterialDetailPage = () => {
     if (!material) return null;
     
     const materialType = getMaterialType();
-    if (!materialType) return null;
+    if (!materialType) {
+      return (
+        <div className="flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-500">Tipo de material não encontrado</p>
+          </div>
+        </div>
+      );
+    }
 
-    switch (materialType.contentType) {
-      case 'pdf':
-        if (material.fileUrl) {
-          return (
-            <div className="w-full h-screen">
-              <iframe
-                src={`${material.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
-                className="w-full h-full border-0"
-                title={material.title}
+    try {
+      switch (materialType.contentType) {
+        case 'pdf':
+          if (material.fileUrl) {
+            return (
+              <div className="w-full h-screen">
+                <iframe
+                  src={`${material.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                  className="w-full h-full border-0"
+                  title={material.title}
+                  onError={() => console.error('Error loading PDF iframe')}
+                />
+              </div>
+            );
+          }
+          break;
+
+        case 'video':
+          if (material.videoUrl) {
+            return (
+              <div className="w-full flex justify-center">
+                <video 
+                  controls 
+                  className="w-full max-w-6xl h-auto"
+                  poster={material.videoThumbnail || undefined}
+                  style={{ maxHeight: '80vh' }}
+                  onError={() => console.error('Error loading video')}
+                >
+                  <source src={material.videoUrl} type="video/mp4" />
+                  Seu navegador não suporta o elemento de vídeo.
+                </video>
+              </div>
+            );
+          }
+          break;
+
+        case 'embed':
+          if (material.embedCode) {
+            return (
+              <div 
+                className="w-full min-h-screen"
+                dangerouslySetInnerHTML={{ __html: material.embedCode }}
               />
-            </div>
-          );
-        }
-        break;
+            );
+          } else if (material.embedUrl) {
+            return (
+              <div className="w-full h-screen">
+                <iframe
+                  src={material.embedUrl}
+                  className="w-full h-full border-0"
+                  title={material.title}
+                  allowFullScreen
+                  onError={() => console.error('Error loading embed iframe')}
+                />
+              </div>
+            );
+          }
+          break;
 
-      case 'video':
-        if (material.videoUrl) {
+        case 'download':
           return (
-            <div className="w-full flex justify-center">
-              <video 
-                controls 
-                className="w-full max-w-6xl h-auto"
-                poster={material.videoThumbnail || undefined}
-                style={{ maxHeight: '80vh' }}
-              >
-                <source src={material.videoUrl} type="video/mp4" />
-                Seu navegador não suporta o elemento de vídeo.
-              </video>
-            </div>
-          );
-        }
-        break;
-
-      case 'embed':
-        if (material.embedCode) {
-          return (
-            <div 
-              className="w-full min-h-screen"
-              dangerouslySetInnerHTML={{ __html: material.embedCode }}
-            />
-          );
-        } else if (material.embedUrl) {
-          return (
-            <div className="w-full h-screen">
-              <iframe
-                src={material.embedUrl}
-                className="w-full h-full border-0"
-                title={material.title}
-                allowFullScreen
-              />
-            </div>
-          );
-        }
-        break;
-
-      case 'download':
-        return (
-          <div className="flex flex-col items-center justify-center min-h-96 py-12">
-            <div className="text-center max-w-2xl">
-              <Download className="h-24 w-24 mx-auto text-blue-500 mb-6" />
-              <h2 className="text-2xl font-bold mb-4">Material para Download</h2>
-              <p className="text-gray-600 mb-6 text-lg">
-                {material.description}
-              </p>
-              <Button onClick={handleDownload} size="lg" className="mb-4">
-                <Download className="h-5 w-5 mr-2" />
-                Baixar Arquivo
-              </Button>
-              {material.fileSize && (
-                <p className="text-sm text-gray-500">
-                  Tamanho: {(material.fileSize / 1024 / 1024).toFixed(2)} MB
+            <div className="flex flex-col items-center justify-center min-h-96 py-12">
+              <div className="text-center max-w-2xl">
+                <Download className="h-24 w-24 mx-auto text-blue-500 mb-6" />
+                <h2 className="text-2xl font-bold mb-4">Material para Download</h2>
+                <p className="text-gray-600 mb-6 text-lg">
+                  {material.description || 'Material disponível para download'}
                 </p>
-              )}
+                <Button onClick={handleDownload} size="lg" className="mb-4">
+                  <Download className="h-5 w-5 mr-2" />
+                  Baixar Arquivo
+                </Button>
+                {material.fileSize && (
+                  <p className="text-sm text-gray-500">
+                    Tamanho: {(material.fileSize / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        );
+          );
 
-      default:
-        return (
-          <div className="flex items-center justify-center min-h-96">
-            <div className="text-center">
-              <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500">Formato de conteúdo não suportado</p>
+        default:
+          return (
+            <div className="flex items-center justify-center min-h-96">
+              <div className="text-center">
+                <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500">Formato de conteúdo não suportado</p>
+              </div>
             </div>
+          );
+      }
+    } catch (err) {
+      console.error('Error rendering content:', err);
+      return (
+        <div className="flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-500">Erro ao carregar conteúdo</p>
           </div>
-        );
+        </div>
+      );
     }
 
     return (
@@ -213,6 +297,7 @@ const MaterialDetailPage = () => {
   }
 
   if (error) {
+    console.error('Material detail error:', error);
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
@@ -222,10 +307,15 @@ const MaterialDetailPage = () => {
             <p className="text-gray-600 mb-6">
               Ocorreu um erro ao tentar carregar o material. Tente novamente mais tarde.
             </p>
-            <Button onClick={() => navigate('/hub/materials')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar aos Materiais
-            </Button>
+            <div className="space-y-2">
+              <Button onClick={() => window.location.reload()} className="w-full">
+                Tentar Novamente
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/hub/materials')} className="w-full">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar aos Materiais
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -294,7 +384,7 @@ const MaterialDetailPage = () => {
             
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-500">
-                {material.viewCount} visualizações
+                {material.viewCount || 0} visualizações
               </span>
               {material.fileUrl && (
                 <Button variant="outline" size="sm" onClick={handleDownload}>
@@ -325,7 +415,7 @@ const MaterialDetailPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="text-lg font-semibold mb-2">Sobre este material</h3>
-                <p className="text-gray-600 mb-4">{material.description}</p>
+                <p className="text-gray-600 mb-4">{material.description || 'Nenhuma descrição disponível'}</p>
                 {material.tags && material.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {material.tags.map((tag, index) => (
@@ -339,11 +429,11 @@ const MaterialDetailPage = () => {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Downloads:</span>
-                  <span className="font-medium">{material.downloadCount}</span>
+                  <span className="font-medium">{material.downloadCount || 0}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Visualizações:</span>
-                  <span className="font-medium">{material.viewCount}</span>
+                  <span className="font-medium">{material.viewCount || 0}</span>
                 </div>
                 {material.fileSize && (
                   <div className="flex justify-between text-sm">
