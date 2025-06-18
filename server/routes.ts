@@ -247,6 +247,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Material Categories
+  app.get('/api/material-categories', async (req, res) => {
+    try {
+      const categories = await storage.getMaterialCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch material categories' });
+    }
+  });
+
+  app.post('/api/material-categories', async (req, res) => {
+    try {
+      const category = await storage.createMaterialCategory(req.body);
+      res.status(201).json(category);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create material category' });
+    }
+  });
+
+  app.put('/api/material-categories/:id', async (req, res) => {
+    try {
+      const category = await storage.updateMaterialCategory(parseInt(req.params.id), req.body);
+      res.json(category);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update material category' });
+    }
+  });
+
+  app.delete('/api/material-categories/:id', async (req, res) => {
+    try {
+      await storage.deleteMaterialCategory(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete material category' });
+    }
+  });
+
   // Tools
   app.get('/api/tools', async (req, res) => {
     try {

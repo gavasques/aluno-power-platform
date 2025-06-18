@@ -122,6 +122,12 @@ export interface IStorage {
   incrementMaterialViewCount(id: number): Promise<void>;
   incrementMaterialDownloadCount(id: number): Promise<void>;
 
+  // Material Categories
+  getMaterialCategories(): Promise<MaterialCategory[]>;
+  createMaterialCategory(category: InsertMaterialCategory): Promise<MaterialCategory>;
+  updateMaterialCategory(id: number, category: Partial<InsertMaterialCategory>): Promise<MaterialCategory>;
+  deleteMaterialCategory(id: number): Promise<void>;
+
   // Tools
   getTools(): Promise<Tool[]>;
   getTool(id: number): Promise<Tool | undefined>;
