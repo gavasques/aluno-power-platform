@@ -4,7 +4,6 @@ export interface MaterialFormData {
   title: string;
   description: string;
   typeId: string;
-  categoryId: string;
   accessLevel: "public" | "restricted";
   
   // File content

@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2 } from 'lucide-react';
 import type { MaterialFormData } from './MaterialFormTypes';
 import type { MaterialType } from '@shared/schema';
-import { useMaterialCategories } from '@/hooks/useMaterialCategories';
 
 interface MaterialFormTabsProps {
   formData: MaterialFormData;
@@ -26,7 +25,6 @@ export const MaterialFormTabs: React.FC<MaterialFormTabsProps> = ({
   currentTag,
   setCurrentTag,
 }) => {
-  const { categories: materialCategories } = useMaterialCategories();
   const selectedType = materialTypes.find(t => t.id.toString() === formData.typeId);
 
   const addTag = () => {
@@ -93,23 +91,6 @@ export const MaterialFormTabs: React.FC<MaterialFormTabsProps> = ({
               </SelectContent>
             </Select>
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="category">Categoria do Material</Label>
-          <Select value={formData.categoryId || ''} onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione uma categoria (opcional)" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Nenhuma categoria</SelectItem>
-              {materialCategories.map((category) => (
-                <SelectItem key={category.id} value={category.id.toString()}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
         
         <div className="space-y-2">
