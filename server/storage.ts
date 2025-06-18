@@ -589,6 +589,7 @@ export class DatabaseStorage implements IStorage {
         title: materials.title,
         description: materials.description,
         typeId: materials.typeId,
+        categoryId: materials.categoryId,
         accessLevel: materials.accessLevel,
         fileUrl: materials.fileUrl,
         fileName: materials.fileName,
