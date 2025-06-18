@@ -52,7 +52,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   );
 
   const handleCardClick = () => {
-    navigate(`/minha-area/produtos/${product.id}`);
+    setLocation(`/minha-area/produtos/${product.id}`);
   };
 
   return (
@@ -136,7 +136,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                     className="text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                     onClick={e => {
                       e.stopPropagation();
-                      navigate(`/minha-area/produtos/${product.id}`);
+                      setLocation(`/minha-area/produtos/${product.id}`);
                     }}
                   >
                     <Eye className="w-4 h-4 mr-2" />

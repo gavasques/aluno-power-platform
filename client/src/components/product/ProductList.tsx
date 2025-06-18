@@ -80,7 +80,7 @@ export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }
                   <TableRow
                     key={product.id}
                     className={`hover:bg-gray-50/50 cursor-pointer ${!product.active ? 'opacity-50' : ''}`}
-                    onClick={() => navigate(`/minha-area/produtos/${product.id}`)}
+                    onClick={() => setLocation(`/minha-area/produtos/${product.id}`)}
                     tabIndex={0}
                     role="button"
                     aria-label={`Visualizar detalhes de ${product.name}`}
@@ -151,7 +151,7 @@ export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }
                           className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
                           onClick={e => {
                             e.stopPropagation();
-                            navigate(`/minha-area/produtos/${product.id}`);
+                            setLocation(`/minha-area/produtos/${product.id}`);
                           }}
                           title="Editar"
                         >
