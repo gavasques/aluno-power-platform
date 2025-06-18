@@ -28,7 +28,7 @@ export function UserBreadcrumbs() {
   const [location, setLocation] = useLocation();
   
   const pathSegments = location.split("/").filter(Boolean);
-  const breadcrumbs = [];
+  const breadcrumbs: Array<{path: string, label: string, isLast: boolean}> = [];
   
   // Sempre adiciona o dashboard como primeiro item se não estiver na página inicial
   if (location !== "/") {
