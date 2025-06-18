@@ -56,6 +56,8 @@ import {
   type InsertToolType,
   type MaterialType,
   type InsertMaterialType,
+  type MaterialCategory,
+  type InsertMaterialCategory,
   type PartnerType,
   type InsertPartnerType,
   type PartnerContact,
@@ -476,6 +478,7 @@ export class DatabaseStorage implements IStorage {
         title: materials.title,
         description: materials.description,
         typeId: materials.typeId,
+        categoryId: materials.categoryId,
         accessLevel: materials.accessLevel,
         fileUrl: materials.fileUrl,
         fileName: materials.fileName,
@@ -680,6 +683,30 @@ export class DatabaseStorage implements IStorage {
         lastModified: new Date(),
       })
       .where(eq(materials.id, id));
+  }
+
+  // Material Categories
+  async getMaterialCategories(): Promise<MaterialCategory[]> {
+    const results = await db.select().from(materialCategories).orderBy(materialCategories.name);
+    return results;
+  }
+
+  async createMaterialCategory(category: InsertMaterialCategory): Promise<MaterialCategory> {
+    const [result] = await db.insert(materialCategories).values(category).returning();
+    return result;
+  }
+
+  async updateMaterialCategory(id: number, category: Partial<InsertMaterialCategory>): Promise<MaterialCategory> {
+    const [result] = await db
+      .update(materialCategories)
+      .set(category)
+      .where(eq(materialCategories.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteMaterialCategory(id: number): Promise<void> {
+    await db.delete(materialCategories).where(eq(materialCategories.id, id));
   }
 
   // Tools
