@@ -1,24 +1,21 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { apiRequest } from '@/lib/queryClient';
 import { MaterialFilters } from './MaterialFilters';
 import { MaterialGrid } from './MaterialGrid';
-import { MaterialViewer } from './MaterialViewer';
 import type { Material as DbMaterial, MaterialType } from '@shared/schema';
 
 const MaterialsPageRefactored = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [selectedAccess, setSelectedAccess] = useState("all");
-  
-  // Viewer states
-  const [viewingMaterial, setViewingMaterial] = useState<DbMaterial | null>(null);
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   // Fetch materials
   const { data: materials = [], isLoading: materialsLoading } = useQuery({

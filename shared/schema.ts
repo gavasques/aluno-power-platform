@@ -185,6 +185,16 @@ export const partnerReviewReplies = pgTable("partner_review_replies", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Material Categories
+export const materialCategories = pgTable("material_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  color: text("color").notNull().default("#3B82F6"), // Hex color for UI
+  icon: text("icon").notNull().default("Folder"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Material Types
 export const materialTypes = pgTable("material_types", {
   id: serial("id").primaryKey(),
@@ -205,6 +215,7 @@ export const materials = pgTable("materials", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   typeId: integer("type_id").references(() => materialTypes.id).notNull(),
+  categoryId: integer("category_id").references(() => materialCategories.id),
   accessLevel: text("access_level").notNull().default("public"), // 'public', 'restricted'
   
   // File content
@@ -832,6 +843,11 @@ export const insertMaterialTypeSchema = createInsertSchema(materialTypes).omit({
   createdAt: true,
 });
 
+export const insertMaterialCategorySchema = createInsertSchema(materialCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertPartnerTypeSchema = createInsertSchema(partnerTypes).omit({
   id: true,
   createdAt: true,
@@ -911,6 +927,9 @@ export type ToolType = typeof toolTypes.$inferSelect;
 
 export type InsertMaterialType = z.infer<typeof insertMaterialTypeSchema>;
 export type MaterialType = typeof materialTypes.$inferSelect;
+
+export type InsertMaterialCategory = z.infer<typeof insertMaterialCategorySchema>;
+export type MaterialCategory = typeof materialCategories.$inferSelect;
 
 export type InsertPartnerType = z.infer<typeof insertPartnerTypeSchema>;
 export type PartnerType = typeof partnerTypes.$inferSelect;
