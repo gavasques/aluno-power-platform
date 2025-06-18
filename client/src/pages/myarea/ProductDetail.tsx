@@ -141,8 +141,9 @@ const mockProduct: Product = {
 };
 
 const ProductDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const [, params] = useRoute("/minha-area/produtos/:id");
+  const [, setLocation] = useLocation();
+  const id = params?.id;
   const { getProductById, updateProduct, toggleProductStatus } = useProducts();
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -201,7 +202,7 @@ const ProductDetail = () => {
       <div className="mb-6">
         <Button
           variant="ghost"
-          onClick={() => navigate("/minha-area/produtos")}
+          onClick={() => setLocation("/minha-area/produtos")}
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

@@ -27,8 +27,9 @@ import {
 import type { PartnerType, PartnerContact } from '@shared/schema';
 
 const PartnerDetailSimple = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const [, params] = useRoute("/hub/parceiros/:id");
+  const [, setLocation] = useLocation();
+  const id = params?.id;
   const { getPartnerById } = usePartners();
   const { user } = useAuth();
 

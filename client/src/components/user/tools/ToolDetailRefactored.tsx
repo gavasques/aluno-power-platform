@@ -25,7 +25,7 @@ const ToolDetailRefactored = () => {
   });
 
   const handleBackNavigation = () => {
-    navigate("/hub/ferramentas");
+    setLocation("/hub/ferramentas");
   };
 
   if (!tool) {

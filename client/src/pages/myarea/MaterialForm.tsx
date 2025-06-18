@@ -49,8 +49,9 @@ const materialSchema = z.object({
 type MaterialFormData = z.infer<typeof materialSchema>;
 
 const MaterialForm = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const [, setLocation] = useLocation();
+  const [, params] = useRoute("/minha-area/materiais/:id");
+  const id = params?.id;
   const { materials, materialTypes, addMaterial, updateMaterial } = useMaterials();
   const [selectedType, setSelectedType] = useState<MaterialType | null>(null);
   
@@ -123,7 +124,7 @@ const MaterialForm = () => {
       addMaterial(materialData);
     }
 
-    navigate('/minha-area/materiais');
+    setLocation('/minha-area/materiais');
   };
 
   return (
