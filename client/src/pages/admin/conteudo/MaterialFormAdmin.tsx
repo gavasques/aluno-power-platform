@@ -86,12 +86,8 @@ const MaterialFormAdmin = () => {
         id: materialToEdit.type.id.toString(),
         name: materialToEdit.type.name,
         icon: materialToEdit.type.icon,
-        description: materialToEdit.type.description,
-        contentType: materialToEdit.type.contentType,
-        allowsUpload: materialToEdit.type.allowsUpload,
-        allowsUrl: materialToEdit.type.allowsUrl,
-        allowsEmbed: materialToEdit.type.allowsEmbed,
-        viewerType: materialToEdit.type.viewerType,
+        description: materialToEdit.type.description || undefined,
+        viewerType: materialToEdit.type.viewerType as "download" | "inline" | "external",
         createdAt: materialToEdit.type.createdAt,
       });
     }
@@ -135,10 +131,10 @@ const MaterialFormAdmin = () => {
 
     try {
       if (isEditing && materialToEdit) {
-        updateMaterial(materialToEdit.id, materialData as Partial<Material>);
+        updateMaterial(materialToEdit.id, materialData as any);
         toast({ title: "Material atualizado com sucesso!" });
       } else {
-        addMaterial(materialData as Omit<Material, 'id' | 'uploadDate' | 'lastModified' | 'downloadCount' | 'viewCount'>);
+        addMaterial(materialData as any);
         toast({ title: "Material criado com sucesso!" });
       }
       navigate('/admin/conteudo/materiais');
