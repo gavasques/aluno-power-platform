@@ -416,6 +416,20 @@ export const updates = pgTable("updates", {
   typeCreatedIdx: index("updates_type_created_idx").on(table.type, table.createdAt),
 }));
 
+// Tool videos
+export const toolVideos = pgTable("tool_videos", {
+  id: serial("id").primaryKey(),
+  toolId: integer("tool_id").references(() => tools.id, { onDelete: "cascade" }).notNull(),
+  title: text("title").notNull(),
+  videoId: text("video_id").notNull(), // YouTube video ID
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  toolIdx: index("tool_videos_tool_idx").on(table.toolId),
+  videoIdx: index("tool_videos_video_idx").on(table.videoId),
+}));
+
 // Webhook configurations
 export const webhookConfigs = pgTable("webhook_configs", {
   id: serial("id").primaryKey(),
@@ -586,6 +600,7 @@ export const toolsRelations = relations(tools, ({ one, many }) => ({
   }),
   reviews: many(toolReviews),
   discounts: many(toolDiscounts),
+  videos: many(toolVideos),
 }));
 
 export const toolReviewsRelations = relations(toolReviews, ({ one, many }) => ({
@@ -614,6 +629,13 @@ export const toolReviewRepliesRelations = relations(toolReviewReplies, ({ one })
 export const toolDiscountsRelations = relations(toolDiscounts, ({ one }) => ({
   tool: one(tools, {
     fields: [toolDiscounts.toolId],
+    references: [tools.id],
+  }),
+}));
+
+export const toolVideosRelations = relations(toolVideos, ({ one }) => ({
+  tool: one(tools, {
+    fields: [toolVideos.toolId],
     references: [tools.id],
   }),
 }));
@@ -809,6 +831,12 @@ export const insertPartnerFileSchema = createInsertSchema(partnerFiles).omit({
   createdAt: true,
 });
 
+export const insertToolVideoSchema = createInsertSchema(toolVideos).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -901,3 +929,6 @@ export type ToolReviewWithUser = ToolReview & {
   user: User;
   replies: (ToolReviewReply & { user: User })[];
 };
+
+export type InsertToolVideo = z.infer<typeof insertToolVideoSchema>;
+export type ToolVideo = typeof toolVideos.$inferSelect;
