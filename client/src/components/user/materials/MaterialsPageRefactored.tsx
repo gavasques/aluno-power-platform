@@ -33,7 +33,7 @@ const MaterialsPageRefactored = () => {
   // Fetch material categories
   const { data: materialCategories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ['/api/material-categories'],
-    queryFn: () => apiRequest('/api/material-categories'),
+    queryFn: () => apiRequest<any[]>('/api/material-categories'),
   });
 
   const filteredMaterials = materials.filter(material => {
@@ -75,7 +75,7 @@ const MaterialsPageRefactored = () => {
     incrementDownloadMutation.mutate(material.id);
   };
 
-  const isLoading = materialsLoading || typesLoading;
+  const isLoading = materialsLoading || typesLoading || categoriesLoading;
 
   const getMaterialType = (typeId: number) => {
     return materialTypes.find(t => t.id === typeId);
@@ -111,7 +111,7 @@ const MaterialsPageRefactored = () => {
                 <span className="text-sm text-gray-600">
                   {filteredMaterials.length} material{filteredMaterials.length !== 1 ? 'is' : ''} encontrado{filteredMaterials.length !== 1 ? 's' : ''}
                 </span>
-                {(searchTerm || selectedType !== "all" || selectedAccess !== "all") && (
+                {(searchTerm || selectedType !== "all" || selectedCategory !== "all" || selectedAccess !== "all") && (
                   <Badge variant="secondary" className="text-xs">
                     Filtrado
                   </Badge>
