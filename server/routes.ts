@@ -1334,6 +1334,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tool Reviews
+  app.get('/api/tools/:toolId/reviews', async (req, res) => {
+    try {
+      const toolId = parseInt(req.params.toolId);
+      const reviews = await storage.getToolReviews(toolId);
+      res.json(reviews);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch tool reviews' });
+    }
+  });
+
+  app.post('/api/tools/:toolId/reviews', async (req, res) => {
+    try {
+      const toolId = parseInt(req.params.toolId);
+      const validatedData = insertToolReviewSchema.parse({
+        ...req.body,
+        toolId,
+        userId: 1 // TODO: Get from authenticated user session
+      });
+      const review = await storage.createToolReview(validatedData);
+      res.status(201).json(review);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid review data' });
+    }
+  });
+
+  app.delete('/api/tools/reviews/:id', async (req, res) => {
+    try {
+      await storage.deleteToolReview(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete review' });
+    }
+  });
+
+  // Tool Review Replies
+  app.post('/api/tools/reviews/:reviewId/replies', async (req, res) => {
+    try {
+      const reviewId = parseInt(req.params.reviewId);
+      const validatedData = insertToolReviewReplySchema.parse({
+        ...req.body,
+        reviewId,
+        userId: 1 // TODO: Get from authenticated user session
+      });
+      const reply = await storage.createToolReviewReply(validatedData);
+      res.status(201).json(reply);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid reply data' });
+    }
+  });
+
+  // Tool Discounts
+  app.get('/api/tools/:toolId/discounts', async (req, res) => {
+    try {
+      const toolId = parseInt(req.params.toolId);
+      const discounts = await storage.getToolDiscounts(toolId);
+      res.json(discounts);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch tool discounts' });
+    }
+  });
+
+  app.post('/api/tools/:toolId/discounts', async (req, res) => {
+    try {
+      const toolId = parseInt(req.params.toolId);
+      const validatedData = insertToolDiscountSchema.parse({
+        ...req.body,
+        toolId
+      });
+      const discount = await storage.createToolDiscount(validatedData);
+      res.status(201).json(discount);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid discount data' });
+    }
+  });
+
+  app.put('/api/tools/discounts/:id', async (req, res) => {
+    try {
+      const validatedData = insertToolDiscountSchema.partial().parse(req.body);
+      const discount = await storage.updateToolDiscount(parseInt(req.params.id), validatedData);
+      res.json(discount);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid discount data' });
+    }
+  });
+
+  app.delete('/api/tools/discounts/:id', async (req, res) => {
+    try {
+      await storage.deleteToolDiscount(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete discount' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server setup

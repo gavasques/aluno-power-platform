@@ -18,6 +18,9 @@ import {
   partnerFiles,
   partnerReviews,
   partnerReviewReplies,
+  toolReviews,
+  toolReviewReplies,
+  toolDiscounts,
   youtubeVideos,
   news,
   updates,
@@ -62,6 +65,13 @@ import {
   type PartnerReviewReply,
   type InsertPartnerReviewReply,
   type PartnerReviewWithUser,
+  type ToolReview,
+  type InsertToolReview,
+  type ToolReviewReply,
+  type InsertToolReviewReply,
+  type ToolReviewWithUser,
+  type ToolDiscount,
+  type InsertToolDiscount,
   type YoutubeVideo,
   type InsertYoutubeVideo,
   type News,
@@ -200,6 +210,20 @@ export interface IStorage {
   createPartnerFile(file: InsertPartnerFile): Promise<PartnerFile>;
   updatePartnerFile(id: number, file: Partial<InsertPartnerFile>): Promise<PartnerFile>;
   deletePartnerFile(id: number): Promise<void>;
+
+  // Tool Reviews
+  getToolReviews(toolId: number): Promise<ToolReviewWithUser[]>;
+  createToolReview(review: InsertToolReview): Promise<ToolReview>;
+  deleteToolReview(id: number): Promise<void>;
+
+  // Tool Review Replies
+  createToolReviewReply(reply: InsertToolReviewReply): Promise<ToolReviewReply>;
+
+  // Tool Discounts
+  getToolDiscounts(toolId: number): Promise<ToolDiscount[]>;
+  createToolDiscount(discount: InsertToolDiscount): Promise<ToolDiscount>;
+  updateToolDiscount(id: number, discount: Partial<InsertToolDiscount>): Promise<ToolDiscount>;
+  deleteToolDiscount(id: number): Promise<void>;
 
   // YouTube Videos
   getYoutubeVideos(): Promise<YoutubeVideo[]>;
@@ -1435,6 +1459,120 @@ export class DatabaseStorage implements IStorage {
 
   async deleteWebhookConfig(id: number): Promise<void> {
     await db.delete(webhookConfigs).where(eq(webhookConfigs.id, id));
+  }
+
+  // Tool Reviews
+  async getToolReviews(toolId: number): Promise<ToolReviewWithUser[]> {
+    const reviewsWithUsers = await db
+      .select({
+        id: toolReviews.id,
+        toolId: toolReviews.toolId,
+        userId: toolReviews.userId,
+        rating: toolReviews.rating,
+        comment: toolReviews.comment,
+        photos: toolReviews.photos,
+        createdAt: toolReviews.createdAt,
+        user: {
+          id: users.id,
+          name: users.name,
+          username: users.username,
+          email: users.email,
+          role: users.role,
+          isActive: users.isActive,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        }
+      })
+      .from(toolReviews)
+      .innerJoin(users, eq(toolReviews.userId, users.id))
+      .where(eq(toolReviews.toolId, toolId))
+      .orderBy(desc(toolReviews.createdAt));
+
+    // Get replies for each review
+    const reviewsWithReplies = await Promise.all(
+      reviewsWithUsers.map(async (review) => {
+        const replies = await db
+          .select({
+            id: toolReviewReplies.id,
+            reviewId: toolReviewReplies.reviewId,
+            userId: toolReviewReplies.userId,
+            comment: toolReviewReplies.comment,
+            createdAt: toolReviewReplies.createdAt,
+            user: {
+              id: users.id,
+              name: users.name,
+              username: users.username,
+              email: users.email,
+              role: users.role,
+              isActive: users.isActive,
+              createdAt: users.createdAt,
+              updatedAt: users.updatedAt,
+            }
+          })
+          .from(toolReviewReplies)
+          .innerJoin(users, eq(toolReviewReplies.userId, users.id))
+          .where(eq(toolReviewReplies.reviewId, review.id))
+          .orderBy(toolReviewReplies.createdAt);
+
+        return {
+          ...review,
+          replies
+        };
+      })
+    );
+
+    return reviewsWithReplies;
+  }
+
+  async createToolReview(review: InsertToolReview): Promise<ToolReview> {
+    const [created] = await db
+      .insert(toolReviews)
+      .values(review)
+      .returning();
+    return created;
+  }
+
+  async deleteToolReview(id: number): Promise<void> {
+    await db.delete(toolReviews).where(eq(toolReviews.id, id));
+  }
+
+  // Tool Review Replies
+  async createToolReviewReply(reply: InsertToolReviewReply): Promise<ToolReviewReply> {
+    const [created] = await db
+      .insert(toolReviewReplies)
+      .values(reply)
+      .returning();
+    return created;
+  }
+
+  // Tool Discounts
+  async getToolDiscounts(toolId: number): Promise<ToolDiscount[]> {
+    return await db
+      .select()
+      .from(toolDiscounts)
+      .where(eq(toolDiscounts.toolId, toolId))
+      .orderBy(desc(toolDiscounts.createdAt));
+  }
+
+  async createToolDiscount(discount: InsertToolDiscount): Promise<ToolDiscount> {
+    const [created] = await db
+      .insert(toolDiscounts)
+      .values(discount)
+      .returning();
+    return created;
+  }
+
+  async updateToolDiscount(id: number, discount: Partial<InsertToolDiscount>): Promise<ToolDiscount> {
+    const [updated] = await db
+      .update(toolDiscounts)
+      .set(discount)
+      .where(eq(toolDiscounts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteToolDiscount(id: number): Promise<void> {
+    await db.delete(toolDiscounts).where(eq(toolDiscounts.id, id));
   }
 }
 
