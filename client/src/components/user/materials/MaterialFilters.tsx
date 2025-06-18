@@ -7,10 +7,13 @@ import type { MaterialFiltersProps } from './MaterialTypes';
 export const MaterialFilters: React.FC<MaterialFiltersProps> = ({
   searchTerm,
   selectedType,
+  selectedCategory,
   selectedAccess,
   materialTypes,
+  materialCategories,
   onSearchChange,
   onTypeChange,
+  onCategoryChange,
   onAccessChange,
 }) => {
   return (
@@ -33,6 +36,19 @@ export const MaterialFilters: React.FC<MaterialFiltersProps> = ({
           {materialTypes.map((type) => (
             <SelectItem key={type.id} value={type.id.toString()}>
               {type.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={selectedCategory} onValueChange={onCategoryChange}>
+        <SelectTrigger className="w-full sm:w-[200px]">
+          <SelectValue placeholder="Categoria" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todas as categorias</SelectItem>
+          {materialCategories.map((category) => (
+            <SelectItem key={category.id} value={category.id.toString()}>
+              {category.name}
             </SelectItem>
           ))}
         </SelectContent>

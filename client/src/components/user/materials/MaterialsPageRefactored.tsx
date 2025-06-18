@@ -15,6 +15,7 @@ const MaterialsPageRefactored = () => {
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedAccess, setSelectedAccess] = useState("all");
 
   // Fetch materials
@@ -29,12 +30,19 @@ const MaterialsPageRefactored = () => {
     queryFn: () => apiRequest<MaterialType[]>('/api/material-types'),
   });
 
+  // Fetch material categories
+  const { data: materialCategories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ['/api/material-categories'],
+    queryFn: () => apiRequest('/api/material-categories'),
+  });
+
   const filteredMaterials = materials.filter(material => {
     const matchesSearch = material.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          material.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === "all" || material.typeId === parseInt(selectedType);
+    const matchesCategory = selectedCategory === "all" || material.categoryId === parseInt(selectedCategory);
     const matchesAccess = selectedAccess === "all" || material.accessLevel === selectedAccess;
-    return matchesSearch && matchesType && matchesAccess;
+    return matchesSearch && matchesType && matchesCategory && matchesAccess;
   });
 
   // Increment view count mutation
@@ -88,10 +96,13 @@ const MaterialsPageRefactored = () => {
             <MaterialFilters
               searchTerm={searchTerm}
               selectedType={selectedType}
+              selectedCategory={selectedCategory}
               selectedAccess={selectedAccess}
               materialTypes={materialTypes}
+              materialCategories={materialCategories}
               onSearchChange={setSearchTerm}
               onTypeChange={setSelectedType}
+              onCategoryChange={setSelectedCategory}
               onAccessChange={setSelectedAccess}
             />
 
