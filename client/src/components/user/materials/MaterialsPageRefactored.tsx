@@ -85,36 +85,6 @@ const MaterialsPageRefactored = () => {
 
         {!isLoading && (
           <>
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <div>
-                      <p className="text-2xl font-bold text-gray-900">{materials.length}</p>
-                      <p className="text-sm text-gray-600">Total de Materiais</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {materialTypes.map((type) => {
-                const count = materials.filter(m => m.typeId === type.id).length;
-                return (
-                  <Card key={type.id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center">
-                        <div>
-                          <p className="text-2xl font-bold text-gray-900">{count}</p>
-                          <p className="text-sm text-gray-600">{type.name}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-
             <MaterialFilters
               searchTerm={searchTerm}
               selectedType={selectedType}
