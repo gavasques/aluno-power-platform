@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { PartnerStatsWidget } from '@/components/dashboard/widgets/PartnerStatsWidget';
 import { BaseWidget } from '@/components/dashboard/widgets/BaseWidget';
 import { Button } from '@/components/ui/button';

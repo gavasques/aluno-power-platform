@@ -161,7 +161,7 @@ const MySuppliers = () => {
                 </Button>
               </div>
 
-              <Button onClick={() => navigate('/minha-area/fornecedores/novo')}>
+              <Button onClick={() => setLocation('/minha-area/fornecedores/novo')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar
               </Button>
@@ -434,7 +434,7 @@ const MySuppliers = () => {
                 ? "Tente ajustar os filtros ou termos de busca" 
                 : "Você ainda não possui fornecedores cadastrados"}
             </p>
-            <Button onClick={() => navigate('/minha-area/fornecedores/novo')}>
+            <Button onClick={() => setLocation('/minha-area/fornecedores/novo')}>
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Primeiro Fornecedor
             </Button>

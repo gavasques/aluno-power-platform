@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { toast } from "@/hooks/use-toast";
 import { ProductChannels, ProductSupplier } from "@/types/product";
 import { useProducts } from "@/contexts/ProductContext";
 
 export const useProductForm = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { addProduct } = useProducts();
   
   const [productData, setProductData] = useState({
@@ -222,7 +222,7 @@ export const useProductForm = () => {
       description: "O produto foi cadastrado com sucesso."
     });
     
-    navigate("/minha-area/produtos");
+    setLocation("/minha-area/produtos");
   };
 
   return {
@@ -235,6 +235,6 @@ export const useProductForm = () => {
     handleSuppliersChange,
     handlePhotoUpload,
     handleSubmit,
-    navigate
+    setLocation
   };
 };

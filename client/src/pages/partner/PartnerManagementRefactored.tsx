@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { PartnerList } from '@/components/partner/ui/PartnerList';
 import { usePartners } from '@/lib/hooks/partner/usePartner';
 import { useQuery } from '@tanstack/react-query';
@@ -12,7 +12,7 @@ interface PartnerManagementProps {
 export const PartnerManagementRefactored: React.FC<PartnerManagementProps> = ({
   variant = 'user'
 }) => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('');
 
@@ -45,21 +45,21 @@ export const PartnerManagementRefactored: React.FC<PartnerManagementProps> = ({
 
   const handlePartnerView = (partnerId: number) => {
     if (variant === 'admin') {
-      navigate(`/admin/cadastros/parceiros/${partnerId}`);
+      setLocation(`/admin/cadastros/parceiros/${partnerId}`);
     } else {
-      navigate(`/hub/parceiros/${partnerId}`);
+      setLocation(`/hub/parceiros/${partnerId}`);
     }
   };
 
   const handlePartnerEdit = (partnerId: number) => {
     if (variant === 'admin') {
-      navigate(`/admin/cadastros/parceiros/${partnerId}/edit`);
+      setLocation(`/admin/cadastros/parceiros/${partnerId}/edit`);
     }
   };
 
   const handlePartnerCreate = () => {
     if (variant === 'admin') {
-      navigate('/admin/cadastros/parceiros/novo');
+      setLocation('/admin/cadastros/parceiros/novo');
     }
   };
 
