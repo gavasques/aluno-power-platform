@@ -6,10 +6,15 @@ import type { MaterialFiltersProps } from './MaterialTypes';
 
 export const MaterialFilters: React.FC<MaterialFiltersProps> = ({
   searchTerm,
+  selectedType,
   selectedCategory,
+  selectedAccess,
+  materialTypes,
   materialCategories,
   onSearchChange,
+  onTypeChange,
   onCategoryChange,
+  onAccessChange,
 }) => {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -22,7 +27,19 @@ export const MaterialFilters: React.FC<MaterialFiltersProps> = ({
           className="pl-10"
         />
       </div>
-
+      <Select value={selectedType} onValueChange={onTypeChange}>
+        <SelectTrigger className="w-full sm:w-[200px]">
+          <SelectValue placeholder="Tipo de material" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos os tipos</SelectItem>
+          {materialTypes.map((type) => (
+            <SelectItem key={type.id} value={type.id.toString()}>
+              {type.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <Select value={selectedCategory} onValueChange={onCategoryChange}>
         <SelectTrigger className="w-full sm:w-[200px]">
           <SelectValue placeholder="Categoria" />
@@ -36,7 +53,16 @@ export const MaterialFilters: React.FC<MaterialFiltersProps> = ({
           ))}
         </SelectContent>
       </Select>
-
+      <Select value={selectedAccess} onValueChange={onAccessChange}>
+        <SelectTrigger className="w-full sm:w-[150px]">
+          <SelectValue placeholder="Acesso" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos</SelectItem>
+          <SelectItem value="public">Público</SelectItem>
+          <SelectItem value="restricted">Restrito</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 };
