@@ -109,7 +109,7 @@ const ToolsManagerRefactored = () => {
 
   const handleEdit = (tool: DbTool) => {
     setFormData({
-      name: tool.name,
+      name: tool.name || "",
       description: tool.description || "",
       typeId: tool.typeId.toString(),
       logo: tool.logo || "",

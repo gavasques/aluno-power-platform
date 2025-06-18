@@ -118,7 +118,7 @@ export const ToolContentTabs: React.FC<ToolTabsProps> = ({
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-0">
-            <ToolReviews toolId={tool.id} isAdmin={isAdmin} />
+            <ToolReviews toolId={tool.id} />
           </TabsContent>
 
           <TabsContent value="discounts" className="mt-0">
