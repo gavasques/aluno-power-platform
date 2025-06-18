@@ -50,6 +50,8 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     website: partner?.website || '',
     instagram: partner?.instagram || '',
     linkedin: partner?.linkedin || '',
+    presentationVideoUrl: partner?.presentationVideoUrl || '',
+    guilhermeVideoUrl: partner?.guilhermeVideoUrl || '',
     isVerified: partner?.isVerified || false,
   });
 
@@ -76,6 +78,8 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
       website: formData.website,
       instagram: formData.instagram,
       linkedin: formData.linkedin,
+      presentationVideoUrl: formData.presentationVideoUrl || null,
+      guilhermeVideoUrl: formData.guilhermeVideoUrl || null,
       isVerified: formData.isVerified,
     };
 
@@ -292,6 +296,30 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
                   className="bg-slate-800 border-slate-600 text-white"
                   placeholder="https://linkedin.com/in/usuario"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="presentationVideoUrl" className="text-white">Vídeo de Apresentação</Label>
+                <Input
+                  id="presentationVideoUrl"
+                  value={formData.presentationVideoUrl}
+                  onChange={(e) => setFormData(prev => ({ ...prev, presentationVideoUrl: e.target.value }))}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+                <p className="text-xs text-slate-400">Link do YouTube para vídeo de apresentação do parceiro</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="guilhermeVideoUrl" className="text-white">Vídeo Guilherme</Label>
+                <Input
+                  id="guilhermeVideoUrl"
+                  value={formData.guilhermeVideoUrl}
+                  onChange={(e) => setFormData(prev => ({ ...prev, guilhermeVideoUrl: e.target.value }))}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+                <p className="text-xs text-slate-400">Link do YouTube para vídeo específico do Guilherme sobre o parceiro</p>
               </div>
             </TabsContent>
 
