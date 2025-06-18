@@ -191,8 +191,10 @@ export const materialTypes = pgTable("material_types", {
   name: text("name").notNull(),
   icon: text("icon").notNull(),
   description: text("description"),
+  contentType: text("content_type").notNull(), // 'embed', 'video', 'pdf', 'download'
   allowsUpload: boolean("allows_upload").notNull().default(true),
   allowsUrl: boolean("allows_url").notNull().default(true),
+  allowsEmbed: boolean("allows_embed").notNull().default(false),
   viewerType: text("viewer_type").notNull().default("inline"), // 'inline', 'download', 'external'
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -204,11 +206,25 @@ export const materials = pgTable("materials", {
   description: text("description").notNull(),
   typeId: integer("type_id").references(() => materialTypes.id).notNull(),
   accessLevel: text("access_level").notNull().default("public"), // 'public', 'restricted'
+  
+  // File content
   fileUrl: text("file_url"),
-  externalUrl: text("external_url"),
-  embedCode: text("embed_code"),
+  fileName: text("file_name"),
   fileSize: integer("file_size"),
   fileType: text("file_type"),
+  
+  // External/URL content
+  externalUrl: text("external_url"),
+  
+  // Embed content
+  embedCode: text("embed_code"),
+  embedUrl: text("embed_url"),
+  
+  // Video content
+  videoUrl: text("video_url"),
+  videoDuration: integer("video_duration"), // in seconds
+  videoThumbnail: text("video_thumbnail"),
+  
   tags: text("tags").array(),
   downloadCount: integer("download_count").notNull().default(0),
   viewCount: integer("view_count").notNull().default(0),
