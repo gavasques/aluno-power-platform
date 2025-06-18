@@ -257,6 +257,26 @@ export const toolReviews = pgTable("tool_reviews", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Tool Review Replies
+export const toolReviewReplies = pgTable("tool_review_replies", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").references(() => toolReviews.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  comment: text("comment").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Tool Discounts
+export const toolDiscounts = pgTable("tool_discounts", {
+  id: serial("id").primaryKey(),
+  toolId: integer("tool_id").references(() => tools.id).notNull(),
+  title: text("title").notNull(),
+  linkOrCoupon: text("link_or_coupon").notNull(),
+  explanation: text("explanation").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Template Categories
 export const templateCategories = pgTable("template_categories", {
   id: serial("id").primaryKey(),
@@ -565,9 +585,10 @@ export const toolsRelations = relations(tools, ({ one, many }) => ({
     references: [toolTypes.id],
   }),
   reviews: many(toolReviews),
+  discounts: many(toolDiscounts),
 }));
 
-export const toolReviewsRelations = relations(toolReviews, ({ one }) => ({
+export const toolReviewsRelations = relations(toolReviews, ({ one, many }) => ({
   tool: one(tools, {
     fields: [toolReviews.toolId],
     references: [tools.id],
@@ -575,6 +596,25 @@ export const toolReviewsRelations = relations(toolReviews, ({ one }) => ({
   user: one(users, {
     fields: [toolReviews.userId],
     references: [users.id],
+  }),
+  replies: many(toolReviewReplies),
+}));
+
+export const toolReviewRepliesRelations = relations(toolReviewReplies, ({ one }) => ({
+  review: one(toolReviews, {
+    fields: [toolReviewReplies.reviewId],
+    references: [toolReviews.id],
+  }),
+  user: one(users, {
+    fields: [toolReviewReplies.userId],
+    references: [users.id],
+  }),
+}));
+
+export const toolDiscountsRelations = relations(toolDiscounts, ({ one }) => ({
+  tool: one(tools, {
+    fields: [toolDiscounts.toolId],
+    references: [tools.id],
   }),
 }));
 
@@ -671,6 +711,22 @@ export const insertPromptSchema = createInsertSchema(prompts).omit({
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertToolReviewSchema = createInsertSchema(toolReviews).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertToolReviewReplySchema = createInsertSchema(toolReviewReplies).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertToolDiscountSchema = createInsertSchema(toolDiscounts).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -827,7 +883,21 @@ export type PartnerReview = typeof partnerReviews.$inferSelect;
 export type InsertPartnerReviewReply = z.infer<typeof insertPartnerReviewReplySchema>;
 export type PartnerReviewReply = typeof partnerReviewReplies.$inferSelect;
 
+export type InsertToolReview = z.infer<typeof insertToolReviewSchema>;
+export type ToolReview = typeof toolReviews.$inferSelect;
+
+export type InsertToolReviewReply = z.infer<typeof insertToolReviewReplySchema>;
+export type ToolReviewReply = typeof toolReviewReplies.$inferSelect;
+
+export type InsertToolDiscount = z.infer<typeof insertToolDiscountSchema>;
+export type ToolDiscount = typeof toolDiscounts.$inferSelect;
+
 export type PartnerReviewWithUser = PartnerReview & {
   user: User;
   replies: (PartnerReviewReply & { user: User })[];
+};
+
+export type ToolReviewWithUser = ToolReview & {
+  user: User;
+  replies: (ToolReviewReply & { user: User })[];
 };
