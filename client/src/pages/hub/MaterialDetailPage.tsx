@@ -23,23 +23,29 @@ const MaterialDetailPage = () => {
   const queryClient = useQueryClient();
 
   // Fetch material
-  const { data: material, isLoading } = useQuery({
-    queryKey: ['/api/materials', id],
+  const { data: material, isLoading, error } = useQuery({
+    queryKey: ['material', id],
     queryFn: () => apiRequest<DbMaterial>(`/api/materials/${id}`),
     enabled: !!id,
+    retry: 1,
   });
 
   // Fetch material types
   const { data: materialTypes = [] } = useQuery({
-    queryKey: ['/api/material-types'],
+    queryKey: ['material-types'],
     queryFn: () => apiRequest<MaterialType[]>('/api/material-types'),
+    retry: 1,
   });
 
   // Increment view count mutation
   const incrementViewMutation = useMutation({
     mutationFn: () => apiRequest(`/api/materials/${id}/view`, { method: 'POST' }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/materials'] });
+      queryClient.invalidateQueries({ queryKey: ['material', id] });
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
+    },
+    onError: (error) => {
+      console.warn('Failed to increment view count:', error);
     },
   });
 
@@ -47,13 +53,17 @@ const MaterialDetailPage = () => {
   const incrementDownloadMutation = useMutation({
     mutationFn: () => apiRequest(`/api/materials/${id}/download`, { method: 'POST' }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/materials'] });
+      queryClient.invalidateQueries({ queryKey: ['material', id] });
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
+    },
+    onError: (error) => {
+      console.warn('Failed to increment download count:', error);
     },
   });
 
   // Increment view count on page load
   useEffect(() => {
-    if (material) {
+    if (material && !incrementViewMutation.isPending) {
       incrementViewMutation.mutate();
     }
   }, [material?.id]);
@@ -198,6 +208,26 @@ const MaterialDetailPage = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Carregando material...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="text-center py-8">
+            <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Erro ao carregar material</h2>
+            <p className="text-gray-600 mb-6">
+              Ocorreu um erro ao tentar carregar o material. Tente novamente mais tarde.
+            </p>
+            <Button onClick={() => navigate('/hub/materials')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar aos Materiais
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

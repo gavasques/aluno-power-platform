@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider"
 import { AdminLayout } from "./components/layout/AdminLayout";
@@ -74,7 +73,7 @@ function App() {
                             <Route path="noticias" element={<News />} />
                             <Route path="novidades" element={<Updates />} />
                             <Route path="fornecedores" element={<Suppliers />} />
-                            
+
                             {/* Rotas do Hub */}
                             <Route path="hub">
                               {/* Detail routes first (dynamic routes before the catch-all) */}
