@@ -1083,34 +1083,56 @@ export class DatabaseStorage implements IStorage {
   // Partner Reviews
   async getPartnerReviews(partnerId: number): Promise<PartnerReviewWithUser[]> {
     try {
+      // Fetch all reviews with users in one query
       const reviews = await db
-        .select()
+        .select({
+          review: partnerReviews,
+          user: users
+        })
         .from(partnerReviews)
+        .leftJoin(users, eq(partnerReviews.userId, users.id))
         .where(and(eq(partnerReviews.partnerId, partnerId), eq(partnerReviews.isApproved, true)))
         .orderBy(desc(partnerReviews.createdAt));
 
-      const result: PartnerReviewWithUser[] = [];
-      
-      for (const review of reviews) {
-        const [user] = await db.select().from(users).where(eq(users.id, review.userId));
-        const replies = await this.getPartnerReviewReplies(review.id);
-        
-        result.push({
-          ...review,
-          user: user || {
-            id: 0,
-            username: 'Usuário Desconhecido',
-            name: 'Usuário Desconhecido',
-            email: '',
-            password: '',
-            role: 'user',
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          replies: replies,
-        });
+      if (reviews.length === 0) {
+        return [];
       }
+
+      // Get all review IDs
+      const reviewIds = reviews.map(row => row.review.id);
+
+      // Fetch all replies for all reviews
+      const allReplies: (PartnerReviewReply & { user: User })[] = [];
+      for (const reviewId of reviewIds) {
+        const replies = await this.getPartnerReviewReplies(reviewId);
+        allReplies.push(...replies);
+      }
+
+      // Group replies by review ID
+      const repliesByReview = allReplies.reduce((acc, reply) => {
+        if (!acc[reply.reviewId]) {
+          acc[reply.reviewId] = [];
+        }
+        acc[reply.reviewId].push(reply as PartnerReviewReply & { user: User });
+        return acc;
+      }, {} as Record<number, (PartnerReviewReply & { user: User })[]>);
+
+      // Build result with replies
+      const result: PartnerReviewWithUser[] = reviews.map(row => ({
+        ...row.review,
+        user: row.user || {
+          id: 0,
+          username: 'Usuário Desconhecido',
+          name: 'Usuário Desconhecido',
+          email: '',
+          password: '',
+          role: 'user',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        replies: repliesByReview[row.review.id] || [],
+      }));
       
       return result;
     } catch (error) {
