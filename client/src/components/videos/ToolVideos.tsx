@@ -131,7 +131,7 @@ export function ToolVideos({ toolId, isAdmin = false }: ToolVideosProps) {
       toolId,
       title: data.title,
       videoId,
-      description: data.description || null,
+      description: data.description || undefined,
     };
 
     if (editingVideo) {
@@ -312,7 +312,7 @@ export function ToolVideos({ toolId, isAdmin = false }: ToolVideosProps) {
                   <YouTubeVideoPlayer
                     title={video.title}
                     videoId={video.videoId}
-                    description={video.description}
+                    description={video.description || undefined}
                   />
                 </div>
               ))}
