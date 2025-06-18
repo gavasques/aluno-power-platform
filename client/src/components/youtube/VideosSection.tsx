@@ -32,8 +32,8 @@ export function VideosSection() {
   }, {} as Record<string, typeof videos>);
 
   const categories = Object.keys(groupedVideos);
-  const featuredVideos = videos
-    .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+  const latestVideos = videos
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
     .slice(0, 6);
 
   return (
@@ -139,17 +139,17 @@ export function VideosSection() {
         </Card>
       ) : (
         <>
-          {/* Featured Videos */}
+          {/* Latest Videos */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Play className="h-5 w-5" />
-                Vídeos em Destaque
+                Últimos Vídeos
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {featuredVideos.map((video) => (
+                {latestVideos.map((video) => (
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>

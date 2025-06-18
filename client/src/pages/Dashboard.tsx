@@ -40,7 +40,9 @@ StatCard.displayName = 'StatCard';
 
 const Dashboard = () => {
   const { videos, loading } = useYoutube();
-  const recentVideos = videos.slice(0, 6);
+  const recentVideos = videos
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    .slice(0, 6);
 
   // Fetch published news preview (lightweight)
   const { data: newsData = [], isLoading: newsLoading } = useQuery<Partial<News>[]>({
