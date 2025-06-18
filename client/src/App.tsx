@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { Router, Route, Switch } from "wouter";
 import { ThemeProvider } from "@/components/theme-provider"
 import { AdminLayout } from "./components/layout/AdminLayout";
 import Layout from "./components/layout/Layout";
@@ -48,12 +48,10 @@ const Auth = () => (
   </div>
 );
 
-
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <Router>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <AuthProvider>
             <YoutubeProvider>
@@ -64,48 +62,164 @@ function App() {
                     <ToolsProvider>
                       <TemplatesProvider>
                         <PromptsProvider>
-                        <Routes>
-                          <Route path="/auth" element={<Auth />} />
+                        <Switch>
+                          <Route path="/auth" component={Auth} />
 
-                          {/* Rotas do usuário com Layout */}
-                          <Route path="/" element={<Layout><Outlet /></Layout>}>
-                            <Route index element={<Dashboard />} />
-                            <Route path="videos" element={<Videos />} />
-                            <Route path="noticias" element={<News />} />
-                            <Route path="novidades" element={<Updates />} />
-                            <Route path="fornecedores" element={<Suppliers />} />
-                            
-                            {/* Rotas do Hub */}
-                            <Route path="hub">
-                              {/* Detail routes first (dynamic routes before the catch-all) */}
-                              <Route path="parceiros/:id" element={<PartnerDetail />} />
-                              <Route path="ferramentas/:id" element={<ToolDetail />} />
-                              <Route path="materiais/:id" element={<MaterialDetailPage />} />
-                              <Route path="fornecedores/:id" element={<SupplierDetail />} />
-                              <Route path="templates/:id" element={<TemplateDetail />} />
-                              <Route path="prompts-ia/:id" element={<PromptDetail />} />
-                              <Route path="parceiros" element={<Partners />} />
-                              <Route path="fornecedores" element={<Suppliers />} />
-                              <Route path=":section" element={<Hub />} />
-                            </Route>
-
-                            {/* Rotas da Minha Área */}
-                            <Route path="minha-area">
-                              <Route path=":section/:id?/:action?" element={<MyArea />} />
-                            </Route>
+                          {/* Detail routes with Layout */}
+                          <Route path="/hub/materiais/:id">
+                            {(params) => (
+                              <Layout>
+                                <MaterialDetailPage />
+                              </Layout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/hub/parceiros/:id">
+                            {(params) => (
+                              <Layout>
+                                <PartnerDetail />
+                              </Layout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/hub/ferramentas/:id">
+                            {(params) => (
+                              <Layout>
+                                <ToolDetail />
+                              </Layout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/hub/fornecedores/:id">
+                            {(params) => (
+                              <Layout>
+                                <SupplierDetail />
+                              </Layout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/hub/templates/:id">
+                            {(params) => (
+                              <Layout>
+                                <TemplateDetail />
+                              </Layout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/hub/prompts-ia/:id">
+                            {(params) => (
+                              <Layout>
+                                <PromptDetail />
+                              </Layout>
+                            )}
                           </Route>
 
-                          {/* Rotas de admin com AdminLayout */}
-                          <Route path="/admin" element={<AdminLayout><Outlet /></AdminLayout>}>
-                            <Route index element={<AdminDashboard />} />
-                            <Route path=":section/:subsection?" element={<Admin />} />
-                            <Route path="usuarios" element={<UserManagement />} />
-                            <Route path="suporte" element={<SupportManagement />} />
-                            <Route path="configuracoes/:section?" element={<GeneralSettings />} />
-                            <Route path="conteudo/:subsection?/:id?/:action?" element={<ContentManagement />} />
+                          {/* Hub section routes */}
+                          <Route path="/hub/parceiros">
+                            <Layout>
+                              <Partners />
+                            </Layout>
+                          </Route>
+                          
+                          <Route path="/hub/fornecedores">
+                            <Layout>
+                              <Suppliers />
+                            </Layout>
+                          </Route>
+                          
+                          <Route path="/hub/:section">
+                            {(params) => (
+                              <Layout>
+                                <Hub />
+                              </Layout>
+                            )}
                           </Route>
 
-                          </Routes>
+                          {/* Minha Área routes */}
+                          <Route path="/minha-area/:section/:id?/:action?">
+                            {(params) => (
+                              <Layout>
+                                <MyArea />
+                              </Layout>
+                            )}
+                          </Route>
+
+                          {/* Admin routes */}
+                          <Route path="/admin/usuarios">
+                            <AdminLayout>
+                              <UserManagement />
+                            </AdminLayout>
+                          </Route>
+                          
+                          <Route path="/admin/suporte">
+                            <AdminLayout>
+                              <SupportManagement />
+                            </AdminLayout>
+                          </Route>
+                          
+                          <Route path="/admin/configuracoes/:section?">
+                            {(params) => (
+                              <AdminLayout>
+                                <GeneralSettings />
+                              </AdminLayout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/admin/conteudo/:subsection?/:id?/:action?">
+                            {(params) => (
+                              <AdminLayout>
+                                <ContentManagement />
+                              </AdminLayout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/admin/:section/:subsection?">
+                            {(params) => (
+                              <AdminLayout>
+                                <Admin />
+                              </AdminLayout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/admin">
+                            <AdminLayout>
+                              <AdminDashboard />
+                            </AdminLayout>
+                          </Route>
+
+                          {/* Main user routes */}
+                          <Route path="/videos">
+                            <Layout>
+                              <Videos />
+                            </Layout>
+                          </Route>
+                          
+                          <Route path="/noticias">
+                            <Layout>
+                              <News />
+                            </Layout>
+                          </Route>
+                          
+                          <Route path="/novidades">
+                            <Layout>
+                              <Updates />
+                            </Layout>
+                          </Route>
+                          
+                          <Route path="/fornecedores">
+                            <Layout>
+                              <Suppliers />
+                            </Layout>
+                          </Route>
+
+                          {/* Home route */}
+                          <Route path="/">
+                            <Layout>
+                              <Dashboard />
+                            </Layout>
+                          </Route>
+
+                          </Switch>
                           <Toaster />
                         </PromptsProvider>
                       </TemplatesProvider>
@@ -117,7 +231,7 @@ function App() {
             </YoutubeProvider>
           </AuthProvider>
         </ThemeProvider>
-      </BrowserRouter>
+      </Router>
     </QueryClientProvider>
   );
 }

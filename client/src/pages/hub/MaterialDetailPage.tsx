@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useRoute, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,8 +18,9 @@ import { apiRequest } from '@/lib/queryClient';
 import type { Material as DbMaterial, MaterialType } from '@shared/schema';
 
 const MaterialDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const [, params] = useRoute('/hub/materiais/:id');
+  const [, setLocation] = useLocation();
+  const id = params?.id;
   const queryClient = useQueryClient();
 
   // Fetch material
@@ -212,7 +213,7 @@ const MaterialDetailPage = () => {
             <p className="text-gray-600 mb-6">
               O material solicitado não existe ou foi removido.
             </p>
-            <Button onClick={() => navigate('/hub/materials')}>
+            <Button onClick={() => setLocation('/hub/materials')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar aos Materiais
             </Button>
@@ -234,7 +235,7 @@ const MaterialDetailPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/hub/materials')}
+                onClick={() => setLocation('/hub/materials')}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Voltar

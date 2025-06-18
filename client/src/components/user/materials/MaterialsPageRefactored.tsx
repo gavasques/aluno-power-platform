@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { apiRequest } from '@/lib/queryClient';
@@ -10,7 +10,7 @@ import type { Material as DbMaterial, MaterialType } from '@shared/schema';
 
 const MaterialsPageRefactored = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,7 +68,7 @@ const MaterialsPageRefactored = () => {
   });
 
   const handleView = (material: DbMaterial) => {
-    navigate(`/hub/materials/${material.id}`);
+    setLocation(`/hub/materiais/${material.id}`);
   };
 
   const handleDownload = (material: DbMaterial) => {
