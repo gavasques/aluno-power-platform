@@ -15,17 +15,43 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
+interface Material {
+  id: number;
+  title: string;
+  description: string;
+  typeId: number;
+  categoryId: number | null;
+  accessLevel: string;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
+  fileType: string | null;
+  externalUrl: string | null;
+  embedCode: string | null;
+  embedUrl: string | null;
+  videoUrl: string | null;
+  videoDuration: number | null;
+  videoThumbnail: string | null;
+  tags: string[];
+  downloadCount: number;
+  viewCount: number;
+  uploadedBy: number;
+  technicalInfo: string | null;
+  uploadDate: string;
+  lastModified: string;
+}
+
 const MaterialDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   // Fetch material
-  const { data: material, isLoading } = useQuery({
+  const { data: material, isLoading, error } = useQuery<Material>({
     queryKey: ['/api/materials', id],
     queryFn: () => apiRequest(`/api/materials/${id}`),
     enabled: !!id,
-  }) as { data: any, isLoading: boolean };
+  });
 
   // Increment view count mutation
   const incrementViewMutation = useMutation({
@@ -45,7 +71,7 @@ const MaterialDetailPage = () => {
 
   // Increment view count on page load
   useEffect(() => {
-    if (material) {
+    if (material && material.id) {
       incrementViewMutation.mutate();
     }
   }, [material?.id]);
@@ -75,16 +101,18 @@ const MaterialDetailPage = () => {
     // Handle embed content
     if (material.embedCode) {
       return (
-        <div 
-          className="w-full min-h-screen"
-          dangerouslySetInnerHTML={{ __html: material.embedCode }}
-        />
+        <div className="w-full bg-white p-4">
+          <div 
+            className="w-full min-h-screen"
+            dangerouslySetInnerHTML={{ __html: material.embedCode }}
+          />
+        </div>
       );
     }
 
     if (material.embedUrl) {
       return (
-        <div className="w-full h-screen">
+        <div className="w-full h-screen bg-white">
           <iframe
             src={material.embedUrl}
             className="w-full h-full border-0"
@@ -98,7 +126,7 @@ const MaterialDetailPage = () => {
     // Handle video content
     if (material.videoUrl) {
       return (
-        <div className="w-full flex justify-center">
+        <div className="w-full flex justify-center bg-white p-4">
           <video 
             controls 
             className="w-full max-w-6xl h-auto"
@@ -115,7 +143,7 @@ const MaterialDetailPage = () => {
     // Handle PDF content
     if (material.fileUrl && material.fileType === 'application/pdf') {
       return (
-        <div className="w-full h-screen">
+        <div className="w-full h-screen bg-white">
           <iframe
             src={`${material.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
             className="w-full h-full border-0"
@@ -128,7 +156,7 @@ const MaterialDetailPage = () => {
     // Handle downloadable files
     if (material.fileUrl) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-96 py-12">
+        <div className="flex flex-col items-center justify-center min-h-96 py-12 bg-white">
           <div className="text-center max-w-2xl">
             <Download className="h-24 w-24 mx-auto text-blue-500 mb-6" />
             <h2 className="text-2xl font-bold mb-4">Material para Download</h2>
@@ -151,7 +179,7 @@ const MaterialDetailPage = () => {
 
     // Default fallback
     return (
-      <div className="flex items-center justify-center min-h-96">
+      <div className="flex items-center justify-center min-h-96 bg-white">
         <div className="text-center">
           <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
           <p className="text-gray-500">Conteúdo não disponível</p>
@@ -171,7 +199,7 @@ const MaterialDetailPage = () => {
     );
   }
 
-  if (!material) {
+  if (error || !material) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
@@ -263,7 +291,7 @@ const MaterialDetailPage = () => {
                 <p className="text-gray-600 mb-4">{material.description}</p>
                 {material.tags && material.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {material.tags.map((tag, index) => (
+                    {material.tags.map((tag: string, index: number) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {tag}
                       </Badge>

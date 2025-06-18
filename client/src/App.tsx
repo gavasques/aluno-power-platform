@@ -67,6 +67,14 @@ function App() {
                         <Routes>
                           <Route path="/auth" element={<Auth />} />
 
+                          {/* Rotas específicas do Hub - Rota simples e direta */}
+                          <Route path="hub/materiais/:id" element={<Layout><MaterialDetailPage /></Layout>} />
+                          <Route path="hub/parceiros/:id" element={<Layout><PartnerDetail /></Layout>} />
+                          <Route path="hub/ferramentas/:id" element={<Layout><ToolDetail /></Layout>} />
+                          <Route path="hub/fornecedores/:id" element={<Layout><SupplierDetail /></Layout>} />
+                          <Route path="hub/templates/:id" element={<Layout><TemplateDetail /></Layout>} />
+                          <Route path="hub/prompts-ia/:id" element={<Layout><PromptDetail /></Layout>} />
+
                           {/* Rotas do usuário com Layout */}
                           <Route path="/" element={<Layout><Outlet /></Layout>}>
                             <Route index element={<Dashboard />} />
@@ -74,14 +82,6 @@ function App() {
                             <Route path="noticias" element={<News />} />
                             <Route path="novidades" element={<Updates />} />
                             <Route path="fornecedores" element={<Suppliers />} />
-                            
-                            {/* Rotas específicas do Hub */}
-                            <Route path="hub/parceiros/:id" element={<PartnerDetail />} />
-                            <Route path="hub/ferramentas/:id" element={<ToolDetail />} />
-                            <Route path="hub/materiais/:id" element={<MaterialDetailPage />} />
-                            <Route path="hub/fornecedores/:id" element={<SupplierDetail />} />
-                            <Route path="hub/templates/:id" element={<TemplateDetail />} />
-                            <Route path="hub/prompts-ia/:id" element={<PromptDetail />} />
                             
                             {/* Rotas do Hub */}
                             <Route path="hub">
