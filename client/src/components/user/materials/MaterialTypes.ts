@@ -29,5 +29,6 @@ export interface MaterialGridProps {
   materials: DbMaterial[];
   materialTypes: MaterialType[];
   onView: (material: DbMaterial) => void;
+  onNavigate?: (material: DbMaterial) => void;
   onDownload?: (material: DbMaterial) => void;
 }

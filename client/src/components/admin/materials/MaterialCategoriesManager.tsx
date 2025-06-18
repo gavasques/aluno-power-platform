@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { Plus, Edit, Trash2, Folder } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import type { MaterialCategory, InsertMaterialCategory } from '@/hooks/useMaterialCategories';
+import type { MaterialCategory } from '@shared/schema';
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -49,7 +49,7 @@ const MaterialCategoriesManager = () => {
 
   // Create category mutation
   const createCategoryMutation = useMutation({
-    mutationFn: (category: InsertMaterialCategory) =>
+    mutationFn: (category: any) =>
       apiRequest<MaterialCategory>('/api/material-categories', {
         method: 'POST',
         body: JSON.stringify(category),
@@ -74,7 +74,7 @@ const MaterialCategoriesManager = () => {
 
   // Update category mutation
   const updateCategoryMutation = useMutation({
-    mutationFn: ({ id, category }: { id: number; category: Partial<InsertMaterialCategory> }) =>
+    mutationFn: ({ id, category }: { id: number; category: Partial<any> }) =>
       apiRequest<MaterialCategory>(`/api/material-categories/${id}`, {
         method: 'PUT',
         body: JSON.stringify(category),
