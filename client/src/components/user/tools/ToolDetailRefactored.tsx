@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useTools } from "@/contexts/ToolsContext";
@@ -9,8 +9,9 @@ import { ToolHeader } from './ToolHeader';
 import { ToolContentTabs } from './ToolContentTabs';
 
 const ToolDetailRefactored = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const [, params] = useRoute("/hub/ferramentas/:id");
+  const [, setLocation] = useLocation();
+  const id = params?.id;
   const { tools, toolTypes } = useTools();
   const { user, isAdmin } = useAuth();
 

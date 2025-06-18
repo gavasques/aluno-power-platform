@@ -27,7 +27,7 @@ const SupplierDetail = () => {
             <p className="text-muted-foreground mb-4">
               O fornecedor que você está procurando não existe ou foi removido.
             </p>
-            <Button onClick={() => navigate('/minha-area/fornecedores')}>
+            <Button onClick={() => setLocation('/minha-area/fornecedores')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar para Fornecedores
             </Button>
@@ -52,7 +52,7 @@ const SupplierDetail = () => {
       <div className="mb-6">
         <Button
           variant="ghost"
-          onClick={() => navigate('/minha-area/fornecedores')}
+          onClick={() => setLocation('/minha-area/fornecedores')}
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
