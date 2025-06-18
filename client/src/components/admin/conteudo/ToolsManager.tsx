@@ -598,6 +598,17 @@ const ToolsManager = () => {
                 </div>
               </TabsContent>
 
+              <TabsContent value="videos" className="space-y-6">
+                {editingTool && (
+                  <ToolVideoManager toolId={editingTool.id} />
+                )}
+                {!editingTool && (
+                  <div className="text-center text-gray-500 py-8">
+                    <p>Salve a ferramenta primeiro para gerenciar vídeos</p>
+                  </div>
+                )}
+              </TabsContent>
+
               <TabsContent value="analysis" className="space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-4">
