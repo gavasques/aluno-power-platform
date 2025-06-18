@@ -1,5 +1,5 @@
 
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserNav } from "@/components/layout/UserNav";
 import {

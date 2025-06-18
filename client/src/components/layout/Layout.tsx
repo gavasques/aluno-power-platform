@@ -1,5 +1,5 @@
 
-import { useLocation } from "wouter";
+import { useLocation } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { UserBreadcrumbs } from "@/components/layout/UserBreadcrumbs";
@@ -9,8 +9,8 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const [location] = useLocation();
-  const isAdminRoute = location.startsWith("/admin");
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
   if (isAdminRoute) {
     return <AdminLayout>{children}</AdminLayout>;

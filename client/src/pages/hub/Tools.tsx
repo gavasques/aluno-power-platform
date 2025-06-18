@@ -6,14 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Star, Search, CheckCircle, Wrench } from "lucide-react";
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useTools } from "@/contexts/ToolsContext";
 
 const Tools = () => {
   const { tools, toolTypes } = useTools();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   const filteredTools = tools.filter(tool => {
     const matchesSearch = tool.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -32,7 +32,7 @@ const Tools = () => {
   };
 
   const handleToolClick = (toolId: number) => {
-    setLocation(`/hub/ferramentas/${toolId}`);
+    navigate(`/hub/ferramentas/${toolId}`);
   };
 
   return (

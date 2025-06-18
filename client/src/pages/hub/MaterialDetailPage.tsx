@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams, useLocation } from 'wouter';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,50 +8,31 @@ import {
   ArrowLeft, 
   Download, 
   ExternalLink, 
+  Eye,
   FileText,
   Video,
   Code,
-  Eye
+  Share2
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
-
-interface Material {
-  id: number;
-  title: string;
-  description: string;
-  typeId: number;
-  categoryId: number | null;
-  accessLevel: string;
-  fileUrl: string | null;
-  fileName: string | null;
-  fileSize: number | null;
-  fileType: string | null;
-  externalUrl: string | null;
-  embedCode: string | null;
-  embedUrl: string | null;
-  videoUrl: string | null;
-  videoDuration: number | null;
-  videoThumbnail: string | null;
-  tags: string[];
-  downloadCount: number;
-  viewCount: number;
-  uploadedBy: number;
-  technicalInfo: string | null;
-  uploadDate: string;
-  lastModified: string;
-}
+import type { Material as DbMaterial, MaterialType } from '@shared/schema';
 
 const MaterialDetailPage = () => {
-  const params = useParams();
-  const [location, setLocation] = useLocation();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const id = params.id;
 
   // Fetch material
-  const { data: material, isLoading, error } = useQuery<Material>({
+  const { data: material, isLoading } = useQuery({
     queryKey: ['/api/materials', id],
-    queryFn: () => apiRequest(`/api/materials/${id}`),
+    queryFn: () => apiRequest<DbMaterial>(`/api/materials/${id}`),
     enabled: !!id,
+  });
+
+  // Fetch material types
+  const { data: materialTypes = [] } = useQuery({
+    queryKey: ['/api/material-types'],
+    queryFn: () => apiRequest<MaterialType[]>('/api/material-types'),
   });
 
   // Increment view count mutation
@@ -72,10 +53,15 @@ const MaterialDetailPage = () => {
 
   // Increment view count on page load
   useEffect(() => {
-    if (material && material.id) {
+    if (material) {
       incrementViewMutation.mutate();
     }
   }, [material?.id]);
+
+  const getMaterialType = () => {
+    if (!material) return null;
+    return materialTypes.find(t => t.id === material.typeId);
+  };
 
   const handleDownload = () => {
     if (material?.fileUrl) {
@@ -90,97 +76,113 @@ const MaterialDetailPage = () => {
     }
   };
 
-  const getTypeIcon = () => {
-    if (material?.embedCode || material?.embedUrl) return Code;
-    if (material?.videoUrl) return Video;
-    return FileText;
+  const getTypeIcon = (contentType: string) => {
+    const icons = {
+      pdf: FileText,
+      video: Video,
+      embed: Code,
+      download: Download,
+    };
+    const IconComponent = icons[contentType as keyof typeof icons] || FileText;
+    return <IconComponent className="h-5 w-5" />;
   };
 
   const renderContent = () => {
     if (!material) return null;
+    
+    const materialType = getMaterialType();
+    if (!materialType) return null;
 
-    // Handle embed content
-    if (material.embedCode) {
-      return (
-        <div className="w-full bg-white p-4">
-          <div 
-            className="w-full min-h-screen"
-            dangerouslySetInnerHTML={{ __html: material.embedCode }}
-          />
-        </div>
-      );
-    }
+    switch (materialType.contentType) {
+      case 'pdf':
+        if (material.fileUrl) {
+          return (
+            <div className="w-full h-screen">
+              <iframe
+                src={`${material.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                className="w-full h-full border-0"
+                title={material.title}
+              />
+            </div>
+          );
+        }
+        break;
 
-    if (material.embedUrl) {
-      return (
-        <div className="w-full h-screen bg-white">
-          <iframe
-            src={material.embedUrl}
-            className="w-full h-full border-0"
-            title={material.title}
-            allowFullScreen
-          />
-        </div>
-      );
-    }
+      case 'video':
+        if (material.videoUrl) {
+          return (
+            <div className="w-full flex justify-center">
+              <video 
+                controls 
+                className="w-full max-w-6xl h-auto"
+                poster={material.videoThumbnail || undefined}
+                style={{ maxHeight: '80vh' }}
+              >
+                <source src={material.videoUrl} type="video/mp4" />
+                Seu navegador não suporta o elemento de vídeo.
+              </video>
+            </div>
+          );
+        }
+        break;
 
-    // Handle video content
-    if (material.videoUrl) {
-      return (
-        <div className="w-full flex justify-center bg-white p-4">
-          <video 
-            controls 
-            className="w-full max-w-6xl h-auto"
-            poster={material.videoThumbnail || undefined}
-            style={{ maxHeight: '80vh' }}
-          >
-            <source src={material.videoUrl} type="video/mp4" />
-            Seu navegador não suporta o elemento de vídeo.
-          </video>
-        </div>
-      );
-    }
+      case 'embed':
+        if (material.embedCode) {
+          return (
+            <div 
+              className="w-full min-h-screen"
+              dangerouslySetInnerHTML={{ __html: material.embedCode }}
+            />
+          );
+        } else if (material.embedUrl) {
+          return (
+            <div className="w-full h-screen">
+              <iframe
+                src={material.embedUrl}
+                className="w-full h-full border-0"
+                title={material.title}
+                allowFullScreen
+              />
+            </div>
+          );
+        }
+        break;
 
-    // Handle PDF content
-    if (material.fileUrl && material.fileType === 'application/pdf') {
-      return (
-        <div className="w-full h-screen bg-white">
-          <iframe
-            src={`${material.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
-            className="w-full h-full border-0"
-            title={material.title}
-          />
-        </div>
-      );
-    }
-
-    // Handle downloadable files
-    if (material.fileUrl) {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-96 py-12 bg-white">
-          <div className="text-center max-w-2xl">
-            <Download className="h-24 w-24 mx-auto text-blue-500 mb-6" />
-            <h2 className="text-2xl font-bold mb-4">Material para Download</h2>
-            <p className="text-gray-600 mb-6 text-lg">
-              {material.description}
-            </p>
-            <Button onClick={handleDownload} size="lg" className="mb-4">
-              <Download className="h-5 w-5 mr-2" />
-              Baixar Arquivo
-            </Button>
-            {material.fileSize && (
-              <p className="text-sm text-gray-500">
-                Tamanho: {(material.fileSize / 1024 / 1024).toFixed(2)} MB
+      case 'download':
+        return (
+          <div className="flex flex-col items-center justify-center min-h-96 py-12">
+            <div className="text-center max-w-2xl">
+              <Download className="h-24 w-24 mx-auto text-blue-500 mb-6" />
+              <h2 className="text-2xl font-bold mb-4">Material para Download</h2>
+              <p className="text-gray-600 mb-6 text-lg">
+                {material.description}
               </p>
-            )}
+              <Button onClick={handleDownload} size="lg" className="mb-4">
+                <Download className="h-5 w-5 mr-2" />
+                Baixar Arquivo
+              </Button>
+              {material.fileSize && (
+                <p className="text-sm text-gray-500">
+                  Tamanho: {(material.fileSize / 1024 / 1024).toFixed(2)} MB
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      );
+        );
+
+      default:
+        return (
+          <div className="flex items-center justify-center min-h-96">
+            <div className="text-center">
+              <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-500">Formato de conteúdo não suportado</p>
+            </div>
+          </div>
+        );
     }
 
-    // Default fallback
     return (
-      <div className="flex items-center justify-center min-h-96 bg-white">
+      <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
           <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
           <p className="text-gray-500">Conteúdo não disponível</p>
@@ -200,7 +202,7 @@ const MaterialDetailPage = () => {
     );
   }
 
-  if (error || !material) {
+  if (!material) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
@@ -210,7 +212,7 @@ const MaterialDetailPage = () => {
             <p className="text-gray-600 mb-6">
               O material solicitado não existe ou foi removido.
             </p>
-            <Button onClick={() => setLocation('/hub/materials')}>
+            <Button onClick={() => navigate('/hub/materials')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar aos Materiais
             </Button>
@@ -220,7 +222,7 @@ const MaterialDetailPage = () => {
     );
   }
 
-  const IconComponent = getTypeIcon();
+  const materialType = getMaterialType();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -232,18 +234,23 @@ const MaterialDetailPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation('/hub/materials')}
+                onClick={() => navigate('/hub/materials')}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Voltar
               </Button>
               <div className="flex items-center space-x-3">
-                <IconComponent className="h-5 w-5" />
+                {materialType && getTypeIcon(materialType.contentType)}
                 <div>
                   <h1 className="text-lg font-semibold text-gray-900 truncate max-w-md">
                     {material.title}
                   </h1>
                   <div className="flex items-center space-x-2">
+                    {materialType && (
+                      <Badge variant="secondary" className="text-xs">
+                        {materialType.name}
+                      </Badge>
+                    )}
                     <Badge 
                       variant={material.accessLevel === 'public' ? 'default' : 'destructive'}
                       className="text-xs"
@@ -256,8 +263,7 @@ const MaterialDetailPage = () => {
             </div>
             
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500 flex items-center">
-                <Eye className="h-4 w-4 mr-1" />
+              <span className="text-sm text-gray-500">
                 {material.viewCount} visualizações
               </span>
               {material.fileUrl && (
@@ -283,7 +289,7 @@ const MaterialDetailPage = () => {
       </div>
 
       {/* Footer with material info */}
-      {!material.embedCode && (
+      {materialType?.contentType !== 'embed' && (
         <div className="bg-white border-t mt-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -292,7 +298,7 @@ const MaterialDetailPage = () => {
                 <p className="text-gray-600 mb-4">{material.description}</p>
                 {material.tags && material.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {material.tags.map((tag: string, index: number) => (
+                    {material.tags.map((tag, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {tag}
                       </Badge>
