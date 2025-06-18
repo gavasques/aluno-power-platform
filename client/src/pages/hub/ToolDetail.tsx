@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink, ArrowLeft, Star } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useTools } from "@/contexts/ToolsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ToolReviews } from "@/components/reviews/ToolReviews";
@@ -32,6 +33,14 @@ const ToolDetail = () => {
   }
 
   const toolType = toolTypes.find(t => t.id === tool.typeId);
+
+  // Fetch videos to check if tab should be shown
+  const { data: videos = [] } = useQuery({
+    queryKey: ['/api/tools', tool.id, 'videos'],
+    queryFn: () => fetch(`/api/tools/${tool.id}/videos`).then(res => res.json()),
+  });
+
+  const hasVideos = videos && videos.length > 0;
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -104,11 +113,11 @@ const ToolDetail = () => {
 
         {/* Content */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className={`grid w-full ${hasVideos ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="features">Funcionalidades</TabsTrigger>
             <TabsTrigger value="pros-cons">Prós e Contras</TabsTrigger>
-            <TabsTrigger value="videos">Vídeos</TabsTrigger>
+            {hasVideos && <TabsTrigger value="videos">Vídeos</TabsTrigger>}
             <TabsTrigger value="discounts">Descontos</TabsTrigger>
             <TabsTrigger value="reviews">Avaliações</TabsTrigger>
           </TabsList>
@@ -211,9 +220,11 @@ const ToolDetail = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="videos" className="mt-6">
-            <ToolVideos toolId={tool.id} />
-          </TabsContent>
+          {hasVideos && (
+            <TabsContent value="videos" className="mt-6">
+              <ToolVideos toolId={tool.id} />
+            </TabsContent>
+          )}
 
           <TabsContent value="discounts" className="mt-6">
             <ToolDiscounts toolId={tool.id} isAdmin={isAdmin} />
