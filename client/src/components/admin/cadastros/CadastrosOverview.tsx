@@ -91,6 +91,8 @@ const CadastrosOverview = () => {
     }
   ];
 
+  console.log('CadastrosOverview renderizado com', cadastroItems.length, 'items');
+  
   return (
     <div className="space-y-6">
       <div className="mb-6">
@@ -101,6 +103,7 @@ const CadastrosOverview = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cadastroItems.map((item) => {
           const IconComponent = item.icon;
+          console.log('Renderizando item:', item.title, item.id);
           return (
             <Card 
               key={item.id}
