@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { Router, Route, Switch } from "wouter";
 import { ThemeProvider } from "@/components/theme-provider"
 import { AdminLayout } from "./components/layout/AdminLayout";
 import Layout from "./components/layout/Layout";
@@ -53,7 +53,7 @@ const Auth = () => (
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <Router>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <AuthProvider>
             <YoutubeProvider>
@@ -64,48 +64,103 @@ function App() {
                     <ToolsProvider>
                       <TemplatesProvider>
                         <PromptsProvider>
-                        <Routes>
-                          <Route path="/auth" element={<Auth />} />
+                        <Switch>
+                          <Route path="/auth" component={Auth} />
 
-                          {/* Rotas do usuário com Layout */}
-                          <Route path="/" element={<Layout><Outlet /></Layout>}>
-                            <Route index element={<Dashboard />} />
-                            <Route path="videos" element={<Videos />} />
-                            <Route path="noticias" element={<News />} />
-                            <Route path="novidades" element={<Updates />} />
-                            <Route path="fornecedores" element={<Suppliers />} />
-                            
-                            {/* Rotas do Hub */}
-                            <Route path="hub">
-                              {/* Detail routes first (dynamic routes before the catch-all) */}
-                              <Route path="parceiros/:id" element={<PartnerDetail />} />
-                              <Route path="ferramentas/:id" element={<ToolDetail />} />
-                              <Route path="materiais/:id" element={<MaterialDetailPage />} />
-                              <Route path="fornecedores/:id" element={<SupplierDetail />} />
-                              <Route path="templates/:id" element={<TemplateDetail />} />
-                              <Route path="prompts-ia/:id" element={<PromptDetail />} />
-                              <Route path="parceiros" element={<Partners />} />
-                              <Route path="fornecedores" element={<Suppliers />} />
-                              <Route path=":section" element={<Hub />} />
-                            </Route>
-
-                            {/* Rotas da Minha Área */}
-                            <Route path="minha-area">
-                              <Route path=":section/:id?/:action?" element={<MyArea />} />
-                            </Route>
+                          {/* Rotas específicas do Hub */}
+                          <Route path="/hub/materiais/:id">
+                            <Layout>
+                              <MaterialDetailPage />
+                            </Layout>
+                          </Route>
+                          <Route path="/hub/parceiros/:id">
+                            <Layout>
+                              <PartnerDetail />
+                            </Layout>
+                          </Route>
+                          <Route path="/hub/ferramentas/:id">
+                            <Layout>
+                              <ToolDetail />
+                            </Layout>
+                          </Route>
+                          <Route path="/hub/fornecedores/:id">
+                            <Layout>
+                              <SupplierDetail />
+                            </Layout>
+                          </Route>
+                          <Route path="/hub/templates/:id">
+                            <Layout>
+                              <TemplateDetail />
+                            </Layout>
+                          </Route>
+                          <Route path="/hub/prompts-ia/:id">
+                            <Layout>
+                              <PromptDetail />
+                            </Layout>
                           </Route>
 
-                          {/* Rotas de admin com AdminLayout */}
-                          <Route path="/admin" element={<AdminLayout><Outlet /></AdminLayout>}>
-                            <Route index element={<AdminDashboard />} />
-                            <Route path=":section/:subsection?" element={<Admin />} />
-                            <Route path="usuarios" element={<UserManagement />} />
-                            <Route path="suporte" element={<SupportManagement />} />
-                            <Route path="configuracoes/:section?" element={<GeneralSettings />} />
-                            <Route path="conteudo/:subsection?/:id?/:action?" element={<ContentManagement />} />
+                          {/* Rotas do Hub */}
+                          <Route path="/hub/parceiros">
+                            <Layout>
+                              <Partners />
+                            </Layout>
+                          </Route>
+                          <Route path="/hub/fornecedores">
+                            <Layout>
+                              <Suppliers />
+                            </Layout>
+                          </Route>
+                          <Route path="/hub/:section">
+                            <Layout>
+                              <Hub />
+                            </Layout>
                           </Route>
 
-                          </Routes>
+                          {/* Rotas da Minha Área */}
+                          <Route path="/minha-area/:section">
+                            <Layout>
+                              <MyArea />
+                            </Layout>
+                          </Route>
+
+                          {/* Rotas do usuário */}
+                          <Route path="/videos">
+                            <Layout>
+                              <Videos />
+                            </Layout>
+                          </Route>
+                          <Route path="/noticias">
+                            <Layout>
+                              <News />
+                            </Layout>
+                          </Route>
+                          <Route path="/novidades">
+                            <Layout>
+                              <Updates />
+                            </Layout>
+                          </Route>
+                          <Route path="/fornecedores">
+                            <Layout>
+                              <Suppliers />
+                            </Layout>
+                          </Route>
+
+                          {/* Rotas de admin */}
+                          <Route path="/admin" component={AdminDashboard} />
+                          <Route path="/admin/:section" component={Admin} />
+                          <Route path="/admin/usuarios" component={UserManagement} />
+                          <Route path="/admin/suporte" component={SupportManagement} />
+                          <Route path="/admin/configuracoes" component={GeneralSettings} />
+                          <Route path="/admin/conteudo" component={ContentManagement} />
+
+                          {/* Home */}
+                          <Route path="/">
+                            <Layout>
+                              <Dashboard />
+                            </Layout>
+                          </Route>
+
+                          </Switch>
                           <Toaster />
                         </PromptsProvider>
                       </TemplatesProvider>
@@ -117,7 +172,7 @@ function App() {
             </YoutubeProvider>
           </AuthProvider>
         </ThemeProvider>
-      </BrowserRouter>
+      </Router>
     </QueryClientProvider>
   );
 }

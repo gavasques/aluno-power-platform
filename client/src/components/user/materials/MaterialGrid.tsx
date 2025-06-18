@@ -4,13 +4,9 @@ import type { MaterialGridProps } from './MaterialTypes';
 
 export const MaterialGrid: React.FC<MaterialGridProps> = ({
   materials,
-  materialTypes,
   onView,
   onDownload,
 }) => {
-  const getMaterialType = (typeId: number) => {
-    return materialTypes.find(t => t.id === typeId);
-  };
 
   if (materials.length === 0) {
     return (
@@ -26,8 +22,14 @@ export const MaterialGrid: React.FC<MaterialGridProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {materials.map((material) => {
-        const materialType = getMaterialType(material.typeId);
-        if (!materialType) return null;
+        // Create a basic materialType object from the material data
+        const materialType = {
+          id: material.typeId,
+          name: material.type?.name || 'Unknown',
+          icon: material.type?.icon || 'File',
+          description: material.type?.description || '',
+          viewerType: material.type?.viewerType || 'download'
+        };
 
         return (
           <MaterialCard

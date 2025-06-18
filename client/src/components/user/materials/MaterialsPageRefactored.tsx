@@ -14,9 +14,7 @@ const MaterialsPageRefactored = () => {
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedAccess, setSelectedAccess] = useState("all");
 
   // Fetch materials
   const { data: materials = [], isLoading: materialsLoading } = useQuery({
@@ -24,11 +22,7 @@ const MaterialsPageRefactored = () => {
     queryFn: () => apiRequest<DbMaterial[]>('/api/materials'),
   });
 
-  // Fetch material types
-  const { data: materialTypes = [], isLoading: typesLoading } = useQuery({
-    queryKey: ['/api/material-types'],
-    queryFn: () => apiRequest<MaterialType[]>('/api/material-types'),
-  });
+
 
   // Fetch material categories
   const { data: materialCategories = [], isLoading: categoriesLoading } = useQuery({
@@ -39,10 +33,8 @@ const MaterialsPageRefactored = () => {
   const filteredMaterials = materials.filter(material => {
     const matchesSearch = material.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          material.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = selectedType === "all" || material.typeId === parseInt(selectedType);
     const matchesCategory = selectedCategory === "all" || material.categoryId === parseInt(selectedCategory);
-    const matchesAccess = selectedAccess === "all" || material.accessLevel === selectedAccess;
-    return matchesSearch && matchesType && matchesCategory && matchesAccess;
+    return matchesSearch && matchesCategory;
   });
 
   // Increment view count mutation
@@ -75,11 +67,7 @@ const MaterialsPageRefactored = () => {
     incrementDownloadMutation.mutate(material.id);
   };
 
-  const isLoading = materialsLoading || typesLoading || categoriesLoading;
-
-  const getMaterialType = (typeId: number) => {
-    return materialTypes.find(t => t.id === typeId);
-  };
+  const isLoading = materialsLoading || categoriesLoading;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -95,15 +83,10 @@ const MaterialsPageRefactored = () => {
           <>
             <MaterialFilters
               searchTerm={searchTerm}
-              selectedType={selectedType}
               selectedCategory={selectedCategory}
-              selectedAccess={selectedAccess}
-              materialTypes={materialTypes}
               materialCategories={materialCategories}
               onSearchChange={setSearchTerm}
-              onTypeChange={setSelectedType}
               onCategoryChange={setSelectedCategory}
-              onAccessChange={setSelectedAccess}
             />
 
             <div className="mb-4 flex items-center justify-between">
@@ -111,7 +94,7 @@ const MaterialsPageRefactored = () => {
                 <span className="text-sm text-gray-600">
                   {filteredMaterials.length} material{filteredMaterials.length !== 1 ? 'is' : ''} encontrado{filteredMaterials.length !== 1 ? 's' : ''}
                 </span>
-                {(searchTerm || selectedType !== "all" || selectedCategory !== "all" || selectedAccess !== "all") && (
+                {(searchTerm || selectedCategory !== "all") && (
                   <Badge variant="secondary" className="text-xs">
                     Filtrado
                   </Badge>
@@ -121,7 +104,6 @@ const MaterialsPageRefactored = () => {
 
             <MaterialGrid
               materials={filteredMaterials}
-              materialTypes={materialTypes}
               onView={handleView}
               onDownload={handleDownload}
             />

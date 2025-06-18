@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMaterials } from '@/contexts/MaterialsContext';
+import { useMaterialCategories } from '@/hooks/useMaterialCategories';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,6 +51,7 @@ const MaterialFormAdmin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { materials, addMaterial, updateMaterial, materialTypes } = useMaterials();
+  const { categories: materialCategories } = useMaterialCategories();
   const [selectedType, setSelectedType] = useState<MaterialType | null>(null);
   const [tempFileUrl, setTempFileUrl] = useState<string | null>(null);
 
@@ -62,6 +64,7 @@ const MaterialFormAdmin = () => {
       title: '',
       description: '',
       typeId: '',
+      categoryId: '',
       accessLevel: 'public',
       tags: '',
       externalUrl: '',
@@ -76,6 +79,7 @@ const MaterialFormAdmin = () => {
         title: materialToEdit.title,
         description: materialToEdit.description,
         typeId: materialToEdit.type.id.toString(),
+        categoryId: materialToEdit.categoryId?.toString() || '',
         accessLevel: materialToEdit.accessLevel as "public" | "restricted",
         tags: materialToEdit.tags?.join(', ') || '',
         externalUrl: materialToEdit.externalUrl || '',
@@ -204,6 +208,32 @@ const MaterialFormAdmin = () => {
                     <SelectContent>
                       {materialTypes.map(type => (
                         <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoria do Material</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma categoria (opcional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Nenhuma categoria</SelectItem>
+                      {materialCategories.map(category => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
