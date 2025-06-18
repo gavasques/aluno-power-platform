@@ -400,7 +400,7 @@ const MaterialForm = () => {
                       type="button" 
                       variant="outline" 
                       className="w-full"
-                      onClick={() => navigate('/minha-area/materiais')}
+                      onClick={() => setLocation('/minha-area/materiais')}
                     >
                       <X className="h-4 w-4 mr-2" />
                       Cancelar

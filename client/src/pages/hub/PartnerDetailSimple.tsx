@@ -63,7 +63,7 @@ const PartnerDetailSimple = () => {
           <h2 className="text-2xl font-semibold text-gray-900">Parceiro não encontrado</h2>
           <p className="mt-2 text-gray-600">O parceiro que você está procurando não existe.</p>
           <Button
-            onClick={() => navigate('/hub/parceiros')}
+            onClick={() => setLocation('/hub/parceiros')}
             className="mt-4"
           >
             Voltar aos Parceiros
@@ -97,7 +97,7 @@ const PartnerDetailSimple = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Button
             variant="ghost"
-            onClick={() => navigate('/hub/parceiros')}
+            onClick={() => setLocation('/hub/parceiros')}
             className="mb-6 hover:bg-gray-100"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

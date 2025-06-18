@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Images as ImageIcon } from 'lucide-react';
@@ -11,14 +11,14 @@ interface PromptDetailHeaderProps {
 }
 
 export const PromptDetailHeader = ({ prompt }: PromptDetailHeaderProps) => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   return (
     <div className="flex items-center gap-4 mb-6">
       <Button 
         variant="outline" 
         size="sm"
-        onClick={() => navigate('/hub/prompts-ia')}
+        onClick={() => setLocation('/hub/prompts-ia')}
         className="flex items-center gap-2"
       >
         <ArrowLeft className="h-4 w-4" />

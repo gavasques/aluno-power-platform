@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Edit, Trash2, Power, PowerOff } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Product } from "@/types/product";
 import { calculateChannelResults, formatCurrency, formatPercentage } from "@/utils/productCalculations";
 import { channelNames } from "@/config/channels";
@@ -18,7 +18,7 @@ interface ProductListProps {
 }
 
 export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }: ProductListProps) => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { columnPreferences, updateColumnVisibility, updateChannelVisibility } = useColumnPreferences();
 
   const allChannels = [

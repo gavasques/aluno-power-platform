@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Eye } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Product } from "@/types/product";
 import { calculateChannelResults, formatCurrency, formatPercentage } from "@/utils/productCalculations";
 
@@ -12,7 +12,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const getEnabledChannels = (product: Product) => {
     const channels = [];
