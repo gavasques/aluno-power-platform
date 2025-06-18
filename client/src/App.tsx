@@ -31,7 +31,7 @@ import Suppliers from "./pages/hub/Suppliers";
 import Partners from "./pages/hub/Partners";
 import PartnerDetail from "./pages/hub/PartnerDetailSimple";
 import ToolDetail from "./pages/hub/ToolDetail";
-import HubMaterialDetail from "./pages/hub/MaterialDetail";
+import MaterialDetailPage from "./pages/hub/MaterialDetailPage";
 import SupplierDetail from "./pages/hub/SupplierDetail";
 import TemplateDetail from "./pages/hub/TemplateDetail";
 import PromptDetail from "./pages/hub/PromptDetail";
@@ -80,7 +80,7 @@ function App() {
                               {/* Detail routes first (dynamic routes before the catch-all) */}
                               <Route path="parceiros/:id" element={<PartnerDetail />} />
                               <Route path="ferramentas/:id" element={<ToolDetail />} />
-                              <Route path="materiais/:id" element={<HubMaterialDetail />} />
+                              <Route path="materiais/:id" element={<MaterialDetailPage />} />
                               <Route path="fornecedores/:id" element={<SupplierDetail />} />
                               <Route path="templates/:id" element={<TemplateDetail />} />
                               <Route path="prompts-ia/:id" element={<PromptDetail />} />

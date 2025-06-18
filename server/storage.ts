@@ -9,6 +9,7 @@ import {
   products,
   categories,
   materialTypes,
+  materialCategories,
   toolTypes,
   templateCategories,
   promptCategories,

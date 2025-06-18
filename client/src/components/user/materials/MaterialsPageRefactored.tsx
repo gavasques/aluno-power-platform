@@ -60,18 +60,11 @@ const MaterialsPageRefactored = () => {
   });
 
   const handleView = (material: DbMaterial) => {
-    setViewingMaterial(material);
-    setIsViewerOpen(true);
-    incrementViewMutation.mutate(material.id);
+    navigate(`/hub/materials/${material.id}`);
   };
 
   const handleDownload = (material: DbMaterial) => {
     incrementDownloadMutation.mutate(material.id);
-  };
-
-  const handleCloseViewer = () => {
-    setIsViewerOpen(false);
-    setViewingMaterial(null);
   };
 
   const isLoading = materialsLoading || typesLoading;
@@ -160,14 +153,7 @@ const MaterialsPageRefactored = () => {
           </div>
         )}
 
-        {viewingMaterial && (
-          <MaterialViewer
-            material={viewingMaterial}
-            materialType={getMaterialType(viewingMaterial.typeId)!}
-            isOpen={isViewerOpen}
-            onClose={handleCloseViewer}
-          />
-        )}
+
       </div>
     </div>
   );
