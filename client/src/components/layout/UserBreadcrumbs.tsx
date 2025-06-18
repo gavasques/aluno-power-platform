@@ -1,6 +1,6 @@
 
 import { ChevronRight, ArrowLeft } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
@@ -25,14 +25,13 @@ const breadcrumbMap: Record<string, string> = {
 };
 
 export function UserBreadcrumbs() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [location, setLocation] = useLocation();
   
-  const pathSegments = location.pathname.split("/").filter(Boolean);
+  const pathSegments = location.split("/").filter(Boolean);
   const breadcrumbs = [];
   
   // Sempre adiciona o dashboard como primeiro item se não estiver na página inicial
-  if (location.pathname !== "/") {
+  if (location !== "/") {
     breadcrumbs.push({
       path: "/",
       label: "Dashboard",
@@ -97,16 +96,16 @@ export function UserBreadcrumbs() {
   const handleGoBack = () => {
     if (breadcrumbs.length > 1) {
       const previousPath = breadcrumbs[breadcrumbs.length - 2].path;
-      navigate(previousPath);
+      setLocation(previousPath);
     } else {
-      navigate("/");
+      setLocation("/");
     }
   };
 
-  const canGoBack = location.pathname !== "/" && breadcrumbs.length > 1;
+  const canGoBack = location !== "/" && breadcrumbs.length > 1;
 
   // Não mostrar breadcrumbs na página inicial
-  if (location.pathname === "/") {
+  if (location === "/") {
     return null;
   }
 
