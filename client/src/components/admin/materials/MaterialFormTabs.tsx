@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2 } from 'lucide-react';
 import type { MaterialFormData } from './MaterialFormTypes';
 import type { MaterialType } from '@shared/schema';
-import { useMaterialCategories, type MaterialCategory } from '@/hooks/useMaterialCategories';
+import { useMaterialCategories } from '@/hooks/useMaterialCategories';
 
 interface MaterialFormTabsProps {
   formData: MaterialFormData;

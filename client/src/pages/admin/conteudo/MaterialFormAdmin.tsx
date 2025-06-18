@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMaterials } from '@/contexts/MaterialsContext';
-import { useMaterialCategories, type MaterialCategory } from '@/hooks/useMaterialCategories';
+import { useMaterialCategories } from '@/hooks/useMaterialCategories';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -92,8 +92,7 @@ const MaterialFormAdmin = () => {
         icon: materialToEdit.type.icon,
         description: materialToEdit.type.description || undefined,
         viewerType: materialToEdit.type.viewerType as "download" | "inline" | "external",
-        allowsUpload: materialToEdit.type.allowsUpload,
-        allowsUrl: materialToEdit.type.allowsUrl,
+        createdAt: materialToEdit.type.createdAt,
       });
     }
   }, [isEditing, materialToEdit, form]);

@@ -176,7 +176,6 @@ const MaterialsManagerRefactored = () => {
       title: data.title,
       description: data.description,
       typeId: parseInt(data.typeId),
-      categoryId: data.categoryId ? parseInt(data.categoryId) : null,
       accessLevel: data.accessLevel,
       fileUrl: data.fileUrl || null,
       fileName: data.fileName || null,
