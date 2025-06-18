@@ -24,7 +24,6 @@ import {
   insertToolReviewSchema,
   insertToolReviewReplySchema,
   insertToolDiscountSchema,
-  insertToolVideoSchema,
   insertYoutubeVideoSchema,
   insertNewsSchema,
   insertUpdateSchema,
@@ -1427,52 +1426,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete discount' });
-    }
-  });
-
-  // Tool Videos
-  app.get('/api/tools/:toolId/videos', async (req, res) => {
-    try {
-      const toolId = parseInt(req.params.toolId);
-      const videos = await storage.getToolVideos(toolId);
-      res.json(videos);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch tool videos' });
-    }
-  });
-
-  app.post('/api/tools/:toolId/videos', async (req, res) => {
-    try {
-      const toolId = parseInt(req.params.toolId);
-      const validatedData = insertToolVideoSchema.parse({
-        ...req.body,
-        toolId
-      });
-      const video = await storage.createToolVideo(validatedData);
-      res.status(201).json(video);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid video data' });
-    }
-  });
-
-  app.patch('/api/tools/videos/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const validatedData = insertToolVideoSchema.partial().parse(req.body);
-      const video = await storage.updateToolVideo(id, validatedData);
-      res.json(video);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid video data' });
-    }
-  });
-
-  app.delete('/api/tools/videos/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteToolVideo(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete tool video' });
     }
   });
 

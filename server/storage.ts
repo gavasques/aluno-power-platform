@@ -21,7 +21,6 @@ import {
   toolReviews,
   toolReviewReplies,
   toolDiscounts,
-  toolVideos,
   youtubeVideos,
   news,
   updates,
@@ -73,8 +72,6 @@ import {
   type ToolReviewWithUser,
   type ToolDiscount,
   type InsertToolDiscount,
-  type ToolVideo,
-  type InsertToolVideo,
   type YoutubeVideo,
   type InsertYoutubeVideo,
   type News,
@@ -227,12 +224,6 @@ export interface IStorage {
   createToolDiscount(discount: InsertToolDiscount): Promise<ToolDiscount>;
   updateToolDiscount(id: number, discount: Partial<InsertToolDiscount>): Promise<ToolDiscount>;
   deleteToolDiscount(id: number): Promise<void>;
-
-  // Tool Videos
-  getToolVideos(toolId: number): Promise<ToolVideo[]>;
-  createToolVideo(video: InsertToolVideo): Promise<ToolVideo>;
-  updateToolVideo(id: number, video: Partial<InsertToolVideo>): Promise<ToolVideo>;
-  deleteToolVideo(id: number): Promise<void>;
 
   // YouTube Videos
   getYoutubeVideos(): Promise<YoutubeVideo[]>;
@@ -1582,36 +1573,6 @@ export class DatabaseStorage implements IStorage {
 
   async deleteToolDiscount(id: number): Promise<void> {
     await db.delete(toolDiscounts).where(eq(toolDiscounts.id, id));
-  }
-
-  // Tool Videos
-  async getToolVideos(toolId: number): Promise<ToolVideo[]> {
-    return await db
-      .select()
-      .from(toolVideos)
-      .where(eq(toolVideos.toolId, toolId))
-      .orderBy(desc(toolVideos.createdAt));
-  }
-
-  async createToolVideo(video: InsertToolVideo): Promise<ToolVideo> {
-    const [created] = await db
-      .insert(toolVideos)
-      .values(video)
-      .returning();
-    return created;
-  }
-
-  async updateToolVideo(id: number, video: Partial<InsertToolVideo>): Promise<ToolVideo> {
-    const [updated] = await db
-      .update(toolVideos)
-      .set(video)
-      .where(eq(toolVideos.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteToolVideo(id: number): Promise<void> {
-    await db.delete(toolVideos).where(eq(toolVideos.id, id));
   }
 }
 
