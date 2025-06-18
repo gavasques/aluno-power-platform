@@ -39,11 +39,7 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({
         />
       );
     }
-    return (
-      <div className="w-full h-32 bg-gray-100 rounded-t-lg flex items-center justify-center">
-        {getTypeIcon()}
-      </div>
-    );
+    return getTypeIcon();
   };
 
   return (

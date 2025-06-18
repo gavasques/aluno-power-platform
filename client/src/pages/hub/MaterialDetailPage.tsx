@@ -25,7 +25,7 @@ const MaterialDetailPage = () => {
     queryKey: ['/api/materials', id],
     queryFn: () => apiRequest(`/api/materials/${id}`),
     enabled: !!id,
-  });
+  }) as { data: any, isLoading: boolean };
 
   // Increment view count mutation
   const incrementViewMutation = useMutation({
