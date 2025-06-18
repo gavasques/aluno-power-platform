@@ -26,7 +26,7 @@ export const MaterialFormTabs: React.FC<MaterialFormTabsProps> = ({
   currentTag,
   setCurrentTag,
 }) => {
-  const { categories: materialCategories } = useMaterialCategories();
+  const { materialCategories } = useMaterialCategories();
   const selectedType = materialTypes.find(t => t.id.toString() === formData.typeId);
 
   const addTag = () => {
@@ -103,7 +103,7 @@ export const MaterialFormTabs: React.FC<MaterialFormTabsProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Nenhuma categoria</SelectItem>
-              {materialCategories.map((category) => (
+              {materialCategories.map((category: any) => (
                 <SelectItem key={category.id} value={category.id.toString()}>
                   {category.name}
                 </SelectItem>
