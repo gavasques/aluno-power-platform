@@ -62,7 +62,6 @@ const ToolsManager = () => {
     typeId: "",
     logo: "",
     website: "",
-    pricing: "",
     features: [] as string[],
     pros: [] as string[],
     cons: [] as string[],
@@ -88,7 +87,6 @@ const ToolsManager = () => {
       typeId: "",
       logo: "",
       website: "",
-      pricing: "",
       features: [],
       pros: [],
       cons: [],
@@ -119,7 +117,6 @@ const ToolsManager = () => {
       typeId: parseInt(formData.typeId),
       logo: formData.logo,
       website: formData.website || null,
-      pricing: formData.pricing || null,
       features: formData.features.length > 0 ? formData.features : null,
       pros: formData.pros.length > 0 ? formData.pros : null,
       cons: formData.cons.length > 0 ? formData.cons : null,
@@ -160,7 +157,6 @@ const ToolsManager = () => {
       typeId: tool.typeId.toString(),
       logo: tool.logo || "",
       website: tool.website || "",
-      pricing: tool.pricing || "",
       features: tool.features || [],
       pros: tool.pros || [],
       cons: tool.cons || [],
@@ -416,10 +412,9 @@ const ToolsManager = () => {
           </DialogHeader>
           
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="basic">Básico</TabsTrigger>
               <TabsTrigger value="features">Funcionalidades</TabsTrigger>
-              <TabsTrigger value="pricing">Preços</TabsTrigger>
               <TabsTrigger value="videos">Vídeos</TabsTrigger>
               <TabsTrigger value="analysis">Análise</TabsTrigger>
             </TabsList>
@@ -579,22 +574,6 @@ const ToolsManager = () => {
                       </Badge>
                     ))}
                   </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="pricing" className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="pricing">Informações de Preço</Label>
-                  <Textarea
-                    id="pricing"
-                    value={formData.pricing}
-                    onChange={(e) => setFormData({ ...formData, pricing: e.target.value })}
-                    rows={4}
-                    placeholder="Ex: Gratuito, Freemium, R$ 29/mês, A partir de $9.99/mês..."
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Descreva os planos de preço, versão gratuita, trials, etc.
-                  </p>
                 </div>
               </TabsContent>
 
