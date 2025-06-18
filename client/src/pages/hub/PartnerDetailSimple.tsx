@@ -17,6 +17,7 @@ import {
   Globe,
   Instagram,
   Linkedin,
+  Youtube,
   ArrowLeft,
   FileText,
   MessageSquare,
@@ -260,7 +261,7 @@ const PartnerDetailSimple = () => {
                 )}
 
                 {/* Partner General Contact Info */}
-                {(partner.phone || partner.email || partner.website || partner.instagram || partner.linkedin) && (
+                {(partner.phone || partner.email || partner.website || partner.instagram || partner.linkedin || partner.youtubeChannel) && (
                   <div>
                     {partnerContacts.length > 0 && (
                       <div className="border-t pt-6">
@@ -324,12 +325,26 @@ const PartnerDetailSimple = () => {
                           </a>
                         </div>
                       )}
+                      
+                      {partner.youtubeChannel && (
+                        <div className="flex items-center bg-gray-50 rounded-lg p-3">
+                          <Youtube className="h-5 w-5 mr-3 text-red-500" />
+                          <a 
+                            href={partner.youtubeChannel}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-red-600 hover:underline font-medium"
+                          >
+                            Canal do YouTube
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
 
                 {/* Empty state */}
-                {partnerContacts.length === 0 && !partner.phone && !partner.email && !partner.website && !partner.instagram && !partner.linkedin && (
+                {partnerContacts.length === 0 && !partner.phone && !partner.email && !partner.website && !partner.instagram && !partner.linkedin && !partner.youtubeChannel && (
                   <div className="text-center py-12">
                     <Phone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500">Nenhuma informação de contato disponível</p>

@@ -50,6 +50,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     website: partner?.website || '',
     instagram: partner?.instagram || '',
     linkedin: partner?.linkedin || '',
+    youtubeChannel: partner?.youtubeChannel || '',
     presentationVideoUrl: partner?.presentationVideoUrl || '',
     guilhermeVideoUrl: partner?.guilhermeVideoUrl || '',
     isVerified: partner?.isVerified || false,
@@ -78,6 +79,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
       website: formData.website,
       instagram: formData.instagram,
       linkedin: formData.linkedin,
+      youtubeChannel: formData.youtubeChannel || null,
       presentationVideoUrl: formData.presentationVideoUrl || null,
       guilhermeVideoUrl: formData.guilhermeVideoUrl || null,
       isVerified: formData.isVerified,
@@ -296,6 +298,18 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
                   className="bg-slate-800 border-slate-600 text-white"
                   placeholder="https://linkedin.com/in/usuario"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="youtubeChannel" className="text-white">Canal do YouTube</Label>
+                <Input
+                  id="youtubeChannel"
+                  value={formData.youtubeChannel}
+                  onChange={(e) => setFormData(prev => ({ ...prev, youtubeChannel: e.target.value }))}
+                  className="bg-slate-800 border-slate-600 text-white"
+                  placeholder="https://www.youtube.com/@canal"
+                />
+                <p className="text-xs text-slate-400">Link para o canal do YouTube do parceiro</p>
               </div>
 
               <div className="space-y-2">

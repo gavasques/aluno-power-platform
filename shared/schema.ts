@@ -116,6 +116,7 @@ export const partners = pgTable("partners", {
   website: text("website"),
   instagram: text("instagram"),
   linkedin: text("linkedin"),
+  youtubeChannel: text("youtube_channel"), // YouTube channel URL
   presentationVideoUrl: text("presentation_video_url"), // YouTube URL for presentation video
   guilhermeVideoUrl: text("guilherme_video_url"), // YouTube URL for Guilherme video
   isVerified: boolean("is_verified").notNull().default(false),
