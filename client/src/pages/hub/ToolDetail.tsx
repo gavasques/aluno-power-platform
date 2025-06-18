@@ -5,11 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink, ArrowLeft, Star } from "lucide-react";
 import { useTools } from "@/contexts/ToolsContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { ToolReviews } from "@/components/reviews/ToolReviews";
+import { ToolDiscounts } from "@/components/discounts/ToolDiscounts";
 
 const ToolDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { tools, toolTypes } = useTools();
+  const { user, isAdmin } = useAuth();
 
   const tool = tools.find(t => t.id.toString() === id);
 
@@ -99,11 +103,12 @@ const ToolDetail = () => {
 
         {/* Content */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="features">Funcionalidades</TabsTrigger>
             <TabsTrigger value="pros-cons">Prós e Contras</TabsTrigger>
-            <TabsTrigger value="pricing">Preços</TabsTrigger>
+            <TabsTrigger value="discounts">Descontos</TabsTrigger>
+            <TabsTrigger value="reviews">Avaliações</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6 space-y-6">
@@ -204,38 +209,12 @@ const ToolDetail = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="pricing" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações de Preço</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {tool.pricing ? (
-                  <div className="prose max-w-none">
-                    <p className="text-gray-700">{tool.pricing}</p>
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-8">
-                    Informações de preço não disponíveis
-                  </p>
-                )}
-                {tool.website && (
-                  <div className="mt-6">
-                    <Button asChild>
-                      <a
-                        href={tool.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        Ver Preços no Site Oficial
-                      </a>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="discounts" className="mt-6">
+            <ToolDiscounts toolId={tool.id} isAdmin={isAdmin} />
+          </TabsContent>
+
+          <TabsContent value="reviews" className="mt-6">
+            <ToolReviews toolId={tool.id} />
           </TabsContent>
         </Tabs>
       </div>
