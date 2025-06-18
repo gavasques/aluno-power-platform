@@ -1,42 +1,5 @@
 
-import React, { useState } from 'react';
-import { useMaterials } from '@/contexts/MaterialsContext';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Eye,
-  Download,
-  Lock,
-  Unlock,
-  FileText,
-  Video,
-  Youtube,
-  FileSpreadsheet,
-  Code2,
-  Globe,
-  Image,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import MaterialsManagerRefactored from '@/components/admin/materials/MaterialsManagerRefactored';
 
 const getIcon = (iconName: string) => {
   const icons: Record<string, React.ComponentType> = {
