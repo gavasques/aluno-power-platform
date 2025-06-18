@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Star } from 'lucide-react';
 import { ToolReviews } from '@/components/reviews/ToolReviews';
 import { ToolDiscounts } from '@/components/discounts/ToolDiscounts';
-import { ToolVideos } from '@/components/videos/ToolVideos';
 import type { ToolTabsProps } from './ToolDetailTypes';
+
+// Lazy load ToolVideos component only when needed
+const ToolVideos = lazy(() => import('@/components/videos/ToolVideos').then(module => ({ default: module.ToolVideos })));
 
 export const ToolContentTabs: React.FC<ToolTabsProps> = ({
   tool,
@@ -12,6 +14,8 @@ export const ToolContentTabs: React.FC<ToolTabsProps> = ({
   user,
   isAdmin,
 }) => {
+  const [activeTab, setActiveTab] = useState("overview");
+  
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
@@ -25,7 +29,7 @@ export const ToolContentTabs: React.FC<ToolTabsProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow">
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full justify-start border-b rounded-none bg-transparent p-0">
           <TabsTrigger 
             value="overview" 
@@ -127,7 +131,20 @@ export const ToolContentTabs: React.FC<ToolTabsProps> = ({
 
           {hasVideos && (
             <TabsContent value="videos" className="mt-0">
-              <ToolVideos toolId={tool.id} />
+              {activeTab === "videos" ? (
+                <Suspense fallback={
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <span className="ml-2 text-gray-600">Carregando vídeos...</span>
+                  </div>
+                }>
+                  <ToolVideos toolId={tool.id} />
+                </Suspense>
+              ) : (
+                <div className="py-8 text-center text-gray-500">
+                  Clique na aba Vídeos para carregar o conteúdo
+                </div>
+              )}
             </TabsContent>
           )}
         </div>
