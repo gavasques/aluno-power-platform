@@ -139,23 +139,6 @@ export function VideosSection() {
         </Card>
       ) : (
         <>
-          {/* Latest Videos */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Play className="h-5 w-5" />
-                Últimos Vídeos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {latestVideos.map((video) => (
-                  <VideoCard key={video.id} video={video} />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Categories */}
           {categories.map((category) => (
             <Card key={category}>
