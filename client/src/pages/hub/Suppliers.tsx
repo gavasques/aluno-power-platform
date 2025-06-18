@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Star, Search, CheckCircle, Phone, Mail, Filter, Globe, Factory, Truck, Users, Package, Send } from "lucide-react";
 import { useState } from "react";
 import { useSuppliers } from "@/contexts/SuppliersContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 const Suppliers = () => {
@@ -15,7 +15,7 @@ const Suppliers = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [verifiedFilter, setVerifiedFilter] = useState("all");
   const { suppliers, loading } = useSuppliers();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const categories = [

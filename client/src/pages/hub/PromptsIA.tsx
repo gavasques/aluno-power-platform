@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { usePrompts } from '@/contexts/PromptsContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 
 const PromptsIA = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { prompts, categories, loading, searchPrompts } = usePrompts();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

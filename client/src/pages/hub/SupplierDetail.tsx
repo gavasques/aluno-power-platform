@@ -1,5 +1,5 @@
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const SupplierDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { getSupplierById } = useSuppliers();
   const { toast } = useToast();
   

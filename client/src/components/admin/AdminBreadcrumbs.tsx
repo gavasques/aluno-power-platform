@@ -77,7 +77,7 @@ export function AdminBreadcrumbs() {
     }
   };
 
-  const canGoBack = location.pathname !== "/admin" && location.pathname !== "/admin/dashboard";
+  const canGoBack = location !== "/admin" && location !== "/admin/dashboard";
 
   return (
     <div className="flex items-center space-x-4 py-4 px-6 bg-gray-50 border-b border-border">

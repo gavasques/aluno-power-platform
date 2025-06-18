@@ -1,5 +1,5 @@
 
-import { useParams } from "react-router-dom";
+import { useParams } from "wouter";
 import MySuppliers from "./myarea/MySuppliers";
 import MyProducts from "./myarea/MyProducts";
 import MyMaterials from "./myarea/MyMaterials";

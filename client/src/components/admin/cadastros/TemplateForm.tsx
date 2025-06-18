@@ -105,7 +105,7 @@ const TemplateForm = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/admin/conteudo/templates')}
+            onClick={() => setLocation('/admin/conteudo/templates')}
             className="text-primary hover:text-primary/80"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

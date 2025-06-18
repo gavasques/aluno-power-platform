@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useLocation } from 'wouter';
 import { usePrompts } from '@/contexts/PromptsContext';
 import { Button } from '@/components/ui/button';
 import { BrainCircuit } from 'lucide-react';
@@ -12,7 +12,7 @@ import { PromptInfo } from '@/components/prompts/PromptInfo';
 
 const PromptDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { getPromptById } = usePrompts();
 
   const prompt = getPromptById(id || '');

@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams } from "wouter";
 import AdminDashboard from "./admin/AdminDashboard";
 import UserManagement from "./admin/UserManagement";
 import ContentManagement from "./admin/ContentManagement";

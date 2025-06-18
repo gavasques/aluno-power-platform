@@ -1,5 +1,5 @@
 
-import { useParams } from "react-router-dom";
+import { useParams } from "wouter";
 import PromptsIA from "./hub/PromptsIA";
 import Materials from "./hub/Materials";
 import Templates from "./hub/Templates";

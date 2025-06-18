@@ -217,7 +217,7 @@ const PromptForm = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/admin/conteudo/prompts-ia')}
+            onClick={() => setLocation('/admin/conteudo/prompts-ia')}
             className="text-primary hover:text-primary/80"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
