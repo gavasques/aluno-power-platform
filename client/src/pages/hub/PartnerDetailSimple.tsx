@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePartners } from '@/contexts/PartnersContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ const PartnerDetailSimple = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getPartnerById } = usePartners();
+  const { user } = useAuth();
 
   const partner = id ? getPartnerById(parseInt(id)) : null;
 
@@ -71,6 +73,21 @@ const PartnerDetailSimple = () => {
   }
 
   const partnerType = partnerTypes.find(type => type.id === partner.partnerTypeId);
+
+  // Função para gerar link do WhatsApp
+  const generateWhatsAppLink = (phoneNumber: string) => {
+    if (!phoneNumber || !user?.name) return '#';
+    
+    // Remove todos os caracteres não numéricos e adiciona + se não tiver
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    const formattedPhone = cleanPhone.startsWith('55') ? `+${cleanPhone}` : `+55${cleanPhone}`;
+    
+    // Cria a mensagem personalizada
+    const message = `Olá, sou ${user.name}, e vim através do Guilherme Vasques. Tudo bem?`;
+    const encodedMessage = encodeURIComponent(message);
+    
+    return `https://wa.me/${formattedPhone}/?text=${encodedMessage}`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -235,16 +252,36 @@ const PartnerDetailSimple = () => {
                           </div>
                           <div className="space-y-2 ml-8">
                             {contact.phone && (
-                              <div className="flex items-center">
-                                <Phone className="h-4 w-4 mr-2 text-gray-500" />
-                                <span className="text-gray-700">{contact.phone}</span>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <Phone className="h-4 w-4 mr-2 text-gray-500" />
+                                  <span className="text-gray-700">{contact.phone}</span>
+                                </div>
+                                <a
+                                  href={generateWhatsAppLink(contact.phone)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-2 px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded transition-colors duration-200"
+                                >
+                                  WhatsApp
+                                </a>
                               </div>
                             )}
                             {contact.whatsapp && (
-                              <div className="flex items-center">
-                                <Phone className="h-4 w-4 mr-2 text-green-500" />
-                                <span className="text-gray-700">{contact.whatsapp}</span>
-                                <span className="ml-2 text-xs text-green-600 font-medium">(WhatsApp)</span>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <Phone className="h-4 w-4 mr-2 text-green-500" />
+                                  <span className="text-gray-700">{contact.whatsapp}</span>
+                                  <span className="ml-2 text-xs text-green-600 font-medium">(WhatsApp)</span>
+                                </div>
+                                <a
+                                  href={generateWhatsAppLink(contact.whatsapp)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-2 px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded transition-colors duration-200"
+                                >
+                                  Abrir
+                                </a>
                               </div>
                             )}
                             {contact.email && (
@@ -271,9 +308,19 @@ const PartnerDetailSimple = () => {
                     
                     <div className="space-y-3">
                       {partner.phone && (
-                        <div className="flex items-center bg-gray-50 rounded-lg p-3">
-                          <Phone className="h-5 w-5 mr-3 text-gray-500" />
-                          <span className="text-gray-700">{partner.phone}</span>
+                        <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                          <div className="flex items-center">
+                            <Phone className="h-5 w-5 mr-3 text-gray-500" />
+                            <span className="text-gray-700">{partner.phone}</span>
+                          </div>
+                          <a
+                            href={generateWhatsAppLink(partner.phone)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-3 px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md transition-colors duration-200"
+                          >
+                            WhatsApp
+                          </a>
                         </div>
                       )}
                       
