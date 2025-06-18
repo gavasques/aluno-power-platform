@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Save } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "wouter";
 import { useTemplates } from "@/contexts/TemplatesContext";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 
 const TemplateForm = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { id } = useParams();
   const { templates, categories, createTemplate, updateTemplate, getTemplateById } = useTemplates();
   const { toast } = useToast();

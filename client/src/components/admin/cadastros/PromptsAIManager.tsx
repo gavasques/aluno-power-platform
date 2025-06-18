@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Plus, Edit, Trash2, BrainCircuit, Search, Copy, Image } from "lucide-react";
 import { usePrompts } from "@/contexts/PromptsContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import {
   Select,
   SelectContent,
@@ -32,7 +32,7 @@ const PromptsAIManager = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const filteredPrompts = React.useMemo(() => {
     let result = searchQuery ? searchPrompts(searchQuery) : prompts;

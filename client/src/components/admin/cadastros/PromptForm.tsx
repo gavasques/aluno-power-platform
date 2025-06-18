@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Save, BrainCircuit, Eye, Plus, Trash2, Copy } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "wouter";
 import { usePrompts } from "@/contexts/PromptsContext";
 import { useToast } from "@/hooks/use-toast";
 import { PromptImage, PromptFile, PromptStep } from "@/types/prompt";
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 
 const PromptForm = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { id } = useParams();
   const { prompts, categories, createPrompt, updatePrompt, getPromptById } = usePrompts();
   const { toast } = useToast();

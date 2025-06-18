@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Plus, Edit, Trash2, FileText, Search, Copy } from "lucide-react";
 import { useTemplates } from "@/contexts/TemplatesContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import {
   Select,
   SelectContent,
@@ -32,7 +32,7 @@ const TemplatesManager = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const filteredTemplates = React.useMemo(() => {
     let result = searchQuery ? searchTemplates(searchQuery) : templates;

@@ -1,6 +1,6 @@
 
 import { ChevronRight, ArrowLeft } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
@@ -43,7 +43,7 @@ const breadcrumbMap: Record<string, string> = {
 
 export function AdminBreadcrumbs() {
   const location = useLocation();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   
   const pathSegments = location.pathname.split("/").filter(Boolean);
   const breadcrumbs = [];

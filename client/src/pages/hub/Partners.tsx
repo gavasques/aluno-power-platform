@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { usePartners } from '@/contexts/PartnersContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/select';
 
 const Partners = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { partners, loading, searchPartners } = usePartners();
   const [searchQuery, setSearchQuery] = useState('');
   // Use "all" instead of "" for Select's no-filter state
@@ -152,7 +152,7 @@ const Partners = () => {
               <div className="flex gap-2">
                 <Button 
                   className="flex-1"
-                  onClick={() => navigate(`/hub/parceiros/${partner.id}`)}
+                  onClick={() => setLocation(`/hub/parceiros/${partner.id}`)}
                 >
                   Ver Perfil
                 </Button>
