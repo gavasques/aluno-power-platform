@@ -8,6 +8,7 @@ import { useTools } from "@/contexts/ToolsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ToolReviews } from "@/components/reviews/ToolReviews";
 import { ToolDiscounts } from "@/components/discounts/ToolDiscounts";
+import { ToolVideos } from "@/components/videos/ToolVideos";
 
 const ToolDetail = () => {
   const { id } = useParams();
@@ -103,10 +104,11 @@ const ToolDetail = () => {
 
         {/* Content */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="features">Funcionalidades</TabsTrigger>
             <TabsTrigger value="pros-cons">Prós e Contras</TabsTrigger>
+            <TabsTrigger value="videos">Vídeos</TabsTrigger>
             <TabsTrigger value="discounts">Descontos</TabsTrigger>
             <TabsTrigger value="reviews">Avaliações</TabsTrigger>
           </TabsList>
@@ -207,6 +209,10 @@ const ToolDetail = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="videos" className="mt-6">
+            <ToolVideos toolId={tool.id} />
           </TabsContent>
 
           <TabsContent value="discounts" className="mt-6">

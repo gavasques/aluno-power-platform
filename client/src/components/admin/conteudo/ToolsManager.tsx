@@ -46,6 +46,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { ToolVideoManager } from '@/components/videos/ToolVideoManager';
 import type { Tool as DbTool, InsertTool } from '@shared/schema';
 
 const ToolsManager = () => {
@@ -415,10 +416,11 @@ const ToolsManager = () => {
           </DialogHeader>
           
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="basic">Básico</TabsTrigger>
               <TabsTrigger value="features">Funcionalidades</TabsTrigger>
               <TabsTrigger value="pricing">Preços</TabsTrigger>
+              <TabsTrigger value="videos">Vídeos</TabsTrigger>
               <TabsTrigger value="analysis">Análise</TabsTrigger>
             </TabsList>
 
