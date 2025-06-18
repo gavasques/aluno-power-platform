@@ -75,15 +75,16 @@ function App() {
                             <Route path="novidades" element={<Updates />} />
                             <Route path="fornecedores" element={<Suppliers />} />
                             
+                            {/* Rotas específicas do Hub */}
+                            <Route path="hub/parceiros/:id" element={<PartnerDetail />} />
+                            <Route path="hub/ferramentas/:id" element={<ToolDetail />} />
+                            <Route path="hub/materiais/:id" element={<MaterialDetailPage />} />
+                            <Route path="hub/fornecedores/:id" element={<SupplierDetail />} />
+                            <Route path="hub/templates/:id" element={<TemplateDetail />} />
+                            <Route path="hub/prompts-ia/:id" element={<PromptDetail />} />
+                            
                             {/* Rotas do Hub */}
                             <Route path="hub">
-                              {/* Detail routes first (dynamic routes before the catch-all) */}
-                              <Route path="parceiros/:id" element={<PartnerDetail />} />
-                              <Route path="ferramentas/:id" element={<ToolDetail />} />
-                              <Route path="materiais/:id" element={<MaterialDetailPage />} />
-                              <Route path="fornecedores/:id" element={<SupplierDetail />} />
-                              <Route path="templates/:id" element={<TemplateDetail />} />
-                              <Route path="prompts-ia/:id" element={<PromptDetail />} />
                               <Route path="parceiros" element={<Partners />} />
                               <Route path="fornecedores" element={<Suppliers />} />
                               <Route path=":section" element={<Hub />} />
