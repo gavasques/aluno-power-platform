@@ -58,8 +58,6 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
         return "Gerenciar Tipos de Prompts IA";
       case "tipos-materiais":
         return "Gerenciar Tipos de Materiais";
-      case "categorias-materiais":
-        return "Gerenciar Categorias de Materiais";
       case "tipos-ferramentas":
         return "Gerenciar Tipos de Ferramentas";
       case "parceiros":

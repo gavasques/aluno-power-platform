@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { Plus, Edit, Trash2, Folder } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import type { MaterialCategory, InsertMaterialCategory } from '@/hooks/useMaterialCategories';
+import type { MaterialCategory, InsertMaterialCategory } from '@shared/schema';
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
