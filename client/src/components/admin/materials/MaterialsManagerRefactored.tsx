@@ -9,6 +9,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { MaterialFilters } from './MaterialFilters';
 import { MaterialList } from './MaterialList';
 import { MaterialForm } from './MaterialForm';
+import { MaterialViewer } from '../../user/materials/MaterialViewer';
 import type { MaterialFormData } from './MaterialFormTypes';
 import type { Material as DbMaterial, MaterialType, InsertMaterial } from '@shared/schema';
 
@@ -25,6 +26,10 @@ const MaterialsManagerRefactored = () => {
   // Dialog states
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<DbMaterial | null>(null);
+  
+  // Viewer states
+  const [viewingMaterial, setViewingMaterial] = useState<DbMaterial | null>(null);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   
   // Form states
   const [formData, setFormData] = useState<MaterialFormData>({
@@ -220,12 +225,13 @@ const MaterialsManagerRefactored = () => {
   };
 
   const handleView = (material: DbMaterial) => {
-    // Open material in a new tab or modal for viewing
-    if (material.fileUrl) {
-      window.open(material.fileUrl, '_blank');
-    } else if (material.externalUrl) {
-      window.open(material.externalUrl, '_blank');
-    }
+    setViewingMaterial(material);
+    setIsViewerOpen(true);
+  };
+
+  const handleCloseViewer = () => {
+    setIsViewerOpen(false);
+    setViewingMaterial(null);
   };
 
   const handleCreateNew = () => {
@@ -239,6 +245,10 @@ const MaterialsManagerRefactored = () => {
   };
 
   const isLoading = materialsLoading || typesLoading;
+
+  const getMaterialType = (typeId: number) => {
+    return materialTypes.find(t => t.id === typeId);
+  };
 
   return (
     <div className="space-y-6">
@@ -299,6 +309,15 @@ const MaterialsManagerRefactored = () => {
         isOpen={isDialogOpen}
         onClose={handleCloseDialog}
       />
+
+      {viewingMaterial && (
+        <MaterialViewer
+          material={viewingMaterial}
+          materialType={getMaterialType(viewingMaterial.typeId)!}
+          isOpen={isViewerOpen}
+          onClose={handleCloseViewer}
+        />
+      )}
     </div>
   );
 };
