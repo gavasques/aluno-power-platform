@@ -200,18 +200,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/materials/:id', async (req, res) => {
-    try {
-      const material = await storage.getMaterial(parseInt(req.params.id));
-      if (!material) {
-        return res.status(404).json({ error: 'Material not found' });
-      }
-      res.json(material);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch material' });
-    }
-  });
-
   app.put('/api/materials/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
