@@ -35,12 +35,8 @@ const SupplierForm = () => {
     tradeName: '',
     corporateName: '',
     categoryId: '',
-    departmentIds: [] as string[],
+    departmentId: '',
     notes: '',
-    email: '',
-    mainContact: '',
-    phone: '',
-    whatsapp: '',
     commercialTerms: '',
     isVerified: false,
     logo: ''
@@ -53,26 +49,38 @@ const SupplierForm = () => {
 
   // Estados para arquivos - corrigindo o tipo
   const [files, setFiles] = useState<SupplierFile[]>([]);
+  
+  // Estado para departamentos
+  const [departments, setDepartments] = useState<any[]>([]);
+
+  // Carregar departamentos
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch('/api/departments');
+        const data = await response.json();
+        setDepartments(data);
+      } catch (error) {
+        console.error('Erro ao carregar departamentos:', error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   // Carregar dados do fornecedor se estiver editando
   useEffect(() => {
     if (supplier) {
       setFormData({
         tradeName: supplier.tradeName,
-        corporateName: supplier.corporateName,
-        categoryId: supplier.category.id,
-        departmentIds: supplier.departments.map(d => d.id),
-        notes: supplier.notes,
-        email: supplier.email,
-        mainContact: supplier.mainContact,
-        phone: supplier.phone,
-        whatsapp: supplier.whatsapp,
-        commercialTerms: supplier.commercialTerms,
+        corporateName: supplier.corporateName || '',
+        categoryId: supplier.categoryId?.toString() || '',
+        departmentId: '', // Por enquanto vazio até implementar no backend
+        notes: supplier.notes || '',
+        commercialTerms: '', // Por enquanto vazio até implementar no backend
         isVerified: supplier.isVerified,
         logo: supplier.logo || ''
       });
-      setContacts(supplier.contacts.length > 0 ? supplier.contacts : [{ name: '', role: '', phone: '', whatsapp: '', email: '', notes: '' }]);
-      setFiles(supplier.files.length > 0 ? supplier.files : []);
     }
   }, [supplier]);
 
@@ -245,12 +253,11 @@ const SupplierForm = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="corporateName">Razão Social *</Label>
+                    <Label htmlFor="corporateName">Razão Social</Label>
                     <Input
                       id="corporateName"
                       value={formData.corporateName}
                       onChange={(e) => setFormData({ ...formData, corporateName: e.target.value })}
-                      required
                     />
                   </div>
                 </div>
