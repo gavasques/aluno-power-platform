@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2, Plus, Edit, Grid2X2, List, Filter, Trash2, ShoppingBag } from "lucide-react";
+import { Star, Search, CheckCircle, Phone, Mail, MapPin, Building2, Plus, Edit, Grid2X2, List, Filter, Trash2, ShoppingBag, Globe } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "@/hooks/use-toast";

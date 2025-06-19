@@ -206,33 +206,90 @@ const SupplierDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Contato Principal */}
+            {/* Informações de Contato */}
             <Card>
               <CardHeader>
-                <CardTitle>Contato Principal</CardTitle>
+                <CardTitle>Informações de Contato</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Email</label>
-                    <p className="text-base">{supplier.email}</p>
+                {supplier.email && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Email Principal</label>
+                      <p className="text-base">{supplier.email}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Telefone</label>
-                    <p className="text-base">{supplier.phone}</p>
+                )}
+                {supplier.commercialEmail && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Email Comercial</label>
+                      <p className="text-base">{supplier.commercialEmail}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">WhatsApp</label>
-                    <p className="text-base">{supplier.whatsapp}</p>
+                )}
+                {supplier.supportEmail && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Email de Suporte</label>
+                      <p className="text-base">{supplier.supportEmail}</p>
+                    </div>
                   </div>
-                </div>
+                )}
+                {supplier.phone && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Telefone</label>
+                      <p className="text-base">{supplier.phone}</p>
+                    </div>
+                  </div>
+                )}
+                {supplier.whatsapp && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">WhatsApp</label>
+                      <p className="text-base">{supplier.whatsapp}</p>
+                    </div>
+                  </div>
+                )}
+                {supplier.website && (
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Website</label>
+                      <a href={supplier.website} target="_blank" rel="noopener noreferrer" className="text-base text-blue-600 hover:underline">
+                        {supplier.website}
+                      </a>
+                    </div>
+                  </div>
+                )}
+                {supplier.linkedin && (
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">LinkedIn</label>
+                      <a href={supplier.linkedin} target="_blank" rel="noopener noreferrer" className="text-base text-blue-600 hover:underline">
+                        {supplier.linkedin}
+                      </a>
+                    </div>
+                  </div>
+                )}
+                {supplier.youtube && (
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Canal YouTube</label>
+                      <a href={supplier.youtube} target="_blank" rel="noopener noreferrer" className="text-base text-blue-600 hover:underline">
+                        {supplier.youtube}
+                      </a>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

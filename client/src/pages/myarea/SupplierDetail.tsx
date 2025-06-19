@@ -141,29 +141,91 @@ const SupplierDetail = () => {
                 <CardTitle>Contato Principal</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">{supplier.phone}</p>
-                    <p className="text-sm text-muted-foreground">Telefone</p>
+                {supplier.phone && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{supplier.phone}</p>
+                      <p className="text-sm text-muted-foreground">Telefone</p>
+                    </div>
                   </div>
-                </div>
+                )}
                 
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">{supplier.email}</p>
-                    <p className="text-sm text-muted-foreground">Email</p>
+                {supplier.email && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{supplier.email}</p>
+                      <p className="text-sm text-muted-foreground">Email Principal</p>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {supplier.commercialEmail && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{supplier.commercialEmail}</p>
+                      <p className="text-sm text-muted-foreground">Email Comercial</p>
+                    </div>
+                  </div>
+                )}
+
+                {supplier.supportEmail && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{supplier.supportEmail}</p>
+                      <p className="text-sm text-muted-foreground">Email de Suporte</p>
+                    </div>
+                  </div>
+                )}
+
+                {supplier.website && (
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <a href={supplier.website} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">
+                        {supplier.website}
+                      </a>
+                      <p className="text-sm text-muted-foreground">Website</p>
+                    </div>
+                  </div>
+                )}
+
+                {supplier.linkedin && (
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <a href={supplier.linkedin} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">
+                        LinkedIn
+                      </a>
+                      <p className="text-sm text-muted-foreground">LinkedIn</p>
+                    </div>
+                  </div>
+                )}
+
+                {supplier.youtube && (
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <a href={supplier.youtube} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">
+                        Canal YouTube
+                      </a>
+                      <p className="text-sm text-muted-foreground">YouTube</p>
+                    </div>
+                  </div>
+                )}
                 
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">{supplier.mainContact}</p>
-                    <p className="text-sm text-muted-foreground">Contato Principal</p>
+                {supplier.mainContact && (
+                  <div className="flex items-center gap-3">
+                    <Users className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{supplier.mainContact}</p>
+                      <p className="text-sm text-muted-foreground">Contato Principal</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
