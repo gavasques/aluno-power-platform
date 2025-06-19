@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useRoute, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,11 +21,12 @@ import { SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS, FILE_TYPES, SupplierFile } f
 import { useToast } from "@/hooks/use-toast";
 
 const SupplierForm = () => {
-  const navigate = useNavigate();
-  const { id } = useParams();
+  const [match, params] = useRoute('/admin/conteudo/fornecedores/:id?/:action?');
+  const [, setLocation] = useLocation();
   const { addSupplier, updateSupplier, getSupplierById } = useSuppliers();
   const { toast } = useToast();
   
+  const id = params?.id;
   const isEditing = id && id !== 'novo';
   const supplier = isEditing ? getSupplierById(id) : null;
 
@@ -144,7 +145,7 @@ const SupplierForm = () => {
       });
     }
 
-    navigate('/admin/conteudo/fornecedores');
+    setLocation('/admin/conteudo/fornecedores');
   };
 
   const handleDepartmentChange = (departmentId: string, checked: boolean) => {
@@ -203,7 +204,7 @@ const SupplierForm = () => {
       <div className="flex items-center gap-4">
         <Button
           variant="outline"
-          onClick={() => navigate('/admin/conteudo/fornecedores')}
+          onClick={() => setLocation('/admin/conteudo/fornecedores')}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
@@ -553,7 +554,7 @@ const SupplierForm = () => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate('/admin/conteudo/fornecedores')}
+            onClick={() => setLocation('/admin/conteudo/fornecedores')}
           >
             Cancelar
           </Button>
