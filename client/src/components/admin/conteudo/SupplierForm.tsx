@@ -45,7 +45,9 @@ const SupplierForm = () => {
     instagram: '',
     youtube: '',
     commercialEmail: '',
-    supportEmail: ''
+    supportEmail: '',
+    phone0800Sales: '',
+    phone0800Support: ''
   });
 
   // Estados para contatos múltiplos
@@ -91,7 +93,9 @@ const SupplierForm = () => {
         instagram: '',
         youtube: '',
         commercialEmail: '',
-        supportEmail: ''
+        supportEmail: '',
+        phone0800Sales: '',
+        phone0800Support: ''
       });
     }
   }, [supplier]);
@@ -143,7 +147,9 @@ const SupplierForm = () => {
       instagram: formData.instagram,
       youtube: formData.youtube,
       commercialEmail: formData.commercialEmail,
-      supportEmail: formData.supportEmail
+      supportEmail: formData.supportEmail,
+      phone0800Sales: formData.phone0800Sales,
+      phone0800Support: formData.phone0800Support
     };
 
     if (isEditing) {
@@ -346,6 +352,27 @@ const SupplierForm = () => {
                       value={formData.supportEmail}
                       onChange={(e) => setFormData({ ...formData, supportEmail: e.target.value })}
                       placeholder="atendimento@empresa.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="phone0800Sales">Telefone 0800 Vendas</Label>
+                    <Input
+                      id="phone0800Sales"
+                      value={formData.phone0800Sales}
+                      onChange={(e) => setFormData({ ...formData, phone0800Sales: e.target.value })}
+                      placeholder="0800 123 4567"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone0800Support">Telefone 0800 Atendimento</Label>
+                    <Input
+                      id="phone0800Support"
+                      value={formData.phone0800Support}
+                      onChange={(e) => setFormData({ ...formData, phone0800Support: e.target.value })}
+                      placeholder="0800 987 6543"
                     />
                   </div>
                 </div>

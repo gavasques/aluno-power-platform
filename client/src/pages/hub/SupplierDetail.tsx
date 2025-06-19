@@ -257,6 +257,24 @@ const SupplierDetail = () => {
                     </div>
                   </div>
                 )}
+                {supplier.phone0800Sales && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Telefone 0800 Vendas</label>
+                      <p className="text-base">{supplier.phone0800Sales}</p>
+                    </div>
+                  </div>
+                )}
+                {supplier.phone0800Support && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Telefone 0800 Atendimento</label>
+                      <p className="text-base">{supplier.phone0800Support}</p>
+                    </div>
+                  </div>
+                )}
                 {supplier.website && (
                   <div className="flex items-center gap-3">
                     <Globe className="h-5 w-5 text-muted-foreground" />
