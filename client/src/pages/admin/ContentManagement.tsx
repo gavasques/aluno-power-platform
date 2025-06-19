@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, Users, Wrench, Package, BrainCircuit } from "lucide-react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useRoute, useLocation } from "wouter";
 import { usePartners } from "@/contexts/PartnersContext";
 import { useSuppliers } from "@/contexts/SuppliersContext";
 import { useTemplates } from "@/contexts/TemplatesContext";
@@ -27,20 +27,23 @@ import { UpdatesCenter } from "./content/UpdatesCenter";
 
 const ContentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
+  const [match, params] = useRoute('/admin/conteudo/:subsection?/:id?/:action?');
+  const [, setLocation] = useLocation();
   const { partners } = usePartners();
   const { suppliers } = useSuppliers();
   const { templates } = useTemplates();
   const { prompts } = usePrompts();
-  const { subsection, id, action } = useParams();
-  const { pathname } = useLocation();
+  
+  const subsection = params?.subsection;
+  const id = params?.id;
+  const action = params?.action;
 
   // Redirecionar se estiver na rota de selos (que foi removida)
   useEffect(() => {
     if (subsection === 'selos') {
-      navigate('/admin/conteudo', { replace: true });
+      setLocation('/admin/conteudo');
     }
-  }, [subsection, navigate]);
+  }, [subsection, setLocation]);
 
   // Se estiver na subseção específica, renderiza o componente específico
   if (subsection === 'parceiros') {
@@ -60,7 +63,7 @@ const ContentManagement = () => {
 
   if (subsection === 'materiais') {
     if (id === 'novo') return <MaterialFormAdmin />;
-    if (id && pathname.includes('/edit')) return <MaterialFormAdmin />;
+    if (id && action === 'edit') return <MaterialFormAdmin />;
     if (id) return <MaterialDetailAdmin />;
     return <MaterialsManager />;
   }
