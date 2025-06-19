@@ -105,7 +105,7 @@ const ContentManagement = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card 
           className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => navigate('/admin/conteudo/parceiros')}
+          onClick={() => setLocation('/admin/conteudo/parceiros')}
         >
           <CardHeader>
             <div className="flex items-center space-x-2">
@@ -126,7 +126,7 @@ const ContentManagement = () => {
 
         <Card 
           className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => navigate('/admin/conteudo/fornecedores')}
+          onClick={() => setLocation('/admin/conteudo/fornecedores')}
         >
           <CardHeader>
             <div className="flex items-center space-x-2">
@@ -147,7 +147,7 @@ const ContentManagement = () => {
 
         <Card 
           className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => navigate('/admin/conteudo/materiais')}
+          onClick={() => setLocation('/admin/conteudo/materiais')}
         >
           <CardHeader>
             <div className="flex items-center space-x-2">
@@ -168,7 +168,7 @@ const ContentManagement = () => {
 
         <Card 
           className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => navigate('/admin/conteudo/ferramentas')}
+          onClick={() => setLocation('/admin/conteudo/ferramentas')}
         >
           <CardHeader>
             <div className="flex items-center space-x-2">
@@ -189,7 +189,7 @@ const ContentManagement = () => {
 
         <Card 
           className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => navigate('/admin/conteudo/templates')}
+          onClick={() => setLocation('/admin/conteudo/templates')}
         >
           <CardHeader>
             <div className="flex items-center space-x-2">
@@ -210,7 +210,7 @@ const ContentManagement = () => {
 
         <Card 
           className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => navigate('/admin/conteudo/prompts-ia')}
+          onClick={() => setLocation('/admin/conteudo/prompts-ia')}
         >
           <CardHeader>
             <div className="flex items-center space-x-2">

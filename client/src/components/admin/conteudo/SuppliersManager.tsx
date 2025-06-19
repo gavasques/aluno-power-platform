@@ -22,14 +22,14 @@ import {
   XCircle,
   Star
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { useSuppliers } from "@/contexts/SuppliersContext";
 
 const SuppliersManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [viewMode, setViewMode] = useState<"list" | "cards">("list");
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { suppliers, deleteSupplier } = useSuppliers();
 
   const categories = ["Todas", "Fabricantes", "Distribuidores", "Importadores", "Representantes", "Atacadistas", "Dropshipping"];
