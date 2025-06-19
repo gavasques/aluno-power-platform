@@ -39,7 +39,12 @@ const SupplierForm = () => {
     notes: '',
     commercialTerms: '',
     isVerified: false,
-    logo: ''
+    logo: '',
+    website: '',
+    linkedin: '',
+    youtube: '',
+    commercialEmail: '',
+    supportEmail: ''
   });
 
   // Estados para contatos múltiplos
@@ -79,7 +84,12 @@ const SupplierForm = () => {
         notes: supplier.notes || '',
         commercialTerms: '', // Por enquanto vazio até implementar no backend
         isVerified: supplier.isVerified,
-        logo: supplier.logo || ''
+        logo: supplier.logo || '',
+        website: '',
+        linkedin: '',
+        youtube: '',
+        commercialEmail: '',
+        supportEmail: ''
       });
     }
   }, [supplier]);
@@ -125,7 +135,12 @@ const SupplierForm = () => {
       files: filesWithIds,
       commercialTerms: formData.commercialTerms,
       logo: formData.logo,
-      isVerified: formData.isVerified
+      isVerified: formData.isVerified,
+      website: formData.website,
+      linkedin: formData.linkedin,
+      youtube: formData.youtube,
+      commercialEmail: formData.commercialEmail,
+      supportEmail: formData.supportEmail
     };
 
     if (isEditing) {
@@ -262,6 +277,60 @@ const SupplierForm = () => {
                       value={formData.logo}
                       onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
                       placeholder="https://..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="website">URL do Site da Empresa</Label>
+                  <Input
+                    id="website"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="linkedin">LinkedIn da Empresa</Label>
+                    <Input
+                      id="linkedin"
+                      value={formData.linkedin}
+                      onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                      placeholder="https://linkedin.com/company/..."
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="youtube">Canal YouTube da Empresa</Label>
+                    <Input
+                      id="youtube"
+                      value={formData.youtube}
+                      onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
+                      placeholder="https://youtube.com/@..."
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="commercialEmail">Email Comercial</Label>
+                    <Input
+                      id="commercialEmail"
+                      type="email"
+                      value={formData.commercialEmail}
+                      onChange={(e) => setFormData({ ...formData, commercialEmail: e.target.value })}
+                      placeholder="vendas@empresa.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="supportEmail">Email Atendimento</Label>
+                    <Input
+                      id="supportEmail"
+                      type="email"
+                      value={formData.supportEmail}
+                      onChange={(e) => setFormData({ ...formData, supportEmail: e.target.value })}
+                      placeholder="atendimento@empresa.com"
                     />
                   </div>
                 </div>

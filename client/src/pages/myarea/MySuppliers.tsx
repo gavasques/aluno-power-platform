@@ -246,14 +246,30 @@ const MySuppliers = () => {
                 </div>
 
                 <div className="flex gap-2 text-xs text-muted-foreground mb-4">
-                  <div className="flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    {supplier.phone}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Mail className="h-3 w-3" />
-                    {supplier.email.split('@')[0]}@...
-                  </div>
+                  {supplier.phone && (
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      {supplier.phone}
+                    </div>
+                  )}
+                  {supplier.email && (
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      {supplier.email.split('@')[0]}@...
+                    </div>
+                  )}
+                  {supplier.commercialEmail && (
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      Comercial
+                    </div>
+                  )}
+                  {supplier.website && (
+                    <div className="flex items-center gap-1">
+                      <Globe className="h-3 w-3" />
+                      Site
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
