@@ -42,6 +42,7 @@ const SupplierForm = () => {
     logo: '',
     website: '',
     linkedin: '',
+    instagram: '',
     youtube: '',
     commercialEmail: '',
     supportEmail: ''
@@ -87,6 +88,7 @@ const SupplierForm = () => {
         logo: supplier.logo || '',
         website: '',
         linkedin: '',
+        instagram: '',
         youtube: '',
         commercialEmail: '',
         supportEmail: ''
@@ -138,6 +140,7 @@ const SupplierForm = () => {
       isVerified: formData.isVerified,
       website: formData.website,
       linkedin: formData.linkedin,
+      instagram: formData.instagram,
       youtube: formData.youtube,
       commercialEmail: formData.commercialEmail,
       supportEmail: formData.supportEmail
@@ -301,6 +304,18 @@ const SupplierForm = () => {
                       placeholder="https://linkedin.com/company/..."
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="instagram">Instagram da Empresa</Label>
+                    <Input
+                      id="instagram"
+                      value={formData.instagram}
+                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                      placeholder="https://instagram.com/..."
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-1 gap-4">
                   <div>
                     <Label htmlFor="youtube">Canal YouTube da Empresa</Label>
                     <Input

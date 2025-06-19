@@ -270,6 +270,12 @@ const MySuppliers = () => {
                       Site
                     </div>
                   )}
+                  {supplier.instagram && (
+                    <div className="flex items-center gap-1">
+                      <Globe className="h-3 w-3" />
+                      Instagram
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
