@@ -276,6 +276,18 @@ const MySuppliers = () => {
                       Instagram
                     </div>
                   )}
+                  {supplier.phone0800Sales && (
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      0800 Vendas
+                    </div>
+                  )}
+                  {supplier.phone0800Support && (
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      0800 Atend.
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
