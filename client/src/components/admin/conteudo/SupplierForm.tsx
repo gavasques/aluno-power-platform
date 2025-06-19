@@ -88,50 +88,39 @@ const SupplierForm = () => {
     e.preventDefault();
     
     const selectedCategory = SUPPLIER_CATEGORIES.find(cat => cat.id === formData.categoryId);
-    const selectedDepartments = SUPPLIER_DEPARTMENTS.filter(dept => formData.departmentIds.includes(dept.id));
+    const selectedDepartment = departments.find(dept => dept.id.toString() === formData.departmentId);
     
     if (!selectedCategory) {
       toast({
         title: "Erro",
-        description: "Por favor, selecione uma categoria.",
+        description: "Por favor, selecione um tipo de fornecedor.",
         variant: "destructive"
       });
       return;
     }
 
-    if (selectedDepartments.length === 0) {
-      toast({
-        title: "Erro",
-        description: "Por favor, selecione pelo menos um departamento.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Preparar contatos com IDs se for edição
+    // Preparar contatos simples para formulário
     const contactsWithIds = contacts.filter(contact => contact.name.trim() !== '').map(contact => ({
       ...contact,
-      id: isEditing && supplier?.contacts.find(c => c.name === contact.name)?.id || Date.now().toString() + Math.random()
+      id: Date.now().toString() + Math.random()
     }));
 
-    // Preparar arquivos com IDs se for edição
+    // Preparar arquivos simples para formulário
     const filesWithIds = files.filter(file => file.name.trim() !== '').map(file => ({
       ...file,
-      id: isEditing && supplier?.files.find(f => f.name === file.name)?.id || Date.now().toString() + Math.random(),
-      uploadedAt: isEditing && supplier?.files.find(f => f.name === file.name)?.uploadedAt || new Date().toISOString()
+      id: Date.now().toString() + Math.random(),
+      uploadedAt: new Date().toISOString()
     }));
 
     const supplierData = {
       tradeName: formData.tradeName,
       corporateName: formData.corporateName,
       category: selectedCategory,
-      departments: selectedDepartments,
-      brands: isEditing ? supplier?.brands || [] : [], // Adicionando a propriedade brands
+      department: selectedDepartment,
+      categoryId: parseInt(formData.categoryId),
+      departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
+      brands: isEditing ? supplier?.brands || [] : [],
       notes: formData.notes,
-      email: formData.email,
-      mainContact: formData.mainContact,
-      phone: formData.phone,
-      whatsapp: formData.whatsapp,
       contacts: contactsWithIds,
       files: filesWithIds,
       commercialTerms: formData.commercialTerms,
@@ -156,19 +145,7 @@ const SupplierForm = () => {
     setLocation('/admin/conteudo/fornecedores');
   };
 
-  const handleDepartmentChange = (departmentId: string, checked: boolean) => {
-    if (checked) {
-      setFormData(prev => ({
-        ...prev,
-        departmentIds: [...prev.departmentIds, departmentId]
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        departmentIds: prev.departmentIds.filter(id => id !== departmentId)
-      }));
-    }
-  };
+
 
   const addContact = () => {
     setContacts([...contacts, { name: '', role: '', phone: '', whatsapp: '', email: '', notes: '' }]);
@@ -264,7 +241,7 @@ const SupplierForm = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="category">Categoria Principal *</Label>
+                    <Label htmlFor="category">Tipo de Fornecedor *</Label>
                     <Select value={formData.categoryId} onValueChange={(value) => setFormData({ ...formData, categoryId: value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma categoria" />
@@ -290,21 +267,19 @@ const SupplierForm = () => {
                 </div>
 
                 <div>
-                  <Label>Departamentos que Atende *</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-                    {SUPPLIER_DEPARTMENTS.map(department => (
-                      <div key={department.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`dept-${department.id}`}
-                          checked={formData.departmentIds.includes(department.id)}
-                          onCheckedChange={(checked) => handleDepartmentChange(department.id, checked as boolean)}
-                        />
-                        <Label htmlFor={`dept-${department.id}`} className="text-sm">
+                  <Label htmlFor="department">Departamento Principal</Label>
+                  <Select value={formData.departmentId} onValueChange={(value) => setFormData({ ...formData, departmentId: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um departamento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departments.map(department => (
+                        <SelectItem key={department.id} value={department.id.toString()}>
                           {department.name}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
@@ -319,53 +294,7 @@ const SupplierForm = () => {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Contato Principal</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="mainContact">Nome do Contato *</Label>
-                    <Input
-                      id="mainContact"
-                      value={formData.mainContact}
-                      onChange={(e) => setFormData({ ...formData, mainContact: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="phone">Telefone</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="whatsapp">WhatsApp</Label>
-                    <Input
-                      id="whatsapp"
-                      value={formData.whatsapp}
-                      onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="contacts" className="space-y-6">
