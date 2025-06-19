@@ -205,6 +205,18 @@ const SupplierDetail = () => {
                   </div>
                 )}
 
+                {supplier.instagram && (
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <a href={supplier.instagram} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">
+                        Instagram
+                      </a>
+                      <p className="text-sm text-muted-foreground">Instagram</p>
+                    </div>
+                  </div>
+                )}
+
                 {supplier.youtube && (
                   <div className="flex items-center gap-3">
                     <Globe className="h-5 w-5 text-muted-foreground" />
