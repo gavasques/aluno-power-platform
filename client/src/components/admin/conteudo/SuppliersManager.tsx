@@ -64,7 +64,7 @@ const SuppliersManager = () => {
           <p className="text-muted-foreground">Gerencie fabricantes, distribuidores, importadores e representantes</p>
         </div>
         <Button 
-          onClick={() => navigate('/admin/conteudo/fornecedores/novo')}
+          onClick={() => setLocation('/admin/conteudo/fornecedores/novo')}
           className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -180,14 +180,14 @@ const SuppliersManager = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => navigate(`/admin/conteudo/fornecedores/${supplier.id}`)}
+                        onClick={() => setLocation(`/admin/conteudo/fornecedores/${supplier.id}`)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => navigate(`/admin/conteudo/fornecedores/${supplier.id}/edit`)}
+                        onClick={() => setLocation(`/admin/conteudo/fornecedores/${supplier.id}/edit`)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -243,7 +243,7 @@ const SuppliersManager = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => navigate(`/admin/conteudo/fornecedores/${supplier.id}`)}
+                      onClick={() => setLocation(`/admin/conteudo/fornecedores/${supplier.id}`)}
                       className="flex-1"
                     >
                       <Eye className="h-4 w-4 mr-1" />
@@ -252,7 +252,7 @@ const SuppliersManager = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => navigate(`/admin/conteudo/fornecedores/${supplier.id}/edit`)}
+                      onClick={() => setLocation(`/admin/conteudo/fornecedores/${supplier.id}/edit`)}
                       className="flex-1"
                     >
                       <Edit className="h-4 w-4 mr-1" />
