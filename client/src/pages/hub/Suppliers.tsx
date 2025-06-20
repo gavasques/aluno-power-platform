@@ -20,12 +20,18 @@ const ITEMS_PER_PAGE = 25;
 const Suppliers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [departmentFilter, setDepartmentFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Buscar categorias
   const { data: categories = [] } = useQuery({
     queryKey: ['/api/categories'],
+  });
+
+  // Buscar departamentos
+  const { data: departments = [] } = useQuery({
+    queryKey: ['/api/departments'],
   });
 
   // Buscar fornecedores com paginação
@@ -35,6 +41,7 @@ const Suppliers = () => {
       limit: ITEMS_PER_PAGE, 
       search: searchTerm, 
       category: categoryFilter,
+      department: departmentFilter,
       sortBy 
     }],
     queryFn: async () => {
@@ -46,6 +53,7 @@ const Suppliers = () => {
       
       if (searchTerm) params.append('search', searchTerm);
       if (categoryFilter !== 'all') params.append('categoryId', categoryFilter);
+      if (departmentFilter !== 'all') params.append('departmentId', departmentFilter);
       
       const response = await fetch(`/api/suppliers/paginated?${params}`);
       if (!response.ok) throw new Error('Failed to fetch suppliers');
@@ -167,7 +175,7 @@ const Suppliers = () => {
       {/* Filtros e Busca */}
       <Card className="mb-6">
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {/* Busca */}
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -189,6 +197,21 @@ const Suppliers = () => {
                 {categories.map((category: any) => (
                   <SelectItem key={category.id} value={category.id.toString()}>
                     {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Filtro por departamento */}
+            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Departamento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os departamentos</SelectItem>
+                {departments.map((department: any) => (
+                  <SelectItem key={department.id} value={department.id.toString()}>
+                    {department.name}
                   </SelectItem>
                 ))}
               </SelectContent>
