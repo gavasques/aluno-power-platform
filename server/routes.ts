@@ -63,6 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = parseInt(req.query.limit as string) || 25;
       const search = req.query.search as string;
       const categoryId = req.query.categoryId as string;
+      const departmentId = req.query.departmentId as string;
       const sortBy = req.query.sortBy as string || 'name';
       
       const offset = (page - 1) * limit;
@@ -72,6 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         offset,
         search,
         categoryId: categoryId ? parseInt(categoryId) : undefined,
+        departmentId: departmentId ? parseInt(departmentId) : undefined,
         sortBy
       });
       
