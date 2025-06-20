@@ -20,6 +20,16 @@ import { useSuppliers } from "@/contexts/SuppliersContext";
 import { SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS, FILE_TYPES, SupplierFile } from "@/types/supplier";
 import { useToast } from "@/hooks/use-toast";
 
+interface SupplierContact {
+  name: string;
+  role: string;
+  phone: string;
+  extension: string;
+  whatsapp: string;
+  email: string;
+  notes: string;
+}
+
 const SupplierForm = () => {
   const [match, params] = useRoute('/admin/conteudo/fornecedores/:id?/:action?');
   const [, setLocation] = useLocation();
@@ -51,8 +61,8 @@ const SupplierForm = () => {
   });
 
   // Estados para contatos múltiplos
-  const [contacts, setContacts] = useState([
-    { name: '', role: '', phone: '', whatsapp: '', email: '', notes: '' }
+  const [contacts, setContacts] = useState<SupplierContact[]>([
+    { name: '', role: '', phone: '', extension: '', whatsapp: '', email: '', notes: '' }
   ]);
 
   // Estados para arquivos - corrigindo o tipo
@@ -172,14 +182,14 @@ const SupplierForm = () => {
 
 
   const addContact = () => {
-    setContacts([...contacts, { name: '', role: '', phone: '', whatsapp: '', email: '', notes: '' }]);
+    setContacts([...contacts, { name: '', role: '', phone: '', extension: '', whatsapp: '', email: '', notes: '' }]);
   };
 
   const removeContact = (index: number) => {
     setContacts(contacts.filter((_, i) => i !== index));
   };
 
-  const updateContact = (index: number, field: string, value: string) => {
+  const updateContact = (index: number, field: keyof SupplierContact, value: string) => {
     const updatedContacts = [...contacts];
     updatedContacts[index] = { ...updatedContacts[index], [field]: value };
     setContacts(updatedContacts);
@@ -459,6 +469,15 @@ const SupplierForm = () => {
                         <Input
                           value={contact.phone}
                           onChange={(e) => updateContact(index, 'phone', e.target.value)}
+                          placeholder="+55 11 99999-9999"
+                        />
+                      </div>
+                      <div>
+                        <Label>Ramal</Label>
+                        <Input
+                          value={contact.extension}
+                          onChange={(e) => updateContact(index, 'extension', e.target.value)}
+                          placeholder="1234"
                         />
                       </div>
                       <div>
@@ -466,6 +485,7 @@ const SupplierForm = () => {
                         <Input
                           value={contact.whatsapp}
                           onChange={(e) => updateContact(index, 'whatsapp', e.target.value)}
+                          placeholder="+55 11 99999-9999"
                         />
                       </div>
                       <div>
