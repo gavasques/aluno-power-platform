@@ -511,6 +511,32 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
+  // Supplier Brands
+  async getSupplierBrands(supplierId: number) {
+    return await db
+      .select()
+      .from(supplierBrands)
+      .where(eq(supplierBrands.supplierId, supplierId))
+      .orderBy(supplierBrands.name);
+  }
+
+  async createSupplierBrand(brandData: any) {
+    const [created] = await db
+      .insert(supplierBrands)
+      .values({
+        ...brandData,
+        createdAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async deleteSupplierBrand(brandId: number) {
+    await db
+      .delete(supplierBrands)
+      .where(eq(supplierBrands.id, brandId));
+  }
+
   // Partners
   async getPartners(): Promise<Partner[]> {
     return await db.select().from(partners);

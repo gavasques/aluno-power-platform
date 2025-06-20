@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useSuppliers } from "@/contexts/SuppliersContext";
 import { FILE_TYPES } from "@/types/supplier";
+import SupplierBrands from "./SupplierBrands";
 
 const SupplierDetail = () => {
   const navigate = useNavigate();
@@ -113,10 +114,11 @@ const SupplierDetail = () => {
       </div>
 
       <Tabs defaultValue="info" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="contacts">Contatos</TabsTrigger>
           <TabsTrigger value="files">Arquivos</TabsTrigger>
+          <TabsTrigger value="brands">Marcas</TabsTrigger>
           <TabsTrigger value="reviews">Avaliações</TabsTrigger>
         </TabsList>
 
@@ -327,6 +329,10 @@ const SupplierDetail = () => {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="brands" className="space-y-6">
+          <SupplierBrands supplierId={supplier.id} />
         </TabsContent>
 
         <TabsContent value="reviews" className="space-y-6">

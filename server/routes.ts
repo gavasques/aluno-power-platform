@@ -165,6 +165,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Supplier Brands
+  app.get('/api/suppliers/:id/brands', async (req, res) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const brands = await storage.getSupplierBrands(supplierId);
+      res.json(brands);
+    } catch (error) {
+      console.error('Error fetching supplier brands:', error);
+      res.status(500).json({ error: 'Failed to fetch brands' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/brands', async (req, res) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const brandData = {
+        ...req.body,
+        supplierId,
+      };
+      const brand = await storage.createSupplierBrand(brandData);
+      res.status(201).json(brand);
+    } catch (error) {
+      console.error('Error creating supplier brand:', error);
+      res.status(500).json({ error: 'Failed to create brand' });
+    }
+  });
+
+  app.delete('/api/suppliers/brands/:brandId', async (req, res) => {
+    try {
+      const brandId = parseInt(req.params.brandId);
+      await storage.deleteSupplierBrand(brandId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting supplier brand:', error);
+      res.status(500).json({ error: 'Failed to delete brand' });
+    }
+  });
+
   // Partners
   app.get('/api/partners', async (req, res) => {
     try {
