@@ -73,6 +73,7 @@ export const supplierContacts = pgTable("supplier_contacts", {
   supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
   type: text("type").notNull(), // 'phone', 'email', 'whatsapp', 'website'
   value: text("value").notNull(),
+  extension: text("extension"), // Campo de ramal
   label: text("label"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

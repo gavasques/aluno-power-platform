@@ -238,27 +238,36 @@ const SupplierDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Telefone</label>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      <p className="text-muted-foreground">{contact.phone}</p>
+                  {contact.phone && (
+                    <div>
+                      <label className="text-sm font-medium">Telefone</label>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        <p className="text-muted-foreground">
+                          {contact.phone}
+                          {contact.extension && <span className="ml-2 text-xs">Ramal: {contact.extension}</span>}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">WhatsApp</label>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      <p className="text-muted-foreground">{contact.whatsapp}</p>
+                  )}
+                  {contact.whatsapp && (
+                    <div>
+                      <label className="text-sm font-medium">WhatsApp</label>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        <p className="text-muted-foreground">{contact.whatsapp}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Email</label>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      <p className="text-muted-foreground">{contact.email}</p>
+                  )}
+                  {contact.email && (
+                    <div>
+                      <label className="text-sm font-medium">Email</label>
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        <p className="text-muted-foreground">{contact.email}</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
                 {contact.notes && (
                   <div className="mt-4">

@@ -283,14 +283,27 @@ const SupplierDetail = () => {
                     <p className="text-muted-foreground">{contact.role}</p>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{contact.phone}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{contact.email}</span>
-                    </div>
+                    {contact.phone && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">
+                          {contact.phone}
+                          {contact.extension && <span className="text-muted-foreground"> (Ramal: {contact.extension})</span>}
+                        </span>
+                      </div>
+                    )}
+                    {contact.whatsapp && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">WhatsApp: {contact.whatsapp}</span>
+                      </div>
+                    )}
+                    {contact.email && (
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{contact.email}</span>
+                      </div>
+                    )}
                     {contact.notes && (
                       <p className="text-sm text-muted-foreground bg-muted p-2 rounded">
                         {contact.notes}
