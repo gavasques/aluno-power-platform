@@ -1,497 +1,518 @@
-
-import { useParams, useLocation } from "wouter";
+import { useState } from "react";
+import { useParams, Link } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { 
   Star, 
+  ArrowLeft, 
+  MapPin, 
   Phone, 
   Mail, 
-  Download, 
-  CheckCircle, 
   Globe, 
-  Factory, 
-  Truck, 
-  Users, 
-  Package, 
-  Send,
-  ArrowLeft,
+  Shield, 
+  Calendar,
   MessageSquare,
-  FileText,
-  User
+  ThumbsUp,
+  User,
+  Building2,
+  Linkedin,
+  Instagram,
+  Youtube
 } from "lucide-react";
-import { useSuppliers } from "@/contexts/SuppliersContext";
 import { useToast } from "@/hooks/use-toast";
+import type { Supplier } from "@shared/schema";
+
+interface SupplierWithDetails extends Supplier {
+  categoryName?: string;
+  reviews?: SupplierReview[];
+}
+
+interface SupplierReview {
+  id: number;
+  rating: number;
+  comment: string;
+  userName: string;
+  createdAt: string;
+  isApproved: boolean;
+}
+
+const reviewSchema = z.object({
+  rating: z.string().min(1, "Selecione uma avaliação"),
+  comment: z.string().min(10, "Comentário deve ter pelo menos 10 caracteres").max(500, "Comentário não pode exceder 500 caracteres"),
+});
 
 const SupplierDetail = () => {
   const { id } = useParams();
-  const [, setLocation] = useLocation();
-  const { getSupplierById } = useSuppliers();
   const { toast } = useToast();
-  
-  const supplier = getSupplierById(id || "");
+  const queryClient = useQueryClient();
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
 
-  if (!supplier) {
+  const { data: supplier, isLoading } = useQuery({
+    queryKey: ['/api/suppliers', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/suppliers/${id}`);
+      if (!response.ok) throw new Error('Supplier not found');
+      return response.json();
+    },
+    enabled: !!id,
+  });
+
+  const { data: reviews = [] } = useQuery({
+    queryKey: ['/api/suppliers', id, 'reviews'],
+    queryFn: async () => {
+      const response = await fetch(`/api/suppliers/${id}/reviews`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!id,
+  });
+
+  const form = useForm({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: {
+      rating: "",
+      comment: "",
+    },
+  });
+
+  const createReviewMutation = useMutation({
+    mutationFn: async (data: { rating: number; comment: string }) => {
+      const response = await fetch(`/api/suppliers/${id}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create review');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/suppliers', id, 'reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/suppliers', id] });
+      setIsReviewDialogOpen(false);
+      form.reset();
+      toast({
+        title: "Avaliação enviada",
+        description: "Sua avaliação foi enviada e está aguardando aprovação.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível enviar a avaliação. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmitReview = (data: { rating: string; comment: string }) => {
+    createReviewMutation.mutate({
+      rating: parseInt(data.rating),
+      comment: data.comment,
+    });
+  };
+
+  const renderStars = (rating: number, interactive = false, onRatingChange?: (rating: number) => void) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Star
+          key={i}
+          className={`h-5 w-5 ${
+            i <= rating 
+              ? 'fill-yellow-400 text-yellow-400' 
+              : 'text-gray-300'
+          } ${interactive ? 'cursor-pointer hover:text-yellow-400' : ''}`}
+          onClick={interactive && onRatingChange ? () => onRatingChange(i) : undefined}
+        />
+      );
+    }
+    return stars;
+  };
+
+  if (isLoading) {
     return (
-      <div className="container mx-auto p-6 max-w-7xl">
-        <div className="text-center py-12">
-          <h1 className="text-2xl font-bold mb-4">Fornecedor não encontrado</h1>
-          <Button onClick={() => setLocation("/hub/fornecedores")}>
-            Voltar para Fornecedores
-          </Button>
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <div className="h-64 bg-gray-200 rounded mb-6"></div>
+            </div>
+            <div className="h-96 bg-gray-200 rounded"></div>
+          </div>
         </div>
       </div>
     );
   }
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-      />
-    ));
-  };
+  if (!supplier) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="text-center py-12">
+            <h3 className="text-lg font-medium mb-2">Fornecedor não encontrado</h3>
+            <p className="text-muted-foreground mb-4">O fornecedor que você está procurando não existe.</p>
+            <Link href="/hub/fornecedores">
+              <Button>Voltar aos Fornecedores</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-  const getCategoryIcon = (iconName: string) => {
-    switch (iconName) {
-      case "Factory": return <Factory className="h-6 w-6" />;
-      case "Truck": return <Truck className="h-6 w-6" />;
-      case "Globe": return <Globe className="h-6 w-6" />;
-      case "Users": return <Users className="h-6 w-6" />;
-      case "Package": return <Package className="h-6 w-6" />;
-      case "Send": return <Send className="h-6 w-6" />;
-      default: return <Factory className="h-6 w-6" />;
-    }
-  };
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((sum: number, review: SupplierReview) => sum + review.rating, 0) / reviews.length 
+    : 0;
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const getFileTypeLabel = (type: string) => {
-    const types = {
-      'catalog': 'Catálogo de Produtos',
-      'price_sheet': 'Planilha de Preços',
-      'presentation': 'Apresentação',
-      'certificate': 'Certificados',
-      'other': 'Outros'
-    };
-    return types[type as keyof typeof types] || type;
-  };
-
-  const handleDownloadFile = (file: any) => {
-    if (file.fileUrl && file.fileUrl !== '#') {
-      window.open(file.fileUrl, '_blank');
-      toast({
-        title: "Download iniciado",
-        description: `O download de "${file.name}" foi iniciado.`,
-      });
-    } else {
-      toast({
-        title: "Download não disponível",
-        description: "Este arquivo não está disponível para download.",
-        variant: "destructive"
-      });
-    }
-  };
+  const approvedReviews = reviews.filter((review: SupplierReview) => review.isApproved);
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      {/* Header com informações principais */}
-      <Card className="mb-8">
-        <CardHeader>
-          <div className="flex items-center gap-6">
-            {supplier.logo ? (
-              <img
-                src={supplier.logo}
-                alt={supplier.tradeName}
-                className="w-20 h-20 rounded-lg object-cover border"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center border">
-                {getCategoryIcon(supplier.category.icon)}
-              </div>
-            )}
-            
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold">{supplier.tradeName}</h1>
-                {supplier.isVerified && (
-                  <Badge className="bg-green-100 text-green-800 border-green-200">
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Verificado
-                  </Badge>
-                )}
-              </div>
-              
-              <p className="text-lg text-muted-foreground mb-3">{supplier.corporateName}</p>
-              
-              <div className="flex items-center gap-4 mb-4">
-                <Badge variant="outline" className="text-base px-3 py-1">
-                  {getCategoryIcon(supplier.category.icon)}
-                  <span className="ml-2">{supplier.category.name}</span>
-                </Badge>
-                
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <Link href="/hub/fornecedores">
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold">{supplier.tradeName}</h1>
+          <p className="text-muted-foreground">{supplier.corporateName}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Company Info */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Informações da Empresa</CardTitle>
                 <div className="flex items-center gap-2">
-                  <div className="flex">{renderStars(supplier.averageRating)}</div>
-                  <span className="text-sm text-muted-foreground">
-                    {supplier.averageRating.toFixed(1)} ({supplier.totalReviews} avaliações)
-                  </span>
+                  {supplier.isVerified && (
+                    <Badge className="bg-green-100 text-green-800">
+                      <Shield className="h-3 w-3 mr-1" />
+                      Verificado
+                    </Badge>
+                  )}
+                  {supplier.categoryName && (
+                    <Badge variant="outline">{supplier.categoryName}</Badge>
+                  )}
                 </div>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {supplier.description && (
+                <div>
+                  <h4 className="font-medium mb-2">Descrição</h4>
+                  <p className="text-muted-foreground">{supplier.description}</p>
+                </div>
+              )}
 
-              <div className="flex flex-wrap gap-2">
-                {supplier.departments.map(dept => (
-                  <Badge key={dept.id} variant="secondary">
-                    {dept.name}
-                  </Badge>
-                ))}
+              {/* Avaliações */}
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-1">
+                  {renderStars(Math.round(averageRating))}
+                  <span className="ml-2 font-medium">{averageRating.toFixed(1)}</span>
+                </div>
+                <span className="text-muted-foreground">
+                  {approvedReviews.length} avaliação{approvedReviews.length !== 1 ? 'ões' : ''}
+                </span>
+                <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Avaliar
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Avaliar Fornecedor</DialogTitle>
+                      <DialogDescription>
+                        Compartilhe sua experiência com {supplier.tradeName}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(handleSubmitReview)} className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="rating"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Avaliação</FormLabel>
+                              <FormControl>
+                                <div className="flex gap-1">
+                                  {[1, 2, 3, 4, 5].map((rating) => (
+                                    <Star
+                                      key={rating}
+                                      className={`h-8 w-8 cursor-pointer ${
+                                        rating <= parseInt(field.value || "0")
+                                          ? 'fill-yellow-400 text-yellow-400'
+                                          : 'text-gray-300 hover:text-yellow-400'
+                                      }`}
+                                      onClick={() => field.onChange(rating.toString())}
+                                    />
+                                  ))}
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="comment"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Comentário</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Conte sobre sua experiência com este fornecedor..."
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="flex gap-2">
+                          <Button 
+                            type="submit" 
+                            disabled={createReviewMutation.isPending}
+                          >
+                            {createReviewMutation.isPending ? "Enviando..." : "Enviar Avaliação"}
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => setIsReviewDialogOpen(false)}
+                          >
+                            Cancelar
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </div>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
+            </CardContent>
+          </Card>
 
-      {/* Tabs com informações detalhadas */}
-      <Tabs defaultValue="info" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
-          <TabsTrigger value="info" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Informações
-          </TabsTrigger>
-          <TabsTrigger value="contacts" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            Contatos
-          </TabsTrigger>
-          <TabsTrigger value="files" className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            Arquivos
-          </TabsTrigger>
-          <TabsTrigger value="reviews" className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Avaliações
-          </TabsTrigger>
-        </TabsList>
+          {/* Reviews */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Avaliações ({approvedReviews.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {approvedReviews.length > 0 ? (
+                <div className="space-y-4">
+                  {approvedReviews.map((review: SupplierReview) => (
+                    <div key={review.id} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                          <User className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium">{review.userName}</span>
+                            <div className="flex items-center gap-1">
+                              {renderStars(review.rating)}
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(review.createdAt).toLocaleDateString('pt-BR')}
+                            </span>
+                          </div>
+                          <p className="text-muted-foreground">{review.comment}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-muted-foreground">Ainda não há avaliações para este fornecedor.</p>
+                  <p className="text-sm text-muted-foreground mt-1">Seja o primeiro a avaliar!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-        <TabsContent value="info" className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Informações Básicas */}
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Contact Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informações de Contato</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {supplier.commercialEmail && (
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">E-mail Comercial</p>
+                    <a 
+                      href={`mailto:${supplier.commercialEmail}`} 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {supplier.commercialEmail}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {supplier.supportEmail && (
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">E-mail Suporte</p>
+                    <a 
+                      href={`mailto:${supplier.supportEmail}`} 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {supplier.supportEmail}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {supplier.phone0800Sales && (
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Vendas</p>
+                    <a 
+                      href={`tel:${supplier.phone0800Sales}`} 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {supplier.phone0800Sales}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {supplier.phone0800Support && (
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Suporte</p>
+                    <a 
+                      href={`tel:${supplier.phone0800Support}`} 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {supplier.phone0800Support}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {supplier.website && (
+                <div className="flex items-center gap-3">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Website</p>
+                    <a 
+                      href={supplier.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      Visitar site
+                    </a>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Social Media */}
+          {(supplier.linkedin || supplier.instagram || supplier.youtube) && (
             <Card>
               <CardHeader>
-                <CardTitle>Informações Básicas</CardTitle>
+                <CardTitle>Redes Sociais</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Nome Fantasia</label>
-                  <p className="text-base">{supplier.tradeName}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Razão Social</label>
-                  <p className="text-base">{supplier.corporateName}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Categoria Principal</label>
-                  <p className="text-base">{supplier.category.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Contato Principal</label>
-                  <p className="text-base">{supplier.mainContact}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Informações de Contato */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações de Contato</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {supplier.email && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Email Principal</label>
-                      <p className="text-base">{supplier.email}</p>
-                    </div>
-                  </div>
-                )}
-                {supplier.commercialEmail && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Email Comercial</label>
-                      <p className="text-base">{supplier.commercialEmail}</p>
-                    </div>
-                  </div>
-                )}
-                {supplier.supportEmail && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Email de Suporte</label>
-                      <p className="text-base">{supplier.supportEmail}</p>
-                    </div>
-                  </div>
-                )}
-                {supplier.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Telefone</label>
-                      <p className="text-base">{supplier.phone}</p>
-                    </div>
-                  </div>
-                )}
-                {supplier.whatsapp && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">WhatsApp</label>
-                      <p className="text-base">{supplier.whatsapp}</p>
-                    </div>
-                  </div>
-                )}
-                {supplier.phone0800Sales && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Telefone 0800 Vendas</label>
-                      <p className="text-base">{supplier.phone0800Sales}</p>
-                    </div>
-                  </div>
-                )}
-                {supplier.phone0800Support && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Telefone 0800 Atendimento</label>
-                      <p className="text-base">{supplier.phone0800Support}</p>
-                    </div>
-                  </div>
-                )}
-                {supplier.website && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Website</label>
-                      <a href={supplier.website} target="_blank" rel="noopener noreferrer" className="text-base text-blue-600 hover:underline">
-                        {supplier.website}
-                      </a>
-                    </div>
-                  </div>
-                )}
+              <CardContent className="space-y-3">
                 {supplier.linkedin && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">LinkedIn</label>
-                      <a href={supplier.linkedin} target="_blank" rel="noopener noreferrer" className="text-base text-blue-600 hover:underline">
-                        {supplier.linkedin}
-                      </a>
-                    </div>
-                  </div>
-                )}
-                {supplier.instagram && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Instagram</label>
-                      <a href={supplier.instagram} target="_blank" rel="noopener noreferrer" className="text-base text-blue-600 hover:underline">
-                        {supplier.instagram}
-                      </a>
-                    </div>
-                  </div>
-                )}
-                {supplier.youtube && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Canal YouTube</label>
-                      <a href={supplier.youtube} target="_blank" rel="noopener noreferrer" className="text-base text-blue-600 hover:underline">
-                        {supplier.youtube}
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Observações */}
-          {supplier.notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Observações</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">{supplier.notes}</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Termos Comerciais */}
-          {supplier.commercialTerms && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Termos Comerciais</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {supplier.commercialTerms}
-                  </pre>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="contacts" className="space-y-4">
-          {supplier.contacts.map((contact) => (
-            <Card key={contact.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">{contact.name}</CardTitle>
-                    <Badge variant="outline" className="mt-1">{contact.role}</Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-3 gap-4">
-                  {contact.phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Telefone</label>
-                        <p className="text-sm">
-                          {contact.phone}
-                          {contact.extension && <span className="text-muted-foreground"> Ramal: {contact.extension}</span>}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {contact.whatsapp && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">WhatsApp</label>
-                        <p className="text-sm">{contact.whatsapp}</p>
-                      </div>
-                    </div>
-                  )}
-                  {contact.email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Email</label>
-                        <p className="text-sm">{contact.email}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {contact.notes && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Observações</label>
-                    <p className="text-sm text-muted-foreground">{contact.notes}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-          {supplier.contacts.length === 0 && (
-            <Card>
-              <CardContent className="text-center py-8">
-                <User className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Nenhum contato adicional cadastrado.</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="files" className="space-y-4">
-          {supplier.files.map((file) => (
-            <Card key={file.id}>
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h4 className="font-medium text-lg">{file.name}</h4>
-                    <p className="text-muted-foreground text-sm">{file.description}</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <Badge variant="outline">{getFileTypeLabel(file.type)}</Badge>
-                      <span>Tamanho: {formatFileSize(file.size)}</span>
-                      <span>Enviado em: {new Date(file.uploadedAt).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleDownloadFile(file)}
+                  <a 
+                    href={supplier.linkedin} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-blue-600 hover:underline"
                   >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          {supplier.files.length === 0 && (
-            <Card>
-              <CardContent className="text-center py-8">
-                <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Nenhum arquivo disponível para este fornecedor.</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+                    <Linkedin className="h-4 w-4" />
+                    <span className="text-sm">LinkedIn</span>
+                  </a>
+                )}
 
-        <TabsContent value="reviews" className="space-y-4">
-          {supplier.reviews.filter(review => review.isApproved).map((review) => (
-            <Card key={review.id}>
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h4 className="font-medium">{review.userName}</h4>
-                    <div className="flex items-center gap-2">
-                      <div className="flex">{renderStars(review.rating)}</div>
-                      <span className="text-sm text-muted-foreground">
-                        {new Date(review.createdAt).toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-muted-foreground">{review.comment}</p>
-                {review.photos.length > 0 && (
-                  <div className="mt-4 flex gap-2">
-                    {review.photos.map((photo, photoIndex) => (
-                      <img
-                        key={photoIndex}
-                        src={photo}
-                        alt={`Foto ${photoIndex + 1}`}
-                        className="w-20 h-20 object-cover rounded-md"
-                      />
-                    ))}
-                  </div>
+                {supplier.instagram && (
+                  <a 
+                    href={supplier.instagram} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-pink-600 hover:underline"
+                  >
+                    <Instagram className="h-4 w-4" />
+                    <span className="text-sm">Instagram</span>
+                  </a>
+                )}
+
+                {supplier.youtube && (
+                  <a 
+                    href={supplier.youtube} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-red-600 hover:underline"
+                  >
+                    <Youtube className="h-4 w-4" />
+                    <span className="text-sm">YouTube</span>
+                  </a>
                 )}
               </CardContent>
             </Card>
-          ))}
-          {supplier.reviews.filter(review => review.isApproved).length === 0 && (
-            <Card>
-              <CardContent className="text-center py-8">
-                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Ainda não há avaliações para este fornecedor.</p>
-              </CardContent>
-            </Card>
           )}
-        </TabsContent>
-      </Tabs>
+
+          {/* Additional Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informações Adicionais</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Cadastrado em</p>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(supplier.createdAt).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+              </div>
+
+              {supplier.notes && (
+                <div className="flex items-start gap-3">
+                  <Building2 className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium">Observações</p>
+                    <p className="text-sm text-muted-foreground">{supplier.notes}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

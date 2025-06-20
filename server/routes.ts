@@ -133,6 +133,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Supplier Reviews
+  app.get('/api/suppliers/:id/reviews', async (req, res) => {
+    try {
+      const reviews = await storage.getSupplierReviews(parseInt(req.params.id));
+      res.json(reviews);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch reviews' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/reviews', async (req, res) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const { rating, comment } = req.body;
+      
+      // Mock user ID - in real app this would come from authentication
+      const userId = 1;
+      
+      const review = await storage.createSupplierReview({
+        supplierId,
+        userId,
+        rating,
+        comment,
+        isApproved: false
+      });
+      
+      res.status(201).json(review);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to create review' });
+    }
+  });
+
   // Partners
   app.get('/api/partners', async (req, res) => {
     try {

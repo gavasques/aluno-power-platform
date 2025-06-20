@@ -68,6 +68,8 @@ import {
   type InsertPartnerReview,
   type PartnerReviewReply,
   type InsertPartnerReviewReply,
+  type SupplierReview,
+  type InsertSupplierReview,
   type PartnerReviewWithUser,
   type ToolReview,
   type InsertToolReview,
@@ -88,7 +90,7 @@ import {
   type InsertWebhookConfig
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, ilike, and, or, desc, asc, sql } from "drizzle-orm";
+import { eq, ilike, and, or, desc, asc, sql, count } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -113,6 +115,10 @@ export interface IStorage {
     suppliers: Supplier[];
     total: number;
   }>;
+  
+  // Supplier Reviews
+  getSupplierReviews(supplierId: number): Promise<SupplierReview[]>;
+  createSupplierReview(review: InsertSupplierReview): Promise<SupplierReview>;
 
   // Partners
   getPartners(): Promise<Partner[]>;
@@ -471,6 +477,38 @@ export class DatabaseStorage implements IStorage {
       suppliers: suppliersWithStats,
       total,
     };
+  }
+
+  // Supplier Reviews
+  async getSupplierReviews(supplierId: number): Promise<SupplierReview[]> {
+    const reviews = await db
+      .select({
+        id: supplierReviews.id,
+        supplierId: supplierReviews.supplierId,
+        userId: supplierReviews.userId,
+        rating: supplierReviews.rating,
+        comment: supplierReviews.comment,
+        isApproved: supplierReviews.isApproved,
+        createdAt: supplierReviews.createdAt,
+        userName: users.name,
+      })
+      .from(supplierReviews)
+      .leftJoin(users, eq(supplierReviews.userId, users.id))
+      .where(eq(supplierReviews.supplierId, supplierId))
+      .orderBy(desc(supplierReviews.createdAt));
+
+    return reviews;
+  }
+
+  async createSupplierReview(review: InsertSupplierReview): Promise<SupplierReview> {
+    const [created] = await db
+      .insert(supplierReviews)
+      .values({
+        ...review,
+        createdAt: new Date(),
+      })
+      .returning();
+    return created;
   }
 
   // Partners
