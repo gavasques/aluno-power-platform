@@ -56,6 +56,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Suppliers with pagination and filters
+  app.get('/api/suppliers/paginated', async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 25;
+      const search = req.query.search as string;
+      const categoryId = req.query.categoryId as string;
+      const sortBy = req.query.sortBy as string || 'name';
+      
+      const offset = (page - 1) * limit;
+      
+      const result = await storage.getSuppliersWithPagination({
+        limit,
+        offset,
+        search,
+        categoryId: categoryId ? parseInt(categoryId) : undefined,
+        sortBy
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching paginated suppliers:', error);
+      res.status(500).json({ error: 'Failed to fetch suppliers' });
+    }
+  });
+
   app.get('/api/suppliers/:id', async (req, res) => {
     try {
       const supplier = await storage.getSupplier(parseInt(req.params.id));

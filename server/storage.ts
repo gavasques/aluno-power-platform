@@ -103,6 +103,16 @@ export interface IStorage {
   updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier>;
   deleteSupplier(id: number): Promise<void>;
   searchSuppliers(query: string): Promise<Supplier[]>;
+  getSuppliersWithPagination(options: {
+    limit: number;
+    offset: number;
+    search?: string;
+    categoryId?: number;
+    sortBy?: string;
+  }): Promise<{
+    suppliers: Supplier[];
+    total: number;
+  }>;
 
   // Partners
   getPartners(): Promise<Partner[]>;
@@ -354,6 +364,113 @@ export class DatabaseStorage implements IStorage {
           ilike(suppliers.description, `%${query}%`)
         )
       );
+  }
+
+  async getSuppliersWithPagination(options: {
+    limit: number;
+    offset: number;
+    search?: string;
+    categoryId?: number;
+    sortBy?: string;
+  }): Promise<{
+    suppliers: Supplier[];
+    total: number;
+  }> {
+    const { limit, offset, search, categoryId, sortBy = 'name' } = options;
+    
+    // Build where conditions
+    const conditions = [];
+    if (search) {
+      conditions.push(
+        or(
+          ilike(suppliers.tradeName, `%${search}%`),
+          ilike(suppliers.corporateName, `%${search}%`),
+          ilike(suppliers.description, `%${search}%`)
+        )
+      );
+    }
+    if (categoryId) {
+      conditions.push(eq(suppliers.categoryId, categoryId));
+    }
+
+    // Build order by
+    let orderBy;
+    switch (sortBy) {
+      case 'name_desc':
+        orderBy = desc(suppliers.tradeName);
+        break;
+      case 'rating':
+        // For now, order by tradeName since we don't have ratings in suppliers table
+        orderBy = asc(suppliers.tradeName);
+        break;
+      case 'rating_desc':
+        orderBy = desc(suppliers.tradeName);
+        break;
+      case 'recent':
+        orderBy = desc(suppliers.createdAt);
+        break;
+      default:
+        orderBy = asc(suppliers.tradeName);
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // Get suppliers with pagination
+    const suppliersQuery = db
+      .select()
+      .from(suppliers)
+      .limit(limit)
+      .offset(offset)
+      .orderBy(orderBy);
+
+    if (whereClause) {
+      suppliersQuery.where(whereClause);
+    }
+
+    const suppliersList = await suppliersQuery;
+
+    // Get total count
+    const countQuery = db
+      .select({ count: count() })
+      .from(suppliers);
+
+    if (whereClause) {
+      countQuery.where(whereClause);
+    }
+
+    const [{ count: total }] = await countQuery;
+
+    // Add category name and review stats to suppliers
+    const suppliersWithStats = await Promise.all(
+      suppliersList.map(async (supplier) => {
+        // Get category name
+        let categoryName = undefined;
+        if (supplier.categoryId) {
+          const [category] = await db
+            .select()
+            .from(categories)
+            .where(eq(categories.id, supplier.categoryId));
+          categoryName = category?.name;
+        }
+
+        // For now, use mock rating data since we don't have supplier reviews yet
+        // In a real implementation, this would query a supplier reviews table
+        const averageRating = 4.2; // Mock data
+        const totalReviews = 15; // Mock data
+
+        return {
+          ...supplier,
+          categoryName,
+          averageRating,
+          totalReviews,
+        };
+      })
+    );
+
+    return {
+      suppliers: suppliersWithStats,
+      total,
+    };
   }
 
   // Partners

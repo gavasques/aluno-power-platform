@@ -1,283 +1,324 @@
-
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Search, CheckCircle, Phone, Mail, Filter, Globe, Factory, Truck, Users, Package, Send } from "lucide-react";
-import { useState } from "react";
-import { useSuppliers } from "@/contexts/SuppliersContext";
-import { useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Star, Search, Filter, MapPin, Phone, Mail, Globe, ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "wouter";
+import type { Supplier } from "@shared/schema";
+
+interface SupplierWithCategory extends Supplier {
+  categoryName?: string;
+  averageRating: number;
+  totalReviews: number;
+}
+
+const ITEMS_PER_PAGE = 25;
 
 const Suppliers = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [verifiedFilter, setVerifiedFilter] = useState("all");
-  const { suppliers, loading } = useSuppliers();
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const categories = [
-    { id: "all", name: "Todas", icon: "Filter" },
-    { id: "1", name: "Fabricantes", icon: "Factory" },
-    { id: "2", name: "Distribuidores", icon: "Truck" },
-    { id: "3", name: "Importadores", icon: "Globe" },
-    { id: "4", name: "Representantes", icon: "Users" },
-    { id: "5", name: "Atacadistas", icon: "Package" },
-    { id: "6", name: "Dropshipping", icon: "Send" }
-  ];
-
-  const filteredSuppliers = suppliers.filter(supplier => {
-    const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         supplier.notes.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || supplier.category.id === selectedCategory;
-    const matchesVerified = verifiedFilter === "all" || 
-                           (verifiedFilter === "verified" && supplier.isVerified) ||
-                           (verifiedFilter === "unverified" && !supplier.isVerified);
-    return matchesSearch && matchesCategory && matchesVerified;
+  // Buscar categorias
+  const { data: categories = [] } = useQuery({
+    queryKey: ['/api/categories'],
   });
 
+  // Buscar fornecedores com paginação
+  const { data: suppliersResponse, isLoading } = useQuery({
+    queryKey: ['/api/suppliers', { 
+      page: currentPage, 
+      limit: ITEMS_PER_PAGE, 
+      search: searchTerm, 
+      category: categoryFilter,
+      sortBy 
+    }],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: ITEMS_PER_PAGE.toString(),
+        sortBy,
+      });
+      
+      if (searchTerm) params.append('search', searchTerm);
+      if (categoryFilter !== 'all') params.append('categoryId', categoryFilter);
+      
+      const response = await fetch(`/api/suppliers/paginated?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch suppliers');
+      return response.json();
+    },
+  });
+
+  const suppliers = suppliersResponse?.suppliers || [];
+  const totalPages = Math.ceil((suppliersResponse?.total || 0) / ITEMS_PER_PAGE);
+
+  // Reset para primeira página quando filtros mudam
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoryFilter, sortBy]);
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+  };
+
   const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-      />
-    ));
-  };
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
 
-  const getCategoryIcon = (iconName: string) => {
-    switch (iconName) {
-      case "Factory": return <Factory className="h-5 w-5" />;
-      case "Truck": return <Truck className="h-5 w-5" />;
-      case "Globe": return <Globe className="h-5 w-5" />;
-      case "Users": return <Users className="h-5 w-5" />;
-      case "Package": return <Package className="h-5 w-5" />;
-      case "Send": return <Send className="h-5 w-5" />;
-      default: return <Factory className="h-5 w-5" />;
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(<Star key={i} className="h-4 w-4 fill-yellow-400/50 text-yellow-400" />);
+      } else {
+        stars.push(<Star key={i} className="h-4 w-4 text-gray-300" />);
+      }
     }
+    return stars;
   };
 
-  const handleViewSupplier = (supplier: any) => {
-    setLocation(`/hub/fornecedores/${supplier.id}`);
-  };
+  const SupplierCard = ({ supplier }: { supplier: SupplierWithCategory }) => (
+    <Card className="hover:shadow-lg transition-shadow duration-200">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <CardTitle className="text-lg mb-2">{supplier.tradeName}</CardTitle>
+            <p className="text-sm text-muted-foreground mb-2">{supplier.corporateName}</p>
+            
+            <div className="flex items-center gap-2 mb-2">
+              {supplier.isVerified && (
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  Verificado
+                </Badge>
+              )}
+              {supplier.categoryName && (
+                <Badge variant="outline">{supplier.categoryName}</Badge>
+              )}
+            </div>
 
-  if (loading) {
-    return (
-      <div className="container mx-auto p-6 max-w-7xl">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Carregando fornecedores...</div>
+            <div className="flex items-center gap-1 mb-2">
+              {renderStars(supplier.averageRating)}
+              <span className="text-sm text-muted-foreground ml-1">
+                {supplier.averageRating.toFixed(1)} ({supplier.totalReviews} avaliações)
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
-    );
-  }
+      </CardHeader>
+
+      <CardContent className="pt-0">
+        {supplier.description && (
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+            {supplier.description}
+          </p>
+        )}
+
+        <div className="space-y-2 mb-4">
+          {supplier.commercialEmail && (
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">{supplier.commercialEmail}</span>
+            </div>
+          )}
+          {supplier.phone0800Sales && (
+            <div className="flex items-center gap-2 text-sm">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">{supplier.phone0800Sales}</span>
+            </div>
+          )}
+          {supplier.website && (
+            <div className="flex items-center gap-2 text-sm">
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <a 
+                href={supplier.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Website
+              </a>
+            </div>
+          )}
+        </div>
+
+        <Link href={`/hub/fornecedores/${supplier.id}`}>
+          <Button className="w-full" variant="outline">
+            Ver Detalhes
+          </Button>
+        </Link>
+      </CardContent>
+    </Card>
+  );
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <h1 className="text-4xl font-bold">Fornecedores</h1>
-          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Diretório Completo
-          </Badge>
-        </div>
-        <p className="text-muted-foreground text-lg">
-          Diretório de fabricantes, distribuidores, importadores e representantes
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Fornecedores</h1>
+        <p className="text-muted-foreground">
+          Encontre os melhores fornecedores para seu negócio
         </p>
       </div>
 
-      {/* Filtros em Uma Linha */}
-      <Card className="mb-8">
+      {/* Filtros e Busca */}
+      <Card className="mb-6">
         <CardContent className="p-6">
-          <div className="flex flex-col lg:flex-row gap-4 items-center">
-            {/* Barra de Busca */}
-            <div className="relative flex-1 max-w-2xl">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Busca */}
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar fornecedores por nome, razão social ou observações..."
-                className="pl-12 h-12 text-lg"
+                placeholder="Buscar fornecedores..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-10"
               />
             </div>
 
-            {/* Filtros */}
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Filtros:</span>
-              </div>
-              
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Filtro por categoria */}
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as categorias</SelectItem>
+                {categories.map((category: any) => (
+                  <SelectItem key={category.id} value={category.id.toString()}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-              <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="verified">Verificados</SelectItem>
-                  <SelectItem value="unverified">Não Verificados</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Ordenação */}
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger>
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Nome A-Z</SelectItem>
+                <SelectItem value="name_desc">Nome Z-A</SelectItem>
+                <SelectItem value="rating">Melhor avaliados</SelectItem>
+                <SelectItem value="rating_desc">Menor avaliação</SelectItem>
+                <SelectItem value="recent">Mais recentes</SelectItem>
+              </SelectContent>
+            </Select>
 
-              {(searchTerm || selectedCategory !== "all" || verifiedFilter !== "all") && (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setSelectedCategory("all");
-                    setVerifiedFilter("all");
-                  }}
-                >
-                  Limpar Filtros
-                </Button>
-              )}
-            </div>
+            {/* Botão Limpar Filtros */}
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchTerm("");
+                setCategoryFilter("all");
+                setSortBy("name");
+              }}
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Limpar Filtros
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Grid de Fornecedores */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredSuppliers.map(supplier => (
-          <Card key={supplier.id} className="hover:shadow-lg transition-shadow group">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center gap-2">
-                  {supplier.logo ? (
-                    <img
-                      src={supplier.logo}
-                      alt={supplier.tradeName}
-                      className="w-8 h-8 rounded object-cover"
-                    />
-                  ) : (
-                    getCategoryIcon(supplier.category.icon)
-                  )}
-                  <Badge variant="outline">{supplier.category.name}</Badge>
-                </div>
-                <div className="flex gap-1">
-                  {supplier.isVerified ? (
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Verificado
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-yellow-600">
-                      Pendente
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                {supplier.tradeName}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {supplier.corporateName}
-              </p>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                {supplier.notes}
-              </p>
-              
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex">{renderStars(supplier.averageRating)}</div>
-                <span className="text-sm text-muted-foreground">
-                  {supplier.averageRating.toFixed(1)} ({supplier.totalReviews} avaliações)
-                </span>
-              </div>
+      {/* Lista de Fornecedores */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : suppliers.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {suppliers.map((supplier: SupplierWithCategory) => (
+              <SupplierCard key={supplier.id} supplier={supplier} />
+            ))}
+          </div>
 
-              <div className="flex flex-wrap gap-1 mb-4">
-                {supplier.departments.slice(0, 2).map(dept => (
-                  <Badge key={dept.id} variant="secondary" className="text-xs">
-                    {dept.name}
-                  </Badge>
-                ))}
-                {supplier.departments.length > 2 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{supplier.departments.length - 2}
-                  </Badge>
-                )}
-              </div>
+          {/* Paginação */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Anterior
+              </Button>
 
-              <div className="flex gap-2 text-xs text-muted-foreground mb-4">
-                {supplier.phone && (
-                  <div className="flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    {supplier.phone}
-                  </div>
-                )}
-                {supplier.email && (
-                  <div className="flex items-center gap-1">
-                    <Mail className="h-3 w-3" />
-                    {supplier.email.split('@')[0]}@...
-                  </div>
-                )}
-                {supplier.commercialEmail && (
-                  <div className="flex items-center gap-1">
-                    <Mail className="h-3 w-3" />
-                    Comercial
-                  </div>
-                )}
-                {supplier.website && (
-                  <div className="flex items-center gap-1">
-                    <Globe className="h-3 w-3" />
-                    Site
-                  </div>
-                )}
-                {supplier.instagram && (
-                  <div className="flex items-center gap-1">
-                    <Globe className="h-3 w-3" />
-                    Instagram
-                  </div>
-                )}
-                {supplier.phone0800Sales && (
-                  <div className="flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    0800 Vendas
-                  </div>
-                )}
-                {supplier.phone0800Support && (
-                  <div className="flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    0800 Atend.
-                  </div>
-                )}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
               </div>
 
               <Button
-                className="w-full"
-                onClick={() => handleViewSupplier(supplier)}
+                variant="outline"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
               >
-                Ver Perfil Completo
+                Próxima
+                <ChevronRight className="h-4 w-4" />
               </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </div>
+          )}
 
-      {filteredSuppliers.length === 0 && (
-        <Card className="mt-8">
+          <div className="text-center text-sm text-muted-foreground mt-4">
+            Página {currentPage} de {totalPages} ({suppliersResponse?.total} fornecedores encontrados)
+          </div>
+        </>
+      ) : (
+        <Card>
           <CardContent className="text-center py-12">
-            <Factory className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-medium mb-2">Nenhum fornecedor encontrado</h3>
-            <p className="text-muted-foreground">
-              Tente ajustar os filtros ou termos de busca
-            </p>
+            <div className="text-muted-foreground mb-4">
+              <Search className="h-16 w-16 mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">Nenhum fornecedor encontrado</h3>
+              <p>Tente ajustar os filtros de busca para encontrar fornecedores.</p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchTerm("");
+                setCategoryFilter("all");
+                setSortBy("name");
+              }}
+            >
+              Limpar Filtros
+            </Button>
           </CardContent>
         </Card>
       )}
