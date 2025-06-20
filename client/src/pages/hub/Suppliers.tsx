@@ -9,7 +9,7 @@ import { Star, Search, Filter, MapPin, Phone, Mail, Globe, ChevronLeft, ChevronR
 import { Link } from "wouter";
 import type { Supplier } from "@shared/schema";
 
-interface SupplierWithCategory extends Supplier {
+interface SupplierWithCategory extends Omit<Supplier, 'averageRating'> {
   categoryName?: string;
   averageRating: number;
   totalReviews: number;
