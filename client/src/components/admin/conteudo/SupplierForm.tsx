@@ -39,7 +39,7 @@ const SupplierForm = () => {
   const id = params?.id;
   const isEditing = id && id !== 'novo';
   const supplierId = isEditing ? parseInt(id) : undefined;
-  const supplier = isEditing ? getSupplierById(id) : null;
+  const supplier = isEditing && supplierId ? getSupplierById(supplierId) : null;
 
   // Estados do formulário principal
   const [formData, setFormData] = useState({
@@ -146,7 +146,7 @@ const SupplierForm = () => {
       department: selectedDepartment,
       categoryId: parseInt(formData.categoryId),
       departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
-      brands: isEditing ? supplier?.brands || [] : [],
+      // brands: isEditing ? supplier?.brands || [] : [],
       notes: formData.notes,
       contacts: contactsWithIds,
       files: filesWithIds,
@@ -163,8 +163,8 @@ const SupplierForm = () => {
       phone0800Support: formData.phone0800Support
     };
 
-    if (isEditing) {
-      updateSupplier(id, supplierData);
+    if (isEditing && supplierId) {
+      updateSupplier(supplierId, supplierData);
       toast({
         title: "Sucesso",
         description: "Fornecedor atualizado com sucesso!"
