@@ -1725,6 +1725,247 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin prompts management endpoints
+  app.get('/api/agent-prompts/:agentId', async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      
+      if (agentId !== 'amazon-listings') {
+        return res.status(404).json({ error: 'Agent not found' });
+      }
+
+      // Return mock data structure for now - in production this would come from database
+      const mockPrompts = [
+        {
+          id: 'analysis',
+          name: 'Análise de Avaliações',
+          description: 'Prompt para análise profunda das avaliações dos concorrentes',
+          currentVersion: {
+            id: 'analysis-v3',
+            version: 3,
+            content: `Você é um especialista em análise de mercado e e-commerce da Amazon. Analise as avaliações dos concorrentes fornecidas e extraia insights valiosos.
+
+PRODUTO: {{PRODUCT_NAME}}
+DESCRIÇÃO: {{PRODUCT_DESCRIPTION}}
+PALAVRAS-CHAVE: {{KEYWORDS}}
+CATEGORIA: {{CATEGORY}}
+
+AVALIAÇÕES DOS CONCORRENTES:
+{{COMPETITOR_REVIEWS}}
+
+Baseado nas avaliações acima, forneça uma análise estruturada em JSON com os seguintes campos:
+
+{
+  "mainBenefits": ["lista dos 5 principais benefícios mais mencionados"],
+  "painPoints": ["lista dos 5 principais problemas/reclamações"],
+  "keyFeatures": ["características técnicas mais valorizadas"],
+  "targetAudience": "descrição detalhada do público-alvo ideal",
+  "competitorWeaknesses": ["principais fraquezas dos concorrentes"],
+  "opportunityAreas": ["oportunidades de melhoria identificadas"],
+  "emotionalTriggers": ["gatilhos emocionais encontrados"],
+  "searchIntentAnalysis": "análise da intenção de busca dos consumidores",
+  "pricePositioning": "sugestão de posicionamento de preço baseado no valor percebido",
+  "marketDifferentiators": ["principais diferenciais competitivos possíveis"]
+}
+
+Seja específico, prático e focado em insights acionáveis para otimização de listagem Amazon.`,
+            createdAt: '2025-06-27T20:00:00Z',
+            createdBy: 'admin',
+            status: 'active'
+          },
+          versions: [],
+          variables: ['{{PRODUCT_NAME}}', '{{PRODUCT_DESCRIPTION}}', '{{KEYWORDS}}', '{{COMPETITOR_REVIEWS}}', '{{CATEGORY}}'],
+          maxLength: 3000
+        },
+        {
+          id: 'titles',
+          name: 'Geração de Títulos',
+          description: 'Prompt para criar títulos otimizados para Amazon',
+          currentVersion: {
+            id: 'titles-v2',
+            version: 2,
+            content: `Você é um especialista em SEO e copywriting para Amazon. Crie títulos otimizados que maximizem vendas e visibilidade.
+
+PRODUTO: {{PRODUCT_NAME}}
+PALAVRAS-CHAVE: {{KEYWORDS}}
+PRINCIPAIS BENEFÍCIOS: {{MAIN_BENEFITS}}
+PÚBLICO-ALVO: {{TARGET_AUDIENCE}}
+CATEGORIA: {{CATEGORY}}
+
+DIRETRIZES PARA OS TÍTULOS:
+- Máximo 200 caracteres cada
+- Incluir palavra-chave principal no início
+- Destacar principais benefícios
+- Usar termos que geram urgência/desejo
+- Otimizar para algoritmo da Amazon
+- Incluir especificações técnicas relevantes
+- Apelar para o público-alvo identificado
+
+Crie exatamente 10 títulos diferentes, cada um em uma linha, numerados de 1 a 10.
+Varie o estilo: alguns mais técnicos, outros mais emocionais, alguns focados em benefícios, outros em recursos.
+
+Exemplo de formato:
+1. [Título aqui]
+2. [Título aqui]
+...
+
+Seja criativo, persuasivo e focado em conversão!`,
+            createdAt: '2025-06-27T19:30:00Z',
+            createdBy: 'admin',
+            status: 'active'
+          },
+          versions: [],
+          variables: ['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{MAIN_BENEFITS}}', '{{TARGET_AUDIENCE}}', '{{CATEGORY}}'],
+          maxLength: 2000
+        },
+        {
+          id: 'bulletPoints',
+          name: 'Bullet Points',
+          description: 'Prompt para criar bullet points persuasivos',
+          currentVersion: {
+            id: 'bullets-v2',
+            version: 2,
+            content: `Você é um copywriter especialista em Amazon. Crie bullet points que convertem visitantes em compradores.
+
+PRODUTO: {{PRODUCT_NAME}}
+CARACTERÍSTICAS: {{KEY_FEATURES}}
+BENEFÍCIOS: {{MAIN_BENEFITS}}
+DORES DO PÚBLICO: {{PAIN_POINTS}}
+GATILHOS EMOCIONAIS: {{EMOTIONAL_TRIGGERS}}
+
+DIRETRIZES PARA BULLET POINTS:
+- Máximo 200 caracteres cada bullet point
+- Começar com emoji relevante
+- Foco em benefícios, não apenas características
+- Usar linguagem persuasiva e emocional
+- Abordar objeções principais do público
+- Incluir especificações técnicas quando relevante
+- Criar senso de urgência e valor
+
+Crie exatamente 5 bullet points numerados, cada um focando em um aspecto diferente:
+1. Qualidade/Performance principal
+2. Benefício emocional/lifestyle
+3. Especificação técnica valorizada
+4. Diferencial competitivo
+5. Garantia/suporte/valor agregado
+
+Formato:
+• TÍTULO EM MAIÚSCULAS: Descrição persuasiva do benefício...
+
+Seja persuasivo, específico e focado em conversão!`,
+            createdAt: '2025-06-27T19:00:00Z',
+            createdBy: 'admin',
+            status: 'active'
+          },
+          versions: [],
+          variables: ['{{PRODUCT_NAME}}', '{{KEY_FEATURES}}', '{{MAIN_BENEFITS}}', '{{PAIN_POINTS}}', '{{EMOTIONAL_TRIGGERS}}'],
+          maxLength: 2500
+        },
+        {
+          id: 'description',
+          name: 'Descrição Completa',
+          description: 'Prompt para descrição detalhada do produto',
+          currentVersion: {
+            id: 'description-v1',
+            version: 1,
+            content: `Você é um copywriter especialista em Amazon. Crie uma descrição completa que eduque, persuada e converta.
+
+PRODUTO: {{PRODUCT_NAME}}
+ANÁLISE: {{ANALYSIS_RESULT}}
+CARACTERÍSTICAS: {{KEY_FEATURES}}
+PÚBLICO-ALVO: {{TARGET_AUDIENCE}}
+DIFERENCIADORES: {{MARKET_DIFFERENTIATORS}}
+
+ESTRUTURA DA DESCRIÇÃO:
+1. Abertura impactante (problema + solução)
+2. Benefícios principais (3-4 parágrafos)
+3. Especificações técnicas detalhadas
+4. Diferenciadores competitivos
+5. Garantias e suporte
+6. Call-to-action persuasivo
+
+DIRETRIZES:
+- Tom conversacional e persuasivo
+- Focar em benefícios, não apenas recursos
+- Usar storytelling quando apropriado
+- Incluir social proof e credibilidade
+- Abordar objeções principais
+- Criar urgência sem ser exagerado
+- Máximo 2000 caracteres
+- Usar formatação (quebras de linha, emojis)
+
+Crie uma descrição que transforme visitantes em compradores apaixonados pelo produto!`,
+            createdAt: '2025-06-27T18:30:00Z',
+            createdBy: 'admin',
+            status: 'active'
+          },
+          versions: [],
+          variables: ['{{PRODUCT_NAME}}', '{{ANALYSIS_RESULT}}', '{{KEY_FEATURES}}', '{{TARGET_AUDIENCE}}', '{{MARKET_DIFFERENTIATORS}}'],
+          maxLength: 2000
+        }
+      ];
+
+      res.json(mockPrompts);
+    } catch (error) {
+      console.error('Error fetching agent prompts:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.put('/api/agent-prompts/:agentId/:promptId', async (req, res) => {
+    try {
+      const { agentId, promptId } = req.params;
+      const { content } = req.body;
+
+      if (agentId !== 'amazon-listings') {
+        return res.status(404).json({ error: 'Agent not found' });
+      }
+
+      // In production, this would update the database and create a new version
+      const updatedPrompt = {
+        id: promptId,
+        success: true,
+        message: 'Prompt atualizado com sucesso!'
+      };
+
+      res.json(updatedPrompt);
+    } catch (error) {
+      console.error('Error updating agent prompt:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/agent-prompts/:agentId/:promptId/test', async (req, res) => {
+    try {
+      const { agentId, promptId } = req.params;
+      const { content } = req.body;
+
+      if (agentId !== 'amazon-listings') {
+        return res.status(404).json({ error: 'Agent not found' });
+      }
+
+      // Basic validation of prompt content
+      const hasRequiredVariables = content.includes('{{') && content.includes('}}');
+      const isValidLength = content.length > 50 && content.length <= 5000;
+      const hasValidStructure = content.length > 100;
+
+      const success = hasRequiredVariables && isValidLength && hasValidStructure;
+
+      const testResult = {
+        success,
+        message: success 
+          ? 'Prompt testado com sucesso. Formato válido e variáveis reconhecidas.'
+          : 'Erro: Prompt deve conter variáveis válidas ({{VARIABLE}}) e ter entre 50-5000 caracteres.',
+        testedAt: new Date().toISOString()
+      };
+
+      res.json(testResult);
+    } catch (error) {
+      console.error('Error testing agent prompt:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Agent Usage routes
   app.get('/api/agents/:agentId/usage', async (req, res) => {
     try {

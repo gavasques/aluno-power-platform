@@ -42,6 +42,7 @@ import AgentsPage from "./pages/agents";
 import AgentProcessorPage from "./pages/AgentProcessorPage";
 import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
 import AmazonListingsOptimizerResult from "./pages/agents/amazon-listings-optimizer-result";
+import AmazonListingsOptimizerPrompts from "./pages/admin/agents/AmazonListingsOptimizerPrompts";
 
 // Create a simple Auth component
 const Auth = () => (
