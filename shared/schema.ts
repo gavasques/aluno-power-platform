@@ -1085,3 +1085,26 @@ export type ToolReviewWithUser = ToolReview & {
 
 export type InsertToolVideo = z.infer<typeof insertToolVideoSchema>;
 export type ToolVideo = typeof toolVideos.$inferSelect;
+
+// Agent types
+export type InsertAgent = z.infer<typeof insertAgentSchema>;
+export type Agent = typeof agents.$inferSelect;
+
+export type InsertAgentPrompt = z.infer<typeof insertAgentPromptSchema>;
+export type AgentPrompt = typeof agentPrompts.$inferSelect;
+
+export type InsertAgentUsage = z.infer<typeof insertAgentUsageSchema>;
+export type AgentUsage = typeof agentUsage.$inferSelect;
+
+export type InsertAgentGeneration = z.infer<typeof insertAgentGenerationSchema>;
+export type AgentGeneration = typeof agentGenerations.$inferSelect;
+
+// Agent with prompts type
+export type AgentWithPrompts = Agent & {
+  prompts: AgentPrompt[];
+};
+
+// Agent usage with generations type
+export type AgentUsageWithGenerations = AgentUsage & {
+  generations: AgentGeneration[];
+};

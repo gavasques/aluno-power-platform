@@ -19,6 +19,8 @@ import {
   partnerFiles,
   partnerReviews,
   partnerReviewReplies,
+  supplierReviews,
+  supplierBrands,
   toolReviews,
   toolReviewReplies,
   toolDiscounts,
@@ -27,6 +29,10 @@ import {
   news,
   updates,
   webhookConfigs,
+  agents,
+  agentPrompts,
+  agentUsage,
+  agentGenerations,
   type User, 
   type InsertUser,
   type Supplier,
@@ -68,8 +74,6 @@ import {
   type InsertPartnerReview,
   type PartnerReviewReply,
   type InsertPartnerReviewReply,
-  type SupplierReview,
-  type InsertSupplierReview,
   type PartnerReviewWithUser,
   type ToolReview,
   type InsertToolReview,
@@ -87,7 +91,16 @@ import {
   type Update,
   type InsertUpdate,
   type WebhookConfig,
-  type InsertWebhookConfig
+  type InsertWebhookConfig,
+  type Agent,
+  type InsertAgent,
+  type AgentPrompt,
+  type InsertAgentPrompt,
+  type AgentUsage,
+  type InsertAgentUsage,
+  type AgentGeneration,
+  type InsertAgentGeneration,
+  type AgentWithPrompts
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, ilike, and, or, desc, asc, sql, count } from "drizzle-orm";
@@ -293,6 +306,28 @@ export interface IStorage {
   createWebhookConfig(config: InsertWebhookConfig): Promise<WebhookConfig>;
   updateWebhookConfig(id: number, config: Partial<InsertWebhookConfig>): Promise<WebhookConfig>;
   deleteWebhookConfig(id: number): Promise<void>;
+
+  // Agents
+  getAgents(): Promise<Agent[]>;
+  getAgent(id: string): Promise<Agent | undefined>;
+  getAgentWithPrompts(id: string): Promise<AgentWithPrompts | undefined>;
+  createAgent(agent: InsertAgent): Promise<Agent>;
+  updateAgent(id: string, agent: Partial<InsertAgent>): Promise<Agent>;
+  deleteAgent(id: string): Promise<void>;
+
+  // Agent Prompts
+  getAgentPrompts(agentId: string): Promise<AgentPrompt[]>;
+  getAgentPrompt(id: string): Promise<AgentPrompt | undefined>;
+  createAgentPrompt(prompt: InsertAgentPrompt): Promise<AgentPrompt>;
+  updateAgentPrompt(id: string, prompt: Partial<InsertAgentPrompt>): Promise<AgentPrompt>;
+  deleteAgentPrompt(id: string): Promise<void>;
+
+  // Agent Usage
+  getAgentUsage(agentId: string): Promise<AgentUsage[]>;
+  createAgentUsage(usage: InsertAgentUsage): Promise<AgentUsage>;
+
+  // Agent Generations
+  createAgentGeneration(generation: InsertAgentGeneration): Promise<AgentGeneration>;
 }
 
 export class DatabaseStorage implements IStorage {
