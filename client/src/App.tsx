@@ -65,6 +65,7 @@ function App() {
                     <ToolsProvider>
                       <TemplatesProvider>
                         <PromptsProvider>
+                          <AgentsProvider>
                         <Switch>
                           <Route path="/auth" component={Auth} />
 
@@ -119,7 +120,13 @@ function App() {
                           
 
                           
-                          <Route path="/hub/agents">
+                          <Route path="/hub/agentes-ia">
+                            <Layout>
+                              <AIAgents />
+                            </Layout>
+                          </Route>
+                          
+                          <Route path="/agentes">
                             <Layout>
                               <AIAgents />
                             </Layout>
@@ -184,6 +191,14 @@ function App() {
                             )}
                           </Route>
                           
+                          <Route path="/admin/agentes/:section?/:id?/:action?">
+                            {(params) => (
+                              <AdminLayout>
+                                <AgentsManagement />
+                              </AdminLayout>
+                            )}
+                          </Route>
+                          
                           <Route path="/admin/:section/:subsection?">
                             {(params) => (
                               <AdminLayout>
@@ -232,6 +247,7 @@ function App() {
 
                           </Switch>
                           <Toaster />
+                          </AgentsProvider>
                         </PromptsProvider>
                       </TemplatesProvider>
                     </ToolsProvider>

@@ -29,8 +29,9 @@ This is a full-stack web application built as a "Ferramentas Hub" (Tools Hub) - 
 4. **Materials**: Educational content (e-books, templates, videos, spreadsheets)
 5. **Templates**: Reusable communication templates
 6. **AI Prompts**: Multi-step AI prompts with categories and examples
-7. **Products**: E-commerce products with multi-channel pricing
-8. **News & Updates**: Content management system for announcements
+7. **AI Agents**: Intelligent automation agents with execution capabilities
+8. **Products**: E-commerce products with multi-channel pricing
+9. **News & Updates**: Content management system for announcements
 
 #### Authentication & Authorization
 - Role-based access control (admin, support, user)
@@ -99,6 +100,7 @@ This is a full-stack web application built as a "Ferramentas Hub" (Tools Hub) - 
 
 - June 27, 2025. Initial setup
 - June 27, 2025. Amazon Agent refactoring following clean code principles
+- June 27, 2025. Complete AI Agents system integration with admin structure
 
 ## User Preferences
 

@@ -1,310 +1,398 @@
-import React, { useState, useMemo } from 'react';
-import { useLocation } from 'wouter';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Star, StarIcon } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Agent, AGENT_CATEGORIES, AGENT_FILTERS } from '@/types/agent';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Search, 
+  Star, 
+  Clock, 
+  Users, 
+  Filter,
+  Grid3X3,
+  List,
+  Play,
+  Zap,
+  TrendingUp,
+  Target
+} from 'lucide-react';
+import { useAgents } from '@/contexts/AgentsContext';
+import { useLocation } from 'wouter';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const AIAgents = () => {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
+  const { 
+    agents, 
+    categories, 
+    getFeaturedAgents,
+    searchAgents,
+    getAgentsByCategory,
+    isLoadingAgents 
+  } = useAgents();
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    const saved = localStorage.getItem('ai-agent-favorites');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Mock data para os agentes
-  const mockAgents: Agent[] = [
-    {
-      id: '1',
-      title: 'Gerador de Listings Amazon',
-      description: 'Crie listings otimizados para Amazon com títulos, bullet points e descrições que convertem mais vendas.',
-      icon: '🛒',
-      category: AGENT_CATEGORIES.find(c => c.id === 'ecommerce')!,
-      badges: ['Novo!'],
-      isFavorite: false,
-      isNew: true,
-      isBeta: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '2',
-      title: 'Análise de Escrita',
-      description: 'Analise e melhore seus e-mails para aumentar taxa de abertura e engajamento dos destinatários.',
-      icon: '✍️',
-      category: AGENT_CATEGORIES.find(c => c.id === 'emails')!,
-      badges: [],
-      isFavorite: false,
-      isNew: false,
-      isBeta: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '3',
-      title: 'Ângulos de Anúncios',
-      description: 'Gere múltiplos ângulos criativos para seus anúncios e encontre o que melhor ressoa com seu público.',
-      icon: '📊',
-      category: AGENT_CATEGORIES.find(c => c.id === 'marketing')!,
-      badges: ['Beta'],
-      isFavorite: false,
-      isNew: false,
-      isBeta: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '4',
-      title: 'Criador de Conteúdo',
-      description: 'Produza conteúdo envolvente para redes sociais, blogs e campanhas de marketing digital.',
-      icon: '📝',
-      category: AGENT_CATEGORIES.find(c => c.id === 'content')!,
-      badges: [],
-      isFavorite: false,
-      isNew: false,
-      isBeta: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '5',
-      title: 'Otimizador de Títulos',
-      description: 'Otimize títulos para SEO e conversão usando técnicas comprovadas de copywriting e marketing.',
-      icon: '🎯',
-      category: AGENT_CATEGORIES.find(c => c.id === 'marketing')!,
-      badges: [],
-      isFavorite: false,
-      isNew: false,
-      isBeta: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '6',
-      title: 'Gerador de Scripts',
-      description: 'Crie scripts envolventes para vídeos do YouTube que mantêm a audiência engajada do início ao fim.',
-      icon: '🎬',
-      category: AGENT_CATEGORIES.find(c => c.id === 'youtube')!,
-      badges: ['Beta'],
-      isFavorite: false,
-      isNew: false,
-      isBeta: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
+  // Filter agents based on search and filters
+  const filteredAgents = React.useMemo(() => {
+    let result = agents.filter(agent => agent.isActive);
 
-  const filteredAgents = useMemo(() => {
-    let result = mockAgents;
-
-    // Filtro por busca
     if (searchQuery) {
-      result = result.filter(agent =>
-        agent.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        agent.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      result = searchAgents(searchQuery);
     }
 
-    // Filtro por categoria/tipo
-    switch (selectedFilter) {
-      case 'favorites':
-        result = result.filter(agent => favorites.includes(agent.id));
-        break;
-      case 'beta':
-        result = result.filter(agent => agent.isBeta);
-        break;
-      case 'new':
-        result = result.filter(agent => agent.isNew);
-        break;
-      case 'ecommerce':
-        result = result.filter(agent => agent.category.id === 'ecommerce');
-        break;
-      case 'marketing':
-        result = result.filter(agent => agent.category.id === 'marketing');
-        break;
-      case 'ads':
-        result = result.filter(agent => agent.category.id === 'ads');
-        break;
-      case 'content':
-        result = result.filter(agent => agent.category.id === 'content');
-        break;
-      case 'all':
-      default:
-        break;
+    if (selectedCategory && selectedCategory !== 'all') {
+      result = result.filter(agent => agent.category.id === selectedCategory);
+    }
+
+    if (selectedDifficulty && selectedDifficulty !== 'all') {
+      result = result.filter(agent => agent.difficulty === selectedDifficulty);
     }
 
     return result;
-  }, [mockAgents, searchQuery, selectedFilter, favorites]);
+  }, [agents, searchQuery, selectedCategory, selectedDifficulty, searchAgents]);
 
-  const toggleFavorite = (agentId: string) => {
-    const newFavorites = favorites.includes(agentId)
-      ? favorites.filter(id => id !== agentId)
-      : [...favorites, agentId];
-    
-    setFavorites(newFavorites);
-    localStorage.setItem('ai-agent-favorites', JSON.stringify(newFavorites));
-  };
+  const featuredAgents = getFeaturedAgents();
 
-  const handleAgentClick = (agentId: string) => {
-    // Por enquanto, mostrar um toast informativo
-    toast({
-      title: "Agente selecionado",
-      description: `Você clicou no agente ${mockAgents.find(a => a.id === agentId)?.title}. Página de detalhes em desenvolvimento.`,
-    });
-  };
-
-  const getBadgeVariant = (badge: string) => {
-    switch (badge) {
-      case 'Novo!':
-        return 'default';
-      case 'Beta':
-        return 'secondary';
-      default:
-        return 'outline';
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner': return 'bg-green-100 text-green-800 border-green-200';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'advanced': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="space-y-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Todos os Agentes</h1>
-          <p className="text-lg text-gray-700 mt-2">
-            Agentes de IA especializados para automatizar suas tarefas de marketing e vendas
-          </p>
-        </div>
+  const getDifficultyLabel = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner': return 'Iniciante';
+      case 'intermediate': return 'Intermediário';
+      case 'advanced': return 'Avançado';
+      default: return 'N/A';
+    }
+  };
 
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Buscar agentes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+  const getCategoryColor = (color: string) => {
+    switch (color) {
+      case 'blue': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'purple': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'green': return 'bg-green-100 text-green-800 border-green-200';
+      case 'orange': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'red': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const handleExecuteAgent = (agentId: string) => {
+    // Redirecionar para página de execução do agente
+    setLocation(`/agentes/${agentId}/executar`);
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center space-x-2 mb-4">
+          <Zap className="h-8 w-8 text-primary" />
+          <h1 className="text-4xl font-bold text-gray-900">Agentes de IA</h1>
         </div>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          Descubra poderosos agentes de inteligência artificial para automatizar tarefas, 
+          otimizar processos e potencializar seus resultados.
+        </p>
       </div>
 
-      {/* Filters */}
-      <Tabs value={selectedFilter} onValueChange={setSelectedFilter} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-1">
-          {AGENT_FILTERS.map((filter) => (
-            <TabsTrigger
-              key={filter.id}
-              value={filter.id}
-              className="text-xs px-2 py-1"
-            >
-              {filter.name}
-              {filter.id === 'favorites' && favorites.length > 0 && (
-                <span className="ml-1 text-xs bg-primary text-primary-foreground rounded-full px-1">
-                  {favorites.length}
-                </span>
-              )}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value={selectedFilter} className="mt-6">
-          {/* Agents Grid */}
-          {filteredAgents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-              {filteredAgents.map((agent) => (
-                <Card
-                  key={agent.id}
-                  className="group hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-105 relative"
-                  onClick={() => handleAgentClick(agent.id)}
-                >
-                  {/* Favorite Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 z-10 h-8 w-8 p-0 hover:bg-yellow-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(agent.id);
-                    }}
-                  >
-                    {favorites.includes(agent.id) ? (
-                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                    ) : (
-                      <StarIcon className="h-4 w-4 text-gray-400 hover:text-yellow-500" />
-                    )}
-                  </Button>
-
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start gap-3">
-                      <div className="text-3xl">{agent.icon}</div>
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg mb-2 line-clamp-2">
-                          {agent.title}
+      {/* Featured Agents */}
+      {featuredAgents.length > 0 && (
+        <section>
+          <div className="flex items-center space-x-2 mb-6">
+            <Star className="h-6 w-6 text-yellow-500" />
+            <h2 className="text-2xl font-bold text-gray-900">Agentes em Destaque</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredAgents.slice(0, 3).map((agent) => (
+              <Card key={agent.id} className="group hover:shadow-lg transition-all duration-300 border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-white">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                          {agent.name}
                         </CardTitle>
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          <Badge className={agent.category.color} variant="secondary">
-                            {agent.category.name}
-                          </Badge>
-                          {agent.badges.map((badge) => (
-                            <Badge
-                              key={badge}
-                              variant={getBadgeVariant(badge)}
-                              className="text-xs"
-                            >
-                              {badge}
-                            </Badge>
-                          ))}
-                        </div>
+                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
                       </div>
+                      <Badge className={getCategoryColor(agent.category.color)}>
+                        {agent.category.name}
+                      </Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-sm text-gray-600 line-clamp-3">
-                      {agent.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    {agent.description}
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
+                    <div className="flex items-center space-x-1">
+                      <Clock className="h-3 w-3 text-gray-400" />
+                      <span>{agent.estimatedTime}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Users className="h-3 w-3 text-gray-400" />
+                      <span>{agent.usageCount} usos</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Star className="h-3 w-3 text-gray-400" />
+                      <span>★ {agent.rating}</span>
+                    </div>
+                    <Badge className={getDifficultyColor(agent.difficulty)} variant="outline">
+                      {getDifficultyLabel(agent.difficulty)}
+                    </Badge>
+                  </div>
+
+                  <Button 
+                    className="w-full group-hover:bg-primary/90 transition-colors"
+                    onClick={() => handleExecuteAgent(agent.id)}
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Usar Agente
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Filters and Search */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filtros e Busca
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Buscar agentes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🤖</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Nenhum agente encontrado
-              </h3>
-              <p className="text-gray-600 max-w-md mx-auto">
-                {searchQuery
-                  ? `Não encontramos agentes que correspondam à sua busca "${searchQuery}".`
-                  : selectedFilter === 'favorites'
-                  ? 'Você ainda não favoritou nenhum agente. Clique na estrela para adicionar aos favoritos.'
-                  : 'Nenhum agente disponível nesta categoria no momento.'}
+            
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as Categorias</SelectItem>
+                {categories.filter(cat => cat.isActive).map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Dificuldade" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as Dificuldades</SelectItem>
+                <SelectItem value="beginner">Iniciante</SelectItem>
+                <SelectItem value="intermediate">Intermediário</SelectItem>
+                <SelectItem value="advanced">Avançado</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-4 flex justify-between items-center">
+            <span className="text-sm text-gray-600">
+              {filteredAgents.length} agente{filteredAgents.length !== 1 ? 's' : ''} encontrado{filteredAgents.length !== 1 ? 's' : ''}
+              {searchQuery && ` para "${searchQuery}"`}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Agents Grid */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Todos os Agentes</h2>
+          <span className="text-sm text-gray-500">
+            {filteredAgents.length} agente{filteredAgents.length !== 1 ? 's' : ''} disponível{filteredAgents.length !== 1 ? 'is' : ''}
+          </span>
+        </div>
+
+        {isLoadingAgents ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-gray-600 mt-4">Carregando agentes...</p>
+          </div>
+        ) : filteredAgents.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Zap className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Nenhum agente encontrado</h3>
+              <p className="text-gray-600 mb-4">
+                {searchQuery || selectedCategory !== 'all' || selectedDifficulty !== 'all'
+                  ? 'Tente ajustar os filtros de busca.'
+                  : 'Nenhum agente está disponível no momento.'}
               </p>
-              {searchQuery && (
-                <Button
-                  variant="outline"
-                  onClick={() => setSearchQuery('')}
-                  className="mt-4"
+              {(searchQuery || selectedCategory !== 'all' || selectedDifficulty !== 'all') && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('all');
+                    setSelectedDifficulty('all');
+                  }}
                 >
-                  Limpar busca
+                  Limpar Filtros
                 </Button>
               )}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className={viewMode === 'grid' 
+            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+            : 'space-y-4'
+          }>
+            {filteredAgents.map((agent) => (
+              <Card key={agent.id} className="group hover:shadow-md transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors mb-2">
+                        {agent.name}
+                      </CardTitle>
+                      <Badge className={getCategoryColor(agent.category.color)}>
+                        {agent.category.name}
+                      </Badge>
+                    </div>
+                    {agent.isFeatured && (
+                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    {agent.description}
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {agent.tags.slice(0, 3).map((tag) => (
+                      <Badge key={tag} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {agent.tags.length > 3 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{agent.tags.length - 3}
+                      </Badge>
+                    )}
+                  </div>
 
-      {/* Stats */}
-      {filteredAgents.length > 0 && (
-        <div className="text-center text-sm text-gray-500 mt-8">
-          Mostrando {filteredAgents.length} de {mockAgents.length} agentes
+                  <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
+                    <div className="flex items-center space-x-1">
+                      <Clock className="h-3 w-3 text-gray-400" />
+                      <span>{agent.estimatedTime}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Users className="h-3 w-3 text-gray-400" />
+                      <span>{agent.usageCount} usos</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Star className="h-3 w-3 text-gray-400" />
+                      <span>★ {agent.rating}</span>
+                    </div>
+                    <Badge className={getDifficultyColor(agent.difficulty)} variant="outline">
+                      {getDifficultyLabel(agent.difficulty)}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Button 
+                      className="w-full group-hover:bg-primary/90 transition-colors"
+                      onClick={() => handleExecuteAgent(agent.id)}
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      Usar Agente
+                    </Button>
+                    
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>v{agent.version}</span>
+                      <span>Atualizado em {agent.lastUpdated}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Categories Overview */}
+      <section>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Explore por Categoria</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categories.filter(cat => cat.isActive).map((category) => {
+            const categoryAgents = getAgentsByCategory(category.id);
+            return (
+              <Card 
+                key={category.id} 
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => setSelectedCategory(category.id)}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">{category.name}</CardTitle>
+                    <Badge className={getCategoryColor(category.color)}>
+                      {categoryAgents.length}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    {category.description}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
-      )}
+      </section>
     </div>
   );
 };
