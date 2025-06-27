@@ -28,7 +28,11 @@ import {
   insertYoutubeVideoSchema,
   insertNewsSchema,
   insertUpdateSchema,
-  insertWebhookConfigSchema
+  insertWebhookConfigSchema,
+  insertAgentSchema,
+  insertAgentPromptSchema,
+  insertAgentUsageSchema,
+  insertAgentGenerationSchema
 } from "@shared/schema";
 import { youtubeService } from "./services/youtubeService";
 
@@ -1624,6 +1628,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete video' });
+    }
+  });
+
+  // Agents API routes
+  app.get('/api/agents', async (req, res) => {
+    try {
+      const agents = await storage.getAgents();
+      res.json(agents);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch agents' });
+    }
+  });
+
+  app.get('/api/agents/:id', async (req, res) => {
+    try {
+      const agent = await storage.getAgentWithPrompts(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ error: 'Agent not found' });
+      }
+      res.json(agent);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch agent' });
+    }
+  });
+
+  app.post('/api/agents', async (req, res) => {
+    try {
+      const validatedData = insertAgentSchema.parse(req.body);
+      const agent = await storage.createAgent(validatedData);
+      res.status(201).json(agent);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid agent data' });
+    }
+  });
+
+  app.put('/api/agents/:id', async (req, res) => {
+    try {
+      const validatedData = insertAgentSchema.partial().parse(req.body);
+      const agent = await storage.updateAgent(req.params.id, validatedData);
+      res.json(agent);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid agent data' });
+    }
+  });
+
+  app.delete('/api/agents/:id', async (req, res) => {
+    try {
+      await storage.deleteAgent(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete agent' });
+    }
+  });
+
+  // Agent Prompts routes
+  app.get('/api/agents/:agentId/prompts', async (req, res) => {
+    try {
+      const prompts = await storage.getAgentPrompts(req.params.agentId);
+      res.json(prompts);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch agent prompts' });
+    }
+  });
+
+  app.post('/api/agents/:agentId/prompts', async (req, res) => {
+    try {
+      const validatedData = insertAgentPromptSchema.parse({
+        ...req.body,
+        agentId: req.params.agentId
+      });
+      const prompt = await storage.createAgentPrompt(validatedData);
+      res.status(201).json(prompt);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid prompt data' });
+    }
+  });
+
+  app.put('/api/agent-prompts/:id', async (req, res) => {
+    try {
+      const validatedData = insertAgentPromptSchema.partial().parse(req.body);
+      const prompt = await storage.updateAgentPrompt(req.params.id, validatedData);
+      res.json(prompt);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid prompt data' });
+    }
+  });
+
+  app.delete('/api/agent-prompts/:id', async (req, res) => {
+    try {
+      await storage.deleteAgentPrompt(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete prompt' });
+    }
+  });
+
+  // Agent Usage routes
+  app.get('/api/agents/:agentId/usage', async (req, res) => {
+    try {
+      const usage = await storage.getAgentUsage(req.params.agentId);
+      res.json(usage);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch agent usage' });
+    }
+  });
+
+  app.post('/api/agents/:agentId/usage', async (req, res) => {
+    try {
+      const validatedData = insertAgentUsageSchema.parse({
+        ...req.body,
+        agentId: req.params.agentId
+      });
+      const usage = await storage.createAgentUsage(validatedData);
+      res.status(201).json(usage);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid usage data' });
+    }
+  });
+
+  // Agent Generations routes
+  app.post('/api/agent-generations', async (req, res) => {
+    try {
+      const validatedData = insertAgentGenerationSchema.parse(req.body);
+      const generation = await storage.createAgentGeneration(validatedData);
+      res.status(201).json(generation);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid generation data' });
     }
   });
 
