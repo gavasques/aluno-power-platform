@@ -33,14 +33,14 @@ export interface ModelConfig {
   maxTokens: number;
 }
 
-// Model configurations with pricing
+// Model configurations with latest pricing
 export const MODEL_CONFIGS: Record<string, ModelConfig> = {
   // OpenAI Models
   'gpt-4o': {
     provider: 'openai',
     model: 'gpt-4o',
-    inputCostPer1M: 2.50,
-    outputCostPer1M: 10.00,
+    inputCostPer1M: 5.00,
+    outputCostPer1M: 15.00,
     maxTokens: 128000
   },
   'gpt-4o-mini': {
@@ -57,54 +57,72 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 30.00,
     maxTokens: 128000
   },
-  
-  // Anthropic Models (Claude)
-  'claude-sonnet-4-20250514': {
+  'gpt-3.5-turbo': {
+    provider: 'openai',
+    model: 'gpt-3.5-turbo',
+    inputCostPer1M: 0.50,
+    outputCostPer1M: 1.50,
+    maxTokens: 16385
+  },
+
+  // Anthropic Models
+  'claude-3-5-sonnet-20241022': {
     provider: 'anthropic',
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-3-5-sonnet-20241022',
     inputCostPer1M: 3.00,
     outputCostPer1M: 15.00,
     maxTokens: 200000
   },
-  'claude-3-7-sonnet-20250219': {
+  'claude-3-opus-20240229': {
     provider: 'anthropic',
-    model: 'claude-3-7-sonnet-20250219',
+    model: 'claude-3-opus-20240229',
+    inputCostPer1M: 15.00,
+    outputCostPer1M: 75.00,
+    maxTokens: 200000
+  },
+  'claude-3-sonnet-20240229': {
+    provider: 'anthropic',
+    model: 'claude-3-sonnet-20240229',
     inputCostPer1M: 3.00,
     outputCostPer1M: 15.00,
     maxTokens: 200000
   },
-  'claude-3-5-haiku-20241022': {
+  'claude-3-haiku-20240307': {
     provider: 'anthropic',
-    model: 'claude-3-5-haiku-20241022',
-    inputCostPer1M: 1.00,
-    outputCostPer1M: 5.00,
+    model: 'claude-3-haiku-20240307',
+    inputCostPer1M: 0.25,
+    outputCostPer1M: 1.25,
     maxTokens: 200000
   },
-  
+
   // Google Gemini Models
-  'gemini-2.5-flash': {
+  'gemini-1.5-pro': {
     provider: 'gemini',
-    model: 'gemini-2.5-flash',
-    inputCostPer1M: 0.075,
-    outputCostPer1M: 0.30,
-    maxTokens: 1000000
-  },
-  'gemini-2.5-pro': {
-    provider: 'gemini',
-    model: 'gemini-2.5-pro',
+    model: 'gemini-1.5-pro',
     inputCostPer1M: 1.25,
     outputCostPer1M: 5.00,
     maxTokens: 2000000
   },
-  
-
+  'gemini-1.5-flash': {
+    provider: 'gemini',
+    model: 'gemini-1.5-flash',
+    inputCostPer1M: 0.075,
+    outputCostPer1M: 0.30,
+    maxTokens: 1000000
+  },
+  'gemini-2.0-flash-exp': {
+    provider: 'gemini',
+    model: 'gemini-2.0-flash-exp',
+    inputCostPer1M: 0.075,
+    outputCostPer1M: 0.30,
+    maxTokens: 1000000
+  }
 };
 
 class AIProviderService {
   private openai: OpenAI | null = null;
   private anthropic: Anthropic | null = null;
   private gemini: GoogleGenAI | null = null;
-
 
   constructor() {
     this.initializeProviders();
@@ -131,8 +149,6 @@ class AIProviderService {
         apiKey: process.env.GEMINI_API_KEY,
       });
     }
-
-
   }
 
   private calculateCost(inputTokens: number, outputTokens: number, modelConfig: ModelConfig): number {
@@ -166,7 +182,6 @@ class AIProviderService {
           return await this.generateAnthropic(request, modelConfig);
         case 'gemini':
           return await this.generateGemini(request, modelConfig);
-
         default:
           throw new Error(`Unsupported provider: ${request.provider}`);
       }
@@ -207,7 +222,7 @@ class AIProviderService {
       throw new Error('Anthropic client not initialized. Please check ANTHROPIC_API_KEY.');
     }
 
-    // Convert messages format for Anthropic
+    // Convert messages to Anthropic format
     const systemMessage = request.messages.find(m => m.role === 'system');
     const userMessages = request.messages.filter(m => m.role !== 'system');
 
@@ -218,7 +233,7 @@ class AIProviderService {
       system: systemMessage?.content,
       messages: userMessages.map(msg => ({
         role: msg.role as 'user' | 'assistant',
-        content: msg.content,
+        content: msg.content
       })),
     });
 
@@ -243,29 +258,27 @@ class AIProviderService {
     }
 
     // Convert messages to Gemini format
-    const systemInstruction = request.messages.find(m => m.role === 'system')?.content;
-    const conversationHistory = request.messages.filter(m => m.role !== 'system');
+    const systemMessage = request.messages.find(m => m.role === 'system');
+    const userMessages = request.messages.filter(m => m.role !== 'system');
     
-    const lastMessage = conversationHistory[conversationHistory.length - 1];
-    const history = conversationHistory.slice(0, -1);
+    const contents = userMessages.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content }]
+    }));
+
+    const config: any = {
+      temperature: request.temperature || 0.7,
+      maxOutputTokens: request.maxTokens || 2000,
+    };
+
+    if (systemMessage) {
+      config.systemInstruction = systemMessage.content;
+    }
 
     const response = await this.gemini.models.generateContent({
       model: request.model,
-      config: {
-        temperature: request.temperature || 0.7,
-        maxOutputTokens: request.maxTokens || 2000,
-        systemInstruction: systemInstruction,
-      },
-      contents: [
-        ...history.map(msg => ({
-          role: msg.role === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.content }],
-        })),
-        {
-          role: 'user',
-          parts: [{ text: lastMessage.content }],
-        },
-      ],
+      contents,
+      config,
     });
 
     const content = response.text || '';
@@ -282,8 +295,6 @@ class AIProviderService {
       cost: this.calculateCost(inputTokens, outputTokens, modelConfig),
     };
   }
-
-
 
   getAvailableModels(provider?: AIProvider): ModelConfig[] {
     const models = Object.values(MODEL_CONFIGS);
