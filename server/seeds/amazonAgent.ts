@@ -23,7 +23,7 @@ export async function seedAmazonAgent() {
       icon: '🛒',
       isActive: true,
       model: 'gpt-4o',
-      temperature: 0.7,
+      temperature: "0.7",
       maxTokens: 2000
     });
 

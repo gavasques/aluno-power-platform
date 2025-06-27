@@ -33,6 +33,14 @@ This is a full-stack web application built as a "Ferramentas Hub" (Tools Hub) - 
 8. **Products**: E-commerce products with multi-channel pricing
 9. **News & Updates**: Content management system for announcements
 
+#### AI Agents System (Simplified Architecture)
+- **Agents**: Core agent definitions with model configurations (gpt-4o, gpt-4o-mini)
+- **Agent Prompts**: Versioned prompt templates by type (system, analysis, title, bulletPoints, description)
+- **Agent Usage**: Simple usage tracking without cost calculations
+- **Agent Generations**: Complete generation outputs with all AI-generated content
+- **OpenAI Integration**: Direct API integration for content generation
+- **Amazon Listing Agent**: Pre-configured agent for creating optimized Amazon product listings
+
 #### Authentication & Authorization
 - Role-based access control (admin, support, user)
 - Mock authentication system for development
@@ -102,6 +110,7 @@ This is a full-stack web application built as a "Ferramentas Hub" (Tools Hub) - 
 - June 27, 2025. Amazon Agent refactoring following clean code principles
 - June 27, 2025. Complete AI Agents system integration with admin structure
 - June 27, 2025. Administrative agents management page with clean code architecture
+- June 27, 2025. Simplified AI Agents system implementation without cost tracking
 
 ## User Preferences
 

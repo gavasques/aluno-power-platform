@@ -73,5 +73,8 @@ app.use((req, res, next) => {
     
     // Start the YouTube video scheduler
     scheduler.start();
+    
+    // Seed Amazon agent
+    seedAmazonAgent().catch(console.error);
   });
 })();
