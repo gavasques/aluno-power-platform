@@ -1,0 +1,154 @@
+Prompt 1: Setup Simplificado sem Custos
+
+Plain Text
+
+
+DESCRIÇÃO DO SISTEMA:
+Estamos criando um sistema de agentes de IA para a plataforma "Aluno Power Platform". O sistema permite que admins criem agentes especializados que alunos usam para automatizar tarefas. Começamos com um agente para criar listings da Amazon baseado em análise de avaliações.
+
+ARQUITETURA SIMPLIFICADA:
+- Área Admin: Gestão de agentes e prompts
+- Área Aluno: Interface simples para usar agentes
+- Banco: PostgreSQL com tracking básico de uso
+- IA: OpenAI com modelos atualizados do ChatGPT
+
+Configure o projeto Aluno Power Platform para integrar o sistema de agentes SIMPLIFICADO.
+
+REPOSITÓRIO: https://github.com/gavasques/aluno-power-platform
+
+SETUP NECESSÁRIO:
+
+1. **BANCO DE DADOS SIMPLIFICADO**
+```sql
+-- Tabela de Agentes (SEM custos)
+CREATE TABLE agents (
+  id VARCHAR(36) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  category VARCHAR(100),
+  icon VARCHAR(10),
+  is_active BOOLEAN DEFAULT true,
+  model VARCHAR(100) NOT NULL, -- Campo texto: "gpt-4o", "gpt-4o-mini", etc.
+  temperature DECIMAL(3,2) DEFAULT 0.7,
+  max_tokens INTEGER DEFAULT 2000,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Prompts
+CREATE TABLE agent_prompts (
+  id VARCHAR(36) PRIMARY KEY,
+  agent_id VARCHAR(36) REFERENCES agents(id) ON DELETE CASCADE,
+  prompt_type ENUM('system', 'analysis', 'title', 'bulletPoints', 'description'),
+  content TEXT NOT NULL,
+  version INTEGER DEFAULT 1,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Uso SIMPLIFICADA
+CREATE TABLE agent_usage (
+  id VARCHAR(36) PRIMARY KEY,
+  agent_id VARCHAR(36) REFERENCES agents(id),
+  user_id VARCHAR(36) NOT NULL,
+  user_name VARCHAR(255),
+  status ENUM('success', 'error') DEFAULT 'success',
+  error_message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Gerações
+CREATE TABLE agent_generations (
+  id VARCHAR(36) PRIMARY KEY,
+  usage_id VARCHAR(36) REFERENCES agent_usage(id),
+  product_name VARCHAR(255),
+  product_info JSON,
+  reviews_data JSON,
+  analysis_result JSON,
+  titles JSON,
+  bullet_points JSON,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices
+CREATE INDEX idx_agents_active ON agents(is_active);
+CREATE INDEX idx_prompts_agent_type ON agent_prompts(agent_id, prompt_type, is_active);
+CREATE INDEX idx_usage_user_date ON agent_usage(user_id, created_at);
+
+
+1.
+TIPOS TYPESCRIPT SIMPLIFICADOS
+
+TypeScript
+
+
+// src/types/agent.types.ts
+export interface Agent {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+  isActive: boolean;
+  model: string; // Campo livre: "gpt-4o", "gpt-4o-mini", etc.
+  temperature: number;
+  maxTokens: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AgentPrompt {
+  id: string;
+  agentId: string;
+  promptType: 'system' | 'analysis' | 'title' | 'bulletPoints' | 'description';
+  content: string;
+  version: number;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+export interface AgentUsage {
+  id: string;
+  agentId: string;
+  userId: string;
+  userName: string;
+  status: 'success' | 'error';
+  errorMessage?: string;
+  createdAt: Date;
+}
+
+
+1.
+VARIÁVEIS DE AMBIENTE
+
+Plain Text
+
+
+OPENAI_API_KEY=sk-...
+DATABASE_URL=postgresql://...
+AGENTS_ENABLED=true
+
+
+Configure estrutura base simplificada sem complexidade de custos.
+
+DIRETRIZES DE CÓDIGO LIMPO (OBRIGATÓRIAS):
+
+•
+Legibilidade e manutenibilidade
+
+•
+Princípios SOLID e responsabilidade única
+
+•
+DRY (Don't Repeat Yourself)
+
+•
+KISS (Keep It Simple, Stupid)
+
+•
+Modularização e padronização
+
+•
+Código limpo sem comentários desnecessários
+

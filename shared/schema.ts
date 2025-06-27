@@ -479,6 +479,60 @@ export const webhookConfigs = pgTable("webhook_configs", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// AI Agents System - Simplified without costs
+export const agents = pgTable("agents", {
+  id: text("id").primaryKey(), // UUID as text
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category"),
+  icon: text("icon"),
+  isActive: boolean("is_active").notNull().default(true),
+  model: text("model").notNull(), // Free text field: "gpt-4o", "gpt-4o-mini", etc.
+  temperature: decimal("temperature", { precision: 3, scale: 2 }).notNull().default("0.7"),
+  maxTokens: integer("max_tokens").notNull().default(2000),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  activeIdx: index("agents_active_idx").on(table.isActive),
+}));
+
+export const agentPrompts = pgTable("agent_prompts", {
+  id: text("id").primaryKey(), // UUID as text
+  agentId: text("agent_id").references(() => agents.id, { onDelete: "cascade" }).notNull(),
+  promptType: text("prompt_type").notNull(), // 'system', 'analysis', 'title', 'bulletPoints', 'description'
+  content: text("content").notNull(),
+  version: integer("version").notNull().default(1),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  agentTypeActiveIdx: index("agent_prompts_agent_type_active_idx").on(table.agentId, table.promptType, table.isActive),
+}));
+
+export const agentUsage = pgTable("agent_usage", {
+  id: text("id").primaryKey(), // UUID as text
+  agentId: text("agent_id").references(() => agents.id).notNull(),
+  userId: text("user_id").notNull(), // UUID as text
+  userName: text("user_name"),
+  status: text("status").notNull().default("success"), // 'success', 'error'
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userDateIdx: index("agent_usage_user_date_idx").on(table.userId, table.createdAt),
+}));
+
+export const agentGenerations = pgTable("agent_generations", {
+  id: text("id").primaryKey(), // UUID as text
+  usageId: text("usage_id").references(() => agentUsage.id).notNull(),
+  productName: text("product_name"),
+  productInfo: jsonb("product_info"),
+  reviewsData: jsonb("reviews_data"),
+  analysisResult: jsonb("analysis_result"),
+  titles: jsonb("titles"),
+  bulletPoints: jsonb("bullet_points"),
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
@@ -705,6 +759,34 @@ export const productsRelations = relations(products, ({ one }) => ({
   }),
 }));
 
+// Agent relations
+export const agentsRelations = relations(agents, ({ many }) => ({
+  prompts: many(agentPrompts),
+  usage: many(agentUsage),
+}));
+
+export const agentPromptsRelations = relations(agentPrompts, ({ one }) => ({
+  agent: one(agents, {
+    fields: [agentPrompts.agentId],
+    references: [agents.id],
+  }),
+}));
+
+export const agentUsageRelations = relations(agentUsage, ({ one, many }) => ({
+  agent: one(agents, {
+    fields: [agentUsage.agentId],
+    references: [agents.id],
+  }),
+  generations: many(agentGenerations),
+}));
+
+export const agentGenerationsRelations = relations(agentGenerations, ({ one }) => ({
+  usage: one(agentUsage, {
+    fields: [agentGenerations.usageId],
+    references: [agentUsage.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -878,6 +960,24 @@ export const insertToolVideoSchema = createInsertSchema(toolVideos).omit({
   updatedAt: true,
 });
 
+// Agent insert schemas
+export const insertAgentSchema = createInsertSchema(agents).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAgentPromptSchema = createInsertSchema(agentPrompts).omit({
+  createdAt: true,
+});
+
+export const insertAgentUsageSchema = createInsertSchema(agentUsage).omit({
+  createdAt: true,
+});
+
+export const insertAgentGenerationSchema = createInsertSchema(agentGenerations).omit({
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -976,3 +1076,25 @@ export type ToolReviewWithUser = ToolReview & {
 
 export type InsertToolVideo = z.infer<typeof insertToolVideoSchema>;
 export type ToolVideo = typeof toolVideos.$inferSelect;
+
+// Agent types
+export type InsertAgent = z.infer<typeof insertAgentSchema>;
+export type Agent = typeof agents.$inferSelect;
+
+export type InsertAgentPrompt = z.infer<typeof insertAgentPromptSchema>;
+export type AgentPrompt = typeof agentPrompts.$inferSelect;
+
+export type InsertAgentUsage = z.infer<typeof insertAgentUsageSchema>;
+export type AgentUsage = typeof agentUsage.$inferSelect;
+
+export type InsertAgentGeneration = z.infer<typeof insertAgentGenerationSchema>;
+export type AgentGeneration = typeof agentGenerations.$inferSelect;
+
+// Composite types for agents
+export type AgentWithPrompts = Agent & {
+  prompts: AgentPrompt[];
+};
+
+export type AgentUsageWithGeneration = AgentUsage & {
+  generations: AgentGeneration[];
+};

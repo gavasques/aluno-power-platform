@@ -27,6 +27,10 @@ import {
   news,
   updates,
   webhookConfigs,
+  agents,
+  agentPrompts,
+  agentUsage,
+  agentGenerations,
   type User, 
   type InsertUser,
   type Supplier,
@@ -68,8 +72,6 @@ import {
   type InsertPartnerReview,
   type PartnerReviewReply,
   type InsertPartnerReviewReply,
-  type SupplierReview,
-  type InsertSupplierReview,
   type PartnerReviewWithUser,
   type ToolReview,
   type InsertToolReview,
@@ -87,7 +89,16 @@ import {
   type Update,
   type InsertUpdate,
   type WebhookConfig,
-  type InsertWebhookConfig
+  type InsertWebhookConfig,
+  type Agent,
+  type InsertAgent,
+  type AgentPrompt,
+  type InsertAgentPrompt,
+  type AgentUsage,
+  type InsertAgentUsage,
+  type AgentGeneration,
+  type InsertAgentGeneration,
+  type AgentWithPrompts
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, ilike, and, or, desc, asc, sql, count } from "drizzle-orm";
