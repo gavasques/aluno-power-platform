@@ -32,17 +32,12 @@ import {
 
 // Types
 interface ModelConfig {
-  model: 'gpt-4' | 'gpt-4-turbo' | 'gpt-3.5-turbo';
+  model: string;
   temperature: number;
   maxTokens: number;
   topP?: number;
   frequencyPenalty?: number;
   presencePenalty?: number;
-}
-
-interface AgentPermissions {
-  allowedUserIds: string[];
-  allowedRoles: string[];
 }
 
 interface AgentUsage {
@@ -59,23 +54,16 @@ interface AdminAgentConfig {
   category: string;
   isActive: boolean;
   modelConfig: ModelConfig;
-  permissions: AgentPermissions;
   usage: AgentUsage;
 }
 
 // Constants
-const AVAILABLE_MODELS = [
-  { value: 'gpt-4', label: 'GPT-4', costPer1k: 0.03 },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', costPer1k: 0.01 },
-  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', costPer1k: 0.002 }
-] as const;
-
-const AVAILABLE_ROLES = ['admin', 'support', 'user'] as const;
+const DEFAULT_MODEL = 'GPT-4o';
+const COST_PER_1K_TOKENS = 0.01;
 
 // Utility functions
 const calculateEstimatedCost = (model: string, tokens: number): number => {
-  const modelData = AVAILABLE_MODELS.find(m => m.value === model);
-  return modelData ? (tokens / 1000) * modelData.costPer1k : 0;
+  return (tokens / 1000) * COST_PER_1K_TOKENS;
 };
 
 const formatCurrency = (value: number): string => 
@@ -104,20 +92,11 @@ const ModelConfigSection: React.FC<{
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium">Modelo</label>
-          <Select value={config.model} onValueChange={(value) => 
-            onChange({ ...config, model: value as ModelConfig['model'] })
-          }>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {AVAILABLE_MODELS.map(model => (
-                <SelectItem key={model.value} value={model.value}>
-                  {model.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            value={config.model}
+            onChange={(e) => onChange({ ...config, model: e.target.value })}
+            placeholder="GPT-4o"
+          />
         </div>
 
         <div>
@@ -193,89 +172,7 @@ const ModelConfigSection: React.FC<{
   );
 };
 
-const PermissionsSection: React.FC<{
-  permissions: AgentPermissions;
-  onChange: (permissions: AgentPermissions) => void;
-}> = ({ permissions, onChange }) => {
-  const [newUserId, setNewUserId] = useState('');
 
-  const addUserId = () => {
-    if (newUserId && !permissions.allowedUserIds.includes(newUserId)) {
-      onChange({
-        ...permissions,
-        allowedUserIds: [...permissions.allowedUserIds, newUserId]
-      });
-      setNewUserId('');
-    }
-  };
-
-  const removeUserId = (userId: string) => {
-    onChange({
-      ...permissions,
-      allowedUserIds: permissions.allowedUserIds.filter(id => id !== userId)
-    });
-  };
-
-  const toggleRole = (role: string) => {
-    const newRoles = permissions.allowedRoles.includes(role)
-      ? permissions.allowedRoles.filter(r => r !== role)
-      : [...permissions.allowedRoles, role];
-    
-    onChange({ ...permissions, allowedRoles: newRoles });
-  };
-
-  return (
-    <div className="space-y-4">
-      <h4 className="font-medium">Permissões de Acesso</h4>
-      
-      <div>
-        <label className="text-sm font-medium">Roles Permitidos</label>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {AVAILABLE_ROLES.map(role => (
-            <Badge
-              key={role}
-              variant={permissions.allowedRoles.includes(role) ? 'default' : 'outline'}
-              className="cursor-pointer"
-              onClick={() => toggleRole(role)}
-            >
-              {role}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <label className="text-sm font-medium">Usuários Específicos</label>
-        <div className="flex space-x-2 mt-2">
-          <Input
-            placeholder="ID do usuário"
-            value={newUserId}
-            onChange={(e) => setNewUserId(e.target.value)}
-          />
-          <Button onClick={addUserId} size="sm">
-            Adicionar
-          </Button>
-        </div>
-        
-        {permissions.allowedUserIds.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {permissions.allowedUserIds.map(userId => (
-              <Badge key={userId} variant="secondary" className="cursor-pointer">
-                {userId}
-                <button
-                  onClick={() => removeUserId(userId)}
-                  className="ml-1 text-xs"
-                >
-                  ×
-                </button>
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 const AgentCard: React.FC<{
   agent: AdminAgentConfig;
@@ -423,14 +320,6 @@ const AgentConfigDialog: React.FC<{
             })}
           />
 
-          <PermissionsSection
-            permissions={editingAgent.permissions}
-            onChange={(permissions) => setEditingAgent({
-              ...editingAgent,
-              permissions
-            })}
-          />
-
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={onClose}>
               Cancelar
@@ -455,16 +344,12 @@ const AdminAgents: React.FC = () => {
       category: 'E-commerce',
       isActive: true,
       modelConfig: {
-        model: 'gpt-4',
+        model: 'GPT-4o',
         temperature: 0.7,
         maxTokens: 2000,
         topP: 1,
         frequencyPenalty: 0,
         presencePenalty: 0
-      },
-      permissions: {
-        allowedUserIds: [],
-        allowedRoles: ['admin', 'user']
       },
       usage: {
         totalGenerations: 245,
@@ -486,16 +371,12 @@ const AdminAgents: React.FC = () => {
       category: '',
       isActive: false,
       modelConfig: {
-        model: 'gpt-3.5-turbo',
+        model: DEFAULT_MODEL,
         temperature: 0.7,
         maxTokens: 1000,
         topP: 1,
         frequencyPenalty: 0,
         presencePenalty: 0
-      },
-      permissions: {
-        allowedUserIds: [],
-        allowedRoles: ['user']
       },
       usage: {
         totalGenerations: 0,
@@ -515,7 +396,7 @@ const AdminAgents: React.FC = () => {
   };
 
   const duplicateAgent = (agent: AdminAgentConfig) => {
-    const duplicated = {
+    const duplicated: AdminAgentConfig = {
       ...agent,
       id: Date.now().toString(),
       name: `${agent.name} (Cópia)`,
