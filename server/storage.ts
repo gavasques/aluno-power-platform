@@ -19,8 +19,6 @@ import {
   partnerFiles,
   partnerReviews,
   partnerReviewReplies,
-  supplierReviews,
-  supplierBrands,
   toolReviews,
   toolReviewReplies,
   toolDiscounts,
@@ -29,10 +27,6 @@ import {
   news,
   updates,
   webhookConfigs,
-  agents,
-  agentPrompts,
-  agentUsage,
-  agentGenerations,
   type User, 
   type InsertUser,
   type Supplier,
@@ -74,6 +68,8 @@ import {
   type InsertPartnerReview,
   type PartnerReviewReply,
   type InsertPartnerReviewReply,
+  type SupplierReview,
+  type InsertSupplierReview,
   type PartnerReviewWithUser,
   type ToolReview,
   type InsertToolReview,
@@ -91,16 +87,7 @@ import {
   type Update,
   type InsertUpdate,
   type WebhookConfig,
-  type InsertWebhookConfig,
-  type Agent,
-  type InsertAgent,
-  type AgentPrompt,
-  type InsertAgentPrompt,
-  type AgentUsage,
-  type InsertAgentUsage,
-  type AgentGeneration,
-  type InsertAgentGeneration,
-  type AgentWithPrompts
+  type InsertWebhookConfig
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, ilike, and, or, desc, asc, sql, count } from "drizzle-orm";
@@ -130,8 +117,8 @@ export interface IStorage {
   }>;
   
   // Supplier Reviews
-  getSupplierReviews(supplierId: number): Promise<any[]>;
-  createSupplierReview(review: any): Promise<any>;
+  getSupplierReviews(supplierId: number): Promise<SupplierReview[]>;
+  createSupplierReview(review: InsertSupplierReview): Promise<SupplierReview>;
 
   // Partners
   getPartners(): Promise<Partner[]>;
@@ -306,28 +293,6 @@ export interface IStorage {
   createWebhookConfig(config: InsertWebhookConfig): Promise<WebhookConfig>;
   updateWebhookConfig(id: number, config: Partial<InsertWebhookConfig>): Promise<WebhookConfig>;
   deleteWebhookConfig(id: number): Promise<void>;
-
-  // Agents
-  getAgents(): Promise<Agent[]>;
-  getAgent(id: string): Promise<Agent | undefined>;
-  getAgentWithPrompts(id: string): Promise<AgentWithPrompts | undefined>;
-  createAgent(agent: InsertAgent): Promise<Agent>;
-  updateAgent(id: string, agent: Partial<InsertAgent>): Promise<Agent>;
-  deleteAgent(id: string): Promise<void>;
-
-  // Agent Prompts
-  getAgentPrompts(agentId: string): Promise<AgentPrompt[]>;
-  getAgentPrompt(id: string): Promise<AgentPrompt | undefined>;
-  createAgentPrompt(prompt: InsertAgentPrompt): Promise<AgentPrompt>;
-  updateAgentPrompt(id: string, prompt: Partial<InsertAgentPrompt>): Promise<AgentPrompt>;
-  deleteAgentPrompt(id: string): Promise<void>;
-
-  // Agent Usage
-  getAgentUsage(agentId: string): Promise<AgentUsage[]>;
-  createAgentUsage(usage: InsertAgentUsage): Promise<AgentUsage>;
-
-  // Agent Generations
-  createAgentGeneration(generation: InsertAgentGeneration): Promise<AgentGeneration>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1915,122 +1880,6 @@ export class DatabaseStorage implements IStorage {
 
   async deleteToolVideo(id: number): Promise<void> {
     await db.delete(toolVideos).where(eq(toolVideos.id, id));
-  }
-
-  // Agents
-  async getAgents(): Promise<Agent[]> {
-    return await db.select().from(agents).where(eq(agents.isActive, true));
-  }
-
-  async getAgent(id: string): Promise<Agent | undefined> {
-    const [agent] = await db.select().from(agents).where(eq(agents.id, id));
-    return agent || undefined;
-  }
-
-  async getAgentWithPrompts(id: string): Promise<AgentWithPrompts | undefined> {
-    const agent = await this.getAgent(id);
-    if (!agent) return undefined;
-
-    const prompts = await this.getAgentPrompts(id);
-    return { ...agent, prompts };
-  }
-
-  async createAgent(agent: InsertAgent): Promise<Agent> {
-    const [created] = await db
-      .insert(agents)
-      .values({
-        ...agent,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning();
-    return created;
-  }
-
-  async updateAgent(id: string, agent: Partial<InsertAgent>): Promise<Agent> {
-    const [updated] = await db
-      .update(agents)
-      .set({
-        ...agent,
-        updatedAt: new Date(),
-      })
-      .where(eq(agents.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteAgent(id: string): Promise<void> {
-    await db.delete(agents).where(eq(agents.id, id));
-  }
-
-  // Agent Prompts
-  async getAgentPrompts(agentId: string): Promise<AgentPrompt[]> {
-    return await db
-      .select()
-      .from(agentPrompts)
-      .where(and(eq(agentPrompts.agentId, agentId), eq(agentPrompts.isActive, true)))
-      .orderBy(agentPrompts.promptType);
-  }
-
-  async getAgentPrompt(id: string): Promise<AgentPrompt | undefined> {
-    const [prompt] = await db.select().from(agentPrompts).where(eq(agentPrompts.id, id));
-    return prompt || undefined;
-  }
-
-  async createAgentPrompt(prompt: InsertAgentPrompt): Promise<AgentPrompt> {
-    const [created] = await db
-      .insert(agentPrompts)
-      .values({
-        ...prompt,
-        createdAt: new Date(),
-      })
-      .returning();
-    return created;
-  }
-
-  async updateAgentPrompt(id: string, prompt: Partial<InsertAgentPrompt>): Promise<AgentPrompt> {
-    const [updated] = await db
-      .update(agentPrompts)
-      .set(prompt)
-      .where(eq(agentPrompts.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteAgentPrompt(id: string): Promise<void> {
-    await db.delete(agentPrompts).where(eq(agentPrompts.id, id));
-  }
-
-  // Agent Usage
-  async getAgentUsage(agentId: string): Promise<AgentUsage[]> {
-    return await db
-      .select()
-      .from(agentUsage)
-      .where(eq(agentUsage.agentId, agentId))
-      .orderBy(desc(agentUsage.createdAt));
-  }
-
-  async createAgentUsage(usage: InsertAgentUsage): Promise<AgentUsage> {
-    const [created] = await db
-      .insert(agentUsage)
-      .values({
-        ...usage,
-        createdAt: new Date(),
-      })
-      .returning();
-    return created;
-  }
-
-  // Agent Generations
-  async createAgentGeneration(generation: InsertAgentGeneration): Promise<AgentGeneration> {
-    const [created] = await db
-      .insert(agentGenerations)
-      .values({
-        ...generation,
-        createdAt: new Date(),
-      })
-      .returning();
-    return created;
   }
 }
 

@@ -1,0 +1,105 @@
+## Prompt 3: Área Admin - Gestão de Agentes
+Desenvolva a área administrativa completa para GESTÃO de agentes.
+PÁGINA: src/pages/admin/agents.tsx
+FUNCIONALIDADE: Controle total sobre agentes pelos administradores
+SEÇÕES PRINCIPAIS:
+1. LISTA DE AGENTES
+interface AdminAgentConfig {
+id: string;
+name: string;
+description: string;
+category: string;
+isActive: boolean;
+modelConfig: {
+model: 'gpt-4' | 'gpt-4-turbo' | 'gpt-3.5-turbo';
+temperature: number; // 0.0 - 2.0
+maxTokens: number;
+topP?: number;
+frequencyPenalty?: number;
+presencePenalty?: number;
+};
+permissions: {
+allowedUserIds: string[];
+allowedRoles: string[];
+};
+usage: {
+totalGenerations: number;
+totalTokens: number;
+totalCost: number;
+lastUsed: Date;
+};
+}
+1. CONFIGURAÇÃO DE MODELO POR AGENTE Interface para cada agente:
+2. Seletor de modelo GPT (4, 4-turbo, 3.5-turbo)
+3. Slider de temperatura (0.0 - 2.0)
+4. Input de limite de tokens
+5. Configurações avançadas (top_p, penalties)
+6. Estimativa de custo em tempo real
+7. GESTÃO DE PERMISSÕES
+8. Quais usuários podem acessar cada agente
+9. Limites por usuário
+10. Controle de acesso por role
+11. AÇÕES ADMINISTRATIVAS
+12. Criar novo agente
+13. Ativar/Desativar agente
+14. Editar configurações
+15. Duplicar agente
+16. Excluir agente
+INTERFACE:
+<div className="space-y-6">
+{/* Header */}
+<div className="flex justify-between items-center">
+<h1 className="text-2xl font-bold">Gestão de Agentes</h1>
+<Button onClick={createNewAgent}>
+<Plus className="h-4 w-4 mr-2" />
+Novo Agente
+</Button>
+</div>
+{/* Lista de Agentes */}
+<div className="grid gap-6">
+{agents.map(agent => (
+<div key={agent.id} className="bg-white p-6 rounded-lg shadow">
+<div className="flex justify-between items-start mb-4">
+<div>
+<h3 className="text-lg font-semibold">{agent.name}</h3>
+<p className="text-gray-600">{agent.description}</p>
+</div>
+<div className="flex items-center space-x-2">
+<Switch
+checked={agent.isActive}
+onCheckedChange={(checked) => toggleAgent(agent.id, checked)}
+/>
+<Button variant="outline" size="sm" onClick={() =>
+editAgent(agent.id)}>
+<Settings className="h-4 w-4" />
+</Button>
+</div>
+</div>
+<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+<div>
+<span className="text-gray-500">Modelo:</span>
+<p className="font-medium">{agent.modelConfig.model}</p>
+</div>
+<div>
+<span className="text-gray-500">Temperatura:</span>
+<p className="font-medium">{agent.modelConfig.temperature}</p>
+</div>
+<div>
+<span className="text-gray-500">Uso Total:</span>
+<p className="font-medium">{agent.usage.totalGenerations}
+gerações</p>
+</div>
+<div>
+<span className="text-gray-500">Custo:</span>
+<p className="font-medium">${agent.usage.totalCost.toFixed(2)}</p>
+</div>
+</div>
+</div>
+))}
+</div>
+</div>
+FUNCIONALIDADES ADMIN: - Controle total sobre configurações - Monitoramento de
+uso em tempo real - Gestão de custos e limites - Configuração granular por agente
+Implemente área administrativa completa e profissional.
+DIRETRIZES DE CÓDIGO LIMPO (OBRIGATÓRIAS): [Incluir template completo das
+diretrizes aqui]
