@@ -35,6 +35,8 @@ import MaterialDetailPage from "./pages/hub/MaterialDetailPage";
 import SupplierDetail from "./pages/hub/SupplierDetail";
 import TemplateDetail from "./pages/hub/TemplateDetail";
 import PromptDetail from "./pages/hub/PromptDetail";
+import AIAgents from "./pages/hub/AIAgents";
+import AgentDetail from "./pages/hub/AgentDetail";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
 
