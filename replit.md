@@ -1,133 +1,112 @@
-# Ferramentas Hub - System Architecture Guide
+# Aluno Power Platform - AI Agents System
 
 ## Overview
 
-This is a full-stack web application built as a "Ferramentas Hub" (Tools Hub) - a comprehensive platform for managing business tools, suppliers, partners, materials, templates, and AI prompts. The system follows SOLID principles and modern web development best practices, providing both user and admin interfaces for content management and resource discovery.
+This is a comprehensive educational e-commerce platform focused on Amazon FBA and e-commerce training, featuring an integrated AI agents system. The platform provides tools, resources, and AI-powered assistance for students learning e-commerce strategies.
 
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React 18 with TypeScript
+- **Framework**: React with TypeScript and Vite for fast development
+- **Styling**: Tailwind CSS with shadcn/ui component library
+- **State Management**: TanStack Query for server state and React Context for local state
 - **Routing**: Wouter for lightweight client-side routing
-- **State Management**: React Context API with Tanstack Query for server state
-- **UI Framework**: Shadcn/ui components with Tailwind CSS
-- **Build Tool**: Vite for fast development and optimized builds
+- **Theme**: Light theme with HSL-based color system
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js
+- **Runtime**: Node.js with Express framework
+- **API**: RESTful API with WebSocket support for real-time features
 - **Database**: PostgreSQL with Drizzle ORM
-- **Database Provider**: Neon Database (serverless PostgreSQL)
-- **API**: RESTful endpoints with WebSocket support for real-time updates
-- **File Handling**: Direct file uploads and external URL support
+- **AI Integration**: OpenAI API for agent processing
+- **External Services**: YouTube API for video content management
 
-### Key Components
+### Database Schema
+The system uses PostgreSQL with the following core tables:
+- `agents` - AI agent configurations
+- `agent_prompts` - Prompt templates for different agent operations
+- `agent_usage` - Usage tracking and analytics
+- `agent_generations` - Generated content storage
+- Supporting tables for users, materials, tools, partners, suppliers, and content management
 
-#### Core Entities
-1. **Tools**: Software tools with ratings, reviews, and feature details
-2. **Partners**: Service providers with contact information and materials
-3. **Suppliers**: Product suppliers with commercial terms and file attachments
-4. **Materials**: Educational content (e-books, templates, videos, spreadsheets)
-5. **Templates**: Reusable communication templates
-6. **AI Prompts**: Multi-step AI prompts with categories and examples
-7. **AI Agents**: Intelligent automation agents with execution capabilities
-8. **Products**: E-commerce products with multi-channel pricing
-9. **News & Updates**: Content management system for announcements
+## Key Components
 
-#### AI Agents System (Simplified Architecture)
-- **Agents**: Core agent definitions with model configurations (gpt-4o, gpt-4o-mini)
-- **Agent Prompts**: Versioned prompt templates by type (system, analysis, title, bulletPoints, description)
-- **Agent Usage**: Simple usage tracking without cost calculations
-- **Agent Generations**: Complete generation outputs with all AI-generated content
-- **OpenAI Integration**: Direct API integration for content generation
-- **Amazon Listing Agent**: Pre-configured agent for creating optimized Amazon product listings
+### AI Agents System
+- **Purpose**: Amazon listing optimization through competitor review analysis
+- **Core Features**: 
+  - CSV upload from Helium10 or manual text input
+  - Analysis of competitor reviews
+  - Generation of optimized titles, bullet points, and descriptions
+  - Token usage tracking and cost monitoring
+- **Models**: Configurable OpenAI models with temperature and token limits
 
-#### Authentication & Authorization
-- Role-based access control (admin, support, user)
-- Mock authentication system for development
-- Admin-only sections for content management
+### Content Management
+- **Hub Resources**: Tools, materials, templates, prompts, partners, and suppliers
+- **News & Updates**: Publishing system with categorization and featured content
+- **Video Integration**: YouTube channel synchronization with automated content fetching
+- **User Area**: Personal content management and product catalog
 
-#### UI Components (Refactored with SOLID Principles)
-- **Single Responsibility**: Each component has a focused purpose
-- **Open/Closed**: Components are extensible through props
-- **Interface Segregation**: Separate interfaces for different component needs
-- **Dependency Inversion**: Components depend on abstractions, not concrete implementations
+### Admin Panel
+- **Dashboard**: Analytics and system overview
+- **User Management**: Role-based access control (admin, support, user)
+- **Content Administration**: Full CRUD operations for all resource types
+- **System Configuration**: Platform settings and AI credit management
 
 ## Data Flow
 
-### Client-Server Communication
-1. **API Requests**: Centralized through `apiRequest` utility with error handling
-2. **Real-time Updates**: WebSocket connection for live notifications
-3. **Query Management**: Tanstack Query for caching and synchronization
-4. **Context Providers**: Dedicated contexts for each entity type
+### AI Processing Flow
+1. User selects an AI agent (e.g., Amazon Listings)
+2. Input product information and competitor review data
+3. Agent processes through multiple prompts (system, analysis, generation)
+4. OpenAI API generates optimized content
+5. Results stored with usage metrics and cost tracking
+6. Real-time updates via WebSocket connections
 
-### Database Schema
-- **Users**: Authentication and role management
-- **Categories**: Hierarchical categorization system
-- **Content Tables**: Tools, partners, suppliers, materials, etc.
-- **Relationship Tables**: Reviews, files, contacts, and associations
-- **Media Tables**: YouTube videos, images, and file attachments
+### Content Synchronization
+1. YouTube service runs scheduled sync (2x daily)
+2. Fetches latest videos from configured channels
+3. Stores metadata and thumbnails in database
+4. WebSocket notifications for real-time updates
+5. Content categorization and search indexing
 
 ## External Dependencies
 
 ### Core Dependencies
-- **UI**: @radix-ui components, shadcn/ui, tailwindcss
-- **Data**: @tanstack/react-query, drizzle-orm, @neondatabase/serverless
-- **Forms**: @hookform/resolvers, react-hook-form
-- **Utilities**: clsx, date-fns, lucide-react icons
+- **OpenAI API**: AI agent processing and content generation
+- **YouTube Data API v3**: Video content synchronization
+- **Neon Database**: Serverless PostgreSQL hosting
+- **shadcn/ui**: Component library for consistent UI
 
 ### Development Tools
-- **Build**: Vite, TypeScript, ESBuild
-- **Database**: Drizzle Kit for migrations
-- **Development**: tsx for TypeScript execution
-
-### External Services
-- **YouTube API**: Video synchronization and channel management
-- **WebSocket**: Real-time notifications
-- **File Storage**: Direct file uploads and external URL support
+- **Drizzle Kit**: Database migrations and schema management
+- **TanStack Query**: Server state management and caching
+- **Replit Tools**: Development environment integration
+- **ESBuild**: Fast bundling for production builds
 
 ## Deployment Strategy
 
 ### Development Environment
-- **Local Development**: Vite dev server with HMR
-- **Database**: Neon serverless PostgreSQL
-- **Environment Variables**: DATABASE_URL, YOUTUBE_API_KEY
+- Replit-based development with hot reloading
+- WebSocket support for real-time features
+- Environment variable configuration for API keys
+- Automated database provisioning
 
-### Production Build
-- **Frontend**: Static build output to `dist/public`
-- **Backend**: ESBuild bundle to `dist/index.js`
-- **Database**: Drizzle migrations for schema updates
-- **Compression**: Gzip compression enabled
+### Production Considerations
+- Express server with compression middleware
+- Static asset serving from dist/public
+- Error handling and logging middleware
+- Database connection pooling with Neon
 
 ### Performance Optimizations
-- **Query Caching**: 5-minute stale time for API queries
-- **Component Optimization**: Memoized components and lazy loading
-- **Database Indexing**: Optimized queries with proper indexes
-- **WebSocket Efficiency**: Connection pooling and message batching
-
-## Changelog
-
-- June 27, 2025. Initial setup
-- June 27, 2025. Amazon Agent refactoring following clean code principles
-- June 27, 2025. Complete AI Agents system integration with admin structure
-- June 27, 2025. Administrative agents management page with clean code architecture
-- June 27, 2025. Simplified AI Agents system implementation without cost tracking
-- June 27, 2025. Agent infrastructure completed with Amazon Listings Optimizer interface
-- June 27, 2025. Added common agent components following SOLID principles
+- Query result caching with TanStack Query
+- Lazy loading for route components
+- Image optimization and CDN integration
+- WebSocket connection management
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-Code quality priorities:
-1. Readability (legibilidade)
-2. Maintainability (manutenibilidade) 
-3. Reusability (reusabilidade)
-4. Testability (testabilidade)
-5. SOLID principles
-6. Single Responsibility
-7. Remove obsolete/unused code
-8. Eliminate code duplication
-9. DRY (Don't Repeat Yourself)
-10. KISS (Keep It Simple, Stupid)
-11. Modularization
-12. Standardization
+## Changelog
+
+Changelog:
+- June 27, 2025. Initial setup

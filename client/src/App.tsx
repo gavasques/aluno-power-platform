@@ -36,13 +36,10 @@ import MaterialDetailPage from "./pages/hub/MaterialDetailPage";
 import SupplierDetail from "./pages/hub/SupplierDetail";
 import TemplateDetail from "./pages/hub/TemplateDetail";
 import PromptDetail from "./pages/hub/PromptDetail";
-import AIAgents from "./pages/hub/AIAgents";
-import Agents from "./pages/agents";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
-import AgentsManagement from "./pages/admin/AgentsManagement";
-import AdminAgents from "./pages/admin/agents";
-import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
+import AgentsPage from "./pages/agents";
+import AgentProcessorPage from "./pages/AgentProcessorPage";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -69,8 +66,23 @@ function App() {
                       <TemplatesProvider>
                         <PromptsProvider>
                           <AgentsProvider>
-                        <Switch>
+                            <Switch>
                           <Route path="/auth" component={Auth} />
+
+                          {/* Agents routes */}
+                          <Route path="/agents/:id">
+                            {(params) => (
+                              <Layout>
+                                <AgentProcessorPage />
+                              </Layout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/agents">
+                            <Layout>
+                              <AgentsPage />
+                            </Layout>
+                          </Route>
 
                           {/* Detail routes with Layout */}
                           <Route path="/hub/materiais/:id">
@@ -119,26 +131,6 @@ function App() {
                                 <PromptDetail />
                               </Layout>
                             )}
-                          </Route>
-                          
-
-                          
-                          <Route path="/hub/agentes-ia">
-                            <Layout>
-                              <AIAgents />
-                            </Layout>
-                          </Route>
-                          
-                          <Route path="/agents/amazon-listings-optimizer">
-                            <Layout>
-                              <AmazonListingsOptimizer />
-                            </Layout>
-                          </Route>
-                          
-                          <Route path="/agentes">
-                            <Layout>
-                              <Agents />
-                            </Layout>
                           </Route>
 
                           {/* Hub section routes */}
@@ -200,14 +192,6 @@ function App() {
                             )}
                           </Route>
                           
-                          <Route path="/admin/agentes/:section?/:id?/:action?">
-                            {(params) => (
-                              <AdminLayout>
-                                <AdminAgents />
-                              </AdminLayout>
-                            )}
-                          </Route>
-                          
                           <Route path="/admin/:section/:subsection?">
                             {(params) => (
                               <AdminLayout>
@@ -254,8 +238,8 @@ function App() {
                             </Layout>
                           </Route>
 
-                          </Switch>
-                          <Toaster />
+                            </Switch>
+                            <Toaster />
                           </AgentsProvider>
                         </PromptsProvider>
                       </TemplatesProvider>

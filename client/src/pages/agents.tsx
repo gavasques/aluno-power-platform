@@ -1,342 +1,285 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { 
   Search, 
-  Clock, 
+  Star, 
   Play,
-  Zap,
-  ShoppingCart,
-  FileText,
-  MessageSquare,
-  Target,
-  Heart,
-  Lock,
-  CheckCircle,
-  Users,
-  History
-} from 'lucide-react';
-import { useLocation } from 'wouter';
+  Grid3X3,
+  List,
+  Filter
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Agent } from "../types/agent.types";
 
-// Interfaces para área do aluno
-interface StudentAgent {
-  id: string;
-  name: string;
-  description: string;
-  category: {
-    id: string;
-    name: string;
-    color: string;
+const categoryColors = {
+  "E-commerce": "bg-blue-100 text-blue-800",
+  "Marketing": "bg-purple-100 text-purple-800",
+  "Conteúdo": "bg-green-100 text-green-800",
+  "E-mails": "bg-orange-100 text-orange-800",
+  "Anúncios": "bg-red-100 text-red-800",
+  "Beta": "bg-yellow-100 text-yellow-800",
+  "YouTube": "bg-red-100 text-red-800",
+  "Copywriting": "bg-indigo-100 text-indigo-800",
+  "Vendas": "bg-emerald-100 text-emerald-800"
+};
+
+// Get icon for agent based on category
+const getAgentIcon = (category: string) => {
+  const icons: Record<string, string> = {
+    "E-commerce": "🛒",
+    "Marketing": "📈",
+    "Conteúdo": "✍️",
+    "E-mails": "📧",
+    "Anúncios": "📱",
+    "Beta": "🧪",
+    "YouTube": "🎥",
+    "Copywriting": "💬",
+    "Vendas": "💰"
   };
-  icon: string;
-  isAvailable: boolean;
-  userCanAccess: boolean;
-  lastUsed?: string;
-  usageCount: number;
-  estimatedTime: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  tags: string[];
-  isFavorite?: boolean;
+  return icons[category] || "🤖";
+};
+
+interface AgentCardProps {
+  agent: any;
+  isFavorited: boolean;
+  onToggleFavorite: (id: string) => void;
 }
 
-interface AgentCategory {
-  id: string;
-  name: string;
-  icon: React.ComponentType<any>;
-  color: string;
-  count: number;
-}
-
-const Agents = () => {
-  const [, setLocation] = useLocation();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('todos');
-  const [favorites, setFavorites] = useState<string[]>([]);
-
-  // Carregar favoritos do localStorage
-  useEffect(() => {
-    const savedFavorites = localStorage.getItem('student-agent-favorites');
-    if (savedFavorites) {
-      setFavorites(JSON.parse(savedFavorites));
-    }
-  }, []);
-
-  // Agentes mockados para área do aluno
-  const agents: StudentAgent[] = [
-    {
-      id: 'amazon-listing',
-      name: 'Gerador de Listings Amazon',
-      description: 'Crie títulos, bullet points e descrições otimizadas para produtos na Amazon',
-      category: { id: 'ecommerce', name: 'E-commerce', color: 'blue' },
-      icon: 'ShoppingCart',
-      isAvailable: true,
-      userCanAccess: true,
-      lastUsed: '2025-06-26',
-      usageCount: 15,
-      estimatedTime: '5-10 min',
-      difficulty: 'beginner',
-      tags: ['Amazon', 'SEO', 'Produtos', 'Otimização'],
-      isFavorite: false
-    },
-    {
-      id: 'content-writer',
-      name: 'Criador de Conteúdo',
-      description: 'Gere posts para redes sociais, artigos de blog e conteúdo marketing',
-      category: { id: 'marketing', name: 'Marketing', color: 'purple' },
-      icon: 'FileText',
-      isAvailable: true,
-      userCanAccess: true,
-      usageCount: 8,
-      estimatedTime: '3-7 min',
-      difficulty: 'beginner',
-      tags: ['Blog', 'Social Media', 'Marketing', 'Copywriting']
-    },
-    {
-      id: 'email-assistant',
-      name: 'Assistente de E-mail',
-      description: 'Redija e-mails profissionais, respostas e campanhas de marketing',
-      category: { id: 'comunicacao', name: 'Comunicação', color: 'green' },
-      icon: 'MessageSquare',
-      isAvailable: true,
-      userCanAccess: true,
-      usageCount: 12,
-      estimatedTime: '2-5 min',
-      difficulty: 'beginner',
-      tags: ['E-mail', 'Comunicação', 'Profissional']
-    },
-    {
-      id: 'keyword-research',
-      name: 'Pesquisa de Palavras-chave',
-      description: 'Encontre palavras-chave relevantes para SEO e campanhas de marketing',
-      category: { id: 'marketing', name: 'Marketing', color: 'purple' },
-      icon: 'Target',
-      isAvailable: false, // Indisponível
-      userCanAccess: true,
-      usageCount: 0,
-      estimatedTime: '10-15 min',
-      difficulty: 'intermediate',
-      tags: ['SEO', 'Keywords', 'Marketing Digital']
-    },
-    {
-      id: 'competitor-analysis',
-      name: 'Análise de Concorrentes',
-      description: 'Analise estratégias de concorrentes e identifique oportunidades',
-      category: { id: 'analise', name: 'Análise', color: 'orange' },
-      icon: 'Users',
-      isAvailable: true,
-      userCanAccess: false, // Sem acesso
-      usageCount: 0,
-      estimatedTime: '15-20 min',
-      difficulty: 'advanced',
-      tags: ['Concorrência', 'Estratégia', 'Mercado']
-    }
-  ];
-
-  // Categorias para filtros
-  const categories: AgentCategory[] = [
-    { id: 'todos', name: 'Todos', icon: Zap, color: 'gray', count: agents.length },
-    { id: 'ecommerce', name: 'E-commerce', icon: ShoppingCart, color: 'blue', count: agents.filter(a => a.category.id === 'ecommerce').length },
-    { id: 'marketing', name: 'Marketing', icon: Target, color: 'purple', count: agents.filter(a => a.category.id === 'marketing').length },
-    { id: 'comunicacao', name: 'Comunicação', icon: MessageSquare, color: 'green', count: agents.filter(a => a.category.id === 'comunicacao').length },
-    { id: 'analise', name: 'Análise', icon: Users, color: 'orange', count: agents.filter(a => a.category.id === 'analise').length }
-  ];
-
-  // Filtrar agentes
-  const filteredAgents = agents.filter(agent => {
-    const matchesSearch = agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         agent.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         agent.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === 'todos' || agent.category.id === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  }).map(agent => ({
-    ...agent,
-    isFavorite: favorites.includes(agent.id)
-  }));
-
-  // Toggle favorito
-  const toggleFavorite = (agentId: string) => {
-    const newFavorites = favorites.includes(agentId)
-      ? favorites.filter(id => id !== agentId)
-      : [...favorites, agentId];
-    
-    setFavorites(newFavorites);
-    localStorage.setItem('student-agent-favorites', JSON.stringify(newFavorites));
-  };
-
-  // Usar agente
-  const handleUseAgent = (agentId: string) => {
-    if (agentId === 'amazon-listing') {
-      setLocation('/agents/amazon-listings-optimizer');
-    } else {
-      // Para outros agentes, redirecionar para página genérica
-      setLocation(`/agents/${agentId}`);
-    }
-  };
-
-  // Cores das categorias
-  const getCategoryColor = (color: string) => {
-    const colors = {
-      blue: 'bg-blue-100 text-blue-800 border-blue-200',
-      purple: 'bg-purple-100 text-purple-800 border-purple-200',
-      green: 'bg-green-100 text-green-800 border-green-200',
-      orange: 'bg-orange-100 text-orange-800 border-orange-200',
-      gray: 'bg-gray-100 text-gray-800 border-gray-200'
-    };
-    return colors[color as keyof typeof colors] || colors.gray;
-  };
-
-  // Cores de dificuldade
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-800';
-      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getDifficultyLabel = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner': return 'Iniciante';
-      case 'intermediate': return 'Intermediário';
-      case 'advanced': return 'Avançado';
-      default: return 'N/A';
-    }
-  };
-
+function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Todos os Agentes</h1>
+    <Card className="group hover:shadow-md transition-all duration-200 border border-gray-200 bg-white">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="text-2xl">{getAgentIcon(agent.category || "")}</div>
+            <button
+              onClick={() => onToggleFavorite(agent.id)}
+              className="text-gray-400 hover:text-yellow-500 transition-colors"
+            >
+              <Star 
+                className={`w-5 h-5 ${isFavorited ? 'fill-yellow-500 text-yellow-500' : ''}`} 
+              />
+            </button>
+          </div>
         </div>
         
-        {/* Busca */}
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Buscar agentes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+        <div className="mb-3">
+          <Badge 
+            className={`text-xs px-2 py-1 rounded-full font-medium ${
+              categoryColors[agent.category as keyof typeof categoryColors] || 
+              "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {agent.category || "Geral"}
+          </Badge>
+        </div>
+        
+        <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
+          {agent.name}
+        </h3>
+        
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
+          {agent.description || "Agente de IA para automação"}
+        </p>
+        
+        <Button 
+          asChild 
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+        >
+          <Link href={`/agents/${agent.id}`}>
+            <Play className="w-4 h-4 mr-2" />
+            Usar Agente
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function AgentsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  // Fetch agents from API
+  const { data: agents = [], isLoading } = useQuery<Agent[]>({
+    queryKey: ["/api/agents"],
+  });
+
+  const categories = [
+    "Favoritos",
+    "Todos", 
+    "Beta", 
+    "Novo!", 
+    "Vendas", 
+    "YouTube", 
+    "Copywriting", 
+    "E-mails", 
+    "Marketing", 
+    "Anúncios", 
+    "Conteúdo"
+  ];
+
+  const filteredAgents = agents.filter((agent: Agent) => {
+    const matchesSearch = agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (agent.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = selectedCategory === "Todos" || 
+                           (selectedCategory === "Favoritos" && favorites.has(agent.id)) ||
+                           agent.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const featuredAgents = agents.slice(0, 3);
+
+  const toggleFavorite = (agentId: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(agentId)) {
+        newFavorites.delete(agentId);
+      } else {
+        newFavorites.add(agentId);
+      }
+      return newFavorites;
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-8">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* Featured Agents Section */}
+      <div className="mb-12">
+        <div className="flex items-center space-x-2 mb-6">
+          <Star className="w-6 h-6 text-yellow-500" />
+          <h2 className="text-2xl font-bold text-gray-900">Agentes em Destaque</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featuredAgents.map((agent: Agent) => (
+            <AgentCard
+              key={agent.id}
+              agent={agent}
+              isFavorited={favorites.has(agent.id)}
+              onToggleFavorite={toggleFavorite}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Filtros por categoria */}
-      <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
-          {categories.map((category) => {
-            const IconComponent = category.icon;
-            return (
-              <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-2">
-                <IconComponent className="h-4 w-4" />
-                <span className="hidden sm:inline">{category.name}</span>
-                <Badge variant="secondary" className="text-xs">
-                  {category.count}
-                </Badge>
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-
-        {/* Conteúdo das abas */}
-        {categories.map((category) => (
-          <TabsContent key={category.id} value={category.id} className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAgents.map((agent) => (
-                <Card key={agent.id} className="hover:shadow-md transition-shadow">
-                  {/* Botão de favorito */}
-                  <button
-                    onClick={() => toggleFavorite(agent.id)}
-                    className="absolute top-3 right-3 z-10 p-1"
-                  >
-                    <Heart 
-                      className={`h-4 w-4 ${agent.isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
-                    />
-                  </button>
-
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg pr-8">
-                      {agent.name}
-                    </CardTitle>
-                    <Badge className={getCategoryColor(agent.category.color)}>
-                      {agent.category.name}
-                    </Badge>
-                  </CardHeader>
-
-                  <CardContent>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {agent.description}
-                    </p>
-
-                    {/* Tempo estimado */}
-                    <div className="flex items-center space-x-1 mb-4 text-xs text-gray-600">
-                      <Clock className="h-3 w-3" />
-                      <span>{agent.estimatedTime}</span>
-                    </div>
-
-                    {/* Botão de ação */}
-                    {!agent.isAvailable ? (
-                      <Button disabled className="w-full" variant="secondary">
-                        <Lock className="h-4 w-4 mr-2" />
-                        Indisponível
-                      </Button>
-                    ) : !agent.userCanAccess ? (
-                      <Button disabled className="w-full" variant="outline">
-                        <Lock className="h-4 w-4 mr-2" />
-                        Acesso Restrito
-                      </Button>
-                    ) : (
-                      <Button 
-                        className="w-full"
-                        onClick={() => handleUseAgent(agent.id)}
-                      >
-                        <Play className="h-4 w-4 mr-2" />
-                        Usar Agente
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+      {/* Search and Filters */}
+      <div className="mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Buscar agentes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-600">
+              {filteredAgents.length} agentes encontrados
+            </span>
+            
+            <div className="flex items-center space-x-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="w-4 h-4" />
+              </Button>
             </div>
+          </div>
+        </div>
 
-            {/* Estado vazio */}
-            {filteredAgents.length === 0 && (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Zap className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Nenhum agente encontrado</h3>
-                  <p className="text-gray-600 mb-4">
-                    {searchQuery 
-                      ? `Nenhum agente encontrado para "${searchQuery}"`
-                      : 'Nenhum agente disponível nesta categoria'
-                    }
-                  </p>
-                  {searchQuery && (
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setSearchQuery('')}
-                    >
-                      Limpar busca
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+        {/* Category Filters */}
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(category)}
+              className={`text-sm ${
+                selectedCategory === category 
+                  ? "bg-blue-600 text-white" 
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Agents Grid */}
+      <div className={`grid gap-6 ${
+        viewMode === "grid" 
+          ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+          : "grid-cols-1"
+      }`}>
+        {filteredAgents.map((agent: Agent) => (
+          <AgentCard
+            key={agent.id}
+            agent={agent}
+            isFavorited={favorites.has(agent.id)}
+            onToggleFavorite={toggleFavorite}
+          />
         ))}
-      </Tabs>
+      </div>
 
-
+      {/* Empty State */}
+      {filteredAgents.length === 0 && (
+        <div className="text-center py-16">
+          <div className="text-6xl mb-4">🤖</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Nenhum agente encontrado
+          </h3>
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+            Tente ajustar sua busca ou explorar diferentes categorias para encontrar o agente ideal.
+          </p>
+          <Button 
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedCategory("Todos");
+            }}
+            variant="outline"
+          >
+            Limpar Filtros
+          </Button>
+        </div>
+      )}
     </div>
   );
-};
-
-export default Agents;
+}
