@@ -33,7 +33,6 @@ import {
   agentPrompts,
   agentUsage,
   agentGenerations,
-  supplierReviews,
   type User, 
   type InsertUser,
   type Supplier,
@@ -104,6 +103,26 @@ import {
   type AgentWithPrompts
 } from "@shared/schema";
 import { db } from "./db";
+
+// Define SupplierReview types
+export type SupplierReview = {
+  id: number;
+  supplierId: number;
+  userId: number;
+  rating: number;
+  comment: string;
+  isApproved: boolean;
+  createdAt: Date;
+  userName?: string | null;
+};
+
+export type InsertSupplierReview = {
+  supplierId: number;
+  userId: number;
+  rating: number;
+  comment: string;
+  isApproved?: boolean;
+};
 import { eq, ilike, and, or, desc, asc, sql, count } from "drizzle-orm";
 
 export interface IStorage {
@@ -529,7 +548,7 @@ export class DatabaseStorage implements IStorage {
         comment: supplierReviews.comment,
         isApproved: supplierReviews.isApproved,
         createdAt: supplierReviews.createdAt,
-        userName: users.name,
+        userName: users.name || undefined,
       })
       .from(supplierReviews)
       .leftJoin(users, eq(supplierReviews.userId, users.id))
@@ -1818,6 +1837,7 @@ export class DatabaseStorage implements IStorage {
               id: users.id,
               name: users.name,
               username: users.username,
+              password: users.password || '',
               email: users.email,
               role: users.role,
               isActive: users.isActive,
