@@ -175,7 +175,7 @@ export default function AgentsPage() {
           <h2 className="text-2xl font-bold text-gray-900">Agentes em Destaque</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredAgents.map((agent) => (
+          {featuredAgents.map((agent: Agent) => (
             <AgentCard
               key={agent.id}
               agent={agent}
@@ -249,7 +249,7 @@ export default function AgentsPage() {
           ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
           : "grid-cols-1"
       }`}>
-        {filteredAgents.map((agent) => (
+        {filteredAgents.map((agent: Agent) => (
           <AgentCard
             key={agent.id}
             agent={agent}
