@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenAI } from '@google/genai';
 
-export type AIProvider = 'openai' | 'anthropic' | 'gemini' | 'deepseek';
+export type AIProvider = 'openai' | 'anthropic' | 'gemini';
 
 export interface AIRequest {
   provider: AIProvider;
@@ -97,28 +97,14 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 2000000
   },
   
-  // DeepSeek Models
-  'deepseek-chat': {
-    provider: 'deepseek',
-    model: 'deepseek-chat',
-    inputCostPer1M: 0.14,
-    outputCostPer1M: 0.28,
-    maxTokens: 64000
-  },
-  'deepseek-coder': {
-    provider: 'deepseek',
-    model: 'deepseek-coder',
-    inputCostPer1M: 0.14,
-    outputCostPer1M: 0.28,
-    maxTokens: 64000
-  }
+
 };
 
 class AIProviderService {
   private openai: OpenAI | null = null;
   private anthropic: Anthropic | null = null;
   private gemini: GoogleGenAI | null = null;
-  private deepseek: OpenAI | null = null; // DeepSeek uses OpenAI-compatible API
+
 
   constructor() {
     this.initializeProviders();
@@ -146,13 +132,7 @@ class AIProviderService {
       });
     }
 
-    // Initialize DeepSeek (OpenAI-compatible)
-    if (process.env.DEEPSEEK_API_KEY) {
-      this.deepseek = new OpenAI({
-        apiKey: process.env.DEEPSEEK_API_KEY,
-        baseURL: 'https://api.deepseek.com/v1',
-      });
-    }
+
   }
 
   private calculateCost(inputTokens: number, outputTokens: number, modelConfig: ModelConfig): number {
@@ -186,8 +166,7 @@ class AIProviderService {
           return await this.generateAnthropic(request, modelConfig);
         case 'gemini':
           return await this.generateGemini(request, modelConfig);
-        case 'deepseek':
-          return await this.generateDeepSeek(request, modelConfig);
+
         default:
           throw new Error(`Unsupported provider: ${request.provider}`);
       }
@@ -304,31 +283,7 @@ class AIProviderService {
     };
   }
 
-  private async generateDeepSeek(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
-    if (!this.deepseek) {
-      throw new Error('DeepSeek client not initialized. Please check DEEPSEEK_API_KEY.');
-    }
 
-    const response = await this.deepseek.chat.completions.create({
-      model: request.model,
-      messages: request.messages,
-      temperature: request.temperature || 0.7,
-      max_tokens: request.maxTokens || 2000,
-    });
-
-    const content = response.choices[0]?.message?.content || '';
-    const usage = response.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-
-    return {
-      content,
-      usage: {
-        inputTokens: usage.prompt_tokens,
-        outputTokens: usage.completion_tokens,
-        totalTokens: usage.total_tokens,
-      },
-      cost: this.calculateCost(usage.prompt_tokens, usage.completion_tokens, modelConfig),
-    };
-  }
 
   getAvailableModels(provider?: AIProvider): ModelConfig[] {
     const models = Object.values(MODEL_CONFIGS);
@@ -340,7 +295,6 @@ class AIProviderService {
       openai: !!this.openai,
       anthropic: !!this.anthropic,
       gemini: !!this.gemini,
-      deepseek: !!this.deepseek,
     };
   }
 }
