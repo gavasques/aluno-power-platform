@@ -17,6 +17,9 @@ const Hub = () => {
       return <Partners />;
     case "prompts-ia":
       return <PromptsIA />;
+    case "agents":
+    case "agentes":
+      return <AIAgents />;
     case "materiais":
       return <Materials />;
     case "templates":
