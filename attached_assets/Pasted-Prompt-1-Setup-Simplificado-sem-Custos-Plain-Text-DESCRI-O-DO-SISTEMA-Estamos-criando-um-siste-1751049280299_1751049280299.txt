@@ -1,50 +1,4 @@
-DESCRIÇÃO COMPLETA DO SISTEMA
-
-CONTEXTO GERAL:
-Estamos desenvolvendo um sistema de agentes de IA integrado ao projeto "Aluno Power Platform" - uma plataforma educacional para ensino de e-commerce e Amazon FBA. O sistema permite que administradores criem agentes especializados que os alunos podem usar para automatizar tarefas específicas.
-
-ARQUITETURA DO SISTEMA:
-
-•
-Área do Aluno: Interface simples para USAR agentes (sem configurações técnicas)
-
-•
-Área Admin: Gestão completa de agentes, prompts, modelos e monitoramento
-
-•
-Banco de Dados: PostgreSQL com 4 tabelas (agents, agent_prompts, agent_usage, agent_generations)
-
-•
-IA: Integração com OpenAI usando modelos atualizados do ChatGPT
-
-•
-MVP: Foco no essencial, sem complexidade desnecessária
-
-PRIMEIRO AGENTE - AMAZON LISTINGS:
-Agente especializado em criar títulos, bullet points e descrições para produtos Amazon baseado em análise de avaliações de concorrentes. Processo: Upload de CSVs do Helium10 ou texto manual → Análise das avaliações → Geração de conteúdo otimizado.
-
-TECNOLOGIAS:
-
-•
-Next.js/React com TypeScript
-
-•
-Tailwind CSS + shadcn-ui
-
-•
-PostgreSQL/MySQL
-
-•
-OpenAI API
-
-•
-Estrutura existente do projeto
-
-
-
-
-
-Prompt 1: Setup com Modelos Atualizados
+Prompt 1: Setup Simplificado sem Custos
 
 Plain Text
 
@@ -52,21 +6,21 @@ Plain Text
 DESCRIÇÃO DO SISTEMA:
 Estamos criando um sistema de agentes de IA para a plataforma "Aluno Power Platform". O sistema permite que admins criem agentes especializados que alunos usam para automatizar tarefas. Começamos com um agente para criar listings da Amazon baseado em análise de avaliações.
 
-ARQUITETURA:
-- Área Admin: Gestão de agentes, prompts, modelos e custos
+ARQUITETURA SIMPLIFICADA:
+- Área Admin: Gestão de agentes e prompts
 - Área Aluno: Interface simples para usar agentes
-- Banco: PostgreSQL com tracking completo de uso
+- Banco: PostgreSQL com tracking básico de uso
 - IA: OpenAI com modelos atualizados do ChatGPT
 
-Configure o projeto Aluno Power Platform para integrar o sistema de agentes com modelos atualizados.
+Configure o projeto Aluno Power Platform para integrar o sistema de agentes SIMPLIFICADO.
 
 REPOSITÓRIO: https://github.com/gavasques/aluno-power-platform
 
 SETUP NECESSÁRIO:
 
-1. **BANCO DE DADOS ATUALIZADO**
+1. **BANCO DE DADOS SIMPLIFICADO**
 ```sql
--- Tabela de Agentes (com custo manual)
+-- Tabela de Agentes (SEM custos)
 CREATE TABLE agents (
   id VARCHAR(36) PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
@@ -74,10 +28,9 @@ CREATE TABLE agents (
   category VARCHAR(100),
   icon VARCHAR(10),
   is_active BOOLEAN DEFAULT true,
-  model VARCHAR(100) NOT NULL, -- Campo texto: "gpt-4o", "gpt-4o-mini", "o1-preview"
+  model VARCHAR(100) NOT NULL, -- Campo texto: "gpt-4o", "gpt-4o-mini", etc.
   temperature DECIMAL(3,2) DEFAULT 0.7,
   max_tokens INTEGER DEFAULT 2000,
-  cost_per_1k_tokens DECIMAL(8,6) NOT NULL, -- Custo manual por 1000 tokens
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -93,17 +46,12 @@ CREATE TABLE agent_prompts (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de Uso
+-- Tabela de Uso SIMPLIFICADA
 CREATE TABLE agent_usage (
   id VARCHAR(36) PRIMARY KEY,
   agent_id VARCHAR(36) REFERENCES agents(id),
   user_id VARCHAR(36) NOT NULL,
   user_name VARCHAR(255),
-  input_tokens INTEGER,
-  output_tokens INTEGER,
-  total_tokens INTEGER,
-  cost_usd DECIMAL(10,6), -- Calculado com custo manual
-  processing_time_ms INTEGER,
   status ENUM('success', 'error') DEFAULT 'success',
   error_message TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -130,31 +78,7 @@ CREATE INDEX idx_usage_user_date ON agent_usage(user_id, created_at);
 
 
 1.
-MODELOS ATUALIZADOS (2024)
-Exemplos de modelos para inserção manual:
-
-•
-gpt-4o: 15.00por1Mtokens(input)/15.00 por 1M tokens (input) / 
-15.00por1Mtokens(input)/
-60.00 por 1M tokens (output)
-
-•
-gpt-4o-mini: 0.15por1Mtokens(input)/0.15 por 1M tokens (input) / 
-0.15por1Mtokens(input)/
-0.60 por 1M tokens (output)
-
-•
-o1-preview: 15.00por1Mtokens(input)/15.00 por 1M tokens (input) / 
-15.00por1Mtokens(input)/
-60.00 por 1M tokens (output)
-
-•
-o1-mini: 3.00por1Mtokens(input)/3.00 por 1M tokens (input) / 
-3.00por1Mtokens(input)/
-12.00 por 1M tokens (output)
-
-1.
-TIPOS TYPESCRIPT ATUALIZADOS
+TIPOS TYPESCRIPT SIMPLIFICADOS
 
 TypeScript
 
@@ -170,14 +94,28 @@ export interface Agent {
   model: string; // Campo livre: "gpt-4o", "gpt-4o-mini", etc.
   temperature: number;
   maxTokens: number;
-  costPer1kTokens: number; // Custo manual por 1000 tokens
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface ModelPricing {
-  inputCostPer1M: number;  // Custo por 1M tokens de input
-  outputCostPer1M: number; // Custo por 1M tokens de output
+export interface AgentPrompt {
+  id: string;
+  agentId: string;
+  promptType: 'system' | 'analysis' | 'title' | 'bulletPoints' | 'description';
+  content: string;
+  version: number;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+export interface AgentUsage {
+  id: string;
+  agentId: string;
+  userId: string;
+  userName: string;
+  status: 'success' | 'error';
+  errorMessage?: string;
+  createdAt: Date;
 }
 
 
@@ -192,7 +130,7 @@ DATABASE_URL=postgresql://...
 AGENTS_ENABLED=true
 
 
-Configure estrutura base com modelos atualizados e custo manual.
+Configure estrutura base simplificada sem complexidade de custos.
 
 DIRETRIZES DE CÓDIGO LIMPO (OBRIGATÓRIAS):
 

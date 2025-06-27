@@ -35,7 +35,7 @@ import {
   insertAgentGenerationSchema
 } from "@shared/schema";
 import { youtubeService } from "./services/youtubeService";
-import { openaiService } from "./services/openaiService";
+import { agentService } from "./services/agentService";
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -1632,13 +1632,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Agents API routes
+  // AI Agents
   app.get('/api/agents', async (req, res) => {
     try {
       const agents = await storage.getAgents();
       res.json(agents);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch agents' });
+    }
+  });
+
+  app.get('/api/agents/active', async (req, res) => {
+    try {
+      const agents = await storage.getActiveAgents();
+      res.json(agents);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch active agents' });
     }
   });
 
@@ -1658,6 +1667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertAgentSchema.parse(req.body);
       const agent = await storage.createAgent(validatedData);
+      broadcastNotification('agent_created', agent);
       res.status(201).json(agent);
     } catch (error) {
       res.status(400).json({ error: 'Invalid agent data' });
@@ -1668,6 +1678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertAgentSchema.partial().parse(req.body);
       const agent = await storage.updateAgent(req.params.id, validatedData);
+      broadcastNotification('agent_updated', agent);
       res.json(agent);
     } catch (error) {
       res.status(400).json({ error: 'Invalid agent data' });
@@ -1677,13 +1688,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/agents/:id', async (req, res) => {
     try {
       await storage.deleteAgent(req.params.id);
+      broadcastNotification('agent_deleted', { id: req.params.id });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete agent' });
     }
   });
 
-  // Agent Prompts routes
+  // Agent Prompts
   app.get('/api/agents/:agentId/prompts', async (req, res) => {
     try {
       const prompts = await storage.getAgentPrompts(req.params.agentId);
@@ -1706,7 +1718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/agent-prompts/:id', async (req, res) => {
+  app.put('/api/agents/prompts/:id', async (req, res) => {
     try {
       const validatedData = insertAgentPromptSchema.partial().parse(req.body);
       const prompt = await storage.updateAgentPrompt(req.params.id, validatedData);
@@ -1716,7 +1728,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/agent-prompts/:id', async (req, res) => {
+  app.delete('/api/agents/prompts/:id', async (req, res) => {
     try {
       await storage.deleteAgentPrompt(req.params.id);
       res.status(204).send();
@@ -1725,7 +1737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Agent Usage routes
+  // Agent Usage
   app.get('/api/agents/:agentId/usage', async (req, res) => {
     try {
       const usage = await storage.getAgentUsage(req.params.agentId);
@@ -1735,12 +1747,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/agents/:agentId/usage', async (req, res) => {
+  app.get('/api/users/:userId/agent-usage', async (req, res) => {
     try {
-      const validatedData = insertAgentUsageSchema.parse({
-        ...req.body,
-        agentId: req.params.agentId
-      });
+      const usage = await storage.getUserAgentUsage(req.params.userId);
+      res.json(usage);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch user agent usage' });
+    }
+  });
+
+  app.post('/api/agents/usage', async (req, res) => {
+    try {
+      const validatedData = insertAgentUsageSchema.parse(req.body);
       const usage = await storage.createAgentUsage(validatedData);
       res.status(201).json(usage);
     } catch (error) {
@@ -1748,7 +1766,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Agent Generations routes
+  // Agent Generations
+  app.get('/api/agent-usage/:usageId/generation', async (req, res) => {
+    try {
+      const generation = await storage.getAgentGeneration(req.params.usageId);
+      if (!generation) {
+        return res.status(404).json({ error: 'Generation not found' });
+      }
+      res.json(generation);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch generation' });
+    }
+  });
+
   app.post('/api/agent-generations', async (req, res) => {
     try {
       const validatedData = insertAgentGenerationSchema.parse(req.body);
@@ -1759,32 +1789,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // OpenAI Processing route
-  app.post('/api/agents/:agentId/process', async (req, res) => {
+  // Agent Execution
+  app.post('/api/agents/:agentId/execute', async (req, res) => {
     try {
-      const { productName, productInfo, reviewsData, format } = req.body;
-      const agentId = req.params.agentId;
-      
-      // TODO: Get from authenticated user session
-      const userId = "user-1";
-      const userName = "Demo User";
+      const { agentId } = req.params;
+      const { userId, userName, productInfo, reviewsData } = req.body;
 
-      const result = await openaiService.processAmazonListing({
+      if (!userId || !userName || !productInfo || !reviewsData) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: userId, userName, productInfo, reviewsData' 
+        });
+      }
+
+      const generation = await agentService.executeAgent(
         agentId,
         userId,
         userName,
-        productName,
         productInfo,
-        reviewsData,
-        format: format || 'text'
+        reviewsData
+      );
+
+      broadcastNotification('agent_executed', {
+        agentId,
+        userId,
+        generation: generation.id
       });
 
-      res.json(result);
-    } catch (error: any) {
-      console.error('OpenAI processing error:', error);
+      res.json(generation);
+    } catch (error) {
+      console.error('Agent execution error:', error);
       res.status(500).json({ 
-        error: error.message || 'Failed to process listing',
-        details: error.response?.data || null
+        error: error instanceof Error ? error.message : 'Agent execution failed' 
       });
     }
   });

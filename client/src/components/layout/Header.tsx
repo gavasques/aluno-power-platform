@@ -101,13 +101,6 @@ export function Header() {
                   Dashboard
                 </Link>
               </NavigationMenuItem>
-              
-              <NavigationMenuItem>
-                <Link to="/agents" className={navigationMenuTriggerStyle()}>
-                  <Bot className="mr-2 h-4 w-4" />
-                  Agentes IA
-                </Link>
-              </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/videos" className={navigationMenuTriggerStyle()}>
                   <Youtube className="mr-2 h-4 w-4" />
@@ -143,7 +136,7 @@ export function Header() {
                 </NavigationMenuItem>
               ))}
               <NavigationMenuItem>
-                <Link to="/agentes-ia" className={navigationMenuTriggerStyle()}>
+                <Link to="/hub/agents" className={navigationMenuTriggerStyle()}>
                   <Bot className="mr-2 h-4 w-4" />
                   Agentes de IA
                 </Link>

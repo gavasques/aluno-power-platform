@@ -3,6 +3,7 @@ import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { scheduler } from "./services/scheduler";
+import { seedAmazonAgent } from "./seeds/amazonAgent";
 
 const app = express();
 app.use(compression()); // Enable gzip compression
@@ -72,5 +73,8 @@ app.use((req, res, next) => {
     
     // Start the YouTube video scheduler
     scheduler.start();
+    
+    // Seed Amazon agent
+    seedAmazonAgent().catch(console.error);
   });
 })();
