@@ -19,6 +19,8 @@ import {
   partnerFiles,
   partnerReviews,
   partnerReviewReplies,
+  supplierReviews,
+  supplierBrands,
   toolReviews,
   toolReviewReplies,
   toolDiscounts,
@@ -128,8 +130,8 @@ export interface IStorage {
   }>;
   
   // Supplier Reviews
-  getSupplierReviews(supplierId: number): Promise<SupplierReview[]>;
-  createSupplierReview(review: InsertSupplierReview): Promise<SupplierReview>;
+  getSupplierReviews(supplierId: number): Promise<any[]>;
+  createSupplierReview(review: any): Promise<any>;
 
   // Partners
   getPartners(): Promise<Partner[]>;
@@ -305,9 +307,8 @@ export interface IStorage {
   updateWebhookConfig(id: number, config: Partial<InsertWebhookConfig>): Promise<WebhookConfig>;
   deleteWebhookConfig(id: number): Promise<void>;
 
-  // AI Agents
+  // Agents
   getAgents(): Promise<Agent[]>;
-  getActiveAgents(): Promise<Agent[]>;
   getAgent(id: string): Promise<Agent | undefined>;
   getAgentWithPrompts(id: string): Promise<AgentWithPrompts | undefined>;
   createAgent(agent: InsertAgent): Promise<Agent>;
@@ -316,21 +317,17 @@ export interface IStorage {
 
   // Agent Prompts
   getAgentPrompts(agentId: string): Promise<AgentPrompt[]>;
-  getActiveAgentPrompts(agentId: string, promptType?: string): Promise<AgentPrompt[]>;
+  getAgentPrompt(id: string): Promise<AgentPrompt | undefined>;
   createAgentPrompt(prompt: InsertAgentPrompt): Promise<AgentPrompt>;
   updateAgentPrompt(id: string, prompt: Partial<InsertAgentPrompt>): Promise<AgentPrompt>;
   deleteAgentPrompt(id: string): Promise<void>;
 
   // Agent Usage
   getAgentUsage(agentId: string): Promise<AgentUsage[]>;
-  getUserAgentUsage(userId: string): Promise<AgentUsage[]>;
   createAgentUsage(usage: InsertAgentUsage): Promise<AgentUsage>;
-  updateAgentUsage(id: string, usage: Partial<InsertAgentUsage>): Promise<AgentUsage>;
 
   // Agent Generations
-  getAgentGeneration(usageId: string): Promise<AgentGeneration | undefined>;
   createAgentGeneration(generation: InsertAgentGeneration): Promise<AgentGeneration>;
-  updateAgentGeneration(id: string, generation: Partial<InsertAgentGeneration>): Promise<AgentGeneration>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1920,15 +1917,9 @@ export class DatabaseStorage implements IStorage {
     await db.delete(toolVideos).where(eq(toolVideos.id, id));
   }
 
-  // AI Agents
+  // Agents
   async getAgents(): Promise<Agent[]> {
-    return await db.select().from(agents).orderBy(desc(agents.createdAt));
-  }
-
-  async getActiveAgents(): Promise<Agent[]> {
-    return await db.select().from(agents)
-      .where(eq(agents.isActive, true))
-      .orderBy(desc(agents.createdAt));
+    return await db.select().from(agents).where(eq(agents.isActive, true));
   }
 
   async getAgent(id: string): Promise<Agent | undefined> {
@@ -1949,7 +1940,8 @@ export class DatabaseStorage implements IStorage {
       .insert(agents)
       .values({
         ...agent,
-        updatedAt: new Date()
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
       .returning();
     return created;
@@ -1960,7 +1952,7 @@ export class DatabaseStorage implements IStorage {
       .update(agents)
       .set({
         ...agent,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(agents.id, id))
       .returning();
@@ -1973,30 +1965,25 @@ export class DatabaseStorage implements IStorage {
 
   // Agent Prompts
   async getAgentPrompts(agentId: string): Promise<AgentPrompt[]> {
-    return await db.select().from(agentPrompts)
-      .where(eq(agentPrompts.agentId, agentId))
-      .orderBy(agentPrompts.promptType, desc(agentPrompts.version));
+    return await db
+      .select()
+      .from(agentPrompts)
+      .where(and(eq(agentPrompts.agentId, agentId), eq(agentPrompts.isActive, true)))
+      .orderBy(agentPrompts.promptType);
   }
 
-  async getActiveAgentPrompts(agentId: string, promptType?: string): Promise<AgentPrompt[]> {
-    const conditions = [
-      eq(agentPrompts.agentId, agentId),
-      eq(agentPrompts.isActive, true)
-    ];
-
-    if (promptType) {
-      conditions.push(eq(agentPrompts.promptType, promptType));
-    }
-
-    return await db.select().from(agentPrompts)
-      .where(and(...conditions))
-      .orderBy(agentPrompts.promptType, desc(agentPrompts.version));
+  async getAgentPrompt(id: string): Promise<AgentPrompt | undefined> {
+    const [prompt] = await db.select().from(agentPrompts).where(eq(agentPrompts.id, id));
+    return prompt || undefined;
   }
 
   async createAgentPrompt(prompt: InsertAgentPrompt): Promise<AgentPrompt> {
     const [created] = await db
       .insert(agentPrompts)
-      .values(prompt)
+      .values({
+        ...prompt,
+        createdAt: new Date(),
+      })
       .returning();
     return created;
   }
@@ -2016,56 +2003,34 @@ export class DatabaseStorage implements IStorage {
 
   // Agent Usage
   async getAgentUsage(agentId: string): Promise<AgentUsage[]> {
-    return await db.select().from(agentUsage)
+    return await db
+      .select()
+      .from(agentUsage)
       .where(eq(agentUsage.agentId, agentId))
-      .orderBy(desc(agentUsage.createdAt));
-  }
-
-  async getUserAgentUsage(userId: string): Promise<AgentUsage[]> {
-    return await db.select().from(agentUsage)
-      .where(eq(agentUsage.userId, userId))
       .orderBy(desc(agentUsage.createdAt));
   }
 
   async createAgentUsage(usage: InsertAgentUsage): Promise<AgentUsage> {
     const [created] = await db
       .insert(agentUsage)
-      .values(usage)
+      .values({
+        ...usage,
+        createdAt: new Date(),
+      })
       .returning();
     return created;
-  }
-
-  async updateAgentUsage(id: string, usage: Partial<InsertAgentUsage>): Promise<AgentUsage> {
-    const [updated] = await db
-      .update(agentUsage)
-      .set(usage)
-      .where(eq(agentUsage.id, id))
-      .returning();
-    return updated;
   }
 
   // Agent Generations
-  async getAgentGeneration(usageId: string): Promise<AgentGeneration | undefined> {
-    const [generation] = await db.select().from(agentGenerations)
-      .where(eq(agentGenerations.usageId, usageId));
-    return generation || undefined;
-  }
-
   async createAgentGeneration(generation: InsertAgentGeneration): Promise<AgentGeneration> {
     const [created] = await db
       .insert(agentGenerations)
-      .values(generation)
+      .values({
+        ...generation,
+        createdAt: new Date(),
+      })
       .returning();
     return created;
-  }
-
-  async updateAgentGeneration(id: string, generation: Partial<InsertAgentGeneration>): Promise<AgentGeneration> {
-    const [updated] = await db
-      .update(agentGenerations)
-      .set(generation)
-      .where(eq(agentGenerations.id, id))
-      .returning();
-    return updated;
   }
 }
 
