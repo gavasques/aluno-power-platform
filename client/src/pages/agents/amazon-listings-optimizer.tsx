@@ -44,6 +44,16 @@ const AmazonListingsOptimizer = () => {
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStage, setProcessingStage] = useState(0);
+  const [processingProgress, setProcessingProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  const processingStages = [
+    'Analisando avaliações...',
+    'Gerando títulos...',
+    'Criando bullet points...',
+    'Finalizando descrição...'
+  ];
 
   const handleProductChange = (data: ProductData) => {
     setProductData(data);
@@ -66,12 +76,76 @@ const AmazonListingsOptimizer = () => {
     if (!isValid()) return;
     
     setIsProcessing(true);
-    
-    // Show alert as specified - processing will be implemented in next prompt
-    setTimeout(() => {
+    setError(null);
+    setProcessingStage(0);
+    setProcessingProgress(0);
+
+    try {
+      // Prepare review content
+      let reviewContent = '';
+      if (reviewsData.type === 'text') {
+        reviewContent = reviewsData.textContent;
+      } else {
+        // For CSV files, we'll use a placeholder - in production this would read file content
+        reviewContent = `Dados de ${reviewsData.csvFiles.length} arquivos CSV do Helium10 com ${reviewsData.reviewCount} avaliações processadas.`;
+      }
+
+      const requestData = {
+        productName: productData.productName,
+        mainKeywords: productData.mainKeywords,
+        longTailKeywords: productData.longTailKeywords,
+        features: productData.features,
+        additionalInfo: productData.additionalInfo,
+        reviewsData: {
+          type: reviewsData.type,
+          content: reviewContent,
+          reviewCount: reviewsData.reviewCount
+        }
+      };
+
+      // Simulate progress updates for each stage
+      const progressInterval = setInterval(() => {
+        setProcessingProgress(prev => {
+          const newProgress = prev + 2;
+          const currentStage = Math.floor(newProgress / 25);
+          
+          if (currentStage !== processingStage && currentStage < 4) {
+            setProcessingStage(currentStage);
+          }
+          
+          return Math.min(newProgress, 98);
+        });
+      }, 1500);
+
+      const response = await apiRequest('/api/agents/amazon-listings-optimizer/process', {
+        method: 'POST',
+        body: JSON.stringify(requestData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }) as { success: boolean; processingTime?: number; error?: string; data?: any };
+
+      clearInterval(progressInterval);
+      setProcessingProgress(100);
+
+      if (response.success) {
+        // TODO: Navigate to results page or show results
+        // For now, show success message
+        setTimeout(() => {
+          setIsProcessing(false);
+          alert(`Processamento concluído! Interface de resultados será implementada no próximo prompt.`);
+        }, 500);
+      } else {
+        throw new Error(response.error || 'Erro no processamento');
+      }
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro interno do servidor';
+      setError(errorMessage);
       setIsProcessing(false);
-      alert("Processamento será implementado no próximo prompt");
-    }, 1000);
+      setProcessingProgress(0);
+      setProcessingStage(0);
+    }
   };
 
   return (
@@ -131,6 +205,27 @@ const AmazonListingsOptimizer = () => {
           {/* Process Button */}
           <Card>
             <CardContent className="p-6">
+              {isProcessing && (
+                <div className="mb-6 space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold mb-2">Processando com IA</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {processingStages[processingStage]} ({processingProgress}%)
+                    </p>
+                    <Progress value={processingProgress} className="mb-2" />
+                    <p className="text-xs text-gray-500">
+                      Tempo estimado: 2-3 minutos
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-700 text-sm">{error}</p>
+                </div>
+              )}
+
               <ProcessingButton
                 isProcessing={isProcessing}
                 isValid={isValid()}
