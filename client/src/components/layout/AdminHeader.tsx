@@ -20,9 +20,7 @@ import {
   Settings,
   Database,
   Bot,
-  Shield,
-  Zap,
-  BarChart
+  Shield
 } from "lucide-react";
 
 const adminMenuItems = [
@@ -36,15 +34,6 @@ const adminMenuItems = [
       { title: "Tipos de Prompts IA", href: "/admin/cadastros/tipos-prompts-ia", icon: FileText },
       { title: "Tipos de Materiais", href: "/admin/cadastros/tipos-materiais", icon: FileText },
       { title: "Tipos de Ferramentas", href: "/admin/cadastros/tipos-ferramentas", icon: Settings },
-    ],
-  },
-  {
-    title: "Agentes IA",
-    items: [
-      { title: "Gestão de Agentes", href: "/admin/agentes", icon: Zap },
-      { title: "Categorias de Agentes", href: "/admin/agentes/categorias", icon: Database },
-      { title: "Execuções", href: "/admin/agentes/execucoes", icon: LayoutDashboard },
-      { title: "Estatísticas", href: "/admin/agentes/estatisticas", icon: BarChart },
     ],
   },
   {

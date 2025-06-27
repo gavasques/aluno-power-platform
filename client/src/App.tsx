@@ -15,7 +15,6 @@ import { TemplatesProvider } from "./contexts/TemplatesContext";
 import { PromptsProvider } from "./contexts/PromptsContext";
 import { YoutubeProvider } from "./contexts/YoutubeContext";
 import { AuthProvider } from "./contexts/AuthContext";
-import { AgentsProvider } from "./contexts/AgentsContext";
 
 // Import pages that exist
 import Dashboard from "./pages/Dashboard";
@@ -36,12 +35,8 @@ import MaterialDetailPage from "./pages/hub/MaterialDetailPage";
 import SupplierDetail from "./pages/hub/SupplierDetail";
 import TemplateDetail from "./pages/hub/TemplateDetail";
 import PromptDetail from "./pages/hub/PromptDetail";
-import AIAgents from "./pages/hub/AIAgents";
-import Agents from "./pages/agents";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
-import AgentsManagement from "./pages/admin/AgentsManagement";
-import AdminAgents from "./pages/admin/agents";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -67,7 +62,6 @@ function App() {
                     <ToolsProvider>
                       <TemplatesProvider>
                         <PromptsProvider>
-                          <AgentsProvider>
                         <Switch>
                           <Route path="/auth" component={Auth} />
 
@@ -118,20 +112,6 @@ function App() {
                                 <PromptDetail />
                               </Layout>
                             )}
-                          </Route>
-                          
-
-                          
-                          <Route path="/hub/agentes-ia">
-                            <Layout>
-                              <AIAgents />
-                            </Layout>
-                          </Route>
-                          
-                          <Route path="/agentes">
-                            <Layout>
-                              <Agents />
-                            </Layout>
                           </Route>
 
                           {/* Hub section routes */}
@@ -193,14 +173,6 @@ function App() {
                             )}
                           </Route>
                           
-                          <Route path="/admin/agentes/:section?/:id?/:action?">
-                            {(params) => (
-                              <AdminLayout>
-                                <AdminAgents />
-                              </AdminLayout>
-                            )}
-                          </Route>
-                          
                           <Route path="/admin/:section/:subsection?">
                             {(params) => (
                               <AdminLayout>
@@ -249,7 +221,6 @@ function App() {
 
                           </Switch>
                           <Toaster />
-                          </AgentsProvider>
                         </PromptsProvider>
                       </TemplatesProvider>
                     </ToolsProvider>
