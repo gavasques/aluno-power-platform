@@ -3,11 +3,13 @@ import { ShoppingCart } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { AgentHeader } from '@/components/agents/common/AgentHeader';
 import { ProcessingButton } from '@/components/agents/common/ProcessingButton';
 import { ProductForm } from '@/components/agents/amazon/ProductForm';
 import { ReviewsInput } from '@/components/agents/amazon/ReviewsInput';
 import { DataSummary } from '@/components/agents/amazon/DataSummary';
+import { apiRequest } from '@/lib/queryClient';
 
 export interface ProductData {
   productName: string;

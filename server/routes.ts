@@ -1824,6 +1824,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Amazon Listings Optimizer Processing
+  app.post('/api/agents/amazon-listings-optimizer/process', async (req, res) => {
+    const { processAmazonListing } = await import('./api/agents/amazon-listings-optimizer/process');
+    return processAmazonListing(req, res);
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server setup
