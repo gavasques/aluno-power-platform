@@ -15,6 +15,7 @@ import { TemplatesProvider } from "./contexts/TemplatesContext";
 import { PromptsProvider } from "./contexts/PromptsContext";
 import { YoutubeProvider } from "./contexts/YoutubeContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { AgentsProvider } from "./contexts/AgentsContext";
 
 // Import pages that exist
 import Dashboard from "./pages/Dashboard";
@@ -64,7 +65,8 @@ function App() {
                     <ToolsProvider>
                       <TemplatesProvider>
                         <PromptsProvider>
-                        <Switch>
+                          <AgentsProvider>
+                            <Switch>
                           <Route path="/auth" component={Auth} />
 
                           {/* Agents routes */}
@@ -238,6 +240,7 @@ function App() {
 
                           </Switch>
                           <Toaster />
+                        </AgentsProvider>
                         </PromptsProvider>
                       </TemplatesProvider>
                     </ToolsProvider>
