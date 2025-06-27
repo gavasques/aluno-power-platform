@@ -129,6 +129,12 @@ function App() {
                             </Layout>
                           </Route>
                           
+                          <Route path="/agents/amazon-listings-optimizer">
+                            <Layout>
+                              <AmazonListingsOptimizer />
+                            </Layout>
+                          </Route>
+                          
                           <Route path="/agentes">
                             <Layout>
                               <Agents />

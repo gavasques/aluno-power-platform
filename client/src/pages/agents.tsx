@@ -171,7 +171,7 @@ const Agents = () => {
   // Usar agente
   const handleUseAgent = (agentId: string) => {
     if (agentId === 'amazon-listing') {
-      setLocation('/agents/amazon');
+      setLocation('/agents/amazon-listings-optimizer');
     } else {
       // Para outros agentes, redirecionar para página genérica
       setLocation(`/agents/${agentId}`);
