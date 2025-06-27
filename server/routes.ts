@@ -35,6 +35,7 @@ import {
   insertAgentGenerationSchema
 } from "@shared/schema";
 import { youtubeService } from "./services/youtubeService";
+import { openaiService } from "./services/openaiService";
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -1755,6 +1756,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(generation);
     } catch (error) {
       res.status(400).json({ error: 'Invalid generation data' });
+    }
+  });
+
+  // OpenAI Processing route
+  app.post('/api/agents/:agentId/process', async (req, res) => {
+    try {
+      const { productName, productInfo, reviewsData, format } = req.body;
+      const agentId = req.params.agentId;
+      
+      // TODO: Get from authenticated user session
+      const userId = "user-1";
+      const userName = "Demo User";
+
+      const result = await openaiService.processAmazonListing({
+        agentId,
+        userId,
+        userName,
+        productName,
+        productInfo,
+        reviewsData,
+        format: format || 'text'
+      });
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('OpenAI processing error:', error);
+      res.status(500).json({ 
+        error: error.message || 'Failed to process listing',
+        details: error.response?.data || null
+      });
     }
   });
 

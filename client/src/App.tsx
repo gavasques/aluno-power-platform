@@ -37,6 +37,8 @@ import TemplateDetail from "./pages/hub/TemplateDetail";
 import PromptDetail from "./pages/hub/PromptDetail";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
+import AgentsPage from "./pages/AgentsPage";
+import AgentProcessorPage from "./pages/AgentProcessorPage";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -64,6 +66,21 @@ function App() {
                         <PromptsProvider>
                         <Switch>
                           <Route path="/auth" component={Auth} />
+
+                          {/* Agents routes */}
+                          <Route path="/agents/:id">
+                            {(params) => (
+                              <Layout>
+                                <AgentProcessorPage />
+                              </Layout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/agents">
+                            <Layout>
+                              <AgentsPage />
+                            </Layout>
+                          </Route>
 
                           {/* Detail routes with Layout */}
                           <Route path="/hub/materiais/:id">
