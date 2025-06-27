@@ -179,6 +179,12 @@ function App() {
                           </Route>
 
                           {/* Admin routes */}
+                          <Route path="/admin/agents/amazon-listings-optimizer/prompts">
+                            <AdminLayout>
+                              <AmazonListingsOptimizerPrompts />
+                            </AdminLayout>
+                          </Route>
+                          
                           <Route path="/admin/usuarios">
                             <AdminLayout>
                               <UserManagement />
