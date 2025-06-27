@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Copy, Eye, Star, TrendingUp, Target } from 'lucide-react';
+import { Download, Copy, Eye, Star, TrendingUp, Target, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { GeneratedContent } from '@/types/amazon';
-import { TitlesList } from './components/TitlesList';
-import { BulletPointsList } from './components/BulletPointsList';
-import { DescriptionEditor } from './components/DescriptionEditor';
-import { InsightsDisplay } from './components/InsightsDisplay';
+import { GeneratedContent, GeneratedTitle, ProductInsight } from '@/types/amazon';
 
 interface AmazonResultsProps {
   content: GeneratedContent;
@@ -126,7 +123,7 @@ ${content.searchTerms.join(', ')}
           <TabsContent value="titles" className="mt-6">
             <TitlesList 
               titles={content.titles}
-              onCopy={(title) => {
+              onCopy={(title: string) => {
                 navigator.clipboard.writeText(title);
                 toast({ title: "Título copiado!", description: "Título copiado para a área de transferência." });
               }}
