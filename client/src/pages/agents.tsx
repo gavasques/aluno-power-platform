@@ -6,9 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, 
-  Star, 
   Clock, 
-  Users, 
   Play,
   Zap,
   ShoppingCart,
@@ -16,9 +14,10 @@ import {
   MessageSquare,
   Target,
   Heart,
-  History,
   Lock,
-  CheckCircle
+  CheckCircle,
+  Users,
+  History
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
@@ -213,16 +212,13 @@ const Agents = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Todos os Agentes</h1>
-          <p className="text-gray-600 mt-1">
-            Use agentes de IA para automatizar suas tarefas e aumentar produtividade
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">Todos os Agentes</h1>
         </div>
         
         {/* Busca */}
-        <div className="relative w-full md:w-80">
+        <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Buscar agentes..."
@@ -253,13 +249,13 @@ const Agents = () => {
         {/* Conteúdo das abas */}
         {categories.map((category) => (
           <TabsContent key={category.id} value={category.id} className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredAgents.map((agent) => (
-                <Card key={agent.id} className="group hover:shadow-lg transition-all duration-300 relative">
+                <Card key={agent.id} className="hover:shadow-md transition-shadow">
                   {/* Botão de favorito */}
                   <button
                     onClick={() => toggleFavorite(agent.id)}
-                    className="absolute top-4 right-4 z-10 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                    className="absolute top-3 right-3 z-10 p-1"
                   >
                     <Heart 
                       className={`h-4 w-4 ${agent.isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
@@ -267,61 +263,23 @@ const Agents = () => {
                   </button>
 
                   <CardHeader className="pb-3">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg group-hover:text-primary transition-colors pr-8">
-                          {agent.name}
-                        </CardTitle>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge className={getCategoryColor(agent.category.color)}>
-                            {agent.category.name}
-                          </Badge>
-                          <Badge 
-                            variant="outline" 
-                            className={getDifficultyColor(agent.difficulty)}
-                          >
-                            {getDifficultyLabel(agent.difficulty)}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
+                    <CardTitle className="text-lg pr-8">
+                      {agent.name}
+                    </CardTitle>
+                    <Badge className={getCategoryColor(agent.category.color)}>
+                      {agent.category.name}
+                    </Badge>
                   </CardHeader>
 
                   <CardContent>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    <p className="text-sm text-gray-600 mb-4">
                       {agent.description}
                     </p>
 
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {agent.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {agent.tags.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{agent.tags.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-
-                    {/* Estatísticas */}
-                    <div className="grid grid-cols-2 gap-3 mb-4 text-xs text-gray-600">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-3 w-3" />
-                        <span>{agent.estimatedTime}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Users className="h-3 w-3" />
-                        <span>{agent.usageCount} usos</span>
-                      </div>
-                      {agent.lastUsed && (
-                        <div className="flex items-center space-x-1 col-span-2">
-                          <History className="h-3 w-3" />
-                          <span>Último uso: {agent.lastUsed}</span>
-                        </div>
-                      )}
+                    {/* Tempo estimado */}
+                    <div className="flex items-center space-x-1 mb-4 text-xs text-gray-600">
+                      <Clock className="h-3 w-3" />
+                      <span>{agent.estimatedTime}</span>
                     </div>
 
                     {/* Botão de ação */}
@@ -337,32 +295,13 @@ const Agents = () => {
                       </Button>
                     ) : (
                       <Button 
-                        className="w-full group-hover:bg-primary/90 transition-colors"
+                        className="w-full"
                         onClick={() => handleUseAgent(agent.id)}
                       >
                         <Play className="h-4 w-4 mr-2" />
                         Usar Agente
                       </Button>
                     )}
-
-                    {/* Status */}
-                    <div className="flex justify-between items-center mt-3 text-xs">
-                      <div className="flex items-center space-x-1">
-                        {agent.isAvailable && agent.userCanAccess ? (
-                          <>
-                            <CheckCircle className="h-3 w-3 text-green-500" />
-                            <span className="text-green-600">Disponível</span>
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="h-3 w-3 text-gray-400" />
-                            <span className="text-gray-500">
-                              {!agent.isAvailable ? 'Indisponível' : 'Sem Acesso'}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -395,37 +334,7 @@ const Agents = () => {
         ))}
       </Tabs>
 
-      {/* Resumo */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-primary">
-                {agents.filter(a => a.isAvailable && a.userCanAccess).length}
-              </div>
-              <div className="text-sm text-gray-600">Agentes Disponíveis</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-700">
-                {agents.reduce((sum, agent) => sum + agent.usageCount, 0)}
-              </div>
-              <div className="text-sm text-gray-600">Total de Usos</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-yellow-600">
-                {favorites.length}
-              </div>
-              <div className="text-sm text-gray-600">Favoritos</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-green-600">
-                {agents.filter(a => a.lastUsed).length}
-              </div>
-              <div className="text-sm text-gray-600">Usados Recentemente</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 };
