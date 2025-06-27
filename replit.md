@@ -101,6 +101,7 @@ This is a full-stack web application built as a "Ferramentas Hub" (Tools Hub) - 
 - June 27, 2025. Initial setup
 - June 27, 2025. Amazon Agent refactoring following clean code principles
 - June 27, 2025. Complete AI Agents system integration with admin structure
+- June 27, 2025. Administrative agents management page with clean code architecture
 
 ## User Preferences
 

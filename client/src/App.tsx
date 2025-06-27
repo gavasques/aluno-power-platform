@@ -41,6 +41,7 @@ import Agents from "./pages/agents";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
 import AgentsManagement from "./pages/admin/AgentsManagement";
+import AdminAgents from "./pages/admin/agents";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -195,7 +196,7 @@ function App() {
                           <Route path="/admin/agentes/:section?/:id?/:action?">
                             {(params) => (
                               <AdminLayout>
-                                <AgentsManagement />
+                                <AdminAgents />
                               </AdminLayout>
                             )}
                           </Route>
