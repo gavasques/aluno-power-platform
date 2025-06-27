@@ -65,7 +65,22 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 16385
   },
 
-  // Anthropic Models
+  // Anthropic Claude 4.0 Models
+  'claude-sonnet-4-20250514': {
+    provider: 'anthropic',
+    model: 'claude-sonnet-4-20250514',
+    inputCostPer1M: 3.00,
+    outputCostPer1M: 15.00,
+    maxTokens: 200000
+  },
+  'claude-4-opus': {
+    provider: 'anthropic',
+    model: 'claude-4-opus',
+    inputCostPer1M: 15.00,
+    outputCostPer1M: 75.00,
+    maxTokens: 200000
+  },
+  // Anthropic Claude 3.x Models (Legacy)
   'claude-3-5-sonnet-20241022': {
     provider: 'anthropic',
     model: 'claude-3-5-sonnet-20241022',
@@ -80,13 +95,6 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 75.00,
     maxTokens: 200000
   },
-  'claude-3-sonnet-20240229': {
-    provider: 'anthropic',
-    model: 'claude-3-sonnet-20240229',
-    inputCostPer1M: 3.00,
-    outputCostPer1M: 15.00,
-    maxTokens: 200000
-  },
   'claude-3-haiku-20240307': {
     provider: 'anthropic',
     model: 'claude-3-haiku-20240307',
@@ -95,7 +103,22 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 200000
   },
 
-  // Google Gemini Models
+  // Google Gemini 2.5 Models
+  'gemini-2.5-pro': {
+    provider: 'gemini',
+    model: 'gemini-2.5-pro',
+    inputCostPer1M: 1.25,
+    outputCostPer1M: 5.00,
+    maxTokens: 2000000
+  },
+  'gemini-2.5-flash': {
+    provider: 'gemini',
+    model: 'gemini-2.5-flash',
+    inputCostPer1M: 0.075,
+    outputCostPer1M: 0.30,
+    maxTokens: 1000000
+  },
+  // Google Gemini Legacy Models
   'gemini-1.5-pro': {
     provider: 'gemini',
     model: 'gemini-1.5-pro',

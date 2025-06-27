@@ -77,7 +77,7 @@ export default function AgentProviderSettings() {
   });
 
   // Fetch provider status
-  const { data: status = { openai: false, anthropic: false, gemini: false } } = useQuery({
+  const { data: status = { openai: false, anthropic: false, gemini: false } } = useQuery<ProviderStatus>({
     queryKey: ['/api/ai-providers/status'],
     enabled: user?.role === 'admin'
   });
