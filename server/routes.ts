@@ -1966,6 +1966,59 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // AI Provider management endpoints
+  app.get('/api/ai-providers/status', async (req, res) => {
+    try {
+      const { aiProviderService } = await import('./services/aiProviderService');
+      const status = aiProviderService.getProviderStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('Error getting provider status:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get('/api/ai-providers/models', async (req, res) => {
+    try {
+      const { aiProviderService } = await import('./services/aiProviderService');
+      const models = aiProviderService.getAvailableModels();
+      res.json(models);
+    } catch (error) {
+      console.error('Error getting available models:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/ai-providers/test', async (req, res) => {
+    try {
+      const { provider, model } = req.body;
+      const { aiProviderService } = await import('./services/aiProviderService');
+      
+      // Test with a simple message
+      const testResponse = await aiProviderService.generateCompletion({
+        provider,
+        model,
+        messages: [
+          { role: 'user', content: 'Responda apenas "OK" para confirmar que a conexão está funcionando.' }
+        ],
+        temperature: 0.1,
+        maxTokens: 10
+      });
+
+      res.json({
+        success: true,
+        message: `Conexão com ${provider} (${model}) testada com sucesso!`,
+        response: testResponse.content.substring(0, 50)
+      });
+    } catch (error) {
+      console.error('Error testing provider connection:', error);
+      res.status(500).json({
+        success: false,
+        message: `Erro ao testar conexão: ${error.message}`
+      });
+    }
+  });
+
   // Agent Usage routes
   app.get('/api/agents/:agentId/usage', async (req, res) => {
     try {

@@ -1,10 +1,7 @@
-import OpenAI from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 import { storage } from '../storage';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { aiProviderService } from './aiProviderService';
+import type { AIProvider } from './aiProviderService';
 
 interface ProcessListingRequest {
   agentId: string;

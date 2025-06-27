@@ -487,6 +487,7 @@ export const agents = pgTable("agents", {
   category: text("category"),
   icon: text("icon"),
   isActive: boolean("is_active").notNull().default(true),
+  provider: text("provider").notNull().default("openai"), // 'openai', 'anthropic', 'gemini', 'deepseek'
   model: text("model").notNull(),
   temperature: decimal("temperature", { precision: 3, scale: 2 }).notNull().default("0.7"),
   maxTokens: integer("max_tokens").notNull().default(2000),
@@ -495,6 +496,7 @@ export const agents = pgTable("agents", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => ({
   activeIdx: index("agents_active_idx").on(table.isActive),
+  providerIdx: index("agents_provider_idx").on(table.provider),
 }));
 
 // Agent Prompts table
