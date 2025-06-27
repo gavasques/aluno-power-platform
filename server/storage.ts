@@ -304,6 +304,33 @@ export interface IStorage {
   createWebhookConfig(config: InsertWebhookConfig): Promise<WebhookConfig>;
   updateWebhookConfig(id: number, config: Partial<InsertWebhookConfig>): Promise<WebhookConfig>;
   deleteWebhookConfig(id: number): Promise<void>;
+
+  // AI Agents
+  getAgents(): Promise<Agent[]>;
+  getActiveAgents(): Promise<Agent[]>;
+  getAgent(id: string): Promise<Agent | undefined>;
+  getAgentWithPrompts(id: string): Promise<AgentWithPrompts | undefined>;
+  createAgent(agent: InsertAgent): Promise<Agent>;
+  updateAgent(id: string, agent: Partial<InsertAgent>): Promise<Agent>;
+  deleteAgent(id: string): Promise<void>;
+
+  // Agent Prompts
+  getAgentPrompts(agentId: string): Promise<AgentPrompt[]>;
+  getActiveAgentPrompts(agentId: string, promptType?: string): Promise<AgentPrompt[]>;
+  createAgentPrompt(prompt: InsertAgentPrompt): Promise<AgentPrompt>;
+  updateAgentPrompt(id: string, prompt: Partial<InsertAgentPrompt>): Promise<AgentPrompt>;
+  deleteAgentPrompt(id: string): Promise<void>;
+
+  // Agent Usage
+  getAgentUsage(agentId: string): Promise<AgentUsage[]>;
+  getUserAgentUsage(userId: string): Promise<AgentUsage[]>;
+  createAgentUsage(usage: InsertAgentUsage): Promise<AgentUsage>;
+  updateAgentUsage(id: string, usage: Partial<InsertAgentUsage>): Promise<AgentUsage>;
+
+  // Agent Generations
+  getAgentGeneration(usageId: string): Promise<AgentGeneration | undefined>;
+  createAgentGeneration(generation: InsertAgentGeneration): Promise<AgentGeneration>;
+  updateAgentGeneration(id: string, generation: Partial<InsertAgentGeneration>): Promise<AgentGeneration>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1891,6 +1918,154 @@ export class DatabaseStorage implements IStorage {
 
   async deleteToolVideo(id: number): Promise<void> {
     await db.delete(toolVideos).where(eq(toolVideos.id, id));
+  }
+
+  // AI Agents
+  async getAgents(): Promise<Agent[]> {
+    return await db.select().from(agents).orderBy(desc(agents.createdAt));
+  }
+
+  async getActiveAgents(): Promise<Agent[]> {
+    return await db.select().from(agents)
+      .where(eq(agents.isActive, true))
+      .orderBy(desc(agents.createdAt));
+  }
+
+  async getAgent(id: string): Promise<Agent | undefined> {
+    const [agent] = await db.select().from(agents).where(eq(agents.id, id));
+    return agent || undefined;
+  }
+
+  async getAgentWithPrompts(id: string): Promise<AgentWithPrompts | undefined> {
+    const agent = await this.getAgent(id);
+    if (!agent) return undefined;
+
+    const prompts = await this.getAgentPrompts(id);
+    return { ...agent, prompts };
+  }
+
+  async createAgent(agent: InsertAgent): Promise<Agent> {
+    const [created] = await db
+      .insert(agents)
+      .values({
+        ...agent,
+        updatedAt: new Date()
+      })
+      .returning();
+    return created;
+  }
+
+  async updateAgent(id: string, agent: Partial<InsertAgent>): Promise<Agent> {
+    const [updated] = await db
+      .update(agents)
+      .set({
+        ...agent,
+        updatedAt: new Date()
+      })
+      .where(eq(agents.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAgent(id: string): Promise<void> {
+    await db.delete(agents).where(eq(agents.id, id));
+  }
+
+  // Agent Prompts
+  async getAgentPrompts(agentId: string): Promise<AgentPrompt[]> {
+    return await db.select().from(agentPrompts)
+      .where(eq(agentPrompts.agentId, agentId))
+      .orderBy(agentPrompts.promptType, desc(agentPrompts.version));
+  }
+
+  async getActiveAgentPrompts(agentId: string, promptType?: string): Promise<AgentPrompt[]> {
+    const conditions = [
+      eq(agentPrompts.agentId, agentId),
+      eq(agentPrompts.isActive, true)
+    ];
+
+    if (promptType) {
+      conditions.push(eq(agentPrompts.promptType, promptType));
+    }
+
+    return await db.select().from(agentPrompts)
+      .where(and(...conditions))
+      .orderBy(agentPrompts.promptType, desc(agentPrompts.version));
+  }
+
+  async createAgentPrompt(prompt: InsertAgentPrompt): Promise<AgentPrompt> {
+    const [created] = await db
+      .insert(agentPrompts)
+      .values(prompt)
+      .returning();
+    return created;
+  }
+
+  async updateAgentPrompt(id: string, prompt: Partial<InsertAgentPrompt>): Promise<AgentPrompt> {
+    const [updated] = await db
+      .update(agentPrompts)
+      .set(prompt)
+      .where(eq(agentPrompts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAgentPrompt(id: string): Promise<void> {
+    await db.delete(agentPrompts).where(eq(agentPrompts.id, id));
+  }
+
+  // Agent Usage
+  async getAgentUsage(agentId: string): Promise<AgentUsage[]> {
+    return await db.select().from(agentUsage)
+      .where(eq(agentUsage.agentId, agentId))
+      .orderBy(desc(agentUsage.createdAt));
+  }
+
+  async getUserAgentUsage(userId: string): Promise<AgentUsage[]> {
+    return await db.select().from(agentUsage)
+      .where(eq(agentUsage.userId, userId))
+      .orderBy(desc(agentUsage.createdAt));
+  }
+
+  async createAgentUsage(usage: InsertAgentUsage): Promise<AgentUsage> {
+    const [created] = await db
+      .insert(agentUsage)
+      .values(usage)
+      .returning();
+    return created;
+  }
+
+  async updateAgentUsage(id: string, usage: Partial<InsertAgentUsage>): Promise<AgentUsage> {
+    const [updated] = await db
+      .update(agentUsage)
+      .set(usage)
+      .where(eq(agentUsage.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Agent Generations
+  async getAgentGeneration(usageId: string): Promise<AgentGeneration | undefined> {
+    const [generation] = await db.select().from(agentGenerations)
+      .where(eq(agentGenerations.usageId, usageId));
+    return generation || undefined;
+  }
+
+  async createAgentGeneration(generation: InsertAgentGeneration): Promise<AgentGeneration> {
+    const [created] = await db
+      .insert(agentGenerations)
+      .values(generation)
+      .returning();
+    return created;
+  }
+
+  async updateAgentGeneration(id: string, generation: Partial<InsertAgentGeneration>): Promise<AgentGeneration> {
+    const [updated] = await db
+      .update(agentGenerations)
+      .set(generation)
+      .where(eq(agentGenerations.id, id))
+      .returning();
+    return updated;
   }
 }
 
