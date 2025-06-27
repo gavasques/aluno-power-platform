@@ -13,17 +13,13 @@ interface AmazonResultsProps {
   isExporting?: boolean;
 }
 
-export const AmazonResults = ({ content, onExport, isExporting }: AmazonResultsProps) => {
-  const [selectedTab, setSelectedTab] = useState('titles');
-  const { toast } = useToast();
-
-  const copyAllContent = async () => {
-    const allContent = `
+// Utilitários reutilizáveis
+const formatAllContent = (content: GeneratedContent): string => `
 TÍTULOS GERADOS:
 ${content.titles.map((title, index) => `${index + 1}. ${title.title} (Score: ${title.score})`).join('\n')}
 
 BULLET POINTS:
-${content.bulletPoints.map((point, index) => `• ${point}`).join('\n')}
+${content.bulletPoints.map((point) => `• ${point}`).join('\n')}
 
 DESCRIÇÃO:
 ${content.description}
@@ -33,37 +29,63 @@ ${content.keywords.join(', ')}
 
 TERMOS DE BUSCA:
 ${content.searchTerms.join(', ')}
-    `.trim();
+`.trim();
 
+const TAB_CONFIG = [
+  { id: 'titles', label: 'Títulos', icon: Star },
+  { id: 'bullets', label: 'Bullet Points', icon: Target },
+  { id: 'description', label: 'Descrição', icon: Eye },
+  { id: 'insights', label: 'Insights', icon: TrendingUp }
+] as const;
+
+// Componentes auxiliares modulares
+const ContentSection = ({ title, icon: Icon, children }: { 
+  title: string; 
+  icon: React.ComponentType<{ className?: string }>; 
+  children: React.ReactNode;
+}) => (
+  <div className="space-y-4">
+    <div className="flex items-center gap-2">
+      <Icon className="h-5 w-5" />
+      <h3 className="text-lg font-semibold">{title}</h3>
+    </div>
+    <div className="space-y-3">{children}</div>
+  </div>
+);
+
+const ContentCard = ({ children, index }: { 
+  children: React.ReactNode; 
+  index?: number;
+}) => (
+  <Card className="p-4">
+    <CardContent className="p-0">
+      {index !== undefined && (
+        <div className="mb-2">
+          <Badge variant="outline">#{index + 1}</Badge>
+        </div>
+      )}
+      {children}
+    </CardContent>
+  </Card>
+);
+
+export const AmazonResults = ({ content, onExport, isExporting }: AmazonResultsProps) => {
+  const [selectedTab, setSelectedTab] = useState('titles');
+  const { toast } = useToast();
+
+  const copyToClipboard = async (text: string, successMessage: string) => {
     try {
-      await navigator.clipboard.writeText(allContent);
-      toast({
-        title: "Conteúdo copiado!",
-        description: "Todo o conteúdo foi copiado para a área de transferência.",
-      });
-    } catch (err) {
-      toast({
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o conteúdo.",
-        variant: "destructive",
-      });
+      await navigator.clipboard.writeText(text);
+      toast({ title: "Copiado!", description: successMessage });
+    } catch {
+      toast({ title: "Erro ao copiar", variant: "destructive" });
     }
   };
 
-  const getTabIcon = (tabId: string) => {
-    switch (tabId) {
-      case 'titles':
-        return Star;
-      case 'bullets':
-        return Target;
-      case 'description':
-        return Eye;
-      case 'insights':
-        return TrendingUp;
-      default:
-        return Eye;
-    }
-  };
+  const copyAllContent = () => copyToClipboard(
+    formatAllContent(content), 
+    "Todo o conteúdo foi copiado para a área de transferência."
+  );
 
   return (
     <Card>
@@ -121,38 +143,81 @@ ${content.searchTerms.join(', ')}
           </TabsList>
 
           <TabsContent value="titles" className="mt-6">
-            <TitlesList 
-              titles={content.titles}
-              onCopy={(title: string) => {
-                navigator.clipboard.writeText(title);
-                toast({ title: "Título copiado!", description: "Título copiado para a área de transferência." });
-              }}
-            />
+            <ContentSection title="Títulos Otimizados" icon={Star}>
+              {content.titles.map((title, index) => (
+                <ContentCard key={title.id} index={index}>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <Badge variant="outline" className="mb-2">Score: {title.score}/10</Badge>
+                      <p className="font-medium">{title.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{title.length} caracteres</p>
+                    </div>
+                    <Button size="sm" variant="outline" 
+                      onClick={() => copyToClipboard(title.title, "Título copiado!")}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </ContentCard>
+              ))}
+            </ContentSection>
           </TabsContent>
 
           <TabsContent value="bullets" className="mt-6">
-            <BulletPointsList 
-              bulletPoints={content.bulletPoints}
-              onCopy={(bullet) => {
-                navigator.clipboard.writeText(bullet);
-                toast({ title: "Bullet point copiado!", description: "Bullet point copiado para a área de transferência." });
-              }}
-            />
+            <ContentSection title="Bullet Points" icon={Target}>
+              {content.bulletPoints.map((bullet, index) => (
+                <ContentCard key={index} index={index}>
+                  <div className="flex justify-between items-start">
+                    <p className="flex-1">{bullet}</p>
+                    <Button size="sm" variant="outline"
+                      onClick={() => copyToClipboard(bullet, "Bullet point copiado!")}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </ContentCard>
+              ))}
+            </ContentSection>
           </TabsContent>
 
           <TabsContent value="description" className="mt-6">
-            <DescriptionEditor 
-              description={content.description}
-              keywords={content.keywords}
-              onCopy={(description) => {
-                navigator.clipboard.writeText(description);
-                toast({ title: "Descrição copiada!", description: "Descrição copiada para a área de transferência." });
-              }}
-            />
+            <ContentSection title="Descrição do Produto" icon={Eye}>
+              <ContentCard>
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button size="sm" variant="outline"
+                      onClick={() => copyToClipboard(content.description, "Descrição copiada!")}>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copiar
+                    </Button>
+                  </div>
+                  <div className="bg-gray-50 border rounded-lg p-4">
+                    <pre className="whitespace-pre-wrap text-sm">{content.description}</pre>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {content.keywords.map((keyword, index) => (
+                      <Badge key={index} variant="secondary">{keyword}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </ContentCard>
+            </ContentSection>
           </TabsContent>
 
           <TabsContent value="insights" className="mt-6">
-            <InsightsDisplay insights={content.insights} />
+            <ContentSection title="Insights e Recomendações" icon={TrendingUp}>
+              {content.insights.map((insight, index) => (
+                <ContentCard key={index}>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-medium">{insight.title}</h4>
+                      <Badge variant={insight.impact === 'high' ? 'destructive' : 'secondary'}>
+                        {insight.impact === 'high' ? 'Alto' : insight.impact === 'medium' ? 'Médio' : 'Baixo'} Impacto
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{insight.description}</p>
+                  </div>
+                </ContentCard>
+              ))}
+            </ContentSection>
           </TabsContent>
         </Tabs>
 
