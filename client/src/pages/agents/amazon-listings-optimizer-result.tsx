@@ -192,88 +192,26 @@ export default function AmazonListingsOptimizerResult() {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const { toast } = useToast();
 
-  // Simular carregamento dos dados - em produção viria da query string ou context
+  // Load data from sessionStorage
   useEffect(() => {
-    // Mock data para demonstração - em produção seria obtido do estado global ou API
-    const mockResult: ProcessingResult = {
-      analysis: {
-        mainBenefits: [
-          "Qualidade de som excepcional com drivers de 40mm",
-          "Cancelamento ativo de ruído eficiente",
-          "Bateria de longa duração (30+ horas)"
-        ],
-        painPoints: [
-          "Conectividade Bluetooth instável em alguns dispositivos",
-          "Desconforto após uso prolongado",
-          "Falta de case de transporte adequado"
-        ],
-        keyFeatures: [
-          "Bluetooth 5.0",
-          "Cancelamento ativo de ruído",
-          "Drivers 40mm",
-          "Bateria 30h",
-          "Design dobrável"
-        ],
-        targetAudience: "Profissionais que trabalham remotamente, estudantes universitários, amantes de música e gamers casuais",
-        competitorWeaknesses: [
-          "Preço elevado em relação ao valor oferecido",
-          "Qualidade de construção inferior",
-          "Suporte técnico limitado"
-        ],
-        opportunityAreas: [
-          "Melhor custo-benefício",
-          "Design mais ergonômico",
-          "Conectividade mais estável"
-        ],
-        emotionalTriggers: [
-          "Produtividade no trabalho",
-          "Escape e relaxamento",
-          "Status e qualidade premium"
-        ],
-        searchIntentAnalysis: "Usuários buscam principalmente por qualidade de som, conforto e durabilidade da bateria",
-        pricePositioning: "Faixa média-premium (R$ 200-400) com foco em custo-benefício",
-        marketDifferentiators: [
-          "Tecnologia de cancelamento adaptativo",
-          "Conectividade multi-dispositivo",
-          "Design ergonômico superior"
-        ]
-      },
-      titles: [
-        "Fone Bluetooth Premium Cancelamento Ruído Ativo 30h Bateria Graves Potentes Conforto Ergonômico Trabalho Home Office Gaming Estudo Música",
-        "Headphone Bluetooth 5.0 Noise Cancelling Dobrável 40mm Drivers Qualidade Studio Microfone HD Chamadas Profissionais Bateria Longa Duração",
-        "Fone Ouvido Bluetooth Sem Fio Cancelamento Ativo Ruído Premium Quality Sound Confortável Leve Gaming Work From Home 30h Autonomia",
-        "Bluetooth Headphones Cancelamento Ruído Profissional Qualidade Studio Drivers 40mm Bateria 30h Microfone HD Ergonômico Dobrável Premium",
-        "Fone Bluetooth Noise Cancelling Premium Graves Potentes 30h Bateria Conforto Extremo Trabalho Remoto Gaming Música Qualidade Excepcional",
-        "Headphone Sem Fio Bluetooth 5.0 Ativo Noise Cancel Drivers 40mm Som Crystal Clear Bateria Longa Duração Ergonômico Gaming Profissional",
-        "Fone Bluetooth Premium Quality Cancelamento Ruído Adaptativo Conforto Ergonômico Superior Bateria 30h Gaming Work Music Studio Sound",
-        "Bluetooth Headset Cancelamento Ativo Ruído Profissional Qualidade Premium Drivers 40mm Bateria Longa Duração Confortável Gaming Office",
-        "Fone Ouvido Bluetooth Noise Cancelling Graves Potentes Som Cristalino Bateria 30h Ergonômico Dobrável Premium Gaming Work From Home",
-        "Headphone Bluetooth Premium Cancelamento Ruído Ativo Qualidade Studio Drivers 40mm Conforto Extremo Bateria Longa Gaming Profissional"
-      ],
-      bulletPoints: [
-        "🎵 QUALIDADE SONORA PREMIUM: Drivers de 40mm de alta definição entregam graves potentes, médios cristalinos e agudos nítidos para experiência musical imersiva",
-        "🔇 CANCELAMENTO ATIVO DE RUÍDO: Tecnologia ANC avançada elimina até 95% dos ruídos externos, perfeito para foco no trabalho e imersão completa",
-        "🔋 BATERIA DE LONGA DURAÇÃO: Até 30 horas de reprodução contínua com ANC ativo, carregamento rápido USB-C em apenas 2 horas, nunca fique sem música",
-        "💼 CONFORTO ERGONÔMICO: Almofadas memory foam ultra-macias e headband acolchoado garantem conforto mesmo após 8+ horas de uso contínuo",
-        "📱 CONECTIVIDADE UNIVERSAL: Bluetooth 5.0 estável conecta até 2 dispositivos simultaneamente, compatível com todos smartphones, tablets e computadores"
-      ],
-      description: "Experimente a revolução do áudio com nosso Fone Bluetooth Premium, projetado especificamente para profissionais exigentes e amantes da música de qualidade. Com tecnologia de cancelamento ativo de ruído de última geração, você terá foco total em suas atividades, seja no home office, gaming ou simplesmente relaxando com suas músicas favoritas.\n\nNossos drivers de 40mm de alta definição foram calibrados por engenheiros de áudio para entregar graves profundos e cristalinos, médios precisos e agudos brilhantes, proporcionando uma experiência sonora que rivaliza com equipamentos de estúdio profissional. A tecnologia ANC elimina até 95% dos ruídos externos, criando seu próprio ambiente sonoro privado.\n\nO design ergonômico com almofadas memory foam premium e headband ultra-acolchoado garante conforto excepcional mesmo durante maratonas de 8+ horas de uso. A construção dobrável e resistente torna o transporte simples e seguro.\n\nCom bateria de 30 horas e Bluetooth 5.0 que conecta até 2 dispositivos simultaneamente, você terá liberdade total para trabalhar, jogar e se entreter sem limitações. Microfone HD integrado garante chamadas profissionais cristalinas.\n\n✅ Garantia de 2 anos e suporte técnico especializado\n✅ Certificações internacionais de qualidade e segurança\n\nTransforme sua experiência sonora hoje mesmo - sua produtividade e bem-estar agradecem!",
-      processingTime: 45230,
-      tokensUsed: {
-        input: 2450,
-        output: 1230,
-        total: 3680
-      },
-      cost: 0.0892,
-      usageId: "usage-123",
-      generationId: "gen-456"
-    };
+    const storedResult = sessionStorage.getItem('amazonListingResult');
+    if (!storedResult) {
+      navigate('/agents/amazon-listings-optimizer');
+      return;
+    }
 
-    setResult(mockResult);
-    setEditedTitles([...mockResult.titles]);
-    setEditedBulletPoints([...mockResult.bulletPoints]);
-    setEditedDescription(mockResult.description);
-  }, []);
+    try {
+      const parsedResult: ProcessingResult = JSON.parse(storedResult);
+      setResult(parsedResult);
+      setEditedTitles([...parsedResult.titles]);
+      setEditedBulletPoints([...parsedResult.bulletPoints]);
+      setEditedDescription(parsedResult.description);
+    } catch (error) {
+      console.error('Error parsing stored result:', error);
+      navigate('/agents/amazon-listings-optimizer');
+      return;
+    }
+  }, [navigate]);
 
   const updateTitle = (index: number, value: string) => {
     const updated = [...editedTitles];
