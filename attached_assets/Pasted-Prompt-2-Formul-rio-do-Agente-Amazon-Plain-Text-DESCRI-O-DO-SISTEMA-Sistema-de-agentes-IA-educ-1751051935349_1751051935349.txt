@@ -1,0 +1,97 @@
+Prompt 2: Formulário do Agente Amazon
+
+Plain Text
+
+
+DESCRIÇÃO DO SISTEMA:
+Sistema de agentes IA educacional. Agora vamos criar o formulário do agente Amazon Listings Optimizer.
+
+OBJETIVO: Criar APENAS o formulário de entrada de dados (sem processamento).
+
+=== O QUE FAZER ===
+
+**PÁGINA PRINCIPAL:**
+✅ Criar: src/pages/agents/amazon-listings-optimizer.tsx
+✅ URL: /agents/amazon-listings-optimizer
+✅ Layout responsivo (desktop/mobile)
+
+**HEADER DO AGENTE:**
+✅ Ícone: 🛒
+✅ Título: "Amazon Listings Optimizer"
+✅ Descrição: "Agente especializado em otimizar listagens da Amazon através da análise de avaliações de concorrentes"
+✅ Badge azul: "Ativo"
+✅ Botão "Voltar aos Agentes"
+
+**FORMULÁRIO (5 CAMPOS ESPECÍFICOS):**
+
+1. **Nome do Produto**
+   ✅ Label: "Nome do Produto *"
+   ✅ Input text obrigatório
+   ✅ Placeholder: "Ex: Capa de Berço Descartável 300 Unidades"
+   ✅ Validação: mínimo 5 caracteres
+
+2. **Palavras-chave Principais**
+   ✅ Label: "Palavras-chave Principais *"
+   ✅ Input text obrigatório
+   ✅ Placeholder: "Ex: capa berço, descartável, bebê, proteção, higiênico"
+   ✅ Texto ajuda: "Até 10 palavras-chave separadas por vírgula"
+   ✅ Contador: "0/10 palavras-chave"
+
+3. **Palavras Long Tail**
+   ✅ Label: "Palavras Long Tail (Opcional)"
+   ✅ Input text opcional
+   ✅ Placeholder: "Ex: capa descartável para berço de bebê"
+   ✅ Texto ajuda: "Até 5 frases específicas separadas por vírgula"
+
+4. **Características Destacadas**
+   ✅ Label: "Características Destacadas *"
+   ✅ Textarea obrigatório
+   ✅ Placeholder: "Ex: Material hipoalergênico, Descartável, 300 unidades"
+   ✅ Texto ajuda: "Até 8 características separadas por vírgula"
+
+5. **Mais Informações**
+   ✅ Label: "Mais Informações (Opcional)"
+   ✅ Textarea opcional
+   ✅ Placeholder: "Informações adicionais: materiais, dimensões, certificações..."
+   ✅ Contador: "0/500 caracteres"
+
+**SEÇÃO AVALIAÇÕES (2 OPÇÕES):**
+
+**Tab 1: Upload CSV**
+✅ Área de drop zone
+✅ Texto: "Arraste até 10 arquivos CSV do Helium10"
+✅ Botão: "Selecionar Arquivos"
+✅ Lista de arquivos com botão remover
+
+**Tab 2: Texto Manual**
+✅ Textarea grande
+✅ Placeholder: "Cole as avaliações aqui, uma por linha..."
+✅ Contador: "0 avaliações detectadas"
+
+**RESUMO DOS DADOS:**
+✅ Card com informações preenchidas
+✅ Validação visual (checks verdes)
+
+**BOTÃO PROCESSAR:**
+✅ "Processar Listagem" (azul, largura total)
+✅ Só ativo quando campos obrigatórios preenchidos
+✅ Por enquanto apenas mostrar alert("Processamento será implementado no próximo prompt")
+
+=== O QUE NÃO FAZER ===
+
+❌ NÃO mostrar informações técnicas (modelo, temperatura, etc.)
+❌ NÃO implementar processamento IA ainda
+❌ NÃO criar interface de resultados ainda
+❌ NÃO adicionar campos desnecessários (marca, categoria, etc.)
+
+=== RESULTADO ESPERADO ===
+
+🎯 Formulário completo e funcional
+🎯 Validações básicas funcionando
+🎯 Upload de arquivos funcionando
+🎯 Interface limpa e responsiva
+🎯 Pronto para receber processamento IA
+
+FOQUE APENAS no formulário. Processamento será o próximo prompt.
+
+

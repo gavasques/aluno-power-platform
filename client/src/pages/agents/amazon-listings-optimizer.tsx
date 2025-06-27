@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { AgentHeader } from '@/components/agents/common/AgentHeader';
 import { ProcessingButton } from '@/components/agents/common/ProcessingButton';
 import { ProductForm } from '@/components/agents/amazon/ProductForm';
@@ -63,50 +64,23 @@ const AmazonListingsOptimizer = () => {
     if (!isValid()) return;
     
     setIsProcessing(true);
-    // TODO: Implement actual processing logic
+    
+    // Show alert as specified - processing will be implemented in next prompt
     setTimeout(() => {
       setIsProcessing(false);
-      // TODO: Navigate to results page or show results
-    }, 3000);
+      alert("Processamento será implementado no próximo prompt");
+    }, 1000);
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="ghost"
-            onClick={() => setLocation('/agentes')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar aos Agentes
-          </Button>
-        </div>
-        
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0">
-            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-              🛒
-            </div>
-          </div>
-          
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-gray-900">
-                Amazon Listings Optimizer
-              </h1>
-              <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                Ativo
-              </Badge>
-            </div>
-            <p className="text-lg text-gray-600">
-              Agente especializado em otimizar listagens da Amazon através da análise de avaliações de concorrentes
-            </p>
-          </div>
-        </div>
-      </div>
+      <AgentHeader
+        title="Amazon Listings Optimizer"
+        description="Agente especializado em otimizar listagens da Amazon através da análise de avaliações de concorrentes"
+        icon="🛒"
+        isActive={true}
+        onBack={() => setLocation('/agentes')}
+      />
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -155,26 +129,16 @@ const AmazonListingsOptimizer = () => {
           {/* Process Button */}
           <Card>
             <CardContent className="p-6">
-              <Button
-                onClick={handleProcess}
-                disabled={!isValid() || isProcessing}
-                className="w-full"
+              <ProcessingButton
+                isProcessing={isProcessing}
+                isValid={isValid()}
+                onProcess={handleProcess}
                 size="lg"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Processando...
-                  </>
-                ) : isValid() ? (
-                  <>
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Processar Listagem
-                  </>
-                ) : (
-                  'Preencha os campos obrigatórios'
-                )}
-              </Button>
+                processingText="Processando..."
+                idleText="Processar Listagem"
+                invalidText="Preencha os campos obrigatórios"
+                icon={<ShoppingCart className="h-4 w-4" />}
+              />
             </CardContent>
           </Card>
         </div>
