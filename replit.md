@@ -111,10 +111,14 @@ Preferred communication style: Simple, everyday language.
 - **June 27, 2025**: Integração completa com Anthropic (Claude) e Google Gemini
   - Removido DeepSeek do sistema
   - Implementadas integrações nativas com Claude e Gemini
-  - Adicionados modelos: Claude 3.5 Sonnet, Claude 3 Opus, Gemini 1.5 Pro, Gemini 2.0 Flash
+  - Adicionados modelos mais recentes:
+    - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
+    - Gemini 2.5: gemini-2.5-pro, gemini-2.5-flash
+    - Mantidos modelos legacy para compatibilidade
   - Interface de configuração de provedores totalmente reformulada
   - Sistema de teste de conectividade implementado
   - Cálculo automático de custos por modelo
+  - Validação de API keys e status em tempo real
 
 ## Changelog
 
