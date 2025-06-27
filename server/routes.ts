@@ -1759,7 +1759,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // OpenAI Processing route
+  // OpenAI Processing route (generic)
   app.post('/api/agents/:agentId/process', async (req, res) => {
     try {
       const { productName, productInfo, reviewsData, format } = req.body;
@@ -1785,6 +1785,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         error: error.message || 'Failed to process listing',
         details: error.response?.data || null
+      });
+    }
+  });
+
+  // Specific Amazon Listings Optimizer endpoint with enhanced processing
+  app.post('/api/agents/amazon-listings-optimizer/process', async (req, res) => {
+    try {
+      // Validate request method
+      if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Only POST method is allowed' });
+      }
+
+      // Validate and sanitize inputs
+      const {
+        productName,
+        category,
+        price,
+        keywords,
+        longTailKeywords,
+        features,
+        targetAudience,
+        competitors,
+        reviewsData,
+        format = 'text'
+      } = req.body;
+
+      // Required field validation
+      if (!productName?.trim()) {
+        return res.status(400).json({ error: 'Product name is required' });
+      }
+      if (!category?.trim()) {
+        return res.status(400).json({ error: 'Category is required' });
+      }
+      if (!keywords?.trim()) {
+        return res.status(400).json({ error: 'Keywords are required' });
+      }
+      if (!reviewsData?.trim()) {
+        return res.status(400).json({ error: 'Reviews data is required' });
+      }
+
+      // Sanitize inputs
+      const sanitizedData = {
+        productName: productName.trim(),
+        category: category.trim(),
+        price: price?.trim() || '',
+        keywords: keywords.trim(),
+        longTailKeywords: longTailKeywords?.trim() || '',
+        features: features?.trim() || '',
+        targetAudience: targetAudience?.trim() || '',
+        competitors: competitors?.trim() || '',
+        reviewsData: reviewsData.trim(),
+        format
+      };
+
+      // Price validation if provided
+      if (sanitizedData.price && isNaN(Number(sanitizedData.price))) {
+        return res.status(400).json({ error: 'Price must be a valid number' });
+      }
+
+      // TODO: Get from authenticated user session
+      const userId = "user-1";
+      const userName = "Demo User";
+      const agentId = "agent-amazon-listings";
+
+      const result = await openaiService.processAmazonListingOptimizer({
+        agentId,
+        userId,
+        userName,
+        ...sanitizedData
+      });
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Amazon Listings Optimizer processing error:', error);
+      res.status(500).json({ 
+        error: error.message || 'Failed to process listing optimization',
+        details: process.env.NODE_ENV === 'development' ? error.stack : null
       });
     }
   });

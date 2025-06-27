@@ -122,7 +122,7 @@ export default function AmazonListingsOptimizer() {
     updateField('uploadedFile', file);
   };
 
-  // Processar listagem (simulado)
+  // Processar listagem
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -132,12 +132,49 @@ export default function AmazonListingsOptimizer() {
 
     setIsProcessing(true);
     
-    // Simular processamento
-    setTimeout(() => {
+    try {
+      const requestData = {
+        productName: formData.productName,
+        category: formData.category,
+        price: formData.price,
+        keywords: formData.keywords,
+        longTailKeywords: formData.longTailKeywords,
+        features: formData.features,
+        targetAudience: formData.targetAudience,
+        competitors: formData.competitors,
+        reviewsData: reviewsTab === "upload" && formData.uploadedFile 
+          ? `Arquivo CSV carregado: ${formData.uploadedFile.name}` 
+          : formData.reviewsData,
+        format: reviewsTab === "upload" ? "csv" : "text"
+      };
+
+      const response = await fetch('/api/agents/amazon-listings-optimizer/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Falha no processamento');
+      }
+
+      const result = await response.json();
+      
+      // Log the successful result
+      console.log('Processamento concluído:', result);
+      
+      // Here you would typically navigate to a results page or show results in a modal
+      alert(`Processamento concluído com sucesso!\n\nTempo: ${result.processingTime}ms\nCusto: $${result.cost.toFixed(4)}\nTítulos gerados: ${result.titles.length}\nBullet points: ${result.bulletPoints.length}`);
+      
+    } catch (error: any) {
+      console.error('Erro no processamento:', error);
+      alert(`Erro no processamento: ${error.message}`);
+    } finally {
       setIsProcessing(false);
-      // Aqui seria feita a integração real com a API
-      console.log("Processando listagem:", formData);
-    }, 3000);
+    }
   };
 
   // Verificar se o formulário está válido
