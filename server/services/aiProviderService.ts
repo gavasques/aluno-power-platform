@@ -193,7 +193,7 @@ class AIProviderService {
       }
     } catch (error) {
       console.error(`AI Provider Error (${request.provider}):`, error);
-      throw new Error(`AI generation failed: ${error.message}`);
+      throw new Error(`AI generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

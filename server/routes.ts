@@ -2014,7 +2014,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.error('Error testing provider connection:', error);
       res.status(500).json({
         success: false,
-        message: `Erro ao testar conexão: ${error.message}`
+        message: `Erro ao testar conexão: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
     }
   });

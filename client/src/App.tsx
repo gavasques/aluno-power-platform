@@ -43,6 +43,7 @@ import AgentProcessorPage from "./pages/AgentProcessorPage";
 import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
 import AmazonListingsOptimizerResult from "./pages/agents/amazon-listings-optimizer-result";
 import AmazonListingsOptimizerPrompts from "./pages/admin/agents/AmazonListingsOptimizerPrompts";
+import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -179,6 +180,12 @@ function App() {
                           </Route>
 
                           {/* Admin routes */}
+                          <Route path="/admin/agents/providers">
+                            <AdminLayout>
+                              <AgentProviderSettings />
+                            </AdminLayout>
+                          </Route>
+                          
                           <Route path="/admin/agents/amazon-listings-optimizer/prompts">
                             <AdminLayout>
                               <AmazonListingsOptimizerPrompts />

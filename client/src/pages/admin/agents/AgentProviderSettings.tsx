@@ -115,7 +115,7 @@ function ModelSelector({
   models: ModelConfig[];
   onChange: (model: string) => void;
 }) {
-  const providerModels = models.filter(m => m.provider === provider);
+  const providerModels = models.filter((m: ModelConfig) => m.provider === provider);
 
   return (
     <div className="space-y-2">
