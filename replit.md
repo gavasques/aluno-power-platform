@@ -98,7 +98,22 @@ This is a full-stack web application built as a "Ferramentas Hub" (Tools Hub) - 
 ## Changelog
 
 - June 27, 2025. Initial setup
+- June 27, 2025. Amazon Agent refactoring following clean code principles
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+Code quality priorities:
+1. Readability (legibilidade)
+2. Maintainability (manutenibilidade) 
+3. Reusability (reusabilidade)
+4. Testability (testabilidade)
+5. SOLID principles
+6. Single Responsibility
+7. Remove obsolete/unused code
+8. Eliminate code duplication
+9. DRY (Don't Repeat Yourself)
+10. KISS (Keep It Simple, Stupid)
+11. Modularization
+12. Standardization

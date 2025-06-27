@@ -1,22 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, RotateCcw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  CSVUploadResult, 
-  ProductConfig, 
-  GeneratedContent, 
-  AmazonAgentStep,
-  AmazonCategory,
-  AmazonMarketplace,
-  AIModel,
-  InsightType 
-} from '@/types/amazon';
-import { AmazonCSVUpload } from './AmazonCSVUpload';
-import { AmazonProductForm } from './AmazonProductForm';
-import { AmazonSteps } from './AmazonSteps';
+import { ArrowLeft, Upload, Settings, Zap, Download } from 'lucide-react';
+import { ProductConfig, GeneratedContent, CSVUploadResult, InsightType } from '@/types/amazon';
 import { AmazonResults } from './AmazonResults';
 
 type AgentStep = 'upload' | 'config' | 'generate' | 'results';
@@ -25,344 +12,239 @@ interface AmazonAgentProps {
   onBack?: () => void;
 }
 
+// Configuração dos passos - DRY principle
+const STEP_CONFIG = {
+  upload: { label: 'Upload CSV', icon: Upload, progress: 25 },
+  config: { label: 'Configuração', icon: Settings, progress: 50 },
+  generate: { label: 'Geração', icon: Zap, progress: 75 },
+  results: { label: 'Resultados', icon: Download, progress: 100 }
+} as const;
+
+// Componente modular para navegação de passos
+const StepIndicator = ({ 
+  currentStep, 
+  onStepClick 
+}: { 
+  currentStep: AgentStep; 
+  onStepClick: (step: AgentStep) => void;
+}) => (
+  <div className="flex items-center justify-between mb-6">
+    {Object.entries(STEP_CONFIG).map(([stepId, config], index) => {
+      const isActive = currentStep === stepId;
+      const isCompleted = STEP_CONFIG[currentStep as AgentStep].progress > config.progress;
+      const Icon = config.icon;
+      
+      return (
+        <React.Fragment key={stepId}>
+          <div className="flex flex-col items-center">
+            <Button
+              variant={isActive ? "default" : isCompleted ? "secondary" : "outline"}
+              size="sm"
+              className="rounded-full w-10 h-10 p-0 mb-2"
+              onClick={() => onStepClick(stepId as AgentStep)}
+            >
+              <Icon className="h-4 w-4" />
+            </Button>
+            <span className={`text-xs ${isActive ? 'font-medium' : 'text-muted-foreground'}`}>
+              {config.label}
+            </span>
+          </div>
+          {index < Object.keys(STEP_CONFIG).length - 1 && (
+            <div className="flex-1 h-px bg-border mx-4 mt-5" />
+          )}
+        </React.Fragment>
+      );
+    })}
+  </div>
+);
+
 export const AmazonAgent = ({ onBack }: AmazonAgentProps) => {
   const [currentStep, setCurrentStep] = useState<AgentStep>('upload');
   const [uploadResult, setUploadResult] = useState<CSVUploadResult | null>(null);
-  const [productConfig, setProductConfig] = useState<ProductConfig | null>(null);
+  const [config, setConfig] = useState<ProductConfig | null>(null);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const { toast } = useToast();
 
-  const steps: AmazonAgentStep[] = useMemo(() => [
-    {
-      id: 'upload',
-      title: 'Upload de Dados',
-      description: 'Carregue um arquivo CSV com avaliações da Amazon',
-      status: uploadResult ? 'completed' : currentStep === 'upload' ? 'active' : 'pending',
-      component: () => (
-        <AmazonCSVUpload
-          onUploadComplete={handleUploadComplete}
-          onClear={handleClearUpload}
-          uploadResult={uploadResult}
-        />
-      )
-    },
-    {
-      id: 'config',
-      title: 'Configuração do Produto',
-      description: 'Configure as informações do seu produto',
-      status: productConfig ? 'completed' : currentStep === 'config' ? 'active' : 'pending',
-      component: () => (
-        <AmazonProductForm
-          onConfigSubmit={handleConfigSubmit}
-          initialConfig={productConfig || undefined}
-          isLoading={isGenerating}
-        />
-      )
-    },
-    {
-      id: 'generate',
-      title: 'Geração de Conteúdo',
-      description: 'IA analisa os dados e gera conteúdo otimizado',
-      status: isGenerating ? 'active' : generatedContent ? 'completed' : 'pending',
-      component: () => (
-        <div className="text-center py-8">
-          {isGenerating ? (
-            <div className="space-y-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="text-lg font-medium">Gerando conteúdo...</p>
-              <p className="text-sm text-muted-foreground">
-                Analisando {uploadResult?.validRows} avaliações e configurações do produto
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-lg font-medium">Pronto para gerar conteúdo!</p>
-              <p className="text-sm text-muted-foreground">
-                Dados carregados e produto configurado
-              </p>
-            </div>
-          )}
-        </div>
-      )
-    },
-    {
-      id: 'results',
-      title: 'Resultados',
-      description: 'Visualize e baixe o conteúdo gerado',
-      status: generatedContent ? 'completed' : 'pending',
-      component: () => generatedContent && (
-        <AmazonResults
-          content={generatedContent}
-          onExport={handleExport}
-          isExporting={isExporting}
-        />
-      )
-    }
-  ], [currentStep, uploadResult, productConfig, generatedContent, isGenerating, isExporting]);
-
+  // Handlers modulares
   const handleUploadComplete = (result: CSVUploadResult) => {
     setUploadResult(result);
     setCurrentStep('config');
-    toast({
-      title: "Upload concluído!",
-      description: `${result.validRows} avaliações processadas com sucesso.`,
-    });
   };
 
-  const handleClearUpload = () => {
-    setUploadResult(null);
-    setProductConfig(null);
-    setGeneratedContent(null);
-    setCurrentStep('upload');
-  };
-
-  const handleConfigSubmit = async (config: ProductConfig) => {
-    setProductConfig(config);
+  const handleConfigSubmit = async (productConfig: ProductConfig) => {
+    setConfig(productConfig);
     setCurrentStep('generate');
     setIsGenerating(true);
 
-    try {
-      // Simular geração de conteúdo com dados mais realistas
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
+    // Simulação de geração de conteúdo
+    setTimeout(() => {
       const mockContent: GeneratedContent = {
         titles: [
-          {
-            id: '1',
-            title: `${config.productName} Premium | ${config.keyFeatures.slice(0, 2).join(' + ')} | Garantia 2 Anos`,
-            score: 9.2,
-            reasoning: 'Inclui palavras-chave principais no início, menciona garantia e benefícios específicos',
-            length: 98
-          },
-          {
-            id: '2',
-            title: `${config.productName} Profissional - ${config.mainBenefits[0]} - Ideal para ${config.targetAudience.split(',')[0]}`,
-            score: 8.7,
-            reasoning: 'Foca no benefício principal e público-alvo específico',
-            length: 76
-          },
-          {
-            id: '3',
-            title: `${config.productName} | ${config.keyFeatures.slice(0, 3).join(' | ')} | Avaliação 4.8⭐`,
-            score: 8.3,
-            reasoning: 'Lista características técnicas e inclui prova social',
-            length: 84
-          }
+          { id: '1', title: `${productConfig.productName} - Premium Quality`, score: 9.2, length: 45 },
+          { id: '2', title: `Best ${productConfig.productName} for ${productConfig.targetAudience}`, score: 8.8, length: 52 },
+          { id: '3', title: `${productConfig.productName} - ${productConfig.keyFeatures[0]} Edition`, score: 8.5, length: 48 }
         ],
         bulletPoints: [
-          `✅ ${config.mainBenefits[0]} - Ideal para ${config.targetAudience.split(',')[0]?.trim()}`,
-          `🔧 ${config.keyFeatures[0]} - Tecnologia avançada para melhor performance`,
-          `📦 ${config.keyFeatures[1]} - Inclui tudo que você precisa para começar`,
-          `⚡ Instalação rápida em 5 minutos - Manual ilustrado em português`,
-          `🛡️ Garantia de 2 anos + Suporte técnico gratuito via WhatsApp`
+          `✅ ${productConfig.keyFeatures[0]} - Tecnologia avançada`,
+          `🎯 Ideal para ${productConfig.targetAudience}`,
+          `💡 ${productConfig.keyFeatures[1] || 'Fácil de usar'}`,
+          `🚀 Resultados comprovados`,
+          `⭐ Qualidade premium garantida`
         ],
-        description: `Descubra o ${config.productName}, a solução definitiva para ${config.targetAudience.toLowerCase()}. 
+        description: `Descubra o ${productConfig.productName}, a solução perfeita para ${productConfig.targetAudience}. 
+        
+Com ${productConfig.keyFeatures.join(', ')}, este produto oferece qualidade excepcional e resultados garantidos.
 
-Com ${config.keyFeatures.join(', ')}, este produto oferece ${config.mainBenefits.join(' e ')}.
+Características principais:
+- Design inovador e funcional
+- Materiais de alta qualidade
+- Fácil instalação e uso
+- Garantia de satisfação
 
-CARACTERÍSTICAS PRINCIPAIS:
-${config.keyFeatures.map(feature => `• ${feature}`).join('\n')}
-
-BENEFÍCIOS EXCLUSIVOS:
-${config.mainBenefits.map(benefit => `• ${benefit}`).join('\n')}
-
-ESPECIFICAÇÕES TÉCNICAS:
-• Material: Premium quality
-• Dimensões: Compacto e portátil
-• Compatibilidade: Universal
-• Garantia: 2 anos
-
-INCLUÍDO NA EMBALAGEM:
-• 1x ${config.productName}
-• Manual de instruções em português
-• Certificado de garantia
-• Suporte técnico gratuito
-
-Ideal para quem busca qualidade, durabilidade e excelente custo-benefício. Mais de 10.000 clientes satisfeitos!`,
+Ideal para quem busca ${productConfig.keyFeatures[0]} com máxima eficiência. Transforme sua experiência com nossa tecnologia premium.`,
         keywords: [
-          config.productName.toLowerCase(),
-          ...config.keyFeatures.map(f => f.toLowerCase()),
-          ...config.mainBenefits.map(b => b.toLowerCase()),
-          'premium', 'qualidade', 'garantia', 'durável'
+          productConfig.productName.toLowerCase(),
+          ...productConfig.keyFeatures.map(f => f.toLowerCase()),
+          productConfig.targetAudience.toLowerCase(),
+          'premium', 'qualidade', 'garantia', 'eficiente'
         ],
         searchTerms: [
-          config.productName,
-          `${config.productName} premium`,
-          `${config.productName} profissional`,
-          ...config.keyFeatures,
-          config.targetAudience.split(',')[0]?.trim()
-        ].filter(Boolean),
+          productConfig.productName,
+          `${productConfig.productName} premium`,
+          `melhor ${productConfig.productName}`,
+          `${productConfig.productName} ${productConfig.targetAudience}`
+        ],
         insights: [
           {
-            type: InsightType.KEYWORD_OPPORTUNITY,
-            title: 'Oportunidade de Palavra-chave',
-            description: `A palavra-chave "${config.keyFeatures[0]}" tem baixa concorrência mas alto volume de busca`,
-            impact: 'high',
-            category: 'keywords'
+            type: 'opportunity',
+            title: 'Alta Demanda de Mercado',
+            description: 'Produto com potencial de crescimento de 25% no próximo trimestre.',
+            impact: 'high'
           },
           {
-            type: InsightType.CONTENT_OPTIMIZATION,
-            title: 'Otimização de Conteúdo',
-            description: 'Inclua mais especificações técnicas nos bullet points para melhor conversão',
-            impact: 'medium',
-            category: 'optimization'
-          },
-          {
-            type: InsightType.AUDIENCE_BEHAVIOR,
-            title: 'Comportamento da Audiência',
-            description: `${config.targetAudience} valoriza garantia e suporte técnico - destaque esses pontos`,
-            impact: 'high',
-            category: 'audience'
+            type: 'optimization',
+            title: 'Otimização de Título',
+            description: 'Considere incluir termos de busca de cauda longa.',
+            impact: 'medium'
           }
         ]
       };
-
-      setGeneratedContent(mockContent);
-      setCurrentStep('results');
       
-      toast({
-        title: "Conteúdo gerado!",
-        description: `${mockContent.titles.length} títulos, ${mockContent.bulletPoints.length} bullet points e descrição prontos.`,
-      });
-
-    } catch (error) {
-      toast({
-        title: "Erro na geração",
-        description: "Não foi possível gerar o conteúdo. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
+      setGeneratedContent(mockContent);
       setIsGenerating(false);
+      setCurrentStep('results');
+    }, 3000);
+  };
+
+  const handleStepClick = (step: AgentStep) => {
+    const stepOrder: AgentStep[] = ['upload', 'config', 'generate', 'results'];
+    const currentIndex = stepOrder.indexOf(currentStep);
+    const targetIndex = stepOrder.indexOf(step);
+    
+    if (targetIndex <= currentIndex) {
+      setCurrentStep(step);
     }
   };
 
-  const handleExport = async (format: 'csv' | 'json' | 'txt') => {
+  const handleExport = (format: 'csv' | 'json' | 'txt') => {
     if (!generatedContent) return;
     
-    setIsExporting(true);
+    const content = format === 'json' 
+      ? JSON.stringify(generatedContent, null, 2)
+      : `Títulos:\n${generatedContent.titles.map(t => t.title).join('\n')}\n\nBullet Points:\n${generatedContent.bulletPoints.join('\n')}`;
     
-    try {
-      // Simular exportação
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `amazon-content.${format}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Renderização condicional dos componentes de cada passo
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 'upload':
+        return (
+          <CSVUpload
+            title="Upload da Planilha de Produtos"
+            description="Faça upload da sua planilha CSV com os produtos para otimização"
+            onUploadComplete={handleUploadComplete}
+            acceptedColumns={['produto', 'categoria', 'preco', 'descricao']}
+          />
+        );
       
-      let content = '';
-      let filename = '';
-      let mimeType = '';
-
-      switch (format) {
-        case 'csv':
-          content = `Tipo,Conteúdo,Score,Caracteres\n${generatedContent.titles.map(t => 
-            `Título,"${t.title}",${t.score},${t.length}`
-          ).join('\n')}\n${generatedContent.bulletPoints.map(b => 
-            `Bullet Point,"${b}",,${b.length}`
-          ).join('\n')}\nDescrição,"${generatedContent.description}",,${generatedContent.description.length}`;
-          filename = 'amazon-content.csv';
-          mimeType = 'text/csv';
-          break;
-        case 'json':
-          content = JSON.stringify(generatedContent, null, 2);
-          filename = 'amazon-content.json';
-          mimeType = 'application/json';
-          break;
-        case 'txt':
-          content = `TÍTULOS:\n${generatedContent.titles.map(t => t.title).join('\n\n')}\n\nBULLET POINTS:\n${generatedContent.bulletPoints.join('\n')}\n\nDESCRIÇÃO:\n${generatedContent.description}`;
-          filename = 'amazon-content.txt';
-          mimeType = 'text/plain';
-          break;
-      }
-
-      const blob = new Blob([content], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      toast({
-        title: "Arquivo exportado!",
-        description: `Conteúdo exportado como ${filename}`,
-      });
-
-    } catch (error) {
-      toast({
-        title: "Erro na exportação",
-        description: "Não foi possível exportar o arquivo.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExporting(false);
+      case 'config':
+        return uploadResult ? (
+          <AmazonConfigForm 
+            csvData={uploadResult}
+            onSubmit={handleConfigSubmit}
+          />
+        ) : null;
+      
+      case 'generate':
+        return (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <h3 className="text-lg font-semibold mb-2">Gerando Conteúdo Otimizado</h3>
+            <p className="text-muted-foreground mb-4">
+              Analisando seus produtos e criando títulos, descrições e bullet points otimizados...
+            </p>
+            <Progress value={75} className="w-64 mx-auto" />
+          </div>
+        );
+      
+      case 'results':
+        return generatedContent ? (
+          <AmazonResults 
+            content={generatedContent}
+            onExport={handleExport}
+            isExporting={false}
+          />
+        ) : null;
+      
+      default:
+        return null;
     }
   };
 
-  const handleStepClick = (stepId: string) => {
-    setCurrentStep(stepId as AgentStep);
-  };
-
-  const handleReset = () => {
-    setCurrentStep('upload');
-    setUploadResult(null);
-    setProductConfig(null);
-    setGeneratedContent(null);
-    setIsGenerating(false);
-  };
-
-  const progressValue = useMemo(() => {
-    const stepOrder = ['upload', 'config', 'generate', 'results'];
-    const currentIndex = stepOrder.indexOf(currentStep);
-    return ((currentIndex + 1) / stepOrder.length) * 100;
-  }, [currentStep]);
-
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {onBack && (
-            <Button variant="outline" size="sm" onClick={onBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          )}
-          <div>
-            <h1 className="text-3xl font-bold">🛒 Gerador de Listings Amazon</h1>
-            <p className="text-muted-foreground mt-1">
-              Crie conteúdo otimizado para Amazon usando análise de avaliações e IA
-            </p>
-          </div>
-        </div>
-        <Button variant="outline" onClick={handleReset}>
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Reiniciar
-        </Button>
-      </div>
-
-      {/* Progress */}
+    <div className="max-w-6xl mx-auto p-6">
       <Card>
-        <CardContent className="pt-6">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progresso</span>
-              <span>{Math.round(progressValue)}%</span>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {onBack && (
+                <Button variant="ghost" size="sm" onClick={onBack}>
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+              <div>
+                <CardTitle className="text-xl">Agente Amazon - Otimização de Produtos</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Gere títulos, descrições e bullet points otimizados para seus produtos
+                </p>
+              </div>
             </div>
-            <Progress value={progressValue} className="h-2" />
+            <Progress 
+              value={STEP_CONFIG[currentStep].progress} 
+              className="w-32" 
+            />
+          </div>
+        </CardHeader>
+        
+        <CardContent>
+          <StepIndicator 
+            currentStep={currentStep}
+            onStepClick={handleStepClick}
+          />
+          
+          <div className="min-h-[400px]">
+            {renderStepContent()}
           </div>
         </CardContent>
       </Card>
-
-      {/* Steps Overview */}
-      <AmazonSteps 
-        steps={steps}
-        currentStep={currentStep}
-        onStepClick={handleStepClick}
-      />
-
-      {/* Current Step Content */}
-      <div className="min-h-[400px]">
-        {steps.find(step => step.id === currentStep)?.component()}
-      </div>
     </div>
   );
 };

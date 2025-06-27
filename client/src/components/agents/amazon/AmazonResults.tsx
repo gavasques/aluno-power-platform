@@ -69,6 +69,43 @@ const ContentCard = ({ children, index }: {
   </Card>
 );
 
+// Componentes auxiliares para modularização
+const SummaryStats = ({ content }: { content: GeneratedContent }) => {
+  const stats = [
+    { label: 'Títulos', value: content.titles.length, color: 'blue' },
+    { label: 'Bullet Points', value: content.bulletPoints.length, color: 'green' },
+    { label: 'Keywords', value: content.keywords.length, color: 'purple' },
+    { label: 'Insights', value: content.insights.length, color: 'orange' }
+  ];
+
+  return (
+    <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+      {stats.map(({ label, value, color }) => (
+        <div key={label} className={`text-center p-3 bg-${color}-50 rounded-lg`}>
+          <p className={`text-2xl font-bold text-${color}-600`}>{value}</p>
+          <p className="text-sm text-muted-foreground">{label}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const KeywordsPreview = ({ keywords }: { keywords: string[] }) => (
+  <div className="mt-6 p-4 bg-gray-50 border rounded-lg">
+    <h4 className="font-medium text-gray-800 mb-2">Palavras-chave Identificadas:</h4>
+    <div className="flex flex-wrap gap-2">
+      {keywords.slice(0, 10).map((keyword, index) => (
+        <Badge key={index} variant="secondary">{keyword}</Badge>
+      ))}
+      {keywords.length > 10 && (
+        <span className="text-sm text-muted-foreground">
+          +{keywords.length - 10} mais
+        </span>
+      )}
+    </div>
+  </div>
+);
+
 export const AmazonResults = ({ content, onExport, isExporting }: AmazonResultsProps) => {
   const [selectedTab, setSelectedTab] = useState('titles');
   const { toast } = useToast();
@@ -119,27 +156,18 @@ export const AmazonResults = ({ content, onExport, isExporting }: AmazonResultsP
       <CardContent>
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            {[
-              { id: 'titles', label: 'Títulos', count: content.titles.length },
-              { id: 'bullets', label: 'Bullet Points', count: content.bulletPoints.length },
-              { id: 'description', label: 'Descrição', count: 1 },
-              { id: 'insights', label: 'Insights', count: content.insights.length }
-            ].map(tab => {
-              const Icon = getTabIcon(tab.id);
-              return (
-                <TabsTrigger 
-                  key={tab.id} 
-                  value={tab.id}
-                  className="flex items-center gap-2"
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{tab.label}</span>
-                  <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs">
-                    {tab.count}
-                  </span>
-                </TabsTrigger>
-              );
-            })}
+            {TAB_CONFIG.map(({ id, label, icon: Icon }) => (
+              <TabsTrigger key={id} value={id} className="flex items-center gap-2">
+                <Icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{label}</span>
+                <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs">
+                  {id === 'titles' ? content.titles.length :
+                   id === 'bullets' ? content.bulletPoints.length :
+                   id === 'description' ? 1 :
+                   content.insights.length}
+                </span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           <TabsContent value="titles" className="mt-6">
@@ -221,45 +249,8 @@ export const AmazonResults = ({ content, onExport, isExporting }: AmazonResultsP
           </TabsContent>
         </Tabs>
 
-        {/* Summary Stats */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-blue-50 rounded-lg">
-            <p className="text-2xl font-bold text-blue-600">{content.titles.length}</p>
-            <p className="text-sm text-muted-foreground">Títulos</p>
-          </div>
-          <div className="text-center p-3 bg-green-50 rounded-lg">
-            <p className="text-2xl font-bold text-green-600">{content.bulletPoints.length}</p>
-            <p className="text-sm text-muted-foreground">Bullet Points</p>
-          </div>
-          <div className="text-center p-3 bg-purple-50 rounded-lg">
-            <p className="text-2xl font-bold text-purple-600">{content.keywords.length}</p>
-            <p className="text-sm text-muted-foreground">Keywords</p>
-          </div>
-          <div className="text-center p-3 bg-orange-50 rounded-lg">
-            <p className="text-2xl font-bold text-orange-600">{content.insights.length}</p>
-            <p className="text-sm text-muted-foreground">Insights</p>
-          </div>
-        </div>
-
-        {/* Keywords Preview */}
-        <div className="mt-6 p-4 bg-gray-50 border rounded-lg">
-          <h4 className="font-medium text-gray-800 mb-2">Palavras-chave Identificadas:</h4>
-          <div className="flex flex-wrap gap-2">
-            {content.keywords.slice(0, 10).map((keyword, index) => (
-              <span 
-                key={index}
-                className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm"
-              >
-                {keyword}
-              </span>
-            ))}
-            {content.keywords.length > 10 && (
-              <span className="text-sm text-muted-foreground">
-                +{content.keywords.length - 10} mais
-              </span>
-            )}
-          </div>
-        </div>
+        <SummaryStats content={content} />
+        <KeywordsPreview keywords={content.keywords} />
       </CardContent>
     </Card>
   );
