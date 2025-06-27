@@ -151,7 +151,11 @@ const AIAgents = () => {
   };
 
   const handleAgentClick = (agentId: string) => {
-    setLocation(`/hub/agents/${agentId}`);
+    // Por enquanto, mostrar um toast informativo
+    toast({
+      title: "Agente selecionado",
+      description: `Você clicou no agente ${mockAgents.find(a => a.id === agentId)?.title}. Página de detalhes em desenvolvimento.`,
+    });
   };
 
   const getBadgeVariant = (badge: string) => {
