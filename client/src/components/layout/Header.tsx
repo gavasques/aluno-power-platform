@@ -136,7 +136,7 @@ export function Header() {
                 </NavigationMenuItem>
               ))}
               <NavigationMenuItem>
-                <Link to="/agentes-ia" className={navigationMenuTriggerStyle()}>
+                <Link to="/hub/agents" className={navigationMenuTriggerStyle()}>
                   <Bot className="mr-2 h-4 w-4" />
                   Agentes de IA
                 </Link>

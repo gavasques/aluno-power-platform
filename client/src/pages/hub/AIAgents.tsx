@@ -6,10 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Star, StarIcon } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { Agent, AGENT_CATEGORIES, AGENT_FILTERS } from '@/types/agent';
 
 const AIAgents = () => {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [favorites, setFavorites] = useState<string[]>(() => {
