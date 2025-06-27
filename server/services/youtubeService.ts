@@ -37,12 +37,17 @@ class YouTubeService {
   constructor() {
     this.apiKey = process.env.YOUTUBE_API_KEY || '';
     if (!this.apiKey) {
-      throw new Error('YOUTUBE_API_KEY is required');
+      console.warn('YOUTUBE_API_KEY not found - YouTube features will be limited');
     }
   }
 
   async searchVideos(query: string, maxResults: number = 20): Promise<YouTubeVideo[]> {
     try {
+      if (!this.apiKey) {
+        console.warn('YouTube API key not available');
+        return [];
+      }
+
       // Search for videos
       const searchUrl = `${this.baseUrl}/search?part=snippet&type=video&q=${encodeURIComponent(query)}&maxResults=${maxResults}&key=${this.apiKey}&order=relevance&publishedAfter=${this.getDateWeekAgo()}`;
       
@@ -106,6 +111,11 @@ class YouTubeService {
 
   async fetchChannelInfo(channelHandle: string): Promise<any> {
     try {
+      if (!this.apiKey) {
+        console.warn('YouTube API key not available');
+        return null;
+      }
+
       // Try multiple search approaches for better channel discovery
       const searchQueries = [
         channelHandle,
@@ -165,6 +175,11 @@ class YouTubeService {
 
   async fetchChannelVideos(channelHandle: string, maxResults: number = 20): Promise<YouTubeVideo[]> {
     try {
+      if (!this.apiKey) {
+        console.warn('YouTube API key not available');
+        return [];
+      }
+
       // Use the same search approach as fetchChannelInfo for consistency
       const searchQueries = [
         channelHandle,
@@ -253,6 +268,11 @@ class YouTubeService {
   async fetchAndCacheVideos(): Promise<void> {
     try {
       console.log('Starting YouTube video fetch...');
+      
+      if (!this.apiKey) {
+        console.log('No YouTube API key available - skipping video fetch');
+        return;
+      }
       
       // Fetch videos from Guilherme Vasques channel
       const channelHandle = '@guilhermeavasques';
