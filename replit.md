@@ -106,7 +106,16 @@ The system uses PostgreSQL with the following core tables:
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **June 27, 2025**: Integração completa com Anthropic (Claude) e Google Gemini
+  - Removido DeepSeek do sistema
+  - Implementadas integrações nativas com Claude e Gemini
+  - Adicionados modelos: Claude 3.5 Sonnet, Claude 3 Opus, Gemini 1.5 Pro, Gemini 2.0 Flash
+  - Interface de configuração de provedores totalmente reformulada
+  - Sistema de teste de conectividade implementado
+  - Cálculo automático de custos por modelo
+
 ## Changelog
 
-Changelog:
-- June 27, 2025. Initial setup
+- June 27, 2025. Initial setup and AI provider integrations
