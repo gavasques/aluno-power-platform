@@ -1,6 +1,7 @@
 
 import { useParams } from "wouter";
 import PromptsIA from "./hub/PromptsIA";
+import AIAgents from "./hub/AIAgents";
 import Materials from "./hub/Materials";
 import Templates from "./hub/Templates";
 import Tools from "./hub/Tools";

@@ -113,7 +113,7 @@ const AIAgents = () => {
     // Filtro por categoria/tipo
     switch (selectedFilter) {
       case 'favorites':
-        result = result.filter(agent => favorites.has(agent.id));
+        result = result.filter(agent => favorites.includes(agent.id));
         break;
       case 'beta':
         result = result.filter(agent => agent.isBeta);
@@ -142,14 +142,12 @@ const AIAgents = () => {
   }, [mockAgents, searchQuery, selectedFilter, favorites]);
 
   const toggleFavorite = (agentId: string) => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(agentId)) {
-      newFavorites.delete(agentId);
-    } else {
-      newFavorites.add(agentId);
-    }
+    const newFavorites = favorites.includes(agentId)
+      ? favorites.filter(id => id !== agentId)
+      : [...favorites, agentId];
+    
     setFavorites(newFavorites);
-    localStorage.setItem('ai-agent-favorites', JSON.stringify(Array.from(newFavorites)));
+    localStorage.setItem('ai-agent-favorites', JSON.stringify(newFavorites));
   };
 
   const handleAgentClick = (agentId: string) => {
@@ -200,9 +198,9 @@ const AIAgents = () => {
               className="text-xs px-2 py-1"
             >
               {filter.name}
-              {filter.id === 'favorites' && favorites.size > 0 && (
+              {filter.id === 'favorites' && favorites.length > 0 && (
                 <span className="ml-1 text-xs bg-primary text-primary-foreground rounded-full px-1">
-                  {favorites.size}
+                  {favorites.length}
                 </span>
               )}
             </TabsTrigger>
@@ -229,7 +227,7 @@ const AIAgents = () => {
                       toggleFavorite(agent.id);
                     }}
                   >
-                    {favorites.has(agent.id) ? (
+                    {favorites.includes(agent.id) ? (
                       <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                     ) : (
                       <StarIcon className="h-4 w-4 text-gray-400 hover:text-yellow-500" />

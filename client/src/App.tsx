@@ -115,6 +115,20 @@ function App() {
                               </Layout>
                             )}
                           </Route>
+                          
+                          <Route path="/hub/agents/:id">
+                            {(params) => (
+                              <Layout>
+                                <AgentDetail />
+                              </Layout>
+                            )}
+                          </Route>
+                          
+                          <Route path="/hub/agents">
+                            <Layout>
+                              <AIAgents />
+                            </Layout>
+                          </Route>
 
                           {/* Hub section routes */}
                           <Route path="/hub/parceiros">
