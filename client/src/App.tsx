@@ -42,6 +42,7 @@ import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
 import AgentsManagement from "./pages/admin/AgentsManagement";
 import AdminAgents from "./pages/admin/agents";
+import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
 
 // Create a simple Auth component
 const Auth = () => (

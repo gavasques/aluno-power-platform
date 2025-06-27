@@ -1,0 +1,212 @@
+DESCRIÇÃO DO SISTEMA:
+Sistema de agentes IA educacional para plataforma "Aluno Power Platform". Alunos acessam agentes via interface simples para automatizar tarefas de e-commerce. Primeiro agente: Amazon Listings Optimizer que cria títulos, bullet points e descrições baseado em análise de avaliações.
+
+OBJETIVO: Criar interface EXATA do agente Amazon conforme especificações detalhadas.
+
+REPOSITÓRIO: https://github.com/gavasques/aluno-power-platform
+
+=== O QUE DEVE FAZER ===
+
+**HEADER DO AGENTE (OBRIGATÓRIO):**
+✅ Mostrar ícone do agente: 🛒 (emoji carrinho)
+✅ Título: "Amazon Listings Optimizer" 
+✅ Descrição: "Agente especializado em otimizar listagens da Amazon através da análise de avaliações de concorrentes"
+✅ Badge azul: "Ativo" (pequeno, canto superior direito)
+✅ Botão "Voltar aos Agentes" (seta esquerda + texto)
+
+**FORMULÁRIO PRINCIPAL (OBRIGATÓRIO):**
+
+1. **SEÇÃO: Dados do Produto**
+   ✅ Título da seção: "Dados do Produto"
+   ✅ Subtítulo: "Insira as informações do produto e avaliações para processamento"
+
+   **Campo 1: Nome do Produto**
+   ✅ Label: "Nome do Produto *" (asterisco vermelho)
+   ✅ Input text obrigatório
+   ✅ Placeholder: "Ex: Capa de Berço Descartável 300 Unidades"
+   ✅ Validação: mínimo 5 caracteres
+   ✅ Mensagem erro: "Nome do produto é obrigatório (mín. 5 caracteres)"
+
+   **Campo 2: Palavras-chave Principais**
+   ✅ Label: "Palavras-chave Principais *" (asterisco vermelho)
+   ✅ Input text obrigatório
+   ✅ Placeholder: "Ex: capa berço, descartável, bebê, proteção, higiênico"
+   ✅ Texto de ajuda: "Insira até 10 palavras-chave separadas por vírgula (ordem de importância)"
+   ✅ Contador: "0/10 palavras-chave"
+   ✅ Validação: mínimo 3 palavras-chave
+   ✅ Mensagem erro: "Insira pelo menos 3 palavras-chave"
+
+   **Campo 3: Palavras Long Tail**
+   ✅ Label: "Palavras Long Tail (Opcional)"
+   ✅ Input text opcional
+   ✅ Placeholder: "Ex: capa descartável para berço de bebê, proteção higiênica berço"
+   ✅ Texto de ajuda: "Frases mais específicas com oportunidade (até 5, separadas por vírgula)"
+   ✅ Contador: "0/5 long tail"
+
+   **Campo 4: Características Destacadas**
+   ✅ Label: "Características Destacadas *" (asterisco vermelho)
+   ✅ Textarea obrigatório (3 linhas)
+   ✅ Placeholder: "Ex: Material hipoalergênico, Descartável, 300 unidades, Fácil aplicação, Proteção completa, Tamanho universal, Resistente, Econômico"
+   ✅ Texto de ajuda: "Características importantes do produto (até 8, separadas por vírgula)"
+   ✅ Contador: "0/8 características"
+   ✅ Validação: mínimo 3 características
+   ✅ Mensagem erro: "Insira pelo menos 3 características"
+
+   **Campo 5: Mais Informações**
+   ✅ Label: "Mais Informações (Opcional)"
+   ✅ Textarea opcional (4 linhas)
+   ✅ Placeholder: "Informações adicionais que considera úteis: materiais específicos, dimensões, certificações, diferenciais, etc."
+   ✅ Contador de caracteres: "0/500"
+
+2. **SEÇÃO: Avaliações dos Concorrentes**
+   ✅ Título da seção: "Avaliações dos Concorrentes"
+   ✅ Subtítulo: "Escolha como inserir as avaliações para análise"
+
+   **Tabs (2 opções):**
+   
+   **Tab 1: Upload de Arquivos CSV**
+   ✅ Título tab: "📁 Arquivos CSV"
+   ✅ Área de drop zone grande (200px altura)
+   ✅ Ícone de upload grande no centro
+   ✅ Texto principal: "Arraste e solte até 10 arquivos CSV do Helium10"
+   ✅ Texto secundário: "ou clique para selecionar arquivos"
+   ✅ Botão: "Selecionar Arquivos CSV"
+   ✅ Formatos aceitos: apenas .csv
+   ✅ Tamanho máximo: 5MB por arquivo
+   ✅ Lista de arquivos carregados:
+     - Nome do arquivo
+     - Tamanho
+     - Status (carregando/sucesso/erro)
+     - Botão X para remover
+   ✅ Contador: "0/10 arquivos"
+   ✅ Validação: pelo menos 1 arquivo
+   
+   **Tab 2: Texto Manual**
+   ✅ Título tab: "📝 Texto Manual"
+   ✅ Textarea grande (300px altura)
+   ✅ Placeholder: "Cole as avaliações aqui, uma por linha...\n\nExemplo:\nProduto excelente, muito bem feito\nGostei bastante, mas poderia ser maior\nQualidade boa, recomendo\n..."
+   ✅ Contador de avaliações: "0 avaliações detectadas"
+   ✅ Contador de caracteres: "0/10000"
+   ✅ Validação: mínimo 5 avaliações (5 linhas)
+   ✅ Detecção automática: contar linhas não vazias
+
+3. **RESUMO DOS DADOS**
+   ✅ Card informativo com fundo cinza claro
+   ✅ Título: "Resumo dos Dados"
+   ✅ Mostrar:
+     - ✅ Produto: [nome do produto]
+     - ✅ Palavras-chave: [quantidade] principais + [quantidade] long tail
+     - ✅ Características: [quantidade]
+     - ✅ Avaliações: [quantidade] (via CSV/texto)
+   ✅ Ícone de check verde quando tudo preenchido
+
+4. **BOTÕES DE AÇÃO**
+   ✅ Botão "Processar Listagem" (azul, largura total)
+   ✅ Ícone de processamento
+   ✅ Só ativo quando campos obrigatórios preenchidos
+   ✅ Estado desabilitado: cinza com cursor not-allowed
+   ✅ Texto quando desabilitado: "Preencha os campos obrigatórios"
+
+=== O QUE NÃO DEVE FAZER ===
+
+❌ **INFORMAÇÕES TÉCNICAS (PROIBIDO):**
+❌ NÃO mostrar: "Modelo: gpt-4o-mini"
+❌ NÃO mostrar: "Temperatura: 0.70"
+❌ NÃO mostrar: "Max Tokens: 2000"
+❌ NÃO mostrar: "Custo/1k: $0.600000"
+❌ NÃO mostrar NENHUMA informação técnica do modelo
+
+❌ **CAMPOS DESNECESSÁRIOS (PROIBIDO):**
+❌ NÃO incluir campo "Marca"
+❌ NÃO incluir campo "Categoria"
+❌ NÃO incluir campo "Mercado Alvo"
+❌ NÃO incluir dropdown de categorias
+❌ NÃO incluir seletor de país/mercado
+
+❌ **LAYOUT COMPLEXO (PROIBIDO):**
+❌ NÃO usar múltiplas etapas/steps
+❌ NÃO usar wizard/stepper
+❌ NÃO dividir em páginas separadas
+❌ NÃO usar modais para formulário
+
+❌ **FUNCIONALIDADES DESNECESSÁRIAS (PROIBIDO):**
+❌ NÃO incluir preview em tempo real
+❌ NÃO incluir validação de palavras-chave com APIs
+❌ NÃO incluir sugestões automáticas
+❌ NÃO incluir análise prévia de concorrentes
+
+=== RESULTADO ESPERADO ===
+
+🎯 **INTERFACE LIMPA E FUNCIONAL:**
+- Header simples com informações do agente
+- Formulário em uma única página
+- Campos organizados em 2 seções claras
+- Tabs para escolher tipo de input de avaliações
+- Resumo visual dos dados inseridos
+- Botão de ação claro e responsivo
+
+🎯 **EXPERIÊNCIA DO USUÁRIO:**
+- Preenchimento intuitivo e rápido
+- Validações claras e úteis
+- Feedback visual imediato
+- Interface responsiva (mobile/desktop)
+- Carregamento rápido
+
+🎯 **FUNCIONALIDADES ESSENCIAIS:**
+- Upload múltiplo de CSV funcional
+- Textarea para texto manual funcional
+- Validação de campos obrigatórios
+- Contadores dinâmicos
+- Detecção automática de avaliações
+
+=== RESULTADO QUE NÃO QUEREMOS ===
+
+🚫 **INTERFACE COMPLEXA:**
+- Múltiplas páginas/etapas
+- Muitos campos desnecessários
+- Layout confuso ou sobrecarregado
+- Informações técnicas visíveis
+
+🚫 **EXPERIÊNCIA RUIM:**
+- Validações confusas ou excessivas
+- Campos obrigatórios não marcados
+- Feedback inadequado ao usuário
+- Interface não responsiva
+
+🚫 **FUNCIONALIDADES QUEBRADAS:**
+- Upload de arquivos não funcionando
+- Contadores não atualizando
+- Validações não funcionando
+- Botões sem resposta
+
+**ARQUIVOS A CRIAR:**
+- src/pages/agents/amazon-listings-optimizer.tsx (página principal)
+- src/components/agents/amazon/ProductForm.tsx (formulário do produto)
+- src/components/agents/amazon/ReviewsInput.tsx (input de avaliações)
+- src/components/agents/amazon/DataSummary.tsx (resumo dos dados)
+
+**ROTEAMENTO:**
+- URL: /agents/amazon-listings-optimizer
+- Acessível via botão "Usar Agente" da listagem
+- Breadcrumb: Agentes > Amazon Listings Optimizer
+
+**VALIDAÇÕES OBRIGATÓRIAS:**
+- Nome produto: obrigatório, mín 5 caracteres
+- Palavras-chave: obrigatório, mín 3 palavras
+- Características: obrigatório, mín 3 características  
+- Avaliações: obrigatório, mín 5 avaliações (CSV ou texto)
+
+**RESPONSIVIDADE:**
+- Desktop: layout em 2 colunas (formulário + resumo)
+- Tablet: layout em 1 coluna, resumo abaixo
+- Mobile: layout vertical, campos empilhados
+
+Implemente EXATAMENTE conforme especificado. Foque na SIMPLICIDADE e FUNCIONALIDADE.
+
+DIRETRIZES DE CÓDIGO LIMPO (OBRIGATÓRIAS):
+- Legibilidade e manutenibilidade
+- Princípios SOLID e responsabilidade única
+- DRY (Don't Repeat Yourself)
+- KISS (Keep It Simple, Stupid)
+- Modularização e padronização
+- Código limpo sem comentários desnecessários
