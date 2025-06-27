@@ -78,7 +78,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         offset,
         search,
         categoryId: categoryId ? parseInt(categoryId) : undefined,
-        departmentId: departmentId ? parseInt(departmentId) : undefined,
         sortBy
       });
       

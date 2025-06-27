@@ -33,6 +33,7 @@ import {
   agentPrompts,
   agentUsage,
   agentGenerations,
+  supplierReviews,
   type User, 
   type InsertUser,
   type Supplier,
@@ -123,7 +124,6 @@ export interface IStorage {
     offset: number;
     search?: string;
     categoryId?: number;
-    departmentId?: number;
     sortBy?: string;
   }): Promise<{
     suppliers: Supplier[];
@@ -413,13 +413,12 @@ export class DatabaseStorage implements IStorage {
     offset: number;
     search?: string;
     categoryId?: number;
-    departmentId?: number;
     sortBy?: string;
   }): Promise<{
     suppliers: Supplier[];
     total: number;
   }> {
-    const { limit, offset, search, categoryId, departmentId, sortBy = 'name' } = options;
+    const { limit, offset, search, categoryId, sortBy = 'name' } = options;
     
     // Build where conditions
     const conditions = [];
@@ -434,9 +433,6 @@ export class DatabaseStorage implements IStorage {
     }
     if (categoryId) {
       conditions.push(eq(suppliers.categoryId, categoryId));
-    }
-    if (departmentId) {
-      conditions.push(eq(suppliers.departmentId, departmentId));
     }
 
     // Build order by
@@ -499,15 +495,18 @@ export class DatabaseStorage implements IStorage {
           categoryName = category?.name;
         }
 
-        // For now, use mock rating data since we don't have supplier reviews yet
-        // In a real implementation, this would query a supplier reviews table
-        const averageRating = 4.2; // Mock data
-        const totalReviews = 15; // Mock data
+        // Get actual rating data from supplier reviews
+        const reviews = await this.getSupplierReviews(supplier.id);
+        const approvedReviews = reviews.filter(r => r.isApproved);
+        const averageRating = approvedReviews.length > 0 
+          ? approvedReviews.reduce((sum, r) => sum + r.rating, 0) / approvedReviews.length 
+          : 0;
+        const totalReviews = approvedReviews.length;
 
         return {
           ...supplier,
           categoryName,
-          averageRating,
+          averageRating: averageRating.toFixed(1),
           totalReviews,
         };
       })
