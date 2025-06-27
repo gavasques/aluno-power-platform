@@ -15,6 +15,7 @@ import { TemplatesProvider } from "./contexts/TemplatesContext";
 import { PromptsProvider } from "./contexts/PromptsContext";
 import { YoutubeProvider } from "./contexts/YoutubeContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { AgentsProvider } from "./contexts/AgentsContext";
 
 // Import pages that exist
 import Dashboard from "./pages/Dashboard";
@@ -38,6 +39,7 @@ import PromptDetail from "./pages/hub/PromptDetail";
 import AIAgents from "./pages/hub/AIAgents";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
+import AgentsManagement from "./pages/admin/AgentsManagement";
 
 // Create a simple Auth component
 const Auth = () => (
