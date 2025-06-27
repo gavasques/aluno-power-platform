@@ -38,7 +38,7 @@ import TemplateDetail from "./pages/hub/TemplateDetail";
 import PromptDetail from "./pages/hub/PromptDetail";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
-import AgentsPage from "./pages/AgentsPage";
+import AgentsPage from "./pages/agents";
 import AgentProcessorPage from "./pages/AgentProcessorPage";
 
 // Create a simple Auth component
@@ -238,9 +238,9 @@ function App() {
                             </Layout>
                           </Route>
 
-                          </Switch>
-                          <Toaster />
-                        </AgentsProvider>
+                            </Switch>
+                            <Toaster />
+                          </AgentsProvider>
                         </PromptsProvider>
                       </TemplatesProvider>
                     </ToolsProvider>
