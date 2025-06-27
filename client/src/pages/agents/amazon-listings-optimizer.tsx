@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { 
   ArrowLeft, 
   ShoppingCart, 
@@ -55,6 +55,7 @@ export default function AmazonListingsOptimizer() {
   const [reviewsTab, setReviewsTab] = useState<"upload" | "manual">("upload");
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const [, navigate] = useLocation();
 
   // Atualizar campo do formulário
   const updateField = (field: keyof FormData, value: string | File | null) => {
@@ -163,11 +164,11 @@ export default function AmazonListingsOptimizer() {
 
       const result = await response.json();
       
-      // Log the successful result
-      console.log('Processamento concluído:', result);
+      // Store result in sessionStorage for the results page
+      sessionStorage.setItem('amazonListingResult', JSON.stringify(result));
       
-      // Here you would typically navigate to a results page or show results in a modal
-      alert(`Processamento concluído com sucesso!\n\nTempo: ${result.processingTime}ms\nCusto: $${result.cost.toFixed(4)}\nTítulos gerados: ${result.titles.length}\nBullet points: ${result.bulletPoints.length}`);
+      // Navigate to results page
+      navigate('/agents/amazon-listings-optimizer/result');
       
     } catch (error: any) {
       console.error('Erro no processamento:', error);

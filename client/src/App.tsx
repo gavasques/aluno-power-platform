@@ -41,6 +41,7 @@ import MyArea from "./pages/MyArea";
 import AgentsPage from "./pages/agents";
 import AgentProcessorPage from "./pages/AgentProcessorPage";
 import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
+import AmazonListingsOptimizerResult from "./pages/agents/amazon-listings-optimizer-result";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -71,6 +72,12 @@ function App() {
                           <Route path="/auth" component={Auth} />
 
                           {/* Agents routes */}
+                          <Route path="/agents/amazon-listings-optimizer/result">
+                            <Layout>
+                              <AmazonListingsOptimizerResult />
+                            </Layout>
+                          </Route>
+                          
                           <Route path="/agents/amazon-listings-optimizer">
                             <Layout>
                               <AmazonListingsOptimizer />
