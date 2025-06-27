@@ -1,0 +1,79 @@
+DESCRIÇÃO DO SISTEMA:
+Sistema de agentes IA educacional para plataforma "Aluno Power Platform". Vamos criar o primeiro agente: Amazon Listings Optimizer.
+
+OBJETIVO: Configurar estrutura básica do projeto para agentes.
+
+REPOSITÓRIO: https://github.com/gavasques/aluno-power-platform
+
+=== O QUE FAZER ===
+
+**ESTRUTURA DE PASTAS:**
+✅ Criar: src/components/agents/ (pasta principal dos agentes)
+✅ Criar: src/components/agents/common/ (componentes compartilhados)
+✅ Criar: src/components/agents/amazon/ (específicos do agente Amazon)
+✅ Criar: src/pages/agents/ (páginas dos agentes)
+✅ Criar: src/pages/api/agents/ (APIs dos agentes)
+
+**BANCO DE DADOS:**
+✅ Criar tabela: agents
+- id (VARCHAR(36) PRIMARY KEY)
+- name (VARCHAR(255) NOT NULL)
+- description (TEXT)
+- category (VARCHAR(100))
+- icon (VARCHAR(10))
+- model (VARCHAR(100))
+- temperature (DECIMAL(3,2))
+- max_tokens (INT)
+- is_active (BOOLEAN DEFAULT true)
+- created_at (TIMESTAMP)
+
+✅ Criar tabela: agent_prompts
+- id (VARCHAR(36) PRIMARY KEY)
+- agent_id (VARCHAR(36))
+- type (ENUM: 'system', 'analysis', 'titles', 'bullets', 'description')
+- content (TEXT NOT NULL)
+- version (INT DEFAULT 1)
+- is_active (BOOLEAN DEFAULT true)
+- created_at (TIMESTAMP)
+
+✅ Criar tabela: agent_usage
+- id (VARCHAR(36) PRIMARY KEY)
+- agent_id (VARCHAR(36))
+- user_id (VARCHAR(36))
+- user_name (VARCHAR(255))
+- status (ENUM: 'success', 'error')
+- error_message (TEXT)
+- created_at (TIMESTAMP)
+
+**CONFIGURAÇÃO INICIAL:**
+✅ Instalar dependência: openai
+✅ Configurar variável ambiente: OPENAI_API_KEY
+✅ Criar: src/lib/openai.ts (cliente OpenAI)
+✅ Criar: src/lib/agentService.ts (serviços dos agentes)
+
+**AGENTE AMAZON INICIAL:**
+✅ Inserir no banco:
+- name: "Amazon Listings Optimizer"
+- description: "Agente especializado em otimizar listagens da Amazon através da análise de avaliações de concorrentes"
+- category: "E-commerce"
+- icon: "🛒"
+- model: "gpt-4o-mini"
+- temperature: 0.7
+- max_tokens: 2000
+
+=== O QUE NÃO FAZER ===
+
+❌ NÃO criar interface ainda
+❌ NÃO implementar processamento IA ainda
+❌ NÃO criar área admin ainda
+❌ NÃO adicionar validações complexas
+
+=== RESULTADO ESPERADO ===
+
+🎯 Estrutura de pastas organizada
+🎯 Banco de dados configurado
+🎯 Dependências instaladas
+🎯 Agente Amazon cadastrado
+🎯 Base sólida para próximos prompts
+
+FOQUE APENAS na estrutura básica. Próximo prompt será o formulário.

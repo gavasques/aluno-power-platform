@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { AgentHeader } from '@/components/agents/common/AgentHeader';
+import { ProcessingButton } from '@/components/agents/common/ProcessingButton';
 import { ProductForm } from '@/components/agents/amazon/ProductForm';
 import { ReviewsInput } from '@/components/agents/amazon/ReviewsInput';
 import { DataSummary } from '@/components/agents/amazon/DataSummary';
