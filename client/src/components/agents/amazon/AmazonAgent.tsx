@@ -80,9 +80,27 @@ export const AmazonAgent = ({ onBack }: AmazonAgentProps) => {
     setTimeout(() => {
       const mockContent: GeneratedContent = {
         titles: [
-          { id: '1', title: `${productConfig.productName} - Premium Quality`, score: 9.2, length: 45 },
-          { id: '2', title: `Best ${productConfig.productName} for ${productConfig.targetAudience}`, score: 8.8, length: 52 },
-          { id: '3', title: `${productConfig.productName} - ${productConfig.keyFeatures[0]} Edition`, score: 8.5, length: 48 }
+          { 
+            id: '1', 
+            title: `${productConfig.productName} - Premium Quality`, 
+            score: 9.2, 
+            length: 45,
+            reasoning: 'Combina nome do produto com qualificador premium para atrair público-alvo'
+          },
+          { 
+            id: '2', 
+            title: `Best ${productConfig.productName} for ${productConfig.targetAudience}`, 
+            score: 8.8, 
+            length: 52,
+            reasoning: 'Utiliza palavra-chave "Best" e segmenta o público específico'
+          },
+          { 
+            id: '3', 
+            title: `${productConfig.productName} - ${productConfig.keyFeatures[0]} Edition`, 
+            score: 8.5, 
+            length: 48,
+            reasoning: 'Destaca principal característica técnica do produto'
+          }
         ],
         bulletPoints: [
           `✅ ${productConfig.keyFeatures[0]} - Tecnologia avançada`,
@@ -116,16 +134,18 @@ Ideal para quem busca ${productConfig.keyFeatures[0]} com máxima eficiência. T
         ],
         insights: [
           {
-            type: 'opportunity',
+            type: InsightType.KEYWORD_OPPORTUNITY,
             title: 'Alta Demanda de Mercado',
             description: 'Produto com potencial de crescimento de 25% no próximo trimestre.',
-            impact: 'high'
+            impact: 'high',
+            category: 'keywords'
           },
           {
-            type: 'optimization',
+            type: InsightType.CONTENT_OPTIMIZATION,
             title: 'Otimização de Título',
             description: 'Considere incluir termos de busca de cauda longa.',
-            impact: 'medium'
+            impact: 'medium',
+            category: 'optimization'
           }
         ]
       };
@@ -167,21 +187,61 @@ Ideal para quem busca ${productConfig.keyFeatures[0]} com máxima eficiência. T
     switch (currentStep) {
       case 'upload':
         return (
-          <CSVUpload
-            title="Upload da Planilha de Produtos"
-            description="Faça upload da sua planilha CSV com os produtos para otimização"
-            onUploadComplete={handleUploadComplete}
-            acceptedColumns={['produto', 'categoria', 'preco', 'descricao']}
-          />
+          <div className="text-center py-12">
+            <Upload className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2">Upload da Planilha de Produtos</h3>
+            <p className="text-muted-foreground mb-6">
+              Faça upload da sua planilha CSV com os produtos para otimização
+            </p>
+            <Button onClick={() => {
+              // Simular upload bem-sucedido para demonstração
+              const mockUploadResult: CSVUploadResult = {
+                fileName: 'produtos.csv',
+                totalRows: 10,
+                validRows: 10,
+                errors: [],
+                reviews: []
+              };
+              handleUploadComplete(mockUploadResult);
+            }}>
+              Simular Upload (Demo)
+            </Button>
+          </div>
         );
       
       case 'config':
-        return uploadResult ? (
-          <AmazonConfigForm 
-            csvData={uploadResult}
-            onSubmit={handleConfigSubmit}
-          />
-        ) : null;
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <Settings className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">Configuração do Produto</h3>
+              <p className="text-muted-foreground mb-6">
+                Configure os parâmetros para gerar conteúdo otimizado
+              </p>
+            </div>
+            <div className="max-w-md mx-auto space-y-4">
+              <Button 
+                className="w-full" 
+                onClick={() => {
+                  const mockConfig: ProductConfig = {
+                    productName: 'Produto Exemplo',
+                    category: 'electronics' as any,
+                    targetAudience: 'profissionais',
+                    keyFeatures: ['alta qualidade', 'durabilidade'],
+                    mainBenefits: ['economia', 'eficiência'],
+                    priceRange: 'R$ 100-500',
+                    competitors: ['Concorrente A'],
+                    marketplace: 'br' as any,
+                    aiModel: 'gpt-4' as any
+                  };
+                  handleConfigSubmit(mockConfig);
+                }}
+              >
+                Usar Configuração Padrão (Demo)
+              </Button>
+            </div>
+          </div>
+        );
       
       case 'generate':
         return (
