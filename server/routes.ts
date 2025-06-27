@@ -35,6 +35,7 @@ import {
   insertAgentGenerationSchema
 } from "@shared/schema";
 import { youtubeService } from "./services/youtubeService";
+import { agentService } from "./services/agentService";
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -1785,6 +1786,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(generation);
     } catch (error) {
       res.status(400).json({ error: 'Invalid generation data' });
+    }
+  });
+
+  // Agent Execution
+  app.post('/api/agents/:agentId/execute', async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      const { userId, userName, productInfo, reviewsData } = req.body;
+
+      if (!userId || !userName || !productInfo || !reviewsData) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: userId, userName, productInfo, reviewsData' 
+        });
+      }
+
+      const generation = await agentService.executeAgent(
+        agentId,
+        userId,
+        userName,
+        productInfo,
+        reviewsData
+      );
+
+      broadcastNotification('agent_executed', {
+        agentId,
+        userId,
+        generation: generation.id
+      });
+
+      res.json(generation);
+    } catch (error) {
+      console.error('Agent execution error:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Agent execution failed' 
+      });
     }
   });
 
