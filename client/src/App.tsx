@@ -37,6 +37,7 @@ import SupplierDetail from "./pages/hub/SupplierDetail";
 import TemplateDetail from "./pages/hub/TemplateDetail";
 import PromptDetail from "./pages/hub/PromptDetail";
 import AIAgents from "./pages/hub/AIAgents";
+import Agents from "./pages/agents";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
 import AgentsManagement from "./pages/admin/AgentsManagement";
@@ -128,7 +129,7 @@ function App() {
                           
                           <Route path="/agentes">
                             <Layout>
-                              <AIAgents />
+                              <Agents />
                             </Layout>
                           </Route>
 
