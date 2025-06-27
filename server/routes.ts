@@ -978,6 +978,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // YouTube channel info endpoint
   app.get('/api/youtube-channel-info', async (req, res) => {
     try {
+      // Check if YouTube API is available
+      if (!process.env.YOUTUBE_API_KEY) {
+        return res.status(503).json({ 
+          error: 'YouTube service unavailable', 
+          message: 'YouTube API key not configured' 
+        });
+      }
+
       const channelInfo = await youtubeService.fetchChannelInfo('@guilhermeavasques');
       if (channelInfo) {
         res.json({

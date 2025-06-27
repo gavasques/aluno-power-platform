@@ -5,13 +5,32 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       refetchOnWindowFocus: false,
+      retry: (failureCount, error) => {
+        // Don't retry 4xx errors (client errors)
+        if (error instanceof Error && error.message.includes('HTTP 4')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
       queryFn: async ({ queryKey }) => {
         const url = queryKey[0] as string;
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            const errorText = await response.text().catch(() => 'Unknown error');
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+          }
+          return response.json();
+        } catch (error) {
+          console.error('Query error for:', url, error);
+          throw error;
         }
-        return response.json();
+      },
+    },
+    mutations: {
+      retry: false,
+      onError: (error) => {
+        console.error('Mutation error:', error);
       },
     },
   },

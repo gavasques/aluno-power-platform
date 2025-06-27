@@ -123,6 +123,7 @@ export interface IStorage {
     offset: number;
     search?: string;
     categoryId?: number;
+    departmentId?: number;
     sortBy?: string;
   }): Promise<{
     suppliers: Supplier[];
@@ -412,12 +413,13 @@ export class DatabaseStorage implements IStorage {
     offset: number;
     search?: string;
     categoryId?: number;
+    departmentId?: number;
     sortBy?: string;
   }): Promise<{
     suppliers: Supplier[];
     total: number;
   }> {
-    const { limit, offset, search, categoryId, sortBy = 'name' } = options;
+    const { limit, offset, search, categoryId, departmentId, sortBy = 'name' } = options;
     
     // Build where conditions
     const conditions = [];
@@ -432,6 +434,9 @@ export class DatabaseStorage implements IStorage {
     }
     if (categoryId) {
       conditions.push(eq(suppliers.categoryId, categoryId));
+    }
+    if (departmentId) {
+      conditions.push(eq(suppliers.departmentId, departmentId));
     }
 
     // Build order by
