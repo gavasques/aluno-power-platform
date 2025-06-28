@@ -35,7 +35,62 @@ export interface ModelConfig {
 
 // Model configurations with latest pricing
 export const MODEL_CONFIGS: Record<string, ModelConfig> = {
-  // OpenAI Models
+  // OpenAI Normal Models
+  'gpt-4.1': {
+    provider: 'openai',
+    model: 'gpt-4.1',
+    inputCostPer1M: 5.00,
+    outputCostPer1M: 15.00,
+    maxTokens: 128000
+  },
+  'gpt-4.1-mini': {
+    provider: 'openai',
+    model: 'gpt-4.1-mini',
+    inputCostPer1M: 0.15,
+    outputCostPer1M: 0.60,
+    maxTokens: 128000
+  },
+  'gpt-4.1-nano': {
+    provider: 'openai',
+    model: 'gpt-4.1-nano',
+    inputCostPer1M: 0.05,
+    outputCostPer1M: 0.20,
+    maxTokens: 32000
+  },
+  
+  // OpenAI Reasoning Models
+  'o4-mini': {
+    provider: 'openai',
+    model: 'o4-mini',
+    inputCostPer1M: 3.00,
+    outputCostPer1M: 12.00,
+    maxTokens: 65536
+  },
+  'o4': {
+    provider: 'openai',
+    model: 'o4',
+    inputCostPer1M: 15.00,
+    outputCostPer1M: 60.00,
+    maxTokens: 100000
+  },
+  'o4-mini-deep-research': {
+    provider: 'openai',
+    model: 'o4-mini-deep-research',
+    inputCostPer1M: 5.00,
+    outputCostPer1M: 20.00,
+    maxTokens: 100000
+  },
+
+  // OpenAI Image Generation
+  'gpt-image-1': {
+    provider: 'openai',
+    model: 'gpt-image-1',
+    inputCostPer1M: 2.00,
+    outputCostPer1M: 8.00,
+    maxTokens: 4096
+  },
+
+  // OpenAI Legacy Models
   'gpt-4o': {
     provider: 'openai',
     model: 'gpt-4o',
