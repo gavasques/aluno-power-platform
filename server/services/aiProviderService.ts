@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenAI } from '@google/genai';
 
-export type AIProvider = 'openai' | 'anthropic' | 'gemini';
+export type AIProvider = 'openai' | 'anthropic' | 'gemini' | 'deepseek';
 
 export interface AIRequest {
   provider: AIProvider;
@@ -139,6 +139,22 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     inputCostPer1M: 0.075,
     outputCostPer1M: 0.30,
     maxTokens: 1000000
+  },
+
+  // DeepSeek Models
+  'deepseek-chat': {
+    provider: 'deepseek',
+    model: 'deepseek-chat',
+    inputCostPer1M: 0.14,
+    outputCostPer1M: 0.28,
+    maxTokens: 64000
+  },
+  'deepseek-coder': {
+    provider: 'deepseek',
+    model: 'deepseek-coder',
+    inputCostPer1M: 0.14,
+    outputCostPer1M: 0.28,
+    maxTokens: 64000
   }
 };
 
@@ -146,6 +162,7 @@ class AIProviderService {
   private openai: OpenAI | null = null;
   private anthropic: Anthropic | null = null;
   private gemini: GoogleGenAI | null = null;
+  private deepseek: OpenAI | null = null;
 
   constructor() {
     this.initializeProviders();
@@ -170,6 +187,14 @@ class AIProviderService {
     if (process.env.GEMINI_API_KEY) {
       this.gemini = new GoogleGenAI({
         apiKey: process.env.GEMINI_API_KEY,
+      });
+    }
+
+    // Initialize DeepSeek (using OpenAI-compatible API)
+    if (process.env.DEEPSEEK_API_KEY) {
+      this.deepseek = new OpenAI({
+        apiKey: process.env.DEEPSEEK_API_KEY,
+        baseURL: 'https://api.deepseek.com',
       });
     }
   }
