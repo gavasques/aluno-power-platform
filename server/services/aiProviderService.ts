@@ -76,21 +76,7 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 128000
   },
 
-  // OpenAI o3 and o4-mini Reasoning Models
-  'o3': {
-    provider: 'openai',
-    model: 'o3',
-    inputCostPer1M: 25.00,
-    outputCostPer1M: 100.00,
-    maxTokens: 200000
-  },
-  'o3-mini': {
-    provider: 'openai',
-    model: 'o3-mini',
-    inputCostPer1M: 5.00,
-    outputCostPer1M: 20.00,
-    maxTokens: 200000
-  },
+  // OpenAI o4-mini Reasoning Model
   'o4-mini': {
     provider: 'openai',
     model: 'o4-mini',
