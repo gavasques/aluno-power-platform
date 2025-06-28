@@ -184,7 +184,7 @@ function App() {
                           {/* Admin routes */}
                           <Route path="/admin/images">
                             <AdminLayout>
-                              <TestImagePage />
+                              <GeneratedImages />
                             </AdminLayout>
                           </Route>
                           
