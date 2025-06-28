@@ -108,7 +108,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 28, 2025**: Corrigido modelos de raciocínio OpenAI: substituído o4/o4-mini pelos modelos oficiais o3/o3-mini
+- **June 28, 2025**: Corrigido modelos de raciocínio OpenAI: removido o4 (não existe) mantendo o4-mini + adicionados o3/o3-mini
   - Atualizada validação de temperatura para série o3
   - Sistema de teste de conexão com JSON formatado e downloads funcionando
   - Interface completa com campos de requisição e resposta em JSON
@@ -128,7 +128,7 @@ Preferred communication style: Simple, everyday language.
   - Removida implementação Imagen 4.0 do Google (por solicitação do usuário)
   - Modelos disponíveis por categoria:
     - OpenAI Normal: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano
-    - OpenAI Raciocínio: o1-preview, o1-mini, o3, o3-mini
+    - OpenAI Raciocínio: o1-preview, o1-mini, o3, o3-mini, o4-mini
     - OpenAI Imagem: gpt-image-1 (modelo multimodal nova geração)
     - OpenAI Legacy: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
     - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
@@ -138,7 +138,7 @@ Preferred communication style: Simple, everyday language.
     - DeepSeek: deepseek-chat, deepseek-coder
   - Interface completa com 4 provedores ativos e seleção por categorias
   - Sistema de teste de conectividade validado para todos os 25 modelos
-  - Configurações especiais para modelos de raciocínio (série o1 e o3) sem temperatura
+  - Configurações especiais para modelos de raciocínio (série o1, o3 e o4-mini) sem temperatura
   - Central de imagens geradas com interface administrativa completa
   - Preços atualizados conforme documentação oficial:
     - GPT-4.1: $2.50/$10.00 por 1M tokens

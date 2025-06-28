@@ -172,7 +172,7 @@ export default function AgentProviderSettings() {
 
   // Check if model supports temperature
   const selectedModel = models.find((m: ModelConfig) => m.model === formData.model);
-  const supportsTemperature = selectedModel ? !selectedModel.model.includes('o1') && !selectedModel.model.includes('o3') : true;
+  const supportsTemperature = selectedModel ? !selectedModel.model.includes('o1') && !selectedModel.model.includes('o3') && !selectedModel.model.includes('o4') : true;
 
   // Load agent data when selected
   useEffect(() => {

@@ -2050,7 +2050,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       
       // Test with the provided prompt and configured parameters
       const { temperature, maxTokens } = req.body;
-      const isReasoningModel = model.startsWith('o1') || model.startsWith('o3');
+      const isReasoningModel = model.startsWith('o1') || model.startsWith('o3') || model.startsWith('o4');
       
       console.log(`Test parameters - Temperature: ${temperature}, MaxTokens: ${maxTokens}, IsReasoningModel: ${isReasoningModel}`);
       
