@@ -80,6 +80,9 @@ export default function AgentProviderSettings() {
     maxTokens: 2000
   });
 
+  const [testPrompt, setTestPrompt] = useState('Olá! Como você está hoje?');
+  const [testResponse, setTestResponse] = useState('');
+
   // Fetch provider status
   const { data: status = { openai: false, anthropic: false, gemini: false, deepseek: false } } = useQuery<ProviderStatus>({
     queryKey: ['/api/ai-providers/status'],
@@ -160,6 +163,10 @@ export default function AgentProviderSettings() {
   // Filter models by selected provider
   const availableModels = models.filter(model => model.provider === formData.provider);
 
+  // Check if model supports temperature
+  const selectedModel = models.find((m: ModelConfig) => m.model === formData.model);
+  const supportsTemperature = selectedModel ? !selectedModel.model.includes('o1') && !selectedModel.model.includes('o4') : true;
+
   // Load agent data when selected
   useEffect(() => {
     if (selectedAgent) {
@@ -207,10 +214,6 @@ export default function AgentProviderSettings() {
       prompt: testPrompt
     });
   };
-
-  // Check if model supports temperature
-  const selectedModel = models.find((m: ModelConfig) => m.model === formData.model);
-  const supportsTemperature = selectedModel ? !selectedModel.model.includes('o1') && !selectedModel.model.includes('o4') : true;
 
   if (user?.role !== 'admin') {
     return (
@@ -407,57 +410,95 @@ export default function AgentProviderSettings() {
                 </div>
 
                 {/* Temperatura */}
-                <div>
-                  <Label htmlFor="temperature">Temperatura ({formData.temperature})</Label>
-                  <div className="text-xs text-gray-500 mb-2">
-                    0 = mais conservador, 2 = mais criativo
+                <div className="space-y-2">
+                  <Label htmlFor="temperature" className={!supportsTemperature ? "text-muted-foreground" : ""}>
+                    Temperatura ({formData.temperature.toFixed(2)})
+                    {!supportsTemperature && <span className="text-xs ml-2">(Não disponível para este modelo)</span>}
+                  </Label>
+                  <div className="px-4">
+                    <Slider
+                      id="temperature"
+                      min={0}
+                      max={2}
+                      step={0.1}
+                      value={[formData.temperature]}
+                      onValueChange={(value) => 
+                        setFormData(prev => ({ ...prev, temperature: value[0] }))
+                      }
+                      className={`w-full ${!supportsTemperature ? "opacity-50 pointer-events-none" : ""}`}
+                      disabled={!supportsTemperature}
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>0 = mais conservador, 2 = mais criativo</span>
+                    </div>
                   </div>
-                  <Input
-                    type="range"
-                    min="0"
-                    max="2"
-                    step="0.1"
-                    value={formData.temperature}
-                    onChange={(e) => setFormData({ ...formData, temperature: parseFloat(e.target.value) })}
-                    className="w-full"
-                  />
                 </div>
 
                 {/* Máximo de Tokens */}
                 <div>
                   <Label htmlFor="maxTokens">Máximo de Tokens</Label>
-                  <div className="text-xs text-gray-500 mb-2">
-                    Limite de tokens para resposta
-                  </div>
+                  <div className="text-sm text-gray-500 mb-2">Limite de tokens para resposta</div>
                   <Input
+                    id="maxTokens"
                     type="number"
-                    min="100"
-                    max="4000"
+                    min="1"
+                    max="32000"
                     value={formData.maxTokens}
-                    onChange={(e) => setFormData({ ...formData, maxTokens: parseInt(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, maxTokens: parseInt(e.target.value) || 1000 })}
+                    className="w-full"
                   />
                 </div>
 
-                <Separator />
+                {/* Test Connection Section */}
+                <div className="space-y-4 border-t pt-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="testPrompt">Prompt de Teste</Label>
+                    <Textarea
+                      id="testPrompt"
+                      placeholder="Digite um prompt para testar a conexão com o modelo..."
+                      value={testPrompt}
+                      onChange={(e) => setTestPrompt(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
 
-                {/* Ações */}
-                <div className="flex gap-3">
-                  <Button 
-                    onClick={handleTestConnection}
-                    variant="outline"
-                    disabled={!formData.provider || !formData.model || testConnectionMutation.isPending}
-                  >
-                    <TestTube className="w-4 h-4 mr-2" />
-                    {testConnectionMutation.isPending ? 'Testando...' : 'Testar Conexão'}
-                  </Button>
-                  
-                  <Button 
-                    onClick={handleSave}
-                    disabled={!formData.provider || !formData.model || updateAgentMutation.isPending}
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {updateAgentMutation.isPending ? 'Salvando...' : 'Salvar Configurações'}
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleTestConnection}
+                      disabled={!formData.provider || !formData.model || testConnectionMutation.isPending}
+                      className="flex items-center gap-2"
+                    >
+                      <Zap className="h-4 w-4" />
+                      {testConnectionMutation.isPending ? 'Testando...' : 'Testar Conexão'}
+                    </Button>
+
+                    <Button 
+                      onClick={handleSave}
+                      disabled={!formData.provider || !formData.model || updateAgentMutation.isPending}
+                      className="flex items-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {updateAgentMutation.isPending ? 'Salvando...' : 'Salvar Configurações'}
+                    </Button>
+                  </div>
+
+                  {/* Test Response Area */}
+                  {(testResponse || testConnectionMutation.isPending) && (
+                    <div className="space-y-2">
+                      <Label>Resposta do Teste</Label>
+                      <div className="p-4 border rounded-lg bg-muted/50 min-h-[100px] whitespace-pre-wrap">
+                        {testConnectionMutation.isPending ? (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                            Aguardando resposta do modelo...
+                          </div>
+                        ) : (
+                          testResponse || 'Nenhuma resposta ainda'
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

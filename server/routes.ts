@@ -2034,27 +2034,36 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Test AI provider connection
   app.post('/api/ai-providers/test', async (req, res) => {
     try {
-      const { provider, model } = req.body;
+      const { provider, model, prompt } = req.body;
+      
+      if (!provider || !model) {
+        return res.status(400).json({ error: 'Provider and model are required' });
+      }
+
+      const testPrompt = prompt || 'Hello! How are you today?';
+      console.log(`Testing ${provider}/${model} with prompt: "${testPrompt}"`);
+
       const { aiProviderService } = await import('./services/aiProviderService');
       
-      // Test with a simple message
+      // Test with the provided prompt
       const isReasoningModel = model.startsWith('o1') || model.startsWith('o4');
       const testResponse = await aiProviderService.generateCompletion({
         provider,
         model,
         messages: [
-          { role: 'user', content: 'Responda apenas "OK" para confirmar que a conexão está funcionando.' }
+          { role: 'user', content: testPrompt }
         ],
         temperature: isReasoningModel ? undefined : 0.1,
-        maxTokens: 10
+        maxTokens: 100
       });
 
       res.json({
         success: true,
         message: `Conexão com ${provider} (${model}) testada com sucesso!`,
-        response: testResponse.content.substring(0, 50)
+        response: testResponse.content
       });
     } catch (error) {
       console.error('Error testing provider connection:', error);
