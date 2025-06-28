@@ -119,7 +119,7 @@ Preferred communication style: Simple, everyday language.
     - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
     - Claude 3.x: claude-3-5-sonnet, claude-3-opus, claude-3-haiku
     - Gemini 2.5: gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite-preview
-    - Gemini Imagem: imagen-4.0-ultra-generate-preview (estrutura preparada)
+
     - Gemini Legacy: gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash-exp
     - DeepSeek: deepseek-chat, deepseek-coder
   - Interface completa com 4 provedores ativos e seleção por categorias

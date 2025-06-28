@@ -190,14 +190,7 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 500000
   },
 
-  // Google Imagen Models (requires Vertex AI Image Generation API)
-  'imagen-4.0-ultra-generate-preview-06-06': {
-    provider: 'gemini',
-    model: 'imagen-4.0-ultra-generate-preview-06-06',
-    inputCostPer1M: 2.00,
-    outputCostPer1M: 8.00,
-    maxTokens: 4096
-  },
+
 
   // Google Gemini Legacy Models
   'gemini-1.5-pro': {
@@ -483,6 +476,8 @@ class AIProviderService {
       ),
     };
   }
+
+
 
   getProviderStatus(): Record<AIProvider, boolean> {
     return {
