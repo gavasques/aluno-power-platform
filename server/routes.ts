@@ -28,6 +28,7 @@ import {
   insertYoutubeVideoSchema,
   insertNewsSchema,
   insertUpdateSchema,
+  insertGeneratedImageSchema,
   insertWebhookConfigSchema,
   insertAgentSchema,
   insertAgentPromptSchema,

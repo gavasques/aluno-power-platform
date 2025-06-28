@@ -44,6 +44,7 @@ import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
 import AmazonListingsOptimizerResult from "./pages/agents/amazon-listings-optimizer-result";
 import AmazonListingsOptimizerPrompts from "./pages/admin/agents/AmazonListingsOptimizerPrompts";
 import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
+import GeneratedImages from "./pages/admin/GeneratedImages";
 
 // Create a simple Auth component
 const Auth = () => (

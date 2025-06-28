@@ -798,6 +798,31 @@ export const agentGenerationsRelations = relations(agentGenerations, ({ one }) =
   }),
 }));
 
+// Generated Images Storage
+export const generatedImages = pgTable("generated_images", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  agentId: text("agent_id"),
+  sessionId: text("session_id"),
+  model: text("model").notNull(),
+  prompt: text("prompt").notNull(),
+  imageUrl: text("image_url").notNull(),
+  size: text("size").notNull().default("1024x1024"),
+  quality: text("quality").notNull().default("high"),
+  format: text("format").notNull().default("png"),
+  cost: decimal("cost", { precision: 10, scale: 6 }).notNull().default("0"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  modelIdx: index("generated_images_model_idx").on(table.model),
+  createdIdx: index("generated_images_created_idx").on(table.createdAt),
+  agentIdx: index("generated_images_agent_idx").on(table.agentId),
+}));
+
+// Insert schemas for generated images
+export const insertGeneratedImageSchema = createInsertSchema(generatedImages);
+export type InsertGeneratedImage = z.infer<typeof insertGeneratedImageSchema>;
+export type GeneratedImage = typeof generatedImages.$inferSelect;
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
