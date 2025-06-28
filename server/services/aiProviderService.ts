@@ -230,6 +230,8 @@ class AIProviderService {
           return await this.generateAnthropic(request, modelConfig);
         case 'gemini':
           return await this.generateGemini(request, modelConfig);
+        case 'deepseek':
+          return await this.generateDeepSeek(request, modelConfig);
         default:
           throw new Error(`Unsupported provider: ${request.provider}`);
       }
@@ -349,11 +351,42 @@ class AIProviderService {
     return provider ? models.filter(m => m.provider === provider) : models;
   }
 
+  private async generateDeepSeek(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
+    if (!this.deepseek) {
+      throw new Error('DeepSeek client not initialized. Please check DEEPSEEK_API_KEY.');
+    }
+
+    const response = await this.deepseek.chat.completions.create({
+      model: request.model,
+      messages: request.messages,
+      temperature: request.temperature || 0.7,
+      max_tokens: request.maxTokens || 2000,
+    });
+
+    const content = response.choices[0]?.message?.content || '';
+    const usage = response.usage;
+
+    return {
+      content,
+      usage: {
+        inputTokens: usage?.prompt_tokens || 0,
+        outputTokens: usage?.completion_tokens || 0,
+        totalTokens: usage?.total_tokens || 0,
+      },
+      cost: this.calculateCost(
+        usage?.prompt_tokens || 0,
+        usage?.completion_tokens || 0,
+        modelConfig
+      ),
+    };
+  }
+
   getProviderStatus(): Record<AIProvider, boolean> {
     return {
       openai: !!this.openai,
       anthropic: !!this.anthropic,
       gemini: !!this.gemini,
+      deepseek: !!this.deepseek,
     };
   }
 }
