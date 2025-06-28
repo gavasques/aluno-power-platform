@@ -108,9 +108,10 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 28, 2025**: Sistema completo de IA com 4 provedores e modelos mais recentes
+- **June 28, 2025**: Sistema completo de IA com 4 provedores e 25 modelos ativos
   - Adicionado DeepSeek com integração nativa usando API compatível OpenAI
-  - Atualizados modelos OpenAI para versões mais recentes (GPT-4.1, O4, geração de imagem)
+  - Atualizados modelos OpenAI incluindo série o4 (o4, o4-mini) com configurações especiais
+  - Removida implementação Imagen 4.0 do Google (por solicitação do usuário)
   - Modelos disponíveis por categoria:
     - OpenAI Normal: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano
     - OpenAI Raciocínio: o1-preview, o1-mini, o4, o4-mini
@@ -119,13 +120,12 @@ Preferred communication style: Simple, everyday language.
     - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
     - Claude 3.x: claude-3-5-sonnet, claude-3-opus, claude-3-haiku
     - Gemini 2.5: gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite-preview
-
     - Gemini Legacy: gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash-exp
     - DeepSeek: deepseek-chat, deepseek-coder
   - Interface completa com 4 provedores ativos e seleção por categorias
-  - Sistema de teste de conectividade validado para todos os modelos
-  - Cálculo automático de custos por modelo com preços atualizados
-  - Tipos TypeScript corrigidos para suporte completo ao DeepSeek
+  - Sistema de teste de conectividade validado para todos os 25 modelos
+  - Configurações especiais para modelos de raciocínio (série o1 e o4) sem temperatura
+  - Cálculo automático de custos por modelo com preços atualizados 2025
 
 ## Changelog
 
