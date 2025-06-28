@@ -39,8 +39,8 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
   'gpt-4.1': {
     provider: 'openai',
     model: 'gpt-4.1',
-    inputCostPer1M: 5.00,
-    outputCostPer1M: 15.00,
+    inputCostPer1M: 2.50,   // Atualizado: $2.50 por 1M tokens
+    outputCostPer1M: 10.00, // Atualizado: $10.00 por 1M tokens
     maxTokens: 128000
   },
   'gpt-4.1-mini': {
@@ -334,7 +334,11 @@ class AIProviderService {
         quality: 'standard'
       });
 
-      const imageUrl = response.data?.[0]?.url || '';
+      if (!response.data || response.data.length === 0) {
+        throw new Error('No image generated');
+      }
+      
+      const imageUrl = response.data[0]?.url || '';
       const content = `Image generated successfully. URL: ${imageUrl}`;
       
       // Estimate token usage for image generation
