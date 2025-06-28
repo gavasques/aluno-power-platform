@@ -85,7 +85,14 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 200000
   },
 
-
+  // OpenAI Image Generation (gpt-image-1 - preços oficiais da documentação)
+  'gpt-image-1': {
+    provider: 'openai',
+    model: 'gpt-image-1',
+    inputCostPer1M: 5.00,   // Text tokens input: $5.00 per 1M
+    outputCostPer1M: 40.00, // Image tokens output: $40.00 per 1M
+    maxTokens: 4096
+  },
 
   // OpenAI Legacy Models - Preços atualizados Dezembro 2024
   'gpt-4o': {

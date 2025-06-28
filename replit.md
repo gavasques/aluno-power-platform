@@ -109,7 +109,8 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 - **June 28, 2025**: Otimizado conjunto de modelos OpenAI para manter apenas os mais estáveis
-  - Removidos: o4, o3, o3-mini, gpt-image-1 (requerem verificação), gpt-4-turbo, gpt-3.5-turbo (instáveis)
+  - Removidos: o4, o3, o3-mini (requerem verificação), gpt-4-turbo, gpt-3.5-turbo (instáveis)
+  - Readicionado gpt-image-1 com teste de imagem específico
   - Mantidos modelos confiáveis: gpt-4.1, gpt-4o, o1-preview, o1-mini, o4-mini
   - Sistema de teste de conexão com JSON formatado e downloads funcionando
   - Interface completa com campos de requisição e resposta em JSON
@@ -130,7 +131,7 @@ Preferred communication style: Simple, everyday language.
   - Modelos disponíveis por categoria:
     - OpenAI Normal: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano
     - OpenAI Raciocínio: o1-preview, o1-mini, o4-mini
-
+    - OpenAI Imagem: gpt-image-1 (modelo multimodal nova geração)
     - OpenAI Legacy: gpt-4o, gpt-4o-mini
     - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
     - Claude 3.x: claude-3-5-sonnet, claude-3-opus, claude-3-haiku
