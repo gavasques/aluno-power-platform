@@ -184,11 +184,26 @@ export default function AgentProviderSettings() {
   };
 
   const handleTestConnection = () => {
+    if (!testPrompt.trim()) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um prompt para testar",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setTestResponse('');
     testConnectionMutation.mutate({
       provider: formData.provider,
-      model: formData.model
+      model: formData.model,
+      prompt: testPrompt
     });
   };
+
+  // Check if model supports temperature
+  const selectedModel = models.find((m: ModelConfig) => m.model === formData.model);
+  const supportsTemperature = selectedModel ? !selectedModel.model.includes('o1') && !selectedModel.model.includes('o4') : true;
 
   if (user?.role !== 'admin') {
     return (
