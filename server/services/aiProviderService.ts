@@ -314,8 +314,7 @@ class AIProviderService {
         model: request.model,
         prompt: prompt,
         n: 1,
-        size: '1024x1024',
-        response_format: 'b64_json' // Get base64 encoded image
+        size: '1024x1024'
       });
 
       if (!response.data || response.data.length === 0) {
@@ -323,8 +322,8 @@ class AIProviderService {
       }
       
       const imageData = response.data[0];
-      const imageB64 = imageData.b64_json || '';
-      const content = `Image generated successfully (PNG format). Base64 data: ${imageB64.substring(0, 50)}...`;
+      const imageUrl = imageData.url || '';
+      const content = `Image generated successfully (PNG format). URL: ${imageUrl}`;
       
       // For gpt-image-1 pricing: text tokens for input, image generation cost for output
       const inputTokens = this.countTokens(prompt);
@@ -342,7 +341,7 @@ class AIProviderService {
         const imageRecord: InsertGeneratedImage = {
           model: request.model,
           prompt: prompt,
-          imageUrl: `data:image/png;base64,${imageB64}`,
+          imageUrl: imageUrl,
           size: '1024x1024',
           quality: 'standard',
           format: 'png',
