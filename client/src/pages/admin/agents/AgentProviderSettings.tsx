@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -125,26 +127,31 @@ export default function AgentProviderSettings() {
 
   // Test connection mutation
   const testConnectionMutation = useMutation({
-    mutationFn: async (testData: { provider: string; model: string }) => {
+    mutationFn: async (data: { provider: string; model: string; prompt: string }) => {
       const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(testData)
+        body: JSON.stringify(data)
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || 'Test failed');
-      return result;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Test failed');
+      }
+      return response.json();
     },
     onSuccess: (data) => {
+      setTestResponse(data.response || 'Teste realizado com sucesso!');
       toast({
-        title: "Teste bem-sucedido",
-        description: data.message
+        title: "Conexão testada",
+        description: "A conexão com o provedor foi testada com sucesso."
       });
     },
     onError: (error) => {
+      const errorMsg = error instanceof Error ? error.message : "Falha no teste de conexão";
+      setTestResponse(`Erro: ${errorMsg}`);
       toast({
         title: "Erro no teste",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
+        description: errorMsg,
         variant: "destructive"
       });
     }
