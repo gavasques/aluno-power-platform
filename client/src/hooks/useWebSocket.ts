@@ -162,7 +162,7 @@ export function useWebSocket() {
         wsRef.current = null;
       }
     };
-  }, [toast, host, protocol]);
+  }, [toast]);
 
   const sendMessage = useCallback((message: any) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
