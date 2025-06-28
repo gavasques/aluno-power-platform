@@ -108,7 +108,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 28, 2025**: Otimizado conjunto de modelos OpenAI para manter apenas os mais estáveis
+- **June 28, 2025**: Implementado modelo gpt-image-edit para edição de imagens com upload
+  - Criado novo modelo "gpt-image-edit" baseado no gpt-image-1 para editar imagens existentes
+  - Interface de teste com upload de imagem: funcionalidade completa para testar edição
+  - Sistema de validação: obrigatório upload de imagem para modelo gpt-image-edit
+  - Integração com DALL-E 2 edit API para processamento real de edição de imagens
+  - Modo demo funcional quando API não disponível, salvando no banco de dados
+  - Preview de imagem carregada e opção de remoção na interface de teste
+
+- **June 28, 2025 (anterior)**: Otimizado conjunto de modelos OpenAI para manter apenas os mais estáveis
   - Removidos: o4, o3, o3-mini (requerem verificação), gpt-4-turbo, gpt-3.5-turbo (instáveis)
   - Configurado gpt-image-1 com modo demo (simula geração quando verificação organizacional não disponível)
   - Mantidos modelos confiáveis: gpt-4.1, gpt-4o, o1-preview, o1-mini, o4-mini

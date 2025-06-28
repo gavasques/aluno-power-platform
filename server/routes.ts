@@ -2037,10 +2037,15 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Test AI provider connection
   app.post('/api/ai-providers/test', async (req, res) => {
     try {
-      const { provider, model, prompt } = req.body;
+      const { provider, model, prompt, imageData } = req.body;
       
       if (!provider || !model) {
         return res.status(400).json({ error: 'Provider and model are required' });
+      }
+
+      // Check if image is required for gpt-image-edit model
+      if (model === 'gpt-image-edit' && !imageData) {
+        return res.status(400).json({ error: 'Image data is required for gpt-image-edit model' });
       }
 
       const testPrompt = prompt || 'Hello! How are you today?';
@@ -2055,7 +2060,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.log(`Test parameters - Temperature: ${temperature}, MaxTokens: ${maxTokens}, IsReasoningModel: ${isReasoningModel}`);
       
       // Prepare request data for logging
-      const requestData = {
+      const requestData: any = {
         provider,
         model,
         messages: [
@@ -2065,7 +2070,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         maxTokens: maxTokens ? parseInt(maxTokens) : 100
       };
 
-      console.log('Sending request to AI service:', JSON.stringify(requestData, null, 2));
+      // Add image data for gpt-image-edit model
+      if (model === 'gpt-image-edit' && imageData) {
+        requestData.imageData = imageData;
+        console.log('Image data provided for gpt-image-edit model');
+      }
+
+      console.log('Sending request to AI service:', JSON.stringify({...requestData, imageData: imageData ? '[IMAGE_DATA]' : undefined}, null, 2));
 
       const testResponse = await aiProviderService.generateCompletion(requestData);
 
