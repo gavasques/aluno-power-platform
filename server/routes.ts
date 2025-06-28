@@ -1713,8 +1713,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error updating agent:', error);
       res.status(400).json({ 
         error: 'Invalid agent data', 
-        details: error.message,
-        stack: error.stack 
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
       });
     }
   });
