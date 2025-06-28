@@ -498,50 +498,8 @@ class AIProviderService {
         }
       }
       
-      // For gpt-image-1 pricing: text tokens for input, image generation cost for output
-      const inputTokens = this.countTokens(prompt);
-      const outputTokens = 1; // 1 image generated
-      
-      // Custom cost calculation for image generation
-      // Text input: $5.00 per 1M tokens
-      // Image output: 1024x1024 standard quality cost
-      const inputCost = (inputTokens / 1000000) * 5.00;
-      const outputCost = 0.04; // Standard quality image cost for gpt-image-1
-      const totalCost = inputCost + outputCost;
-
-      // Save image to database for centralized storage
-      try {
-        const imageRecord: InsertGeneratedImage = {
-          model: request.model,
-          prompt: prompt,
-          imageUrl: imageUrl,
-          size: '1024x1024',
-          quality: 'standard',
-          format: 'png',
-          cost: totalCost.toString(),
-          metadata: {
-            inputTokens,
-            outputTokens,
-            provider: 'openai',
-            timestamp: new Date().toISOString()
-          }
-        };
-
-        await db.insert(generatedImages).values(imageRecord);
-      } catch (error) {
-        console.error('Failed to save generated image to database:', error);
-        // Continue execution even if database save fails
-      }
-
-      return {
-        content,
-        usage: {
-          inputTokens,
-          outputTokens,
-          totalTokens: inputTokens + outputTokens,
-        },
-        cost: totalCost,
-      };
+      // If we reach here, no fallback worked - return error
+      throw new Error('GPT Image 1 não está disponível. Verifique se sua organização OpenAI tem acesso aprovado ao modelo gpt-image-1.');
     }
 
     const requestParams: any = {
