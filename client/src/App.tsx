@@ -45,6 +45,7 @@ import AmazonListingsOptimizerResult from "./pages/agents/amazon-listings-optimi
 import AmazonListingsOptimizerPrompts from "./pages/admin/agents/AmazonListingsOptimizerPrompts";
 import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
 import GeneratedImages from "./pages/admin/GeneratedImages";
+import TestImagePage from "./components/TestImagePage";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -181,6 +182,12 @@ function App() {
                           </Route>
 
                           {/* Admin routes */}
+                          <Route path="/admin/images">
+                            <AdminLayout>
+                              <TestImagePage />
+                            </AdminLayout>
+                          </Route>
+                          
                           <Route path="/admin/agents/providers">
                             <AdminLayout>
                               <AgentProviderSettings />

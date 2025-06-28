@@ -1,12 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, ExternalLink, Download } from 'lucide-react';
+import { Trash2, ExternalLink, Download, Image as ImageIcon, RefreshCw } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 
 interface GeneratedImage {
   id: string;
@@ -26,33 +26,37 @@ interface GeneratedImage {
 export default function GeneratedImages() {
   const { toast } = useToast();
   
-  const { data: images, isLoading } = useQuery<GeneratedImage[]>({
+  const { data: images, isLoading, error, refetch } = useQuery<GeneratedImage[]>({
     queryKey: ['/api/generated-images'],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
+    retry: 3,
+    retryDelay: 1000,
   });
 
-  const handleDelete = async (id: string) => {
-    try {
-      const response = await fetch(`/api/generated-images/${id}`, {
+  const deleteImageMutation = useMutation({
+    mutationFn: async (imageId: string) => {
+      return apiRequest(`/api/generated-images/${imageId}`, {
         method: 'DELETE',
       });
-      
-      if (response.ok) {
-        queryClient.invalidateQueries({ queryKey: ['/api/generated-images'] });
-        toast({
-          title: 'Imagem removida',
-          description: 'A imagem foi removida com sucesso.',
-        });
-      } else {
-        throw new Error('Falha ao remover imagem');
-      }
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/generated-images'] });
+      toast({
+        title: 'Sucesso',
+        description: 'Imagem removida com sucesso.',
+      });
+    },
+    onError: () => {
       toast({
         title: 'Erro',
         description: 'Não foi possível remover a imagem.',
         variant: 'destructive',
       });
-    }
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    deleteImageMutation.mutate(id);
   };
 
   const handleDownload = async (imageUrl: string, prompt: string) => {
@@ -79,8 +83,16 @@ export default function GeneratedImages() {
   if (isLoading) {
     return (
       <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-2">Imagens Geradas</h1>
-        <p className="text-muted-foreground mb-8">Carregando imagens...</p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Imagens Geradas</h1>
+            <p className="text-muted-foreground">Carregando imagens...</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span className="text-sm text-muted-foreground">Carregando</span>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -88,7 +100,7 @@ export default function GeneratedImages() {
                 <div className="h-4 bg-gray-200 rounded w-3/4"></div>
               </CardHeader>
               <CardContent>
-                <div className="h-32 bg-gray-200 rounded mb-4"></div>
+                <div className="h-48 bg-gray-200 rounded mb-4"></div>
                 <div className="h-4 bg-gray-200 rounded w-1/2"></div>
               </CardContent>
             </Card>
@@ -98,18 +110,56 @@ export default function GeneratedImages() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Imagens Geradas</h1>
+            <p className="text-muted-foreground">Erro ao carregar imagens</p>
+          </div>
+          <Button onClick={() => refetch()} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Tentar Novamente
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="text-red-500 mb-4">
+              <ImageIcon className="h-12 w-12" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Erro ao carregar imagens</h3>
+            <p className="text-muted-foreground mb-4">Não foi possível conectar com o servidor.</p>
+            <Button onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Tentar Novamente
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Imagens Geradas</h1>
-        <p className="text-muted-foreground">
-          Central de imagens geradas pelo modelo gpt-image-1
-        </p>
-        {images && (
-          <p className="text-sm text-muted-foreground mt-2">
-            Total: {images.length} imagens
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Imagens Geradas</h1>
+          <p className="text-muted-foreground">
+            Central de imagens geradas pelo modelo gpt-image-1
           </p>
-        )}
+          {images && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Total: {images.length} imagens
+            </p>
+          )}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button onClick={() => refetch()} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar
+          </Button>
+        </div>
       </div>
 
       {!images || images.length === 0 ? (
@@ -203,8 +253,13 @@ export default function GeneratedImages() {
                     size="sm"
                     variant="destructive"
                     onClick={() => handleDelete(image.id)}
+                    disabled={deleteImageMutation.isPending}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    {deleteImageMutation.isPending ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </CardContent>
