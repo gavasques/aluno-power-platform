@@ -33,6 +33,7 @@ import {
   agentPrompts,
   agentUsage,
   agentGenerations,
+  generatedImages,
   type User, 
   type InsertUser,
   type Supplier,
@@ -100,7 +101,9 @@ import {
   type InsertAgentUsage,
   type AgentGeneration,
   type InsertAgentGeneration,
-  type AgentWithPrompts
+  type AgentWithPrompts,
+  type GeneratedImage,
+  type InsertGeneratedImage
 } from "@shared/schema";
 import { db } from "./db";
 
@@ -2052,6 +2055,18 @@ export class DatabaseStorage implements IStorage {
       .insert(agentGenerations)
       .values({
         ...generation,
+        createdAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  // Generated Images
+  async createGeneratedImage(image: InsertGeneratedImage): Promise<GeneratedImage> {
+    const [created] = await db
+      .insert(generatedImages)
+      .values({
+        ...image,
         createdAt: new Date(),
       })
       .returning();
