@@ -319,68 +319,229 @@ class AIProviderService {
     if (isImageModel) {
       const prompt = request.messages.map(m => m.content).join('\n');
       
-      // Use DALL-E 3 directly for gpt-image-1 since it provides superior image quality
+      // Use the new gpt-image-1 API for image generation as provided by user
       if (request.model === 'gpt-image-1') {
-        console.log('🎨 Gerando imagem com DALL-E 3 (qualidade HD)');
+        console.log('🎨 Using gpt-image-1 for image generation (new OpenAI model)');
         
-        const dalleResponse = await this.openai.images.generate({
-          model: 'dall-e-3',
-          prompt: prompt,
-          n: 1,
-          size: '1024x1024',
-          quality: 'hd'
-        });
-
-        if (!dalleResponse.data || dalleResponse.data.length === 0) {
-          throw new Error('Nenhuma imagem foi gerada');
-        }
-        
-        const imageData = dalleResponse.data[0];
-        const imageUrl = imageData.url || '';
-        const content = `✅ Imagem gerada com DALL-E 3 HD! URL: ${imageUrl}`;
-
-        const inputTokens = this.countTokens(prompt);
-        const outputTokens = 1;
-        const inputCost = (inputTokens / 1000000) * 5.00;
-        const outputCost = 0.08; // HD quality cost
-        const totalCost = inputCost + outputCost;
-
-        // Save to database
         try {
-          const imageRecord: InsertGeneratedImage = {
-            model: request.model,
-            prompt: prompt,
-            imageUrl: imageUrl,
-            size: '1024x1024',
-            quality: 'hd',
-            format: 'png',
-            cost: totalCost.toString(),
-            metadata: {
+          const response = await this.openai.responses.create({
+            model: "gpt-image-1",
+            input: prompt,
+            tools: [{type: "image_generation"}]
+          });
+
+          // Extract image data from response
+          const imageData = response.output
+            .filter((output: any) => output.type === "image_generation_call")
+            .map((output: any) => output.result);
+
+          if (imageData.length === 0) {
+            throw new Error('No image generated');
+          }
+
+          const imageBase64 = imageData[0];
+          const imageUrl = `data:image/png;base64,${imageBase64}`;
+          const content = `✅ Imagem gerada com sucesso usando gpt-image-1! Formato: PNG. Dados base64 disponíveis.`;
+
+          // Calculate costs
+          const inputTokens = this.countTokens(prompt);
+          const outputTokens = 1; // 1 image generated
+          const inputCost = (inputTokens / 1000000) * 5.00;
+          const outputCost = 0.04; // Standard image cost
+          const totalCost = inputCost + outputCost;
+
+          // Save image to database
+          try {
+            const imageRecord: InsertGeneratedImage = {
+              model: request.model,
+              prompt: prompt,
+              imageUrl: imageUrl,
+              size: '1024x1024',
+              quality: 'standard',
+              format: 'png',
+              cost: totalCost.toString(),
+              metadata: {
+                inputTokens,
+                outputTokens,
+                provider: 'openai',
+                model: 'gpt-image-1',
+                actualModel: 'gpt-image-1'
+              }
+            };
+
+            await storage.createGeneratedImage(imageRecord);
+            console.log('✅ Imagem salva no banco de dados:', imageRecord);
+          } catch (dbError) {
+            console.error('❌ Erro ao salvar imagem no banco:', dbError);
+          }
+
+          return {
+            content,
+            usage: {
               inputTokens,
               outputTokens,
-              provider: 'openai',
-              model: 'gpt-image-1',
-              actualModel: 'dall-e-3',
-              quality: 'hd'
-            }
+              totalTokens: inputTokens + outputTokens,
+            },
+            cost: totalCost,
           };
 
-          await storage.createGeneratedImage(imageRecord);
-          console.log('✅ Imagem salva no banco:', imageRecord);
-        } catch (dbError) {
-          console.error('❌ Erro ao salvar:', dbError);
-        }
+        } catch (error: any) {
+          console.log('❌ gpt-image-1 falhou, tentando DALL-E 3...');
+          
+          try {
+            const dalleResponse = await this.openai.images.generate({
+              model: 'dall-e-3',
+              prompt: prompt,
+              n: 1,
+              size: '1024x1024',
+              quality: 'standard'
+            });
 
-        return {
-          content,
-          usage: {
+            if (!dalleResponse.data || dalleResponse.data.length === 0) {
+              throw new Error('No image generated');
+            }
+            
+            const imageData = dalleResponse.data[0];
+            const imageUrl = imageData.url || '';
+            const content = `⚠️ Fallback para DALL-E 3: Imagem gerada com sucesso! URL: ${imageUrl}`;
+
+            const inputTokens = this.countTokens(prompt);
+            const outputTokens = 1;
+            const inputCost = (inputTokens / 1000000) * 5.00;
+            const outputCost = 0.04;
+            const totalCost = inputCost + outputCost;
+
+            // Save DALL-E image to database
+            try {
+              const imageRecord: InsertGeneratedImage = {
+                model: request.model,
+                prompt: prompt,
+                imageUrl: imageUrl,
+                size: '1024x1024',
+                quality: 'standard',
+                format: 'png',
+                cost: totalCost.toString(),
+                metadata: {
+                  inputTokens,
+                  outputTokens,
+                  provider: 'openai',
+                  model: request.model,
+                  actualModel: 'dall-e-3',
+                  fallback: true
+                }
+              };
+
+              await storage.createGeneratedImage(imageRecord);
+              console.log('✅ Imagem DALL-E 3 salva no banco:', imageRecord);
+            } catch (dbError) {
+              console.error('❌ Erro ao salvar imagem DALL-E no banco:', dbError);
+            }
+
+            return {
+              content,
+              usage: {
+                inputTokens,
+                outputTokens,
+                totalTokens: inputTokens + outputTokens,
+              },
+              cost: totalCost,
+            };
+
+          } catch (dalleError: any) {
+            console.log('❌ DALL-E 3 também falhou, ativando modo demo...');
+            
+            // Demo mode as last resort
+            const demoImageUrl = `https://picsum.photos/1024/1024?random=${Date.now()}`;
+            const content = `🔧 MODO DEMO: Simulação de imagem para "${prompt}". URL demo: ${demoImageUrl}`;
+            
+            const inputTokens = this.countTokens(prompt);
+            const outputTokens = 1;
+            const inputCost = (inputTokens / 1000000) * 5.00;
+            const outputCost = 0.04;
+            const totalCost = inputCost + outputCost;
+
+            try {
+              const imageRecord: InsertGeneratedImage = {
+                model: request.model,
+                prompt: prompt,
+                imageUrl: demoImageUrl,
+                size: '1024x1024',
+                quality: 'standard',
+                format: 'png',
+                cost: totalCost.toString(),
+                metadata: {
+                  inputTokens,
+                  outputTokens,
+                  provider: 'openai',
+                  model: request.model,
+                  actualModel: 'demo',
+                  isDemo: true
+                }
+              };
+
+              await storage.createGeneratedImage(imageRecord);
+              console.log('✅ Imagem demo salva no banco:', imageRecord);
+            } catch (dbError) {
+              console.error('❌ Erro ao salvar imagem demo:', dbError);
+            }
+
+            return {
+              content,
+              usage: {
+                inputTokens,
+                outputTokens,
+                totalTokens: inputTokens + outputTokens,
+              },
+              cost: totalCost,
+            };
+          }
+        }
+      }
+      
+      // For gpt-image-1 pricing: text tokens for input, image generation cost for output
+      const inputTokens = this.countTokens(prompt);
+      const outputTokens = 1; // 1 image generated
+      
+      // Custom cost calculation for image generation
+      // Text input: $5.00 per 1M tokens
+      // Image output: 1024x1024 standard quality cost
+      const inputCost = (inputTokens / 1000000) * 5.00;
+      const outputCost = 0.04; // Standard quality image cost for gpt-image-1
+      const totalCost = inputCost + outputCost;
+
+      // Save image to database for centralized storage
+      try {
+        const imageRecord: InsertGeneratedImage = {
+          model: request.model,
+          prompt: prompt,
+          imageUrl: imageUrl,
+          size: '1024x1024',
+          quality: 'standard',
+          format: 'png',
+          cost: totalCost.toString(),
+          metadata: {
             inputTokens,
             outputTokens,
-            totalTokens: inputTokens + outputTokens,
-          },
-          cost: totalCost,
+            provider: 'openai',
+            timestamp: new Date().toISOString()
+          }
         };
+
+        await db.insert(generatedImages).values(imageRecord);
+      } catch (error) {
+        console.error('Failed to save generated image to database:', error);
+        // Continue execution even if database save fails
       }
+
+      return {
+        content,
+        usage: {
+          inputTokens,
+          outputTokens,
+          totalTokens: inputTokens + outputTokens,
+        },
+        cost: totalCost,
+      };
     }
 
     const requestParams: any = {
