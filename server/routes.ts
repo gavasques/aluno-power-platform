@@ -1677,11 +1677,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/agents/:id', async (req, res) => {
     try {
-      const validatedData = insertAgentSchema.partial().parse(req.body);
-      const agent = await storage.updateAgent(req.params.id, validatedData);
+      const { id } = req.params;
+      const updateData = req.body;
+      
+      console.log('PUT /api/agents/:id - Request received');
+      console.log('Agent ID:', id);
+      console.log('Update data:', JSON.stringify(updateData, null, 2));
+      
+      // Validate required fields manually first
+      if (!updateData.provider || !updateData.model) {
+        console.log('Validation failed - missing provider or model');
+        return res.status(400).json({ 
+          error: 'Invalid agent data: provider and model are required',
+          received: { provider: updateData.provider, model: updateData.model }
+        });
+      }
+      
+      // Use storage method instead of direct DB
+      const agent = await storage.updateAgent(id, updateData);
+      console.log('Agent updated successfully:', agent);
       res.json(agent);
     } catch (error) {
-      res.status(400).json({ error: 'Invalid agent data' });
+      console.error('Error updating agent:', error);
+      res.status(400).json({ 
+        error: 'Invalid agent data', 
+        details: error.message,
+        stack: error.stack 
+      });
     }
   });
 
