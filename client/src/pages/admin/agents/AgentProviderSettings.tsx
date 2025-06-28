@@ -130,7 +130,7 @@ export default function AgentProviderSettings() {
 
   // Test connection mutation
   const testConnectionMutation = useMutation({
-    mutationFn: async (data: { provider: string; model: string; prompt: string }) => {
+    mutationFn: async (data: { provider: string; model: string; prompt: string; temperature: number; maxTokens: number }) => {
       const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -211,7 +211,9 @@ export default function AgentProviderSettings() {
     testConnectionMutation.mutate({
       provider: formData.provider,
       model: formData.model,
-      prompt: testPrompt
+      prompt: testPrompt,
+      temperature: formData.temperature,
+      maxTokens: formData.maxTokens
     });
   };
 

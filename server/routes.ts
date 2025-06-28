@@ -2048,16 +2048,20 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       const { aiProviderService } = await import('./services/aiProviderService');
       
-      // Test with the provided prompt
+      // Test with the provided prompt and configured parameters
+      const { temperature, maxTokens } = req.body;
       const isReasoningModel = model.startsWith('o1') || model.startsWith('o4');
+      
+      console.log(`Test parameters - Temperature: ${temperature}, MaxTokens: ${maxTokens}, IsReasoningModel: ${isReasoningModel}`);
+      
       const testResponse = await aiProviderService.generateCompletion({
         provider,
         model,
         messages: [
           { role: 'user', content: testPrompt }
         ],
-        temperature: isReasoningModel ? undefined : 0.1,
-        maxTokens: 100
+        temperature: isReasoningModel ? undefined : (temperature ? parseFloat(temperature) : 0.1),
+        maxTokens: maxTokens ? parseInt(maxTokens) : 100
       });
 
       res.json({
