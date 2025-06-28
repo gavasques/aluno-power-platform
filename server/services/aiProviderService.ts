@@ -94,6 +94,13 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 40.00, // Image generation cost
     maxTokens: 4096
   },
+  'gpt-image-edit': {
+    provider: 'openai',
+    model: 'gpt-image-edit',
+    inputCostPer1M: 5.00,   // Text tokens input: $5.00 per 1M
+    outputCostPer1M: 40.00, // Image editing cost (same as generation)
+    maxTokens: 4096
+  },
 
   // DALL-E 3 - Fallback image generation model
   'dall-e-3': {
@@ -319,6 +326,126 @@ class AIProviderService {
     if (isImageModel) {
       const prompt = request.messages.map(m => m.content).join('\n');
       
+      // GPT Image Edit implementation for image editing
+      if (request.model === 'gpt-image-edit') {
+        console.log('🖼️ Usando gpt-image-edit para edição de imagens');
+        
+        try {
+          // Check if there's an image provided in the request
+          const imageData = (request as any).imageData;
+          if (!imageData) {
+            throw new Error('Imagem é obrigatória para edição');
+          }
+
+          // Use DALL-E 2 edit endpoint for image editing
+          const response = await this.openai.images.edit({
+            image: imageData,
+            prompt: prompt,
+            n: 1,
+            size: '1024x1024'
+          });
+
+          if (!response.data || response.data.length === 0) {
+            throw new Error('No edited image generated');
+          }
+
+          const editedImageUrl = response.data[0].url || '';
+          const content = `Imagem editada com sucesso! URL: ${editedImageUrl}`;
+
+          // Calculate costs
+          const inputTokens = this.countTokens(prompt);
+          const outputTokens = 1;
+          const inputCost = (inputTokens / 1000000) * 5.00;
+          const outputCost = 0.02; // DALL-E 2 edit cost
+          const totalCost = inputCost + outputCost;
+
+          // Save to database
+          try {
+            const imageRecord: InsertGeneratedImage = {
+              model: request.model,
+              prompt: prompt,
+              imageUrl: editedImageUrl,
+              size: '1024x1024',
+              quality: 'standard',
+              format: 'png',
+              cost: totalCost.toString(),
+              metadata: {
+                inputTokens,
+                outputTokens,
+                provider: 'openai',
+                model: 'gpt-image-edit',
+                actualModel: 'dall-e-2-edit',
+                isEdit: true
+              }
+            };
+
+            await storage.createGeneratedImage(imageRecord);
+            console.log('✅ Imagem editada salva no banco:', imageRecord);
+          } catch (dbError) {
+            console.error('❌ Erro ao salvar imagem editada:', dbError);
+          }
+
+          return {
+            content,
+            usage: {
+              inputTokens,
+              outputTokens,
+              totalTokens: inputTokens + outputTokens,
+            },
+            cost: totalCost,
+          };
+
+        } catch (error: any) {
+          console.log('❌ Edição de imagem falhou:', error.message);
+          
+          // Demo mode for image editing
+          const demoImageUrl = `https://picsum.photos/1024/1024?edit=${Date.now()}`;
+          const content = `🔧 MODO DEMO - Edição: Simulação de edição para "${prompt}". URL demo: ${demoImageUrl}`;
+          
+          const inputTokens = this.countTokens(prompt);
+          const outputTokens = 1;
+          const inputCost = (inputTokens / 1000000) * 5.00;
+          const outputCost = 0.02;
+          const totalCost = inputCost + outputCost;
+
+          try {
+            const imageRecord: InsertGeneratedImage = {
+              model: request.model,
+              prompt: prompt,
+              imageUrl: demoImageUrl,
+              size: '1024x1024',
+              quality: 'standard',
+              format: 'png',
+              cost: totalCost.toString(),
+              metadata: {
+                inputTokens,
+                outputTokens,
+                provider: 'openai',
+                model: 'gpt-image-edit',
+                actualModel: 'demo-edit',
+                isDemo: true,
+                isEdit: true
+              }
+            };
+
+            await storage.createGeneratedImage(imageRecord);
+            console.log('✅ Demo de edição salva no banco:', imageRecord);
+          } catch (dbError) {
+            console.error('❌ Erro ao salvar demo de edição:', dbError);
+          }
+
+          return {
+            content,
+            usage: {
+              inputTokens,
+              outputTokens,
+              totalTokens: inputTokens + outputTokens,
+            },
+            cost: totalCost,
+          };
+        }
+      }
+
       // GPT Image 1 implementation based on the guide provided
       if (request.model === 'gpt-image-1') {
         console.log('🎨 Usando gpt-image-1 para geração de imagens');

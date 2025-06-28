@@ -84,6 +84,8 @@ export default function AgentProviderSettings() {
   const [testResponse, setTestResponse] = useState('');
   const [requestSent, setRequestSent] = useState('');
   const [responseReceived, setResponseReceived] = useState('');
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Fetch provider status
   const { data: status = { openai: false, anthropic: false, gemini: false, deepseek: false } } = useQuery<ProviderStatus>({
@@ -130,9 +132,31 @@ export default function AgentProviderSettings() {
     }
   });
 
+  // Handle image upload
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione apenas arquivos de imagem",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setUploadedImage(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Test connection mutation
   const testConnectionMutation = useMutation({
-    mutationFn: async (data: { provider: string; model: string; prompt: string; temperature: number; maxTokens: number }) => {
+    mutationFn: async (data: { provider: string; model: string; prompt: string; temperature: number; maxTokens: number; imageData?: string }) => {
       const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -213,17 +237,35 @@ export default function AgentProviderSettings() {
       });
       return;
     }
+
+    // Check if image is required for gpt-image-edit model
+    if (formData.model === 'gpt-image-edit' && !uploadedImage) {
+      toast({
+        title: "Erro",
+        description: "Por favor, faça upload de uma imagem para o modelo gpt-image-edit",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setTestResponse('');
     setRequestSent('');
     setResponseReceived('');
-    testConnectionMutation.mutate({
+    
+    const testData: any = {
       provider: formData.provider,
       model: formData.model,
       prompt: testPrompt,
       temperature: formData.temperature,
       maxTokens: formData.maxTokens
-    });
+    };
+
+    // Add image data for gpt-image-edit model
+    if (formData.model === 'gpt-image-edit' && uploadedImage) {
+      testData.imageData = uploadedImage.split(',')[1]; // Remove data:image/...;base64, prefix
+    }
+
+    testConnectionMutation.mutate(testData);
   };
 
   if (user?.role !== 'admin') {
@@ -466,12 +508,68 @@ export default function AgentProviderSettings() {
                     <Label htmlFor="testPrompt">Prompt de Teste</Label>
                     <Textarea
                       id="testPrompt"
-                      placeholder="Digite um prompt para testar a conexão com o modelo..."
+                      placeholder={formData.model === 'gpt-image-edit' 
+                        ? "Descreva como editar a imagem (ex: 'Adicione uma praia tropical ao fundo')"
+                        : "Digite um prompt para testar a conexão com o modelo..."
+                      }
                       value={testPrompt}
                       onChange={(e) => setTestPrompt(e.target.value)}
                       rows={3}
                     />
                   </div>
+
+                  {/* Image Upload for gpt-image-edit */}
+                  {formData.model === 'gpt-image-edit' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="imageUpload">Upload de Imagem (Obrigatório para Edição)</Label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                        {uploadedImage ? (
+                          <div className="text-center">
+                            <img 
+                              src={uploadedImage} 
+                              alt="Imagem carregada" 
+                              className="max-w-full max-h-40 mx-auto mb-4 rounded-lg shadow-sm"
+                            />
+                            <div className="space-y-2">
+                              <p className="text-sm text-green-600 font-medium">
+                                Imagem carregada com sucesso
+                              </p>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setUploadedImage(null);
+                                  setImageFile(null);
+                                }}
+                              >
+                                Remover Imagem
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <input
+                              id="imageUpload"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={() => document.getElementById('imageUpload')?.click()}
+                              className="flex items-center gap-2"
+                            >
+                              📎 Selecionar Imagem
+                            </Button>
+                            <p className="text-sm text-gray-500 mt-2">
+                              Formatos suportados: JPG, PNG, WebP (máx. 4MB)
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex gap-3">
                     <Button 
