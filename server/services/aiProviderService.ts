@@ -90,12 +90,12 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 128000
   },
 
-  // OpenAI Image Generation (gpt-image-1 - nova geração multimodal)
+  // OpenAI Image Generation (gpt-image-1 - preços oficiais da documentação)
   'gpt-image-1': {
     provider: 'openai',
     model: 'gpt-image-1',
-    inputCostPer1M: 2.50,   // Mesmo preço do GPT-4o para input
-    outputCostPer1M: 10.00, // Mesmo preço do GPT-4o para output
+    inputCostPer1M: 5.00,   // Text tokens input: $5.00 per 1M
+    outputCostPer1M: 40.00, // Image tokens output: $40.00 per 1M
     maxTokens: 4096
   },
 
@@ -325,27 +325,36 @@ class AIProviderService {
     const isImageModel = request.model.includes('image');
 
     if (isImageModel) {
-      // gpt-image-1 uses the standard chat completions API, not the images API
-      const requestParams: any = {
-        model: request.model,
-        messages: request.messages,
-      };
-
-      if (request.temperature !== undefined) {
-        requestParams.temperature = request.temperature;
-      } else {
-        requestParams.temperature = 0.7;
-      }
-
-      if (request.maxTokens) {
-        requestParams.max_tokens = request.maxTokens;
-      }
-
-      const response = await this.openai.chat.completions.create(requestParams);
-      const content = response.choices[0]?.message?.content || '';
+      // gpt-image-1 can use both Image API and Chat Completions API
+      // Using Image API for image generation as documented
+      const prompt = request.messages.map(m => m.content).join('\n');
       
-      const inputTokens = response.usage?.prompt_tokens || 0;
-      const outputTokens = response.usage?.completion_tokens || 0;
+      const response = await this.openai.images.generate({
+        model: request.model,
+        prompt: prompt,
+        n: 1,
+        size: '1024x1024',
+        quality: 'medium', // medium quality as default ($0.042 per image)
+        response_format: 'url'
+      });
+
+      if (!response.data || response.data.length === 0) {
+        throw new Error('No image generated');
+      }
+      
+      const imageUrl = response.data[0]?.url || '';
+      const content = `Image generated successfully. URL: ${imageUrl}`;
+      
+      // For gpt-image-1 pricing: text tokens for input, image generation cost for output
+      const inputTokens = this.countTokens(prompt);
+      const outputTokens = 1; // 1 image generated
+      
+      // Custom cost calculation for image generation
+      // Text input: $5.00 per 1M tokens
+      // Image output: medium quality 1024x1024 = $0.042 per image
+      const inputCost = (inputTokens / 1000000) * 5.00;
+      const outputCost = 0.042; // Medium quality image cost
+      const totalCost = inputCost + outputCost;
 
       return {
         content,
@@ -354,7 +363,7 @@ class AIProviderService {
           outputTokens,
           totalTokens: inputTokens + outputTokens,
         },
-        cost: this.calculateCost(inputTokens, outputTokens, modelConfig),
+        cost: totalCost,
       };
     }
 

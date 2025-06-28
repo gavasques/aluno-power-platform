@@ -126,7 +126,10 @@ Preferred communication style: Simple, everyday language.
   - Interface completa com 4 provedores ativos e seleção por categorias
   - Sistema de teste de conectividade validado para todos os 25 modelos
   - Configurações especiais para modelos de raciocínio (série o1 e o4) sem temperatura
-  - Preços atualizados: GPT-4.1 ($2.50/$10.00), GPT-4o ($2.50/$10.00), gpt-image-1 ($2.50/$10.00)
+  - Preços atualizados conforme documentação oficial:
+    - GPT-4.1: $2.50/$10.00 por 1M tokens
+    - GPT-4o: $2.50/$10.00 por 1M tokens  
+    - gpt-image-1: $5.00 input + $0.042 por imagem (qualidade média)
 
 ## Changelog
 
