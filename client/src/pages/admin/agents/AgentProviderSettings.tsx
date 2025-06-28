@@ -145,7 +145,10 @@ export default function AgentProviderSettings() {
       return response.json();
     },
     onSuccess: (data) => {
+      console.log('Full response data:', data);
       setTestResponse(data.response || 'Teste realizado com sucesso!');
+      setRequestSent(data.requestSent || '');
+      setResponseReceived(data.responseReceived || '');
       toast({
         title: "Conexão testada",
         description: "A conexão com o provedor foi testada com sucesso."
@@ -154,6 +157,8 @@ export default function AgentProviderSettings() {
     onError: (error) => {
       const errorMsg = error instanceof Error ? error.message : "Falha no teste de conexão";
       setTestResponse(`Erro: ${errorMsg}`);
+      setRequestSent('');
+      setResponseReceived('');
       toast({
         title: "Erro no teste",
         description: errorMsg,
@@ -509,8 +514,27 @@ export default function AgentProviderSettings() {
                       {/* Request JSON */}
                       {requestSent && (
                         <div className="space-y-2">
-                          <Label>Requisição Enviada (JSON)</Label>
-                          <div className="p-4 border rounded-lg bg-slate-900 text-green-400 text-sm font-mono overflow-x-auto">
+                          <div className="flex items-center justify-between">
+                            <Label>Requisição Enviada (JSON)</Label>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const blob = new Blob([requestSent], { type: 'application/json' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'request.json';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                              }}
+                            >
+                              Download JSON
+                            </Button>
+                          </div>
+                          <div className="p-4 border rounded-lg bg-slate-900 text-green-400 text-sm font-mono overflow-x-auto max-h-60">
                             <pre>{requestSent}</pre>
                           </div>
                         </div>
@@ -519,8 +543,27 @@ export default function AgentProviderSettings() {
                       {/* Response JSON */}
                       {responseReceived && (
                         <div className="space-y-2">
-                          <Label>Resposta Recebida (JSON)</Label>
-                          <div className="p-4 border rounded-lg bg-slate-900 text-blue-400 text-sm font-mono overflow-x-auto">
+                          <div className="flex items-center justify-between">
+                            <Label>Resposta Recebida (JSON)</Label>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const blob = new Blob([responseReceived], { type: 'application/json' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'response.json';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                              }}
+                            >
+                              Download JSON
+                            </Button>
+                          </div>
+                          <div className="p-4 border rounded-lg bg-slate-900 text-blue-400 text-sm font-mono overflow-x-auto max-h-60">
                             <pre>{responseReceived}</pre>
                           </div>
                         </div>

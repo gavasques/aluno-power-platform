@@ -2075,18 +2075,29 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         content: testResponse.content?.substring(0, 100) + '...'
       });
 
+      // Prepare clean response data
+      const cleanResponse = {
+        content: testResponse.content,
+        usage: testResponse.usage || null,
+        provider: provider,
+        model: model,
+        timestamp: new Date().toISOString()
+      };
+
       const responseData = {
         success: true,
         message: `Conexão com ${provider} (${model}) testada com sucesso!`,
         response: testResponse.content || 'Resposta vazia',
         requestSent: JSON.stringify(requestData, null, 2),
-        responseReceived: JSON.stringify({
-          content: testResponse.content,
-          usage: testResponse.usage || null,
-          provider: provider,
-          model: model
-        }, null, 2)
+        responseReceived: JSON.stringify(cleanResponse, null, 2)
       };
+
+      console.log('Sending final response to client:', {
+        hasResponse: !!responseData.response,
+        hasRequestJson: !!responseData.requestSent,
+        hasResponseJson: !!responseData.responseReceived,
+        responseLength: responseData.response?.length || 0
+      });
 
       res.json(responseData);
     } catch (error) {
