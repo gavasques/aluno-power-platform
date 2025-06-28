@@ -335,7 +335,8 @@ class AIProviderService {
         n: 1,
         size: '1024x1024',
         quality: 'high', // high quality ($0.167 per image)
-        response_format: 'b64_json'
+        response_format: 'b64_json',
+        content_moderation_level: 'low' // less restrictive filtering
       });
 
       if (!response.data || response.data.length === 0) {
