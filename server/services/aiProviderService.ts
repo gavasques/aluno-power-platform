@@ -58,7 +58,7 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 32000
   },
   
-  // OpenAI Reasoning Models
+  // OpenAI Reasoning Models (o1 series)
   'o1-mini': {
     provider: 'openai',
     model: 'o1-mini',
@@ -69,6 +69,22 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
   'o1-preview': {
     provider: 'openai',
     model: 'o1-preview',
+    inputCostPer1M: 15.00,
+    outputCostPer1M: 60.00,
+    maxTokens: 128000
+  },
+
+  // OpenAI o4 Reasoning Models
+  'o4-mini': {
+    provider: 'openai',
+    model: 'o4-mini',
+    inputCostPer1M: 3.00,
+    outputCostPer1M: 12.00,
+    maxTokens: 65536
+  },
+  'o4': {
+    provider: 'openai',
+    model: 'o4',
     inputCostPer1M: 15.00,
     outputCostPer1M: 60.00,
     maxTokens: 128000
@@ -174,14 +190,14 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 500000
   },
 
-  // Google Imagen Models (Future Implementation)
-  // 'imagen-4.0-ultra-generate-preview-06-06': {
-  //   provider: 'gemini',
-  //   model: 'imagen-4.0-ultra-generate-preview-06-06',
-  //   inputCostPer1M: 2.00,
-  //   outputCostPer1M: 8.00,
-  //   maxTokens: 4096
-  // },
+  // Google Imagen Models
+  'imagen-4.0-ultra-generate-preview-06-06': {
+    provider: 'gemini',
+    model: 'imagen-4.0-ultra-generate-preview-06-06',
+    inputCostPer1M: 2.00,
+    outputCostPer1M: 8.00,
+    maxTokens: 4096
+  },
 
   // Google Gemini Legacy Models
   'gemini-1.5-pro': {
@@ -311,8 +327,8 @@ class AIProviderService {
       throw new Error('OpenAI client not initialized. Please check OPENAI_API_KEY.');
     }
 
-    // Handle reasoning models (o1 series) with different parameter names
-    const isReasoningModel = request.model.startsWith('o1');
+    // Handle reasoning models (o1 and o4 series) with different parameter names
+    const isReasoningModel = request.model.startsWith('o1') || request.model.startsWith('o4');
     const isImageModel = request.model.includes('image');
 
     if (isImageModel) {
