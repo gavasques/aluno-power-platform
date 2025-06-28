@@ -228,7 +228,7 @@ function App() {
                             )}
                           </Route>
                           
-                          <Route path="/admin/:section/:subsection?">
+                          <Route path="/admin/:section/:subsection?/:id?/:action?">
                             {(params) => (
                               <AdminLayout>
                                 <Admin />
