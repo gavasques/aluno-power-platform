@@ -618,3 +618,6 @@ export class AIProviderService {
     };
   }
 }
+
+// Export a singleton instance
+export const aiProviderService = new AIProviderService();

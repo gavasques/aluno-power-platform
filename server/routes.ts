@@ -37,6 +37,7 @@ import {
 } from "@shared/schema";
 import { youtubeService } from "./services/youtubeService";
 import { openaiService } from "./services/openaiService";
+import { aiProviderService } from "./services/aiProviderService";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
 import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages } from '@shared/schema';
@@ -2014,7 +2015,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // AI Provider management endpoints
   app.get('/api/ai-providers/status', async (req, res) => {
     try {
-      const { aiProviderService } = await import('./services/aiProviderService');
       const status = aiProviderService.getProviderStatus();
       res.json(status);
     } catch (error) {
@@ -2025,7 +2025,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
   app.get('/api/ai-providers/models', async (req, res) => {
     try {
-      const { aiProviderService } = await import('./services/aiProviderService');
       const models = aiProviderService.getAvailableModels();
       res.json(models);
     } catch (error) {
@@ -2051,7 +2050,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const testPrompt = prompt || 'Hello! How are you today?';
       console.log(`Testing ${provider}/${model} with prompt: "${testPrompt}"`);
 
-      const { aiProviderService } = await import('./services/aiProviderService');
+      // Use the imported aiProviderService
       
       // Test with the provided prompt and configured parameters
       const { temperature, maxTokens } = req.body;
