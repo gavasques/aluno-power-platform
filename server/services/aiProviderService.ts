@@ -90,21 +90,21 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 128000
   },
 
-  // OpenAI Image Generation
+  // OpenAI Image Generation (DALL-E 3)
   'gpt-image-1': {
     provider: 'openai',
     model: 'gpt-image-1',
-    inputCostPer1M: 2.00,
-    outputCostPer1M: 8.00,
+    inputCostPer1M: 40.00,  // DALL-E 3: $0.040 per image (1024x1024)
+    outputCostPer1M: 0.00,  // No output tokens for image generation
     maxTokens: 4096
   },
 
-  // OpenAI Legacy Models
+  // OpenAI Legacy Models - Preços atualizados Dezembro 2024
   'gpt-4o': {
     provider: 'openai',
     model: 'gpt-4o',
-    inputCostPer1M: 5.00,
-    outputCostPer1M: 15.00,
+    inputCostPer1M: 2.50,   // Atualizado: $2.50 por 1M tokens
+    outputCostPer1M: 10.00, // Atualizado: $10.00 por 1M tokens
     maxTokens: 128000
   },
   'gpt-4o-mini': {
@@ -325,7 +325,31 @@ class AIProviderService {
     const isImageModel = request.model.includes('image');
 
     if (isImageModel) {
-      throw new Error('Image generation not yet implemented');
+      // For image generation models, use DALL-E API
+      const response = await this.openai.images.generate({
+        model: request.model === 'gpt-image-1' ? 'dall-e-3' : request.model,
+        prompt: request.messages.map(m => m.content).join('\n'),
+        n: 1,
+        size: '1024x1024',
+        quality: 'standard'
+      });
+
+      const imageUrl = response.data?.[0]?.url || '';
+      const content = `Image generated successfully. URL: ${imageUrl}`;
+      
+      // Estimate token usage for image generation
+      const inputTokens = this.countTokens(request.messages.map(m => m.content).join(''));
+      const outputTokens = 50; // Estimated for image generation response
+
+      return {
+        content,
+        usage: {
+          inputTokens,
+          outputTokens,
+          totalTokens: inputTokens + outputTokens,
+        },
+        cost: this.calculateCost(inputTokens, outputTokens, modelConfig),
+      };
     }
 
     const requestParams: any = {
