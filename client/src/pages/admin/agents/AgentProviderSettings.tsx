@@ -82,6 +82,8 @@ export default function AgentProviderSettings() {
 
   const [testPrompt, setTestPrompt] = useState('Olá! Como você está hoje?');
   const [testResponse, setTestResponse] = useState('');
+  const [requestSent, setRequestSent] = useState('');
+  const [responseReceived, setResponseReceived] = useState('');
 
   // Fetch provider status
   const { data: status = { openai: false, anthropic: false, gemini: false, deepseek: false } } = useQuery<ProviderStatus>({
@@ -208,6 +210,8 @@ export default function AgentProviderSettings() {
     }
     
     setTestResponse('');
+    setRequestSent('');
+    setResponseReceived('');
     testConnectionMutation.mutate({
       provider: formData.provider,
       model: formData.model,
@@ -487,18 +491,40 @@ export default function AgentProviderSettings() {
 
                   {/* Test Response Area */}
                   {(testResponse || testConnectionMutation.isPending) && (
-                    <div className="space-y-2">
-                      <Label>Resposta do Teste</Label>
-                      <div className="p-4 border rounded-lg bg-muted/50 min-h-[100px] whitespace-pre-wrap">
-                        {testConnectionMutation.isPending ? (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
-                            Aguardando resposta do modelo...
-                          </div>
-                        ) : (
-                          testResponse || 'Nenhuma resposta ainda'
-                        )}
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Resposta do Modelo</Label>
+                        <div className="p-4 border rounded-lg bg-muted/50 min-h-[100px] whitespace-pre-wrap">
+                          {testConnectionMutation.isPending ? (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                              Aguardando resposta do modelo...
+                            </div>
+                          ) : (
+                            testResponse || 'Nenhuma resposta ainda'
+                          )}
+                        </div>
                       </div>
+
+                      {/* Request JSON */}
+                      {requestSent && (
+                        <div className="space-y-2">
+                          <Label>Requisição Enviada (JSON)</Label>
+                          <div className="p-4 border rounded-lg bg-slate-900 text-green-400 text-sm font-mono overflow-x-auto">
+                            <pre>{requestSent}</pre>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Response JSON */}
+                      {responseReceived && (
+                        <div className="space-y-2">
+                          <Label>Resposta Recebida (JSON)</Label>
+                          <div className="p-4 border rounded-lg bg-slate-900 text-blue-400 text-sm font-mono overflow-x-auto">
+                            <pre>{responseReceived}</pre>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

@@ -2054,7 +2054,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       
       console.log(`Test parameters - Temperature: ${temperature}, MaxTokens: ${maxTokens}, IsReasoningModel: ${isReasoningModel}`);
       
-      const testResponse = await aiProviderService.generateCompletion({
+      // Prepare request data for logging
+      const requestData = {
         provider,
         model,
         messages: [
@@ -2062,12 +2063,20 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         ],
         temperature: isReasoningModel ? undefined : (temperature ? parseFloat(temperature) : 0.1),
         maxTokens: maxTokens ? parseInt(maxTokens) : 100
-      });
+      };
+
+      const testResponse = await aiProviderService.generateCompletion(requestData);
 
       res.json({
         success: true,
         message: `Conexão com ${provider} (${model}) testada com sucesso!`,
-        response: testResponse.content
+        response: testResponse.content,
+        requestSent: JSON.stringify(requestData, null, 2),
+        responseReceived: JSON.stringify({
+          content: testResponse.content,
+          usage: testResponse.usage || null,
+          model: testResponse.model || model
+        }, null, 2)
       });
     } catch (error) {
       console.error('Error testing provider connection:', error);
