@@ -1,6 +1,8 @@
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenAI } from '@google/genai';
+import { db } from '../db';
+import { generatedImages, type InsertGeneratedImage } from '../../shared/schema';
 
 export type AIProvider = 'openai' | 'anthropic' | 'gemini' | 'deepseek';
 
@@ -354,6 +356,30 @@ class AIProviderService {
       const inputCost = (inputTokens / 1000000) * 5.00;
       const outputCost = 0.167; // High quality image cost
       const totalCost = inputCost + outputCost;
+
+      // Save image to database for centralized storage
+      try {
+        const imageRecord: InsertGeneratedImage = {
+          model: request.model,
+          prompt: prompt,
+          imageUrl: imageUrl,
+          size: '1024x1024',
+          quality: 'high',
+          format: 'png',
+          cost: totalCost.toString(),
+          metadata: {
+            inputTokens,
+            outputTokens,
+            provider: 'openai',
+            timestamp: new Date().toISOString()
+          }
+        };
+
+        await db.insert(generatedImages).values(imageRecord);
+      } catch (error) {
+        console.error('Failed to save generated image to database:', error);
+        // Continue execution even if database save fails
+      }
 
       return {
         content,

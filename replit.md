@@ -108,10 +108,11 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 28, 2025**: Sistema completo de IA com 4 provedores e 25 modelos ativos
+- **June 28, 2025**: Sistema completo de IA com 4 provedores e 25 modelos ativos + armazenamento centralizado de imagens
   - Adicionado DeepSeek com integração nativa usando API compatível OpenAI
   - Atualizados modelos OpenAI incluindo série o4 (o4, o4-mini) com configurações especiais
-  - Implementado modelo gpt-image-1 (nova geração multimodal da OpenAI)
+  - Implementado modelo gpt-image-1 (nova geração multimodal da OpenAI) com armazenamento automático
+  - Sistema centralizado de imagens geradas: todas as imagens do gpt-image-1 são automaticamente salvas no banco
   - Removida implementação Imagen 4.0 do Google (por solicitação do usuário)
   - Modelos disponíveis por categoria:
     - OpenAI Normal: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano
@@ -126,6 +127,7 @@ Preferred communication style: Simple, everyday language.
   - Interface completa com 4 provedores ativos e seleção por categorias
   - Sistema de teste de conectividade validado para todos os 25 modelos
   - Configurações especiais para modelos de raciocínio (série o1 e o4) sem temperatura
+  - Central de imagens geradas com interface administrativa completa
   - Preços atualizados conforme documentação oficial:
     - GPT-4.1: $2.50/$10.00 por 1M tokens
     - GPT-4o: $2.50/$10.00 por 1M tokens  
