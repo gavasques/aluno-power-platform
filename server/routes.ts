@@ -1697,10 +1697,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cleanUpdateData = {
         provider: updateData.provider,
         model: updateData.model,
-        temperature: parseFloat(updateData.temperature) || 0.7,
+        temperature: typeof updateData.temperature === 'number' ? updateData.temperature.toString() : updateData.temperature.toString(),
         maxTokens: parseInt(updateData.maxTokens) || 1000,
         isActive: updateData.isActive !== undefined ? updateData.isActive : true,
-        costPer1kTokens: parseFloat(updateData.costPer1kTokens) || 0.0125
+        costPer1kTokens: (parseFloat(updateData.costPer1kTokens) || 0.0125).toString()
       };
       
       console.log('Clean update data:', cleanUpdateData);

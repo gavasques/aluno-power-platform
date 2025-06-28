@@ -173,7 +173,7 @@ export default function AgentProviderSettings() {
       setFormData({
         provider: selectedAgent.provider,
         model: selectedAgent.model,
-        temperature: selectedAgent.temperature,
+        temperature: typeof selectedAgent.temperature === 'string' ? parseFloat(selectedAgent.temperature) : selectedAgent.temperature,
         maxTokens: selectedAgent.maxTokens
       });
     }
@@ -185,7 +185,7 @@ export default function AgentProviderSettings() {
     const selectedModel = models.find((m: ModelConfig) => m.model === formData.model);
     const costPer1kTokens = selectedModel 
       ? (selectedModel.inputCostPer1M + selectedModel.outputCostPer1M) / 1000
-      : selectedAgent.costPer1kTokens;
+      : parseFloat(selectedAgent.costPer1kTokens.toString());
 
     updateAgentMutation.mutate({
       ...selectedAgent,
@@ -412,7 +412,7 @@ export default function AgentProviderSettings() {
                 {/* Temperatura */}
                 <div className="space-y-2">
                   <Label htmlFor="temperature" className={!supportsTemperature ? "text-muted-foreground" : ""}>
-                    Temperatura ({formData.temperature.toFixed(2)})
+                    Temperatura ({typeof formData.temperature === 'number' ? formData.temperature.toFixed(2) : formData.temperature})
                     {!supportsTemperature && <span className="text-xs ml-2">(Não disponível para este modelo)</span>}
                   </Label>
                   <div className="px-4">
