@@ -108,7 +108,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 28, 2025**: Sistema completo de IA com 4 provedores e 25 modelos ativos + armazenamento centralizado de imagens
+- **June 28, 2025**: Sistema completo funcionando com navegação corrigida e interface de imagens geradas
+  - Corrigidas todas as rotas de navegação do painel administrativo
+  - Interface de imagens geradas completamente funcional em /admin/images
+  - Sistema de configuração de provedores funcionando em /admin/agents/providers
+  - Corrigido endpoint de atualização de agentes com logging detalhado
+  - Todas as 4 integrações de IA ativas e prontas para uso
+
+- **June 28, 2025 (anterior)**: Sistema completo de IA com 4 provedores e 25 modelos ativos + armazenamento centralizado de imagens
   - Adicionado DeepSeek com integração nativa usando API compatível OpenAI
   - Atualizados modelos OpenAI incluindo série o4 (o4, o4-mini) com configurações especiais
   - Implementado modelo gpt-image-1 (nova geração multimodal da OpenAI) com armazenamento automático
