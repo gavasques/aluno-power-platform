@@ -2059,25 +2059,36 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         provider,
         model,
         messages: [
-          { role: 'user', content: testPrompt }
+          { role: 'user' as const, content: testPrompt }
         ],
         temperature: isReasoningModel ? undefined : (temperature ? parseFloat(temperature) : 0.1),
         maxTokens: maxTokens ? parseInt(maxTokens) : 100
       };
 
+      console.log('Sending request to AI service:', JSON.stringify(requestData, null, 2));
+
       const testResponse = await aiProviderService.generateCompletion(requestData);
 
-      res.json({
+      console.log('Received response from AI service:', {
+        contentLength: testResponse.content?.length || 0,
+        hasUsage: !!testResponse.usage,
+        content: testResponse.content?.substring(0, 100) + '...'
+      });
+
+      const responseData = {
         success: true,
         message: `Conexão com ${provider} (${model}) testada com sucesso!`,
-        response: testResponse.content,
+        response: testResponse.content || 'Resposta vazia',
         requestSent: JSON.stringify(requestData, null, 2),
         responseReceived: JSON.stringify({
           content: testResponse.content,
           usage: testResponse.usage || null,
-          model: testResponse.model || model
+          provider: provider,
+          model: model
         }, null, 2)
-      });
+      };
+
+      res.json(responseData);
     } catch (error) {
       console.error('Error testing provider connection:', error);
       res.status(500).json({
