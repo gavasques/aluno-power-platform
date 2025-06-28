@@ -85,7 +85,14 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 200000
   },
 
-
+  // OpenAI Image Generation (gpt-image-1 - preços oficiais da documentação)
+  'gpt-image-1': {
+    provider: 'openai',
+    model: 'gpt-image-1',
+    inputCostPer1M: 5.00,   // Text tokens input: $5.00 per 1M
+    outputCostPer1M: 40.00, // Image tokens output: $40.00 per 1M
+    maxTokens: 4096
+  },
 
   // OpenAI Legacy Models - Preços atualizados Dezembro 2024
   'gpt-4o': {
@@ -300,8 +307,7 @@ class AIProviderService {
     const isImageModel = request.model.includes('image');
 
     if (isImageModel) {
-      // gpt-image-1 can use both Image API and Chat Completions API
-      // Using Image API for image generation as documented
+      // gpt-image-1 uses Image API for image generation as documented
       const prompt = request.messages.map(m => m.content).join('\n');
       
       const response = await this.openai.images.generate({
@@ -309,15 +315,16 @@ class AIProviderService {
         prompt: prompt,
         n: 1,
         size: '1024x1024',
-        quality: 'high' // high quality ($0.167 per image)
+        response_format: 'b64_json' // Get base64 encoded image
       });
 
       if (!response.data || response.data.length === 0) {
         throw new Error('No image generated');
       }
       
-      const imageUrl = response.data[0]?.url || '';
-      const content = `Image generated successfully (PNG format, high quality). URL: ${imageUrl}`;
+      const imageData = response.data[0];
+      const imageB64 = imageData.b64_json || '';
+      const content = `Image generated successfully (PNG format). Base64 data: ${imageB64.substring(0, 50)}...`;
       
       // For gpt-image-1 pricing: text tokens for input, image generation cost for output
       const inputTokens = this.countTokens(prompt);
@@ -325,9 +332,9 @@ class AIProviderService {
       
       // Custom cost calculation for image generation
       // Text input: $5.00 per 1M tokens
-      // Image output: high quality 1024x1024 = $0.167 per image
+      // Image output: 1024x1024 standard quality cost
       const inputCost = (inputTokens / 1000000) * 5.00;
-      const outputCost = 0.167; // High quality image cost
+      const outputCost = 0.04; // Standard quality image cost for gpt-image-1
       const totalCost = inputCost + outputCost;
 
       // Save image to database for centralized storage
@@ -335,9 +342,9 @@ class AIProviderService {
         const imageRecord: InsertGeneratedImage = {
           model: request.model,
           prompt: prompt,
-          imageUrl: imageUrl,
+          imageUrl: `data:image/png;base64,${imageB64}`,
           size: '1024x1024',
-          quality: 'high',
+          quality: 'standard',
           format: 'png',
           cost: totalCost.toString(),
           metadata: {
