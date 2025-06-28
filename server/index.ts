@@ -6,8 +6,9 @@ import { scheduler } from "./services/scheduler";
 
 const app = express();
 app.use(compression()); // Enable gzip compression
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Increase payload size limit to handle large images and data
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();

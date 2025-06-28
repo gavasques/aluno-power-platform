@@ -108,8 +108,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 28, 2025**: Otimizado conjunto de modelos OpenAI para manter apenas os mais estáveis
+- **June 28, 2025**: Implementado sistema GPT-Image-1 exclusivo para geração e edição de imagens
+  - Corrigido erro "PayloadTooLargeError" aumentando limite servidor para 50MB
+  - Modelo "gpt-image-edit" usa EXCLUSIVAMENTE gpt-image-1 com formato multimodal correto
+  - Modelo "gpt-image-1" para geração usa EXCLUSIVAMENTE gpt-image-1, sem fallbacks DALL-E
+  - Interface de teste com upload de imagem: funcionalidade completa para testar edição
+  - Sistema de validação: obrigatório upload de imagem para modelo gpt-image-edit
+  - Logs detalhados para diagnóstico completo de problemas
+  - Tratamento de erros específicos para acesso organizacional ao gpt-image-1
+  - Preview de imagem carregada e opção de remoção na interface de teste
+  - Suporte multimodal: texto + imagem como entrada para gpt-image-1
+
+- **June 28, 2025 (anterior)**: Otimizado conjunto de modelos OpenAI para manter apenas os mais estáveis
   - Removidos: o4, o3, o3-mini (requerem verificação), gpt-4-turbo, gpt-3.5-turbo (instáveis)
+  - Configurado gpt-image-1 com modo demo (simula geração quando verificação organizacional não disponível)
   - Mantidos modelos confiáveis: gpt-4.1, gpt-4o, o1-preview, o1-mini, o4-mini
   - Sistema de teste de conexão com JSON formatado e downloads funcionando
   - Interface completa com campos de requisição e resposta em JSON
@@ -130,7 +142,7 @@ Preferred communication style: Simple, everyday language.
   - Modelos disponíveis por categoria:
     - OpenAI Normal: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano
     - OpenAI Raciocínio: o1-preview, o1-mini, o4-mini
-    - OpenAI Imagem: gpt-image-1 (modelo multimodal nova geração)
+    - OpenAI Imagem: gpt-image-1 (modelo de geração de imagens)
     - OpenAI Legacy: gpt-4o, gpt-4o-mini
     - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
     - Claude 3.x: claude-3-5-sonnet, claude-3-opus, claude-3-haiku
