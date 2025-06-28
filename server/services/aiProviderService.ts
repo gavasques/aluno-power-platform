@@ -76,20 +76,27 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 128000
   },
 
-  // OpenAI o4 Reasoning Models
+  // OpenAI o3 and o4-mini Reasoning Models
+  'o3': {
+    provider: 'openai',
+    model: 'o3',
+    inputCostPer1M: 25.00,
+    outputCostPer1M: 100.00,
+    maxTokens: 200000
+  },
+  'o3-mini': {
+    provider: 'openai',
+    model: 'o3-mini',
+    inputCostPer1M: 5.00,
+    outputCostPer1M: 20.00,
+    maxTokens: 200000
+  },
   'o4-mini': {
     provider: 'openai',
     model: 'o4-mini',
-    inputCostPer1M: 3.00,
-    outputCostPer1M: 12.00,
-    maxTokens: 65536
-  },
-  'o4': {
-    provider: 'openai',
-    model: 'o4',
-    inputCostPer1M: 15.00,
-    outputCostPer1M: 60.00,
-    maxTokens: 128000
+    inputCostPer1M: 5.00,
+    outputCostPer1M: 20.00,
+    maxTokens: 200000
   },
 
   // OpenAI Image Generation (gpt-image-1 - preços oficiais da documentação)
