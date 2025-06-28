@@ -79,6 +79,8 @@ export default function GeneratedImages() {
   if (isLoading) {
     return (
       <div className="container mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-2">Imagens Geradas</h1>
+        <p className="text-muted-foreground mb-8">Carregando imagens...</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -113,7 +115,13 @@ export default function GeneratedImages() {
       {!images || images.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground">Nenhuma imagem gerada ainda.</p>
+            <h3 className="text-lg font-semibold mb-2">Nenhuma imagem gerada ainda</h3>
+            <p className="text-muted-foreground mb-4">Use o modelo gpt-image-1 para gerar imagens que aparecerão aqui automaticamente.</p>
+            <div className="text-sm text-muted-foreground">
+              <p>• Acesse qualquer agente de IA</p>
+              <p>• Selecione o modelo "gpt-image-1"</p>
+              <p>• Digite um prompt para geração de imagem</p>
+            </div>
           </CardContent>
         </Card>
       ) : (
