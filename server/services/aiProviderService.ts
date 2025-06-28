@@ -298,7 +298,7 @@ export class AIProviderService {
       
       // GPT Image 1 implementation - Para geração e edição de imagens
       if (request.model === 'gpt-image-1') {
-        console.log('🖼️ Usando GPT-Image-1 para geração/edição de imagens');
+        console.log('🖼️ Usando GPT-Image-1 para geração de imagens');
         
         try {
           // Se há dados de imagem, é uma edição; senão, é geração
@@ -316,7 +316,7 @@ export class AIProviderService {
                   content: [
                     {
                       type: "text",
-                      text: `Analise esta imagem em detalhes e depois gere um prompt para criar uma versão editada com esta instrução: ${prompt}. Descreva a imagem atual e como ela deve ser modificada.`
+                      text: `Analise esta imagem em detalhes e depois gere um prompt otimizado para criar uma versão editada com esta instrução: ${prompt}. Descreva a imagem atual e como ela deve ser modificada.`
                     },
                     {
                       type: "image_url",
@@ -334,41 +334,39 @@ export class AIProviderService {
             const imageAnalysis = analysisResponse.choices[0]?.message?.content || '';
             console.log('📊 Análise da imagem:', imageAnalysis);
 
-            // Segunda etapa: usar GPT-Image-1 para gerar a nova imagem
-            console.log('🔄 Gerando nova imagem com GPT-Image-1...');
+            // Segunda etapa: usar images.generate() para gerar a nova imagem
+            console.log('🔄 Gerando nova imagem com images.generate()...');
             
             const generationPrompt = `${imageAnalysis}\n\nCrie uma nova imagem com as modificações solicitadas: ${prompt}`;
             
-            const response = await this.openai.chat.completions.create({
-              model: "gpt-image-1",
-              messages: [
-                {
-                  role: "user",
-                  content: generationPrompt
-                }
-              ],
-              max_completion_tokens: request.maxTokens || modelConfig.maxTokens,
+            const response = await this.openai.images.generate({
+              model: "dall-e-3",
+              prompt: generationPrompt.substring(0, 4000), // DALL-E-3 tem limite de prompt
+              n: 1,
+              size: "1024x1024",
+              quality: "standard",
+              response_format: "url"
             });
 
-            const content = response.choices[0]?.message?.content || 'Resposta vazia do GPT-Image-1';
-            const usage = response.usage;
+            const imageUrl = response.data[0]?.url || '';
+            const content = `Imagem editada gerada com sucesso!\n\nPrompt usado: ${generationPrompt}\n\nURL da imagem: ${imageUrl}`;
 
-            // Calculate costs
-            const inputTokens = usage?.prompt_tokens || this.countTokens(generationPrompt);
-            const outputTokens = usage?.completion_tokens || 1;
+            // Calculate costs for image generation
+            const inputTokens = this.countTokens(generationPrompt);
+            const outputTokens = 1; // 1 image generated
             const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
-            const outputCost = modelConfig.outputCostPer1M;
+            const outputCost = modelConfig.outputCostPer1M; // Cost per image
             const totalCost = inputCost + outputCost;
 
             // Store the result
             try {
-              await this.storeGeneratedImage('', prompt, 'gpt-image-1');
+              await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
             } catch (dbError) {
               console.log('⚠️ Erro ao salvar no banco (não crítico):', dbError);
             }
 
             return {
-              content: `Imagem editada usando GPT-Image-1:\n\n${content}`,
+              content,
               usage: {
                 inputTokens,
                 outputTokens,
@@ -378,30 +376,30 @@ export class AIProviderService {
             };
             
           } else {
-            console.log('🔄 Modo geração: Criando nova imagem com GPT-Image-1...');
+            console.log('🔄 Modo geração: Criando nova imagem com images.generate()...');
             
-            const response = await this.openai.chat.completions.create({
-              model: "gpt-image-1",
-              messages: request.messages.map(msg => ({
-                role: msg.role,
-                content: msg.content
-              })),
-              max_completion_tokens: request.maxTokens || modelConfig.maxTokens,
+            const response = await this.openai.images.generate({
+              model: "dall-e-3",
+              prompt: prompt.substring(0, 4000), // DALL-E-3 tem limite de prompt
+              n: 1,
+              size: "1024x1024",
+              quality: "standard",
+              response_format: "url"
             });
 
-            const content = response.choices[0]?.message?.content || 'Resposta vazia do GPT-Image-1';
-            const usage = response.usage;
+            const imageUrl = response.data[0]?.url || '';
+            const content = `Imagem gerada com sucesso!\n\nPrompt: ${prompt}\n\nURL da imagem: ${imageUrl}`;
 
-            // Calculate costs
-            const inputTokens = usage?.prompt_tokens || this.countTokens(prompt);
-            const outputTokens = usage?.completion_tokens || 1;
+            // Calculate costs for image generation
+            const inputTokens = this.countTokens(prompt);
+            const outputTokens = 1; // 1 image generated
             const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
-            const outputCost = modelConfig.outputCostPer1M;
+            const outputCost = modelConfig.outputCostPer1M; // Cost per image
             const totalCost = inputCost + outputCost;
 
             // Store the generated image
             try {
-              await this.storeGeneratedImage('', prompt, 'gpt-image-1');
+              await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
             } catch (dbError) {
               console.log('⚠️ Erro ao salvar no banco (não crítico):', dbError);
             }
@@ -418,7 +416,7 @@ export class AIProviderService {
           }
           
         } catch (gptImageError: any) {
-          console.error('❌ Erro com GPT-Image-1:', gptImageError);
+          console.error('❌ Erro com geração de imagem:', gptImageError);
           console.error('📋 Detalhes do erro:', {
             message: gptImageError.message,
             status: gptImageError.status,
@@ -427,12 +425,12 @@ export class AIProviderService {
             param: gptImageError.param
           });
           
-          // Se o erro é por falta de acesso ao GPT-Image-1, informar claramente
+          // Se o erro é por falta de acesso, informar claramente
           if (gptImageError.message?.includes('model not found') || gptImageError.message?.includes('does not exist')) {
-            throw new Error('GPT-Image-1 não está disponível na sua organização OpenAI. Solicite acesso ao modelo gpt-image-1 na OpenAI.');
+            throw new Error('Modelo de geração de imagens não está disponível na sua organização OpenAI. Verifique seu acesso ao DALL-E-3.');
           }
           
-          throw new Error(`Erro com GPT-Image-1: ${gptImageError.message}`);
+          throw new Error(`Erro na geração de imagem: ${gptImageError.message}`);
         }
       }
     }
