@@ -47,12 +47,43 @@ const connectedClients = new Set<WebSocket>();
 
 // Broadcast function for real-time notifications
 function broadcastNotification(type: string, data: any) {
-  const message = JSON.stringify({ type, data, timestamp: new Date().toISOString() });
-  connectedClients.forEach(client => {
+  const messageId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const message = JSON.stringify({ 
+    type, 
+    data, 
+    timestamp: new Date().toISOString(),
+    messageId 
+  });
+  
+  console.log(`📡 [WS_BROADCAST] Broadcasting notification`);
+  console.log(`   🆔 Message ID: ${messageId}`);
+  console.log(`   📋 Type: ${type}`);
+  console.log(`   📊 Connected Clients: ${connectedClients.size}`);
+  console.log(`   📄 Data Preview: ${JSON.stringify(data).substring(0, 200)}...`);
+  
+  let successCount = 0;
+  let errorCount = 0;
+  
+  connectedClients.forEach((client, index) => {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
+      try {
+        client.send(message);
+        successCount++;
+      } catch (error) {
+        console.error(`❌ [WS_SEND_ERROR] Failed to send to client ${index}:`, error);
+        errorCount++;
+        // Remove broken client
+        connectedClients.delete(client);
+      }
+    } else {
+      console.log(`🔌 [WS_SKIP] Skipping client ${index} (state: ${client.readyState})`);
+      // Remove dead client
+      connectedClients.delete(client);
+      errorCount++;
     }
   });
+  
+  console.log(`📊 [WS_BROADCAST_RESULT] Message ${messageId}: ${successCount} sent, ${errorCount} failed`);
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -2035,28 +2066,41 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
   // Test AI provider connection
   app.post('/api/ai-providers/test', async (req, res) => {
+    const startTime = Date.now();
+    const requestId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
     try {
-      const { provider, model, prompt, imageData } = req.body;
+      console.log(`🧪 [AI_TEST_START] RequestID: ${requestId}`);
+      console.log(`   📋 Request Body Keys: ${Object.keys(req.body)}`);
       
+      const { provider, model, prompt, imageData, temperature, maxTokens } = req.body;
+      
+      // Validation with detailed logging
       if (!provider || !model) {
-        return res.status(400).json({ error: 'Provider and model are required' });
+        console.log(`❌ [AI_TEST_ERROR] RequestID: ${requestId} - Missing required fields`);
+        console.log(`   📋 Received: provider="${provider}", model="${model}"`);
+        return res.status(400).json({ 
+          error: 'Provider and model are required',
+          received: { provider, model }
+        });
       }
 
       // Check if image is required for gpt-image-edit model
       if (model === 'gpt-image-edit' && !imageData) {
+        console.log(`❌ [AI_TEST_ERROR] RequestID: ${requestId} - Missing image data for gpt-image-edit`);
         return res.status(400).json({ error: 'Image data is required for gpt-image-edit model' });
       }
 
       const testPrompt = prompt || 'Hello! How are you today?';
-      console.log(`Testing ${provider}/${model} with prompt: "${testPrompt}"`);
-
-      // Use the imported aiProviderService
-      
-      // Test with the provided prompt and configured parameters
-      const { temperature, maxTokens } = req.body;
       const isReasoningModel = model.startsWith('o1') || model.startsWith('o4');
       
-      console.log(`Test parameters - Temperature: ${temperature}, MaxTokens: ${maxTokens}, IsReasoningModel: ${isReasoningModel}`);
+      console.log(`🔧 [AI_TEST_CONFIG] RequestID: ${requestId}`);
+      console.log(`   🤖 Provider: ${provider}`);
+      console.log(`   🧠 Model: ${model}`);
+      console.log(`   🌡️  Temperature: ${temperature} (Reasoning model: ${isReasoningModel})`);
+      console.log(`   🎯 MaxTokens: ${maxTokens}`);
+      console.log(`   📝 Prompt: "${testPrompt.substring(0, 100)}${testPrompt.length > 100 ? '...' : ''}"`);
+      console.log(`   🖼️  Has Image: ${!!imageData} (${imageData ? `${imageData.length} chars` : 'none'})`);
       
       // Prepare request data for logging
       const requestData: any = {
@@ -2072,23 +2116,26 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       // Add image data for gpt-image-edit model
       if (model === 'gpt-image-edit' && imageData) {
         requestData.imageData = imageData;
-        console.log('Image data provided for gpt-image-edit model');
+        console.log(`🖼️  [AI_TEST_IMAGE] RequestID: ${requestId} - Image data provided (${imageData.length} chars)`);
       }
 
-      console.log('Sending request to AI service:', JSON.stringify({...requestData, imageData: imageData ? '[IMAGE_DATA]' : undefined}, null, 2));
+      console.log(`🚀 [AI_TEST_SEND] RequestID: ${requestId} - Sending to AI service`);
+      const aiStartTime = Date.now();
 
       const testResponse = await aiProviderService.generateCompletion(requestData);
 
-      console.log('Received response from AI service:', {
-        contentLength: testResponse.content?.length || 0,
-        hasUsage: !!testResponse.usage,
-        content: testResponse.content?.substring(0, 100) + '...'
-      });
+      const aiDuration = Date.now() - aiStartTime;
+      console.log(`✅ [AI_TEST_RESPONSE] RequestID: ${requestId} - AI service responded in ${aiDuration}ms`);
+      console.log(`   📏 Content Length: ${testResponse.content?.length || 0}`);
+      console.log(`   📊 Usage: ${JSON.stringify(testResponse.usage)}`);
+      console.log(`   💰 Cost: $${testResponse.cost?.toFixed(6) || '0.000000'}`);
+      console.log(`   📄 Content Preview: "${testResponse.content?.substring(0, 200)}${testResponse.content && testResponse.content.length > 200 ? '...' : ''}"`);
 
       // Prepare clean response data
       const cleanResponse = {
         content: testResponse.content,
         usage: testResponse.usage || null,
+        cost: testResponse.cost || 0,
         provider: provider,
         model: model,
         timestamp: new Date().toISOString()
@@ -2099,22 +2146,41 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         message: `Conexão com ${provider} (${model}) testada com sucesso!`,
         response: testResponse.content || 'Resposta vazia',
         requestSent: JSON.stringify(requestData, null, 2),
-        responseReceived: JSON.stringify(cleanResponse, null, 2)
+        responseReceived: JSON.stringify(cleanResponse, null, 2),
+        duration: aiDuration,
+        cost: testResponse.cost || 0
       };
 
-      console.log('Sending final response to client:', {
-        hasResponse: !!responseData.response,
-        hasRequestJson: !!responseData.requestSent,
-        hasResponseJson: !!responseData.responseReceived,
-        responseLength: responseData.response?.length || 0
-      });
+      const totalDuration = Date.now() - startTime;
+      console.log(`🎉 [AI_TEST_SUCCESS] RequestID: ${requestId} - Total duration: ${totalDuration}ms`);
 
       res.json(responseData);
-    } catch (error) {
-      console.error('Error testing provider connection:', error);
+    } catch (error: any) {
+      const totalDuration = Date.now() - startTime;
+      console.error(`💥 [AI_TEST_ERROR] RequestID: ${requestId} - Error after ${totalDuration}ms`);
+      console.error(`   🚨 Error Type: ${error.constructor.name}`);
+      console.error(`   💬 Error Message: ${error.message}`);
+      console.error(`   📋 Error Status: ${error.status || 'N/A'}`);
+      console.error(`   🔍 Error Code: ${error.code || 'N/A'}`);
+      console.error(`   📊 Error Details:`, {
+        name: error.name,
+        type: error.type,
+        param: error.param,
+        headers: error.headers ? Object.fromEntries(error.headers) : undefined
+      });
+      console.error(`   📜 Stack Trace:`, error.stack);
+      
       res.status(500).json({
         success: false,
-        message: `Erro ao testar conexão: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Erro ao testar conexão: ${error.message}`,
+        errorDetails: {
+          type: error.constructor.name,
+          status: error.status,
+          code: error.code,
+          timestamp: new Date().toISOString(),
+          duration: totalDuration,
+          requestId
+        }
       });
     }
   });
@@ -2305,26 +2371,93 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // WebSocket server setup
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
-  wss.on('connection', (ws) => {
-    console.log('New WebSocket client connected');
+  wss.on('connection', (ws, req) => {
+    const clientId = `client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const clientIP = req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    
+    console.log(`🔌 [WS_CONNECT] New WebSocket client connected`);
+    console.log(`   🆔 Client ID: ${clientId}`);
+    console.log(`   📍 IP: ${clientIP}`);
+    console.log(`   🖥️  User-Agent: ${userAgent?.substring(0, 50)}...`);
+    console.log(`   📊 Total Clients: ${connectedClients.size + 1}`);
+    
     connectedClients.add(ws);
     
     // Send welcome message
-    ws.send(JSON.stringify({ 
+    const welcomeMessage = { 
       type: 'connection', 
-      data: { message: 'Connected to real-time notifications' },
+      data: { 
+        message: 'Connected to real-time notifications',
+        clientId,
+        serverTime: new Date().toISOString()
+      },
       timestamp: new Date().toISOString()
-    }));
+    };
     
-    ws.on('close', () => {
-      console.log('WebSocket client disconnected');
+    try {
+      ws.send(JSON.stringify(welcomeMessage));
+      console.log(`📤 [WS_WELCOME] Sent welcome message to ${clientId}`);
+    } catch (error) {
+      console.error(`❌ [WS_ERROR] Failed to send welcome message to ${clientId}:`, error);
+    }
+    
+    ws.on('message', (data) => {
+      console.log(`📨 [WS_MESSAGE] Received from ${clientId}:`, data.toString());
+    });
+    
+    ws.on('close', (code, reason) => {
+      console.log(`🔌 [WS_DISCONNECT] Client ${clientId} disconnected`);
+      console.log(`   📋 Code: ${code}`);
+      console.log(`   💬 Reason: ${reason?.toString() || 'No reason provided'}`);
+      console.log(`   📊 Remaining Clients: ${connectedClients.size - 1}`);
       connectedClients.delete(ws);
     });
     
     ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      console.error(`💥 [WS_ERROR] WebSocket error for ${clientId}:`, error);
+      console.error(`   🚨 Error Type: ${error.constructor.name}`);
+      console.error(`   💬 Error Message: ${error.message}`);
+      console.error(`   📜 Stack:`, error.stack);
       connectedClients.delete(ws);
     });
+    
+    ws.on('pong', () => {
+      console.log(`🏓 [WS_PONG] Received pong from ${clientId}`);
+    });
+  });
+  
+  // Add heartbeat to detect broken connections
+  const interval = setInterval(() => {
+    console.log(`💓 [WS_HEARTBEAT] Checking ${connectedClients.size} connections`);
+    let activeConnections = 0;
+    let removedConnections = 0;
+    
+    connectedClients.forEach((ws) => {
+      if (ws.readyState === 1) { // OPEN
+        try {
+          ws.ping();
+          activeConnections++;
+        } catch (error) {
+          console.error(`❌ [WS_PING_ERROR] Failed to ping client:`, error);
+          connectedClients.delete(ws);
+          removedConnections++;
+        }
+      } else {
+        console.log(`🔌 [WS_CLEANUP] Removing dead connection (state: ${ws.readyState})`);
+        connectedClients.delete(ws);
+        removedConnections++;
+      }
+    });
+    
+    if (removedConnections > 0) {
+      console.log(`🧹 [WS_CLEANUP] Removed ${removedConnections} dead connections, ${activeConnections} active`);
+    }
+  }, 30000); // Check every 30 seconds
+  
+  // Cleanup interval on server shutdown
+  process.on('SIGTERM', () => {
+    clearInterval(interval);
   });
 
   return httpServer;
