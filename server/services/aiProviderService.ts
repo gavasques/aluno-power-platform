@@ -301,12 +301,34 @@ class AIProviderService {
       throw new Error('OpenAI client not initialized. Please check OPENAI_API_KEY.');
     }
 
-    const response = await this.openai.chat.completions.create({
+    // Handle reasoning models (o4 series) with different parameter names
+    const isReasoningModel = request.model.startsWith('o4');
+    const isImageModel = request.model.includes('image');
+
+    if (isImageModel) {
+      throw new Error('Image generation not yet implemented');
+    }
+
+    const requestParams: any = {
       model: request.model,
       messages: request.messages,
-      temperature: request.temperature || 0.7,
-      max_tokens: request.maxTokens || 2000,
-    });
+    };
+
+    // Reasoning models don't support temperature adjustment
+    if (!isReasoningModel && request.temperature !== undefined) {
+      requestParams.temperature = request.temperature;
+    } else if (!isReasoningModel) {
+      requestParams.temperature = 0.7;
+    }
+
+    // Use correct token parameter based on model type
+    if (isReasoningModel) {
+      requestParams.max_completion_tokens = request.maxTokens || 2000;
+    } else {
+      requestParams.max_tokens = request.maxTokens || 2000;
+    }
+
+    const response = await this.openai.chat.completions.create(requestParams);
 
     const content = response.choices[0]?.message?.content || '';
     const usage = response.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
