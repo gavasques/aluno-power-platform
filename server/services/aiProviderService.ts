@@ -190,7 +190,7 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 500000
   },
 
-  // Google Imagen Models
+  // Google Imagen Models (requires Vertex AI Image Generation API)
   'imagen-4.0-ultra-generate-preview-06-06': {
     provider: 'gemini',
     model: 'imagen-4.0-ultra-generate-preview-06-06',
