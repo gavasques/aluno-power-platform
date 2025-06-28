@@ -2002,7 +2002,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { aiProviderService } = await import('./services/aiProviderService');
       
       // Test with a simple message
-      const isReasoningModel = model.startsWith('o4');
+      const isReasoningModel = model.startsWith('o1');
       const testResponse = await aiProviderService.generateCompletion({
         provider,
         model,

@@ -59,26 +59,19 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
   },
   
   // OpenAI Reasoning Models
-  'o4-mini': {
+  'o1-mini': {
     provider: 'openai',
-    model: 'o4-mini',
+    model: 'o1-mini',
     inputCostPer1M: 3.00,
     outputCostPer1M: 12.00,
     maxTokens: 65536
   },
-  'o4': {
+  'o1-preview': {
     provider: 'openai',
-    model: 'o4',
+    model: 'o1-preview',
     inputCostPer1M: 15.00,
     outputCostPer1M: 60.00,
-    maxTokens: 100000
-  },
-  'o4-mini-deep-research': {
-    provider: 'openai',
-    model: 'o4-mini-deep-research',
-    inputCostPer1M: 5.00,
-    outputCostPer1M: 20.00,
-    maxTokens: 100000
+    maxTokens: 128000
   },
 
   // OpenAI Image Generation
@@ -301,8 +294,8 @@ class AIProviderService {
       throw new Error('OpenAI client not initialized. Please check OPENAI_API_KEY.');
     }
 
-    // Handle reasoning models (o4 series) with different parameter names
-    const isReasoningModel = request.model.startsWith('o4');
+    // Handle reasoning models (o1 series) with different parameter names
+    const isReasoningModel = request.model.startsWith('o1');
     const isImageModel = request.model.includes('image');
 
     if (isImageModel) {
