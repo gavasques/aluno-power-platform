@@ -166,6 +166,23 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 0.30,
     maxTokens: 1000000
   },
+  'gemini-2.5-flash-lite-preview-06-17': {
+    provider: 'gemini',
+    model: 'gemini-2.5-flash-lite-preview-06-17',
+    inputCostPer1M: 0.05,
+    outputCostPer1M: 0.20,
+    maxTokens: 500000
+  },
+
+  // Google Imagen Models (Future Implementation)
+  // 'imagen-4.0-ultra-generate-preview-06-06': {
+  //   provider: 'gemini',
+  //   model: 'imagen-4.0-ultra-generate-preview-06-06',
+  //   inputCostPer1M: 2.00,
+  //   outputCostPer1M: 8.00,
+  //   maxTokens: 4096
+  // },
+
   // Google Gemini Legacy Models
   'gemini-1.5-pro': {
     provider: 'gemini',
