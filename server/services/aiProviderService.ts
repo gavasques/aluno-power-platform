@@ -334,8 +334,7 @@ class AIProviderService {
         prompt: prompt,
         n: 1,
         size: '1024x1024',
-        quality: 'medium', // medium quality as default ($0.042 per image)
-        response_format: 'url'
+        quality: 'high' // high quality ($0.167 per image)
       });
 
       if (!response.data || response.data.length === 0) {
@@ -351,9 +350,9 @@ class AIProviderService {
       
       // Custom cost calculation for image generation
       // Text input: $5.00 per 1M tokens
-      // Image output: medium quality 1024x1024 = $0.042 per image
+      // Image output: high quality 1024x1024 = $0.167 per image
       const inputCost = (inputTokens / 1000000) * 5.00;
-      const outputCost = 0.042; // Medium quality image cost
+      const outputCost = 0.167; // High quality image cost
       const totalCost = inputCost + outputCost;
 
       return {
