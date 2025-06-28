@@ -1693,8 +1693,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Clean the update data - remove fields that shouldn't be updated directly
+      const cleanUpdateData = {
+        provider: updateData.provider,
+        model: updateData.model,
+        temperature: parseFloat(updateData.temperature) || 0.7,
+        maxTokens: parseInt(updateData.maxTokens) || 1000,
+        isActive: updateData.isActive !== undefined ? updateData.isActive : true,
+        costPer1kTokens: parseFloat(updateData.costPer1kTokens) || 0.0125
+      };
+      
+      console.log('Clean update data:', cleanUpdateData);
+      
       // Use storage method instead of direct DB
-      const agent = await storage.updateAgent(id, updateData);
+      const agent = await storage.updateAgent(id, cleanUpdateData);
       console.log('Agent updated successfully:', agent);
       res.json(agent);
     } catch (error) {
