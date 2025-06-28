@@ -110,7 +110,7 @@ Preferred communication style: Simple, everyday language.
 
 - **June 28, 2025**: Otimizado conjunto de modelos OpenAI para manter apenas os mais estáveis
   - Removidos: o4, o3, o3-mini (requerem verificação), gpt-4-turbo, gpt-3.5-turbo (instáveis)
-  - Configurado gpt-image-1 corretamente usando API de imagens da OpenAI
+  - Configurado gpt-image-1 com modo demo (simula geração quando verificação organizacional não disponível)
   - Mantidos modelos confiáveis: gpt-4.1, gpt-4o, o1-preview, o1-mini, o4-mini
   - Sistema de teste de conexão com JSON formatado e downloads funcionando
   - Interface completa com campos de requisição e resposta em JSON
