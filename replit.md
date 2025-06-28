@@ -111,12 +111,12 @@ Preferred communication style: Simple, everyday language.
 - **June 28, 2025**: Sistema completo de IA com 4 provedores e 25 modelos ativos
   - Adicionado DeepSeek com integração nativa usando API compatível OpenAI
   - Atualizados modelos OpenAI incluindo série o4 (o4, o4-mini) com configurações especiais
-  - Implementado geração de imagens com DALL-E 3 através do modelo gpt-image-1
+  - Implementado modelo gpt-image-1 (nova geração multimodal da OpenAI)
   - Removida implementação Imagen 4.0 do Google (por solicitação do usuário)
   - Modelos disponíveis por categoria:
     - OpenAI Normal: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano
     - OpenAI Raciocínio: o1-preview, o1-mini, o4, o4-mini
-    - OpenAI Imagem: gpt-image-1 (DALL-E 3 integrado)
+    - OpenAI Imagem: gpt-image-1 (modelo multimodal nova geração)
     - OpenAI Legacy: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
     - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
     - Claude 3.x: claude-3-5-sonnet, claude-3-opus, claude-3-haiku
@@ -126,7 +126,7 @@ Preferred communication style: Simple, everyday language.
   - Interface completa com 4 provedores ativos e seleção por categorias
   - Sistema de teste de conectividade validado para todos os 25 modelos
   - Configurações especiais para modelos de raciocínio (série o1 e o4) sem temperatura
-  - Preços atualizados: GPT-4.1 ($2.50/$10.00), GPT-4o ($2.50/$10.00), DALL-E 3 ($40.00 por imagem)
+  - Preços atualizados: GPT-4.1 ($2.50/$10.00), GPT-4o ($2.50/$10.00), gpt-image-1 ($2.50/$10.00)
 
 ## Changelog
 

@@ -90,12 +90,12 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 128000
   },
 
-  // OpenAI Image Generation (DALL-E 3)
+  // OpenAI Image Generation (gpt-image-1 - nova geração multimodal)
   'gpt-image-1': {
     provider: 'openai',
     model: 'gpt-image-1',
-    inputCostPer1M: 40.00,  // DALL-E 3: $0.040 per image (1024x1024)
-    outputCostPer1M: 0.00,  // No output tokens for image generation
+    inputCostPer1M: 2.50,   // Mesmo preço do GPT-4o para input
+    outputCostPer1M: 10.00, // Mesmo preço do GPT-4o para output
     maxTokens: 4096
   },
 
@@ -325,25 +325,27 @@ class AIProviderService {
     const isImageModel = request.model.includes('image');
 
     if (isImageModel) {
-      // For image generation models, use DALL-E API
-      const response = await this.openai.images.generate({
-        model: request.model === 'gpt-image-1' ? 'dall-e-3' : request.model,
-        prompt: request.messages.map(m => m.content).join('\n'),
-        n: 1,
-        size: '1024x1024',
-        quality: 'standard'
-      });
+      // gpt-image-1 uses the standard chat completions API, not the images API
+      const requestParams: any = {
+        model: request.model,
+        messages: request.messages,
+      };
 
-      if (!response.data || response.data.length === 0) {
-        throw new Error('No image generated');
+      if (request.temperature !== undefined) {
+        requestParams.temperature = request.temperature;
+      } else {
+        requestParams.temperature = 0.7;
       }
+
+      if (request.maxTokens) {
+        requestParams.max_tokens = request.maxTokens;
+      }
+
+      const response = await this.openai.chat.completions.create(requestParams);
+      const content = response.choices[0]?.message?.content || '';
       
-      const imageUrl = response.data[0]?.url || '';
-      const content = `Image generated successfully. URL: ${imageUrl}`;
-      
-      // Estimate token usage for image generation
-      const inputTokens = this.countTokens(request.messages.map(m => m.content).join(''));
-      const outputTokens = 50; // Estimated for image generation response
+      const inputTokens = response.usage?.prompt_tokens || 0;
+      const outputTokens = response.usage?.completion_tokens || 0;
 
       return {
         content,
