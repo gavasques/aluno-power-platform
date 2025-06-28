@@ -108,12 +108,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 28, 2025**: Implementado modelo gpt-image-edit para edição de imagens com upload
-  - Criado novo modelo "gpt-image-edit" baseado exclusivamente no gpt-image-1
+- **June 28, 2025**: Implementado sistema GPT-Image-1 exclusivo para geração e edição de imagens
+  - Corrigido erro "PayloadTooLargeError" aumentando limite servidor para 50MB
+  - Modelo "gpt-image-edit" usa EXCLUSIVAMENTE gpt-image-1 com formato multimodal correto
+  - Modelo "gpt-image-1" para geração usa EXCLUSIVAMENTE gpt-image-1, sem fallbacks DALL-E
   - Interface de teste com upload de imagem: funcionalidade completa para testar edição
   - Sistema de validação: obrigatório upload de imagem para modelo gpt-image-edit
-  - Usa APENAS gpt-image-1 para edição, sem fallbacks para DALL-E ou modo demo
-  - Falha com erro claro se gpt-image-1 não estiver disponível
+  - Logs detalhados para diagnóstico completo de problemas
+  - Tratamento de erros específicos para acesso organizacional ao gpt-image-1
   - Preview de imagem carregada e opção de remoção na interface de teste
   - Suporte multimodal: texto + imagem como entrada para gpt-image-1
 
