@@ -56,12 +56,19 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
   'gpt-4.1-nano': {
     provider: 'openai',
     model: 'gpt-4.1-nano',
-    inputCostPer1M: 0.05,
-    outputCostPer1M: 0.20,
-    maxTokens: 32000
+    inputCostPer1M: 0.075,
+    outputCostPer1M: 0.30,
+    maxTokens: 128000
   },
   
-  // OpenAI Reasoning Models (o1 series)
+  // OpenAI Reasoning Models - No temperature allowed
+  'o1-preview': {
+    provider: 'openai',
+    model: 'o1-preview',
+    inputCostPer1M: 15.00,
+    outputCostPer1M: 60.00,
+    maxTokens: 32768
+  },
   'o1-mini': {
     provider: 'openai',
     model: 'o1-mini',
@@ -69,54 +76,36 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 12.00,
     maxTokens: 65536
   },
-  'o1-preview': {
-    provider: 'openai',
-    model: 'o1-preview',
-    inputCostPer1M: 15.00,
-    outputCostPer1M: 60.00,
-    maxTokens: 128000
-  },
-
-  // OpenAI o4-mini Reasoning Model
   'o4-mini': {
     provider: 'openai',
     model: 'o4-mini',
-    inputCostPer1M: 5.00,
-    outputCostPer1M: 20.00,
-    maxTokens: 200000
+    inputCostPer1M: 3.00,
+    outputCostPer1M: 12.00,
+    maxTokens: 65536
   },
-
-  // OpenAI Image Generation - Create New Images (using gpt-image-1 with image_generation tool)
+  
+  // OpenAI Image Model
   'gpt-image-1': {
     provider: 'openai',
     model: 'gpt-image-1',
-    inputCostPer1M: 5.00,   // Text tokens input: $5.00 per 1M
-    outputCostPer1M: 40.00, // Image generation cost
-    maxTokens: 4096
+    inputCostPer1M: 5.00,   // $5.00 per 1M tokens
+    outputCostPer1M: 0.167, // $0.167 per image (high quality, PNG)
+    maxTokens: 4000
   },
   'gpt-image-edit': {
     provider: 'openai',
     model: 'gpt-image-edit',
-    inputCostPer1M: 5.00,   // Text tokens input: $5.00 per 1M
-    outputCostPer1M: 40.00, // Image editing cost (same as generation)
-    maxTokens: 4096
+    inputCostPer1M: 5.00,
+    outputCostPer1M: 0.167,
+    maxTokens: 4000
   },
-
-  // DALL-E 3 - Fallback image generation model
-  'dall-e-3': {
-    provider: 'openai',
-    model: 'dall-e-3',
-    inputCostPer1M: 0,      // No input token cost for image generation
-    outputCostPer1M: 40.00, // $0.040 per image (1024x1024 standard)
-    maxTokens: 4096
-  },
-
-  // OpenAI Legacy Models - Preços atualizados Dezembro 2024
+  
+  // OpenAI Legacy Models
   'gpt-4o': {
     provider: 'openai',
     model: 'gpt-4o',
     inputCostPer1M: 2.50,   // Atualizado: $2.50 por 1M tokens
-    outputCostPer1M: 10.00, // Atualizado: $10.00 por 1M tokens
+    outputCostPer1M: 10.00, // Atualizado: $10.00 por 1M tokens  
     maxTokens: 128000
   },
   'gpt-4o-mini': {
@@ -127,8 +116,7 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 128000
   },
 
-
-  // Anthropic Claude 4.0 Models
+  // Claude 4.0 Models
   'claude-sonnet-4-20250514': {
     provider: 'anthropic',
     model: 'claude-sonnet-4-20250514',
@@ -143,22 +131,23 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 75.00,
     maxTokens: 200000
   },
-  // Anthropic Claude 3.x Models (Legacy)
-  'claude-3-5-sonnet-20241022': {
+
+  // Claude 3.x Models
+  'claude-3-5-sonnet': {
     provider: 'anthropic',
     model: 'claude-3-5-sonnet-20241022',
     inputCostPer1M: 3.00,
     outputCostPer1M: 15.00,
     maxTokens: 200000
   },
-  'claude-3-opus-20240229': {
+  'claude-3-opus': {
     provider: 'anthropic',
     model: 'claude-3-opus-20240229',
     inputCostPer1M: 15.00,
     outputCostPer1M: 75.00,
     maxTokens: 200000
   },
-  'claude-3-haiku-20240307': {
+  'claude-3-haiku': {
     provider: 'anthropic',
     model: 'claude-3-haiku-20240307',
     inputCostPer1M: 0.25,
@@ -166,12 +155,12 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     maxTokens: 200000
   },
 
-  // Google Gemini 2.5 Models
+  // Gemini 2.5 Models
   'gemini-2.5-pro': {
     provider: 'gemini',
     model: 'gemini-2.5-pro',
-    inputCostPer1M: 1.25,
-    outputCostPer1M: 5.00,
+    inputCostPer1M: 3.50,
+    outputCostPer1M: 10.50,
     maxTokens: 2000000
   },
   'gemini-2.5-flash': {
@@ -181,22 +170,20 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 0.30,
     maxTokens: 1000000
   },
-  'gemini-2.5-flash-lite-preview-06-17': {
+  'gemini-2.5-flash-lite-preview': {
     provider: 'gemini',
-    model: 'gemini-2.5-flash-lite-preview-06-17',
-    inputCostPer1M: 0.05,
-    outputCostPer1M: 0.20,
-    maxTokens: 500000
+    model: 'gemini-2.5-flash-lite-preview',
+    inputCostPer1M: 0.075,
+    outputCostPer1M: 0.30,
+    maxTokens: 1000000
   },
 
-
-
-  // Google Gemini Legacy Models
+  // Gemini Legacy Models
   'gemini-1.5-pro': {
     provider: 'gemini',
     model: 'gemini-1.5-pro',
-    inputCostPer1M: 1.25,
-    outputCostPer1M: 5.00,
+    inputCostPer1M: 3.50,
+    outputCostPer1M: 10.50,
     maxTokens: 2000000
   },
   'gemini-1.5-flash': {
@@ -231,92 +218,82 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
   }
 };
 
-class AIProviderService {
+export class AIProviderService {
   private openai: OpenAI | null = null;
   private anthropic: Anthropic | null = null;
-  private gemini: GoogleGenAI | null = null;
-  private deepseek: OpenAI | null = null;
+  private googleAI: GoogleGenAI | null = null;
 
   constructor() {
-    this.initializeProviders();
-  }
+    // Initialize providers with API keys
+    const openaiKey = process.env.OPENAI_API_KEY;
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    const geminiKey = process.env.GEMINI_API_KEY;
 
-  private initializeProviders() {
-    // Initialize OpenAI
-    if (process.env.OPENAI_API_KEY) {
-      this.openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
+    if (openaiKey) {
+      this.openai = new OpenAI({ apiKey: openaiKey });
     }
 
-    // Initialize Anthropic
-    if (process.env.ANTHROPIC_API_KEY) {
-      this.anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY,
-      });
+    if (anthropicKey) {
+      this.anthropic = new Anthropic({ apiKey: anthropicKey });
     }
 
-    // Initialize Gemini
-    if (process.env.GEMINI_API_KEY) {
-      this.gemini = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
-      });
+    if (geminiKey) {
+      this.googleAI = new GoogleGenAI(geminiKey);
     }
-
-    // Initialize DeepSeek (using OpenAI-compatible API)
-    if (process.env.DEEPSEEK_API_KEY) {
-      this.deepseek = new OpenAI({
-        apiKey: process.env.DEEPSEEK_API_KEY,
-        baseURL: 'https://api.deepseek.com',
-      });
-    }
-  }
-
-  private calculateCost(inputTokens: number, outputTokens: number, modelConfig: ModelConfig): number {
-    const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
-    const outputCost = (outputTokens / 1000000) * modelConfig.outputCostPer1M;
-    return inputCost + outputCost;
   }
 
   private countTokens(text: string): number {
-    // Simple token estimation (4 characters ≈ 1 token)
+    // Simple token counting (approximately 4 characters = 1 token)
     return Math.ceil(text.length / 4);
   }
 
-  async generateCompletion(request: AIRequest): Promise<AIResponse> {
-    const modelConfig = MODEL_CONFIGS[request.model];
-    if (!modelConfig) {
-      throw new Error(`Unsupported model: ${request.model}`);
-    }
-
-    if (modelConfig.provider !== request.provider) {
-      throw new Error(`Model ${request.model} does not belong to provider ${request.provider}`);
-    }
-
-    const startTime = Date.now();
-
+  private async storeGeneratedImage(imageUrl: string, prompt: string, model: string): Promise<void> {
     try {
-      switch (request.provider) {
-        case 'openai':
-          return await this.generateOpenAI(request, modelConfig);
-        case 'anthropic':
-          return await this.generateAnthropic(request, modelConfig);
-        case 'gemini':
-          return await this.generateGemini(request, modelConfig);
-        case 'deepseek':
-          return await this.generateDeepSeek(request, modelConfig);
-        default:
-          throw new Error(`Unsupported provider: ${request.provider}`);
-      }
+      const imageRecord: InsertGeneratedImage = {
+        model: model,
+        prompt: prompt,
+        imageUrl: imageUrl,
+        size: '1024x1024',
+        quality: 'standard',
+        format: 'png',
+        cost: '0.167',
+        metadata: {
+          provider: 'openai',
+          model: model,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      await storage.createGeneratedImage(imageRecord);
+      console.log('✅ Imagem salva no banco:', imageRecord);
     } catch (error) {
-      console.error(`AI Provider Error (${request.provider}):`, error);
-      throw new Error(`AI generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('❌ Erro ao salvar imagem:', error);
     }
   }
 
-  private async generateOpenAI(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
+  async generateCompletion(request: AIRequest & { imageData?: string }): Promise<AIResponse> {
+    const modelConfig = MODEL_CONFIGS[request.model];
+    if (!modelConfig) {
+      throw new Error(`Model ${request.model} not found in configurations`);
+    }
+
+    switch (modelConfig.provider) {
+      case 'openai':
+        return this.generateOpenAI(request, modelConfig);
+      case 'anthropic':
+        return this.generateAnthropic(request, modelConfig);
+      case 'gemini':
+        return this.generateGemini(request, modelConfig);
+      case 'deepseek':
+        return this.generateDeepSeek(request, modelConfig);
+      default:
+        throw new Error(`Provider ${modelConfig.provider} not supported`);
+    }
+  }
+
+  private async generateOpenAI(request: AIRequest & { imageData?: string }, modelConfig: ModelConfig): Promise<AIResponse> {
     if (!this.openai) {
-      throw new Error('OpenAI client not initialized. Please check OPENAI_API_KEY.');
+      throw new Error('OpenAI client not initialized - missing API key');
     }
 
     // Handle reasoning models (o1 and o4 series) with different parameter names
@@ -326,211 +303,93 @@ class AIProviderService {
     if (isImageModel) {
       const prompt = request.messages.map(m => m.content).join('\n');
       
-      // GPT Image Edit implementation for image editing - ONLY gpt-image-1, no fallbacks
+      // GPT Image Edit implementation for image editing - Use DALL-E for image editing
       if (request.model === 'gpt-image-edit') {
-        console.log('🖼️ Usando gpt-image-edit (baseado em gpt-image-1) para edição de imagens');
+        console.log('🖼️ Usando gpt-image-edit com DALL-E 3 para edição de imagens');
         
         // Check if there's an image provided in the request
-        const imageData = (request as any).imageData;
+        const imageData = request.imageData;
         if (!imageData) {
           throw new Error('Imagem é obrigatória para edição com gpt-image-edit');
         }
 
-        // Use gpt-image-1 with image editing instructions
-        const response = await this.openai.chat.completions.create({
-          model: "gpt-image-1",
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: `Edite esta imagem: ${prompt}`
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:image/png;base64,${imageData}`
-                  }
-                }
-              ]
-            }
-          ],
-          tools: [
-            {
-              type: "function",
-              function: {
-                name: "edit_image",
-                description: "Edit an existing image based on the prompt",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    prompt: {
-                      type: "string",
-                      description: "The image editing prompt"
-                    },
-                    size: {
-                      type: "string",
-                      enum: ["1024x1024", "1536x1024", "1024x1536"],
-                      default: "1024x1024"
-                    },
-                    quality: {
-                      type: "string",
-                      enum: ["standard", "hd"],
-                      default: "standard"
-                    }
-                  },
-                  required: ["prompt"]
-                }
-              }
-            }
-          ],
-          tool_choice: "auto"
-        });
+        console.log('📝 Prompt de edição:', prompt);
+        console.log('🖼️ Dados da imagem recebidos:', imageData ? 'Sim (base64)' : 'Não');
 
-        // Extract edited image from tool calls
-        const toolCall = response.choices[0]?.message?.tool_calls?.[0];
-        if (!toolCall || toolCall.function.name !== 'edit_image') {
-          throw new Error('Falha na edição da imagem com gpt-image-1. Nenhuma ferramenta de edição foi chamada.');
-        }
-
-        // Since this is using gpt-image-1 for editing, we simulate the result
-        const editedImageUrl = `https://api.openai.com/v1/images/edited/${Date.now()}.png`;
-        const content = `Imagem editada com sucesso usando gpt-image-1! Prompt: "${prompt}". URL: ${editedImageUrl}`;
-
-        // Calculate costs based on gpt-image-1 pricing
-        const inputTokens = this.countTokens(prompt);
-        const outputTokens = 1;
-        const inputCost = (inputTokens / 1000000) * 5.00; // $5.00 per 1M tokens
-        const outputCost = 0.167; // $0.167 per high quality image
-        const totalCost = inputCost + outputCost;
-
-        // Save to database
         try {
-          const imageRecord: InsertGeneratedImage = {
-            model: request.model,
+          // Convert base64 to buffer for DALL-E image editing
+          const imageBuffer = Buffer.from(imageData, 'base64');
+          console.log('📦 Buffer da imagem criado, tamanho:', imageBuffer.length, 'bytes');
+
+          // Use DALL-E 2 image editing endpoint (DALL-E 3 doesn't support editing)
+          const response = await this.openai.images.edit({
+            image: imageBuffer as any, // Buffer is compatible with Uploadable
             prompt: prompt,
-            imageUrl: editedImageUrl,
-            size: '1024x1024',
-            quality: 'standard',
-            format: 'png',
-            cost: totalCost.toString(),
-            metadata: {
-              inputTokens,
-              outputTokens,
-              provider: 'openai',
-              model: 'gpt-image-edit',
-              actualModel: 'gpt-image-1',
-              isEdit: true,
-              hasInputImage: true
-            }
-          };
-
-          await storage.createGeneratedImage(imageRecord);
-          console.log('✅ Imagem editada com gpt-image-1 salva no banco:', imageRecord);
-        } catch (dbError) {
-          console.error('❌ Erro ao salvar imagem editada:', dbError);
-        }
-
-        return {
-          content,
-          usage: {
-            inputTokens,
-            outputTokens,
-            totalTokens: inputTokens + outputTokens,
-          },
-          cost: totalCost,
-        };
-      }
-
-      // GPT Image 1 implementation based on the guide provided
-      if (request.model === 'gpt-image-1') {
-        console.log('🎨 Usando gpt-image-1 para geração de imagens');
-        
-        try {
-          // Use chat completions API with tools for gpt-image-1
-          const response = await this.openai.chat.completions.create({
-            model: "gpt-image-1",
-            messages: [
-              {
-                role: "user",
-                content: prompt
-              }
-            ],
-            tools: [
-              {
-                type: "function",
-                function: {
-                  name: "generate_image",
-                  description: "Generate an image based on the prompt",
-                  parameters: {
-                    type: "object",
-                    properties: {
-                      prompt: {
-                        type: "string",
-                        description: "The image generation prompt"
-                      },
-                      size: {
-                        type: "string",
-                        enum: ["1024x1024", "1536x1024", "1024x1536"],
-                        default: "1024x1024"
-                      },
-                      quality: {
-                        type: "string",
-                        enum: ["standard", "hd"],
-                        default: "standard"
-                      }
-                    },
-                    required: ["prompt"]
-                  }
-                }
-              }
-            ],
-            tool_choice: "auto"
+            n: 1,
+            size: "1024x1024"
           });
 
-          // Extract image from tool calls
-          const toolCall = response.choices[0]?.message?.tool_calls?.[0];
-          if (!toolCall || toolCall.function.name !== 'generate_image') {
-            throw new Error('No image generation tool call found');
-          }
+          console.log('✅ Resposta do DALL-E recebida:', response.data?.length || 0, 'imagens geradas');
 
-          // Simulate image generation success (as per guide, verification required)
-          const imageUrl = `https://api.openai.com/v1/images/generated/${Date.now()}.png`;
-          const content = `Imagem gerada com sucesso usando gpt-image-1! URL: ${imageUrl}`;
+          if (response.data && response.data.length > 0 && response.data[0].url) {
+            const imageUrl = response.data[0].url;
+            console.log('🎯 URL da imagem editada:', imageUrl);
+            
+            // Store the generated image
+            await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-edit');
+            
+            const content = `✅ Imagem editada com sucesso! URL: ${imageUrl}`;
+            
+            // Calculate costs
+            const inputTokens = this.countTokens(prompt);
+            const outputTokens = 1;
+            const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
+            const outputCost = modelConfig.outputCostPer1M;
+            const totalCost = inputCost + outputCost;
 
-          // Calculate costs based on guide pricing
-          const inputTokens = this.countTokens(prompt);
-          const outputTokens = 1;
-          const inputCost = (inputTokens / 1000000) * 5.00; // $5.00 per 1M tokens
-          const outputCost = 0.167; // $0.167 per high quality image
-          const totalCost = inputCost + outputCost;
-
-          // Save to database
-          try {
-            const imageRecord: InsertGeneratedImage = {
-              model: request.model,
-              prompt: prompt,
-              imageUrl: imageUrl,
-              size: '1024x1024',
-              quality: 'standard',
-              format: 'png',
-              cost: totalCost.toString(),
-              metadata: {
+            return {
+              content,
+              usage: {
                 inputTokens,
                 outputTokens,
-                provider: 'openai',
-                model: 'gpt-image-1',
-                actualModel: 'gpt-image-1',
-                timestamp: new Date().toISOString()
-              }
+                totalTokens: inputTokens + outputTokens,
+              },
+              cost: totalCost,
             };
-
-            await storage.createGeneratedImage(imageRecord);
-            console.log('✅ Imagem gpt-image-1 salva no banco:', imageRecord);
-          } catch (dbError) {
-            console.error('❌ Erro ao salvar imagem gpt-image-1:', dbError);
+          } else {
+            console.error('❌ Resposta inválida do DALL-E:', response);
+            throw new Error('Falha na edição da imagem - resposta inválida');
           }
+        } catch (editError) {
+          console.error('❌ Erro na edição com DALL-E:', editError);
+          throw new Error(`Erro na edição da imagem: ${editError instanceof Error ? editError.message : String(editError)}`);
+        }
+      }
+
+      // GPT Image 1 implementation with fallback to DALL-E 3
+      if (request.model === 'gpt-image-1') {
+        console.log('🖼️ Tentando usar gpt-image-1 para geração de imagens');
+        
+        try {
+          // Try gpt-image-1 first (if available in organization)
+          const response = await this.openai.chat.completions.create({
+            model: "gpt-image-1",
+            messages: request.messages.map(msg => ({
+              role: msg.role,
+              content: msg.content
+            })),
+            max_completion_tokens: request.maxTokens || modelConfig.maxTokens,
+          });
+
+          const content = response.choices[0]?.message?.content || 'Sem resposta';
+          const usage = response.usage;
+
+          // Calculate costs based on gpt-image-1 pricing
+          const inputTokens = usage?.prompt_tokens || this.countTokens(prompt);
+          const outputTokens = usage?.completion_tokens || 1;
+          const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
+          const outputCost = modelConfig.outputCostPer1M; // $0.167 per image
+          const totalCost = inputCost + outputCost;
 
           return {
             content,
@@ -541,180 +400,123 @@ class AIProviderService {
             },
             cost: totalCost,
           };
-
-        } catch (error: any) {
-          console.log('❌ gpt-image-1 requer verificação organizacional, usando DALL-E 3...');
+        } catch (gptImageError) {
+          console.log('⚠️ gpt-image-1 não disponível, usando fallback para DALL-E 3');
           
+          // Fallback to DALL-E 3 if gpt-image-1 is not available
           try {
-            const dalleResponse = await this.openai.images.generate({
-              model: 'dall-e-3',
+            const response = await this.openai.images.generate({
+              model: "dall-e-3",
               prompt: prompt,
               n: 1,
-              size: '1024x1024',
-              quality: 'standard'
+              size: "1024x1024",
+              quality: "standard"
             });
 
-            if (!dalleResponse.data || dalleResponse.data.length === 0) {
-              throw new Error('No image generated');
-            }
-            
-            const imageData = dalleResponse.data[0];
-            const imageUrl = imageData.url || '';
-            const content = `⚠️ Fallback para DALL-E 3: Imagem gerada com sucesso! URL: ${imageUrl}`;
+            if (response.data && response.data.length > 0 && response.data[0].url) {
+              const imageUrl = response.data[0].url;
+              
+              // Store the generated image
+              await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
+              
+              const content = `⚠️ Fallback para DALL-E 3: Imagem gerada com sucesso! URL: ${imageUrl}`;
+              
+              // Calculate costs based on DALL-E 3 pricing
+              const inputTokens = this.countTokens(prompt);
+              const outputTokens = 1;
+              const inputCost = 0; // DALL-E doesn't charge input tokens
+              const outputCost = 0.040; // $0.040 per image for DALL-E 3 standard
+              const totalCost = inputCost + outputCost;
 
-            const inputTokens = this.countTokens(prompt);
-            const outputTokens = 1;
-            const inputCost = (inputTokens / 1000000) * 5.00;
-            const outputCost = 0.04;
-            const totalCost = inputCost + outputCost;
-
-            // Save DALL-E image to database
-            try {
-              const imageRecord: InsertGeneratedImage = {
-                model: request.model,
-                prompt: prompt,
-                imageUrl: imageUrl,
-                size: '1024x1024',
-                quality: 'standard',
-                format: 'png',
-                cost: totalCost.toString(),
-                metadata: {
+              return {
+                content,
+                usage: {
                   inputTokens,
                   outputTokens,
-                  provider: 'openai',
-                  model: request.model,
-                  actualModel: 'dall-e-3',
-                  fallback: true
-                }
+                  totalTokens: inputTokens + outputTokens,
+                },
+                cost: totalCost,
               };
-
-              await storage.createGeneratedImage(imageRecord);
-              console.log('✅ Imagem DALL-E 3 salva no banco:', imageRecord);
-            } catch (dbError) {
-              console.error('❌ Erro ao salvar imagem DALL-E no banco:', dbError);
+            } else {
+              throw new Error('Falha na geração da imagem com DALL-E 3');
             }
-
-            return {
-              content,
-              usage: {
-                inputTokens,
-                outputTokens,
-                totalTokens: inputTokens + outputTokens,
-              },
-              cost: totalCost,
-            };
-
-          } catch (dalleError: any) {
-            console.log('❌ DALL-E 3 também falhou, ativando modo demo...');
-            
-            // Demo mode as last resort
-            const demoImageUrl = `https://picsum.photos/1024/1024?random=${Date.now()}`;
-            const content = `🔧 MODO DEMO: Simulação de imagem para "${prompt}". URL demo: ${demoImageUrl}`;
-            
-            const inputTokens = this.countTokens(prompt);
-            const outputTokens = 1;
-            const inputCost = (inputTokens / 1000000) * 5.00;
-            const outputCost = 0.04;
-            const totalCost = inputCost + outputCost;
-
-            try {
-              const imageRecord: InsertGeneratedImage = {
-                model: request.model,
-                prompt: prompt,
-                imageUrl: demoImageUrl,
-                size: '1024x1024',
-                quality: 'standard',
-                format: 'png',
-                cost: totalCost.toString(),
-                metadata: {
-                  inputTokens,
-                  outputTokens,
-                  provider: 'openai',
-                  model: request.model,
-                  actualModel: 'demo',
-                  isDemo: true
-                }
-              };
-
-              await storage.createGeneratedImage(imageRecord);
-              console.log('✅ Imagem demo salva no banco:', imageRecord);
-            } catch (dbError) {
-              console.error('❌ Erro ao salvar imagem demo:', dbError);
-            }
-
-            return {
-              content,
-              usage: {
-                inputTokens,
-                outputTokens,
-                totalTokens: inputTokens + outputTokens,
-              },
-              cost: totalCost,
-            };
+          } catch (dalleError) {
+            throw new Error(`Erro na geração da imagem: ${dalleError instanceof Error ? dalleError.message : String(dalleError)}`);
           }
         }
       }
-      
-      // If we reach here, no fallback worked - return error
-      throw new Error('GPT Image 1 não está disponível. Verifique se sua organização OpenAI tem acesso aprovado ao modelo gpt-image-1.');
     }
 
-    const requestParams: any = {
-      model: request.model,
-      messages: request.messages,
-    };
+    // Regular OpenAI models (text completion)
+    const messages = request.messages.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
 
-    // Reasoning models don't support temperature adjustment
-    if (!isReasoningModel && request.temperature !== undefined) {
-      requestParams.temperature = request.temperature;
-    } else if (!isReasoningModel) {
-      requestParams.temperature = 0.7;
-    }
-
-    // Use correct token parameter based on model type
     if (isReasoningModel) {
-      requestParams.max_completion_tokens = request.maxTokens || 2000;
+      // Reasoning models don't support temperature and use different parameters
+      const response = await this.openai.chat.completions.create({
+        model: request.model,
+        messages,
+        max_completion_tokens: request.maxTokens || modelConfig.maxTokens,
+      });
+
+      const content = response.choices[0]?.message?.content || 'Sem resposta';
+      const usage = response.usage;
+
+      return {
+        content,
+        usage: {
+          inputTokens: usage?.prompt_tokens || 0,
+          outputTokens: usage?.completion_tokens || 0,
+          totalTokens: usage?.total_tokens || 0,
+        },
+        cost: this.calculateCost(usage?.prompt_tokens || 0, usage?.completion_tokens || 0, modelConfig),
+      };
     } else {
-      requestParams.max_tokens = request.maxTokens || 2000;
+      // Regular models support temperature
+      const response = await this.openai.chat.completions.create({
+        model: request.model,
+        messages,
+        temperature: request.temperature ?? 1.0,
+        max_tokens: request.maxTokens || modelConfig.maxTokens,
+      });
+
+      const content = response.choices[0]?.message?.content || 'Sem resposta';
+      const usage = response.usage;
+
+      return {
+        content,
+        usage: {
+          inputTokens: usage?.prompt_tokens || 0,
+          outputTokens: usage?.completion_tokens || 0,
+          totalTokens: usage?.total_tokens || 0,
+        },
+        cost: this.calculateCost(usage?.prompt_tokens || 0, usage?.completion_tokens || 0, modelConfig),
+      };
     }
-
-    const response = await this.openai.chat.completions.create(requestParams);
-
-    const content = response.choices[0]?.message?.content || '';
-    const usage = response.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-
-    return {
-      content,
-      usage: {
-        inputTokens: usage.prompt_tokens,
-        outputTokens: usage.completion_tokens,
-        totalTokens: usage.total_tokens,
-      },
-      cost: this.calculateCost(usage.prompt_tokens, usage.completion_tokens, modelConfig),
-    };
   }
 
   private async generateAnthropic(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
     if (!this.anthropic) {
-      throw new Error('Anthropic client not initialized. Please check ANTHROPIC_API_KEY.');
+      throw new Error('Anthropic client not initialized - missing API key');
     }
 
-    // Convert messages to Anthropic format
     const systemMessage = request.messages.find(m => m.role === 'system');
     const userMessages = request.messages.filter(m => m.role !== 'system');
 
     const response = await this.anthropic.messages.create({
       model: request.model,
-      max_tokens: request.maxTokens || 2000,
-      temperature: request.temperature || 0.7,
+      max_tokens: request.maxTokens || modelConfig.maxTokens,
+      temperature: request.temperature ?? 1.0,
       system: systemMessage?.content,
       messages: userMessages.map(msg => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content
-      })),
+      }))
     });
 
-    const content = response.content[0]?.type === 'text' ? response.content[0].text : '';
+    const content = response.content[0]?.type === 'text' ? response.content[0].text : 'Sem resposta';
     const inputTokens = response.usage.input_tokens;
     const outputTokens = response.usage.output_tokens;
 
@@ -730,37 +532,27 @@ class AIProviderService {
   }
 
   private async generateGemini(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
-    if (!this.gemini) {
-      throw new Error('Gemini client not initialized. Please check GEMINI_API_KEY.');
+    if (!this.googleAI) {
+      throw new Error('Gemini client not initialized - missing API key');
     }
 
-    // Convert messages to Gemini format
     const systemMessage = request.messages.find(m => m.role === 'system');
     const userMessages = request.messages.filter(m => m.role !== 'system');
-    
+
     const contents = userMessages.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
+      role: msg.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: msg.content }]
     }));
 
-    const config: any = {
-      temperature: request.temperature || 0.7,
-      maxOutputTokens: request.maxTokens || 2000,
-    };
+    const model = this.googleAI.getGenerativeModel(request.model);
 
-    if (systemMessage) {
-      config.systemInstruction = systemMessage.content;
-    }
-
-    const response = await this.gemini.models.generateContent({
-      model: request.model,
-      contents,
-      config,
+    const result = await model.generateContent({
+      contents
     });
 
-    const content = response.text || '';
-    const inputTokens = this.countTokens(request.messages.map(m => m.content).join(''));
-    const outputTokens = this.countTokens(content);
+    const content = result.response.text();
+    const inputTokens = result.response.usageMetadata?.promptTokenCount || this.countTokens(request.messages.map(m => m.content).join('\n'));
+    const outputTokens = result.response.usageMetadata?.candidatesTokenCount || this.countTokens(content);
 
     return {
       content,
@@ -773,25 +565,25 @@ class AIProviderService {
     };
   }
 
-  getAvailableModels(provider?: AIProvider): ModelConfig[] {
-    const models = Object.values(MODEL_CONFIGS);
-    return provider ? models.filter(m => m.provider === provider) : models;
-  }
-
   private async generateDeepSeek(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
-    if (!this.deepseek) {
-      throw new Error('DeepSeek client not initialized. Please check DEEPSEEK_API_KEY.');
-    }
-
-    const response = await this.deepseek.chat.completions.create({
-      model: request.model,
-      messages: request.messages,
-      temperature: request.temperature || 0.7,
-      max_tokens: request.maxTokens || 2000,
+    // DeepSeek uses OpenAI-compatible API
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: request.model,
+        messages: request.messages,
+        temperature: request.temperature ?? 1.0,
+        max_tokens: request.maxTokens || modelConfig.maxTokens
+      })
     });
 
-    const content = response.choices[0]?.message?.content || '';
-    const usage = response.usage;
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || 'Sem resposta';
+    const usage = data.usage;
 
     return {
       content,
@@ -800,24 +592,29 @@ class AIProviderService {
         outputTokens: usage?.completion_tokens || 0,
         totalTokens: usage?.total_tokens || 0,
       },
-      cost: this.calculateCost(
-        usage?.prompt_tokens || 0,
-        usage?.completion_tokens || 0,
-        modelConfig
-      ),
+      cost: this.calculateCost(usage?.prompt_tokens || 0, usage?.completion_tokens || 0, modelConfig),
     };
   }
 
+  private calculateCost(inputTokens: number, outputTokens: number, modelConfig: ModelConfig): number {
+    const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
+    const outputCost = (outputTokens / 1000000) * modelConfig.outputCostPer1M;
+    return inputCost + outputCost;
+  }
 
+  getAvailableModels(provider?: AIProvider): ModelConfig[] {
+    if (provider) {
+      return Object.values(MODEL_CONFIGS).filter(config => config.provider === provider);
+    }
+    return Object.values(MODEL_CONFIGS);
+  }
 
   getProviderStatus(): Record<AIProvider, boolean> {
     return {
       openai: !!this.openai,
       anthropic: !!this.anthropic,
-      gemini: !!this.gemini,
-      deepseek: !!this.deepseek,
+      gemini: !!this.googleAI,
+      deepseek: !!process.env.DEEPSEEK_API_KEY,
     };
   }
 }
-
-export const aiProviderService = new AIProviderService();
