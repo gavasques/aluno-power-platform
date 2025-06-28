@@ -334,15 +334,16 @@ class AIProviderService {
         prompt: prompt,
         n: 1,
         size: '1024x1024',
-        quality: 'high' // high quality ($0.167 per image)
+        quality: 'high', // high quality ($0.167 per image)
+        response_format: 'b64_json'
       });
 
       if (!response.data || response.data.length === 0) {
         throw new Error('No image generated');
       }
       
-      const imageUrl = response.data[0]?.url || '';
-      const content = `Image generated successfully. URL: ${imageUrl}`;
+      const imageData = response.data[0]?.b64_json || '';
+      const content = `Image generated successfully (JPEG format, high quality). Base64 data: ${imageData.substring(0, 50)}...`;
       
       // For gpt-image-1 pricing: text tokens for input, image generation cost for output
       const inputTokens = this.countTokens(prompt);

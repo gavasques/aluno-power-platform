@@ -129,7 +129,7 @@ Preferred communication style: Simple, everyday language.
   - Preços atualizados conforme documentação oficial:
     - GPT-4.1: $2.50/$10.00 por 1M tokens
     - GPT-4o: $2.50/$10.00 por 1M tokens  
-    - gpt-image-1: $5.00 input + $0.167 por imagem (qualidade alta)
+    - gpt-image-1: $5.00 input + $0.167 por imagem (qualidade alta, formato JPEG)
 
 ## Changelog
 
