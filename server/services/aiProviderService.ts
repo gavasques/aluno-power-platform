@@ -92,13 +92,6 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 0.167, // $0.167 per image (high quality, PNG)
     maxTokens: 4000
   },
-  'gpt-image-edit': {
-    provider: 'openai',
-    model: 'gpt-image-edit',
-    inputCostPer1M: 5.00,
-    outputCostPer1M: 0.167,
-    maxTokens: 4000
-  },
   
   // OpenAI Legacy Models
   'gpt-4o': {
@@ -303,96 +296,126 @@ export class AIProviderService {
     if (isImageModel) {
       const prompt = request.messages.map(m => m.content).join('\n');
       
-      // GPT Image Edit implementation - EXCLUSIVAMENTE GPT-Image-1
-      if (request.model === 'gpt-image-edit') {
-        console.log('🖼️ Usando gpt-image-edit com GPT-Image-1 EXCLUSIVAMENTE para edição de imagens');
+      // GPT Image 1 implementation - Para geração e edição de imagens
+      if (request.model === 'gpt-image-1') {
+        console.log('🖼️ Usando GPT-Image-1 para geração/edição de imagens');
         
-        // Check if there's an image provided in the request
-        const imageData = request.imageData;
-        if (!imageData) {
-          throw new Error('Imagem é obrigatória para edição com gpt-image-edit');
-        }
-
-        console.log('📝 Prompt de edição:', prompt);
-        console.log('🖼️ Dados da imagem recebidos:', imageData ? 'Sim (base64)' : 'Não');
-
         try {
-          // Usar GPT-4o-mini para análise da imagem primeiro, depois GPT-Image-1 para geração
-          console.log('🔄 Primeira etapa: Analisando imagem com GPT-4o-mini...');
+          // Se há dados de imagem, é uma edição; senão, é geração
+          const imageData = request.imageData;
           
-          const analysisResponse = await this.openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: `Analise esta imagem em detalhes e depois gere um prompt para criar uma versão editada com esta instrução: ${prompt}. Descreva a imagem atual e como ela deve ser modificada.`
-                  },
-                  {
-                    type: "image_url",
-                    image_url: {
-                      url: `data:image/jpeg;base64,${imageData}`,
-                      detail: "high"
+          if (imageData) {
+            console.log('🔄 Modo edição: Analisando imagem com GPT-4o-mini primeiro...');
+            
+            // Primeira etapa: análise da imagem com GPT-4o-mini
+            const analysisResponse = await this.openai.chat.completions.create({
+              model: "gpt-4o-mini",
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text: `Analise esta imagem em detalhes e depois gere um prompt para criar uma versão editada com esta instrução: ${prompt}. Descreva a imagem atual e como ela deve ser modificada.`
+                    },
+                    {
+                      type: "image_url",
+                      image_url: {
+                        url: `data:image/jpeg;base64,${imageData}`,
+                        detail: "high"
+                      }
                     }
-                  }
-                ]
-              }
-            ],
-            max_tokens: 500
-          });
+                  ]
+                }
+              ],
+              max_tokens: 500
+            });
 
-          const imageAnalysis = analysisResponse.choices[0]?.message?.content || '';
-          console.log('📊 Análise da imagem:', imageAnalysis);
+            const imageAnalysis = analysisResponse.choices[0]?.message?.content || '';
+            console.log('📊 Análise da imagem:', imageAnalysis);
 
-          // Segunda etapa: usar GPT-Image-1 para gerar a nova imagem
-          console.log('🔄 Segunda etapa: Gerando nova imagem com GPT-Image-1...');
-          
-          const generationPrompt = `${imageAnalysis}\n\nCrie uma nova imagem com as modificações solicitadas: ${prompt}`;
-          
-          const response = await this.openai.chat.completions.create({
-            model: "gpt-image-1",
-            messages: [
-              {
-                role: "user",
-                content: generationPrompt
-              }
-            ],
-            max_completion_tokens: request.maxTokens || 4000
-          });
+            // Segunda etapa: usar GPT-Image-1 para gerar a nova imagem
+            console.log('🔄 Gerando nova imagem com GPT-Image-1...');
+            
+            const generationPrompt = `${imageAnalysis}\n\nCrie uma nova imagem com as modificações solicitadas: ${prompt}`;
+            
+            const response = await this.openai.chat.completions.create({
+              model: "gpt-image-1",
+              messages: [
+                {
+                  role: "user",
+                  content: generationPrompt
+                }
+              ],
+              max_completion_tokens: request.maxTokens || modelConfig.maxTokens,
+            });
 
-          console.log('✅ Resposta do GPT-Image-1 recebida');
+            const content = response.choices[0]?.message?.content || 'Resposta vazia do GPT-Image-1';
+            const usage = response.usage;
 
-          const content = response.choices[0]?.message?.content || 'Resposta vazia do GPT-Image-1';
-          const usage = response.usage;
+            // Calculate costs
+            const inputTokens = usage?.prompt_tokens || this.countTokens(generationPrompt);
+            const outputTokens = usage?.completion_tokens || 1;
+            const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
+            const outputCost = modelConfig.outputCostPer1M;
+            const totalCost = inputCost + outputCost;
 
-          console.log('📤 Conteúdo da resposta:', content);
-          console.log('📊 Usage:', usage);
+            // Store the result
+            try {
+              await this.storeGeneratedImage('', prompt, 'gpt-image-1');
+            } catch (dbError) {
+              console.log('⚠️ Erro ao salvar no banco (não crítico):', dbError);
+            }
 
-          // Calculate costs based on GPT-Image-1 pricing
-          const inputTokens = usage?.prompt_tokens || this.countTokens(generationPrompt);
-          const outputTokens = usage?.completion_tokens || 1;
-          const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M; // $5.00 per 1M tokens
-          const outputCost = modelConfig.outputCostPer1M; // $0.167 per image
-          const totalCost = inputCost + outputCost;
+            return {
+              content: `Imagem editada usando GPT-Image-1:\n\n${content}`,
+              usage: {
+                inputTokens,
+                outputTokens,
+                totalTokens: inputTokens + outputTokens,
+              },
+              cost: totalCost,
+            };
+            
+          } else {
+            console.log('🔄 Modo geração: Criando nova imagem com GPT-Image-1...');
+            
+            const response = await this.openai.chat.completions.create({
+              model: "gpt-image-1",
+              messages: request.messages.map(msg => ({
+                role: msg.role,
+                content: msg.content
+              })),
+              max_completion_tokens: request.maxTokens || modelConfig.maxTokens,
+            });
 
-          // Store the result (GPT-Image-1 might return image URLs in the content)
-          try {
-            await this.storeGeneratedImage('', prompt, 'gpt-image-edit');
-          } catch (dbError) {
-            console.log('⚠️ Erro ao salvar no banco (não crítico):', dbError);
+            const content = response.choices[0]?.message?.content || 'Resposta vazia do GPT-Image-1';
+            const usage = response.usage;
+
+            // Calculate costs
+            const inputTokens = usage?.prompt_tokens || this.countTokens(prompt);
+            const outputTokens = usage?.completion_tokens || 1;
+            const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
+            const outputCost = modelConfig.outputCostPer1M;
+            const totalCost = inputCost + outputCost;
+
+            // Store the generated image
+            try {
+              await this.storeGeneratedImage('', prompt, 'gpt-image-1');
+            } catch (dbError) {
+              console.log('⚠️ Erro ao salvar no banco (não crítico):', dbError);
+            }
+
+            return {
+              content,
+              usage: {
+                inputTokens,
+                outputTokens,
+                totalTokens: inputTokens + outputTokens,
+              },
+              cost: totalCost,
+            };
           }
-
-          return {
-            content: `Imagem editada usando GPT-Image-1:\n\n${content}`,
-            usage: {
-              inputTokens,
-              outputTokens,
-              totalTokens: inputTokens + outputTokens,
-            },
-            cost: totalCost,
-          };
           
         } catch (gptImageError: any) {
           console.error('❌ Erro com GPT-Image-1:', gptImageError);
@@ -409,75 +432,7 @@ export class AIProviderService {
             throw new Error('GPT-Image-1 não está disponível na sua organização OpenAI. Solicite acesso ao modelo gpt-image-1 na OpenAI.');
           }
           
-          throw new Error(`Erro na edição com GPT-Image-1: ${gptImageError.message}`);
-        }
-      }
-
-      // GPT Image 1 implementation - EXCLUSIVAMENTE GPT-Image-1
-      if (request.model === 'gpt-image-1') {
-        console.log('🖼️ Usando GPT-Image-1 EXCLUSIVAMENTE para geração de imagens');
-        
-        try {
-          // GPT-Image-1 for image generation
-          console.log('🔄 Enviando para GPT-Image-1 para geração...');
-          
-          const response = await this.openai.chat.completions.create({
-            model: "gpt-image-1",
-            messages: request.messages.map(msg => ({
-              role: msg.role,
-              content: msg.content
-            })),
-            max_completion_tokens: request.maxTokens || modelConfig.maxTokens,
-          });
-
-          console.log('✅ Resposta do GPT-Image-1 recebida para geração');
-
-          const content = response.choices[0]?.message?.content || 'Resposta vazia do GPT-Image-1';
-          const usage = response.usage;
-
-          console.log('📤 Conteúdo da resposta GPT-Image-1:', content);
-          console.log('📊 Usage GPT-Image-1:', usage);
-
-          // Calculate costs based on gpt-image-1 pricing
-          const inputTokens = usage?.prompt_tokens || this.countTokens(prompt);
-          const outputTokens = usage?.completion_tokens || 1;
-          const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M; // $5.00 per 1M tokens
-          const outputCost = modelConfig.outputCostPer1M; // $0.167 per image
-          const totalCost = inputCost + outputCost;
-
-          // Store the generated image if URL is present in response
-          try {
-            await this.storeGeneratedImage('', prompt, 'gpt-image-1');
-          } catch (dbError) {
-            console.log('⚠️ Erro ao salvar no banco (não crítico):', dbError);
-          }
-
-          return {
-            content,
-            usage: {
-              inputTokens,
-              outputTokens,
-              totalTokens: inputTokens + outputTokens,
-            },
-            cost: totalCost,
-          };
-          
-        } catch (gptImageError: any) {
-          console.error('❌ Erro com GPT-Image-1:', gptImageError);
-          console.error('📋 Detalhes do erro GPT-Image-1:', {
-            message: gptImageError.message,
-            status: gptImageError.status,
-            code: gptImageError.code,
-            type: gptImageError.type,
-            param: gptImageError.param
-          });
-          
-          // Se o erro é por falta de acesso ao GPT-Image-1, informar claramente
-          if (gptImageError.message?.includes('model not found') || gptImageError.message?.includes('does not exist')) {
-            throw new Error('GPT-Image-1 não está disponível na sua organização OpenAI. Solicite acesso ao modelo gpt-image-1 na OpenAI.');
-          }
-          
-          throw new Error(`Erro na geração com GPT-Image-1: ${gptImageError.message}`);
+          throw new Error(`Erro com GPT-Image-1: ${gptImageError.message}`);
         }
       }
     }

@@ -142,7 +142,7 @@ Preferred communication style: Simple, everyday language.
   - Modelos disponíveis por categoria:
     - OpenAI Normal: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano
     - OpenAI Raciocínio: o1-preview, o1-mini, o4-mini
-    - OpenAI Imagem: gpt-image-1 (modelo de geração de imagens)
+    - OpenAI Imagem: gpt-image-1 (modelo de geração e edição de imagens)
     - OpenAI Legacy: gpt-4o, gpt-4o-mini
     - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
     - Claude 3.x: claude-3-5-sonnet, claude-3-opus, claude-3-haiku

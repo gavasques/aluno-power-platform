@@ -2085,10 +2085,11 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         });
       }
 
-      // Check if image is required for gpt-image-edit model
-      if (model === 'gpt-image-edit' && !imageData) {
-        console.log(`❌ [AI_TEST_ERROR] RequestID: ${requestId} - Missing image data for gpt-image-edit`);
-        return res.status(400).json({ error: 'Image data is required for gpt-image-edit model' });
+      // Log if image data is provided for gpt-image-1 model
+      if (model === 'gpt-image-1' && imageData) {
+        console.log(`🖼️ [AI_TEST_INFO] RequestID: ${requestId} - Image data provided for gpt-image-1 (edit mode)`);
+      } else if (model === 'gpt-image-1' && !imageData) {
+        console.log(`🎨 [AI_TEST_INFO] RequestID: ${requestId} - No image data for gpt-image-1 (generation mode)`);
       }
 
       const testPrompt = prompt || 'Hello! How are you today?';
@@ -2113,8 +2114,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         maxTokens: maxTokens ? parseInt(maxTokens) : 100
       };
 
-      // Add image data for gpt-image-edit model
-      if (model === 'gpt-image-edit' && imageData) {
+      // Add image data for gpt-image-1 model if provided
+      if (model === 'gpt-image-1' && imageData) {
         requestData.imageData = imageData;
         console.log(`🖼️  [AI_TEST_IMAGE] RequestID: ${requestId} - Image data provided (${imageData.length} chars)`);
       }
