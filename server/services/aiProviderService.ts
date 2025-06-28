@@ -317,26 +317,46 @@ export class AIProviderService {
         console.log('🖼️ Dados da imagem recebidos:', imageData ? 'Sim (base64)' : 'Não');
 
         try {
-          // GPT-Image-1 multimodal format with image editing prompt
-          console.log('🔄 Enviando para GPT-Image-1 com formato multimodal correto...');
+          // Usar GPT-4o-mini para análise da imagem primeiro, depois GPT-Image-1 para geração
+          console.log('🔄 Primeira etapa: Analisando imagem com GPT-4o-mini...');
           
-          const response = await this.openai.chat.completions.create({
-            model: "gpt-image-1",
+          const analysisResponse = await this.openai.chat.completions.create({
+            model: "gpt-4o-mini",
             messages: [
               {
                 role: "user",
                 content: [
                   {
                     type: "text",
-                    text: `Edite esta imagem: ${prompt}`
+                    text: `Analise esta imagem em detalhes e depois gere um prompt para criar uma versão editada com esta instrução: ${prompt}. Descreva a imagem atual e como ela deve ser modificada.`
                   },
                   {
                     type: "image_url",
                     image_url: {
-                      url: `data:image/png;base64,${imageData}`
+                      url: `data:image/jpeg;base64,${imageData}`,
+                      detail: "high"
                     }
                   }
                 ]
+              }
+            ],
+            max_tokens: 500
+          });
+
+          const imageAnalysis = analysisResponse.choices[0]?.message?.content || '';
+          console.log('📊 Análise da imagem:', imageAnalysis);
+
+          // Segunda etapa: usar GPT-Image-1 para gerar a nova imagem
+          console.log('🔄 Segunda etapa: Gerando nova imagem com GPT-Image-1...');
+          
+          const generationPrompt = `${imageAnalysis}\n\nCrie uma nova imagem com as modificações solicitadas: ${prompt}`;
+          
+          const response = await this.openai.chat.completions.create({
+            model: "gpt-image-1",
+            messages: [
+              {
+                role: "user",
+                content: generationPrompt
               }
             ],
             max_completion_tokens: request.maxTokens || 4000
@@ -351,7 +371,7 @@ export class AIProviderService {
           console.log('📊 Usage:', usage);
 
           // Calculate costs based on GPT-Image-1 pricing
-          const inputTokens = usage?.prompt_tokens || this.countTokens(prompt);
+          const inputTokens = usage?.prompt_tokens || this.countTokens(generationPrompt);
           const outputTokens = usage?.completion_tokens || 1;
           const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M; // $5.00 per 1M tokens
           const outputCost = modelConfig.outputCostPer1M; // $0.167 per image
@@ -365,7 +385,7 @@ export class AIProviderService {
           }
 
           return {
-            content,
+            content: `Imagem editada usando GPT-Image-1:\n\n${content}`,
             usage: {
               inputTokens,
               outputTokens,
@@ -387,10 +407,6 @@ export class AIProviderService {
           // Se o erro é por falta de acesso ao GPT-Image-1, informar claramente
           if (gptImageError.message?.includes('model not found') || gptImageError.message?.includes('does not exist')) {
             throw new Error('GPT-Image-1 não está disponível na sua organização OpenAI. Solicite acesso ao modelo gpt-image-1 na OpenAI.');
-          }
-          
-          if (gptImageError.message?.includes('Invalid content type') || gptImageError.message?.includes('image_url is only supported')) {
-            throw new Error('GPT-Image-1 não suporta o formato multimodal enviado. Verificando implementação...');
           }
           
           throw new Error(`Erro na edição com GPT-Image-1: ${gptImageError.message}`);
