@@ -47,6 +47,7 @@ interface ProviderStatus {
   openai: boolean;
   anthropic: boolean;
   gemini: boolean;
+  deepseek: boolean;
 }
 
 interface ProviderInfo {
@@ -59,7 +60,8 @@ interface ProviderInfo {
 const PROVIDERS: ProviderInfo[] = [
   { value: 'openai', label: 'OpenAI (ChatGPT)', icon: '🤖', color: 'bg-green-100 text-green-800' },
   { value: 'anthropic', label: 'Anthropic (Claude)', icon: '🧠', color: 'bg-purple-100 text-purple-800' },
-  { value: 'gemini', label: 'Google Gemini', icon: '⭐', color: 'bg-blue-100 text-blue-800' }
+  { value: 'gemini', label: 'Google Gemini', icon: '⭐', color: 'bg-blue-100 text-blue-800' },
+  { value: 'deepseek', label: 'DeepSeek AI', icon: '🔍', color: 'bg-orange-100 text-orange-800' }
 ];
 
 export default function AgentProviderSettings() {
@@ -77,7 +79,7 @@ export default function AgentProviderSettings() {
   });
 
   // Fetch provider status
-  const { data: status = { openai: false, anthropic: false, gemini: false } } = useQuery<ProviderStatus>({
+  const { data: status = { openai: false, anthropic: false, gemini: false, deepseek: false } } = useQuery<ProviderStatus>({
     queryKey: ['/api/ai-providers/status'],
     enabled: user?.role === 'admin'
   });

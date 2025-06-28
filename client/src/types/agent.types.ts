@@ -6,6 +6,7 @@ export interface Agent {
   category: string;
   icon: string;
   isActive: boolean;
+  provider: 'openai' | 'anthropic' | 'gemini' | 'deepseek';
   model: string;
   temperature: number;
   maxTokens: number;
