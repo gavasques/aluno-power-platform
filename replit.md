@@ -108,11 +108,11 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 28, 2025**: Corrigido modelos OpenAI: removidos o4, o3 e o3-mini (requerem verificação organizacional especial)
-  - Mantido apenas o4-mini que funciona sem verificação especial
+- **June 28, 2025**: Otimizado conjunto de modelos OpenAI para manter apenas os mais estáveis
+  - Removidos: o4, o3, o3-mini (requerem verificação), gpt-4-turbo, gpt-3.5-turbo (instáveis)
+  - Mantidos modelos confiáveis: gpt-4.1, gpt-4o, o1-preview, o1-mini, o4-mini
   - Sistema de teste de conexão com JSON formatado e downloads funcionando
   - Interface completa com campos de requisição e resposta em JSON
-  - Modelos de raciocínio ativos: o1-preview, o1-mini, o4-mini
 
 - **June 28, 2025 (anterior)**: Sistema completo funcionando com navegação corrigida e interface de imagens geradas
   - Corrigidas todas as rotas de navegação do painel administrativo
@@ -131,7 +131,7 @@ Preferred communication style: Simple, everyday language.
     - OpenAI Normal: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano
     - OpenAI Raciocínio: o1-preview, o1-mini, o4-mini
     - OpenAI Imagem: gpt-image-1 (modelo multimodal nova geração)
-    - OpenAI Legacy: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
+    - OpenAI Legacy: gpt-4o, gpt-4o-mini
     - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
     - Claude 3.x: claude-3-5-sonnet, claude-3-opus, claude-3-haiku
     - Gemini 2.5: gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite-preview

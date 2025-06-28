@@ -109,20 +109,7 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 0.60,
     maxTokens: 128000
   },
-  'gpt-4-turbo': {
-    provider: 'openai',
-    model: 'gpt-4-turbo',
-    inputCostPer1M: 10.00,
-    outputCostPer1M: 30.00,
-    maxTokens: 128000
-  },
-  'gpt-3.5-turbo': {
-    provider: 'openai',
-    model: 'gpt-3.5-turbo',
-    inputCostPer1M: 0.50,
-    outputCostPer1M: 1.50,
-    maxTokens: 16385
-  },
+
 
   // Anthropic Claude 4.0 Models
   'claude-sonnet-4-20250514': {
