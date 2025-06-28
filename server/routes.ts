@@ -37,7 +37,6 @@ import {
 } from "@shared/schema";
 import { youtubeService } from "./services/youtubeService";
 import { openaiService } from "./services/openaiService";
-import { aiProviderService } from "./services/aiProviderService";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
 import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages } from '@shared/schema';
@@ -1714,8 +1713,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error updating agent:', error);
       res.status(400).json({ 
         error: 'Invalid agent data', 
-        details: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
+        details: error.message,
+        stack: error.stack 
       });
     }
   });
@@ -2015,6 +2014,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // AI Provider management endpoints
   app.get('/api/ai-providers/status', async (req, res) => {
     try {
+      const { aiProviderService } = await import('./services/aiProviderService');
       const status = aiProviderService.getProviderStatus();
       res.json(status);
     } catch (error) {
@@ -2025,6 +2025,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
   app.get('/api/ai-providers/models', async (req, res) => {
     try {
+      const { aiProviderService } = await import('./services/aiProviderService');
       const models = aiProviderService.getAvailableModels();
       res.json(models);
     } catch (error) {
@@ -2036,21 +2037,16 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Test AI provider connection
   app.post('/api/ai-providers/test', async (req, res) => {
     try {
-      const { provider, model, prompt, imageData } = req.body;
+      const { provider, model, prompt } = req.body;
       
       if (!provider || !model) {
         return res.status(400).json({ error: 'Provider and model are required' });
       }
 
-      // Check if image is required for gpt-image-edit model
-      if (model === 'gpt-image-edit' && !imageData) {
-        return res.status(400).json({ error: 'Image data is required for gpt-image-edit model' });
-      }
-
       const testPrompt = prompt || 'Hello! How are you today?';
       console.log(`Testing ${provider}/${model} with prompt: "${testPrompt}"`);
 
-      // Use the imported aiProviderService
+      const { aiProviderService } = await import('./services/aiProviderService');
       
       // Test with the provided prompt and configured parameters
       const { temperature, maxTokens } = req.body;
@@ -2059,7 +2055,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.log(`Test parameters - Temperature: ${temperature}, MaxTokens: ${maxTokens}, IsReasoningModel: ${isReasoningModel}`);
       
       // Prepare request data for logging
-      const requestData: any = {
+      const requestData = {
         provider,
         model,
         messages: [
@@ -2069,13 +2065,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         maxTokens: maxTokens ? parseInt(maxTokens) : 100
       };
 
-      // Add image data for gpt-image-edit model
-      if (model === 'gpt-image-edit' && imageData) {
-        requestData.imageData = imageData;
-        console.log('Image data provided for gpt-image-edit model');
-      }
-
-      console.log('Sending request to AI service:', JSON.stringify({...requestData, imageData: imageData ? '[IMAGE_DATA]' : undefined}, null, 2));
+      console.log('Sending request to AI service:', JSON.stringify(requestData, null, 2));
 
       const testResponse = await aiProviderService.generateCompletion(requestData);
 
