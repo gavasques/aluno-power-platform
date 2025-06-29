@@ -29,7 +29,7 @@ interface FormData {
   features: string;
   targetAudience: string;
   reviewsData: string;
-  uploadedFile: File | null;
+  uploadedFiles: File[];
 }
 
 interface ValidationErrors {
@@ -45,7 +45,7 @@ export default function AmazonListingsOptimizer() {
     features: "",
     targetAudience: "",
     reviewsData: "",
-    uploadedFile: null
+    uploadedFiles: []
   });
 
   const [reviewsTab, setReviewsTab] = useState<"upload" | "manual">("upload");
@@ -88,8 +88,8 @@ export default function AmazonListingsOptimizer() {
 
     // Validação das avaliações (uma das duas opções)
     if (reviewsTab === "upload") {
-      if (!formData.uploadedFile) {
-        newErrors.uploadedFile = "Arquivo CSV é obrigatório";
+      if (formData.uploadedFiles.length === 0) {
+        newErrors.uploadedFiles = "Pelo menos um arquivo CSV é obrigatório";
       }
     } else {
       if (!formData.reviewsData.trim()) {
@@ -103,17 +103,97 @@ export default function AmazonListingsOptimizer() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Simular upload de arquivo
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    if (file && !file.name.endsWith('.csv')) {
+  // Upload múltiplo de arquivos
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    
+    // Validações
+    if (files.length === 0) return;
+    
+    if (files.length > 8) {
       setErrors(prev => ({
         ...prev,
-        uploadedFile: "Apenas arquivos CSV são aceitos"
+        uploadedFiles: "Máximo de 8 arquivos permitidos"
       }));
       return;
     }
-    updateField('uploadedFile', file);
+    
+    // Verificar se todos são CSV
+    const invalidFiles = files.filter(file => !file.name.endsWith('.csv'));
+    if (invalidFiles.length > 0) {
+      setErrors(prev => ({
+        ...prev,
+        uploadedFiles: "Apenas arquivos CSV são aceitos"
+      }));
+      return;
+    }
+    
+    // Verificar tamanho individual (2MB cada)
+    const oversizedFiles = files.filter(file => file.size > 2 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      setErrors(prev => ({
+        ...prev,
+        uploadedFiles: "Cada arquivo deve ter no máximo 2MB"
+      }));
+      return;
+    }
+    
+    // Verificar tamanho total (10MB)
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    if (totalSize > 10 * 1024 * 1024) {
+      setErrors(prev => ({
+        ...prev,
+        uploadedFiles: "Tamanho total dos arquivos deve ser no máximo 10MB"
+      }));
+      return;
+    }
+    
+    // Processar arquivos e extrair conteúdo
+    try {
+      let combinedContent = "";
+      
+      for (const file of files) {
+        const content = await readFileContent(file);
+        combinedContent += `\n--- ${file.name} ---\n${content}\n`;
+      }
+      
+      // Atualizar dados do formulário
+      setFormData(prev => ({
+        ...prev,
+        uploadedFiles: files,
+        reviewsData: prev.reviewsData + combinedContent
+      }));
+      
+      // Limpar erros
+      setErrors(prev => ({
+        ...prev,
+        uploadedFiles: ""
+      }));
+      
+    } catch (error) {
+      setErrors(prev => ({
+        ...prev,
+        uploadedFiles: "Erro ao processar arquivos"
+      }));
+    }
+  };
+  
+  // Função para ler conteúdo do arquivo
+  const readFileContent = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string || "");
+      reader.onerror = () => reject(new Error("Erro ao ler arquivo"));
+      reader.readAsText(file);
+    });
+  };
+  
+  // Remover arquivo específico
+  const removeFile = (indexToRemove: number) => {
+    setFormData(prev => ({
+      ...prev,
+      uploadedFiles: prev.uploadedFiles.filter((_, index) => index !== indexToRemove)
+    }));
   };
 
   // Processar listagem
@@ -134,8 +214,8 @@ export default function AmazonListingsOptimizer() {
         longTailKeywords: formData.longTailKeywords,
         features: formData.features,
         targetAudience: formData.targetAudience,
-        reviewsData: reviewsTab === "upload" && formData.uploadedFile 
-          ? `Arquivo CSV carregado: ${formData.uploadedFile.name}` 
+        reviewsData: reviewsTab === "upload" && formData.uploadedFiles.length > 0
+          ? `Arquivos CSV carregados: ${formData.uploadedFiles.map(f => f.name).join(', ')}\n\n${formData.reviewsData}` 
           : formData.reviewsData,
         format: reviewsTab === "upload" ? "csv" : "text"
       };
@@ -174,7 +254,7 @@ export default function AmazonListingsOptimizer() {
     return formData.productName.trim() && 
            formData.category.trim() && 
            formData.keywords.trim() &&
-           ((reviewsTab === "upload" && formData.uploadedFile) ||
+           ((reviewsTab === "upload" && formData.uploadedFiles.length > 0) ||
             (reviewsTab === "manual" && formData.reviewsData.trim()));
   };
 
@@ -188,7 +268,7 @@ export default function AmazonListingsOptimizer() {
       formData.longTailKeywords,
       formData.features,
       formData.targetAudience,
-      reviewsTab === "upload" ? formData.uploadedFile : formData.reviewsData
+      reviewsTab === "upload" ? (formData.uploadedFiles.length > 0 ? "files" : "") : formData.reviewsData
     ].filter(field => field && field.toString().trim()).length;
 
     return { filled: filledFields, total: totalFields };
@@ -392,43 +472,62 @@ export default function AmazonListingsOptimizer() {
                       <Alert>
                         <Info className="h-4 w-4" />
                         <AlertDescription>
-                          Faça upload de um arquivo CSV com avaliações exportadas do Helium10 ou similar.
+                          Faça upload de até 8 arquivos CSV com avaliações exportadas do Helium10 ou similar.
                         </AlertDescription>
                       </Alert>
                       
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
                         <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                         <div className="space-y-2">
-                          <Label htmlFor="csvFile" className="cursor-pointer">
+                          <Label htmlFor="csvFiles" className="cursor-pointer">
                             <span className="text-sm font-medium text-blue-600 hover:text-blue-700">
-                              Clique para selecionar arquivo
+                              Clique para selecionar arquivos
                             </span>
                             <span className="text-sm text-gray-500 ml-1">ou arraste aqui</span>
                           </Label>
                           <Input
-                            id="csvFile"
+                            id="csvFiles"
                             type="file"
                             accept=".csv"
+                            multiple
                             onChange={handleFileUpload}
                             className="hidden"
                           />
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
-                          Apenas arquivos CSV (máx. 10MB)
+                          Até 8 arquivos CSV (máx. 2MB cada, 10MB total)
                         </p>
                       </div>
                       
-                      {formData.uploadedFile && (
-                        <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                          <CheckCircle2 className="w-4 h-4 text-green-600" />
-                          <span className="text-sm text-green-700">
-                            {formData.uploadedFile.name} carregado com sucesso
-                          </span>
+                      {formData.uploadedFiles.length > 0 && (
+                        <div className="space-y-2">
+                          {formData.uploadedFiles.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                <span className="text-sm text-green-700">
+                                  {file.name} ({(file.size / 1024 / 1024).toFixed(2)}MB)
+                                </span>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeFile(index)}
+                                className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
+                              >
+                                ×
+                              </Button>
+                            </div>
+                          ))}
+                          <div className="text-xs text-gray-500 text-center">
+                            Total: {formData.uploadedFiles.length} arquivo(s) - {(formData.uploadedFiles.reduce((sum, file) => sum + file.size, 0) / 1024 / 1024).toFixed(2)}MB
+                          </div>
                         </div>
                       )}
                       
-                      {errors.uploadedFile && (
-                        <p className="text-sm text-red-600">{errors.uploadedFile}</p>
+                      {errors.uploadedFiles && (
+                        <p className="text-sm text-red-600">{errors.uploadedFiles}</p>
                       )}
                     </TabsContent>
                     
