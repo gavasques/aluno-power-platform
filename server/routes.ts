@@ -1812,7 +1812,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Agent not found' });
       }
 
-      // Return mock data structure for now - in production this would come from database
+      // Buscar prompts reais do banco de dados
+      const promptsFromDb = await db.select().from(agentPrompts)
+        .where(eq(agentPrompts.agentId, agentId))
+        .orderBy(asc(agentPrompts.promptType));
+
+      // Converter para formato esperado pela interface
+      const prompts = promptsFromDb.map(prompt => ({
+        id: prompt.promptType,
+        name: getPromptDisplayName(prompt.promptType),
+        description: getPromptDescription(prompt.promptType),
+        currentVersion: {
+          id: prompt.id,
+          version: prompt.version,
+          content: prompt.content,
+          createdAt: prompt.createdAt.toISOString(),
+          createdBy: 'admin',
+          status: prompt.isActive ? 'active' : 'inactive'
+        },
+        versions: [],
+        variables: ['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}'],
+        maxLength: getMaxLength(prompt.promptType)
+      }));
+
+      res.json(prompts);
+    } catch (error) {
+      console.error('Error fetching agent prompts:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Helper functions
+  function getPromptDisplayName(promptType: string): string {
+    const names = {
+      'analysis': 'Análise de Avaliações',
+      'titles': 'Geração de Títulos',
+      'bulletPoints': 'Bullet Points',
+      'description': 'Descrição Completa'
+    };
+    return names[promptType as keyof typeof names] || promptType;
+  }
+
+  function getPromptDescription(promptType: string): string {
+    const descriptions = {
+      'analysis': 'Prompt para análise profunda das avaliações dos concorrentes',
+      'titles': 'Prompt para geração de títulos otimizados',
+      'bulletPoints': 'Prompt para criar bullet points persuasivos',
+      'description': 'Prompt para descrição detalhada do produto'
+    };
+    return descriptions[promptType as keyof typeof descriptions] || '';
+  }
+
+  function getMaxLength(promptType: string): number {
+    const lengths = {
+      'analysis': 3000,
+      'titles': 2000,
+      'bulletPoints': 2500,
+      'description': 2000
+    };
+    return lengths[promptType as keyof typeof lengths] || 2000;
+  }
+
+  // Removed mock data - using database only
       const mockPrompts = [
         {
           id: 'analysis',
@@ -1999,14 +2060,29 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         return res.status(404).json({ error: 'Agent not found' });
       }
 
-      // In production, this would update the database and create a new version
-      const updatedPrompt = {
+      // Atualizar prompt no banco de dados
+      const promptRecordId = `${promptId}-${agentId}`;
+      
+      const [updatedPrompt] = await db.update(agentPrompts)
+        .set({ 
+          content: content,
+          version: sql`${agentPrompts.version} + 1`
+        })
+        .where(eq(agentPrompts.id, promptRecordId))
+        .returning();
+
+      if (!updatedPrompt) {
+        return res.status(404).json({ error: 'Prompt not found' });
+      }
+
+      const response = {
         id: promptId,
         success: true,
-        message: 'Prompt atualizado com sucesso!'
+        message: 'Prompt atualizado com sucesso!',
+        version: updatedPrompt.version
       };
 
-      res.json(updatedPrompt);
+      res.json(response);
     } catch (error) {
       console.error('Error updating agent prompt:', error);
       res.status(500).json({ error: 'Internal server error' });

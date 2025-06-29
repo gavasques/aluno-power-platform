@@ -1,0 +1,48 @@
+Preciso que siga as instruções passo a passo, e faça conforme os passos. 
+
+# PARTE 1
+Vou colocar aqui algumas avaliações de produtos simulares ao meu, mas de meus competidores para que analise a informação de maneira completa.
+
+Após a analise, somente após ela, vá para a parte 2 
+A Análise deve focar nos seguintes pontos:
+<pontos_analise_avaliacoes>
+01 – Características desejadas pelos clientes
+02 – Problemas recorrentes e pontos de cor mencionados nas avaliações negativas
+03 – Identificar a linguagem natural que os clientes usam para descrever suas
+necessidades
+04 – Sugestões para destacar essas características e/ou soluções do listing para
+meu produto.
+</pontos_analise_avaliacoes>
+
+# PARTE 2
+Agora com esses dados, responda:
+
+1. Que pontos de vista interessantes emergem após analisar os dados?
+(Comente tanto aspectos positivos quanto negativos que chamaram a atenção).
+2. Quais são os 5 principais pontos de dor que os clientes experimentam com estes
+produtos? (Enumere-os em ordem de importância segundo a frequência e
+severidade mencionadas nas avaliações).
+3. Quais são os 7 principais benefícios que os clientes destacam? (Por favor,
+enumere-os em ordem de relevância segundo a frequência com que são
+mencionados e a satisfação gerada).
+4. Para qual evento ou ocasião estes produtos são comprados? (Organize as
+ocasiões ou eventos mais comuns segundo as avaliações, como uso diário, esporte,
+viagens, etc.).
+5. Se você tivesse que desenhar O MELHOR [Inserir produto] do planeta, que
+características chave incluiria para transformá-lo em um sucesso de vendas e por
+quê? (Explore materiais, design, funcionalidade e outros aspectos táticos baseados
+na análise).
+6. Que tipo de embalagem você recomendaria e por quê? (Considere
+sustentabilidade, funcionalidade e a experiência do cliente).
+7. Que tipo de material você recomendaria para este produto e por quê? (Leve em
+conta durabilidade, estética, conforto e qualquer outro fator relevante).
+8. Que produtos adicionais pequenos e leves poderíamos incluir para surpreender o
+cliente e melhorar sua experiência? (Também sugira produtos digitais que possam
+aumentar a experiência do cliente após a compra).
+9. Existe algum dado interessante ou tendência que tenha emergido da análise das
+avaliações e que deva conhecer? (Qualquer dado fora do comum ou tendência nas
+preferências do cliente).
+10. Que perguntas importantes eu deveria fazer e provavelmente não estou fazendo?
+(Ajude-me a descobrir aspectos que não considerei em relação ao produto ou à
+experiência do cliente).
+
