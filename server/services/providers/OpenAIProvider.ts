@@ -69,7 +69,7 @@ export class OpenAIProvider extends BaseProvider {
     try {
       const response = await this.client.images.edit({
         model: 'gpt-image-1',
-        image: files[0], // Use the first image file
+        image: files,
         prompt: prompt,
         n: 1,
         size: 'auto',
@@ -180,10 +180,7 @@ export class OpenAIProvider extends BaseProvider {
   }
 
   private async storeGeneratedImage(imageUrl: string, prompt: string, model: string): Promise<void> {
-    if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.length < 50) {
-      console.log('Warning: Invalid image URL provided to storeGeneratedImage');
-      return;
-    }
+    if (imageUrl.length < 100) return;
     
     try {
       await db.insert(generatedImages).values({
