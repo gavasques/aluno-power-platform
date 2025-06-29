@@ -42,7 +42,7 @@ import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments } from '@shared/schema';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema } from '@shared/schema';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -2616,6 +2616,236 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       });
     } catch (error: any) {
       console.error('Erro ao buscar sessões do usuário:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Amazon Listing Optimizer Routes - Sistema de 2 etapas conforme especificação
+  
+  // Criar nova sessão Amazon Listing
+  app.post('/api/amazon-sessions', async (req, res) => {
+    try {
+      const { idUsuario } = req.body;
+      
+      if (!idUsuario) {
+        return res.status(400).json({ 
+          error: 'idUsuario é obrigatório' 
+        });
+      }
+
+      const session = await amazonService.createSession(idUsuario);
+      
+      res.status(201).json({
+        success: true,
+        session: {
+          id: session.id,
+          sessionHash: session.sessionHash,
+          idUsuario: session.idUsuario,
+          status: session.status,
+          currentStep: session.currentStep,
+          dataHoraCreated: session.dataHoraCreated
+        }
+      });
+    } catch (error: any) {
+      console.error('Erro ao criar sessão Amazon:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Salvar dados do produto na sessão
+  app.put('/api/amazon-sessions/:sessionId/data', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const productData = req.body;
+      
+      // Validar dados obrigatórios conforme especificação
+      const requiredFields = ['nomeProduto', 'marca', 'categoria', 'keywords', 'reviewsData'];
+      const missingFields = requiredFields.filter(field => !productData[field]);
+      
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          error: `Campos obrigatórios ausentes: ${missingFields.join(', ')}`
+        });
+      }
+
+      const session = await amazonService.updateSessionData(sessionId, productData);
+      
+      res.json({
+        success: true,
+        message: 'Dados salvos com sucesso',
+        session: {
+          id: session.id,
+          sessionHash: session.sessionHash,
+          status: session.status,
+          currentStep: session.currentStep
+        }
+      });
+    } catch (error: any) {
+      console.error('Erro ao salvar dados da sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Processar Etapa 1: Análise de Avaliações
+  app.post('/api/amazon-sessions/:sessionId/process-step1', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      // Notificar clientes sobre início do processamento
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 1,
+        status: 'processing',
+        message: 'Iniciando análise das avaliações...'
+      });
+
+      const result = await amazonService.processStep1_AnalysisReviews(sessionId);
+      
+      // Notificar clientes sobre conclusão
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 1,
+        status: 'completed',
+        message: 'Análise das avaliações concluída'
+      });
+      
+      res.json({
+        success: true,
+        step: 1,
+        status: 'completed',
+        result: result
+      });
+    } catch (error: any) {
+      console.error('Erro na Etapa 1:', error);
+      
+      // Notificar erro
+      broadcastNotification('amazon_processing', {
+        sessionId: req.params.sessionId,
+        step: 1,
+        status: 'error',
+        message: error.message
+      });
+      
+      res.status(500).json({ 
+        error: error.message || 'Erro no processamento da Etapa 1' 
+      });
+    }
+  });
+
+  // Processar Etapa 2: Gerar Títulos
+  app.post('/api/amazon-sessions/:sessionId/process-step2', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      // Notificar clientes sobre início do processamento
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 2,
+        status: 'processing',
+        message: 'Gerando títulos otimizados...'
+      });
+
+      const result = await amazonService.processStep2_GenerateTitles(sessionId);
+      
+      // Notificar clientes sobre conclusão
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 2,
+        status: 'completed',
+        message: 'Títulos gerados com sucesso'
+      });
+      
+      res.json({
+        success: true,
+        step: 2,
+        status: 'completed',
+        result: result
+      });
+    } catch (error: any) {
+      console.error('Erro na Etapa 2:', error);
+      
+      // Notificar erro
+      broadcastNotification('amazon_processing', {
+        sessionId: req.params.sessionId,
+        step: 2,
+        status: 'error',
+        message: error.message
+      });
+      
+      res.status(500).json({ 
+        error: error.message || 'Erro no processamento da Etapa 2' 
+      });
+    }
+  });
+
+  // Abortar processamento
+  app.post('/api/amazon-sessions/:sessionId/abort', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      await amazonService.abortProcessing(sessionId);
+      
+      // Notificar clientes sobre abort
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        status: 'aborted',
+        message: 'Processamento abortado pelo usuário'
+      });
+      
+      res.json({
+        success: true,
+        message: 'Processamento abortado com sucesso'
+      });
+    } catch (error: any) {
+      console.error('Erro ao abortar processamento:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Buscar sessão e resultados
+  app.get('/api/amazon-sessions/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const session = await amazonService.getSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+
+      res.json({
+        success: true,
+        session: session
+      });
+    } catch (error: any) {
+      console.error('Erro ao buscar sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Download dos resultados em TXT
+  app.get('/api/amazon-sessions/:sessionId/download', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const session = await amazonService.getSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+
+      if (!session.reviewsInsight || !session.titulos) {
+        return res.status(400).json({ 
+          error: 'Processamento ainda não concluído' 
+        });
+      }
+
+      const content = amazonService.generateDownloadContent(session);
+      const filename = `amazon-listing-${session.sessionHash}.txt`;
+      
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(content);
+    } catch (error: any) {
+      console.error('Erro ao gerar download:', error);
       res.status(500).json({ error: 'Erro interno do servidor' });
     }
   });
