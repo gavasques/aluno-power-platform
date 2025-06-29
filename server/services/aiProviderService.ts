@@ -310,23 +310,30 @@ export class AIProviderService {
             if (request.referenceImages && request.referenceImages.length > 0) {
               console.log(`📸 Usando /images/edits com ${request.referenceImages.length} imagens de referência`);
               
-              // Preparar array de imagens para o endpoint /images/edits
-              const imageFiles = request.referenceImages.map((img) => {
-                const imageBuffer = Buffer.from(img.data, 'base64');
-                console.log(`📁 Preparando imagem: ${img.filename || 'image.png'} (${imageBuffer.length} bytes)`);
-                return imageBuffer;
-              });
+              // Usar apenas a primeira imagem, pois o endpoint /images/edits aceita uma imagem base
+              // As outras imagens serão incluídas no contexto do prompt
+              const mainImageBuffer = Buffer.from(request.referenceImages[0].data, 'base64');
+              const additionalImages = request.referenceImages.slice(1);
               
-              console.log(`🔧 Enviando ${imageFiles.length} imagens para /images/edits (total: ${imageFiles.reduce((sum, buf) => sum + buf.length, 0)} bytes)`);
+              let enhancedPrompt = prompt;
+              if (additionalImages.length > 0) {
+                enhancedPrompt += `\n\nUse a primeira imagem como base e considere as outras ${additionalImages.length} imagens como referência para composição, cores e elementos.`;
+              }
+              
+              console.log(`📁 Imagem base: ${request.referenceImages[0].filename || 'image.png'} (${mainImageBuffer.length} bytes)`);
+              console.log(`🔧 Prompt aprimorado com ${additionalImages.length} imagens adicionais no contexto`);
+              
+              // Usar toFile para converter o Buffer corretamente
+              const { toFile } = await import('openai');
+              const imageFile = toFile(mainImageBuffer, request.referenceImages[0].filename || 'image.png');
               
               const response = await this.openai.images.edit({
                 model: 'gpt-image-1',
-                image: imageFiles,
-                prompt: prompt,
+                image: imageFile,
+                prompt: enhancedPrompt,
                 n: 1,
-                output_format: 'png',
-                quality: 'high',
-                size: 'auto'
+                size: 'auto',
+                quality: 'high'
               });
               
               console.log('✅ Resposta do /images/edits:', {
