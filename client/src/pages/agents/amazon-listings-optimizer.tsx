@@ -107,7 +107,11 @@ export default function AmazonListingsOptimizer() {
         const response = await fetch('/api/departments');
         if (response.ok) {
           const data = await response.json();
-          setDepartments(data);
+          // Ordenar departamentos por nome (A-Z)
+          const sortedDepartments = data.sort((a: Department, b: Department) => 
+            a.name.localeCompare(b.name, 'pt-BR')
+          );
+          setDepartments(sortedDepartments);
         }
       } catch (error) {
         console.error('Erro ao carregar departamentos:', error);
