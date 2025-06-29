@@ -108,17 +108,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: ✅ Sistema completo de variáveis e prompt de análise otimizado para Amazon Listing Optimizer
-  - **Variáveis Universais**: Todas as abas (análise, títulos, bullet points, descrição) agora mostram as mesmas variáveis
-  - **Tags Disponíveis**: {{PRODUCT_NAME}}, {{KEYWORDS}}, {{LONG_TAIL_KEYWORDS}}, {{FEATURES}}, {{TARGET_AUDIENCE}}, {{REVIEWS_DATA}}, {{CATEGORY}}
-  - **Prompt de Análise Atualizado**: Sistema estruturado de 10 perguntas estratégicas para análise profunda
-    - Parte 1: Análise focada em características, problemas, linguagem natural e sugestões
-    - Parte 2: 10 questões específicas sobre dores, benefícios, ocasiões de uso, design ideal, embalagem, materiais, produtos adicionais e tendências
-  - **Dropdown Ordenado**: Categorias da tabela departments em ordem alfabética (A-Z)
-  - **Sistema de Tags Expandido**: Geração automática de todas as variáveis baseadas nos campos preenchidos
-  - **Interface Consistente**: Mesmas variáveis disponíveis em todos os prompts para máxima flexibilidade
-
-- **June 29, 2025 (anterior)**: ✅ Sistema completo de IA + implementação avançada de sessões para Amazon Listing Optimizer
+- **June 29, 2025**: ✅ Sistema completo de IA + implementação avançada de sessões para Amazon Listing Optimizer
   - **Provedores de IA**: 19 modelos funcionais em 4 provedores (OpenAI, Anthropic, Gemini, DeepSeek)
   - **Sistema de Sessões**: Implementação completa seguindo princípios SOLID
     - Tabelas: agent_sessions, agent_session_files com relações e índices otimizados
