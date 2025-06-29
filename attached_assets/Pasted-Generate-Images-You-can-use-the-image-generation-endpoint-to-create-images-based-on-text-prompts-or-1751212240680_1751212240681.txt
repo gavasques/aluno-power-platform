@@ -1,0 +1,130 @@
+Generate Images
+You can use the image generation endpoint to create images based on text prompts, or the image generation tool in the Responses API to generate images as part of a conversation.
+
+To learn more about customizing the output (size, quality, format, transparency), refer to the customize image output section below.
+
+You can set the n parameter to generate multiple images at once in a single request (by default, the API returns a single image).
+
+
+Responses API
+
+Image API
+Generate an image
+from openai import OpenAI
+import base64
+
+client = OpenAI() 
+
+response = client.responses.create(
+    model="gpt-4.1-mini",
+    input="Generate an image of gray tabby cat hugging an otter with an orange scarf",
+    tools=[{"type": "image_generation"}],
+)
+
+# Save the image to a file
+image_data = [
+    output.result
+    for output in response.output
+    if output.type == "image_generation_call"
+]
+    
+if image_data:
+    image_base64 = image_data[0]
+    with open("otter.png", "wb") as f:
+        f.write(base64.b64decode(image_base64))
+Multi-turn image generation
+With the Responses API, you can build multi-turn conversations involving image generation either by providing image generation calls outputs within context (you can also just use the image ID), or by using the previous_response_id parameter. This makes it easy to iterate on images across multiple turns—refining prompts, applying new instructions, and evolving the visual output as the conversation progresses.
+
+
+Using previous response ID
+
+Using image ID
+Multi-turn image generation
+from openai import OpenAI
+import base64
+
+client = OpenAI()
+
+response = client.responses.create(
+    model="gpt-4.1-mini",
+    input="Generate an image of gray tabby cat hugging an otter with an orange scarf",
+    tools=[{"type": "image_generation"}],
+)
+
+image_data = [
+    output.result
+    for output in response.output
+    if output.type == "image_generation_call"
+]
+
+if image_data:
+    image_base64 = image_data[0]
+
+    with open("cat_and_otter.png", "wb") as f:
+        f.write(base64.b64decode(image_base64))
+
+
+# Follow up
+
+response_fwup = client.responses.create(
+    model="gpt-4.1-mini",
+    previous_response_id=response.id,
+    input="Now make it look realistic",
+    tools=[{"type": "image_generation"}],
+)
+
+image_data_fwup = [
+    output.result
+    for output in response_fwup.output
+    if output.type == "image_generation_call"
+]
+
+if image_data_fwup:
+    image_base64 = image_data_fwup[0]
+    with open("cat_and_otter_realistic.png", "wb") as f:
+        f.write(base64.b64decode(image_base64))
+Result
+"Generate an image of gray tabby cat hugging an otter with an orange scarf"	A cat and an otter
+"Now make it look realistic"	A cat and an otter
+Streaming
+The Responses API also supports streaming image generation. This allows you to stream partial images as they are generated, providing a more interactive experience.
+
+You can adjust the partial_images parameter to receive 1-3 partial images.
+
+Stream an image
+from openai import OpenAI
+import base64
+
+client = OpenAI()
+
+stream = client.responses.create(
+    model="gpt-4.1",
+    input="Draw a gorgeous image of a river made of white owl feathers, snaking its way through a serene winter landscape",
+    stream=True,
+    tools=[{"type": "image_generation", "partial_images": 2}],
+)
+
+for event in stream:
+    if event.type == "response.image_generation_call.partial_image":
+        idx = event.partial_image_index
+        image_base64 = event.partial_image_b64
+        image_bytes = base64.b64decode(image_base64)
+        with open(f"river{idx}.png", "wb") as f:
+            f.write(image_bytes)
+Result
+Partial 1	Partial 2	Final image
+1st partial	2nd partial	3rd partial
+Prompt: Draw a gorgeous image of a river made of white owl feathers, snaking its way through a serene winter landscape
+
+Revised prompt
+When using the image generation tool in the Responses API, the mainline model (e.g. gpt-4.1) will automatically revise your prompt for improved performance.
+
+You can access the revised prompt in the revised_prompt field of the image generation call:
+
+{
+  "id": "ig_123",
+  "type": "image_generation_call",
+  "status": "completed",
+  "revised_prompt": "A gray tabby cat hugging an otter. The otter is wearing an orange scarf. Both animals are cute and friendly, depicted in a warm, heartwarming style.",
+  "result": "..."
+}

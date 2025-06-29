@@ -50,13 +50,21 @@ export class OpenAIProvider extends BaseProvider {
   }
 
   private async handleImageGeneration(request: AIRequest, modelConfig: ModelConfig, prompt: string): Promise<AIResponse> {
-    if (!request.referenceImages?.length) {
-      throw new Error('gpt-image-1 requires reference images');
-    }
-
-    console.log(`Processing ${request.referenceImages.length} reference images with gpt-image-1`);
+    // Two modes for gpt-image-1:
+    // 1. Edit mode: When reference images are provided
+    // 2. Generation mode: When no reference images (uses Responses API)
     
-    const { files, cleanup } = await ImageProcessor.processMultipleImages(request.referenceImages);
+    if (request.referenceImages?.length) {
+      return this.handleImageEdit(request, modelConfig, prompt);
+    } else {
+      return this.handleImageCreation(request, modelConfig, prompt);
+    }
+  }
+
+  private async handleImageEdit(request: AIRequest, modelConfig: ModelConfig, prompt: string): Promise<AIResponse> {
+    console.log(`🖼️ [OPENAI] Edit mode: Processing ${request.referenceImages!.length} reference images with gpt-image-1`);
+    
+    const { files, cleanup } = await ImageProcessor.processMultipleImages(request.referenceImages!);
     
     try {
       const response = await this.client.images.edit({
@@ -69,13 +77,13 @@ export class OpenAIProvider extends BaseProvider {
       });
 
       const imageUrl = ImageProcessor.validateImageResponse(response);
-      const content = `Image generated using ${request.referenceImages.length} reference images with GPT-Image-1!\n\nPrompt: ${prompt}\n\nURL: ${imageUrl}`;
+      const content = `Image edited using ${request.referenceImages!.length} reference images with GPT-Image-1!\n\nPrompt: ${prompt}\n\nURL: ${imageUrl}`;
       
       const inputTokens = this.countTokens(prompt);
       const outputTokens = 1;
       const cost = this.calculateCost(inputTokens, outputTokens, modelConfig);
       
-      await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
+      await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1-edit');
       
       return {
         content,
@@ -84,6 +92,46 @@ export class OpenAIProvider extends BaseProvider {
       };
     } finally {
       cleanup();
+    }
+  }
+
+  private async handleImageCreation(request: AIRequest, modelConfig: ModelConfig, prompt: string): Promise<AIResponse> {
+    console.log(`🎨 [OPENAI] Generation mode: Creating image with gpt-image-1 via Responses API`);
+    
+    try {
+      const response = await this.client.responses.create({
+        model: 'gpt-4.1-mini',
+        input: prompt,
+        tools: [{ type: 'image_generation' }]
+      });
+
+      // Extract image data from response
+      const imageData = response.output
+        .filter((output: any) => output.type === 'image_generation_call')
+        .map((output: any) => output.result);
+
+      if (!imageData.length) {
+        throw new Error('No image generated from Responses API');
+      }
+
+      const imageBase64 = imageData[0];
+      const imageUrl = `data:image/png;base64,${imageBase64}`;
+      const content = `Image created with GPT-Image-1!\n\nPrompt: ${prompt}\n\nURL: ${imageUrl}`;
+      
+      const inputTokens = this.countTokens(prompt);
+      const outputTokens = 1;
+      const cost = this.calculateCost(inputTokens, outputTokens, modelConfig);
+      
+      await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1-create');
+      
+      return {
+        content,
+        usage: { inputTokens, outputTokens, totalTokens: inputTokens + outputTokens },
+        cost
+      };
+    } catch (error) {
+      console.error('❌ [OPENAI] Error in image creation mode:', error);
+      throw error;
     }
   }
 

@@ -108,7 +108,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: ✅ Atualização dos modelos OpenAI conforme nova documentação
+- **June 29, 2025**: ✅ Implementação completa de dois modos para gpt-image-1
+  - Modo Edição: Com imagens de referência usa /images/edit endpoint
+  - Modo Criação: Sem imagens usa novo Responses API com image_generation tool
+  - Detecção automática do modo baseado na presença de referenceImages
+  - Logs detalhados distinguindo entre "Edit mode" e "Generation mode"
+  - Armazenamento diferenciado: gpt-image-1-edit vs gpt-image-1-create
+  - Sistema completo suportando ambos os casos de uso do gpt-image-1
+
+- **June 29, 2025 (anterior)**: ✅ Atualização dos modelos OpenAI conforme nova documentação
   - Removidos modelos: o1-preview, o1-mini, o3-pro (problemas de endpoint)
   - Adicionado modelo: o3 ($20/$80 por 1M tokens)
   - Corrigido GPT-4o: limitação automática de temperatura máxima 1.0
