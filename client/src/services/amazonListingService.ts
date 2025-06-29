@@ -10,12 +10,11 @@ class AmazonListingService {
 
   // Session Management
   async createSession(userId: string): Promise<AmazonListingSession> {
-    const response = await fetch(`${this.baseUrl}/sessions`, {
+    const response = await fetch(`${this.baseUrl}/amazon-sessions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        userId, 
-        agentType: 'amazon-listing-optimizer' 
+        idUsuario: userId
       })
     });
 
@@ -28,10 +27,10 @@ class AmazonListingService {
   }
 
   async updateSession(sessionId: string, formData: AmazonListingFormData): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/sessions/${sessionId}`, {
+    const response = await fetch(`${this.baseUrl}/amazon-sessions/${sessionId}/data`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ inputData: formData })
+      body: JSON.stringify(formData)
     });
 
     if (!response.ok) {
@@ -48,7 +47,7 @@ class AmazonListingService {
       }))
     );
 
-    const response = await fetch(`${this.baseUrl}/sessions/${sessionId}/files/process`, {
+    const response = await fetch(`${this.baseUrl}/amazon-sessions/${sessionId}/files/process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ files: filesData })
@@ -62,19 +61,71 @@ class AmazonListingService {
     return data.combinedContent;
   }
 
-  // AI Processing
-  async processListing(formData: AmazonListingFormData): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/agents/amazon-listings-optimizer/process`, {
+  // AI Processing - Two Step Process
+  async processStep1(sessionId: string): Promise<any> {
+    const response = await fetch(`${this.baseUrl}/amazon-sessions/${sessionId}/step1`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      headers: { 'Content-Type': 'application/json' }
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to process listing: ${response.statusText}`);
+      throw new Error(`Failed to process step 1: ${response.statusText}`);
     }
 
     return response.json();
+  }
+
+  async processStep2(sessionId: string): Promise<any> {
+    const response = await fetch(`${this.baseUrl}/amazon-sessions/${sessionId}/step2`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to process step 2: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  async abortProcessing(sessionId: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/amazon-sessions/${sessionId}/abort`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to abort processing: ${response.statusText}`);
+    }
+  }
+
+  async getSession(sessionId: string): Promise<AmazonListingSession> {
+    const response = await fetch(`${this.baseUrl}/amazon-sessions/${sessionId}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to get session: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.session;
+  }
+
+  async downloadResults(sessionId: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/amazon-sessions/${sessionId}/download`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to download results: ${response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `amazon-listing-results.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   }
 
   // Data Fetching
