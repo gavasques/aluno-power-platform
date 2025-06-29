@@ -39,6 +39,7 @@ import { youtubeService } from "./services/youtubeService";
 import { openaiService } from "./services/openaiService";
 import { aiProviderService } from "./services/aiProviderService";
 import { SessionService } from "./services/sessionService";
+import { amazonListingService as amazonService } from "./services/amazonListingService";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
 import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments } from '@shared/schema';

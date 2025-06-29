@@ -2,8 +2,7 @@ import { eq, desc } from "drizzle-orm";
 import { db } from "../db";
 import { amazonListingSessions, agents } from "@shared/schema";
 import type { InsertAmazonListingSession, AmazonListingSession } from "@shared/schema";
-import { openAIService } from "./openaiService";
-import { v4 as uuidv4 } from 'uuid';
+import { aiProviderService } from "./aiProviderService";
 
 export class AmazonListingService {
   // Criar nova sessão
@@ -67,13 +66,16 @@ export class AmazonListingService {
 
       if (!agent) throw new Error('Agente Amazon Listings não encontrado');
 
-      // Enviar para IA
-      const response = await openAIService.generateCompletion({
-        model: agent.model,
-        prompt: prompt,
-        maxTokens: parseInt(agent.maxTokens.toString()),
-        temperature: parseFloat(agent.temperature.toString())
-      });
+      // Enviar para IA usando aiProviderService
+      const response = await aiProviderService.generateText(
+        agent.provider as any,
+        agent.model,
+        prompt,
+        {
+          maxTokens: parseInt(agent.maxTokens.toString()),
+          temperature: parseFloat(agent.temperature.toString())
+        }
+      );
 
       const analysisResult = response.content;
 
@@ -123,12 +125,15 @@ export class AmazonListingService {
       if (!agent) throw new Error('Agente Amazon Listings não encontrado');
 
       // Enviar para IA
-      const response = await openAIService.generateCompletion({
-        model: agent.model,
-        prompt: prompt,
-        maxTokens: parseInt(agent.maxTokens.toString()),
-        temperature: parseFloat(agent.temperature.toString())
-      });
+      const response = await aiProviderService.generateCompletion(
+        agent.provider as any,
+        agent.model,
+        prompt,
+        {
+          maxTokens: parseInt(agent.maxTokens.toString()),
+          temperature: parseFloat(agent.temperature.toString())
+        }
+      );
 
       const titlesResult = response.content;
 
