@@ -2056,7 +2056,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
   app.get('/api/ai-providers/models', async (req, res) => {
     try {
-      const models = aiProviderService.getAvailableModels();
+      const models = aiProviderService.getAllModels();
       res.json(models);
     } catch (error) {
       console.error('Error getting available models:', error);
@@ -2130,7 +2130,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.log(`🚀 [AI_TEST_SEND] RequestID: ${requestId} - Sending to AI service`);
       const aiStartTime = Date.now();
 
-      const testResponse = await aiProviderService.generateCompletion(requestData);
+      const testResponse = await aiProviderService.generateResponse(requestData);
 
       const aiDuration = Date.now() - aiStartTime;
       console.log(`✅ [AI_TEST_RESPONSE] RequestID: ${requestId} - AI service responded in ${aiDuration}ms`);
