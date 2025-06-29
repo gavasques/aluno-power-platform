@@ -606,14 +606,6 @@ export default function AmazonListingsOptimizer() {
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-gray-600">
                 <div className="flex justify-between">
-                  <span>Modelo:</span>
-                  <span className="font-medium">GPT-4</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Custo por 1k tokens:</span>
-                  <span className="font-medium">$0.030</span>
-                </div>
-                <div className="flex justify-between">
                   <span>Tempo médio:</span>
                   <span className="font-medium">2-5 min</span>
                 </div>
