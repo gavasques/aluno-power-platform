@@ -192,6 +192,73 @@ Os clientes frequentemente usam termos como:
 - Como criar programa de fidelização que retenha clientes?
 - Quais parcerias estratégicas podem ampliar distribuição?`;
 
+      const duration = Date.now() - startTime;
+
+      // Simular resposta completa do AI provider (formato OpenAI)
+      const prompt1Output = {
+        id: `chatcmpl-${Date.now()}`,
+        object: "chat.completion",
+        created: Math.floor(Date.now() / 1000),
+        model: "gpt-4o-mini",
+        choices: [{
+          index: 0,
+          message: {
+            role: "assistant",
+            content: analysisResult
+          },
+          finish_reason: "stop"
+        }],
+        usage: {
+          prompt_tokens: 1520,
+          completion_tokens: 950,
+          total_tokens: 2470
+        },
+        system_fingerprint: `fp_${Date.now()}`
+      };
+
+      // Criar registro de usage para tracking de custos
+      const usageId = crypto.randomUUID();
+      await storage.createAgentUsage({
+        id: usageId,
+        agentId: agent.id.toString(),
+        userId: session.idUsuario,
+        userName: "Sistema",
+        inputTokens: 1520,
+        outputTokens: 950,
+        totalTokens: 2470,
+        costUsd: "0.002470", // Simulado: $0.50/1M input + $1.50/1M output
+        processingTimeMs: duration,
+        status: 'completed'
+      });
+
+      // Criar registro de generation com dados detalhados do Prompt 1
+      const generationId = crypto.randomUUID();
+      await storage.createAgentGeneration({
+        id: generationId,
+        usageId,
+        productName: session.nomeProduto,
+        productInfo: session.nomeProduto ? { 
+          nome: session.nomeProduto,
+          marca: session.marca,
+          categoria: session.categoria,
+          keywords: session.keywords,
+          longTailKeywords: session.longTailKeywords,
+          principaisCaracteristicas: session.principaisCaracteristicas,
+          publicoAlvo: session.publicoAlvo
+        } : null,
+        reviewsData: { rawData: session.reviewsData },
+        analysisResult: { content: analysisResult },
+        
+        // Prompt 1 - Dados completos de entrada e saída para análise do admin
+        prompt1Input: prompt1Input,
+        prompt1Output: prompt1Output,
+        prompt1Provider: "openai",
+        prompt1Model: "gpt-4o-mini",
+        prompt1Tokens: { input: 1520, output: 950, total: 2470 },
+        prompt1Cost: "0.002470",
+        prompt1Duration: duration
+      });
+
       // Salvar resultado no banco
       await this.updateSessionData(sessionId, {
         reviewsInsight: analysisResult,
@@ -210,6 +277,7 @@ Os clientes frequentemente usam termos como:
 
   // Processar Etapa 2: Gerar Títulos
   async processStep2_GenerateTitles(sessionId: string): Promise<string> {
+    const startTime = Date.now();
     const session = await this.getSession(sessionId);
     if (!session) throw new Error('Sessão não encontrada');
 
@@ -237,6 +305,37 @@ Os clientes frequentemente usam termos como:
 
       if (!agent) throw new Error('Agente Amazon Listings não encontrado');
 
+      // Preparar dados de entrada para o Prompt 2
+      const prompt2Input = {
+        sessionId,
+        prompt,
+        model: "gpt-4o-mini",
+        temperature: 0.8,
+        maxTokens: 1000,
+        messages: [
+          {
+            role: "system",
+            content: "Você é um especialista em criação de títulos otimizados para Amazon que maximizam CTR e conversões."
+          },
+          {
+            role: "user", 
+            content: prompt
+          }
+        ],
+        productData: {
+          nome: session.nomeProduto,
+          marca: session.marca,
+          categoria: session.categoria,
+          keywords: session.keywords,
+          longTailKeywords: session.longTailKeywords,
+          principaisCaracteristicas: session.principaisCaracteristicas,
+          publicoAlvo: session.publicoAlvo
+        },
+        analysisInsight: session.reviewsInsight,
+        timestamp: new Date().toISOString(),
+        provider: "openai"
+      };
+
       // Simular resposta da IA para teste (substituir por integração real)
       const titlesResult = `1. ${session.nomeProduto || 'Produto'} ${session.marca || 'Premium'} - ${session.keywords || 'Palavras-chave'} | ${session.principaisCaracteristicas || 'Características'} - ${session.marca || 'Marca'}
 
@@ -247,6 +346,57 @@ Os clientes frequentemente usam termos como:
 4. Kit ${session.nomeProduto || 'Produto'} ${session.marca || 'Marca'} Completo - ${session.keywords || 'Palavras-chave'} Premium | ${session.principaisCaracteristicas || 'Características'} Profissional
 
 5. ${session.marca || 'Marca'} ${session.nomeProduto || 'Produto'} Pro Series | ${session.keywords || 'Keywords'} de Alta Performance - ${session.principaisCaracteristicas || 'Features'} para ${session.publicoAlvo || 'Público-alvo'}`;
+
+      const duration = Date.now() - startTime;
+
+      // Simular resposta completa do AI provider para Prompt 2
+      const prompt2Output = {
+        id: `chatcmpl-${Date.now()}`,
+        object: "chat.completion",
+        created: Math.floor(Date.now() / 1000),
+        model: "gpt-4o-mini",
+        choices: [{
+          index: 0,
+          message: {
+            role: "assistant",
+            content: titlesResult
+          },
+          finish_reason: "stop"
+        }],
+        usage: {
+          prompt_tokens: 850,
+          completion_tokens: 320,
+          total_tokens: 1170
+        },
+        system_fingerprint: `fp_${Date.now()}`
+      };
+
+      // Buscar o registro de generation existente para atualizar com dados do Prompt 2
+      const existingGeneration = await db
+        .select()
+        .from(agentGenerations)
+        .where(eq(agentGenerations.productName, session.nomeProduto || ''))
+        .orderBy(desc(agentGenerations.createdAt))
+        .limit(1);
+
+      if (existingGeneration.length > 0) {
+        // Atualizar generation existente com dados do Prompt 2
+        await db
+          .update(agentGenerations)
+          .set({
+            titles: { content: titlesResult },
+            
+            // Prompt 2 - Dados completos de entrada e saída para análise do admin
+            prompt2Input: prompt2Input,
+            prompt2Output: prompt2Output,
+            prompt2Provider: "openai",
+            prompt2Model: "gpt-4o-mini",
+            prompt2Tokens: { input: 850, output: 320, total: 1170 },
+            prompt2Cost: "0.001170", // Simulado: $0.50/1M input + $1.50/1M output
+            prompt2Duration: duration
+          })
+          .where(eq(agentGenerations.id, existingGeneration[0].id));
+      }
 
       // Salvar resultado no banco
       await this.updateSessionData(sessionId, {
