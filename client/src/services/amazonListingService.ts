@@ -27,10 +27,22 @@ class AmazonListingService {
   }
 
   async updateSession(sessionId: string, formData: AmazonListingFormData): Promise<void> {
+    // Map English field names to Portuguese for backend compatibility
+    const mappedData = {
+      nomeProduto: formData.productName,
+      marca: formData.brand,
+      categoria: formData.category,
+      keywords: formData.keywords,
+      longTailKeywords: formData.longTailKeywords,
+      principaisCaracteristicas: formData.features,
+      publicoAlvo: formData.targetAudience,
+      reviewsData: formData.reviewsData
+    };
+
     const response = await fetch(`${this.baseUrl}/amazon-sessions/${sessionId}/data`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(mappedData)
     });
 
     if (!response.ok) {
@@ -150,20 +162,7 @@ class AmazonListingService {
     });
   }
 
-  // Export functionality
-  downloadResults(analysis: string, titles: string, filename: string = 'amazon-listing-results'): void {
-    const content = `ANÁLISE DAS AVALIAÇÕES\n\n${analysis}\n\n\nTÍTULOS GERADOS\n\n${titles}`;
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${filename}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
+
 }
 
 export const amazonListingService = new AmazonListingService();

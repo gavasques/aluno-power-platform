@@ -132,7 +132,13 @@ export default function AmazonListingsOptimizer() {
     setIsProcessing(true);
 
     try {
-      await amazonListingService.processListing(finalFormData);
+      // Update session with form data first
+      await updateSessionData(finalFormData);
+      
+      // Then start the 2-step processing
+      await amazonListingService.processStep1(session!.id);
+      await amazonListingService.processStep2(session!.id);
+      
       navigate('/agents/amazon-listings-optimizer/result');
     } catch (error) {
       console.error('Error processing listing:', error);
