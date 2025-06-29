@@ -42,7 +42,7 @@ import AgentsPage from "./pages/agents";
 import AgentProcessorPage from "./pages/AgentProcessorPage";
 import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
 import AmazonListingsOptimizerResult from "./pages/agents/amazon-listings-optimizer-result";
-import AmazonListingsOptimizerPrompts from "./pages/admin/agents/AmazonListingsOptimizerPrompts";
+
 import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
 import GeneratedImages from "./pages/admin/GeneratedImages";
 import TestImagePage from "./components/TestImagePage";
@@ -194,11 +194,7 @@ function App() {
                             </AdminLayout>
                           </Route>
                           
-                          <Route path="/admin/agents/amazon-listings-optimizer/prompts">
-                            <AdminLayout>
-                              <AmazonListingsOptimizerPrompts />
-                            </AdminLayout>
-                          </Route>
+
                           
                           <Route path="/admin/usuarios">
                             <AdminLayout>

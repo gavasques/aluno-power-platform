@@ -1761,47 +1761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Agent Prompts routes
-  app.get('/api/agents/:agentId/prompts', async (req, res) => {
-    try {
-      const prompts = await storage.getAgentPrompts(req.params.agentId);
-      res.json(prompts);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch agent prompts' });
-    }
-  });
 
-  app.post('/api/agents/:agentId/prompts', async (req, res) => {
-    try {
-      const validatedData = insertAgentPromptSchema.parse({
-        ...req.body,
-        agentId: req.params.agentId
-      });
-      const prompt = await storage.createAgentPrompt(validatedData);
-      res.status(201).json(prompt);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid prompt data' });
-    }
-  });
-
-  app.put('/api/agent-prompts/:id', async (req, res) => {
-    try {
-      const validatedData = insertAgentPromptSchema.partial().parse(req.body);
-      const prompt = await storage.updateAgentPrompt(req.params.id, validatedData);
-      res.json(prompt);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid prompt data' });
-    }
-  });
-
-  app.delete('/api/agent-prompts/:id', async (req, res) => {
-    try {
-      await storage.deleteAgentPrompt(req.params.id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete prompt' });
-    }
-  });
 
   // Admin prompts management endpoints
   app.get('/api/agent-prompts/:agentId', async (req, res) => {
