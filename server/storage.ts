@@ -33,6 +33,8 @@ import {
   agentPrompts,
   agentUsage,
   agentGenerations,
+  agentSessions,
+  agentSessionFiles,
   generatedImages,
   type User, 
   type InsertUser,
@@ -103,7 +105,12 @@ import {
   type InsertAgentGeneration,
   type AgentWithPrompts,
   type GeneratedImage,
-  type InsertGeneratedImage
+  type InsertGeneratedImage,
+  type AgentSession,
+  type InsertAgentSession,
+  type AgentSessionFile,
+  type InsertAgentSessionFile,
+  type AgentSessionWithFiles
 } from "@shared/schema";
 import { db } from "./db";
 
@@ -351,6 +358,16 @@ export interface IStorage {
 
   // Agent Generations
   createAgentGeneration(generation: InsertAgentGeneration): Promise<AgentGeneration>;
+
+  // Agent Sessions
+  createAgentSession(session: InsertAgentSession): Promise<AgentSession>;
+  getAgentSessionByHash(sessionHash: string): Promise<AgentSessionWithFiles | null>;
+  updateAgentSession(id: string, updates: Partial<InsertAgentSession>): Promise<AgentSession>;
+  getUserAgentSessions(userId: string, agentType?: string, status?: string): Promise<AgentSession[]>;
+
+  // Agent Session Files
+  createAgentSessionFile(file: InsertAgentSessionFile): Promise<AgentSessionFile>;
+  getAgentSessionFiles(sessionId: string): Promise<AgentSessionFile[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2071,6 +2088,85 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return created;
+  }
+
+  // Agent Sessions
+  async createAgentSession(session: InsertAgentSession): Promise<AgentSession> {
+    const [created] = await db
+      .insert(agentSessions)
+      .values({
+        ...session,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async getAgentSessionByHash(sessionHash: string): Promise<AgentSessionWithFiles | null> {
+    const [session] = await db
+      .select()
+      .from(agentSessions)
+      .where(eq(agentSessions.sessionHash, sessionHash));
+    
+    if (!session) return null;
+
+    const files = await db
+      .select()
+      .from(agentSessionFiles)
+      .where(eq(agentSessionFiles.sessionId, session.id));
+
+    return { ...session, files };
+  }
+
+  async updateAgentSession(id: string, updates: Partial<InsertAgentSession>): Promise<AgentSession> {
+    const [updated] = await db
+      .update(agentSessions)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(agentSessions.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getUserAgentSessions(userId: string, agentType?: string, status?: string): Promise<AgentSession[]> {
+    const conditions = [eq(agentSessions.userId, userId)];
+    
+    if (agentType) {
+      conditions.push(eq(agentSessions.agentType, agentType));
+    }
+    
+    if (status) {
+      conditions.push(eq(agentSessions.status, status));
+    }
+
+    return await db
+      .select()
+      .from(agentSessions)
+      .where(and(...conditions))
+      .orderBy(desc(agentSessions.createdAt));
+  }
+
+  // Agent Session Files
+  async createAgentSessionFile(file: InsertAgentSessionFile): Promise<AgentSessionFile> {
+    const [created] = await db
+      .insert(agentSessionFiles)
+      .values({
+        ...file,
+        uploadedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async getAgentSessionFiles(sessionId: string): Promise<AgentSessionFile[]> {
+    return await db
+      .select()
+      .from(agentSessionFiles)
+      .where(eq(agentSessionFiles.sessionId, sessionId))
+      .orderBy(desc(agentSessionFiles.uploadedAt));
   }
 }
 
