@@ -42,6 +42,7 @@ import AgentsPage from "./pages/agents";
 import AgentProcessorPage from "./pages/AgentProcessorPage";
 import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
 import AmazonListingsOptimizerResult from "./pages/agents/amazon-listings-optimizer-result";
+import AmazonListingsOptimizerNew from "./pages/agents/amazon-listings-optimizer-new";
 
 import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
 import GeneratedImages from "./pages/admin/GeneratedImages";
@@ -76,6 +77,12 @@ function App() {
                           <Route path="/auth" component={Auth} />
 
                           {/* Agents routes */}
+                          <Route path="/agents/amazon-listings-optimizer-new">
+                            <Layout>
+                              <AmazonListingsOptimizerNew />
+                            </Layout>
+                          </Route>
+                          
                           <Route path="/agents/amazon-listings-optimizer/result">
                             <Layout>
                               <AmazonListingsOptimizerResult />
