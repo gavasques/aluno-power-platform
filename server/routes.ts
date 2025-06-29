@@ -2160,69 +2160,11 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-DIRETRIZES PARA BULLET POINTS:
-- Máximo 200 caracteres cada bullet point
-- Começar com emoji relevante
-- Foco em benefícios, não apenas características
-- Usar linguagem persuasiva e emocional
-- Abordar objeções principais do público
-- Incluir especificações técnicas quando relevante
-- Criar senso de urgência e valor
-
-Crie exatamente 5 bullet points numerados, cada um focando em um aspecto diferente:
-1. Qualidade/Performance principal
-2. Benefício emocional/lifestyle
-3. Especificação técnica valorizada
-4. Diferencial competitivo
-5. Garantia/suporte/valor agregado
-
-Formato:
-• TÍTULO EM MAIÚSCULAS: Descrição persuasiva do benefício...
-
-Seja persuasivo, específico e focado em conversão!`,
-            createdAt: '2025-06-27T19:00:00Z',
-            createdBy: 'admin',
-            status: 'active'
-          },
-          versions: [],
-          variables: ['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}'],
-          maxLength: 2500
-        },
-        {
-          id: 'description',
-          name: 'Descrição Completa',
-          description: 'Prompt para descrição detalhada do produto',
-          currentVersion: {
-            id: 'description-v1',
-            version: 1,
-            content: `Você é um copywriter especialista em Amazon. Crie uma descrição completa que eduque, persuada e converta.
-
-PRODUTO: {{PRODUCT_NAME}}
-ANÁLISE: {{ANALYSIS_RESULT}}
-CARACTERÍSTICAS: {{KEY_FEATURES}}
-PÚBLICO-ALVO: {{TARGET_AUDIENCE}}
-DIFERENCIADORES: {{MARKET_DIFFERENTIATORS}}
-
-ESTRUTURA DA DESCRIÇÃO:
-1. Abertura impactante (problema + solução)
-2. Benefícios principais (3-4 parágrafos)
-3. Especificações técnicas detalhadas
-4. Diferenciadores competitivos
-5. Garantias e suporte
-6. Call-to-action persuasivo
-
-DIRETRIZES:
-- Tom conversacional e persuasivo
-- Focar em benefícios, não apenas recursos
-- Usar storytelling quando apropriado
-- Incluir social proof e credibilidade
-- Abordar objeções principais
-- Criar urgência sem ser exagerado
-- Máximo 2000 caracteres
-- Usar formatação (quebras de linha, emojis)
-
-Crie uma descrição que transforme visitantes em compradores apaixonados pelo produto!`,
-            createdAt: '2025-06-27T18:30:00Z',
+  // Additional routes and endpoints will be added here as needed
+  
+  // Return the server for WebSocket setup
+  return server;
+}
             createdBy: 'admin',
             status: 'active'
           },
