@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface FormData {
   productName: string;
@@ -219,10 +220,10 @@ export default function AmazonListingsOptimizer() {
     // Validações
     if (files.length === 0) return;
     
-    if (files.length > 8) {
+    if (files.length > 10) {
       setErrors(prev => ({
         ...prev,
-        uploadedFiles: "Máximo de 8 arquivos permitidos"
+        uploadedFiles: "Máximo de 10 arquivos permitidos"
       }));
       return;
     }
@@ -568,13 +569,21 @@ export default function AmazonListingsOptimizer() {
                       <Label htmlFor="category" className="text-sm font-medium">
                         Categoria *
                       </Label>
-                      <Input
-                        id="category"
-                        placeholder="Ex: Eletrônicos > Áudio"
+                      <Select
                         value={formData.category}
-                        onChange={(e) => updateField('category', e.target.value)}
-                        className={errors.category ? "border-red-300" : ""}
-                      />
+                        onValueChange={(value) => updateField('category', value)}
+                      >
+                        <SelectTrigger className={errors.category ? "border-red-300" : ""}>
+                          <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.name}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       {errors.category && (
                         <p className="text-sm text-red-600">{errors.category}</p>
                       )}
@@ -693,7 +702,7 @@ export default function AmazonListingsOptimizer() {
                       <Alert>
                         <Info className="h-4 w-4" />
                         <AlertDescription>
-                          Faça upload de até 8 arquivos CSV com avaliações exportadas do Helium10 ou similar.
+                          Faça upload de até 10 arquivos CSV com avaliações exportadas do Helium10 ou similar.
                         </AlertDescription>
                       </Alert>
                       
