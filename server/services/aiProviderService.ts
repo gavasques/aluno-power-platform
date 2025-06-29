@@ -304,74 +304,61 @@ export class AIProviderService {
             }
             
           } else {
-            // Image generation mode usando Responses API oficial
-            console.log('🔄 Modo geração: Usando Responses API com gpt-4.1...');
+            // Modo geração com imagens de referência usando /images/edits
+            console.log('🔄 Modo geração: Usando /images/edits com gpt-image-1...');
             
             if (request.referenceImages && request.referenceImages.length > 0) {
-              console.log(`📸 Usando Responses API com ${request.referenceImages.length} imagens de referência`);
+              console.log(`📸 Usando /images/edits com ${request.referenceImages.length} imagens de referência`);
               
-              // Preparar conteúdo conforme documentação oficial
-              const content = [
-                { type: "input_text", text: prompt },
-                ...request.referenceImages.map(img => ({
-                  type: "input_image",
-                  image_url: `data:image/jpeg;base64,${img.data}`
-                }))
-              ];
+              // Preparar array de imagens para o endpoint /images/edits
+              const imageFiles = await Promise.all(
+                request.referenceImages.map(async (img) => {
+                  const imageBuffer = Buffer.from(img.data, 'base64');
+                  return new File([imageBuffer], img.filename || 'image.png', { 
+                    type: 'image/png' 
+                  });
+                })
+              );
               
-              // Usar Responses API conforme documentação
-              const response = await (this.openai as any).responses.create({
-                model: "gpt-4.1",
-                input: [
-                  {
-                    role: "user",
-                    content: content
-                  }
-                ],
-                tools: [{ type: "image_generation" }]
+              console.log(`🔧 Enviando ${imageFiles.length} imagens para /images/edits`);
+              
+              const response = await this.openai.images.edit({
+                model: 'gpt-image-1',
+                image: imageFiles,
+                prompt: prompt,
+                n: 1,
+                output_format: 'png',
+                quality: 'high',
+                size: 'auto'
               });
               
-              console.log('🔍 Estrutura da resposta:', {
-                outputExists: !!response.output,
-                outputLength: response.output?.length || 0,
-                outputTypes: response.output?.map((o: any) => o.type) || [],
-                fullResponse: JSON.stringify(response, null, 2).substring(0, 1000)
+              console.log('✅ Resposta do /images/edits:', {
+                dataLength: response.data?.length || 0,
+                hasB64Json: !!response.data?.[0]?.b64_json,
+                responseKeys: Object.keys(response.data?.[0] || {})
               });
               
-              // Extrair imagem conforme documentação
-              const imageGenerationCalls = response.output?.filter((output: any) => output.type === "image_generation_call") || [];
+              const imageBase64 = response.data?.[0]?.b64_json || '';
+              const imageUrl = `data:image/png;base64,${imageBase64}`;
+              const content = `Imagem gerada usando ${request.referenceImages.length} imagens de referência com GPT-Image-1!\n\nPrompt: ${prompt}\n\nURL da imagem: ${imageUrl}`;
               
-              if (imageGenerationCalls.length > 0) {
-                const imageBase64 = imageGenerationCalls[0].result;
-                console.log('✅ Imagem encontrada, tamanho base64:', imageBase64?.length || 0);
-                
-                const imageUrl = `data:image/png;base64,${imageBase64}`;
-                const content = `Imagem gerada com sucesso usando ${request.referenceImages.length} imagens de referência via Responses API!\n\nPrompt: ${prompt}\n\nURL da imagem: ${imageUrl}`;
-                
-                const inputTokens = this.countTokens(prompt);
-                const outputTokens = 1;
-                const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
-                const outputCost = modelConfig.outputCostPer1M;
-                const totalCost = inputCost + outputCost;
-                
-                await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
-                
-                return {
-                  content,
-                  usage: {
-                    inputTokens,
-                    outputTokens,
-                    totalTokens: inputTokens + outputTokens,
-                  },
-                  cost: totalCost,
-                };
-              } else {
-                // Verificar se há respostas de texto
-                const textOutputs = response.output?.filter((output: any) => output.type === "text") || [];
-                const textContent = textOutputs.map((output: any) => output.content).join('\n');
-                
-                throw new Error(`Responses API não gerou imagem. Outputs encontrados: ${response.output?.map((o: any) => o.type).join(', ')}. Conteúdo de texto: ${textContent}`);
-              }
+              const inputTokens = this.countTokens(prompt);
+              const outputTokens = 1;
+              const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
+              const outputCost = modelConfig.outputCostPer1M;
+              const totalCost = inputCost + outputCost;
+              
+              await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
+              
+              return {
+                content,
+                usage: {
+                  inputTokens,
+                  outputTokens,
+                  totalTokens: inputTokens + outputTokens,
+                },
+                cost: totalCost,
+              };
               
             } else {
               // Sem imagens de referência - usar DALL-E-3 tradicional

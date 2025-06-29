@@ -108,13 +108,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: Implementação PURA da OpenAI Responses API para imagens com referência
-  - APENAS Responses API conforme documentação oficial (sem fallbacks)
-  - openai.responses.create() com gpt-4.1 e tool image_generation
-  - Logging detalhado da estrutura da resposta para diagnóstico
-  - Análise completa dos outputs: tipos, conteúdo e estrutura
-  - Interface exibe automaticamente imagens geradas quando há URLs na resposta
-  - Sistema puro: upload → Responses API → geração → visualização
+- **June 29, 2025**: Implementação correta do OpenAI /images/edits endpoint para gpt-image-1
+  - Endpoint oficial: client.images.edit() com modelo gpt-image-1
+  - Suporte para múltiplas imagens de referência (até 16 imagens)
+  - Parâmetros: output_format='png', quality='high', size='auto'
+  - Resposta retorna b64_json conforme documentação oficial
+  - Sistema: upload de imagens → /images/edits → geração → visualização
+  - Logging detalhado para diagnóstico da resposta da API
 
 - **June 28, 2025**: Implementado sistema GPT-Image-1 exclusivo para geração e edição de imagens
   - Corrigido erro "PayloadTooLargeError" aumentando limite servidor para 50MB
