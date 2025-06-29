@@ -156,9 +156,9 @@ export default function AmazonListingsOptimizer() {
         const data = await response.json();
         setSessionInfo(prev => prev ? { ...prev, tags: data.session.tags } : null);
         
-        // Atualizar tags disponíveis
+        // Atualizar tags disponíveis com todas as variáveis
         if (data.session.tags) {
-          const tags = Object.keys(data.session.tags).map(key => `{${key}}`);
+          const tags = Object.keys(data.session.tags).map(key => `{{${key}}}`);
           setAvailableTags(tags);
         }
       }

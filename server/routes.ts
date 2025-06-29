@@ -1852,7 +1852,7 @@ Seja específico, prático e focado em insights acionáveis para otimização de
             status: 'active'
           },
           versions: [],
-          variables: ['{{PRODUCT_NAME}}', '{{PRODUCT_DESCRIPTION}}', '{{KEYWORDS}}', '{{COMPETITOR_REVIEWS}}', '{{CATEGORY}}'],
+          variables: ['{{PRODUCT_NAME}}', '{{PRODUCT_DESCRIPTION}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{COMPETITOR_REVIEWS}}', '{{CATEGORY}}'],
           maxLength: 3000
         },
         {
@@ -1893,7 +1893,7 @@ Seja criativo, persuasivo e focado em conversão!`,
             status: 'active'
           },
           versions: [],
-          variables: ['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{MAIN_BENEFITS}}', '{{TARGET_AUDIENCE}}', '{{CATEGORY}}'],
+          variables: ['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}'],
           maxLength: 2000
         },
         {
@@ -2672,6 +2672,7 @@ function generateSessionHash(): string {
 function generateTags(inputData: any): Record<string, string> {
   const tags: Record<string, string> = {};
 
+  // Tags principais do formulário
   if (inputData.productName) tags.PRODUCT_NAME = inputData.productName;
   if (inputData.category) tags.CATEGORY = inputData.category;
   if (inputData.keywords) tags.KEYWORDS = inputData.keywords;
@@ -2680,8 +2681,17 @@ function generateTags(inputData: any): Record<string, string> {
   if (inputData.targetAudience) tags.TARGET_AUDIENCE = inputData.targetAudience;
   if (inputData.reviewsData) tags.REVIEWS_DATA = inputData.reviewsData;
 
+  // Tags adicionais para melhor usabilidade nos prompts
+  if (inputData.productName) tags.PRODUCT_DESCRIPTION = inputData.productName;
+  if (inputData.reviewsData) tags.COMPETITOR_REVIEWS = inputData.reviewsData;
+  
+  // Combinação de palavras-chave
   if (inputData.keywords && inputData.longTailKeywords) {
     tags.ALL_KEYWORDS = `${inputData.keywords}, ${inputData.longTailKeywords}`;
+  } else if (inputData.keywords) {
+    tags.ALL_KEYWORDS = inputData.keywords;
+  } else if (inputData.longTailKeywords) {
+    tags.ALL_KEYWORDS = inputData.longTailKeywords;
   }
 
   return tags;
