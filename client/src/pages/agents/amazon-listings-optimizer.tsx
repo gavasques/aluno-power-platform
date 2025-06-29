@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   ArrowLeft, 
@@ -42,6 +42,20 @@ interface ReviewData {
   rating: string;
 }
 
+interface SessionInfo {
+  id: string;
+  sessionHash: string;
+  userId: string;
+  status: string;
+  tags?: Record<string, string>;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  description?: string;
+}
+
 export default function AmazonListingsOptimizer() {
   const [formData, setFormData] = useState<FormData>({
     productName: "",
@@ -58,6 +72,95 @@ export default function AmazonListingsOptimizer() {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [, navigate] = useLocation();
+  const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  // Criar sessão ao montar o componente
+  useEffect(() => {
+    const initializeSession = async () => {
+      try {
+        // Simular ID do usuário (em produção vem da autenticação)
+        const userId = "user-1";
+        
+        const response = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            userId, 
+            agentType: 'amazon-listing-optimizer' 
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setSessionInfo(data.session);
+        }
+      } catch (error) {
+        console.error('Erro ao criar sessão:', error);
+      }
+    };
+
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+      }
+    };
+
+    initializeSession();
+    loadCategories();
+  }, []);
+
+  // Atualizar sessão quando dados do formulário mudarem
+  useEffect(() => {
+    if (sessionInfo && Object.values(formData).some(value => 
+      typeof value === 'string' ? value.trim() : value.length > 0
+    )) {
+      updateSessionData();
+    }
+  }, [formData, sessionInfo]);
+
+  // Atualizar dados da sessão
+  const updateSessionData = async () => {
+    if (!sessionInfo) return;
+
+    try {
+      const response = await fetch(`/api/sessions/${sessionInfo.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          inputData: {
+            productName: formData.productName,
+            category: formData.category,
+            keywords: formData.keywords,
+            longTailKeywords: formData.longTailKeywords,
+            mainFeatures: formData.features,
+            targetAudience: formData.targetAudience,
+            reviewsData: formData.reviewsData
+          }
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSessionInfo(prev => prev ? { ...prev, tags: data.session.tags } : null);
+        
+        // Atualizar tags disponíveis
+        if (data.session.tags) {
+          const tags = Object.keys(data.session.tags).map(key => `{${key}}`);
+          setAvailableTags(tags);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar sessão:', error);
+    }
+  };
 
   // Atualizar campo do formulário
   const updateField = (field: keyof FormData, value: string | File[] | null) => {
@@ -383,6 +486,20 @@ export default function AmazonListingsOptimizer() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
+        
+        {/* Informações da Sessão */}
+        {sessionInfo && (
+          <div className="mb-4 p-2 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-600">
+            <div className="flex items-center gap-4">
+              <span>Sessão: <strong>{sessionInfo.sessionHash}</strong></span>
+              <span>Usuário: <strong>{sessionInfo.userId}</strong></span>
+              <span>Status: <strong>{sessionInfo.status}</strong></span>
+              {availableTags.length > 0 && (
+                <span>Tags: <strong>{availableTags.join(', ')}</strong></span>
+              )}
+            </div>
+          </div>
+        )}
         
         {/* Header com padrão Lovable */}
         <div className="mb-8">
