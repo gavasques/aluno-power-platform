@@ -640,7 +640,45 @@ export default function AgentProviderSettings() {
                               Aguardando resposta do modelo...
                             </div>
                           ) : (
-                            testResponse || 'Nenhuma resposta ainda'
+                            <div className="space-y-4">
+                              {testResponse || 'Nenhuma resposta ainda'}
+                              
+                              {/* Exibir imagem gerada se houver URL na resposta */}
+                              {testResponse && (() => {
+                                const imageUrlMatch = testResponse.match(/https:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp)/i);
+                                const imageUrl = imageUrlMatch ? imageUrlMatch[0] : null;
+                                
+                                if (imageUrl) {
+                                  return (
+                                    <div className="mt-4 p-4 border rounded-lg bg-white">
+                                      <Label className="block mb-2 font-medium">Imagem Gerada:</Label>
+                                      <div className="flex justify-center">
+                                        <img 
+                                          src={imageUrl} 
+                                          alt="Imagem gerada pelo modelo"
+                                          className="max-w-full max-h-96 rounded-lg shadow-md"
+                                          onError={(e) => {
+                                            const img = e.target as HTMLImageElement;
+                                            img.style.display = 'none';
+                                          }}
+                                        />
+                                      </div>
+                                      <div className="mt-2 text-sm text-gray-600">
+                                        <a 
+                                          href={imageUrl} 
+                                          target="_blank" 
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:text-blue-800 underline"
+                                        >
+                                          Abrir imagem em nova aba
+                                        </a>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
+                            </div>
                           )}
                         </div>
                       </div>
