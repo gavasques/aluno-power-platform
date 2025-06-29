@@ -32,7 +32,7 @@ export function useProviderConfiguration(agentId?: string) {
     maxTokens: 2000
   });
 
-  const { data: agents = [] } = useQuery<Agent[]>({
+  const { data: agents = [] } = useQuery({
     queryKey: ["/api/agents"],
   });
 
@@ -86,7 +86,7 @@ export function useProviderConfiguration(agentId?: string) {
     },
   });
 
-  const selectedAgent = agentId ? agents.find(agent => agent.id === agentId) : null;
+  const selectedAgent = agentId ? (agents as any[]).find((agent: any) => agent.id === agentId) : null;
 
   const updateConfiguration = (updates: Partial<ConfigurationData>) => {
     setFormData(prev => ({ ...prev, ...updates }));

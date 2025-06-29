@@ -39,11 +39,11 @@ export default function AgentProviderSettings() {
       updateConfiguration({
         provider: selectedAgent.provider,
         model: selectedAgent.model,
-        temperature: selectedAgent.temperature,
-        maxTokens: selectedAgent.maxTokens,
+        temperature: selectedAgent.temperature || 0.7,
+        maxTokens: selectedAgent.maxTokens || 2000,
       });
     }
-  }, [selectedAgent, updateConfiguration]);
+  }, [selectedAgent]);
 
   const getModelCount = (provider: string) => {
     return (models as any[]).filter((m: any) => m.provider === provider).length;

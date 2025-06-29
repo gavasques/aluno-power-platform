@@ -61,7 +61,7 @@ export default function ProviderConfiguration({
 
         <div>
           <Label htmlFor="temperature">
-            Temperatura ({configuration.temperature.toFixed(2)})
+            Temperatura ({typeof configuration.temperature === 'number' ? configuration.temperature.toFixed(2) : '0.70'})
           </Label>
           <div className="mt-2">
             <Slider
@@ -69,7 +69,7 @@ export default function ProviderConfiguration({
               min={0}
               max={2}
               step={0.1}
-              value={[configuration.temperature]}
+              value={[configuration.temperature || 0.7]}
               onValueChange={([value]) => onConfigurationChange({ temperature: value })}
               className="w-full"
             />
