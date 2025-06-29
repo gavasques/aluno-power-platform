@@ -108,20 +108,25 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: ✅ Sistema completo de IA + implementação avançada de sessões para Amazon Listing Optimizer
+- **June 29, 2025**: ✅ Sistema completo de IA + implementação avançada de sessões para Amazon Listing Optimizer + prompts fixos
   - **Provedores de IA**: 19 modelos funcionais em 4 provedores (OpenAI, Anthropic, Gemini, DeepSeek)
   - **Sistema de Sessões**: Implementação completa seguindo princípios SOLID
     - Tabelas: agent_sessions, agent_session_files com relações e índices otimizados
     - SessionService: Gerenciamento de ciclo de vida com responsabilidade única
     - APIs RESTful: /api/sessions com operações CRUD completas
-    - Tags automáticas: {KEYWORDS}, {PRODUCT_NAME}, {CATEGORY}, etc.
+    - Tags automáticas expandidas: {{PRODUCT_NAME}}, {{CATEGORY}}, {{KEYWORDS}}, {{LONG_TAIL_KEYWORDS}}, {{FEATURES}}, {{TARGET_AUDIENCE}}, {{REVIEWS_DATA}}
   - **Amazon Listing Optimizer Refatorado**: 
     - Sistema de sessões integrado com hash único e ID do usuário visíveis
     - Upload múltiplo de até 10 arquivos de avaliações com processamento automático
-    - Dropdown de categorias do banco de dados (removido campo preço)
-    - Tags geradas automaticamente disponíveis para prompts
+    - Dropdown de categorias do banco de dados ordenado A-Z (removido campo preço)
+    - Tags geradas automaticamente disponíveis para prompts em todas as abas
     - Validação com Zod e formulário reativo
     - Arquitetura modular seguindo DRY, KISS e SOLID
+  - **Sistema de Prompts Fixos**: Removida interface de edição, prompts implementados diretamente no banco
+    - Prompts fixos: analysis, title, bulletPoints, description
+    - Todas as variáveis disponíveis em todos os prompts
+    - Sistema simplificado sem interface administrativa de edição
+    - Prompts otimizados com foco em conversão Amazon
 
 - **June 29, 2025 (anterior)**: ✅ Atualização dos modelos OpenAI conforme nova documentação
   - Removidos modelos: o1-preview, o1-mini, o3-pro (problemas de endpoint)
