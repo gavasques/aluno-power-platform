@@ -118,6 +118,9 @@ export default function AmazonListingsOptimizerNew() {
       if (response.ok) {
         const data = await response.json();
         setSession(data.session);
+        console.log('Sessão Amazon criada:', data.session);
+      } else {
+        console.error('Erro na resposta:', await response.text());
       }
     } catch (error) {
       console.error('Erro ao criar sessão Amazon:', error);
@@ -415,7 +418,16 @@ export default function AmazonListingsOptimizerNew() {
     });
   };
 
-  // Extract reviews from CSV content
+  // Remove emojis from text
+  const removeEmojis = (text: string): string => {
+    // Simple text cleaning for emojis and special chars
+    return text.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '') // Surrogate pairs
+                .replace(/[\u2600-\u26FF\u2700-\u27BF]/g, '') // Misc symbols
+                .replace(/\s+/g, ' ') // Clean multiple spaces
+                .trim();
+  };
+
+  // Extract reviews from CSV content - Focus on Title, Body, Rating
   const extractReviewsFromCSV = (content: string): string => {
     const lines = content.split('\n');
     if (lines.length === 0) return '';
@@ -426,44 +438,35 @@ export default function AmazonListingsOptimizerNew() {
     // Primeira linha como cabeçalho
     const headers = lines[0].split(separator).map(h => h.trim().toLowerCase());
     
-    // Encontrar colunas relevantes para reviews
-    const reviewColumns: number[] = [];
-    const ratingColumns: number[] = [];
-    const titleColumns: number[] = [];
+    // Encontrar colunas específicas: Title, Body, Rating
+    let titleIndex = -1;
+    let bodyIndex = -1;
+    let ratingIndex = -1;
     
     headers.forEach((header, index) => {
-      const cleanHeader = header.replace(/['"]/g, '');
+      const cleanHeader = header.replace(/['"]/g, '').trim();
       
-      // Colunas de review/comentário
-      if (cleanHeader.includes('review') || 
-          cleanHeader.includes('comment') || 
-          cleanHeader.includes('feedback') ||
-          cleanHeader.includes('avaliação') ||
-          cleanHeader.includes('comentário') ||
-          cleanHeader.includes('opinião') ||
-          cleanHeader.includes('texto')) {
-        reviewColumns.push(index);
+      // Procurar coluna Title
+      if (cleanHeader === 'title' || cleanHeader.includes('title')) {
+        titleIndex = index;
       }
       
-      // Colunas de rating/nota
-      if (cleanHeader.includes('rating') || 
-          cleanHeader.includes('star') || 
-          cleanHeader.includes('score') ||
-          cleanHeader.includes('nota') ||
-          cleanHeader.includes('estrela')) {
-        ratingColumns.push(index);
+      // Procurar coluna Body
+      if (cleanHeader === 'body' || cleanHeader.includes('body') || 
+          cleanHeader === 'review' || cleanHeader.includes('review') ||
+          cleanHeader === 'text' || cleanHeader.includes('text')) {
+        bodyIndex = index;
       }
       
-      // Colunas de título
-      if (cleanHeader.includes('title') || 
-          cleanHeader.includes('heading') ||
-          cleanHeader.includes('título') ||
-          cleanHeader.includes('assunto')) {
-        titleColumns.push(index);
+      // Procurar coluna Rating
+      if (cleanHeader === 'rating' || cleanHeader.includes('rating') ||
+          cleanHeader === 'star' || cleanHeader.includes('star') ||
+          cleanHeader === 'score' || cleanHeader.includes('score')) {
+        ratingIndex = index;
       }
     });
 
-    const extractedReviews = [];
+    const extractedReviews: string[] = [];
     
     // Processar linhas de dados (pular cabeçalho)
     for (let i = 1; i < lines.length; i++) {
@@ -471,41 +474,41 @@ export default function AmazonListingsOptimizerNew() {
       if (!line) continue;
       
       const columns = line.split(separator);
-      let reviewText = '';
       
-      // Extrair título se existir
-      if (titleColumns.length > 0) {
-        const title = columns[titleColumns[0]]?.replace(/['"]/g, '').trim();
-        if (title) {
-          reviewText += `Título: ${title}\n`;
-        }
+      // Extrair dados específicos
+      const title = titleIndex >= 0 ? removeEmojis(columns[titleIndex]?.replace(/['"]/g, '').trim() || '') : '';
+      const body = bodyIndex >= 0 ? removeEmojis(columns[bodyIndex]?.replace(/['"]/g, '').trim() || '') : '';
+      const rating = ratingIndex >= 0 ? columns[ratingIndex]?.replace(/['"]/g, '').trim() || '' : '';
+      
+      // Filtrar reviews muito curtas ou vazias
+      if (body.length < 10 && title.length < 5) continue;
+      
+      // Formatar em Markdown
+      let reviewMarkdown = '';
+      
+      if (title) {
+        reviewMarkdown += `## ${title}\n\n`;
       }
       
-      // Extrair rating se existir
-      if (ratingColumns.length > 0) {
-        const rating = columns[ratingColumns[0]]?.replace(/['"]/g, '').trim();
-        if (rating) {
-          reviewText += `Rating: ${rating}\n`;
-        }
+      if (rating) {
+        reviewMarkdown += `**Rating:** ${rating}/5\n\n`;
       }
       
-      // Extrair texto da review
-      if (reviewColumns.length > 0) {
-        const review = columns[reviewColumns[0]]?.replace(/['"]/g, '').trim();
-        if (review && review.length > 10) { // Filtrar reviews muito curtas
-          reviewText += `Review: ${review}`;
-        }
-      } else {
-        // Se não encontrou colunas específicas, usar toda a linha
-        reviewText = line.replace(/['"]/g, '').trim();
+      if (body) {
+        reviewMarkdown += `${body}\n\n`;
       }
       
-      if (reviewText.trim()) {
-        extractedReviews.push(reviewText.trim());
+      if (reviewMarkdown.trim()) {
+        extractedReviews.push(reviewMarkdown.trim());
       }
     }
     
-    return extractedReviews.join('\n---\n');
+    // Retornar em formato Markdown estruturado
+    if (extractedReviews.length === 0) {
+      return '# Nenhuma avaliação encontrada\n\nVerifique se o arquivo CSV contém as colunas: Title, Body, Rating';
+    }
+    
+    return `# Avaliações dos Concorrentes\n\n${extractedReviews.join('\n\n---\n\n')}`;
   };
 
   const removeFile = (index: number) => {
