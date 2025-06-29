@@ -156,8 +156,8 @@ export default function AmazonListingsOptimizerNew() {
       newErrors.keywords = "Palavras-chave são obrigatórias";
     }
 
-    // Verificar se tem arquivos ou dados manuais de avaliações
-    if (formData.uploadedFiles.length === 0 && !formData.reviewsData.trim()) {
+    // Verificar se tem dados de avaliações (manual ou processados de arquivos)
+    if (!formData.reviewsData.trim()) {
       newErrors.reviewsData = "Dados de avaliações são obrigatórios";
     }
 
@@ -356,7 +356,7 @@ export default function AmazonListingsOptimizerNew() {
   };
 
   // File upload handlers
-  const handleFileUpload = (files: FileList | null) => {
+  const handleFileUpload = async (files: FileList | null) => {
     if (!files) return;
     
     const fileArray = Array.from(files);
@@ -367,7 +367,145 @@ export default function AmazonListingsOptimizerNew() {
       return;
     }
     
-    updateField('uploadedFiles', [...formData.uploadedFiles, ...fileArray]);
+    // Adicionar arquivos primeiro
+    const newFiles = [...formData.uploadedFiles, ...fileArray];
+    updateField('uploadedFiles', newFiles);
+    
+    // Processar arquivos CSV automaticamente
+    await processUploadedFiles(newFiles);
+  };
+
+  // Process uploaded CSV files and extract review data
+  const processUploadedFiles = async (files: File[]) => {
+    try {
+      const csvFiles = files.filter(file => 
+        file.name.toLowerCase().endsWith('.csv') || 
+        file.name.toLowerCase().endsWith('.txt')
+      );
+      
+      if (csvFiles.length === 0) return;
+
+      let combinedReviews = "";
+      
+      for (const file of csvFiles) {
+        const content = await readFileContent(file);
+        const processedContent = extractReviewsFromCSV(content);
+        combinedReviews += processedContent + "\n\n";
+      }
+
+      // Atualizar automaticamente o campo de entrada manual
+      if (combinedReviews.trim()) {
+        updateField('reviewsData', combinedReviews.trim());
+        // Mudar para aba manual para mostrar o resultado
+        setReviewsTab('manual');
+      }
+    } catch (error) {
+      console.error('Erro ao processar arquivos:', error);
+      alert('Erro ao processar arquivos CSV');
+    }
+  };
+
+  // Read file content
+  const readFileContent = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = (e) => reject(e);
+      reader.readAsText(file);
+    });
+  };
+
+  // Extract reviews from CSV content
+  const extractReviewsFromCSV = (content: string): string => {
+    const lines = content.split('\n');
+    if (lines.length === 0) return '';
+
+    // Detectar separador (vírgula ou ponto e vírgula)
+    const separator = content.includes(';') ? ';' : ',';
+    
+    // Primeira linha como cabeçalho
+    const headers = lines[0].split(separator).map(h => h.trim().toLowerCase());
+    
+    // Encontrar colunas relevantes para reviews
+    const reviewColumns: number[] = [];
+    const ratingColumns: number[] = [];
+    const titleColumns: number[] = [];
+    
+    headers.forEach((header, index) => {
+      const cleanHeader = header.replace(/['"]/g, '');
+      
+      // Colunas de review/comentário
+      if (cleanHeader.includes('review') || 
+          cleanHeader.includes('comment') || 
+          cleanHeader.includes('feedback') ||
+          cleanHeader.includes('avaliação') ||
+          cleanHeader.includes('comentário') ||
+          cleanHeader.includes('opinião') ||
+          cleanHeader.includes('texto')) {
+        reviewColumns.push(index);
+      }
+      
+      // Colunas de rating/nota
+      if (cleanHeader.includes('rating') || 
+          cleanHeader.includes('star') || 
+          cleanHeader.includes('score') ||
+          cleanHeader.includes('nota') ||
+          cleanHeader.includes('estrela')) {
+        ratingColumns.push(index);
+      }
+      
+      // Colunas de título
+      if (cleanHeader.includes('title') || 
+          cleanHeader.includes('heading') ||
+          cleanHeader.includes('título') ||
+          cleanHeader.includes('assunto')) {
+        titleColumns.push(index);
+      }
+    });
+
+    const extractedReviews = [];
+    
+    // Processar linhas de dados (pular cabeçalho)
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      const columns = line.split(separator);
+      let reviewText = '';
+      
+      // Extrair título se existir
+      if (titleColumns.length > 0) {
+        const title = columns[titleColumns[0]]?.replace(/['"]/g, '').trim();
+        if (title) {
+          reviewText += `Título: ${title}\n`;
+        }
+      }
+      
+      // Extrair rating se existir
+      if (ratingColumns.length > 0) {
+        const rating = columns[ratingColumns[0]]?.replace(/['"]/g, '').trim();
+        if (rating) {
+          reviewText += `Rating: ${rating}\n`;
+        }
+      }
+      
+      // Extrair texto da review
+      if (reviewColumns.length > 0) {
+        const review = columns[reviewColumns[0]]?.replace(/['"]/g, '').trim();
+        if (review && review.length > 10) { // Filtrar reviews muito curtas
+          reviewText += `Review: ${review}`;
+        }
+      } else {
+        // Se não encontrou colunas específicas, usar toda a linha
+        reviewText = line.replace(/['"]/g, '').trim();
+      }
+      
+      if (reviewText.trim()) {
+        extractedReviews.push(reviewText.trim());
+      }
+    }
+    
+    return extractedReviews.join('\n---\n');
   };
 
   const removeFile = (index: number) => {
