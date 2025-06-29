@@ -130,9 +130,11 @@ export default function ProviderTestPanel({
           />
         </div>
 
-        {model === 'gpt-image-edit' && (
+        {(model === 'gpt-image-edit' || model === 'gpt-image-1') && (
           <div>
-            <Label htmlFor="referenceImages">Imagens de Referência (Obrigatório para edição)</Label>
+            <Label htmlFor="referenceImages">
+              Imagens de Referência {model === 'gpt-image-edit' ? '(Obrigatório para edição)' : '(Opcional para criação)'}
+            </Label>
             <div className="mt-2 space-y-2">
               <Input
                 id="referenceImages"
