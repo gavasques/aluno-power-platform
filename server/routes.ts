@@ -2165,43 +2165,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Return the server for WebSocket setup
   return server;
 }
-            createdBy: 'admin',
-            status: 'active'
-          },
-          versions: [],
-          variables: ['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}'],
-          maxLength: 2000
-        }
-      ];
-
-      res.json(mockPrompts);
-    } catch (error) {
-      console.error('Error fetching agent prompts:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
-
-  app.put('/api/agent-prompts/:agentId/:promptId', async (req, res) => {
-    try {
-      const { agentId, promptId } = req.params;
-      const { content } = req.body;
-
-      if (agentId !== 'amazon-listings') {
-        return res.status(404).json({ error: 'Agent not found' });
-      }
-
-      // Atualizar prompt no banco de dados
-      const promptRecordId = `${promptId}-${agentId}`;
-      
-      const [updatedPrompt] = await db.update(agentPrompts)
-        .set({ 
-          content: content,
-          version: sql`${agentPrompts.version} + 1`
-        })
-        .where(eq(agentPrompts.id, promptRecordId))
-        .returning();
-
-      if (!updatedPrompt) {
         return res.status(404).json({ error: 'Prompt not found' });
       }
 
