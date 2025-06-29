@@ -214,35 +214,15 @@ Os clientes frequentemente usam termos como:
       if (!agent) throw new Error('Agente Amazon Listings não encontrado');
 
       // Simular resposta da IA para teste (substituir por integração real)
-      const titlesResult = `# 5 OPÇÕES DE TÍTULOS OTIMIZADOS PARA AMAZON
+      const titlesResult = `1. ${session.nomeProduto || 'Produto'} ${session.marca || 'Premium'} - ${session.keywords || 'Palavras-chave'} | ${session.principaisCaracteristicas || 'Características'} - ${session.marca || 'Marca'}
 
-Com base nas informações do produto e análise das avaliações, aqui estão 5 títulos otimizados:
+2. ${session.marca || 'Marca'} ${session.nomeProduto || 'Produto'} Professional | ${session.keywords || 'Palavras-chave'} com ${session.principaisCaracteristicas || 'Características'} para ${session.publicoAlvo || 'Público'}
 
-**1.** ${session.nomeProduto || 'Produto'} ${session.marca || 'Premium'} - ${session.keywords || 'Palavras-chave'} | ${session.principaisCaracteristicas || 'Características'} - ${session.marca || 'Marca'}
-(180 caracteres)
+3. ${session.nomeProduto || 'Produto'} ${session.marca || 'Marca'} Original | ${session.keywords || 'Keywords'} ${session.longTailKeywords || 'Long-tail'} - ${session.principaisCaracteristicas || 'Features'}
 
-**2.** ${session.marca || 'Marca'} ${session.nomeProduto || 'Produto'} Professional | ${session.keywords || 'Palavras-chave'} com ${session.principaisCaracteristicas || 'Características'} para ${session.publicoAlvo || 'Público'}
-(195 caracteres)
+4. Kit ${session.nomeProduto || 'Produto'} ${session.marca || 'Marca'} Completo - ${session.keywords || 'Palavras-chave'} Premium | ${session.principaisCaracteristicas || 'Características'} Profissional
 
-**3.** ${session.nomeProduto || 'Produto'} ${session.marca || 'Marca'} Original | ${session.keywords || 'Keywords'} ${session.longTailKeywords || 'Long-tail'} - ${session.principaisCaracteristicas || 'Features'}
-(175 caracteres)
-
-**4.** Kit ${session.nomeProduto || 'Produto'} ${session.marca || 'Marca'} Completo - ${session.keywords || 'Palavras-chave'} Premium | ${session.principaisCaracteristicas || 'Características'} Profissional
-(185 caracteres)
-
-**5.** ${session.marca || 'Marca'} ${session.nomeProduto || 'Produto'} Pro Series | ${session.keywords || 'Keywords'} de Alta Performance - ${session.principaisCaracteristicas || 'Features'} para ${session.publicoAlvo || 'Público-alvo'}
-(190 caracteres)
-
----
-
-**ESTRUTURA APLICADA:** [Produto Principal] + [Palavras Chave] + [Características Destacadas] + [Marca]
-
-**CARACTERÍSTICAS DOS TÍTULOS:**
-- Todos entre 150-200 caracteres conforme especificação
-- Palavras-chave integradas naturalmente
-- Características destacadas visíveis
-- Marca posicionada estrategicamente
-- Linguagem otimizada para conversão Amazon`;
+5. ${session.marca || 'Marca'} ${session.nomeProduto || 'Produto'} Pro Series | ${session.keywords || 'Keywords'} de Alta Performance - ${session.principaisCaracteristicas || 'Features'} para ${session.publicoAlvo || 'Público-alvo'}`;
 
       // Salvar resultado no banco
       await this.updateSessionData(sessionId, {
@@ -322,28 +302,27 @@ ${reviewsData}`;
 
   // Construir prompt da Etapa 2 conforme especificação
   private buildTitlesPrompt(session: AmazonListingSession): string {
-    return `# PROMPT 2 - Geração de Títulos
+    return `Você é um especialista em gerar títulos que gerem alta taxa de CTR e conversão para a Amazon.
 
-## INFORMAÇÕES DO PRODUTO:
-Nome do Produto: ${session.nomeProduto || ''}
+INFORMAÇÕES DO PRODUTO:
+Nome: ${session.nomeProduto || ''}
 Marca: ${session.marca || ''}
 Categoria: ${session.categoria || ''}
 Keywords: ${session.keywords || ''}
 Long Tail Keywords: ${session.longTailKeywords || ''}
-Principais Características: ${session.principaisCaracteristicas || ''}
+Características: ${session.principaisCaracteristicas || ''}
 Público Alvo: ${session.publicoAlvo || ''}
 
-Você é um especialista em gerar títulos que gerem alta taxa de CTR e conversão para a Amazon. Te dei algumas informações acima sobre o produto que vamos trabalhar. 
+ANÁLISE DAS AVALIAÇÕES:
+${session.reviewsInsight || ''}
 
-Com base nessas informações, vamos desenvolver 5 opções de títulos diferentes, que cumpram com o seguinte:
+Gere 5 títulos otimizados que tenham:
+- Entre 150 e 200 caracteres
+- Palavras-chave integradas naturalmente
+- Características importantes destacadas
+- Marca posicionada estrategicamente
 
-01 – O título deve ter entre 150 e 200 caracteres
-02 – A Estrutura deve ser [Produto Principal] + [Palavras Chave] + [Características Destacadas] + [Marca]
-03 – Utilize as seguintes palavras chave de forma orgânica, mas sem forçar
-
-Se necessário, use palavras long tail, características, sempre quando for importante.
-
-Por favor, forneça exatamente 5 opções de títulos numeradas de 1 a 5.`;
+Retorne APENAS os 5 títulos numerados (1, 2, 3, 4, 5), sem explicações ou estruturas.`;
   }
 
   // Gerar conteúdo para download
