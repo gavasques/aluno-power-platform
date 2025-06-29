@@ -1,8 +1,10 @@
 import { eq, desc } from "drizzle-orm";
 import { db } from "../db";
-import { amazonListingSessions, agents } from "@shared/schema";
+import { amazonListingSessions, agents, agentUsage, agentGenerations } from "@shared/schema";
 import type { InsertAmazonListingSession, AmazonListingSession } from "@shared/schema";
 import { aiProviderService } from "./aiProviderService";
+import { storage } from "../storage";
+import crypto from "crypto";
 
 export class AmazonListingService {
   // Criar nova sessão
@@ -44,6 +46,7 @@ export class AmazonListingService {
 
   // Processar Etapa 1: Análise de Avaliações
   async processStep1_AnalysisReviews(sessionId: string): Promise<string> {
+    const startTime = Date.now();
     const session = await this.getSession(sessionId);
     if (!session) throw new Error('Sessão não encontrada');
 
@@ -65,6 +68,27 @@ export class AmazonListingService {
         .limit(1);
 
       if (!agent) throw new Error('Agente Amazon Listings não encontrado');
+
+      // Preparar dados de entrada para o Prompt 1
+      const prompt1Input = {
+        sessionId,
+        prompt,
+        model: "gpt-4o-mini",
+        temperature: 0.7,
+        maxTokens: 2000,
+        messages: [
+          {
+            role: "system",
+            content: "Você é um especialista em análise de avaliações de produtos para otimização de listings da Amazon."
+          },
+          {
+            role: "user", 
+            content: prompt
+          }
+        ],
+        timestamp: new Date().toISOString(),
+        provider: "openai"
+      };
 
       // Simular resposta da IA para teste (substituir por integração real)
       const analysisResult = `# ANÁLISE COMPLETA DAS AVALIAÇÕES

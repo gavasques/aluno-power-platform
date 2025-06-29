@@ -541,6 +541,27 @@ export const agentGenerations = pgTable("agent_generations", {
   titles: jsonb("titles"),
   bulletPoints: jsonb("bullet_points"),
   description: text("description"),
+  
+  // Prompt 1 - Analysis Request/Response
+  prompt1Input: jsonb("prompt1_input"), // JSON data sent to AI provider for analysis
+  prompt1Output: jsonb("prompt1_output"), // JSON response from AI provider for analysis
+  prompt1Provider: text("prompt1_provider"), // AI provider used (openai, claude, gemini, etc)
+  prompt1Model: text("prompt1_model"), // Model used (gpt-4o, claude-3-sonnet, etc)
+  prompt1Tokens: jsonb("prompt1_tokens"), // Token usage {input, output, total}
+  prompt1Cost: decimal("prompt1_cost", { precision: 10, scale: 6 }), // Cost in USD
+  prompt1Duration: integer("prompt1_duration"), // Processing time in ms
+  
+  // Prompt 2 - Titles Generation Request/Response  
+  prompt2Input: jsonb("prompt2_input"), // JSON data sent to AI provider for titles
+  prompt2Output: jsonb("prompt2_output"), // JSON response from AI provider for titles
+  prompt2Provider: text("prompt2_provider"), // AI provider used
+  prompt2Model: text("prompt2_model"), // Model used
+  prompt2Tokens: jsonb("prompt2_tokens"), // Token usage {input, output, total}
+  prompt2Cost: decimal("prompt2_cost", { precision: 10, scale: 6 }), // Cost in USD
+  prompt2Duration: integer("prompt2_duration"), // Processing time in ms
+  
+  // Additional prompts can be added (prompt3, prompt4, etc) for future expansions
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
