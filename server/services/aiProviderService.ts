@@ -16,6 +16,11 @@ export interface AIRequest {
   }>;
   temperature?: number;
   maxTokens?: number;
+  imageData?: string;
+  referenceImages?: Array<{
+    data: string;
+    filename: string;
+  }>;
 }
 
 export interface AIResponse {
@@ -378,9 +383,43 @@ export class AIProviderService {
           } else {
             console.log('🔄 Modo geração: Criando nova imagem com images.generate()...');
             
+            // Check if reference images are provided
+            let finalPrompt = prompt;
+            if (request.referenceImages && request.referenceImages.length > 0) {
+              console.log(`📸 Processing ${request.referenceImages.length} reference images for inspiration`);
+              
+              // Use GPT-4o-mini to analyze reference images and enhance the prompt
+              const referenceAnalysis = await this.openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: [
+                  {
+                    role: "user",
+                    content: [
+                      {
+                        type: "text",
+                        text: `Analise essas imagens de referência e crie um prompt detalhado para gerar uma nova imagem seguindo esta instrução: "${prompt}". Use os elementos visuais das imagens como inspiração (cores, estilo, composição, objetos).`
+                      },
+                      ...request.referenceImages.map(img => ({
+                        type: "image_url" as const,
+                        image_url: {
+                          url: `data:image/jpeg;base64,${img.data}`,
+                          detail: "high" as const
+                        }
+                      }))
+                    ]
+                  }
+                ],
+                max_tokens: 1000
+              });
+              
+              const enhancedPrompt = referenceAnalysis.choices[0]?.message?.content || prompt;
+              finalPrompt = enhancedPrompt.substring(0, 4000);
+              console.log(`🎨 Enhanced prompt from reference images: ${finalPrompt.substring(0, 200)}...`);
+            }
+            
             const response = await this.openai.images.generate({
               model: "dall-e-3",
-              prompt: prompt.substring(0, 4000), // DALL-E-3 tem limite de prompt
+              prompt: finalPrompt.substring(0, 4000), // DALL-E-3 tem limite de prompt
               n: 1,
               size: "1024x1024",
               quality: "standard",

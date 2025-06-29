@@ -268,9 +268,17 @@ export default function AgentProviderSettings() {
       maxTokens: formData.maxTokens
     };
 
-    // Add image data for gpt-image-edit model
+    // Add image data for image models
     if (formData.model === 'gpt-image-edit' && uploadedImage) {
       testData.imageData = uploadedImage.split(',')[1]; // Remove data:image/...;base64, prefix
+    }
+
+    // Add reference images for all image models (gpt-image-1, gpt-image-edit)
+    if (formData.model.includes('image') && referenceImages.length > 0) {
+      testData.referenceImages = referenceImages.map(img => ({
+        data: img.preview.split(',')[1], // Remove data:image/...;base64, prefix
+        filename: img.file.name
+      }));
     }
 
     testConnectionMutation.mutate(testData);

@@ -2073,7 +2073,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.log(`🧪 [AI_TEST_START] RequestID: ${requestId}`);
       console.log(`   📋 Request Body Keys: ${Object.keys(req.body)}`);
       
-      const { provider, model, prompt, imageData, temperature, maxTokens } = req.body;
+      const { provider, model, prompt, imageData, referenceImages, temperature, maxTokens } = req.body;
       
       // Validation with detailed logging
       if (!provider || !model) {
@@ -2102,6 +2102,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.log(`   🎯 MaxTokens: ${maxTokens}`);
       console.log(`   📝 Prompt: "${testPrompt.substring(0, 100)}${testPrompt.length > 100 ? '...' : ''}"`);
       console.log(`   🖼️  Has Image: ${!!imageData} (${imageData ? `${imageData.length} chars` : 'none'})`);
+      console.log(`   📸 Reference Images: ${referenceImages ? referenceImages.length : 0} images`);
       
       // Prepare request data for logging
       const requestData: any = {
@@ -2118,6 +2119,12 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       if (model === 'gpt-image-1' && imageData) {
         requestData.imageData = imageData;
         console.log(`🖼️  [AI_TEST_IMAGE] RequestID: ${requestId} - Image data provided (${imageData.length} chars)`);
+      }
+
+      // Add reference images for image models
+      if (referenceImages && referenceImages.length > 0) {
+        requestData.referenceImages = referenceImages;
+        console.log(`📸 [AI_TEST_REFS] RequestID: ${requestId} - ${referenceImages.length} reference images provided`);
       }
 
       console.log(`🚀 [AI_TEST_SEND] RequestID: ${requestId} - Sending to AI service`);
