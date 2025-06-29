@@ -1873,104 +1873,292 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return lengths[promptType as keyof typeof lengths] || 2000;
   }
 
-  // Removed mock data - using database only
-      const mockPrompts = [
-        {
-          id: 'analysis',
-          name: 'Análise de Avaliações',
-          description: 'Prompt para análise profunda das avaliações dos concorrentes',
-          currentVersion: {
-            id: 'analysis-v3',
-            version: 3,
+  // GET agent prompts from database
+  app.get('/api/agent-prompts/:agentId', async (req, res) => {
+    try {
+      const { agentId } = req.params;
+
+      if (agentId !== 'amazon-listings') {
+        return res.status(404).json({ error: 'Agent not found' });
+      }
+
+      // Fetch prompts from database
+      const dbPrompts = await db.select().from(agentPrompts).where(eq(agentPrompts.agentId, agentId));
+      
+      // If no prompts in database, initialize with defaults
+      if (dbPrompts.length === 0) {
+        const defaultPrompts = [
+          {
+            id: 'analysis-amazon-listings',
+            agentId: 'amazon-listings',
+            promptType: 'analysis',
+            name: 'Análise de Avaliações',
+            description: 'Prompt para análise profunda das avaliações dos concorrentes',
             content: `Você é um especialista em análise de mercado e e-commerce da Amazon. Analise as avaliações dos concorrentes fornecidas e extraia insights valiosos.
 
 PRODUTO: {{PRODUCT_NAME}}
-DESCRIÇÃO: {{PRODUCT_DESCRIPTION}}
-PALAVRAS-CHAVE: {{KEYWORDS}}
 CATEGORIA: {{CATEGORY}}
+PALAVRAS-CHAVE: {{KEYWORDS}}
+PALAVRAS-CHAVE DE CAUDA LONGA: {{LONG_TAIL_KEYWORDS}}
+CARACTERÍSTICAS: {{FEATURES}}
+PÚBLICO-ALVO: {{TARGET_AUDIENCE}}
 
 AVALIAÇÕES DOS CONCORRENTES:
-{{COMPETITOR_REVIEWS}}
+{{REVIEWS_DATA}}
 
-Baseado nas avaliações acima, forneça uma análise estruturada em JSON com os seguintes campos:
+INSTRUÇÕES PARA ANÁLISE ESTRATÉGICA:
 
-{
-  "mainBenefits": ["lista dos 5 principais benefícios mais mencionados"],
-  "painPoints": ["lista dos 5 principais problemas/reclamações"],
-  "keyFeatures": ["características técnicas mais valorizadas"],
-  "targetAudience": "descrição detalhada do público-alvo ideal",
-  "competitorWeaknesses": ["principais fraquezas dos concorrentes"],
-  "opportunityAreas": ["oportunidades de melhoria identificadas"],
-  "emotionalTriggers": ["gatilhos emocionais encontrados"],
-  "searchIntentAnalysis": "análise da intenção de busca dos consumidores",
-  "pricePositioning": "sugestão de posicionamento de preço baseado no valor percebido",
-  "marketDifferentiators": ["principais diferenciais competitivos possíveis"]
-}
+Parte 1 - Análise Geral:
+Analise as avaliações e identifique:
+- Principais características valorizadas pelos clientes
+- Problemas mais frequentes relatados
+- Linguagem natural usada pelos compradores
+- Sugestões e melhorias mencionadas
 
-Seja específico, prático e focado em insights acionáveis para otimização de listagem Amazon.`,
-            createdAt: '2025-06-27T20:00:00Z',
-            createdBy: 'admin',
-            status: 'active'
+Parte 2 - Responda às 10 Questões Estratégicas:
+
+1. **Dores e Problemas**: Quais são as 5 principais dores e problemas que os clientes relatam sobre produtos similares?
+
+2. **Benefícios Mais Valorizados**: Quais benefícios e resultados os clientes mais valorizam e mencionam positivamente?
+
+3. **Ocasiões de Uso**: Em que ocasiões, momentos ou situações os clientes mais usam este tipo de produto?
+
+4. **Produto Ideal**: Como seria o produto ideal na visão dos clientes baseado nos feedbacks?
+
+5. **Embalagem e Apresentação**: O que os clientes comentam sobre embalagem, apresentação e primeiras impressões?
+
+6. **Materiais e Qualidade**: Quais aspectos de materiais, durabilidade e qualidade são mais mencionados?
+
+7. **Produtos Complementares**: Que outros produtos os clientes mencionam usar junto ou comparar?
+
+8. **Perfil do Comprador**: Qual o perfil demográfico e comportamental predominante dos compradores?
+
+9. **Preço e Valor**: Como os clientes percebem o preço e custo-benefício destes produtos?
+
+10. **Tendências Emergentes**: Que tendências, novidades ou mudanças de comportamento são mencionadas?
+
+Forneça uma análise detalhada e estruturada baseada exclusivamente nos dados fornecidos.`,
+            version: 1,
+            variables: JSON.stringify(['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}']),
+            maxLength: 3000,
+            status: 'active',
+            createdBy: 'system'
           },
-          versions: [],
-          variables: ['{{PRODUCT_NAME}}', '{{PRODUCT_DESCRIPTION}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{COMPETITOR_REVIEWS}}', '{{CATEGORY}}'],
-          maxLength: 3000
-        },
-        {
-          id: 'titles',
-          name: 'Geração de Títulos',
-          description: 'Prompt para criar títulos otimizados para Amazon',
-          currentVersion: {
-            id: 'titles-v2',
-            version: 2,
-            content: `Você é um especialista em SEO e copywriting para Amazon. Crie títulos otimizados que maximizem vendas e visibilidade.
+          {
+            id: 'titles-amazon-listings',
+            agentId: 'amazon-listings',
+            promptType: 'titles',
+            name: 'Geração de Títulos',
+            description: 'Prompt para criar títulos otimizados',
+            content: `Você é um especialista em copywriting Amazon. Crie títulos irresistíveis que convertem navegadores em compradores.
 
 PRODUTO: {{PRODUCT_NAME}}
-PALAVRAS-CHAVE: {{KEYWORDS}}
-PRINCIPAIS BENEFÍCIOS: {{MAIN_BENEFITS}}
-PÚBLICO-ALVO: {{TARGET_AUDIENCE}}
 CATEGORIA: {{CATEGORY}}
+PALAVRAS-CHAVE: {{KEYWORDS}}
+PALAVRAS-CHAVE DE CAUDA LONGA: {{LONG_TAIL_KEYWORDS}}
+CARACTERÍSTICAS: {{FEATURES}}
+PÚBLICO-ALVO: {{TARGET_AUDIENCE}}
 
-DIRETRIZES PARA OS TÍTULOS:
-- Máximo 200 caracteres cada
-- Incluir palavra-chave principal no início
-- Destacar principais benefícios
-- Usar termos que geram urgência/desejo
-- Otimizar para algoritmo da Amazon
-- Incluir especificações técnicas relevantes
-- Apelar para o público-alvo identificado
+DIRETRIZES PARA TÍTULOS AMAZON:
+- Máximo 200 caracteres
+- Incluir palavras-chave principais nos primeiros 80 caracteres
+- Destacar benefícios únicos e diferenciadores
+- Usar linguagem persuasiva e emocional
+- Incluir especificações técnicas importantes
+- Criar senso de valor e qualidade premium
+- Evitar termos supérfluos ou marketing agressivo
 
-Crie exatamente 10 títulos diferentes, cada um em uma linha, numerados de 1 a 10.
-Varie o estilo: alguns mais técnicos, outros mais emocionais, alguns focados em benefícios, outros em recursos.
+ESTRUTURA RECOMENDADA:
+[MARCA] [PRODUTO] - [BENEFÍCIO PRINCIPAL] | [CARACTERÍSTICAS TÉCNICAS] | [PÚBLICO/USO] | [DIFERENCIAL]
 
-Exemplo de formato:
-1. [Título aqui]
-2. [Título aqui]
-...
+Crie 5 títulos numerados diferentes, cada um focando em aspectos distintos:
+1. Foco em qualidade/durabilidade
+2. Foco em conveniência/facilidade de uso
+3. Foco em resultados/performance
+4. Foco em valor/custo-benefício
+5. Foco em exclusividade/diferencial
 
-Seja criativo, persuasivo e focado em conversão!`,
-            createdAt: '2025-06-27T19:30:00Z',
-            createdBy: 'admin',
-            status: 'active'
+Seja específico, persuasivo e otimizado para busca!`,
+            version: 1,
+            variables: JSON.stringify(['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}']),
+            maxLength: 2000,
+            status: 'active',
+            createdBy: 'system'
           },
-          versions: [],
-          variables: ['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}'],
-          maxLength: 2000
-        },
-        {
-          id: 'bulletPoints',
-          name: 'Bullet Points',
-          description: 'Prompt para criar bullet points persuasivos',
-          currentVersion: {
-            id: 'bullets-v2',
-            version: 2,
+          {
+            id: 'bulletPoints-amazon-listings',
+            agentId: 'amazon-listings',
+            promptType: 'bulletPoints',
+            name: 'Bullet Points',
+            description: 'Prompt para criar bullet points persuasivos',
             content: `Você é um copywriter especialista em Amazon. Crie bullet points que convertem visitantes em compradores.
 
 PRODUTO: {{PRODUCT_NAME}}
-CARACTERÍSTICAS: {{KEY_FEATURES}}
-BENEFÍCIOS: {{MAIN_BENEFITS}}
-DORES DO PÚBLICO: {{PAIN_POINTS}}
-GATILHOS EMOCIONAIS: {{EMOTIONAL_TRIGGERS}}
+CATEGORIA: {{CATEGORY}}
+PALAVRAS-CHAVE: {{KEYWORDS}}
+PALAVRAS-CHAVE DE CAUDA LONGA: {{LONG_TAIL_KEYWORDS}}
+CARACTERÍSTICAS: {{FEATURES}}
+PÚBLICO-ALVO: {{TARGET_AUDIENCE}}
+
+DIRETRIZES PARA BULLET POINTS:
+- Máximo 200 caracteres cada bullet point
+- Começar com emoji relevante
+- Foco em benefícios, não apenas características
+- Usar linguagem persuasiva e emocional
+- Abordar objeções principais do público
+- Incluir especificações técnicas quando relevante
+- Criar senso de urgência e valor
+
+Crie exatamente 5 bullet points numerados, cada um focando em um aspecto diferente:
+1. Qualidade/Performance principal
+2. Benefício emocional/lifestyle
+3. Especificação técnica valorizada
+4. Diferencial competitivo
+5. Garantia/suporte/valor agregado
+
+Formato:
+• TÍTULO EM MAIÚSCULAS: Descrição persuasiva do benefício...
+
+Seja persuasivo, específico e focado em conversão!`,
+            version: 1,
+            variables: JSON.stringify(['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}']),
+            maxLength: 2500,
+            status: 'active',
+            createdBy: 'system'
+          },
+          {
+            id: 'description-amazon-listings',
+            agentId: 'amazon-listings',
+            promptType: 'description',
+            name: 'Descrição Completa',
+            description: 'Prompt para descrição detalhada do produto',
+            content: `Você é um copywriter especialista em Amazon. Crie uma descrição completa que eduque, persuada e converta.
+
+PRODUTO: {{PRODUCT_NAME}}
+CATEGORIA: {{CATEGORY}}
+PALAVRAS-CHAVE: {{KEYWORDS}}
+PALAVRAS-CHAVE DE CAUDA LONGA: {{LONG_TAIL_KEYWORDS}}
+CARACTERÍSTICAS: {{FEATURES}}
+PÚBLICO-ALVO: {{TARGET_AUDIENCE}}
+
+ESTRUTURA DA DESCRIÇÃO:
+1. Abertura impactante (problema + solução)
+2. Benefícios principais (3-4 parágrafos)
+3. Especificações técnicas detalhadas
+4. Diferenciadores competitivos
+5. Garantias e suporte
+6. Call-to-action persuasivo
+
+DIRETRIZES:
+- Tom conversacional e persuasivo
+- Focar em benefícios, não apenas recursos
+- Usar storytelling quando apropriado
+- Incluir social proof e credibilidade
+- Abordar objeções principais
+- Criar urgência sem ser exagerado
+- Máximo 2000 caracteres
+- Usar formatação (quebras de linha, emojis)
+
+Crie uma descrição que transforme visitantes em compradores apaixonados pelo produto!`,
+            version: 1,
+            variables: JSON.stringify(['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}']),
+            maxLength: 2000,
+            status: 'active',
+            createdBy: 'system'
+          }
+        ];
+
+        // Insert default prompts
+        await db.insert(agentPrompts).values(defaultPrompts);
+        
+        // Fetch the inserted prompts
+        const insertedPrompts = await db.select().from(agentPrompts).where(eq(agentPrompts.agentId, agentId));
+        
+        // Format response
+        const formattedPrompts = insertedPrompts.map(prompt => ({
+          id: prompt.promptType,
+          name: prompt.name,
+          description: prompt.description,
+          currentVersion: {
+            id: prompt.id,
+            version: prompt.version,
+            content: prompt.content,
+            createdAt: prompt.createdAt,
+            createdBy: prompt.createdBy,
+            status: prompt.status
+          },
+          versions: [],
+          variables: JSON.parse(prompt.variables || '[]'),
+          maxLength: prompt.maxLength
+        }));
+
+        return res.json(formattedPrompts);
+      }
+
+      // Format existing prompts from database
+      const formattedPrompts = dbPrompts.map(prompt => ({
+        id: prompt.promptType,
+        name: prompt.name,
+        description: prompt.description,
+        currentVersion: {
+          id: prompt.id,
+          version: prompt.version,
+          content: prompt.content,
+          createdAt: prompt.createdAt,
+          createdBy: prompt.createdBy,
+          status: prompt.status
+        },
+        versions: [],
+        variables: JSON.parse(prompt.variables || '[]'),
+        maxLength: prompt.maxLength
+      }));
+
+      res.json(formattedPrompts);
+    } catch (error) {
+      console.error('Error fetching agent prompts:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // PUT endpoint to update agent prompts
+  app.put('/api/agent-prompts/:agentId/:promptId', async (req, res) => {
+    try {
+      const { agentId, promptId } = req.params;
+      const { content } = req.body;
+
+      if (agentId !== 'amazon-listings') {
+        return res.status(404).json({ error: 'Agent not found' });
+      }
+
+      // Update prompt in database
+      const promptRecordId = `${promptId}-${agentId}`;
+      
+      const [updatedPrompt] = await db.update(agentPrompts)
+        .set({ 
+          content: content,
+          version: sql`${agentPrompts.version} + 1`
+        })
+        .where(eq(agentPrompts.id, promptRecordId))
+        .returning();
+
+      if (!updatedPrompt) {
+        return res.status(404).json({ error: 'Prompt not found' });
+      }
+
+      const response = {
+        id: promptId,
+        name: updatedPrompt.name,
+        content: updatedPrompt.content,
+        version: updatedPrompt.version,
+        updatedAt: new Date().toISOString()
+      };
+
+      res.json(response);
+    } catch (error) {
+      console.error('Error updating agent prompt:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 
 DIRETRIZES PARA BULLET POINTS:
 - Máximo 200 caracteres cada bullet point
