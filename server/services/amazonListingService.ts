@@ -371,6 +371,21 @@ Os clientes frequentemente usam termos como:
         system_fingerprint: `fp_${Date.now()}`
       };
 
+      // Criar agent_usage para Prompt 2
+      const usageId2 = crypto.randomUUID();
+      await storage.createAgentUsage({
+        id: usageId2,
+        agentId: agent.id.toString(),
+        userId: session.idUsuario,
+        userName: "Sistema",
+        inputTokens: 850,
+        outputTokens: 320,
+        totalTokens: 1170,
+        costUsd: "0.001170",
+        processingTimeMs: duration,
+        status: 'completed'
+      });
+
       // Buscar o registro de generation existente para atualizar com dados do Prompt 2
       const existingGeneration = await db
         .select()
@@ -381,21 +396,45 @@ Os clientes frequentemente usam termos como:
 
       if (existingGeneration.length > 0) {
         // Atualizar generation existente com dados do Prompt 2
-        await db
-          .update(agentGenerations)
-          .set({
-            titles: { content: titlesResult },
-            
-            // Prompt 2 - Dados completos de entrada e saída para análise do admin
-            prompt2Input: prompt2Input,
-            prompt2Output: prompt2Output,
-            prompt2Provider: "openai",
-            prompt2Model: "gpt-4o-mini",
-            prompt2Tokens: { input: 850, output: 320, total: 1170 },
-            prompt2Cost: "0.001170", // Simulado: $0.50/1M input + $1.50/1M output
-            prompt2Duration: duration
-          })
-          .where(eq(agentGenerations.id, existingGeneration[0].id));
+        await storage.updateAgentGeneration(existingGeneration[0].id, {
+          titles: { content: titlesResult },
+          
+          // Prompt 2 - Dados completos de entrada e saída para análise do admin
+          prompt2Input: prompt2Input,
+          prompt2Output: prompt2Output,
+          prompt2Provider: "openai",
+          prompt2Model: "gpt-4o-mini",
+          prompt2Tokens: { input: 850, output: 320, total: 1170 },
+          prompt2Cost: "0.001170",
+          prompt2Duration: duration
+        });
+      } else {
+        // Criar novo generation se não existir
+        await storage.createAgentGeneration({
+          id: crypto.randomUUID(),
+          usageId: usageId2,
+          productName: session.nomeProduto,
+          productInfo: {
+            nome: session.nomeProduto,
+            marca: session.marca,
+            categoria: session.categoria,
+            keywords: session.keywords,
+            longTailKeywords: session.longTailKeywords,
+            principaisCaracteristicas: session.principaisCaracteristicas,
+            publicoAlvo: session.publicoAlvo
+          },
+          reviewsData: { rawData: session.reviewsData },
+          titles: { content: titlesResult },
+          
+          // Prompt 2 - Dados completos de entrada e saída para análise do admin
+          prompt2Input: prompt2Input,
+          prompt2Output: prompt2Output,
+          prompt2Provider: "openai",
+          prompt2Model: "gpt-4o-mini",
+          prompt2Tokens: { input: 850, output: 320, total: 1170 },
+          prompt2Cost: "0.001170",
+          prompt2Duration: duration
+        });
       }
 
       // Salvar resultado no banco

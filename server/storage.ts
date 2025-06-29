@@ -2078,6 +2078,23 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
+  async updateAgentGeneration(id: string, updates: Partial<InsertAgentGeneration>): Promise<AgentGeneration> {
+    const [updated] = await db
+      .update(agentGenerations)
+      .set(updates)
+      .where(eq(agentGenerations.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getAgentGeneration(id: string): Promise<AgentGeneration | undefined> {
+    const [generation] = await db
+      .select()
+      .from(agentGenerations)
+      .where(eq(agentGenerations.id, id));
+    return generation || undefined;
+  }
+
   // Generated Images
   async createGeneratedImage(image: InsertGeneratedImage): Promise<GeneratedImage> {
     const [created] = await db
