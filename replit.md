@@ -132,6 +132,10 @@ Preferred communication style: Simple, everyday language.
     - Validação obrigatória via Zod schema
     - Tag {{BRAND}} disponível em todos os prompts fixos
     - Interface atualizada sem quebrar funcionalidades existentes
+  - **Limpeza de Agentes Duplicados**: Removido agente duplicado mantendo apenas o correto
+    - Mantido: agent-amazon-listings (modelo o4-mini)
+    - Removido: amazon-listings (modelo gpt-4o-mini)
+    - Sistema limpo com apenas um agente Amazon Listings ativo
 
 - **June 29, 2025 (anterior)**: ✅ Atualização dos modelos OpenAI conforme nova documentação
   - Removidos modelos: o1-preview, o1-mini, o3-pro (problemas de endpoint)
