@@ -234,117 +234,48 @@ export class AIProviderService {
         
         try {
           if (request.imageData) {
-            // Image editing mode
-            console.log('🔄 Modo edição: Editando imagem existente...');
+            // Image editing mode usando Responses API para edição
+            console.log('🔄 Modo edição: Editando imagem com Responses API...');
             
-            const analysisResponse = await this.openai.chat.completions.create({
-              model: "gpt-4o-mini",
-              messages: [
+            // Para edição, usar Responses API com input_image
+            const content = [
+              { type: "input_text", text: `Edit this image: ${prompt}` },
+              {
+                type: "input_image",
+                image_url: `data:image/jpeg;base64,${request.imageData}`
+              }
+            ];
+            
+            // Usar Responses API para edição conforme documentação
+            const response = await (this.openai as any).responses.create({
+              model: "gpt-4.1",
+              input: [
                 {
                   role: "user",
-                  content: [
-                    {
-                      type: "text",
-                      text: `Analise esta imagem e crie um prompt detalhado para editá-la conforme solicitado: "${prompt}"`
-                    },
-                    {
-                      type: "image_url",
-                      image_url: {
-                        url: `data:image/jpeg;base64,${request.imageData}`,
-                        detail: "high"
-                      }
-                    }
-                  ]
+                  content: content
                 }
               ],
-              max_tokens: 1000
+              tools: [{ type: "image_generation" }]
             });
-
-            const analysisPrompt = analysisResponse.choices[0]?.message?.content || prompt;
-            console.log(`🎨 Prompt de edição: ${analysisPrompt.substring(0, 200)}...`);
-
-            const response = await this.openai.images.edit({
-              image: Buffer.from(request.imageData, 'base64'),
-              prompt: analysisPrompt.substring(0, 1000),
-              n: 1,
-              size: "1024x1024",
-              response_format: "url"
-            });
-
-            const imageUrl = response.data[0]?.url || '';
-            const content = `Imagem editada com sucesso!\n\nPrompt de edição: ${analysisPrompt}\n\nURL da imagem: ${imageUrl}`;
-
-            const inputTokens = this.countTokens(prompt + analysisPrompt);
-            const outputTokens = 1;
-            const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
-            const outputCost = modelConfig.outputCostPer1M;
-            const totalCost = inputCost + outputCost;
-
-            await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
-
-            return {
-              content,
-              usage: {
-                inputTokens,
-                outputTokens,
-                totalTokens: inputTokens + outputTokens,
-              },
-              cost: totalCost,
-            };
             
-          } else {
-            // Image generation mode
-            console.log('🔄 Modo geração: Criando nova imagem...');
+            // Extrair imagem editada
+            const imageData = response.output
+              .filter((output: any) => output.type === "image_generation_call")
+              .map((output: any) => output.result);
             
-            if (request.referenceImages && request.referenceImages.length > 0) {
-              console.log(`📸 Processando ${request.referenceImages.length} imagens de referência`);
-              
-              const referenceAnalysis = await this.openai.chat.completions.create({
-                model: "gpt-4o-mini",
-                messages: [
-                  {
-                    role: "user",
-                    content: [
-                      {
-                        type: "text",
-                        text: `Analise essas imagens de referência e crie um prompt detalhado para gerar uma nova imagem seguindo esta instrução: "${prompt}". Use os elementos visuais das imagens como inspiração.`
-                      },
-                      ...request.referenceImages.map(img => ({
-                        type: "image_url" as const,
-                        image_url: {
-                          url: `data:image/jpeg;base64,${img.data}`,
-                          detail: "high" as const
-                        }
-                      }))
-                    ]
-                  }
-                ],
-                max_tokens: 1000
-              });
-              
-              const enhancedPrompt = referenceAnalysis.choices[0]?.message?.content || prompt;
-              console.log(`🎨 Prompt aprimorado: ${enhancedPrompt.substring(0, 200)}...`);
-              
-              const response = await this.openai.images.generate({
-                model: "dall-e-3",
-                prompt: enhancedPrompt.substring(0, 4000),
-                n: 1,
-                size: "1024x1024",
-                quality: "standard",
-                response_format: "url"
-              });
+            if (imageData.length > 0) {
+              const imageBase64 = imageData[0];
+              const imageUrl = `data:image/png;base64,${imageBase64}`;
+              const content = `Imagem editada com sucesso via Responses API!\n\nPrompt de edição: ${prompt}\n\nURL da imagem: ${imageUrl}`;
 
-              const imageUrl = response.data?.[0]?.url || '';
-              const content = `Imagem gerada com sucesso usando ${request.referenceImages.length} imagens de referência!\n\nPrompt original: ${prompt}\n\nPrompt aprimorado: ${enhancedPrompt.substring(0, 200)}...\n\nURL da imagem: ${imageUrl}`;
-              
-              const inputTokens = this.countTokens(prompt + enhancedPrompt);
+              const inputTokens = this.countTokens(prompt);
               const outputTokens = 1;
               const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
               const outputCost = modelConfig.outputCostPer1M;
               const totalCost = inputCost + outputCost;
-              
+
               await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
-              
+
               return {
                 content,
                 usage: {
@@ -354,8 +285,106 @@ export class AIProviderService {
                 },
                 cost: totalCost,
               };
+            } else {
+              // Fallback se não conseguiu editar
+              const textContent = response.output
+                .filter((output: any) => output.type === "text")
+                .map((output: any) => output.content)
+                .join('\n');
+              
+              return {
+                content: `Não foi possível editar a imagem. Resposta: ${textContent}`,
+                usage: {
+                  inputTokens: this.countTokens(prompt),
+                  outputTokens: this.countTokens(textContent),
+                  totalTokens: this.countTokens(prompt + textContent),
+                },
+                cost: this.calculateCost(this.countTokens(prompt), this.countTokens(textContent), modelConfig),
+              };
+            }
+            
+          } else {
+            // Image generation mode usando Responses API oficial
+            console.log('🔄 Modo geração: Usando Responses API com gpt-4.1...');
+            
+            if (request.referenceImages && request.referenceImages.length > 0) {
+              console.log(`📸 Gerando imagem com ${request.referenceImages.length} imagens de referência usando Responses API`);
+              
+              // Preparar conteúdo conforme documentação oficial
+              const content = [
+                { type: "input_text", text: prompt },
+                ...request.referenceImages.map(img => ({
+                  type: "input_image",
+                  image_url: `data:image/jpeg;base64,${img.data}`
+                }))
+              ];
+              
+              // Usar Responses API conforme documentação
+              const response = await (this.openai as any).responses.create({
+                model: "gpt-4.1",
+                input: [
+                  {
+                    role: "user",
+                    content: content
+                  }
+                ],
+                tools: [{ type: "image_generation" }]
+              });
+              
+              // Extrair imagem conforme documentação
+              const imageData = response.output
+                .filter((output: any) => output.type === "image_generation_call")
+                .map((output: any) => output.result);
+              
+              if (imageData.length > 0) {
+                const imageBase64 = imageData[0];
+                const imageUrl = `data:image/png;base64,${imageBase64}`;
+                const content = `Imagem gerada com sucesso usando ${request.referenceImages.length} imagens de referência via Responses API!\n\nPrompt: ${prompt}\n\nURL da imagem: ${imageUrl}`;
+                
+                const inputTokens = this.countTokens(prompt);
+                const outputTokens = 1;
+                const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
+                const outputCost = modelConfig.outputCostPer1M;
+                const totalCost = inputCost + outputCost;
+                
+                // Salvar imagem base64 no banco
+                try {
+                  await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
+                } catch (dbError) {
+                  console.log('⚠️ Erro ao salvar no banco (não crítico):', dbError);
+                }
+                
+                return {
+                  content,
+                  usage: {
+                    inputTokens,
+                    outputTokens,
+                    totalTokens: inputTokens + outputTokens,
+                  },
+                  cost: totalCost,
+                };
+              } else {
+                // Fallback para resposta de texto se não gerou imagem
+                const textContent = response.output
+                  .filter((output: any) => output.type === "text")
+                  .map((output: any) => output.content)
+                  .join('\n');
+                
+                return {
+                  content: `Resposta do modelo: ${textContent}`,
+                  usage: {
+                    inputTokens: this.countTokens(prompt),
+                    outputTokens: this.countTokens(textContent),
+                    totalTokens: this.countTokens(prompt + textContent),
+                  },
+                  cost: this.calculateCost(this.countTokens(prompt), this.countTokens(textContent), modelConfig),
+                };
+              }
               
             } else {
+              // Sem imagens de referência - usar DALL-E-3 tradicional
+              console.log('🎨 Sem imagens de referência, usando DALL-E-3 tradicional');
+              
               const response = await this.openai.images.generate({
                 model: "dall-e-3",
                 prompt: prompt.substring(0, 4000),

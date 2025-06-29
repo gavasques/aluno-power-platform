@@ -108,12 +108,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: Sistema de imagens de referência funcionando com visualização automática
-  - Corrigido TypeError no componente AgentProviderSettings
-  - Implementado processamento de imagens de referência para gpt-image-1
-  - Backend agora analisa imagens de referência com GPT-4o-mini para criar prompts aprimorados
+- **June 29, 2025**: Implementação correta da OpenAI Responses API para imagens com referência
+  - Corrigida implementação seguindo documentação oficial da OpenAI
+  - Sistema agora usa openai.responses.create() com modelo gpt-4.1
+  - Formato correto: input_image com image_url para imagens de referência
+  - Tool image_generation obrigatório conforme especificação
+  - Edição e geração via Responses API com extração correta de base64
   - Interface exibe automaticamente imagens geradas quando há URLs na resposta
-  - Sistema completo: upload → análise → geração → visualização
+  - Sistema completo: upload → Responses API → geração → visualização
 
 - **June 28, 2025**: Implementado sistema GPT-Image-1 exclusivo para geração e edição de imagens
   - Corrigido erro "PayloadTooLargeError" aumentando limite servidor para 50MB
