@@ -96,7 +96,7 @@ export class OpenAIService {
 
     try {
       // Step 1: Analysis
-      const analysisResponse = await aiProviderService.generateText({
+      const analysisResponse = await aiProviderService.generateResponse({
         provider: agent.provider,
         model: agent.model,
         temperature: parseFloat(agent.temperature.toString()),
@@ -113,7 +113,7 @@ export class OpenAIService {
       const analysisResult = JSON.parse(analysisResponse.content || '{}');
 
       // Step 2: Generate Titles
-      const titlesResponse = await aiProviderService.generateText({
+      const titlesResponse = await aiProviderService.generateResponse({
         provider: agent.provider,
         model: agent.model,
         temperature: parseFloat(agent.temperature.toString()),
