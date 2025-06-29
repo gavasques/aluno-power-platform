@@ -544,6 +544,37 @@ export const agentGenerations = pgTable("agent_generations", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Agent Sessions - Sistema de sessões para processamento
+export const agentSessions = pgTable("agent_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  sessionHash: text("session_hash").notNull().unique(),
+  userId: text("user_id").notNull(),
+  agentType: text("agent_type").notNull(), // 'amazon-listing-optimizer'
+  status: text("status").notNull().default("active"), // 'active', 'completed', 'archived'
+  inputData: jsonb("input_data"), // Dados de entrada: {productName, category, keywords, etc}
+  tags: jsonb("tags"), // Tags geradas: {KEYWORDS: "...", TITLE: "...", etc}
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("agent_sessions_user_idx").on(table.userId),
+  typeIdx: index("agent_sessions_type_idx").on(table.agentType),
+  hashIdx: index("agent_sessions_hash_idx").on(table.sessionHash),
+}));
+
+// Agent Session Files - Arquivos de uma sessão
+export const agentSessionFiles = pgTable("agent_session_files", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  sessionId: text("session_id").references(() => agentSessions.id, { onDelete: "cascade" }).notNull(),
+  fileName: text("file_name").notNull(),
+  fileType: text("file_type").notNull(),
+  fileUrl: text("file_url").notNull(),
+  fileSize: integer("file_size").notNull(),
+  processedContent: text("processed_content"), // Conteúdo interpretado
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+}, (table) => ({
+  sessionIdx: index("agent_session_files_session_idx").on(table.sessionId),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
@@ -795,6 +826,17 @@ export const agentGenerationsRelations = relations(agentGenerations, ({ one }) =
   usage: one(agentUsage, {
     fields: [agentGenerations.usageId],
     references: [agentUsage.id],
+  }),
+}));
+
+export const agentSessionsRelations = relations(agentSessions, ({ many }) => ({
+  files: many(agentSessionFiles),
+}));
+
+export const agentSessionFilesRelations = relations(agentSessionFiles, ({ one }) => ({
+  session: one(agentSessions, {
+    fields: [agentSessionFiles.sessionId],
+    references: [agentSessions.id],
   }),
 }));
 
@@ -1134,4 +1176,26 @@ export type AgentWithPrompts = Agent & {
 // Agent usage with generations type
 export type AgentUsageWithGenerations = AgentUsage & {
   generations: AgentGeneration[];
+};
+
+// Agent session types
+export const insertAgentSessionSchema = createInsertSchema(agentSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAgentSessionFileSchema = createInsertSchema(agentSessionFiles).omit({
+  id: true,
+  uploadedAt: true,
+});
+
+export type InsertAgentSession = z.infer<typeof insertAgentSessionSchema>;
+export type AgentSession = typeof agentSessions.$inferSelect;
+export type InsertAgentSessionFile = z.infer<typeof insertAgentSessionFileSchema>;
+export type AgentSessionFile = typeof agentSessionFiles.$inferSelect;
+
+// Agent session with files type
+export type AgentSessionWithFiles = AgentSession & {
+  files: AgentSessionFile[];
 };
