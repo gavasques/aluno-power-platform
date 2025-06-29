@@ -109,11 +109,11 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 - **June 29, 2025**: ✅ Atualização dos modelos OpenAI conforme nova documentação
-  - Removidos modelos: o1-preview, o1-mini (descontinuados)
-  - Adicionados modelos: o3 ($20/$80 por 1M tokens), o3-pro ($200/$800 por 1M tokens)
+  - Removidos modelos: o1-preview, o1-mini, o3-pro (problemas de endpoint)
+  - Adicionado modelo: o3 ($20/$80 por 1M tokens)
   - Corrigido GPT-4o: limitação automática de temperatura máxima 1.0
   - Implementado suporte correto para modelos de raciocínio série "o"
-  - Modelos o4-mini, o3, o3-pro usam max_completion_tokens (não max_tokens)
+  - Modelos o4-mini, o3 usam max_completion_tokens (não max_tokens)
   - Modelos de raciocínio não suportam temperature (removido automaticamente)
   - Sistema completo: validação automática de parâmetros por tipo de modelo
 

@@ -27,7 +27,6 @@ export class OpenAIProvider extends BaseProvider {
       { provider: 'openai', model: 'gpt-4o-mini', inputCostPer1M: 0.15, outputCostPer1M: 0.60, maxTokens: 128000 },
       { provider: 'openai', model: 'o4-mini', inputCostPer1M: 1.00, outputCostPer1M: 4.00, maxTokens: 128000 },
       { provider: 'openai', model: 'o3', inputCostPer1M: 20.00, outputCostPer1M: 80.00, maxTokens: 200000 },
-      { provider: 'openai', model: 'o3-pro', inputCostPer1M: 200.00, outputCostPer1M: 800.00, maxTokens: 200000 },
       { provider: 'openai', model: 'gpt-image-1', inputCostPer1M: 5.00, outputCostPer1M: 0.167025, maxTokens: 32000 }
     ];
   }
@@ -89,7 +88,7 @@ export class OpenAIProvider extends BaseProvider {
   }
 
   private async handleTextGeneration(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
-    const isReasoningModel = ['o4-mini', 'o3', 'o3-pro'].includes(request.model);
+    const isReasoningModel = ['o4-mini', 'o3'].includes(request.model);
     
     const params: any = {
       model: request.model,
