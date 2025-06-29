@@ -180,7 +180,19 @@ export function useWebSocket() {
   }, []);
 
   const connect = useCallback(() => {
-    connectWebSocket();
+    // connectWebSocket is defined in the useEffect above
+    if (wsRef.current?.readyState !== WebSocket.OPEN) {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      const wsUrl = `${protocol}//${host}/ws`;
+      
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+      
+      ws.onopen = () => setIsConnected(true);
+      ws.onclose = () => setIsConnected(false);
+      ws.onerror = () => setIsConnected(false);
+    }
   }, [])
 
   const disconnect = useCallback(() => {
