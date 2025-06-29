@@ -4,6 +4,26 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+
+// Função auxiliar para requisições API com tipagem correta
+const makeApiRequest = async (url: string, options: {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  body?: any;
+}) => {
+  const response = await fetch(url, {
+    method: options.method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  return response.json();
+};
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -77,7 +97,7 @@ export function AmazonListingOptimizerForm() {
   // Cria nova sessão ao abrir o componente
   const createSessionMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/sessions', {
+      return makeApiRequest('/api/sessions', {
         method: 'POST',
         body: {
           userId: 'user-1', // TODO: pegar do contexto de autenticação
@@ -86,7 +106,7 @@ export function AmazonListingOptimizerForm() {
         }
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       if (data.success) {
         setSessionInfo({
           sessionHash: data.session.sessionHash,
@@ -109,13 +129,13 @@ export function AmazonListingOptimizerForm() {
     mutationFn: async (inputData: any) => {
       if (!sessionInfo) return;
       
-      return apiRequest(`/api/sessions/${sessionInfo.sessionId}`, {
+      return makeApiRequest(`/api/sessions/${sessionInfo.sessionId}`, {
         method: 'PUT',
         body: { inputData }
       });
     },
-    onSuccess: (data) => {
-      if (data.success && data.session.tags) {
+    onSuccess: (data: any) => {
+      if (data?.success && data?.session?.tags) {
         setTags(data.session.tags);
       }
     }
@@ -126,7 +146,7 @@ export function AmazonListingOptimizerForm() {
     mutationFn: async (files: FileUpload[]) => {
       if (!sessionInfo) throw new Error('Sessão não encontrada');
       
-      return apiRequest(`/api/sessions/${sessionInfo.sessionId}/files/process`, {
+      return makeApiRequest(`/api/sessions/${sessionInfo.sessionId}/files/process`, {
         method: 'POST',
         body: {
           files: files.map(f => ({
@@ -136,8 +156,8 @@ export function AmazonListingOptimizerForm() {
         }
       });
     },
-    onSuccess: (data) => {
-      if (data.success) {
+    onSuccess: (data: any) => {
+      if (data?.success) {
         form.setValue('reviewsData', data.combinedContent);
         toast({
           title: 'Sucesso',
