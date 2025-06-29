@@ -17,7 +17,7 @@ const PROVIDERS: ProviderInfo[] = [
   { value: 'deepseek', label: 'DeepSeek AI', icon: '🔍', color: 'bg-orange-100 text-orange-800' }
 ];
 
-export default function AgentProviderSettings() {
+export default function AgentProviderSettingsRefactored() {
   const { user } = useAuth();
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
 
@@ -46,7 +46,7 @@ export default function AgentProviderSettings() {
   }, [selectedAgent, updateConfiguration]);
 
   const getModelCount = (provider: string) => {
-    return (models as any[]).filter((m: any) => m.provider === provider).length;
+    return models.filter((m: any) => m.provider === provider).length;
   };
 
   const handleProviderChange = (provider: string) => {
@@ -99,7 +99,7 @@ export default function AgentProviderSettings() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {(agents as any[]).length === 0 ? (
+              {agents.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">Nenhum agente encontrado</p>
                   <Link href="/admin/agents">
@@ -109,7 +109,7 @@ export default function AgentProviderSettings() {
                   </Link>
                 </div>
               ) : (
-                (agents as any[]).map((agent: any) => (
+                agents.map((agent: any) => (
                   <Card
                     key={agent.id}
                     className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -148,7 +148,7 @@ export default function AgentProviderSettings() {
                   <ProviderCard
                     key={provider.value}
                     provider={provider}
-                    isConfigured={(status as any)[provider.value] || false}
+                    isConfigured={status[provider.value as keyof typeof status] || false}
                     modelCount={getModelCount(provider.value)}
                     onSelect={() => handleProviderChange(provider.value)}
                     isSelected={formData.provider === provider.value}
@@ -166,7 +166,7 @@ export default function AgentProviderSettings() {
               <ProviderConfiguration
                 agentName={selectedAgent.name}
                 configuration={formData}
-                models={models as any[]}
+                models={models}
                 onConfigurationChange={updateConfiguration}
               />
 
