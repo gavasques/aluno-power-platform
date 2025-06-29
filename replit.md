@@ -108,14 +108,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: Implementação correta da OpenAI Responses API para imagens com referência
-  - Corrigida implementação seguindo documentação oficial da OpenAI
-  - Sistema agora usa openai.responses.create() com modelo gpt-4.1
-  - Formato correto: input_image com image_url para imagens de referência
-  - Tool image_generation obrigatório conforme especificação
-  - Edição e geração via Responses API com extração correta de base64
+- **June 29, 2025**: Sistema híbrido: Responses API + fallback DALL-E-3 para imagens com referência
+  - Implementada Responses API conforme documentação oficial + fallback robusto
+  - Primeira tentativa: openai.responses.create() com gpt-4.1 e tool image_generation
+  - Fallback automático: GPT-4o-mini analisa referências + DALL-E-3 gera imagem
+  - Logging detalhado para diagnosticar problemas da Responses API
+  - Sistema garante geração de imagem mesmo se Responses API falhar
   - Interface exibe automaticamente imagens geradas quando há URLs na resposta
-  - Sistema completo: upload → Responses API → geração → visualização
+  - Sistema completo: upload → Responses API/fallback → geração → visualização
 
 - **June 28, 2025**: Implementado sistema GPT-Image-1 exclusivo para geração e edição de imagens
   - Corrigido erro "PayloadTooLargeError" aumentando limite servidor para 50MB
