@@ -15,8 +15,6 @@ import { TemplatesProvider } from "./contexts/TemplatesContext";
 import { PromptsProvider } from "./contexts/PromptsContext";
 import { YoutubeProvider } from "./contexts/YoutubeContext";
 import { AuthProvider } from "./contexts/AuthContext";
-import { AgentsProvider } from "./contexts/AgentsContext";
-
 // Import pages that exist
 import Dashboard from "./pages/Dashboard";
 import Videos from "./pages/Videos";
@@ -38,14 +36,6 @@ import TemplateDetail from "./pages/hub/TemplateDetail";
 import PromptDetail from "./pages/hub/PromptDetail";
 import Hub from "./pages/Hub";
 import MyArea from "./pages/MyArea";
-import AgentsPage from "./pages/agents";
-import AgentProcessorPage from "./pages/AgentProcessorPage";
-import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
-import AmazonListingsOptimizerResult from "./pages/agents/amazon-listings-optimizer-result";
-import AmazonListingsOptimizerPrompts from "./pages/admin/agents/AmazonListingsOptimizerPrompts";
-import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
-import GeneratedImages from "./pages/admin/GeneratedImages";
-import TestImagePage from "./components/TestImagePage";
 
 // Create a simple Auth component
 const Auth = () => (
@@ -71,36 +61,10 @@ function App() {
                     <ToolsProvider>
                       <TemplatesProvider>
                         <PromptsProvider>
-                          <AgentsProvider>
                             <Switch>
                           <Route path="/auth" component={Auth} />
 
-                          {/* Agents routes */}
-                          <Route path="/agents/amazon-listings-optimizer/result">
-                            <Layout>
-                              <AmazonListingsOptimizerResult />
-                            </Layout>
-                          </Route>
-                          
-                          <Route path="/agents/amazon-listings-optimizer">
-                            <Layout>
-                              <AmazonListingsOptimizer />
-                            </Layout>
-                          </Route>
-                          
-                          <Route path="/agents/:id">
-                            {(params) => (
-                              <Layout>
-                                <AgentProcessorPage />
-                              </Layout>
-                            )}
-                          </Route>
-                          
-                          <Route path="/agents">
-                            <Layout>
-                              <AgentsPage />
-                            </Layout>
-                          </Route>
+
 
                           {/* Detail routes with Layout */}
                           <Route path="/hub/materiais/:id">
@@ -182,23 +146,6 @@ function App() {
                           </Route>
 
                           {/* Admin routes */}
-                          <Route path="/admin/images">
-                            <AdminLayout>
-                              <GeneratedImages />
-                            </AdminLayout>
-                          </Route>
-                          
-                          <Route path="/admin/agents/providers">
-                            <AdminLayout>
-                              <AgentProviderSettings />
-                            </AdminLayout>
-                          </Route>
-                          
-                          <Route path="/admin/agents/amazon-listings-optimizer/prompts">
-                            <AdminLayout>
-                              <AmazonListingsOptimizerPrompts />
-                            </AdminLayout>
-                          </Route>
                           
                           <Route path="/admin/usuarios">
                             <AdminLayout>
@@ -276,7 +223,6 @@ function App() {
 
                             </Switch>
                             <Toaster />
-                          </AgentsProvider>
                         </PromptsProvider>
                       </TemplatesProvider>
                     </ToolsProvider>

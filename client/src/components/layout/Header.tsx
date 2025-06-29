@@ -25,7 +25,6 @@ import {
   Folder,
   Package,
   Calculator,
-  Bot,
   School,
   FileDigit,
   Ship,
@@ -102,12 +101,7 @@ export function Header() {
                 </Link>
               </NavigationMenuItem>
               
-              <NavigationMenuItem>
-                <Link to="/agents" className={navigationMenuTriggerStyle()}>
-                  <Bot className="mr-2 h-4 w-4" />
-                  Agentes IA
-                </Link>
-              </NavigationMenuItem>
+
               <NavigationMenuItem>
                 <Link to="/videos" className={navigationMenuTriggerStyle()}>
                   <Youtube className="mr-2 h-4 w-4" />
