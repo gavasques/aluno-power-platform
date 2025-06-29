@@ -575,6 +575,36 @@ export const agentSessionFiles = pgTable("agent_session_files", {
   sessionIdx: index("agent_session_files_session_idx").on(table.sessionId),
 }));
 
+// Amazon Listing Optimizer Sessions - Tabela específica conforme especificação
+export const amazonListingSessions = pgTable("amazon_listing_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  sessionHash: text("session_hash").notNull().unique().$defaultFn(() => Math.random().toString(36).substring(2, 10).toUpperCase()),
+  idUsuario: text("id_usuario").notNull(),
+  nomeProduto: text("nome_produto"),
+  marca: text("marca"),
+  categoria: text("categoria"),
+  keywords: text("keywords"),
+  longTailKeywords: text("long_tail_keywords"),
+  principaisCaracteristicas: text("principais_caracteristicas"),
+  publicoAlvo: text("publico_alvo"),
+  reviewsData: text("reviews_data"),
+  reviewsInsight: text("reviews_insight"), // Resultado da Etapa 1
+  titulos: text("titulos"), // Resultado da Etapa 2
+  bulletPoints: text("bullet_points"), // Para futuras etapas
+  descricao: text("descricao"), // Para futuras etapas
+  providerAI: text("provider_ai"),
+  modelAI: text("model_ai"),
+  status: text("status").notNull().default("active"), // 'active', 'processing', 'completed', 'aborted'
+  currentStep: integer("current_step").notNull().default(0), // 0=inicio, 1=analise, 2=titulos
+  dataHoraCreated: timestamp("data_hora_created").notNull().defaultNow(),
+  dataHoraUpdated: timestamp("data_hora_updated").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("amazon_listing_sessions_user_idx").on(table.idUsuario),
+  statusIdx: index("amazon_listing_sessions_status_idx").on(table.status),
+  hashIdx: index("amazon_listing_sessions_hash_idx").on(table.sessionHash),
+  createdIdx: index("amazon_listing_sessions_created_idx").on(table.dataHoraCreated),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
@@ -838,6 +868,10 @@ export const agentSessionFilesRelations = relations(agentSessionFiles, ({ one })
     fields: [agentSessionFiles.sessionId],
     references: [agentSessions.id],
   }),
+}));
+
+export const amazonListingSessionsRelations = relations(amazonListingSessions, ({ many }) => ({
+  // Future relations if needed
 }));
 
 // Generated Images Storage
@@ -1167,6 +1201,17 @@ export type AgentUsage = typeof agentUsage.$inferSelect;
 
 export type InsertAgentGeneration = z.infer<typeof insertAgentGenerationSchema>;
 export type AgentGeneration = typeof agentGenerations.$inferSelect;
+
+// Amazon Listing Session schemas
+export const insertAmazonListingSessionSchema = createInsertSchema(amazonListingSessions).omit({
+  id: true,
+  sessionHash: true,
+  dataHoraCreated: true,
+  dataHoraUpdated: true,
+});
+
+export type InsertAmazonListingSession = z.infer<typeof insertAmazonListingSessionSchema>;
+export type AmazonListingSession = typeof amazonListingSessions.$inferSelect;
 
 // Agent with prompts type
 export type AgentWithPrompts = Agent & {
