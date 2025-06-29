@@ -108,7 +108,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: ✅ SUCESSO - OpenAI /images/edits endpoint funcionando com gpt-image-1
+- **June 29, 2025**: ✅ Atualização dos modelos OpenAI conforme nova documentação
+  - Removidos modelos: o1-preview, o1-mini (descontinuados)
+  - Adicionados modelos: o3 ($20/$80 por 1M tokens), o3-pro ($200/$800 por 1M tokens)
+  - Corrigido GPT-4o: limitação automática de temperatura máxima 1.0
+  - Implementado suporte correto para modelos de raciocínio série "o"
+  - Modelos o4-mini, o3, o3-pro usam max_completion_tokens (não max_tokens)
+  - Modelos de raciocínio não suportam temperature (removido automaticamente)
+  - Sistema completo: validação automática de parâmetros por tipo de modelo
+
+- **June 29, 2025 (anterior)**: ✅ SUCESSO - OpenAI /images/edits endpoint funcionando com gpt-image-1
   - Endpoint oficial client.images.edit() com modelo gpt-image-1 FUNCIONANDO
   - Teste realizado: 1 imagem de referência + prompt "ajuste pra vender"
   - Resposta: imagem base64 de 2.4MB gerada em 55 segundos

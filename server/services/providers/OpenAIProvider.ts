@@ -25,9 +25,9 @@ export class OpenAIProvider extends BaseProvider {
       { provider: 'openai', model: 'gpt-4.1', inputCostPer1M: 2.50, outputCostPer1M: 10.00, maxTokens: 128000 },
       { provider: 'openai', model: 'gpt-4o', inputCostPer1M: 2.50, outputCostPer1M: 10.00, maxTokens: 128000 },
       { provider: 'openai', model: 'gpt-4o-mini', inputCostPer1M: 0.15, outputCostPer1M: 0.60, maxTokens: 128000 },
-      { provider: 'openai', model: 'o1-preview', inputCostPer1M: 15.00, outputCostPer1M: 60.00, maxTokens: 128000 },
-      { provider: 'openai', model: 'o1-mini', inputCostPer1M: 3.00, outputCostPer1M: 12.00, maxTokens: 128000 },
       { provider: 'openai', model: 'o4-mini', inputCostPer1M: 1.00, outputCostPer1M: 4.00, maxTokens: 128000 },
+      { provider: 'openai', model: 'o3', inputCostPer1M: 20.00, outputCostPer1M: 80.00, maxTokens: 200000 },
+      { provider: 'openai', model: 'o3-pro', inputCostPer1M: 200.00, outputCostPer1M: 800.00, maxTokens: 200000 },
       { provider: 'openai', model: 'gpt-image-1', inputCostPer1M: 5.00, outputCostPer1M: 0.167025, maxTokens: 32000 }
     ];
   }
@@ -89,17 +89,23 @@ export class OpenAIProvider extends BaseProvider {
   }
 
   private async handleTextGeneration(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
-    const isReasoningModel = ['o1-preview', 'o1-mini', 'o4-mini'].includes(request.model);
+    const isReasoningModel = ['o4-mini', 'o3', 'o3-pro'].includes(request.model);
     
     const params: any = {
       model: request.model,
-      messages: request.messages,
-      max_tokens: request.maxTokens || modelConfig.maxTokens
+      messages: request.messages
     };
 
-    if (!isReasoningModel) {
+    // Reasoning models use max_completion_tokens, others use max_tokens
+    if (isReasoningModel) {
+      params.max_completion_tokens = request.maxTokens || modelConfig.maxTokens;
+      // Reasoning models don't support temperature
+    } else {
+      params.max_tokens = request.maxTokens || modelConfig.maxTokens;
       params.temperature = request.temperature ?? 0.7;
     }
+
+    console.log(`🔧 [OPENAI] Request params for ${request.model}:`, JSON.stringify(params, null, 2));
 
     const response = await this.client.chat.completions.create(params);
     
