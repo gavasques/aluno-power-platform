@@ -108,12 +108,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: ✅ Correção completa de todos os provedores de IA
+- **June 29, 2025**: ✅ Sistema completo de IA com todos os provedores funcionais
   - Anthropic: Limitação automática de temperatura (máximo 1.0) + modelos Claude 4.0/3.x funcionais
-  - Google Gemini: Biblioteca corrigida para @google/generative-ai + apenas modelos funcionais
-  - Modelos finais: gemini-2.5-pro, gemini-2.5-flash (removidos modelos com erro 404)
+  - Google Gemini: Biblioteca corrigida para @google/generative-ai + apenas modelos funcionais (gemini-2.5-pro, gemini-2.5-flash)
+  - DeepSeek: Adicionado modelo deepseek-reasoner (DeepSeek-R1-0528) com preços atualizados
   - Sistema GPT-Image-1 dual mode: Edição (com imagens) + Criação (sem imagens)
-  - Todos os 4 provedores (OpenAI, Anthropic, Gemini, DeepSeek) funcionais
+  - Total: 19 modelos funcionais em 4 provedores (OpenAI, Anthropic, Gemini, DeepSeek)
 
 - **June 29, 2025 (anterior)**: ✅ Atualização dos modelos OpenAI conforme nova documentação
   - Removidos modelos: o1-preview, o1-mini, o3-pro (problemas de endpoint)

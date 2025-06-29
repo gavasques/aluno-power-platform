@@ -21,7 +21,8 @@ export class DeepSeekProvider extends BaseProvider {
   getAvailableModels(): ModelConfig[] {
     return [
       { provider: 'deepseek', model: 'deepseek-chat', inputCostPer1M: 0.27, outputCostPer1M: 1.10, maxTokens: 64000 },
-      { provider: 'deepseek', model: 'deepseek-coder', inputCostPer1M: 0.27, outputCostPer1M: 1.10, maxTokens: 64000 }
+      { provider: 'deepseek', model: 'deepseek-coder', inputCostPer1M: 0.27, outputCostPer1M: 1.10, maxTokens: 64000 },
+      { provider: 'deepseek', model: 'deepseek-reasoner', inputCostPer1M: 0.55, outputCostPer1M: 2.19, maxTokens: 128000 }
     ];
   }
 
