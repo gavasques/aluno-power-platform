@@ -310,31 +310,67 @@ export class AIProviderService {
             if (request.referenceImages && request.referenceImages.length > 0) {
               console.log(`📸 Usando /images/edits com ${request.referenceImages.length} imagens de referência`);
               
-              // Usar apenas a primeira imagem, pois o endpoint /images/edits aceita uma imagem base
-              // As outras imagens serão incluídas no contexto do prompt
-              const mainImageBuffer = Buffer.from(request.referenceImages[0].data, 'base64');
-              const additionalImages = request.referenceImages.slice(1);
-              
-              let enhancedPrompt = prompt;
-              if (additionalImages.length > 0) {
-                enhancedPrompt += `\n\nUse a primeira imagem como base e considere as outras ${additionalImages.length} imagens como referência para composição, cores e elementos.`;
-              }
-              
-              console.log(`📁 Imagem base: ${request.referenceImages[0].filename || 'image.png'} (${mainImageBuffer.length} bytes)`);
-              console.log(`🔧 Prompt aprimorado com ${additionalImages.length} imagens adicionais no contexto`);
-              
-              // Usar toFile para converter o Buffer corretamente
+              // Preparar múltiplas imagens usando toFile() corretamente conforme documentação oficial
               const { toFile } = await import('openai');
-              const imageFile = toFile(mainImageBuffer, request.referenceImages[0].filename || 'image.png');
+              const fs = await import('fs');
+              const path = await import('path');
               
-              const response = await this.openai.images.edit({
-                model: 'gpt-image-1',
-                image: imageFile,
-                prompt: enhancedPrompt,
-                n: 1,
-                size: 'auto',
-                quality: 'high'
-              });
+              const timestamp = Date.now();
+              const tempPaths: string[] = [];
+              
+              // Criar arquivos temporários e converter para toFile()
+              const imageFiles = await Promise.all(
+                request.referenceImages.map(async (img, index) => {
+                  const imageBuffer = Buffer.from(img.data, 'base64');
+                  const tempFileName = `temp_image_${index}_${timestamp}.png`;
+                  const tempPath = path.join('/tmp', tempFileName);
+                  tempPaths.push(tempPath);
+                  
+                  // Escrever buffer para arquivo temporário
+                  fs.writeFileSync(tempPath, imageBuffer);
+                  
+                  console.log(`📁 Imagem ${index + 1}: ${img.filename || 'image.png'} (${imageBuffer.length} bytes) -> ${tempPath}`);
+                  
+                  // Usar toFile com createReadStream conforme exemplo oficial
+                  return toFile(fs.createReadStream(tempPath), img.filename || `image-${index}.png`, {
+                    type: 'image/png'
+                  });
+                })
+              );
+              
+              console.log(`🔧 Enviando ${imageFiles.length} imagens para /images/edits usando toFile() + createReadStream`);
+              
+              try {
+                const response = await this.openai.images.edit({
+                  model: 'gpt-image-1',
+                  image: imageFiles,
+                  prompt: prompt,
+                  n: 1,
+                  size: 'auto',
+                  quality: 'high'
+                });
+                
+                // Limpar arquivos temporários após sucesso
+                tempPaths.forEach(tempPath => {
+                  try {
+                    fs.unlinkSync(tempPath);
+                  } catch (e) {
+                    console.log(`⚠️ Não foi possível limpar arquivo temporário: ${tempPath}`);
+                  }
+                });
+                
+                return response;
+              } catch (error) {
+                // Limpar arquivos temporários mesmo em caso de erro
+                tempPaths.forEach(tempPath => {
+                  try {
+                    fs.unlinkSync(tempPath);
+                  } catch (e) {
+                    console.log(`⚠️ Não foi possível limpar arquivo temporário: ${tempPath}`);
+                  }
+                });
+                throw error;
+              }
               
               console.log('✅ Resposta do /images/edits:', {
                 dataLength: response.data?.length || 0,
