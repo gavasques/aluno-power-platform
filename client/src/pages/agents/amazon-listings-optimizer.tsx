@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface FormData {
   productName: string;
+  brand: string;
   category: string;
   keywords: string;
   longTailKeywords: string;
@@ -60,6 +61,7 @@ interface Department {
 export default function AmazonListingsOptimizer() {
   const [formData, setFormData] = useState<FormData>({
     productName: "",
+    brand: "",
     category: "",
     keywords: "",
     longTailKeywords: "",
@@ -142,6 +144,7 @@ export default function AmazonListingsOptimizer() {
         body: JSON.stringify({ 
           inputData: {
             productName: formData.productName,
+            brand: formData.brand,
             category: formData.category,
             keywords: formData.keywords,
             longTailKeywords: formData.longTailKeywords,
@@ -190,6 +193,10 @@ export default function AmazonListingsOptimizer() {
     // Campos obrigatórios
     if (!formData.productName.trim()) {
       newErrors.productName = "Nome do produto é obrigatório";
+    }
+
+    if (!formData.brand.trim()) {
+      newErrors.brand = "Marca é obrigatória";
     }
 
     if (!formData.category.trim()) {
@@ -570,28 +577,44 @@ export default function AmazonListingsOptimizer() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="category" className="text-sm font-medium">
-                        Categoria *
+                      <Label htmlFor="brand" className="text-sm font-medium">
+                        Marca *
                       </Label>
-                      <Select
-                        value={formData.category}
-                        onValueChange={(value) => updateField('category', value)}
-                      >
-                        <SelectTrigger className={errors.category ? "border-red-300" : ""}>
-                          <SelectValue placeholder="Selecione uma categoria" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {departments.map((department) => (
-                            <SelectItem key={department.id} value={department.name}>
-                              {department.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.category && (
-                        <p className="text-sm text-red-600">{errors.category}</p>
+                      <Input
+                        id="brand"
+                        placeholder="Ex: Sony, JBL, Apple"
+                        value={formData.brand}
+                        onChange={(e) => updateField('brand', e.target.value)}
+                        className={errors.brand ? "border-red-300" : ""}
+                      />
+                      {errors.brand && (
+                        <p className="text-sm text-red-600">{errors.brand}</p>
                       )}
                     </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="category" className="text-sm font-medium">
+                      Categoria *
+                    </Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) => updateField('category', value)}
+                    >
+                      <SelectTrigger className={errors.category ? "border-red-300" : ""}>
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departments.map((department) => (
+                          <SelectItem key={department.id} value={department.name}>
+                            {department.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.category && (
+                      <p className="text-sm text-red-600">{errors.category}</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>

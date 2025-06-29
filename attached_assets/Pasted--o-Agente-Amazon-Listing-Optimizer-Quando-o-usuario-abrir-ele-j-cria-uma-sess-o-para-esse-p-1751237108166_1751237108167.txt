@@ -1,0 +1,142 @@
+
+
+
+o Agente "Amazon Listing Optimizer"
+
+Quando o usuario abrir ele, já "cria uma sessão" para esse processamento, a cada geracão é uma nova sessão, ligada ao usuario. Vamos precisa disso para ter separado as coisas no banco de dados. 
+
+Ao abrir o agente, mostre em cima, bem pequeno, o codigo da sessão, um numero hash, e o id do usuario.  Caso precisamos depois intervir em algo e ele nos questione com um print. 
+
+Na página de Amazon listing Optimier, 
+
+Acredito que devemos ter uma tabela com o fluxo desse agente, com os campos
+"id_usuario"
+"sessao"
+"name_producto"
+"keywords"
+"long-tail_keywords"
+"principais_caracteriscias"
+"publico-alvo"
+"reviews_data"
+"reviews_insight"
+"titulos"
+"bullet points"
+"descricao"
+"data-hora-created"
+"data-hora-updated"
+"provider-AI"
+"model-ai"
+
+Ao rodar o Agente, vamos precisar fazer algumas etapas. 
+
+Primeiro, salvar todos os dados informados no banco de dados
+como:
+"id_usuario"
+"sessao"
+"name_producto"
+"keywords"
+"long-tail_keywords"
+"principais_caracteriscias"
+"publico-alvo"
+"reviews_data"
+
+
+Primeira Etapa:
+- vamos salvar os promts diretamente na tabela agent promts
+- Vamos rodar a analise das avaliaçoes dos Competidores, para isso, vamos subir as informações de {reviews_data} junto ao promt de Analise de Avaliações. Vamos enviar ela ao provedor de Agente configurado para esse agente. 
+O PROMT É:
+
+<PROMT 1>
+- Analise de Avaliações:
+Estou informando aqui, um ablomerado de avaliações de meus competidores, com produtos simulares, agregue e analise todas as avaliações de produtos juntas, para que analise a informação de maneira completa.
+
+# ETAPA 1
+A Análise deve focar nos seguintes pontos:
+01 – Características desejadas pelos clientes
+02 – Problemas recorrentes e pontos de cor mencionados nas avaliações negativas
+03 – Identificar a linguagem natural que os clientes usam para descrever suas
+necessidades
+04 – Sugestões para destacar essas características e/ou soluções do listing para
+meu produto.
+Por favor, me avise quando a análise estiver completa.
+
+#ETAPA2
+
+Com a análise completa da etapa 1, vamos para a proxima etapa, onde com base no que você tem de informações agora, mais o conteudo completo das avaliações, vamos responder algumas perguntas: 
+
+# PERGUNTAS
+1. Que pontos de vista interessantes emergem após analisar os dados?
+(Comente tanto aspectos positivos quanto negativos que chamaram a atenção).
+2. Quais são os 5 principais pontos de dor que os clientes experimentam com estes
+produtos? (Enumere-os em ordem de importância segundo a frequência e
+severidade mencionadas nas avaliações).
+3. Quais são os 7 principais benefícios que os clientes destacam? (Por favor,
+enumere-os em ordem de relevância segundo a frequência com que são
+mencionados e a satisfação gerada).
+4. Para qual evento ou ocasião estes produtos são comprados? (Organize as
+ocasiões ou eventos mais comuns segundo as avaliações, como uso diário, esporte,
+viagens, etc.).
+5. Se você tivesse que desenhar O MELHOR {nome_do_produto} do planeta, que
+características chave incluiria para transformá-lo em um sucesso de vendas e por
+quê? (Explore materiais, design, funcionalidade e outros aspectos táticos baseados
+na análise).
+6. Que tipo de embalagem você recomendaria e por quê? (Considere
+sustentabilidade, funcionalidade e a experiência do cliente).
+7. Que tipo de material você recomendaria para este produto e por quê? (Leve em
+conta durabilidade, estética, conforto e qualquer outro fator relevante).
+8. Que produtos adicionais pequenos e leves poderíamos incluir para surpreender o
+cliente e melhorar sua experiência? (Também sugira produtos digitais que possam
+aumentar a experiência do cliente após a compra).
+9. Existe algum dado interessante ou tendência que tenha emergido da análise das
+avaliações e que deva conhecer? (Qualquer dado fora do comum ou tendência nas
+preferências do cliente).
+10. Que perguntas importantes eu deveria fazer e provavelmente não estou fazendo?
+(Ajude-me a descobrir aspectos que não considerei em relação ao produto ou à
+experiência do cliente).
+
+A ideia é que responta de forma simples, a pergunta/resposta a cada pergunta. De forma detalhada. 
+
+</PROMT 1>
+
+Vamos pegar a resposta e salvar na coluna do banco de dados, nomeada de "reviews_insight"
+
+Segunda etapa:
+
+Agora vamos desenvolver 5 opções de titulos para o usuario depois escolher qual mais faz sentido para ele. 
+
+Para isso, vamos enviar algumas informações antes dos dados para o promt, coloquei entre conchetes o que temos que enviar, podem estar com nome incorreto, corrija e ajjuste corretamente
+
+<PROMT 2>
+
+{nome do produto}
+{Keywords}
+{long_tail_keywords}
+{marca}
+{principais caracteristicas}
+{publico alvo}
+{categoria}
+
+Você é um especialista em gerar titulos que gerem alta taxa de CTR e conversão para a Amazon. Te dei algumas informações acima sobre o produto que vamos trabalhar. 
+Com base nessas informações, vamos desenvolver 5 opções de títulos diferentes, que cumpram com o seguinte:
+01 – O título deve ter entre 150 e 200 caracteres
+02 – A Estrutura deve ser  [Produto Principal] + [ Palavras Chave] + [Características Destacadas] + [Marca]
+03 – Utilize as seguintes palavras chave de forma orgânica, mas sem forçar
+
+Se necessário, use palavras long tail, caracteriscias, sempre quando for importante. 
+
+</PROMT 2>
+
+
+SALVE essa informação como sendo "titulos" no banco de dados dessa sessao desse agente. 
+
+
+Retorne ao usuario, em tela, a Analise das Avaliações, e os titulos Gerados, e já baixe no formato de TXT essas informações, agrupadas. 
+
+
+Quando o usuario abrir novamente o agente, inicia uma nova sessão e novas informações, nada se salva. 
+
+A Cada PROMT que ELE RODA, de um feedback ao usuario, com um visual de progressão, e o botão mostrando aguarda, X de X ou x% concluido. E que tenha um botão para ele poder ABORTAR a qualquer momento tambem. 
+
+Vamos fazer de momento essas etapas, e ver o resultado. 
+
+
