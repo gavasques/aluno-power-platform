@@ -18,11 +18,7 @@ export class GeminiProvider extends BaseProvider {
   getAvailableModels(): ModelConfig[] {
     return [
       { provider: 'gemini', model: 'gemini-2.5-pro', inputCostPer1M: 2.50, outputCostPer1M: 10.00, maxTokens: 2000000 },
-      { provider: 'gemini', model: 'gemini-2.5-flash', inputCostPer1M: 0.075, outputCostPer1M: 0.30, maxTokens: 1000000 },
-      { provider: 'gemini', model: 'gemini-2.5-flash-lite-preview', inputCostPer1M: 0.075, outputCostPer1M: 0.30, maxTokens: 1000000 },
-      { provider: 'gemini', model: 'gemini-1.5-pro', inputCostPer1M: 1.25, outputCostPer1M: 5.00, maxTokens: 2000000 },
-      { provider: 'gemini', model: 'gemini-1.5-flash', inputCostPer1M: 0.075, outputCostPer1M: 0.30, maxTokens: 1000000 },
-      { provider: 'gemini', model: 'gemini-2.0-flash-exp', inputCostPer1M: 0.075, outputCostPer1M: 0.30, maxTokens: 1000000 }
+      { provider: 'gemini', model: 'gemini-2.5-flash', inputCostPer1M: 0.075, outputCostPer1M: 0.30, maxTokens: 1000000 }
     ];
   }
 
@@ -59,9 +55,10 @@ export class GeminiProvider extends BaseProvider {
         },
         cost
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('🚨 [GEMINI] Error generating response:', error);
-      throw new Error(`Gemini API error: ${error.message || error}`);
+      const errorMessage = error?.message || String(error);
+      throw new Error(`Gemini API error: ${errorMessage}`);
     }
   }
 

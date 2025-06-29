@@ -108,13 +108,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: ✅ Correção completa dos modelos Anthropic com nomes oficiais
-  - Adicionados modelos Claude 4.0: claude-sonnet-4-20250514, claude-opus-4-20250514
-  - Mantidos modelos Claude 3.x: claude-3-5-sonnet-20241022, claude-3-opus-20240229, claude-3-haiku-20240307
-  - Sistema de dois modos GPT-Image-1 funcionando perfeitamente
-  - Modo Edição: Com imagens de referência usa /images/edit endpoint
-  - Modo Criação: Sem imagens usa novo Responses API com image_generation tool
-  - Detecção automática do modo baseado na presença de referenceImages
+- **June 29, 2025**: ✅ Correção completa de todos os provedores de IA
+  - Anthropic: Limitação automática de temperatura (máximo 1.0) + modelos Claude 4.0/3.x funcionais
+  - Google Gemini: Biblioteca corrigida para @google/generative-ai + apenas modelos funcionais
+  - Modelos finais: gemini-2.5-pro, gemini-2.5-flash (removidos modelos com erro 404)
+  - Sistema GPT-Image-1 dual mode: Edição (com imagens) + Criação (sem imagens)
+  - Todos os 4 provedores (OpenAI, Anthropic, Gemini, DeepSeek) funcionais
 
 - **June 29, 2025 (anterior)**: ✅ Atualização dos modelos OpenAI conforme nova documentação
   - Removidos modelos: o1-preview, o1-mini, o3-pro (problemas de endpoint)
