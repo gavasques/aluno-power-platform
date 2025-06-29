@@ -19,8 +19,6 @@ export class AnthropicProvider extends BaseProvider {
 
   getAvailableModels(): ModelConfig[] {
     return [
-      { provider: 'anthropic', model: 'claude-sonnet-4-20250514', inputCostPer1M: 3.00, outputCostPer1M: 15.00, maxTokens: 200000 },
-      { provider: 'anthropic', model: 'claude-4-opus', inputCostPer1M: 15.00, outputCostPer1M: 75.00, maxTokens: 200000 },
       { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022', inputCostPer1M: 3.00, outputCostPer1M: 15.00, maxTokens: 200000 },
       { provider: 'anthropic', model: 'claude-3-opus-20240229', inputCostPer1M: 15.00, outputCostPer1M: 75.00, maxTokens: 200000 },
       { provider: 'anthropic', model: 'claude-3-haiku-20240307', inputCostPer1M: 0.25, outputCostPer1M: 1.25, maxTokens: 200000 }
