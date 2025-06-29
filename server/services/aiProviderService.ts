@@ -350,6 +350,34 @@ export class AIProviderService {
                   quality: 'high'
                 });
                 
+                console.log('✅ Resposta do /images/edits:', {
+                  dataLength: response.data?.length || 0,
+                  hasB64Json: !!response.data?.[0]?.b64_json,
+                  responseKeys: Object.keys(response.data?.[0] || {}),
+                  fullResponse: response
+                });
+                
+                // O gpt-image-1 sempre retorna base64 por padrão
+                const imageBase64 = response.data?.[0]?.b64_json || response.data?.[0]?.revised_prompt || '';
+                
+                if (!imageBase64) {
+                  console.log('❌ Nenhuma imagem retornada pela API');
+                  throw new Error('API não retornou imagem gerada');
+                }
+                
+                const imageUrl = imageBase64.startsWith('data:') ? imageBase64 : `data:image/png;base64,${imageBase64}`;
+                const content = `Imagem gerada usando ${request.referenceImages?.length || 0} imagens de referência com GPT-Image-1!\n\nPrompt: ${prompt}\n\nURL da imagem: ${imageUrl}`;
+                
+                const inputTokens = this.countTokens(prompt);
+                const outputTokens = 1;
+                const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
+                const outputCost = modelConfig.outputCostPer1M;
+                const totalCost = inputCost + outputCost;
+                
+                if (imageUrl && imageUrl.length > 100) {
+                  await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
+                }
+                
                 // Limpar arquivos temporários após sucesso
                 tempPaths.forEach(tempPath => {
                   try {
@@ -359,7 +387,15 @@ export class AIProviderService {
                   }
                 });
                 
-                return response;
+                return {
+                  content,
+                  usage: {
+                    inputTokens,
+                    outputTokens,
+                    totalTokens: inputTokens + outputTokens,
+                  },
+                  cost: totalCost,
+                };
               } catch (error) {
                 // Limpar arquivos temporários mesmo em caso de erro
                 tempPaths.forEach(tempPath => {
@@ -371,34 +407,6 @@ export class AIProviderService {
                 });
                 throw error;
               }
-              
-              console.log('✅ Resposta do /images/edits:', {
-                dataLength: response.data?.length || 0,
-                hasB64Json: !!response.data?.[0]?.b64_json,
-                responseKeys: Object.keys(response.data?.[0] || {})
-              });
-              
-              const imageBase64 = response.data?.[0]?.b64_json || '';
-              const imageUrl = `data:image/png;base64,${imageBase64}`;
-              const content = `Imagem gerada usando ${request.referenceImages.length} imagens de referência com GPT-Image-1!\n\nPrompt: ${prompt}\n\nURL da imagem: ${imageUrl}`;
-              
-              const inputTokens = this.countTokens(prompt);
-              const outputTokens = 1;
-              const inputCost = (inputTokens / 1000000) * modelConfig.inputCostPer1M;
-              const outputCost = modelConfig.outputCostPer1M;
-              const totalCost = inputCost + outputCost;
-              
-              await this.storeGeneratedImage(imageUrl, prompt, 'gpt-image-1');
-              
-              return {
-                content,
-                usage: {
-                  inputTokens,
-                  outputTokens,
-                  totalTokens: inputTokens + outputTokens,
-                },
-                cost: totalCost,
-              };
               
             } else {
               // Sem imagens de referência - usar DALL-E-3 tradicional
