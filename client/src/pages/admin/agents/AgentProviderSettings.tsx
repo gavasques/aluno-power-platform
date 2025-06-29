@@ -645,8 +645,13 @@ export default function AgentProviderSettings() {
                               
                               {/* Exibir imagem gerada se houver URL na resposta */}
                               {testResponse && (() => {
-                                const imageUrlMatch = testResponse.match(/https:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp)/i);
-                                const imageUrl = imageUrlMatch ? imageUrlMatch[0] : null;
+                                // Procurar por URLs de imagem (HTTP/HTTPS)
+                                const httpImageMatch = testResponse.match(/https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp)/i);
+                                
+                                // Procurar por imagens base64
+                                const base64ImageMatch = testResponse.match(/data:image\/[^;]+;base64,[A-Za-z0-9+/=]+/i);
+                                
+                                const imageUrl = httpImageMatch ? httpImageMatch[0] : (base64ImageMatch ? base64ImageMatch[0] : null);
                                 
                                 if (imageUrl) {
                                   return (
@@ -660,18 +665,36 @@ export default function AgentProviderSettings() {
                                           onError={(e) => {
                                             const img = e.target as HTMLImageElement;
                                             img.style.display = 'none';
+                                            console.log('Erro ao carregar imagem:', imageUrl.substring(0, 100) + '...');
                                           }}
                                         />
                                       </div>
-                                      <div className="mt-2 text-sm text-gray-600">
-                                        <a 
-                                          href={imageUrl} 
-                                          target="_blank" 
-                                          rel="noopener noreferrer"
-                                          className="text-blue-600 hover:text-blue-800 underline"
-                                        >
-                                          Abrir imagem em nova aba
-                                        </a>
+                                      <div className="mt-2 text-sm text-gray-600 flex gap-4">
+                                        {imageUrl.startsWith('http') ? (
+                                          <a 
+                                            href={imageUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:text-blue-800 underline"
+                                          >
+                                            Abrir imagem em nova aba
+                                          </a>
+                                        ) : (
+                                          <button
+                                            onClick={() => {
+                                              const link = document.createElement('a');
+                                              link.href = imageUrl;
+                                              link.download = 'imagem-gerada.png';
+                                              link.click();
+                                            }}
+                                            className="text-blue-600 hover:text-blue-800 underline"
+                                          >
+                                            Baixar imagem
+                                          </button>
+                                        )}
+                                        <span className="text-gray-500">
+                                          Formato: {imageUrl.startsWith('data:') ? 'Base64' : 'URL'}
+                                        </span>
                                       </div>
                                     </div>
                                   );
