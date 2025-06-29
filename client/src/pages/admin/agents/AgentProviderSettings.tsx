@@ -527,7 +527,7 @@ export default function AgentProviderSettings() {
             </div>
 
             {/* Upload de Imagens de Referência - Só aparece para modelos de imagem */}
-            {selectedModel && selectedModel.toLowerCase().includes('image') && (
+            {selectedModel && selectedModel.model && selectedModel.model.toLowerCase().includes('image') && (
               <div className="space-y-4 p-4 border rounded-lg bg-blue-50 border-blue-200">
                 <div className="flex items-center gap-2">
                   <ImageIcon className="h-5 w-5 text-blue-600" />
