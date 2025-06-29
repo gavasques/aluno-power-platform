@@ -1,14 +1,14 @@
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { BaseProvider } from './BaseProvider';
 import { AIRequest, AIResponse, ModelConfig } from '../types/ai.types';
 
 export class GeminiProvider extends BaseProvider {
   protected providerName = 'gemini';
-  private client: GoogleGenAI;
+  private client: GoogleGenerativeAI;
 
   constructor() {
     super();
-    this.client = new GoogleGenAI(process.env.GEMINI_API_KEY || '');
+    this.client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
   }
 
   isConfigured(): boolean {
@@ -30,34 +30,39 @@ export class GeminiProvider extends BaseProvider {
     this.validateRequest(request);
     const modelConfig = this.getModelConfig(request.model);
 
-    const model = this.client.getGenerativeModel({ model: request.model });
-    
-    const prompt = request.messages.map(msg => 
-      msg.role === 'system' ? `System: ${msg.content}` : msg.content
-    ).join('\n\n');
+    try {
+      const model = this.client.getGenerativeModel({ model: request.model });
+      
+      const prompt = request.messages.map(msg => 
+        msg.role === 'system' ? `System: ${msg.content}` : msg.content
+      ).join('\n\n');
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: request.temperature ?? 0.7,
-        maxOutputTokens: request.maxTokens || 4000
-      }
-    });
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: request.temperature ?? 0.7,
+          maxOutputTokens: request.maxTokens || 4000
+        }
+      });
 
-    const response = result.response;
-    const content = response.text() || '';
-    const usage = response.usageMetadata || { promptTokenCount: 0, candidatesTokenCount: 0, totalTokenCount: 0 };
-    const cost = this.calculateCost(usage.promptTokenCount, usage.candidatesTokenCount, modelConfig);
+      const response = result.response;
+      const content = response.text() || '';
+      const usage = response.usageMetadata || { promptTokenCount: 0, candidatesTokenCount: 0, totalTokenCount: 0 };
+      const cost = this.calculateCost(usage.promptTokenCount, usage.candidatesTokenCount, modelConfig);
 
-    return {
-      content,
-      usage: {
-        inputTokens: usage.promptTokenCount,
-        outputTokens: usage.candidatesTokenCount,
-        totalTokens: usage.totalTokenCount
-      },
-      cost
-    };
+      return {
+        content,
+        usage: {
+          inputTokens: usage.promptTokenCount,
+          outputTokens: usage.candidatesTokenCount,
+          totalTokens: usage.totalTokenCount
+        },
+        cost
+      };
+    } catch (error) {
+      console.error('🚨 [GEMINI] Error generating response:', error);
+      throw new Error(`Gemini API error: ${error.message || error}`);
+    }
   }
 
   private getModelConfig(model: string): ModelConfig {
