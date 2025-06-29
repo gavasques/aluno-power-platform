@@ -38,6 +38,7 @@ import {
 import { youtubeService } from "./services/youtubeService";
 import { openaiService } from "./services/openaiService";
 import { aiProviderService } from "./services/aiProviderService";
+import { SessionService } from "./services/sessionService";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
 import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages } from '@shared/schema';
@@ -2462,7 +2463,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Agent Sessions routes
   app.post('/api/sessions', async (req, res) => {
     try {
-      const { userId, agentType, inputData } = req.body;
+      const { userId, agentType } = req.body;
       
       if (!userId || !agentType) {
         return res.status(400).json({ 
@@ -2470,15 +2471,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         });
       }
 
-      const sessionHash = generateSessionHash();
-      const session = await storage.createAgentSession({
-        sessionHash,
-        userId,
-        agentType,
-        status: 'active',
-        inputData: inputData || {},
-        tags: generateTags(inputData || {}),
-      });
+      const session = await SessionService.createSession(userId, agentType);
       
       res.status(201).json({
         success: true,
@@ -2493,6 +2486,77 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       });
     } catch (error: any) {
       console.error('Erro ao criar sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.get('/api/sessions/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const session = await SessionService.getSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+
+      res.json(session);
+    } catch (error: any) {
+      console.error('Erro ao buscar sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.put('/api/sessions/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const { inputData } = req.body;
+      
+      const session = await SessionService.updateSessionData(sessionId, inputData);
+      
+      res.json({
+        success: true,
+        session: {
+          id: session.id,
+          sessionHash: session.sessionHash,
+          tags: session.tags,
+          updatedAt: session.updatedAt
+        }
+      });
+    } catch (error: any) {
+      console.error('Erro ao atualizar sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.post('/api/sessions/:sessionId/files', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const { fileName, fileType, fileUrl, fileSize, processedContent } = req.body;
+      
+      const file = await SessionService.addFileToSession(
+        sessionId, 
+        fileName, 
+        fileType, 
+        fileUrl, 
+        fileSize, 
+        processedContent
+      );
+      
+      res.status(201).json({ success: true, file });
+    } catch (error: any) {
+      console.error('Erro ao adicionar arquivo à sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.get('/api/sessions/:sessionId/files', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const files = await SessionService.getSessionFiles(sessionId);
+      
+      res.json(files);
+    } catch (error: any) {
+      console.error('Erro ao buscar arquivos da sessão:', error);
       res.status(500).json({ error: 'Erro interno do servidor' });
     }
   });

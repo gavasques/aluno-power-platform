@@ -1,136 +1,175 @@
-import { v4 as uuidv4 } from 'uuid';
-import { storage } from '../storage';
-import { AgentSession, AgentSessionWithFiles, InsertAgentSession, InsertAgentSessionFile } from '@shared/schema';
+import { db } from "../db";
+import { agentSessions, agentSessionFiles } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
+import crypto from "crypto";
 
-/**
- * SessionService - Gerencia sessões de agentes seguindo princípios SOLID
- * Responsabilidade única: gerenciar ciclo de vida das sessões
- */
-export class SessionService {
-  
-  /**
-   * Cria uma nova sessão para um agente
-   */
-  async createSession(userId: string, agentType: string, inputData: any = {}): Promise<AgentSession> {
-    const sessionHash = this.generateSessionHash();
-    
-    const sessionData: InsertAgentSession = {
-      sessionHash,
-      userId,
-      agentType,
-      status: 'active',
-      inputData,
-      tags: this.generateInitialTags(inputData),
-    };
-
-    return await storage.createAgentSession(sessionData);
-  }
-
-  /**
-   * Busca uma sessão por hash
-   */
-  async getSessionByHash(sessionHash: string): Promise<AgentSessionWithFiles | null> {
-    return await storage.getAgentSessionByHash(sessionHash);
-  }
-
-  /**
-   * Atualiza dados de entrada e tags de uma sessão
-   */
-  async updateSessionData(sessionId: string, inputData: any): Promise<AgentSession> {
-    const tags = this.generateTags(inputData);
-    return await storage.updateAgentSession(sessionId, { inputData, tags });
-  }
-
-  /**
-   * Adiciona arquivo à sessão
-   */
-  async addFileToSession(sessionId: string, fileData: Omit<InsertAgentSessionFile, 'sessionId'>): Promise<void> {
-    await storage.createAgentSessionFile({
-      ...fileData,
-      sessionId,
-    });
-  }
-
-  /**
-   * Processa múltiplos arquivos e combina o conteúdo
-   */
-  async processMultipleFiles(sessionId: string, files: Array<{ name: string; content: string }>): Promise<string> {
-    let combinedContent = '';
-
-    for (const file of files) {
-      combinedContent += `\n\n=== ARQUIVO: ${file.name} ===\n${file.content}`;
-      
-      // Salva arquivo processado
-      await this.addFileToSession(sessionId, {
-        fileName: file.name,
-        fileType: 'text/plain',
-        fileUrl: '', // Não há URL física, apenas conteúdo processado
-        fileSize: file.content.length,
-        processedContent: file.content,
-      });
-    }
-
-    return combinedContent.trim();
-  }
-
-  /**
-   * Completa uma sessão
-   */
-  async completeSession(sessionId: string): Promise<void> {
-    await storage.updateAgentSession(sessionId, { status: 'completed' });
-  }
-
-  /**
-   * Gera hash único para a sessão
-   */
-  private generateSessionHash(): string {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 8);
-    return `${timestamp}-${random}`.toUpperCase();
-  }
-
-  /**
-   * Gera tags iniciais baseadas nos dados de entrada
-   */
-  private generateInitialTags(inputData: any): Record<string, string> {
-    const tags: Record<string, string> = {};
-    
-    if (inputData.productName) {
-      tags.PRODUCT_NAME = inputData.productName;
-    }
-    
-    return tags;
-  }
-
-  /**
-   * Gera todas as tags baseadas nos dados completos
-   */
-  private generateTags(inputData: any): Record<string, string> {
-    const tags: Record<string, string> = {};
-
-    // Tags básicas
-    if (inputData.productName) tags.PRODUCT_NAME = inputData.productName;
-    if (inputData.category) tags.CATEGORY = inputData.category;
-    if (inputData.keywords) tags.KEYWORDS = inputData.keywords;
-    if (inputData.longTailKeywords) tags.LONG_TAIL_KEYWORDS = inputData.longTailKeywords;
-    if (inputData.features) tags.FEATURES = inputData.features;
-    if (inputData.targetAudience) tags.TARGET_AUDIENCE = inputData.targetAudience;
-    if (inputData.reviewsData) tags.REVIEWS_DATA = inputData.reviewsData;
-
-    // Tags derivadas
-    if (inputData.keywords && inputData.longTailKeywords) {
-      tags.ALL_KEYWORDS = `${inputData.keywords}, ${inputData.longTailKeywords}`;
-    }
-
-    return tags;
-  }
-
-  /**
-   * Lista sessões ativas de um usuário
-   */
-  async getUserActiveSessions(userId: string, agentType?: string): Promise<AgentSession[]> {
-    return await storage.getUserAgentSessions(userId, agentType, 'active');
-  }
+export interface SessionData {
+  productName?: string;
+  category?: string;
+  keywords?: string;
+  longTailKeywords?: string;
+  mainFeatures?: string;
+  targetAudience?: string;
+  reviewsData?: string;
 }
 
-export const sessionService = new SessionService();
+export interface SessionTags {
+  PRODUCT_NAME?: string;
+  CATEGORY?: string;
+  KEYWORDS?: string;
+  LONG_TAIL_KEYWORDS?: string;
+  MAIN_FEATURES?: string;
+  TARGET_AUDIENCE?: string;
+  REVIEWS_DATA?: string;
+}
+
+export class SessionService {
+  // Criar nova sessão
+  static async createSession(userId: string, agentType: string = "amazon-listing-optimizer") {
+    const sessionHash = this.generateSessionHash();
+    
+    const [session] = await db
+      .insert(agentSessions)
+      .values({
+        sessionHash,
+        userId,
+        agentType,
+        status: "active",
+        inputData: {},
+        tags: {}
+      })
+      .returning();
+    
+    return session;
+  }
+
+  // Atualizar dados da sessão e gerar tags
+  static async updateSessionData(sessionId: string, data: SessionData) {
+    const tags = this.generateTags(data);
+    
+    const [session] = await db
+      .update(agentSessions)
+      .set({
+        inputData: data,
+        tags,
+        updatedAt: new Date()
+      })
+      .where(eq(agentSessions.id, sessionId))
+      .returning();
+    
+    return session;
+  }
+
+  // Buscar sessão por ID
+  static async getSession(sessionId: string) {
+    const [session] = await db
+      .select()
+      .from(agentSessions)
+      .where(eq(agentSessions.id, sessionId));
+    
+    return session;
+  }
+
+  // Buscar sessão por hash
+  static async getSessionByHash(sessionHash: string) {
+    const [session] = await db
+      .select()
+      .from(agentSessions)
+      .where(eq(agentSessions.sessionHash, sessionHash));
+    
+    return session;
+  }
+
+  // Adicionar arquivo à sessão
+  static async addFileToSession(
+    sessionId: string,
+    fileName: string,
+    fileType: string,
+    fileUrl: string,
+    fileSize: number,
+    processedContent?: string
+  ) {
+    const [file] = await db
+      .insert(agentSessionFiles)
+      .values({
+        sessionId,
+        fileName,
+        fileType,
+        fileUrl,
+        fileSize,
+        processedContent
+      })
+      .returning();
+    
+    return file;
+  }
+
+  // Buscar arquivos da sessão
+  static async getSessionFiles(sessionId: string) {
+    return await db
+      .select()
+      .from(agentSessionFiles)
+      .where(eq(agentSessionFiles.sessionId, sessionId));
+  }
+
+  // Marcar sessão como completa
+  static async completeSession(sessionId: string) {
+    const [session] = await db
+      .update(agentSessions)
+      .set({
+        status: "completed",
+        updatedAt: new Date()
+      })
+      .where(eq(agentSessions.id, sessionId))
+      .returning();
+    
+    return session;
+  }
+
+  // Gerar hash único da sessão
+  private static generateSessionHash(): string {
+    const timestamp = Date.now().toString();
+    const random = Math.random().toString(36).substring(2, 8);
+    return `ALS-${timestamp.slice(-6)}${random.toUpperCase()}`;
+  }
+
+  // Gerar tags dos dados da sessão
+  private static generateTags(data: SessionData): SessionTags {
+    const tags: SessionTags = {};
+    
+    if (data.productName) {
+      tags.PRODUCT_NAME = data.productName.trim();
+    }
+    
+    if (data.category) {
+      tags.CATEGORY = data.category.trim();
+    }
+    
+    if (data.keywords) {
+      tags.KEYWORDS = data.keywords.trim();
+    }
+    
+    if (data.longTailKeywords) {
+      tags.LONG_TAIL_KEYWORDS = data.longTailKeywords.trim();
+    }
+    
+    if (data.mainFeatures) {
+      tags.MAIN_FEATURES = data.mainFeatures.trim();
+    }
+    
+    if (data.targetAudience) {
+      tags.TARGET_AUDIENCE = data.targetAudience.trim();
+    }
+    
+    if (data.reviewsData) {
+      tags.REVIEWS_DATA = data.reviewsData.trim();
+    }
+    
+    return tags;
+  }
+
+  // Obter tags disponíveis para prompts
+  static getAvailableTags(sessionData: SessionTags): string[] {
+    return Object.keys(sessionData).map(key => `{${key}}`);
+  }
+}
