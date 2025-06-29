@@ -5,6 +5,7 @@ import crypto from "crypto";
 
 export interface SessionData {
   productName?: string;
+  brand?: string;
   category?: string;
   keywords?: string;
   longTailKeywords?: string;
@@ -15,6 +16,7 @@ export interface SessionData {
 
 export interface SessionTags {
   PRODUCT_NAME?: string;
+  BRAND?: string;
   CATEGORY?: string;
   KEYWORDS?: string;
   LONG_TAIL_KEYWORDS?: string;
@@ -139,6 +141,10 @@ export class SessionService {
     
     if (data.productName) {
       tags.PRODUCT_NAME = data.productName.trim();
+    }
+    
+    if (data.brand) {
+      tags.BRAND = data.brand.trim();
     }
     
     if (data.category) {

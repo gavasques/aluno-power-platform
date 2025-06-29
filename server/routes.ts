@@ -2634,6 +2634,7 @@ function generateTags(inputData: any): Record<string, string> {
 
   // Tags principais do formulário
   if (inputData.productName) tags.PRODUCT_NAME = inputData.productName;
+  if (inputData.brand) tags.BRAND = inputData.brand;
   if (inputData.category) tags.CATEGORY = inputData.category;
   if (inputData.keywords) tags.KEYWORDS = inputData.keywords;
   if (inputData.longTailKeywords) tags.LONG_TAIL_KEYWORDS = inputData.longTailKeywords;

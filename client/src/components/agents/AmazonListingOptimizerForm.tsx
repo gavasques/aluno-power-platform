@@ -36,6 +36,7 @@ import { useToast } from '@/hooks/use-toast';
 // Schema de validação seguindo princípios DRY
 const amazonListingSchema = z.object({
   productName: z.string().min(1, 'Nome do produto é obrigatório'),
+  brand: z.string().min(1, 'Marca é obrigatória'),
   category: z.string().min(1, 'Categoria é obrigatória'),
   keywords: z.string().min(1, 'Palavras-chave são obrigatórias'),
   longTailKeywords: z.string().optional(),
@@ -79,6 +80,7 @@ export function AmazonListingOptimizerForm() {
     resolver: zodResolver(amazonListingSchema),
     defaultValues: {
       productName: '',
+      brand: '',
       category: '',
       keywords: '',
       longTailKeywords: '',
@@ -275,26 +277,46 @@ export function AmazonListingOptimizerForm() {
             <CardTitle>Informações do Produto</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="productName">Nome do Produto</Label>
-              <Input
-                id="productName"
-                {...form.register('productName')}
-                onChange={(e) => {
-                  form.register('productName').onChange(e);
-                  handleFormChange({ productName: e.target.value });
-                }}
-                placeholder="Ex: Fone de Ouvido Bluetooth Premium"
-              />
-              {form.formState.errors.productName && (
-                <p className="text-sm text-red-500 mt-1">
-                  {form.formState.errors.productName.message}
-                </p>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="productName">Nome do Produto *</Label>
+                <Input
+                  id="productName"
+                  {...form.register('productName')}
+                  onChange={(e) => {
+                    form.register('productName').onChange(e);
+                    handleFormChange({ productName: e.target.value });
+                  }}
+                  placeholder="Ex: Fone de Ouvido Bluetooth Premium"
+                />
+                {form.formState.errors.productName && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {form.formState.errors.productName.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="brand">Marca *</Label>
+                <Input
+                  id="brand"
+                  {...form.register('brand')}
+                  onChange={(e) => {
+                    form.register('brand').onChange(e);
+                    handleFormChange({ brand: e.target.value });
+                  }}
+                  placeholder="Ex: Sony, JBL, Apple"
+                />
+                {form.formState.errors.brand && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {form.formState.errors.brand.message}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div>
-              <Label htmlFor="category">Categoria</Label>
+              <Label htmlFor="category">Categoria *</Label>
               <Select 
                 value={form.watch('category')} 
                 onValueChange={(value) => {
