@@ -31,10 +31,17 @@ export class AnthropicProvider extends BaseProvider {
     this.validateRequest(request);
     const modelConfig = this.getModelConfig(request.model);
 
+    // Anthropic only accepts temperature 0-1, clamp it
+    let temperature = request.temperature ?? 0.7;
+    if (temperature > 1.0) {
+      console.log(`⚠️ [ANTHROPIC] Limiting temperature for ${request.model} from ${temperature} to 1.0`);
+      temperature = 1.0;
+    }
+
     const response = await this.client.messages.create({
       model: request.model,
       max_tokens: request.maxTokens || 4000,
-      temperature: request.temperature ?? 0.7,
+      temperature: temperature,
       messages: request.messages.map(msg => ({
         role: msg.role === 'system' ? 'user' : msg.role,
         content: msg.role === 'system' ? `System: ${msg.content}` : msg.content
