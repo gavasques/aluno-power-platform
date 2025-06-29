@@ -278,7 +278,7 @@ ${request.longTailKeywords ? `Long Tail: ${request.longTailKeywords}` : ''}
 ${request.features ? `Características: ${request.features}` : ''}
 ${request.targetAudience ? `Público-alvo: ${request.targetAudience}` : ''}
 
-Avaliações dos concorrentes:
+{{REVIEWS_DATA}}:
 ${request.reviewsData}
 
 Retorne em formato JSON estruturado com as chaves: mainBenefits, painPoints, keyFeatures, targetAudience, competitorWeaknesses, opportunityAreas, emotionalTriggers, searchIntentAnalysis, pricePositioning, marketDifferentiators.`;
