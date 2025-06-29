@@ -428,6 +428,7 @@ export default function AmazonListingsOptimizer() {
     try {
       const requestData = {
         productName: formData.productName,
+        brand: formData.brand,
         category: formData.category,
         keywords: formData.keywords,
         longTailKeywords: formData.longTailKeywords,
@@ -471,6 +472,7 @@ export default function AmazonListingsOptimizer() {
   // Verificar se o formulário está válido
   const isFormValid = () => {
     return formData.productName.trim() && 
+           formData.brand.trim() &&
            formData.category.trim() && 
            formData.keywords.trim() &&
            ((reviewsTab === "upload" && formData.uploadedFiles.length > 0) ||
@@ -479,9 +481,10 @@ export default function AmazonListingsOptimizer() {
 
   // Contar campos preenchidos
   const getCompletionStats = () => {
-    const totalFields = 7; // Total de campos no formulário
+    const totalFields = 8; // Total de campos no formulário (incluindo marca)
     const filledFields = [
       formData.productName,
+      formData.brand,
       formData.category,
       formData.keywords,
       formData.longTailKeywords,
