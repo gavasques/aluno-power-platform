@@ -108,13 +108,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: ✅ Implementação completa de dois modos para gpt-image-1
+- **June 29, 2025**: ✅ Correção completa dos modelos Anthropic com nomes oficiais
+  - Adicionados modelos Claude 4.0: claude-sonnet-4-20250514, claude-opus-4-20250514
+  - Mantidos modelos Claude 3.x: claude-3-5-sonnet-20241022, claude-3-opus-20240229, claude-3-haiku-20240307
+  - Sistema de dois modos GPT-Image-1 funcionando perfeitamente
   - Modo Edição: Com imagens de referência usa /images/edit endpoint
   - Modo Criação: Sem imagens usa novo Responses API com image_generation tool
   - Detecção automática do modo baseado na presença de referenceImages
-  - Logs detalhados distinguindo entre "Edit mode" e "Generation mode"
-  - Armazenamento diferenciado: gpt-image-1-edit vs gpt-image-1-create
-  - Sistema completo suportando ambos os casos de uso do gpt-image-1
 
 - **June 29, 2025 (anterior)**: ✅ Atualização dos modelos OpenAI conforme nova documentação
   - Removidos modelos: o1-preview, o1-mini, o3-pro (problemas de endpoint)
