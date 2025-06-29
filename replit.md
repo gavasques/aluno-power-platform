@@ -124,9 +124,14 @@ Preferred communication style: Simple, everyday language.
     - Arquitetura modular seguindo DRY, KISS e SOLID
   - **Sistema de Prompts Fixos**: Removida interface de edição, prompts implementados diretamente no banco
     - Prompts fixos: analysis, title, bulletPoints, description
-    - Todas as variáveis disponíveis em todos os prompts
+    - Todas as variáveis disponíveis em todos os prompts: {{PRODUCT_NAME}}, {{BRAND}}, {{CATEGORY}}, {{KEYWORDS}}, {{LONG_TAIL_KEYWORDS}}, {{FEATURES}}, {{TARGET_AUDIENCE}}, {{REVIEWS_DATA}}
     - Sistema simplificado sem interface administrativa de edição
     - Prompts otimizados com foco em conversão Amazon
+  - **Campo Marca Adicionado**: Implementado campo obrigatório "Marca" no formulário
+    - Layout responsivo com Nome do Produto e Marca lado a lado
+    - Validação obrigatória via Zod schema
+    - Tag {{BRAND}} disponível em todos os prompts fixos
+    - Interface atualizada sem quebrar funcionalidades existentes
 
 - **June 29, 2025 (anterior)**: ✅ Atualização dos modelos OpenAI conforme nova documentação
   - Removidos modelos: o1-preview, o1-mini, o3-pro (problemas de endpoint)
