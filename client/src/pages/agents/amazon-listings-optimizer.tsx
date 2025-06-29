@@ -36,6 +36,12 @@ interface ValidationErrors {
   [key: string]: string;
 }
 
+interface ReviewData {
+  title: string;
+  body: string;
+  rating: string;
+}
+
 export default function AmazonListingsOptimizer() {
   const [formData, setFormData] = useState<FormData>({
     productName: "",
@@ -148,20 +154,32 @@ export default function AmazonListingsOptimizer() {
       return;
     }
     
-    // Processar arquivos e extrair conteúdo
+    // Processar arquivos CSV e extrair apenas Title, Body, Rating
     try {
-      let combinedContent = "";
+      let combinedMarkdown = "";
       
       for (const file of files) {
-        const content = await readFileContent(file);
-        combinedContent += `\n--- ${file.name} ---\n${content}\n`;
+        const csvContent = await readFileContent(file);
+        const reviews = parseCSVToReviews(csvContent);
+        
+        combinedMarkdown += `\n## Arquivo: ${file.name.replace('.csv', '')}\n\n`;
+        
+        reviews.forEach((review, index) => {
+          if (review.title || review.body || review.rating) {
+            combinedMarkdown += `### Avaliação ${index + 1}\n\n`;
+            combinedMarkdown += `**Título:** ${review.title || 'Sem título'}\n\n`;
+            combinedMarkdown += `**Nota:** ${review.rating || 'N/A'}/5 ⭐\n\n`;
+            combinedMarkdown += `**Comentário:**\n${review.body || 'Sem comentário'}\n\n`;
+            combinedMarkdown += `---\n\n`;
+          }
+        });
       }
       
       // Atualizar dados do formulário
       setFormData(prev => ({
         ...prev,
         uploadedFiles: files,
-        reviewsData: prev.reviewsData + combinedContent
+        reviewsData: prev.reviewsData + combinedMarkdown
       }));
       
       // Limpar erros
@@ -186,6 +204,92 @@ export default function AmazonListingsOptimizer() {
       reader.onerror = () => reject(new Error("Erro ao ler arquivo"));
       reader.readAsText(file);
     });
+  };
+
+  // Função para extrair Title, Body e Rating do CSV
+  const parseCSVToReviews = (csvText: string): ReviewData[] => {
+    const lines = csvText.split('\n').filter(line => line.trim());
+    if (lines.length < 2) return [];
+    
+    const reviews = [];
+    
+    // Encontrar índices das colunas necessárias no header
+    const header = lines[0];
+    const columns = parseCSVLine(header);
+    
+    const titleIndex = columns.findIndex(col => 
+      col.toLowerCase().includes('title') || col.toLowerCase().includes('título')
+    );
+    const bodyIndex = columns.findIndex(col => 
+      col.toLowerCase().includes('body') || col.toLowerCase().includes('comentário') || col.toLowerCase().includes('comment')
+    );
+    const ratingIndex = columns.findIndex(col => 
+      col.toLowerCase().includes('rating') || col.toLowerCase().includes('nota') || col.toLowerCase().includes('star')
+    );
+    
+    // Processar cada linha de dados (pular header)
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      try {
+        const fields = parseCSVLine(line);
+        
+        if (fields.length > Math.max(titleIndex, bodyIndex, ratingIndex)) {
+          const title = titleIndex >= 0 ? cleanText(fields[titleIndex]) : '';
+          const body = bodyIndex >= 0 ? cleanText(fields[bodyIndex]) : '';
+          const rating = ratingIndex >= 0 ? cleanText(fields[ratingIndex]) : '';
+          
+          // Só adicionar se pelo menos um campo tiver conteúdo
+          if (title || body || rating) {
+            reviews.push({
+              title: title || 'Sem título',
+              body: body || 'Sem comentário',
+              rating: rating || 'N/A'
+            });
+          }
+        }
+      } catch (error) {
+        console.warn(`Erro ao processar linha ${i}:`, error);
+        continue;
+      }
+    }
+    
+    return reviews;
+  };
+
+  // Parser CSV robusto que lida com aspas e vírgulas
+  const parseCSVLine = (line: string): string[] => {
+    const fields = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        fields.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    fields.push(current); // Add last field
+    return fields;
+  };
+
+  // Limpar texto removendo aspas extras e espaços
+  const cleanText = (text: string): string => {
+    if (!text) return '';
+    return text.replace(/^"?(.*?)"?$/, '$1').trim();
   };
   
   // Remover arquivo específico
