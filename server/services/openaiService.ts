@@ -19,12 +19,10 @@ interface ProcessListingOptimizerRequest {
   userName: string;
   productName: string;
   category: string;
-  price?: string;
   keywords: string;
   longTailKeywords?: string;
   features?: string;
   targetAudience?: string;
-  competitors?: string;
   reviewsData: string;
   format: 'csv' | 'text';
 }
@@ -98,10 +96,11 @@ export class OpenAIService {
 
     try {
       // Step 1: Analysis
-      const analysisResponse = await openai.chat.completions.create({
+      const analysisResponse = await aiProviderService.generateText({
+        provider: agent.provider,
         model: agent.model,
         temperature: parseFloat(agent.temperature.toString()),
-        max_tokens: agent.maxTokens,
+        maxTokens: agent.maxTokens,
         messages: [
           { role: 'system', content: systemPrompt },
           { 
@@ -111,13 +110,14 @@ export class OpenAIService {
         ],
       });
 
-      const analysisResult = JSON.parse(analysisResponse.choices[0].message.content || '{}');
+      const analysisResult = JSON.parse(analysisResponse.content || '{}');
 
       // Step 2: Generate Titles
-      const titlesResponse = await openai.chat.completions.create({
+      const titlesResponse = await aiProviderService.generateText({
+        provider: agent.provider,
         model: agent.model,
         temperature: parseFloat(agent.temperature.toString()),
-        max_tokens: agent.maxTokens,
+        maxTokens: agent.maxTokens,
         messages: [
           { role: 'system', content: systemPrompt },
           { 
@@ -277,8 +277,6 @@ Palavras-chave: ${request.keywords}
 ${request.longTailKeywords ? `Long Tail: ${request.longTailKeywords}` : ''}
 ${request.features ? `Características: ${request.features}` : ''}
 ${request.targetAudience ? `Público-alvo: ${request.targetAudience}` : ''}
-${request.competitors ? `Concorrentes: ${request.competitors}` : ''}
-${request.price ? `Preço: R$ ${request.price}` : ''}
 
 Avaliações dos concorrentes:
 ${request.reviewsData}
@@ -454,12 +452,10 @@ Retorne apenas o texto da descrição otimizada.`;
         productName: request.productName,
         productInfo: {
           category: request.category,
-          price: request.price,
           keywords: request.keywords,
           longTailKeywords: request.longTailKeywords,
           features: request.features,
-          targetAudience: request.targetAudience,
-          competitors: request.competitors
+          targetAudience: request.targetAudience
         },
         reviewsData: { data: request.reviewsData, format: request.format },
         analysisResult,

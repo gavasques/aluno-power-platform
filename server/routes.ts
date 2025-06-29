@@ -2295,20 +2295,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const sanitizedData = {
         productName: productName.trim(),
         category: category.trim(),
-        price: price?.trim() || '',
         keywords: keywords.trim(),
         longTailKeywords: longTailKeywords?.trim() || '',
         features: features?.trim() || '',
         targetAudience: targetAudience?.trim() || '',
-        competitors: competitors?.trim() || '',
         reviewsData: reviewsData.trim(),
         format
       };
-
-      // Price validation if provided
-      if (sanitizedData.price && isNaN(Number(sanitizedData.price))) {
-        return res.status(400).json({ error: 'Price must be a valid number' });
-      }
 
       // TODO: Get from authenticated user session
       const userId = "user-1";
