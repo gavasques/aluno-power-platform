@@ -2468,5 +2468,166 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     clearInterval(interval);
   });
 
+  // Agent Sessions routes
+  app.post('/api/sessions', async (req, res) => {
+    try {
+      const { userId, agentType, inputData } = req.body;
+      
+      if (!userId || !agentType) {
+        return res.status(400).json({ 
+          error: 'userId e agentType são obrigatórios' 
+        });
+      }
+
+      const sessionHash = generateSessionHash();
+      const session = await storage.createAgentSession({
+        sessionHash,
+        userId,
+        agentType,
+        status: 'active',
+        inputData: inputData || {},
+        tags: generateTags(inputData || {}),
+      });
+      
+      res.status(201).json({
+        success: true,
+        session: {
+          id: session.id,
+          sessionHash: session.sessionHash,
+          userId: session.userId,
+          agentType: session.agentType,
+          status: session.status,
+          createdAt: session.createdAt
+        }
+      });
+    } catch (error: any) {
+      console.error('Erro ao criar sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.get('/api/sessions/:sessionHash', async (req, res) => {
+    try {
+      const { sessionHash } = req.params;
+      
+      const session = await storage.getAgentSessionByHash(sessionHash);
+      
+      if (!session) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+
+      res.json({
+        success: true,
+        session
+      });
+    } catch (error: any) {
+      console.error('Erro ao buscar sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.put('/api/sessions/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const { inputData } = req.body;
+      
+      const tags = generateTags(inputData || {});
+      const session = await storage.updateAgentSession(sessionId, { 
+        inputData, 
+        tags 
+      });
+      
+      res.json({
+        success: true,
+        session
+      });
+    } catch (error: any) {
+      console.error('Erro ao atualizar sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.post('/api/sessions/:sessionId/files/process', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const { files } = req.body;
+      
+      if (!files || !Array.isArray(files)) {
+        return res.status(400).json({ 
+          error: 'Array de arquivos é obrigatório' 
+        });
+      }
+
+      let combinedContent = '';
+      for (const file of files) {
+        combinedContent += `\n\n=== ARQUIVO: ${file.name} ===\n${file.content}`;
+        
+        await storage.createAgentSessionFile({
+          sessionId,
+          fileName: file.name,
+          fileType: 'text/plain',
+          fileUrl: '',
+          fileSize: file.content.length,
+          processedContent: file.content,
+        });
+      }
+      
+      res.json({
+        success: true,
+        combinedContent: combinedContent.trim(),
+        filesProcessed: files.length
+      });
+    } catch (error: any) {
+      console.error('Erro ao processar arquivos:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.get('/api/sessions/user/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { agentType } = req.query;
+      
+      const sessions = await storage.getUserAgentSessions(
+        userId, 
+        agentType as string,
+        'active'
+      );
+      
+      res.json({
+        success: true,
+        sessions
+      });
+    } catch (error: any) {
+      console.error('Erro ao buscar sessões do usuário:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
   return httpServer;
+}
+
+// Utility functions for session management
+function generateSessionHash(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
+  return `${timestamp}-${random}`.toUpperCase();
+}
+
+function generateTags(inputData: any): Record<string, string> {
+  const tags: Record<string, string> = {};
+
+  if (inputData.productName) tags.PRODUCT_NAME = inputData.productName;
+  if (inputData.category) tags.CATEGORY = inputData.category;
+  if (inputData.keywords) tags.KEYWORDS = inputData.keywords;
+  if (inputData.longTailKeywords) tags.LONG_TAIL_KEYWORDS = inputData.longTailKeywords;
+  if (inputData.features) tags.FEATURES = inputData.features;
+  if (inputData.targetAudience) tags.TARGET_AUDIENCE = inputData.targetAudience;
+  if (inputData.reviewsData) tags.REVIEWS_DATA = inputData.reviewsData;
+
+  if (inputData.keywords && inputData.longTailKeywords) {
+    tags.ALL_KEYWORDS = `${inputData.keywords}, ${inputData.longTailKeywords}`;
+  }
+
+  return tags;
 }

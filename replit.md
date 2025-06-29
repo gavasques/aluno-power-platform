@@ -108,12 +108,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: ✅ Sistema completo de IA com todos os provedores funcionais
-  - Anthropic: Limitação automática de temperatura (máximo 1.0) + modelos Claude 4.0/3.x funcionais
-  - Google Gemini: Biblioteca corrigida para @google/generative-ai + apenas modelos funcionais (gemini-2.5-pro, gemini-2.5-flash)
-  - DeepSeek: Adicionado modelo deepseek-reasoner (DeepSeek-R1-0528) com preços atualizados
-  - Sistema GPT-Image-1 dual mode: Edição (com imagens) + Criação (sem imagens)
-  - Total: 19 modelos funcionais em 4 provedores (OpenAI, Anthropic, Gemini, DeepSeek)
+- **June 29, 2025**: ✅ Sistema completo de IA + implementação avançada de sessões para Amazon Listing Optimizer
+  - **Provedores de IA**: 19 modelos funcionais em 4 provedores (OpenAI, Anthropic, Gemini, DeepSeek)
+  - **Sistema de Sessões**: Implementação completa seguindo princípios SOLID
+    - Tabelas: agent_sessions, agent_session_files com relações e índices otimizados
+    - SessionService: Gerenciamento de ciclo de vida com responsabilidade única
+    - APIs RESTful: /api/sessions com operações CRUD completas
+    - Tags automáticas: {KEYWORDS}, {PRODUCT_NAME}, {CATEGORY}, etc.
+  - **Amazon Listing Optimizer Refatorado**: 
+    - Sistema de sessões integrado com hash único e ID do usuário visíveis
+    - Upload múltiplo de até 10 arquivos de avaliações com processamento automático
+    - Dropdown de categorias do banco de dados (removido campo preço)
+    - Tags geradas automaticamente disponíveis para prompts
+    - Validação com Zod e formulário reativo
+    - Arquitetura modular seguindo DRY, KISS e SOLID
 
 - **June 29, 2025 (anterior)**: ✅ Atualização dos modelos OpenAI conforme nova documentação
   - Removidos modelos: o1-preview, o1-mini, o3-pro (problemas de endpoint)
