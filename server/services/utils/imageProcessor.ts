@@ -42,9 +42,19 @@ export class ImageProcessor {
   }
 
   static validateImageResponse(response: any): string {
-    const imageBase64 = response.data?.[0]?.b64_json || '';
+    // Handle different response formats from OpenAI API
+    let imageBase64 = '';
+    
+    if (response.data?.[0]?.b64_json) {
+      imageBase64 = response.data[0].b64_json;
+    } else if (response.data?.[0]?.url) {
+      return response.data[0].url;
+    } else if (typeof response === 'string') {
+      imageBase64 = response;
+    }
     
     if (!imageBase64) {
+      console.error('Image response validation failed:', JSON.stringify(response, null, 2));
       throw new Error('API did not return generated image');
     }
     
