@@ -37,6 +37,12 @@ export class OpenAIProvider extends BaseProvider {
     const modelConfig = this.getModelConfig(request.model);
     const prompt = request.messages[request.messages.length - 1]?.content || '';
 
+    // Fix temperature for problematic models
+    if (request.model === 'gpt-4o' && request.temperature && request.temperature > 1.0) {
+      console.log(`⚠️ [OPENAI] Limiting temperature for ${request.model} from ${request.temperature} to 1.0`);
+      request.temperature = 1.0;
+    }
+
     if (request.model === 'gpt-image-1') {
       return this.handleImageGeneration(request, modelConfig, prompt);
     }
