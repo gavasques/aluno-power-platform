@@ -51,7 +51,7 @@ interface SessionInfo {
   tags?: Record<string, string>;
 }
 
-interface Category {
+interface Department {
   id: number;
   name: string;
   description?: string;
@@ -74,7 +74,7 @@ export default function AmazonListingsOptimizer() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [, navigate] = useLocation();
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
   // Criar sessão ao montar o componente
@@ -102,20 +102,20 @@ export default function AmazonListingsOptimizer() {
       }
     };
 
-    const loadCategories = async () => {
+    const loadDepartments = async () => {
       try {
-        const response = await fetch('/api/categories');
+        const response = await fetch('/api/departments');
         if (response.ok) {
           const data = await response.json();
-          setCategories(data);
+          setDepartments(data);
         }
       } catch (error) {
-        console.error('Erro ao carregar categorias:', error);
+        console.error('Erro ao carregar departamentos:', error);
       }
     };
 
     initializeSession();
-    loadCategories();
+    loadDepartments();
   }, []);
 
   // Atualizar sessão quando dados do formulário mudarem
@@ -577,9 +577,9 @@ export default function AmazonListingsOptimizer() {
                           <SelectValue placeholder="Selecione uma categoria" />
                         </SelectTrigger>
                         <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.name}>
-                              {category.name}
+                          {departments.map((department) => (
+                            <SelectItem key={department.id} value={department.name}>
+                              {department.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
