@@ -1936,7 +1936,7 @@ Seja persuasivo, específico e focado em conversão!`,
             status: 'active'
           },
           versions: [],
-          variables: ['{{PRODUCT_NAME}}', '{{KEY_FEATURES}}', '{{MAIN_BENEFITS}}', '{{PAIN_POINTS}}', '{{EMOTIONAL_TRIGGERS}}'],
+          variables: ['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}'],
           maxLength: 2500
         },
         {
@@ -1978,7 +1978,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             status: 'active'
           },
           versions: [],
-          variables: ['{{PRODUCT_NAME}}', '{{ANALYSIS_RESULT}}', '{{KEY_FEATURES}}', '{{TARGET_AUDIENCE}}', '{{MARKET_DIFFERENTIATORS}}'],
+          variables: ['{{PRODUCT_NAME}}', '{{KEYWORDS}}', '{{LONG_TAIL_KEYWORDS}}', '{{FEATURES}}', '{{TARGET_AUDIENCE}}', '{{REVIEWS_DATA}}', '{{CATEGORY}}'],
           maxLength: 2000
         }
       ];
