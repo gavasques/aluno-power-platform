@@ -54,7 +54,7 @@ export default function AmazonListingsOptimizer() {
   const [, navigate] = useLocation();
 
   // Atualizar campo do formulário
-  const updateField = (field: keyof FormData, value: string | File | null) => {
+  const updateField = (field: keyof FormData, value: string | File[] | null) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -600,12 +600,12 @@ export default function AmazonListingsOptimizer() {
                       Palavras-chave
                     </div>
                     <div className={`flex items-center gap-2 ${
-                      (reviewsTab === "upload" && formData.uploadedFile) || 
+                      (reviewsTab === "upload" && formData.uploadedFiles.length > 0) || 
                       (reviewsTab === "manual" && formData.reviewsData.trim()) 
                         ? 'text-green-600' 
                         : 'text-gray-500'
                     }`}>
-                      {(reviewsTab === "upload" && formData.uploadedFile) || 
+                      {(reviewsTab === "upload" && formData.uploadedFiles.length > 0) || 
                        (reviewsTab === "manual" && formData.reviewsData.trim()) 
                         ? <CheckCircle2 className="w-3 h-3" /> 
                         : <AlertCircle className="w-3 h-3" />}
