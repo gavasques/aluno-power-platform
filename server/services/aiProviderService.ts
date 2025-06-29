@@ -311,16 +311,13 @@ export class AIProviderService {
               console.log(`📸 Usando /images/edits com ${request.referenceImages.length} imagens de referência`);
               
               // Preparar array de imagens para o endpoint /images/edits
-              const imageFiles = await Promise.all(
-                request.referenceImages.map(async (img) => {
-                  const imageBuffer = Buffer.from(img.data, 'base64');
-                  return new File([imageBuffer], img.filename || 'image.png', { 
-                    type: 'image/png' 
-                  });
-                })
-              );
+              const imageFiles = request.referenceImages.map((img) => {
+                const imageBuffer = Buffer.from(img.data, 'base64');
+                console.log(`📁 Preparando imagem: ${img.filename || 'image.png'} (${imageBuffer.length} bytes)`);
+                return imageBuffer;
+              });
               
-              console.log(`🔧 Enviando ${imageFiles.length} imagens para /images/edits`);
+              console.log(`🔧 Enviando ${imageFiles.length} imagens para /images/edits (total: ${imageFiles.reduce((sum, buf) => sum + buf.length, 0)} bytes)`);
               
               const response = await this.openai.images.edit({
                 model: 'gpt-image-1',
