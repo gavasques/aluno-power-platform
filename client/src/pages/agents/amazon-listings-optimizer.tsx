@@ -725,7 +725,7 @@ export default function AmazonListingsOptimizer() {
                           />
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
-                          Até 8 arquivos CSV (máx. 2MB cada, 10MB total)
+                          Até 10 arquivos CSV (máx. 2MB cada, 10MB total)
                         </p>
                       </div>
                       
@@ -872,6 +872,29 @@ export default function AmazonListingsOptimizer() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Tags Disponíveis */}
+            {availableTags.length > 0 && (
+              <Card className="shadow-sm border-0 bg-white/80 backdrop-blur-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg font-semibold text-gray-900">
+                    Tags Disponíveis para Prompts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    {availableTags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Estas tags são geradas automaticamente a partir dos dados preenchidos e podem ser usadas nos prompts do agente.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Informações do Agente */}
             <Card className="shadow-sm border-0 bg-white/80 backdrop-blur-sm">
