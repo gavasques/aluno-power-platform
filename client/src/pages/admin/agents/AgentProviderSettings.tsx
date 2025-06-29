@@ -10,7 +10,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   Zap,
-  DollarSign
+  DollarSign,
+  ImageIcon,
+  Upload,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,6 +89,7 @@ export default function AgentProviderSettings() {
   const [responseReceived, setResponseReceived] = useState('');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [referenceImages, setReferenceImages] = useState<Array<{file: File, preview: string}>>([]);
 
   // Fetch provider status
   const { data: status = { openai: false, anthropic: false, gemini: false, deepseek: false } } = useQuery<ProviderStatus>({
@@ -132,26 +136,30 @@ export default function AgentProviderSettings() {
     }
   });
 
-  // Handle image upload
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(event.target.files || []);
 
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Erro",
-        description: "Por favor, selecione apenas arquivos de imagem",
-        variant: "destructive"
-      });
-      return;
-    }
+    files.forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const preview = e.target?.result as string;
+          setReferenceImages(prev => [...prev, { file, preview }]);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
 
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setUploadedImage(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    // Reset input
+    event.target.value = '';
+  };
+
+  const removeImage = (index: number) => {
+    setReferenceImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const clearImages = () => {
+    setReferenceImages([]);
   };
 
   // Test connection mutation
@@ -247,11 +255,11 @@ export default function AgentProviderSettings() {
       });
       return;
     }
-    
+
     setTestResponse('');
     setRequestSent('');
     setResponseReceived('');
-    
+
     const testData: any = {
       provider: formData.provider,
       model: formData.model,
@@ -504,72 +512,92 @@ export default function AgentProviderSettings() {
 
                 {/* Test Connection Section */}
                 <div className="space-y-4 border-t pt-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="testPrompt">Prompt de Teste</Label>
-                    <Textarea
-                      id="testPrompt"
-                      placeholder={formData.model === 'gpt-image-edit' 
-                        ? "Descreva como editar a imagem (ex: 'Adicione uma praia tropical ao fundo')"
-                        : "Digite um prompt para testar a conexão com o modelo..."
-                      }
-                      value={testPrompt}
-                      onChange={(e) => setTestPrompt(e.target.value)}
-                      rows={3}
-                    />
-                  </div>
+                  
+            {/* Prompt de Teste */}
+            <div className="space-y-2">
+              <Label htmlFor="testPrompt">Prompt de Teste</Label>
+              <Textarea
+                id="testPrompt"
+                placeholder="Digite um prompt para testar a conexão..."
+                value={testPrompt}
+                onChange={(e) => setTestPrompt(e.target.value)}
+                rows={4}
+                className="resize-none"
+              />
+            </div>
 
-                  {/* Image Upload for gpt-image-edit */}
-                  {formData.model === 'gpt-image-edit' && (
+            {/* Upload de Imagens de Referência - Só aparece para modelos de imagem */}
+            {selectedModel && selectedModel.includes('image') && (
+              <div className="space-y-4 p-4 border rounded-lg bg-blue-50 border-blue-200">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5 text-blue-600" />
+                  <Label className="text-blue-800 font-medium">
+                    Imagens de Referência (Opcional)
+                  </Label>
+                </div>
+                <p className="text-sm text-blue-600">
+                  Para modelos de geração de imagem, você pode fornecer imagens de referência que serão usadas como base para edição ou inspiração.
+                </p>
+
+                <div className="space-y-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="reference-images"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('reference-images')?.click()}
+                    className="w-full border-dashed border-2 border-blue-300 text-blue-700 hover:bg-blue-100"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Selecionar Imagens de Referência
+                  </Button>
+
+                  {/* Preview das imagens selecionadas */}
+                  {referenceImages.length > 0 && (
                     <div className="space-y-2">
-                      <Label htmlFor="imageUpload">Upload de Imagem (Obrigatório para Edição)</Label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                        {uploadedImage ? (
-                          <div className="text-center">
-                            <img 
-                              src={uploadedImage} 
-                              alt="Imagem carregada" 
-                              className="max-w-full max-h-40 mx-auto mb-4 rounded-lg shadow-sm"
+                      <Label className="text-sm font-medium">Imagens Selecionadas:</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {referenceImages.map((image, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={image.preview}
+                              alt={`Referência ${index + 1}`}
+                              className="w-full h-20 object-cover rounded border"
                             />
-                            <div className="space-y-2">
-                              <p className="text-sm text-green-600 font-medium">
-                                Imagem carregada com sucesso
-                              </p>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setUploadedImage(null);
-                                  setImageFile(null);
-                                }}
-                              >
-                                Remover Imagem
-                              </Button>
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              ×
+                            </button>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b">
+                              {image.file.name.substring(0, 15)}...
                             </div>
                           </div>
-                        ) : (
-                          <div className="text-center">
-                            <input
-                              id="imageUpload"
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              className="hidden"
-                            />
-                            <Button
-                              variant="outline"
-                              onClick={() => document.getElementById('imageUpload')?.click()}
-                              className="flex items-center gap-2"
-                            >
-                              📎 Selecionar Imagem
-                            </Button>
-                            <p className="text-sm text-gray-500 mt-2">
-                              Formatos suportados: JPG, PNG, WebP (máx. 4MB)
-                            </p>
-                          </div>
-                        )}
+                        ))}
                       </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearImages}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Limpar Todas
+                      </Button>
                     </div>
                   )}
+                </div>
+              </div>
+            )}</div>
 
                   <div className="flex gap-3">
                     <Button 
