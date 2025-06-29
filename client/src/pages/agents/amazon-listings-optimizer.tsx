@@ -24,12 +24,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface FormData {
   productName: string;
   category: string;
-  price: string;
   keywords: string;
   longTailKeywords: string;
   features: string;
   targetAudience: string;
-  competitors: string;
   reviewsData: string;
   uploadedFile: File | null;
 }
@@ -42,12 +40,10 @@ export default function AmazonListingsOptimizer() {
   const [formData, setFormData] = useState<FormData>({
     productName: "",
     category: "",
-    price: "",
     keywords: "",
     longTailKeywords: "",
     features: "",
     targetAudience: "",
-    competitors: "",
     reviewsData: "",
     uploadedFile: null
   });
@@ -101,10 +97,7 @@ export default function AmazonListingsOptimizer() {
       }
     }
 
-    // Validação de preço
-    if (formData.price && isNaN(Number(formData.price))) {
-      newErrors.price = "Preço deve ser um número válido";
-    }
+
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -137,12 +130,10 @@ export default function AmazonListingsOptimizer() {
       const requestData = {
         productName: formData.productName,
         category: formData.category,
-        price: formData.price,
         keywords: formData.keywords,
         longTailKeywords: formData.longTailKeywords,
         features: formData.features,
         targetAudience: formData.targetAudience,
-        competitors: formData.competitors,
         reviewsData: reviewsTab === "upload" && formData.uploadedFile 
           ? `Arquivo CSV carregado: ${formData.uploadedFile.name}` 
           : formData.reviewsData,
@@ -189,16 +180,14 @@ export default function AmazonListingsOptimizer() {
 
   // Contar campos preenchidos
   const getCompletionStats = () => {
-    const totalFields = 9; // Total de campos no formulário
+    const totalFields = 7; // Total de campos no formulário
     const filledFields = [
       formData.productName,
       formData.category,
-      formData.price,
       formData.keywords,
       formData.longTailKeywords,
       formData.features,
       formData.targetAudience,
-      formData.competitors,
       reviewsTab === "upload" ? formData.uploadedFile : formData.reviewsData
     ].filter(field => field && field.toString().trim()).length;
 
@@ -290,24 +279,6 @@ export default function AmazonListingsOptimizer() {
                       )}
                     </div>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="price" className="text-sm font-medium">
-                      Preço (R$)
-                    </Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      step="0.01"
-                      placeholder="199.90"
-                      value={formData.price}
-                      onChange={(e) => updateField('price', e.target.value)}
-                      className={errors.price ? "border-red-300" : ""}
-                    />
-                    {errors.price && (
-                      <p className="text-sm text-red-600">{errors.price}</p>
-                    )}
-                  </div>
                 </CardContent>
               </Card>
 
@@ -392,31 +363,7 @@ export default function AmazonListingsOptimizer() {
                 </CardContent>
               </Card>
 
-              {/* Informações Extras */}
-              <Card className="shadow-sm border-0 bg-white/80 backdrop-blur-sm">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg font-semibold text-gray-900">
-                    Informações Extras
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="competitors" className="text-sm font-medium">
-                      Principais Concorrentes
-                    </Label>
-                    <Textarea
-                      id="competitors"
-                      placeholder="Sony WH-1000XM4, Bose QuietComfort, JBL Tune"
-                      value={formData.competitors}
-                      onChange={(e) => updateField('competitors', e.target.value)}
-                      className="min-h-[80px]"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Liste os principais produtos concorrentes
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+
 
               {/* Seção de Avaliações */}
               <Card className="shadow-sm border-0 bg-white/80 backdrop-blur-sm">

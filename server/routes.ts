@@ -2269,12 +2269,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const {
         productName,
         category,
-        price,
         keywords,
         longTailKeywords,
         features,
         targetAudience,
-        competitors,
         reviewsData,
         format = 'text'
       } = req.body;
