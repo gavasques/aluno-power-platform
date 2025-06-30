@@ -2970,7 +2970,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // Get current user route
+  // Get current user route (legacy)
   app.get('/api/auth/user', async (req, res) => {
     try {
       const authHeader = req.headers.authorization;
@@ -2997,6 +2997,54 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       });
     } catch (error: any) {
       console.error('Get user error:', error);
+      res.status(401).json({ error: 'Token inválido' });
+    }
+  });
+
+  // Get current user route (new endpoint)
+  app.get('/api/auth/me', async (req, res) => {
+    try {
+      console.log('🔍 AUTH ME - Request headers:', JSON.stringify({
+        authorization: req.headers.authorization,
+        'user-agent': req.headers['user-agent']
+      }));
+
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.log('🔍 AUTH ME - No valid authorization header');
+        return res.status(401).json({ error: 'Token não fornecido' });
+      }
+
+      const token = authHeader.substring(7);
+      console.log('🔍 AUTH ME - Validating token:', token.substring(0, 10) + '...');
+      
+      const user = await AuthService.validateSession(token);
+      
+      console.log('🔍 AUTH ME - Session validation result:', JSON.stringify({
+        userFound: !!user,
+        userId: user?.id,
+        userEmail: user?.email
+      }));
+      
+      if (!user) {
+        console.log('🔍 AUTH ME - Token validation failed');
+        return res.status(401).json({ error: 'Token inválido' });
+      }
+
+      res.json({
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        }
+      });
+    } catch (error: any) {
+      console.error('🔍 AUTH ME - Error:', JSON.stringify({
+        error: error.message,
+        stack: error.stack
+      }));
       res.status(401).json({ error: 'Token inválido' });
     }
   });

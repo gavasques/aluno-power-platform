@@ -137,9 +137,12 @@ export class AuthService {
 
   // Validate session
   static async validateSession(sessionToken: string): Promise<User | null> {
+    console.log('🔍 VALIDATE SESSION - Starting validation for token:', sessionToken.substring(0, 10) + '...');
+    
     const [session] = await db
       .select({
         user: users,
+        session: userSessions,
       })
       .from(userSessions)
       .innerJoin(users, eq(userSessions.userId, users.id))
@@ -150,6 +153,15 @@ export class AuthService {
           eq(users.isActive, true)
         )
       );
+
+    console.log('🔍 VALIDATE SESSION - Query result:', JSON.stringify({
+      sessionFound: !!session,
+      userFound: !!session?.user,
+      userId: session?.user?.id,
+      userEmail: session?.user?.email,
+      sessionExpiry: session?.session?.expiresAt,
+      isExpired: session?.session ? new Date() > session.session.expiresAt : 'no session'
+    }));
 
     return session?.user || null;
   }

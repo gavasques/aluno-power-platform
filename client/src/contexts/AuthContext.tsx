@@ -68,13 +68,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const token = TokenManager.getToken();
+    console.log('🔥 AuthContext: Token from storage:', {
+      hasToken: !!token,
+      tokenLength: token?.length,
+      tokenPreview: token?.substring(0, 10) + '...'
+    });
+
     if (!token) {
+      console.log('🔥 AuthContext: No token found, setting as logged out');
       setState(prev => ({ ...prev, isLoading: false }));
       return;
     }
 
     try {
+      console.log('🔥 AuthContext: Attempting to get current user with token');
       const user = await AuthService.getCurrentUser();
+      
+      console.log('🔥 AuthContext: User validation result:', {
+        userFound: !!user,
+        userId: user?.id,
+        userEmail: user?.email
+      });
+
       setState({
         user,
         token,
@@ -82,6 +97,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated: !!user,
       });
     } catch (error) {
+      console.log('🔥 AuthContext: Authentication failed, clearing token:', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       TokenManager.removeToken();
       setState({
         user: null,

@@ -118,9 +118,17 @@ export class AuthService {
 
   static async getCurrentUser(): Promise<User | null> {
     try {
+      console.log('🔍 FRONTEND AUTH - Getting current user...');
       const data = await AuthService.makeRequest(AuthService.ENDPOINTS.ME);
+      console.log('🔍 FRONTEND AUTH - Current user response:', {
+        hasUser: !!data.user,
+        userId: data.user?.id
+      });
       return data.user;
     } catch (error) {
+      console.log('🔍 FRONTEND AUTH - Get current user failed:', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       return null;
     }
   }
