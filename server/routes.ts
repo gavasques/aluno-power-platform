@@ -28,6 +28,8 @@ import {
   insertToolVideoSchema,
   insertYoutubeVideoSchema,
   insertNewsSchema,
+  insertAiGenerationLogSchema,
+  aiGenerationLogs,
   insertUpdateSchema,
   insertGeneratedImageSchema,
   insertWebhookConfigSchema,
@@ -2329,6 +2331,56 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     } catch (error) {
       console.error('Error deleting generated image:', error);
       res.status(500).json({ error: 'Failed to delete generated image' });
+    }
+  });
+
+  // Save AI generation log
+  app.post('/api/ai-generation-logs', async (req, res) => {
+    try {
+      const {
+        userId,
+        provider,
+        model,
+        prompt,
+        response,
+        promptCharacters,
+        responseCharacters,
+        inputTokens,
+        outputTokens,
+        totalTokens,
+        cost,
+        duration,
+        feature
+      } = req.body;
+
+      const logData = {
+        userId: parseInt(userId),
+        provider,
+        model,
+        prompt,
+        response,
+        promptCharacters: promptCharacters || prompt.length,
+        responseCharacters: responseCharacters || response.length,
+        inputTokens: inputTokens || 0,
+        outputTokens: outputTokens || 0,
+        totalTokens: totalTokens || 0,
+        cost: cost || 0,
+        duration: duration || 0,
+        feature: feature || 'html-description'
+      };
+
+      const [savedLog] = await db.insert(aiGenerationLogs).values(logData).returning();
+
+      console.log(`💾 [AI_LOG] Saved generation log - User: ${userId}, Model: ${model}, Cost: $${cost}, Characters: ${responseCharacters}`);
+
+      res.json({ 
+        success: true, 
+        message: 'AI generation log saved successfully',
+        logId: savedLog.id
+      });
+    } catch (error: any) {
+      console.error('Error saving AI generation log:', error);
+      res.status(500).json({ error: 'Failed to save AI generation log' });
     }
   });
 

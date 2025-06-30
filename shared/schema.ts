@@ -949,10 +949,42 @@ export const generatedImages = pgTable("generated_images", {
   agentIdx: index("generated_images_agent_idx").on(table.agentId),
 }));
 
+// AI Generation Logs
+export const aiGenerationLogs = pgTable("ai_generation_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  provider: text("provider").notNull(), // openai, anthropic, etc
+  model: text("model").notNull(),
+  prompt: text("prompt").notNull(),
+  response: text("response").notNull(),
+  promptCharacters: integer("prompt_characters").notNull(),
+  responseCharacters: integer("response_characters").notNull(),
+  inputTokens: integer("input_tokens").notNull().default(0),
+  outputTokens: integer("output_tokens").notNull().default(0),
+  totalTokens: integer("total_tokens").notNull().default(0),
+  cost: decimal("cost", { precision: 10, scale: 6 }).notNull().default("0"),
+  duration: integer("duration").notNull().default(0), // milliseconds
+  feature: text("feature").notNull().default("html-description"), // feature that used the AI
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("ai_logs_user_idx").on(table.userId),
+  createdIdx: index("ai_logs_created_idx").on(table.createdAt),
+  modelIdx: index("ai_logs_model_idx").on(table.model),
+  featureIdx: index("ai_logs_feature_idx").on(table.feature),
+}));
+
 // Insert schemas for generated images
 export const insertGeneratedImageSchema = createInsertSchema(generatedImages);
 export type InsertGeneratedImage = z.infer<typeof insertGeneratedImageSchema>;
 export type GeneratedImage = typeof generatedImages.$inferSelect;
+
+// Insert schemas for AI generation logs
+export const insertAiGenerationLogSchema = createInsertSchema(aiGenerationLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAiGenerationLog = z.infer<typeof insertAiGenerationLogSchema>;
+export type AiGenerationLog = typeof aiGenerationLogs.$inferSelect;
 
 // Insert schemas (moved to end of file to avoid conflicts)
 
