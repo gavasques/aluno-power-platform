@@ -29,7 +29,7 @@ const HtmlDescriptionGenerator: React.FC = () => {
   const charCount = textInput.length;
 
   // Função para gerar HTML do contentEditable
-  const generateHtml = useCallback(() => {
+  const generateHtml = () => {
     if (!textInput.trim()) {
       setHtmlOutput('');
       return;
@@ -117,12 +117,12 @@ const HtmlDescriptionGenerator: React.FC = () => {
     html = html.replace(/<(?!\/?(strong|i|u|br|p|ul|ol|li|em)\b)[^>]*>/gi, '');
     
     setHtmlOutput(html);
-  }, [textInput]);
+  };
 
   // Gerar HTML em tempo real
   useEffect(() => {
     generateHtml();
-  }, [textInput, generateHtml]);
+  }, [textInput]);
 
   // Aplicar formatação visual usando execCommand
   const applyFormatting = (type: string) => {
@@ -148,6 +148,8 @@ const HtmlDescriptionGenerator: React.FC = () => {
         const text = editor.innerText || '';
         if (text.length <= MAX_CHARS) {
           setTextInput(text);
+          // Gerar HTML após formatação
+          setTimeout(() => generateHtml(), 100);
         }
       }, 0);
     } catch (error) {
