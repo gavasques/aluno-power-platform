@@ -2863,7 +2863,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   });
 
   const registerSchema = z.object({
-    username: z.string().min(3),
     email: z.string().email(),
     name: z.string().min(1),
     password: z.string().min(6)
@@ -2910,13 +2909,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         return res.status(400).json({ error: 'Email já está em uso' });
       }
 
-      const existingUsername = await AuthService.getUserByUsername(userData.username);
-      if (existingUsername) {
-        return res.status(400).json({ error: 'Nome de usuário já está em uso' });
-      }
-
-      // Create user
+      // Create user with email as username
       const user = await AuthService.createUser({
+        username: userData.email, // Use email as username
         ...userData,
         role: 'user',
         isActive: true,

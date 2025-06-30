@@ -12,7 +12,6 @@ const Login: React.FC = () => {
   const { login, register, isAuthenticated, isLoading } = useAuth();
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({ 
-    username: '', 
     email: '', 
     name: '', 
     password: '', 
@@ -88,7 +87,6 @@ const Login: React.FC = () => {
     setRegisterLoading(true);
 
     const result = await register(
-      registerData.username,
       registerData.email,
       registerData.name,
       registerData.password
@@ -289,20 +287,7 @@ const Login: React.FC = () => {
 
               <TabsContent value="register" className="space-y-4 mt-6">
                 <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="register-username">Nome de usuário</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="register-username"
-                        placeholder="usuario123"
-                        className="pl-10"
-                        value={registerData.username}
-                        onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
+
 
                   <div className="space-y-2">
                     <Label htmlFor="register-name">Nome completo</Label>
