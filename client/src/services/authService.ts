@@ -80,7 +80,7 @@ export class AuthService {
     } catch (error) {
       console.log('🔐 FRONTEND LOGIN - Error:', {
         error: error instanceof Error ? error.message : 'Unknown error',
-        errorType: error.constructor.name
+        errorType: error instanceof Error ? error.constructor.name : typeof error
       });
 
       return {

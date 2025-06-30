@@ -67,6 +67,7 @@ function App() {
                           <AgentsProvider>
                             <Switch>
                           <Route path="/login" component={Login} />
+                          <Route path="/auth" component={Login} />
 
                           {/* Agents routes */}
                           <Route path="/agents/amazon-listings-optimizer-new">
