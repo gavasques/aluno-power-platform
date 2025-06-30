@@ -369,6 +369,16 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
     }
   }, [htmlOutput, toast]);
 
+  // Limpar todo o conteúdo
+  const clearAll = () => {
+    setTextInput('');
+    setHtmlOutput('');
+    toast({
+      title: "🗑️ Limpo!",
+      description: "Todo o conteúdo foi removido"
+    });
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50">
@@ -397,44 +407,72 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
 
             {/* Barra de Ferramentas */}
             <div className="border-b border-gray-200 pb-4 mb-4">
-              <div className="flex flex-wrap gap-2 mb-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => applyFormatting('b')}
-                  className="flex items-center gap-1"
-                >
-                  <Bold className="h-4 w-4" />
-                  Negrito
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => applyFormatting('i')}
-                  className="flex items-center gap-1"
-                >
-                  <Italic className="h-4 w-4" />
-                  Itálico
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => insertList(false)}
-                  className="flex items-center gap-1"
-                >
-                  <List className="h-4 w-4" />
-                  Lista
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => insertList(true)}
-                  className="flex items-center gap-1"
-                >
-                  <ListOrdered className="h-4 w-4" />
-                  Numerada
-                </Button>
+              <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => applyFormatting('b')}
+                    className="flex items-center gap-1"
+                  >
+                    <Bold className="h-4 w-4" />
+                    Negrito
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => applyFormatting('i')}
+                    className="flex items-center gap-1"
+                  >
+                    <Italic className="h-4 w-4" />
+                    Itálico
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertList(false)}
+                    className="flex items-center gap-1"
+                  >
+                    <List className="h-4 w-4" />
+                    Lista
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertList(true)}
+                    className="flex items-center gap-1"
+                  >
+                    <ListOrdered className="h-4 w-4" />
+                    Numerada
+                  </Button>
+                </div>
 
+                {/* Botões de Ação */}
+                <div className="flex gap-2">
+                  <Button
+                    onClick={generateWithAI}
+                    disabled={isGenerating || !textInput.trim()}
+                    size="sm"
+                    className="flex items-center gap-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Wand2 className="h-4 w-4" />
+                    )}
+                    Gerar com IA
+                  </Button>
+                  
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={clearAll}
+                    className="flex items-center gap-1"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Limpar
+                  </Button>
+                </div>
               </div>
 
               {/* Símbolos Permitidos pela Amazon */}
@@ -495,31 +533,7 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
               />
             </div>
 
-            {/* Botões de Ação */}
-            <div className="flex gap-3 mt-4">
-              <Button
-                onClick={generateWithAI}
-                disabled={isGenerating || !textInput.trim()}
-                className="flex items-center gap-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-              >
-                {isGenerating ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Wand2 className="h-4 w-4" />
-                )}
-                {isGenerating ? 'Gerando...' : 'Gerar com IA'}
-              </Button>
-              
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={clearAll}
-                className="flex items-center gap-1"
-              >
-                <Trash2 className="h-4 w-4" />
-                Limpar Tudo
-              </Button>
-            </div>
+
           </div>
 
           {/* Coluna Direita - Output */}
