@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { db } from '../db';
 import { users, userSessions, userGroups, userGroupMembers } from '@shared/schema';
-import { eq, and, gt } from 'drizzle-orm';
+import { eq, and, gt, sql } from 'drizzle-orm';
 import type { User, InsertUser, UserWithGroups } from '@shared/schema';
 
 export class AuthService {
@@ -259,8 +259,9 @@ export class AuthService {
 
   // Clean expired sessions
   static async cleanExpiredSessions(): Promise<void> {
+    const now = new Date();
     await db
       .delete(userSessions)
-      .where(lt(userSessions.expiresAt, new Date()));
+      .where(sql`${userSessions.expiresAt} < ${now}`);
   }
 }

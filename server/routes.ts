@@ -33,8 +33,12 @@ import {
   insertAgentSchema,
   insertAgentPromptSchema,
   insertAgentUsageSchema,
-  insertAgentGenerationSchema
+  insertAgentGenerationSchema,
+  insertUserSchema
 } from "@shared/schema";
+import { AuthService } from "./services/authService";
+import bcrypt from 'bcryptjs';
+import { z } from 'zod';
 import { youtubeService } from "./services/youtubeService";
 import { openaiService } from "./services/openaiService";
 import { aiProviderService } from "./services/aiProviderService";
