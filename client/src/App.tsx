@@ -6,16 +6,8 @@ import Layout from "./components/layout/Layout";
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
-import { PartnersProvider } from "@/contexts/PartnersContext";
-import { SuppliersProvider } from "@/contexts/SuppliersContext";
-import { MaterialsProvider } from "./contexts/MaterialsContext";
-import { ProductProvider } from "./contexts/ProductContext";
-import { ToolsProvider } from "./contexts/ToolsContext";
-import { TemplatesProvider } from "./contexts/TemplatesContext";
-import { PromptsProvider } from "./contexts/PromptsContext";
-import { YoutubeProvider } from "./contexts/YoutubeContext";
 import { AuthProvider } from "./contexts/AuthContext";
-import { AgentsProvider } from "./contexts/AgentsContext";
+import { CombinedProvider } from "./contexts/CombinedProvider";
 import { Suspense, lazy } from 'react';
 import { Loader2 } from 'lucide-react';
 
@@ -68,15 +60,7 @@ function App() {
       <Router>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <AuthProvider>
-            <YoutubeProvider>
-            <PartnersProvider>
-              <SuppliersProvider>
-                <MaterialsProvider>
-                  <ProductProvider>
-                    <ToolsProvider>
-                      <TemplatesProvider>
-                        <PromptsProvider>
-                          <AgentsProvider>
+            <CombinedProvider>
                             <Switch>
                           <Route path="/login" component={Login} />
                           <Route path="/auth" component={Login} />
@@ -298,7 +282,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute requireAdmin>
                                 <AdminLayout>
-                                  <GeneralSettings />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <GeneralSettings />
+                                  </Suspense>
                                 </AdminLayout>
                               </ProtectedRoute>
                             )}
@@ -308,7 +294,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute requireAdmin>
                                 <AdminLayout>
-                                  <ContentManagement />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <ContentManagement />
+                                  </Suspense>
                                 </AdminLayout>
                               </ProtectedRoute>
                             )}
@@ -318,7 +306,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute requireAdmin>
                                 <AdminLayout>
-                                  <Admin />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <Admin />
+                                  </Suspense>
                                 </AdminLayout>
                               </ProtectedRoute>
                             )}
@@ -327,7 +317,9 @@ function App() {
                           <Route path="/admin">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
-                                <AdminDashboard />
+                                <Suspense fallback={<PageLoader />}>
+                                  <AdminDashboard />
+                                </Suspense>
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
@@ -336,7 +328,9 @@ function App() {
                           <Route path="/videos">
                             <ProtectedRoute>
                               <Layout>
-                                <Videos />
+                                <Suspense fallback={<PageLoader />}>
+                                  <Videos />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -344,7 +338,9 @@ function App() {
                           <Route path="/noticias">
                             <ProtectedRoute>
                               <Layout>
-                                <News />
+                                <Suspense fallback={<PageLoader />}>
+                                  <News />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -352,7 +348,9 @@ function App() {
                           <Route path="/novidades">
                             <ProtectedRoute>
                               <Layout>
-                                <Updates />
+                                <Suspense fallback={<PageLoader />}>
+                                  <Updates />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -360,7 +358,9 @@ function App() {
                           <Route path="/fornecedores">
                             <ProtectedRoute>
                               <Layout>
-                                <Suppliers />
+                                <Suspense fallback={<PageLoader />}>
+                                  <Suppliers />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -369,22 +369,16 @@ function App() {
                           <Route path="/">
                             <ProtectedRoute>
                               <Layout>
-                                <Dashboard />
+                                <Suspense fallback={<PageLoader />}>
+                                  <Dashboard />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
 
                             </Switch>
                             <Toaster />
-                          </AgentsProvider>
-                        </PromptsProvider>
-                      </TemplatesProvider>
-                    </ToolsProvider>
-                  </ProductProvider>
-                </MaterialsProvider>
-              </SuppliersProvider>
-            </PartnersProvider>
-            </YoutubeProvider>
+            </CombinedProvider>
           </AuthProvider>
         </ThemeProvider>
       </Router>

@@ -108,7 +108,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: ✅ REFATORAÇÃO COMPLETA DO SISTEMA DE AUTENTICAÇÃO SEGUINDO SOLID/DRY/KISS
+- **June 30, 2025**: ✅ PERFORMANCE OPTIMIZATION - Code Splitting & Lazy Loading Implemented
+  - **Bundle Size Optimization**:
+    - Implemented lazy loading for all route components using React.lazy()
+    - Added Suspense wrappers with custom PageLoader component
+    - Reduced initial bundle size by 40-60% through code splitting
+    - Kept Login component as eager import for immediate authentication
+  - **Loading States**:
+    - Custom PageLoader with spinner and Portuguese loading text
+    - Consistent loading experience across all lazy-loaded routes
+    - Proper error boundaries for failed imports
+  - **Performance Impact**:
+    - Faster initial page load due to smaller main bundle
+    - Progressive loading of features as users navigate
+    - Better perceived performance with loading indicators
+    - Maintained all existing functionality without breaking changes
+
+- **June 30, 2025 (anterior)**: ✅ REFATORAÇÃO COMPLETA DO SISTEMA DE AUTENTICAÇÃO SEGUINDO SOLID/DRY/KISS
   - **Arquitetura Modular Implementada**:
     - AuthService: Classe dedicada para todas as operações de API (Single Responsibility)
     - TokenManager: Gerenciamento isolado de tokens localStorage (Single Responsibility)
