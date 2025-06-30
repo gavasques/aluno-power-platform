@@ -133,8 +133,10 @@ export function Header() {
                 </NavigationMenuItem>
               ))}
               <NavigationMenuItem>
-                <Link 
-                  to="/nossos-cursos" 
+                <a 
+                  href="https://produtos.guilhermevasques.club/" 
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={cn(
                     navigationMenuTriggerStyle(),
                     "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary font-semibold"
@@ -142,7 +144,7 @@ export function Header() {
                 >
                   <School className="mr-2 h-4 w-4" />
                   Nossos Cursos
-                </Link>
+                </a>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
