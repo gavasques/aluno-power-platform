@@ -37,9 +37,11 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
     let html = textInput;
     
-    // Converter quebras de linha simples em <br> apenas se não houver tags HTML
+    // Se não contém tags HTML, converter cada linha em parágrafo <p>
     if (!html.includes('<')) {
-      html = html.replace(/\n/g, '<br>\n');
+      // Dividir por quebras de linha, filtrar linhas vazias e envolver cada linha em <p>
+      const lines = html.split('\n').filter(line => line.trim() !== '');
+      html = lines.map(line => `<p>${line.trim()}</p>`).join('');
     }
     
     // Limpar HTML não permitido (validação básica)
@@ -91,9 +93,9 @@ const HtmlDescriptionGenerator: React.FC = () => {
     }
   };
 
-  // Inserir quebra de linha
+  // Inserir quebra de linha (nova linha que será convertida em <p>)
   const insertBreak = () => {
-    const newText = textInput + '<br>';
+    const newText = textInput + '\n';
     if (newText.length <= MAX_CHARS) {
       setTextInput(newText);
     }
@@ -265,7 +267,7 @@ Garantia de 12 meses`;
                   size="sm"
                   onClick={insertBreak}
                 >
-                  Quebra
+                  Nova Linha
                 </Button>
                 <Button
                   variant="outline"
