@@ -3,6 +3,16 @@ import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Bold, 
   Italic, 
@@ -10,12 +20,17 @@ import {
   ListOrdered,
   Trash2,
   Copy,
-  Info
+  Info,
+  Wand2,
+  Loader2
 } from 'lucide-react';
 
 const HtmlDescriptionGenerator: React.FC = () => {
   const [textInput, setTextInput] = useState('');
   const [htmlOutput, setHtmlOutput] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedDescription, setGeneratedDescription] = useState('');
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const { toast } = useToast();
 
   const MAX_CHARS = 2000;
@@ -257,6 +272,103 @@ Material resistente e durável
 Ideal para uso diário
 Garantia de 12 meses`;
 
+  // Gerar descrição com IA
+  const generateWithAI = async () => {
+    if (!textInput.trim()) {
+      toast({
+        variant: "destructive",
+        title: "❌ Erro",
+        description: "Digite uma descrição básica do produto antes de gerar com IA"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    
+    try {
+      const prompt = `${textInput}
+
+Baseando-se na breve descrição que te dei do meu produto, por favor escreva uma descrição de produto PODEROSA e PERSUASIVA para Amazon. A descrição deve captar a atenção dos compradores e convencê-los de que meu produto é a melhor opção disponível na Amazon.
+
+Comprimento da descrição:
+a. Deve ter entre 1500 a 2000 Caracteres
+b. Não pode ter menos de 1500 caracteres no total
+c. Não pode ter mais de 2000 caracteres.
+
+Tom da Descrição:
+A descrição deve ser envolvente, divertida e atraente, NUNCA entediante ou corporativa. O texto deve brilhar e se destacar da concorrência, transmitindo confiança e emoção ao comprador.
+a. Mantenha um foco nos benefícios principais do produto, e como este melhora a vida do cliente.
+
+Objetivo:
+A descrição deve gerar urgência e levar o cliente a querer comprar o produto imediatamente. Deve soar natural, mas também ser incrivelmente persuasiva, destacando porque meu produto é o melhor que qualquer outra opção.
+
+Fechamento Persuasivo:
+Termine a descrição com uma chamada para ação direta e convincente, motivando o cliente a adicionar o produto ao carrinho imediatamente.`;
+
+      const response = await fetch('/api/openai/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4.1-mini',
+          prompt: prompt,
+          maxTokens: 1000,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro na API da OpenAI');
+      }
+
+      const data = await response.json();
+      setGeneratedDescription(data.response);
+      setShowReplaceDialog(true);
+      
+    } catch (error) {
+      console.error('Erro ao gerar descrição:', error);
+      toast({
+        variant: "destructive",
+        title: "❌ Erro",
+        description: "Falha ao gerar descrição com IA. Tente novamente."
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Substituir conteúdo original
+  const handleReplaceContent = (replace: boolean) => {
+    if (replace) {
+      setTextInput(generatedDescription);
+      toast({
+        title: "✅ Atualizado!",
+        description: "Descrição substituída pela versão gerada pela IA"
+      });
+    }
+    setShowReplaceDialog(false);
+    setGeneratedDescription('');
+  };
+
+  // Copiar HTML para clipboard
+  const copyToClipboard = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(htmlOutput);
+      toast({
+        title: "✅ Copiado!",
+        description: "HTML copiado para a área de transferência"
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "❌ Erro",
+        description: "Falha ao copiar para a área de transferência"
+      });
+    }
+  }, [htmlOutput, toast]);
+
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50">
@@ -386,6 +498,19 @@ Garantia de 12 meses`;
             {/* Botões de Ação */}
             <div className="flex gap-3 mt-4">
               <Button
+                onClick={generateWithAI}
+                disabled={isGenerating || !textInput.trim()}
+                className="flex items-center gap-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                {isGenerating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Wand2 className="h-4 w-4" />
+                )}
+                {isGenerating ? 'Gerando...' : 'Gerar com IA'}
+              </Button>
+              
+              <Button
                 variant="destructive"
                 size="sm"
                 onClick={clearAll}
@@ -469,6 +594,33 @@ Garantia de 12 meses`;
           </div>
         </div>
       </div>
+
+      {/* Diálogo de Confirmação de Substituição */}
+      <AlertDialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Substituir Conteúdo Original?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A IA gerou uma nova descrição. Deseja substituir o conteúdo original por esta nova versão?
+              
+              <div className="mt-4 p-3 bg-gray-50 rounded-md max-h-40 overflow-y-auto">
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                  {generatedDescription.substring(0, 300)}
+                  {generatedDescription.length > 300 && '...'}
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => handleReplaceContent(false)}>
+              Manter Original
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleReplaceContent(true)}>
+              Substituir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
