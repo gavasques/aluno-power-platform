@@ -186,6 +186,13 @@ export default function HtmlDescriptionAgent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <style jsx>{`
+        [contenteditable][data-placeholder]:empty::before {
+          content: attr(data-placeholder);
+          color: #9ca3af;
+          font-style: italic;
+        }
+      `}</style>
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -315,8 +322,8 @@ export default function HtmlDescriptionAgent() {
                 }}
                 onInput={handleEditorChange}
                 onPaste={handlePaste}
-                placeholder="Digite sua descrição do produto aqui..."
                 suppressContentEditableWarning={true}
+                data-placeholder="Digite sua descrição do produto aqui..."
               />
 
               {/* Actions */}
@@ -355,8 +362,8 @@ export default function HtmlDescriptionAgent() {
 
             {/* Amazon Rules */}
             <Card>
-              <CardHeader>
-                <Collapsible open={rulesOpen} onOpenChange={setRulesOpen}>
+              <Collapsible open={rulesOpen} onOpenChange={setRulesOpen}>
+                <CardHeader>
                   <CollapsibleTrigger asChild>
                     <Button variant="ghost" className="w-full justify-between p-0 h-auto">
                       <div className="flex items-center space-x-2">
@@ -368,20 +375,20 @@ export default function HtmlDescriptionAgent() {
                       </span>
                     </Button>
                   </CollapsibleTrigger>
-                </Collapsible>
-              </CardHeader>
-              <CollapsibleContent>
-                <CardContent className="pt-0">
-                  <div className="space-y-2">
-                    {amazonRules.map((rule, index) => (
-                      <div key={index} className="flex items-start space-x-2">
-                        <span className="text-blue-500 text-xs mt-1">•</span>
-                        <span className="text-sm text-gray-700">{rule}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-2">
+                      {amazonRules.map((rule, index) => (
+                        <div key={index} className="flex items-start space-x-2">
+                          <span className="text-blue-500 text-xs mt-1">•</span>
+                          <span className="text-sm text-gray-700">{rule}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
             </Card>
           </div>
         </div>
