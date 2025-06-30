@@ -245,7 +245,7 @@ const AdminDashboard = memo(() => {
               <CardContent className="p-6">
                 {recentActivity.length > 0 ? (
                   <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
+                    {recentActivity.map((activity: any, index: number) => (
                       <div key={index} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
                         <div className="flex items-center space-x-3">
                           <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
