@@ -7,8 +7,10 @@ export const queryClient = new QueryClient({
       gcTime: 30 * 60 * 1000, // 30 minutes - keep data in cache longer
       refetchOnWindowFocus: false,
       refetchOnReconnect: 'always',
-      refetchOnMount: 'always',
+      refetchOnMount: false, // Prevent duplicate requests on mount
       networkMode: 'online',
+      // Enable query deduplication
+      structuralSharing: true,
       retry: (failureCount, error) => {
         // Don't retry 4xx errors (client errors)
         if (error instanceof Error && error.message.includes('HTTP 4')) {
@@ -16,16 +18,27 @@ export const queryClient = new QueryClient({
         }
         return failureCount < 3;
       },
-      queryFn: async ({ queryKey }) => {
+      queryFn: async ({ queryKey, signal }) => {
         const url = queryKey[0] as string;
+        const token = localStorage.getItem('authToken');
+        
         try {
-          const response = await fetch(url);
+          const response = await fetch(url, {
+            signal, // Support query cancellation
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          });
           if (!response.ok) {
             const errorText = await response.text().catch(() => 'Unknown error');
             throw new Error(`HTTP ${response.status}: ${errorText}`);
           }
           return response.json();
         } catch (error) {
+          if (signal?.aborted) {
+            throw new Error('Query was cancelled');
+          }
           console.error('Query error for:', url, error);
           throw error;
         }

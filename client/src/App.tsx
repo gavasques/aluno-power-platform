@@ -8,8 +8,9 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { AuthProvider } from "./contexts/AuthContext";
 import { CombinedProvider } from "./contexts/CombinedProvider";
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
+import { backgroundPrefetch } from '@/lib/prefetch';
 
 // Lazy load pages for better performance
 const Dashboard = lazy(() => import("./pages/Dashboard"));

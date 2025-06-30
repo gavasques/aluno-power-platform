@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@shared/schema';
 import { AuthService, LoginCredentials, RegisterData } from '@/services/authService';
+import { prefetchUserData, backgroundPrefetch } from '@/lib/prefetch';
 
 // Interfaces seguindo Single Responsibility Principle
 interface AuthState {
@@ -103,6 +104,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           isLoading: false,
           isAuthenticated: true,
         });
+        
+        // Prefetch user-specific data after successful authentication
+        prefetchUserData().catch(error => 
+          console.warn('Failed to prefetch user data:', error)
+        );
       } else {
         throw new Error('No user returned from API');
       }
