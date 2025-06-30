@@ -31,9 +31,7 @@ const HtmlDescriptionGenerator = () => {
 
   // Símbolos permitidos pela Amazon
   const allowedSymbols = [
-    '✅', '❌', '⚠️', '📦', '🚚', '💯', '⭐', '🔥', '💪', '🎯',
-    '➤', '►', '▶', '●', '◆', '■', '▲', '♦', '♠', '♣',
-    '→', '←', '↑', '↓', '↗', '↘', '↙', '↖'
+    '✓', '©', '®', '★', '™', '♥', '①', '②', '③', '④'
   ];
 
   // Converter texto para HTML
@@ -246,9 +244,9 @@ Exemplo:
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="mb-8">
+        <div className="bg-white border-b border-gray-200 px-6 py-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Gerador de Descrições Amazon
           </h1>
@@ -258,10 +256,9 @@ Exemplo:
         </div>
 
         {/* Layout Principal - 2 Colunas */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
           {/* Coluna Esquerda - Editor */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white border-r border-gray-200 p-6 flex flex-col">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Editor de Texto
@@ -361,7 +358,7 @@ Exemplo:
                   }
                 }}
                 placeholder={placeholder}
-                className={`min-h-[400px] resize-none ${
+                className={`flex-1 resize-none ${
                   charCount >= MAX_CHARS ? 'border-red-500' :
                   charCount > WARNING_THRESHOLD ? 'border-yellow-500' :
                   'border-gray-300'
@@ -381,12 +378,10 @@ Exemplo:
                   Limpar Tudo
                 </Button>
               </div>
-            </div>
           </div>
 
           {/* Coluna Direita - Output */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white p-6 flex flex-col">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Código HTML Gerado
@@ -403,26 +398,23 @@ Exemplo:
 
               {/* Output HTML */}
               <div 
-                className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm min-h-[400px] overflow-auto whitespace-pre-wrap"
+                className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm flex-1 overflow-auto whitespace-pre-wrap"
                 id="htmlOutput"
               >
                 {htmlOutput || 'O código HTML aparecerá aqui conforme você digita...'}
               </div>
-            </div>
+          </div>
+        </div>
 
-            {/* Regras da Amazon */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <Collapsible open={isRulesOpen} onOpenChange={setIsRulesOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <Info className="h-4 w-4" />
-                      📋 Regras da Amazon Brasil
-                    </span>
-                    {isRulesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-4 space-y-4">
+        {/* Regras da Amazon - Sempre Aberta Abaixo */}
+        <div className="bg-white border-t border-gray-200 p-6">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              📋 Regras da Amazon Brasil
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <h3 className="font-semibold text-green-600 mb-2">✅ PERMITIDO:</h3>
                     <ul className="text-sm space-y-1 text-gray-700">
@@ -431,7 +423,7 @@ Exemplo:
                       <li>• Máximo 2000 caracteres (incluindo espaços e tags)</li>
                       <li>• Títulos de até 200 caracteres</li>
                       <li>• Descrições claras e concisas</li>
-                      <li>• Símbolos permitidos: ✅ ❌ ⚠️ 📦 🚚 💯 ⭐ 🔥 💪 🎯</li>
+                      <li>• Símbolos permitidos: ✓ © ® ★ ™ ♥ ① ② ③ ④</li>
                     </ul>
                   </div>
 
@@ -455,10 +447,6 @@ Exemplo:
                       <li>• Cada produto deve ter seu próprio listing</li>
                       <li>• Mantenha sempre a experiência do cliente em mente</li>
                     </ul>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
           </div>
         </div>
       </div>
