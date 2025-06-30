@@ -10,10 +10,42 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
-  role: text("role").notNull().default("user"),
+  role: text("role").notNull().default("user"), // admin, support, user
+  isActive: boolean("is_active").notNull().default(true),
+  lastLogin: timestamp("last_login"),
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// User Groups table
+export const userGroups = pgTable("user_groups", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  permissions: jsonb("permissions").notNull().default([]),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// User Group Members table
+export const userGroupMembers = pgTable("user_group_members", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  groupId: integer("group_id").references(() => userGroups.id).notNull(),
+  addedAt: timestamp("added_at").notNull().defaultNow(),
+});
+
+// User Sessions table
+export const userSessions = pgTable("user_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  sessionToken: text("session_token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Categories
@@ -920,14 +952,7 @@ export const insertGeneratedImageSchema = createInsertSchema(generatedImages);
 export type InsertGeneratedImage = z.infer<typeof insertGeneratedImageSchema>;
 export type GeneratedImage = typeof generatedImages.$inferSelect;
 
-// Insert schemas
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  email: true,
-  name: true,
-  role: true,
-});
+// Insert schemas (moved to end of file to avoid conflicts)
 
 export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
@@ -1264,4 +1289,45 @@ export type AgentSessionFile = typeof agentSessionFiles.$inferSelect;
 // Agent session with files type
 export type AgentSessionWithFiles = AgentSession & {
   files: AgentSessionFile[];
+};
+
+// Auth schemas
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastLogin: true,
+  resetToken: true,
+  resetTokenExpiry: true,
+});
+
+export const insertUserGroupSchema = createInsertSchema(userGroups).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserGroupMemberSchema = createInsertSchema(userGroupMembers).omit({
+  id: true,
+  addedAt: true,
+});
+
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Auth types
+export type InsertUserGroup = z.infer<typeof insertUserGroupSchema>;
+export type UserGroup = typeof userGroups.$inferSelect;
+
+export type InsertUserGroupMember = z.infer<typeof insertUserGroupMemberSchema>;
+export type UserGroupMember = typeof userGroupMembers.$inferSelect;
+
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+export type UserSession = typeof userSessions.$inferSelect;
+
+// User with groups type
+export type UserWithGroups = User & {
+  groups: (UserGroupMember & { group: UserGroup })[];
 };
