@@ -2,9 +2,11 @@ import { ReactNode } from 'react';
 
 interface AuthLayoutProps {
   children: ReactNode;
+  title?: string;
+  subtitle?: string;
 }
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+export function AuthLayout({ children, title = "Bem-vindo", subtitle = "Faça login ou crie sua conta para começar" }: AuthLayoutProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -20,10 +22,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
           <div className="text-center mb-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Bem-vindo
+              {title}
             </h2>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Faça login ou crie sua conta para começar
+              {subtitle}
             </p>
           </div>
           
