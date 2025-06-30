@@ -16,38 +16,50 @@ import { PromptsProvider } from "./contexts/PromptsContext";
 import { YoutubeProvider } from "./contexts/YoutubeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AgentsProvider } from "./contexts/AgentsContext";
+import { Suspense, lazy } from 'react';
+import { Loader2 } from 'lucide-react';
 
-// Import pages that exist
-import Dashboard from "./pages/Dashboard";
-import Videos from "./pages/Videos";
-import News from "./pages/News";
-import Updates from "./pages/Updates";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import Admin from "./pages/Admin";
-import UserManagement from "./pages/admin/UserManagement";
-import SupportManagement from "./pages/admin/SupportManagement";
-import GeneralSettings from "./pages/admin/GeneralSettings";
-import ContentManagement from "./pages/admin/ContentManagement";
-import Suppliers from "./pages/hub/Suppliers";
-import Partners from "./pages/hub/Partners";
-import PartnerDetail from "./pages/hub/PartnerDetailSimple";
-import ToolDetail from "./pages/hub/ToolDetail";
-import MaterialDetailPage from "./pages/hub/MaterialDetailPage";
-import SupplierDetail from "./pages/hub/SupplierDetail";
-import TemplateDetail from "./pages/hub/TemplateDetail";
-import PromptDetail from "./pages/hub/PromptDetail";
-import Hub from "./pages/Hub";
-import MyArea from "./pages/MyArea";
-import AgentsPage from "./pages/agents";
-import AgentProcessorPage from "./pages/AgentProcessorPage";
-import AmazonListingsOptimizer from "./pages/agents/amazon-listings-optimizer";
-import AmazonListingsOptimizerResult from "./pages/agents/amazon-listings-optimizer-result";
-import AmazonListingsOptimizerNew from "./pages/agents/amazon-listings-optimizer-new";
+// Lazy load pages for better performance
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Videos = lazy(() => import("./pages/Videos"));
+const News = lazy(() => import("./pages/News"));
+const Updates = lazy(() => import("./pages/Updates"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const Admin = lazy(() => import("./pages/Admin"));
+const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
+const SupportManagement = lazy(() => import("./pages/admin/SupportManagement"));
+const GeneralSettings = lazy(() => import("./pages/admin/GeneralSettings"));
+const ContentManagement = lazy(() => import("./pages/admin/ContentManagement"));
+const Suppliers = lazy(() => import("./pages/hub/Suppliers"));
+const Partners = lazy(() => import("./pages/hub/Partners"));
+const PartnerDetail = lazy(() => import("./pages/hub/PartnerDetailSimple"));
+const ToolDetail = lazy(() => import("./pages/hub/ToolDetail"));
+const MaterialDetailPage = lazy(() => import("./pages/hub/MaterialDetailPage"));
+const SupplierDetail = lazy(() => import("./pages/hub/SupplierDetail"));
+const TemplateDetail = lazy(() => import("./pages/hub/TemplateDetail"));
+const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
+const Hub = lazy(() => import("./pages/Hub"));
+const MyArea = lazy(() => import("./pages/MyArea"));
+const AgentsPage = lazy(() => import("./pages/agents"));
+const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
+const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer"));
+const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
+const AmazonListingsOptimizerNew = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
+const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
+const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
 
-import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
-import GeneratedImages from "./pages/admin/GeneratedImages";
-import TestImagePage from "./components/TestImagePage";
+// Keep Login as eager import for immediate authentication
 import Login from "./pages/Login";
+
+// Loading component for lazy-loaded routes
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="flex items-center gap-3">
+      <Loader2 className="h-6 w-6 animate-spin" />
+      <span className="text-sm text-muted-foreground">Carregando...</span>
+    </div>
+  </div>
+);
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -73,7 +85,9 @@ function App() {
                           <Route path="/agents/amazon-listings-optimizer-new">
                             <ProtectedRoute>
                               <Layout>
-                                <AmazonListingsOptimizerNew />
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonListingsOptimizerNew />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -81,7 +95,9 @@ function App() {
                           <Route path="/agents/amazon-listings-optimizer/result">
                             <ProtectedRoute>
                               <Layout>
-                                <AmazonListingsOptimizerResult />
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonListingsOptimizerResult />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -89,7 +105,9 @@ function App() {
                           <Route path="/agents/amazon-listings-optimizer">
                             <ProtectedRoute>
                               <Layout>
-                                <AmazonListingsOptimizer />
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonListingsOptimizer />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -98,7 +116,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
-                                  <AgentProcessorPage />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <AgentProcessorPage />
+                                  </Suspense>
                                 </Layout>
                               </ProtectedRoute>
                             )}
@@ -107,7 +127,9 @@ function App() {
                           <Route path="/agents">
                             <ProtectedRoute>
                               <Layout>
-                                <AgentsPage />
+                                <Suspense fallback={<PageLoader />}>
+                                  <AgentsPage />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -117,7 +139,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
-                                  <MaterialDetailPage />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <MaterialDetailPage />
+                                  </Suspense>
                                 </Layout>
                               </ProtectedRoute>
                             )}
@@ -127,7 +151,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
-                                  <PartnerDetail />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <PartnerDetail />
+                                  </Suspense>
                                 </Layout>
                               </ProtectedRoute>
                             )}
@@ -137,7 +163,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
-                                  <ToolDetail />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <ToolDetail />
+                                  </Suspense>
                                 </Layout>
                               </ProtectedRoute>
                             )}
@@ -147,7 +175,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
-                                  <SupplierDetail />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <SupplierDetail />
+                                  </Suspense>
                                 </Layout>
                               </ProtectedRoute>
                             )}
@@ -157,7 +187,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
-                                  <TemplateDetail />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <TemplateDetail />
+                                  </Suspense>
                                 </Layout>
                               </ProtectedRoute>
                             )}
@@ -167,7 +199,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
-                                  <PromptDetail />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <PromptDetail />
+                                  </Suspense>
                                 </Layout>
                               </ProtectedRoute>
                             )}
@@ -177,7 +211,9 @@ function App() {
                           <Route path="/hub/parceiros">
                             <ProtectedRoute>
                               <Layout>
-                                <Partners />
+                                <Suspense fallback={<PageLoader />}>
+                                  <Partners />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -185,7 +221,9 @@ function App() {
                           <Route path="/hub/fornecedores">
                             <ProtectedRoute>
                               <Layout>
-                                <Suppliers />
+                                <Suspense fallback={<PageLoader />}>
+                                  <Suppliers />
+                                </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
@@ -194,7 +232,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
-                                  <Hub />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <Hub />
+                                  </Suspense>
                                 </Layout>
                               </ProtectedRoute>
                             )}
@@ -205,7 +245,9 @@ function App() {
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
-                                  <MyArea />
+                                  <Suspense fallback={<PageLoader />}>
+                                    <MyArea />
+                                  </Suspense>
                                 </Layout>
                               </ProtectedRoute>
                             )}
@@ -215,7 +257,9 @@ function App() {
                           <Route path="/admin/images">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
-                                <GeneratedImages />
+                                <Suspense fallback={<PageLoader />}>
+                                  <GeneratedImages />
+                                </Suspense>
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
@@ -223,7 +267,9 @@ function App() {
                           <Route path="/admin/agents/providers">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
-                                <AgentProviderSettings />
+                                <Suspense fallback={<PageLoader />}>
+                                  <AgentProviderSettings />
+                                </Suspense>
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
@@ -231,7 +277,9 @@ function App() {
                           <Route path="/admin/usuarios">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
-                                <UserManagement />
+                                <Suspense fallback={<PageLoader />}>
+                                  <UserManagement />
+                                </Suspense>
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
@@ -239,7 +287,9 @@ function App() {
                           <Route path="/admin/suporte">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
-                                <SupportManagement />
+                                <Suspense fallback={<PageLoader />}>
+                                  <SupportManagement />
+                                </Suspense>
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
