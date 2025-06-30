@@ -30,14 +30,15 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
   // Renderizar preview formatado para overlay
   const renderFormattedPreview = (text: string) => {
-    if (!text) return '';
+    if (!text) return '<span style="color: #999;">' + placeholder + '</span>';
     
-    // Aplicar formatação visual simples
+    // Aplicar formatação visual - converte markdown para visual real
     let formatted = text
-      .replace(/\*\*(.*?)\*\*/g, '<span style="font-weight: bold; color: #000;">$1</span>')
-      .replace(/\*(.*?)\*/g, '<span style="font-style: italic; color: #000;">$1</span>')
-      .replace(/• (.*?)(\n|$)/g, '<span style="color: #0066cc;">• </span><span style="color: #000;">$1</span>$2')
-      .replace(/(\d+)\. (.*?)(\n|$)/g, '<span style="color: #0066cc;">$1. </span><span style="color: #000;">$2</span>$3');
+      .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #000;">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em style="color: #000;">$1</em>')
+      .replace(/• (.*?)(\n|$)/g, '<span style="color: #0066cc; font-weight: bold;">• </span><span style="color: #000;">$1</span>$2')
+      .replace(/(\d+)\. (.*?)(\n|$)/g, '<span style="color: #0066cc; font-weight: bold;">$1. </span><span style="color: #000;">$2</span>$3')
+      .replace(/\n/g, '<br>');
     
     return formatted;
   };
@@ -415,13 +416,12 @@ Garantia de 12 meses`;
               
               {/* Overlay para mostrar formatação visual */}
               <div 
-                className="absolute top-0 left-0 w-full h-full p-3 pointer-events-none overflow-hidden z-10"
+                className="absolute top-0 left-0 w-full h-full p-3 pointer-events-none overflow-hidden z-10 bg-white/95"
                 style={{
                   fontSize: '14px',
                   lineHeight: '1.5',
                   fontFamily: 'inherit',
-                  whiteSpace: 'pre-wrap',
-                  color: 'transparent'
+                  whiteSpace: 'pre-wrap'
                 }}
                 dangerouslySetInnerHTML={{
                   __html: renderFormattedPreview(textInput)
