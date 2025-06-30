@@ -15,6 +15,8 @@ export const users = pgTable("users", {
   lastLogin: timestamp("last_login"),
   resetToken: text("reset_token"),
   resetTokenExpiry: timestamp("reset_token_expiry"),
+  magicLinkToken: text("magic_link_token"),
+  magicLinkExpiresAt: timestamp("magic_link_expires_at"),
   emailVerified: boolean("email_verified").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

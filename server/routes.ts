@@ -3032,6 +3032,49 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Magic link request
+  app.post('/api/auth/magic-link', async (req, res) => {
+    try {
+      const { email } = z.object({ email: z.string().email() }).parse(req.body);
+      
+      const magicToken = await AuthService.generateMagicLinkToken(email);
+      if (!magicToken) {
+        return res.status(404).json({ error: 'Email não encontrado' });
+      }
+
+      // In production, send email here
+      res.json({ 
+        success: true, 
+        message: 'Magic Link enviado por email',
+        magicToken // Remove this in production
+      });
+    } catch (error: any) {
+      console.error('Magic link error:', error);
+      res.status(400).json({ error: 'Dados inválidos' });
+    }
+  });
+
+  // Magic link authentication
+  app.get('/api/auth/magic-link/:token', async (req, res) => {
+    try {
+      const { token } = req.params;
+      
+      const user = await AuthService.authenticateWithMagicLink(token);
+      if (!user) {
+        return res.status(400).json({ error: 'Magic Link inválido ou expirado' });
+      }
+
+      // Create session token
+      const sessionToken = await AuthService.createSession(user.id);
+      
+      // Redirect to frontend with session token
+      res.redirect(`/login?magic=success&token=${sessionToken}`);
+    } catch (error: any) {
+      console.error('Magic link auth error:', error);
+      res.redirect('/login?magic=error');
+    }
+  });
+
   return httpServer;
 }
 

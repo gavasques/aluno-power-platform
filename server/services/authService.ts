@@ -257,6 +257,53 @@ export class AuthService {
     return user || null;
   }
 
+  // Generate magic link token
+  static async generateMagicLinkToken(email: string): Promise<string | null> {
+    const user = await this.getUserByEmail(email);
+    if (!user) return null;
+
+    const magicToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await db
+      .update(users)
+      .set({
+        magicLinkToken: magicToken,
+        magicLinkExpiresAt: expiresAt,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, user.id));
+
+    return magicToken;
+  }
+
+  // Authenticate with magic link
+  static async authenticateWithMagicLink(token: string): Promise<User | null> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.magicLinkToken, token),
+          gt(users.magicLinkExpiresAt, new Date())
+        )
+      );
+
+    if (!user) return null;
+
+    // Clear magic link token after use
+    await db
+      .update(users)
+      .set({
+        magicLinkToken: null,
+        magicLinkExpiresAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, user.id));
+
+    return user;
+  }
+
   // Clean expired sessions
   static async cleanExpiredSessions(): Promise<void> {
     const now = new Date();

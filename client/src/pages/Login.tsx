@@ -31,8 +31,25 @@ const Login: React.FC = () => {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
 
-  // Redirect if already authenticated
+  // Handle magic link authentication and redirect if already authenticated
   useEffect(() => {
+    // Check for magic link authentication
+    const urlParams = new URLSearchParams(window.location.search);
+    const magicStatus = urlParams.get('magic');
+    const token = urlParams.get('token');
+
+    if (magicStatus === 'success' && token) {
+      // Store the token and redirect
+      localStorage.setItem('authToken', token);
+      localStorage.removeItem('userLoggedOut');
+      window.location.href = '/';
+      return;
+    }
+
+    if (magicStatus === 'error') {
+      setMagicLinkError('Magic Link inválido ou expirado');
+    }
+
     if (isAuthenticated) {
       window.location.href = '/';
     }
@@ -136,6 +153,31 @@ const Login: React.FC = () => {
       if (response.ok && data.success) {
         setMagicLinkSuccess('Magic Link enviado para seu email!');
         setMagicLinkEmail('');
+        
+        // Show magic link in development
+        if (data.magicToken) {
+          const magicLink = `${window.location.origin}/api/auth/magic-link/${data.magicToken}`;
+          console.log('🔗 Magic Link (desenvolvimento):', magicLink);
+          
+          // Show clickable link for development
+          const linkElement = document.createElement('div');
+          linkElement.innerHTML = `
+            <div style="background: #f0f9ff; border: 1px solid #0ea5e9; padding: 12px; margin: 8px 0; border-radius: 6px;">
+              <p style="margin: 0 0 8px; font-weight: 600; color: #0369a1;">Magic Link (Desenvolvimento):</p>
+              <a href="${magicLink}" style="color: #0ea5e9; text-decoration: underline; word-break: break-all;">
+                ${magicLink}
+              </a>
+            </div>
+          `;
+          
+          // Find the magic link success alert and add the link below it
+          setTimeout(() => {
+            const magicTab = document.querySelector('[data-value="magic"]');
+            if (magicTab) {
+              magicTab.appendChild(linkElement);
+            }
+          }, 100);
+        }
       } else {
         setMagicLinkError(data.error || 'Erro ao enviar Magic Link');
       }
@@ -449,6 +491,11 @@ const Login: React.FC = () => {
                       'Enviar Magic Link'
                     )}
                   </Button>
+
+                  <div className="text-center text-sm text-gray-600 mt-4">
+                    <p>Para desenvolvimento:</p>
+                    <p>O Magic Link será exibido no console após o envio</p>
+                  </div>
                 </form>
               </TabsContent>
             </Tabs>
