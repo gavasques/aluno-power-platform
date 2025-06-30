@@ -2871,15 +2871,43 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Login route
   app.post('/api/auth/login', async (req, res) => {
     try {
+      console.log('🔐 LOGIN ATTEMPT:', JSON.stringify({
+        timestamp: new Date().toISOString(),
+        requestBody: req.body,
+        headers: req.headers['user-agent']
+      }));
+
       const { email, password } = loginSchema.parse(req.body);
       
+      console.log('🔐 LOGIN DATA PARSED:', JSON.stringify({
+        email,
+        passwordLength: password.length,
+        passwordHash: password.substring(0, 3) + '***'
+      }));
+
       const user = await AuthService.authenticateUserByEmail(email, password);
+      
+      console.log('🔐 AUTHENTICATION RESULT:', JSON.stringify({
+        email,
+        userFound: !!user,
+        userId: user?.id,
+        userRole: user?.role,
+        userActive: user?.isActive
+      }));
+
       if (!user) {
+        console.log('🔐 LOGIN FAILED - User not found or invalid credentials');
         return res.status(401).json({ error: 'Credenciais inválidas' });
       }
 
       // Create session token
       const sessionToken = await AuthService.createSession(user.id);
+      
+      console.log('🔐 LOGIN SUCCESS:', JSON.stringify({
+        userId: user.id,
+        email: user.email,
+        sessionTokenLength: sessionToken.length
+      }));
       
       res.json({
         success: true,
@@ -2890,10 +2918,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           name: user.name,
           role: user.role
         },
-        sessionToken
+        token: sessionToken
       });
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('🔐 LOGIN ERROR:', JSON.stringify({
+        error: error.message,
+        stack: error.stack,
+        requestBody: req.body
+      }));
       res.status(400).json({ error: 'Dados inválidos' });
     }
   });

@@ -56,9 +56,20 @@ export class AuthService {
 
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
+      console.log('🔐 FRONTEND LOGIN - Starting login request:', {
+        email: credentials.email,
+        passwordLength: credentials.password.length
+      });
+
       const data = await AuthService.makeRequest(AuthService.ENDPOINTS.LOGIN, {
         method: 'POST',
         body: JSON.stringify(credentials),
+      });
+
+      console.log('🔐 FRONTEND LOGIN - Success response:', {
+        hasUser: !!data.user,
+        hasToken: !!data.token,
+        userId: data.user?.id
       });
 
       return {
@@ -67,6 +78,11 @@ export class AuthService {
         token: data.token,
       };
     } catch (error) {
+      console.log('🔐 FRONTEND LOGIN - Error:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorType: error.constructor.name
+      });
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro no login',

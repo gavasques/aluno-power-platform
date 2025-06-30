@@ -69,17 +69,44 @@ export class AuthService {
 
   // Authenticate by email
   static async authenticateUserByEmail(email: string, password: string): Promise<User | null> {
+    console.log('🔍 AUTH SERVICE - Searching for user by email:', email);
+    
     const [user] = await db
       .select()
       .from(users)
       .where(eq(users.email, email));
 
-    if (!user || !user.isActive) {
+    console.log('🔍 AUTH SERVICE - User search result:', JSON.stringify({
+      email,
+      userFound: !!user,
+      userId: user?.id,
+      userActive: user?.isActive,
+      userRole: user?.role,
+      passwordHashPresent: !!user?.password
+    }));
+
+    if (!user) {
+      console.log('🔍 AUTH SERVICE - User not found in database');
       return null;
     }
 
+    if (!user.isActive) {
+      console.log('🔍 AUTH SERVICE - User found but not active');
+      return null;
+    }
+
+    console.log('🔍 AUTH SERVICE - Comparing passwords for user:', user.email);
     const isValidPassword = await this.comparePassword(password, user.password);
+    
+    console.log('🔍 AUTH SERVICE - Password comparison result:', JSON.stringify({
+      email: user.email,
+      isValidPassword,
+      providedPasswordLength: password.length,
+      storedHashLength: user.password.length
+    }));
+
     if (!isValidPassword) {
+      console.log('🔍 AUTH SERVICE - Password validation failed');
       return null;
     }
 
