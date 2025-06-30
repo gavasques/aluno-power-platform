@@ -11,6 +11,8 @@ import { CombinedProvider } from "./contexts/CombinedProvider";
 import { Suspense, lazy, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { backgroundPrefetch } from '@/lib/prefetch';
+import { useFontLoader } from '@/lib/fontLoader';
+import { useOptimizedIcons } from '@/components/IconLoader';
 
 // Lazy load pages for better performance
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -56,10 +58,19 @@ const PageLoader = () => (
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  // Initialize background prefetching for common data
+  // Initialize optimized loading systems
+  const { loadRouteSpecificFonts } = useFontLoader();
+  const { preloadCriticalIcons } = useOptimizedIcons();
+
   useEffect(() => {
+    // Initialize all performance optimizations
     backgroundPrefetch();
-  }, []);
+    preloadCriticalIcons();
+    
+    // Load fonts based on current route
+    const currentPath = window.location.pathname;
+    loadRouteSpecificFonts(currentPath);
+  }, [loadRouteSpecificFonts, preloadCriticalIcons]);
 
   return (
     <QueryClientProvider client={queryClient}>
