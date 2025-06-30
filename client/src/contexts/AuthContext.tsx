@@ -46,6 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    // Limpar localStorage se houver dados salvos
+    localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+    // Redirecionar para página de login
+    window.location.href = '/login';
   };
 
   const toggleRole = () => {

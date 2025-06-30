@@ -47,16 +47,7 @@ import AmazonListingsOptimizerNew from "./pages/agents/amazon-listings-optimizer
 import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
 import GeneratedImages from "./pages/admin/GeneratedImages";
 import TestImagePage from "./components/TestImagePage";
-
-// Create a simple Auth component
-const Auth = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="text-center">
-      <h1 className="text-2xl font-bold mb-4">Área de Login</h1>
-      <p className="text-muted-foreground">Sistema de autenticação em desenvolvimento</p>
-    </div>
-  </div>
-);
+import { Login } from "./pages/Login";
 
 function App() {
   return (
@@ -74,7 +65,8 @@ function App() {
                         <PromptsProvider>
                           <AgentsProvider>
                             <Switch>
-                          <Route path="/auth" component={Auth} />
+                          <Route path="/login" component={Login} />
+                          <Route path="/auth" component={Login} />
 
                           {/* Agents routes */}
                           <Route path="/agents/amazon-listings-optimizer-new">
