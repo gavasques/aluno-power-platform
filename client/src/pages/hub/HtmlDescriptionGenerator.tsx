@@ -35,29 +35,38 @@ const HtmlDescriptionGenerator: React.FC = () => {
       return;
     }
 
-    let html = textInput;
+    // Obter HTML do contentEditable se disponível
+    const editor = document.getElementById('textInput') as HTMLDivElement;
+    let sourceContent = textInput;
     
-    // Converter texto visual formatado para HTML
-    // Dividir por quebras de linha mantendo linhas vazias para <p>&nbsp;</p>
-    const lines = html.split('\n');
+    if (editor) {
+      // Usar o innerHTML do editor, que já contém formatação visual
+      const editorHtml = editor.innerHTML;
+      if (editorHtml && editorHtml !== `<span style="color: #999;">${placeholder}</span>`) {
+        sourceContent = editor.innerText || textInput;
+      }
+    }
     
-    // Processar linhas e agrupar listas
+    // Processar o conteúdo linha por linha
+    const lines = sourceContent.split('\n');
     const processedLines: string[] = [];
     let currentList: { type: string; items: string[] } = { type: '', items: [] };
     
     for (const line of lines) {
       let processedLine = line.trim();
       
-      // Converter formatação visual para HTML
-      // **texto** para <strong>texto</strong>
-      processedLine = processedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // *texto* para <i>texto</i>
-      processedLine = processedLine.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<i>$1</i>');
+      // Se há formatação no editor, capturar do HTML
+      if (editor) {
+        const htmlContent = editor.innerHTML;
+        // Converter <b> e <strong> para <strong>
+        processedLine = processedLine.replace(/<b\b[^>]*>/gi, '<strong>').replace(/<\/b>/gi, '</strong>');
+        // Converter <i> e <em> para <i>
+        processedLine = processedLine.replace(/<em\b[^>]*>/gi, '<i>').replace(/<\/em>/gi, '</i>');
+      }
       
       // Verificar se é item de lista
       if (processedLine.startsWith('• ')) {
         if (currentList.type !== 'ul') {
-          // Finalizar lista anterior se existir
           if (currentList.type && currentList.items.length > 0) {
             processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
           }
@@ -66,7 +75,6 @@ const HtmlDescriptionGenerator: React.FC = () => {
         currentList.items.push(`<li>${processedLine.substring(2)}</li>`);
       } else if (/^\d+\.\s/.test(processedLine)) {
         if (currentList.type !== 'ol') {
-          // Finalizar lista anterior se existir
           if (currentList.type && currentList.items.length > 0) {
             processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
           }
@@ -74,7 +82,7 @@ const HtmlDescriptionGenerator: React.FC = () => {
         }
         currentList.items.push(`<li>${processedLine.replace(/^\d+\.\s/, '')}</li>`);
       } else {
-        // Não é item de lista, finalizar lista atual se existir
+        // Finalizar lista atual se existir
         if (currentList.type && currentList.items.length > 0) {
           processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
           currentList = { type: '', items: [] };
@@ -82,72 +90,69 @@ const HtmlDescriptionGenerator: React.FC = () => {
         
         // Processar linha normal
         if (processedLine.trim() === '') {
-          // Linha vazia vira <p>&nbsp;</p>
           processedLines.push('<p>&nbsp;</p>');
-        } else if (processedLine.includes('<')) {
-          processedLines.push(processedLine);
         } else {
           processedLines.push(`<p>${processedLine}</p>`);
         }
       }
     }
     
-    // Finalizar lista se houver uma pendente
+    // Finalizar lista pendente
     if (currentList.type && currentList.items.length > 0) {
       processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
     }
     
-    html = processedLines.join('');
+    let html = processedLines.join('');
     
-    // Limpar HTML não permitido (validação básica)
+    // Limpar HTML não permitido
     html = html.replace(/<(?!\/?(strong|i|u|br|p|ul|ol|li|em)\b)[^>]*>/gi, '');
     
     setHtmlOutput(html);
   }, [textInput]);
 
-  // Aplicar formatação visual
+  // Aplicar formatação visual usando execCommand
   const applyFormatting = (type: string) => {
-    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
-    if (!textarea) return;
+    const editor = document.getElementById('textInput') as HTMLDivElement;
+    if (!editor) return;
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textInput.substring(start, end);
-    
-    if (selectedText) {
-      const beforeText = textInput.substring(0, start);
-      const afterText = textInput.substring(end);
-      
-      let formattedText = '';
+    // Verificar se há seleção
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    // Focar no editor primeiro
+    editor.focus();
+
+    try {
       if (type === 'b') {
-        formattedText = `**${selectedText}**`; // Para negrito visual
+        document.execCommand('bold', false);
       } else if (type === 'i') {
-        formattedText = `*${selectedText}*`; // Para itálico visual
+        document.execCommand('italic', false);
       }
       
-      const newText = beforeText + formattedText + afterText;
-      
-      if (newText.length <= MAX_CHARS) {
-        setTextInput(newText);
-        
-        // Reposicionar cursor
-        setTimeout(() => {
-          const newPos = start + formattedText.length;
-          textarea.setSelectionRange(newPos, newPos);
-          textarea.focus();
-        }, 0);
-      }
+      // Atualizar o estado baseado no conteúdo HTML
+      setTimeout(() => {
+        const text = editor.innerText || '';
+        if (text.length <= MAX_CHARS) {
+          setTextInput(text);
+        }
+      }, 0);
+    } catch (error) {
+      console.warn('execCommand not supported:', error);
     }
   };
 
   // Inserir lista (visual)
   const insertList = (ordered = false) => {
-    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
-    if (!textarea) return;
+    const editor = document.getElementById('textInput') as HTMLDivElement;
+    if (!editor) return;
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textInput.substring(start, end);
+    editor.focus();
+    
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    
+    const range = selection.getRangeAt(0);
+    const selectedText = range.toString();
     
     let listText = '';
     
@@ -168,19 +173,19 @@ const HtmlDescriptionGenerator: React.FC = () => {
       }
     }
     
-    const beforeText = textInput.substring(0, start);
-    const afterText = textInput.substring(end);
-    const newText = beforeText + listText + afterText;
-    
-    if (newText.length <= MAX_CHARS) {
-      setTextInput(newText);
+    try {
+      range.deleteContents();
+      range.insertNode(document.createTextNode(listText));
       
-      // Reposicionar cursor
+      // Atualizar estado
       setTimeout(() => {
-        const newPos = start + listText.length;
-        textarea.setSelectionRange(newPos, newPos);
-        textarea.focus();
+        const text = editor.innerText || '';
+        if (text.length <= MAX_CHARS) {
+          setTextInput(text);
+        }
       }, 0);
+    } catch (error) {
+      console.warn('Lista não pôde ser inserida:', error);
     }
   };
 
@@ -188,23 +193,35 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
   // Inserir símbolo
   const insertSymbol = (symbol: string) => {
-    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
-    if (!textarea) return;
+    const editor = document.getElementById('textInput') as HTMLDivElement;
+    if (!editor) return;
 
-    const start = textarea.selectionStart;
-    const beforeText = textInput.substring(0, start);
-    const afterText = textInput.substring(start);
-    const newText = beforeText + symbol + afterText;
+    editor.focus();
     
-    if (newText.length <= MAX_CHARS) {
-      setTextInput(newText);
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    
+    const range = selection.getRangeAt(0);
+    
+    try {
+      const textNode = document.createTextNode(symbol);
+      range.insertNode(textNode);
       
-      // Reposicionar cursor
+      // Mover cursor para depois do símbolo
+      range.setStartAfter(textNode);
+      range.setEndAfter(textNode);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // Atualizar estado
       setTimeout(() => {
-        const newPos = start + symbol.length;
-        textarea.setSelectionRange(newPos, newPos);
-        textarea.focus();
+        const text = editor.innerText || '';
+        if (text.length <= MAX_CHARS) {
+          setTextInput(text);
+        }
       }, 0);
+    } catch (error) {
+      console.warn('Símbolo não pôde ser inserido:', error);
     }
   };
 
@@ -361,22 +378,39 @@ Garantia de 12 meses`;
               </div>
             </div>
 
-            {/* Textarea */}
-            <Textarea
+            {/* Rich Text Area */}
+            <div
               id="textInput"
-              value={textInput}
-              onChange={(e) => {
-                if (e.target.value.length <= MAX_CHARS) {
-                  setTextInput(e.target.value);
+              contentEditable
+              suppressContentEditableWarning={true}
+              onInput={(e) => {
+                const target = e.target as HTMLDivElement;
+                const text = target.innerText || '';
+                if (text.length <= MAX_CHARS) {
+                  setTextInput(text);
                 }
               }}
-              placeholder={placeholder}
-              className={`flex-1 resize-none ${
+              onPaste={(e) => {
+                e.preventDefault();
+                const text = e.clipboardData.getData('text/plain');
+                if ((textInput + text).length <= MAX_CHARS) {
+                  document.execCommand('insertText', false, text);
+                }
+              }}
+              className={`flex-1 resize-none p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[300px] overflow-y-auto ${
                 charCount >= MAX_CHARS ? 'border-red-500' :
                 charCount > WARNING_THRESHOLD ? 'border-yellow-500' :
                 'border-gray-300'
               }`}
-              maxLength={MAX_CHARS}
+              style={{ 
+                whiteSpace: 'pre-wrap',
+                fontSize: '14px',
+                lineHeight: '1.5',
+                fontFamily: 'inherit'
+              }}
+              dangerouslySetInnerHTML={{
+                __html: textInput || `<span style="color: #999;">${placeholder}</span>`
+              }}
             />
 
             {/* Botões de Ação */}
