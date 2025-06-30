@@ -38,8 +38,8 @@ const HtmlDescriptionGenerator: React.FC = () => {
     let html = textInput;
     
     // Converter texto visual formatado para HTML
-    // Dividir por quebras de linha e filtrar linhas completamente vazias
-    const lines = html.split('\n').filter(line => line.trim() !== '');
+    // Dividir por quebras de linha mantendo linhas vazias para <p>&nbsp;</p>
+    const lines = html.split('\n');
     
     // Processar linhas e agrupar listas
     const processedLines: string[] = [];
@@ -81,7 +81,10 @@ const HtmlDescriptionGenerator: React.FC = () => {
         }
         
         // Processar linha normal
-        if (processedLine.includes('<')) {
+        if (processedLine.trim() === '') {
+          // Linha vazia vira <p>&nbsp;</p>
+          processedLines.push('<p>&nbsp;</p>');
+        } else if (processedLine.includes('<')) {
           processedLines.push(processedLine);
         } else {
           processedLines.push(`<p>${processedLine}</p>`);
@@ -181,21 +184,7 @@ const HtmlDescriptionGenerator: React.FC = () => {
     }
   };
 
-  // Inserir quebra de linha (nova linha que será convertida em <p>)
-  const insertBreak = () => {
-    const newText = textInput + '\n';
-    if (newText.length <= MAX_CHARS) {
-      setTextInput(newText);
-    }
-  };
 
-  // Inserir parágrafo
-  const insertParagraph = () => {
-    const newText = textInput + '\n<p>Novo parágrafo</p>';
-    if (newText.length <= MAX_CHARS) {
-      setTextInput(newText);
-    }
-  };
 
   // Inserir símbolo
   const insertSymbol = (symbol: string) => {
@@ -350,20 +339,7 @@ Garantia de 12 meses`;
                   <ListOrdered className="h-4 w-4" />
                   Numerada
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={insertBreak}
-                >
-                  Nova Linha
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={insertParagraph}
-                >
-                  Parágrafo
-                </Button>
+
               </div>
 
               {/* Símbolos Permitidos pela Amazon */}
@@ -457,7 +433,7 @@ Garantia de 12 meses`;
               <h3 className="font-semibold text-green-600 mb-2">✅ PERMITIDO:</h3>
               <ul className="text-sm space-y-1 text-gray-700">
                 <li>• Tags HTML: &lt;strong&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;</li>
-                <li>• Quebras de linha usando &lt;br&gt;</li>
+                <li>• Quebras de linha usando &lt;p&gt; (automático)</li>
                 <li>• Máximo 2000 caracteres (incluindo espaços e tags)</li>
                 <li>• Títulos de até 200 caracteres</li>
                 <li>• Descrições claras e concisas</li>
