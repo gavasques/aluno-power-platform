@@ -8,6 +8,7 @@ import {
 import { BrainCircuit, Package, Rss, Truck, Youtube, TrendingUp, Users, BookOpen, ExternalLink, Calendar, ArrowRight } from "lucide-react";
 import React, { memo } from "react";
 import { useYoutube } from "@/contexts/YoutubeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { VideoCard } from "@/components/youtube/VideoCard";
@@ -41,6 +42,7 @@ StatCard.displayName = 'StatCard';
 
 const Dashboard = memo(() => {
   const { videos, loading } = useYoutube();
+  const { user } = useAuth();
   const recentVideos = React.useMemo(() => 
     videos
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
