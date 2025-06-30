@@ -108,7 +108,37 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: ✅ SISTEMA DE LOGS DE IA E LIMITES ATUALIZADOS IMPLEMENTADO
+- **June 30, 2025**: ✅ REFATORAÇÃO COMPLETA DO GERADOR HTML SEGUINDO PRINCÍPIOS SOLID/DRY/KISS
+  - **Modularização Completa**:
+    - `useHtmlGenerator`: Hook para gerenciamento de estado e conversão HTML
+    - `useAIGeneration`: Hook dedicado para integração com IA e logging
+    - `HtmlGeneratorToolbar`: Componente toolbar com responsabilidade única
+    - `CharacterCounter`: Componente reutilizável para contagem de caracteres
+    - `AIConfirmationDialog`: Modal modular para confirmação de substituição
+    - `copyToClipboard`: Utilitário isolado para clipboard
+  - **Princípios Aplicados**:
+    - **Single Responsibility**: Cada módulo tem uma função específica
+    - **DRY**: Eliminada duplicação de código, funções extraídas
+    - **KISS**: Código simplificado, sem complexidade desnecessária
+    - **Open/Closed**: Componentes extensíveis sem modificação
+    - **Dependency Inversion**: Hooks injetam dependências
+  - **Melhorias de Performance**:
+    - useCallback para otimização de re-renders
+    - Componentes memoizados e modulares
+    - Estado gerenciado por hooks especializados
+    - Separação clara entre lógica de negócio e apresentação
+  - **Testabilidade Aumentada**:
+    - Hooks isolados e testáveis
+    - Componentes com props bem definidas
+    - Funções puras sem efeitos colaterais
+    - Utilitários independentes
+  - **Manutenibilidade**:
+    - Código organizado em módulos especializados
+    - Interfaces TypeScript claras
+    - Responsabilidades bem definidas
+    - Facilita debugging e extensões futuras
+
+- **June 30, 2025 (anterior)**: ✅ SISTEMA DE LOGS DE IA E LIMITES ATUALIZADOS IMPLEMENTADO
   - **Sistema de Logging Completo**:
     - Tabela `ai_generation_logs` no PostgreSQL com todos os campos detalhados
     - API `/api/ai-generation-logs` para salvamento automático de dados
