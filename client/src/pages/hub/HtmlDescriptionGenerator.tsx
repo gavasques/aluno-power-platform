@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,87 +28,101 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
   const charCount = textInput.length;
 
-  // Gerar HTML em tempo real
-  useEffect(() => {
+  // Função para gerar HTML do contentEditable
+  const generateHtml = useCallback(() => {
     if (!textInput.trim()) {
       setHtmlOutput('');
       return;
     }
 
-    // Obter HTML do contentEditable se disponível
+    // Obter HTML do contentEditable
     const editor = document.getElementById('textInput') as HTMLDivElement;
-    let sourceContent = textInput;
+    let html = '';
     
-    if (editor) {
-      // Usar o innerHTML do editor, que já contém formatação visual
-      const editorHtml = editor.innerHTML;
-      if (editorHtml && editorHtml !== `<span style="color: #999;">${placeholder}</span>`) {
-        sourceContent = editor.innerText || textInput;
-      }
-    }
-    
-    // Processar o conteúdo linha por linha
-    const lines = sourceContent.split('\n');
-    const processedLines: string[] = [];
-    let currentList: { type: string; items: string[] } = { type: '', items: [] };
-    
-    for (const line of lines) {
-      let processedLine = line.trim();
+    if (editor && editor.innerHTML && !editor.innerHTML.includes('color: #999')) {
+      // Usar o HTML real do editor que contém as tags de formatação
+      let editorHtml = editor.innerHTML;
       
-      // Se há formatação no editor, capturar do HTML
-      if (editor) {
-        const htmlContent = editor.innerHTML;
-        // Converter <b> e <strong> para <strong>
-        processedLine = processedLine.replace(/<b\b[^>]*>/gi, '<strong>').replace(/<\/b>/gi, '</strong>');
-        // Converter <i> e <em> para <i>
-        processedLine = processedLine.replace(/<em\b[^>]*>/gi, '<i>').replace(/<\/em>/gi, '</i>');
-      }
+      // Normalizar tags HTML
+      editorHtml = editorHtml
+        .replace(/<div>/gi, '<p>')
+        .replace(/<\/div>/gi, '</p>')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<b\b[^>]*>/gi, '<strong>')
+        .replace(/<\/b>/gi, '</strong>')
+        .replace(/<em\b[^>]*>/gi, '<i>')
+        .replace(/<\/em>/gi, '</i>')
+        .replace(/<span[^>]*font-weight:\s*bold[^>]*>(.*?)<\/span>/gi, '<strong>$1</strong>')
+        .replace(/<span[^>]*font-style:\s*italic[^>]*>(.*?)<\/span>/gi, '<i>$1</i>')
+        .replace(/<span[^>]*>(.*?)<\/span>/gi, '$1'); // Remove spans sem formatação
       
-      // Verificar se é item de lista
-      if (processedLine.startsWith('• ')) {
-        if (currentList.type !== 'ul') {
-          if (currentList.type && currentList.items.length > 0) {
-            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-          }
-          currentList = { type: 'ul', items: [] };
-        }
-        currentList.items.push(`<li>${processedLine.substring(2)}</li>`);
-      } else if (/^\d+\.\s/.test(processedLine)) {
-        if (currentList.type !== 'ol') {
-          if (currentList.type && currentList.items.length > 0) {
-            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-          }
-          currentList = { type: 'ol', items: [] };
-        }
-        currentList.items.push(`<li>${processedLine.replace(/^\d+\.\s/, '')}</li>`);
-      } else {
-        // Finalizar lista atual se existir
-        if (currentList.type && currentList.items.length > 0) {
-          processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-          currentList = { type: '', items: [] };
-        }
+      // Processar linha por linha mantendo a formatação HTML
+      const lines = editorHtml.split(/\n|<\/p><p>|<\/div><div>/);
+      const processedLines: string[] = [];
+      let currentList: { type: string; items: string[] } = { type: '', items: [] };
+      
+      for (let line of lines) {
+        // Limpar tags de parágrafo no início/fim
+        line = line.replace(/^<p[^>]*>|<\/p>$/gi, '').trim();
         
-        // Processar linha normal
-        if (processedLine.trim() === '') {
+        if (!line) {
+          // Linha vazia
+          if (currentList.type && currentList.items.length > 0) {
+            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
+            currentList = { type: '', items: [] };
+          }
           processedLines.push('<p>&nbsp;</p>');
+        } else if (line.startsWith('• ')) {
+          // Lista não numerada
+          if (currentList.type !== 'ul') {
+            if (currentList.type && currentList.items.length > 0) {
+              processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
+            }
+            currentList = { type: 'ul', items: [] };
+          }
+          currentList.items.push(`<li>${line.substring(2)}</li>`);
+        } else if (/^\d+\.\s/.test(line)) {
+          // Lista numerada
+          if (currentList.type !== 'ol') {
+            if (currentList.type && currentList.items.length > 0) {
+              processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
+            }
+            currentList = { type: 'ol', items: [] };
+          }
+          currentList.items.push(`<li>${line.replace(/^\d+\.\s/, '')}</li>`);
         } else {
-          processedLines.push(`<p>${processedLine}</p>`);
+          // Linha normal com possível formatação
+          if (currentList.type && currentList.items.length > 0) {
+            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
+            currentList = { type: '', items: [] };
+          }
+          processedLines.push(`<p>${line}</p>`);
         }
       }
+      
+      // Finalizar lista pendente
+      if (currentList.type && currentList.items.length > 0) {
+        processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
+      }
+      
+      html = processedLines.join('');
+    } else {
+      // Fallback para texto simples
+      html = textInput.split('\n').map(line => 
+        line.trim() === '' ? '<p>&nbsp;</p>' : `<p>${line}</p>`
+      ).join('');
     }
     
-    // Finalizar lista pendente
-    if (currentList.type && currentList.items.length > 0) {
-      processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-    }
-    
-    let html = processedLines.join('');
-    
-    // Limpar HTML não permitido
+    // Limpar HTML não permitido mantendo formatação
     html = html.replace(/<(?!\/?(strong|i|u|br|p|ul|ol|li|em)\b)[^>]*>/gi, '');
     
     setHtmlOutput(html);
   }, [textInput]);
+
+  // Gerar HTML em tempo real
+  useEffect(() => {
+    generateHtml();
+  }, [textInput, generateHtml]);
 
   // Aplicar formatação visual usando execCommand
   const applyFormatting = (type: string) => {
@@ -388,6 +402,10 @@ Garantia de 12 meses`;
                 const text = target.innerText || '';
                 if (text.length <= MAX_CHARS) {
                   setTextInput(text);
+                  // Forçar atualização do HTML após mudança no editor
+                  setTimeout(() => {
+                    generateHtml();
+                  }, 100);
                 }
               }}
               onPaste={(e) => {
