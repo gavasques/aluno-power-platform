@@ -45,66 +45,43 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
   // Função para validar HTML permitido pela Amazon
   const validateAmazonHtml = (html: string) => {
-    // Manter apenas tags permitidas pela Amazon
     return html.replace(/<(?!\/?(strong|i|u|br|p|ul|ol|li|em)\b)[^>]*>/gi, '');
   };
 
-  // Renderizar preview formatado para overlay
-  const renderFormattedPreview = (text: string) => {
-    if (!text) return '<span style="color: #999;">' + placeholder + '</span>';
+  // Converter texto para HTML
+  const convertToHtml = useCallback((text: string) => {
+    if (!text) return '';
+
+    // Quebrar por linhas
+    const lines = text.split('\n');
+    let html = '';
     
-    // Aplicar formatação visual - converte markdown para visual real
-    let formatted = text
-      .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #000;">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em style="color: #000;">$1</em>')
-      .replace(/• (.*?)(\n|$)/g, '<span style="color: #0066cc; font-weight: bold;">• </span><span style="color: #000;">$1</span>$2')
-      .replace(/(\d+)\. (.*?)(\n|$)/g, '<span style="color: #0066cc; font-weight: bold;">$1. </span><span style="color: #000;">$2</span>$3')
-      .replace(/\n/g, '<br>');
-    
-    return formatted;
-  };
-
-  // Função para gerar HTML do markdown
-  const generateHtml = () => {
-    if (!textInput.trim()) {
-      setHtmlOutput('');
-      return;
-    }
-
-    // Dividir por linhas
-    const lines = textInput.split('\n');
-    let htmlLines: string[] = [];
-
-    for (const line of lines) {
-      if (line.trim() === '') {
-        // Linha vazia vira parágrafo com espaço
-        htmlLines.push('<p>&nbsp;</p>');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line === '') {
+        // Linha vazia - adiciona parágrafo vazio
+        html += '<p>&nbsp;</p>';
       } else {
-        // Aplicar formatação markdown para HTML
-        let formatted = line
+        // Processa formatação inline
+        let processedLine = line
           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g, '<i>$1</i>')
-          .replace(/• (.*)/g, '• $1')
-          .replace(/(\d+)\. (.*)/g, '$1. $2');
+          .replace(/\*(.*?)\*/g, '<i>$1</i>');
         
-        htmlLines.push(`<p>${formatted}</p>`);
+        html += `<p>${processedLine}</p>`;
       }
     }
-
-    const finalHtml = htmlLines.join('\n');
     
-    // Validar HTML (remover tags não permitidas)
-    const cleanHtml = validateAmazonHtml(finalHtml);
-    setHtmlOutput(cleanHtml);
-  };
+    return validateAmazonHtml(html);
+  }, []);
 
-  // Gerar HTML em tempo real
+  // Atualizar HTML quando texto muda
   useEffect(() => {
-    generateHtml();
-  }, [textInput]);
+    setHtmlOutput(convertToHtml(textInput));
+  }, [textInput, convertToHtml]);
 
-  // Aplicar formatação usando markdown
-  const applyFormatting = (type: string) => {
+  // Aplicar formatação
+  const applyFormatting = (tag: string) => {
     const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
     if (!textarea) return;
 
@@ -113,76 +90,46 @@ const HtmlDescriptionGenerator: React.FC = () => {
     const selectedText = textInput.substring(start, end);
     
     if (selectedText) {
-      const beforeText = textInput.substring(0, start);
-      const afterText = textInput.substring(end);
-      
       let formattedText = '';
-      if (type === 'b') {
-        formattedText = `**${selectedText}**`;
-      } else if (type === 'i') {
-        formattedText = `*${selectedText}*`;
+      switch (tag) {
+        case 'bold':
+          formattedText = `**${selectedText}**`;
+          break;
+        case 'italic':
+          formattedText = `*${selectedText}*`;
+          break;
+        default:
+          formattedText = selectedText;
       }
       
-      const newText = beforeText + formattedText + afterText;
+      const newText = textInput.substring(0, start) + formattedText + textInput.substring(end);
+      setTextInput(newText);
       
-      if (newText.length <= MAX_CHARS) {
-        setTextInput(newText);
-        
-        // Reposicionar cursor
-        setTimeout(() => {
-          const newPos = start + formattedText.length;
-          textarea.setSelectionRange(newPos, newPos);
-          textarea.focus();
-        }, 0);
-      }
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start, start + formattedText.length);
+      }, 10);
     }
   };
 
-  // Inserir lista (visual)
-  const insertList = (ordered = false) => {
+  // Inserir lista
+  const insertList = (ordered: boolean = false) => {
     const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textInput.substring(start, end);
+    const listItems = ordered 
+      ? '1. Item 1\n2. Item 2\n3. Item 3' 
+      : '• Item 1\n• Item 2\n• Item 3';
     
-    let listText = '';
+    const newText = textInput.substring(0, start) + listItems + textInput.substring(start);
+    setTextInput(newText);
     
-    if (selectedText.trim()) {
-      // Se há texto selecionado, converter para lista
-      const lines = selectedText.split('\n').filter(line => line.trim() !== '');
-      if (ordered) {
-        listText = lines.map((line, index) => `${index + 1}. ${line.trim()}`).join('\n');
-      } else {
-        listText = lines.map(line => `• ${line.trim()}`).join('\n');
-      }
-    } else {
-      // Inserir lista vazia
-      if (ordered) {
-        listText = '1. Item 1\n2. Item 2\n3. Item 3';
-      } else {
-        listText = '• Item 1\n• Item 2\n• Item 3';
-      }
-    }
-    
-    const beforeText = textInput.substring(0, start);
-    const afterText = textInput.substring(end);
-    const newText = beforeText + listText + afterText;
-    
-    if (newText.length <= MAX_CHARS) {
-      setTextInput(newText);
-      
-      // Reposicionar cursor
-      setTimeout(() => {
-        const newPos = start + listText.length;
-        textarea.setSelectionRange(newPos, newPos);
-        textarea.focus();
-      }, 0);
-    }
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + listItems.length, start + listItems.length);
+    }, 10);
   };
-
-
 
   // Inserir símbolo
   const insertSymbol = (symbol: string) => {
@@ -190,56 +137,43 @@ const HtmlDescriptionGenerator: React.FC = () => {
     if (!textarea) return;
 
     const start = textarea.selectionStart;
-    const beforeText = textInput.substring(0, start);
-    const afterText = textInput.substring(start);
-    const newText = beforeText + symbol + afterText;
+    const newText = textInput.substring(0, start) + symbol + textInput.substring(start);
+    setTextInput(newText);
     
-    if (newText.length <= MAX_CHARS) {
-      setTextInput(newText);
-      
-      // Reposicionar cursor
-      setTimeout(() => {
-        const newPos = start + symbol.length;
-        textarea.setSelectionRange(newPos, newPos);
-        textarea.focus();
-      }, 0);
-    }
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + symbol.length, start + symbol.length);
+    }, 10);
   };
 
-  // Copiar HTML
-  const copyHtml = async () => {
-    if (!htmlOutput) {
-      toast({
-        title: "Nada para copiar",
-        description: "Digite algum texto primeiro para gerar o HTML.",
-        variant: "destructive",
-      });
-      return;
-    }
+  // Inserir quebra de linha
+  const insertLineBreak = () => {
+    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
+    if (!textarea) return;
 
-    try {
-      await navigator.clipboard.writeText(htmlOutput);
-      toast({
-        title: "HTML copiado!",
-        description: "O código HTML foi copiado para a área de transferência.",
-      });
-    } catch (err) {
-      console.error('Erro ao copiar:', err);
-      toast({
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o HTML. Tente selecionar e copiar manualmente.",
-        variant: "destructive",
-      });
-    }
+    const start = textarea.selectionStart;
+    const newText = textInput.substring(0, start) + '\n\n' + textInput.substring(start);
+    setTextInput(newText);
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + 2, start + 2);
+    }, 10);
   };
 
-  // Limpar tudo
+  // Limpar todo o conteúdo
   const clearAll = () => {
     setTextInput('');
     setHtmlOutput('');
+    
+    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.focus();
+    }
+    
     toast({
-      title: "Conteúdo limpo",
-      description: "Todo o texto foi removido.",
+      title: "🗑️ Limpo!",
+      description: "Todo o conteúdo foi removido"
     });
   };
 
@@ -369,16 +303,6 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
     }
   }, [htmlOutput, toast]);
 
-  // Limpar todo o conteúdo
-  const clearAll = () => {
-    setTextInput('');
-    setHtmlOutput('');
-    toast({
-      title: "🗑️ Limpo!",
-      description: "Todo o conteúdo foi removido"
-    });
-  };
-
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50">
@@ -388,234 +312,194 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
             Gerador de Descrições Amazon
           </h1>
           <p className="text-gray-600">
-            Crie descrições profissionais para seus produtos na Amazon sem saber HTML
+            Crie descrições em HTML profissionais para seus produtos Amazon com formatação rica e conformidade com as diretrizes da plataforma.
           </p>
         </div>
 
-        {/* Layout Principal - 2 Colunas */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
-          {/* Coluna Esquerda - Editor */}
-          <div className="bg-white border-r border-gray-200 p-6 flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Editor de Texto
-              </h2>
-              <div className={`text-sm font-medium ${getCounterColor()}`}>
-                {getCounterIcon()} {charCount}/{MAX_CHARS} {getCounterMessage()}
-              </div>
-            </div>
-
-            {/* Barra de Ferramentas */}
-            <div className="border-b border-gray-200 pb-4 mb-4">
-              <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => applyFormatting('b')}
-                    className="flex items-center gap-1"
-                  >
-                    <Bold className="h-4 w-4" />
-                    Negrito
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => applyFormatting('i')}
-                    className="flex items-center gap-1"
-                  >
-                    <Italic className="h-4 w-4" />
-                    Itálico
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => insertList(false)}
-                    className="flex items-center gap-1"
-                  >
-                    <List className="h-4 w-4" />
-                    Lista
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => insertList(true)}
-                    className="flex items-center gap-1"
-                  >
-                    <ListOrdered className="h-4 w-4" />
-                    Numerada
-                  </Button>
-                </div>
-
-                {/* Botões de Ação */}
-                <div className="flex gap-2">
-                  <Button
-                    onClick={generateWithAI}
-                    disabled={isGenerating || !textInput.trim()}
-                    size="sm"
-                    className="flex items-center gap-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                  >
-                    {isGenerating ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Wand2 className="h-4 w-4" />
-                    )}
-                    Gerar com IA
-                  </Button>
-                  
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={clearAll}
-                    className="flex items-center gap-1"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Limpar
-                  </Button>
+        {/* Container Principal */}
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
+            
+            {/* Coluna Esquerda - Input */}
+            <div className="bg-white p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  📝 Entrada de Texto
+                </h2>
+                <div className={`flex items-center gap-2 ${getCounterColor()}`}>
+                  <span>{getCounterIcon()}</span>
+                  <span className="text-sm font-medium">
+                    {charCount}/{MAX_CHARS} {getCounterMessage()}
+                  </span>
                 </div>
               </div>
 
-              {/* Símbolos Permitidos pela Amazon */}
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Símbolos Permitidos pela Amazon:</p>
-                <div className="flex flex-wrap gap-1">
-                  {allowedSymbols.map((symbol, index) => (
+              {/* Barra de Ferramentas */}
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Botões de Formatação à Esquerda */}
+                  <div className="flex items-center gap-1">
                     <Button
-                      key={index}
-                      variant="outline"
                       size="sm"
-                      onClick={() => insertSymbol(symbol)}
-                      className="min-w-8 h-8 p-0 text-lg"
+                      variant="outline"
+                      onClick={() => applyFormatting('bold')}
+                      className="h-8 px-2"
                     >
-                      {symbol}
+                      <Bold className="h-4 w-4" />
                     </Button>
-                  ))}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => applyFormatting('italic')}
+                      className="h-8 px-2"
+                    >
+                      <Italic className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => insertList(false)}
+                      className="h-8 px-2"
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => insertList(true)}
+                      className="h-8 px-2"
+                    >
+                      <ListOrdered className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Separador */}
+                  <div className="h-6 w-px bg-gray-300 mx-1"></div>
+
+                  {/* Símbolos Permitidos */}
+                  <div className="flex items-center gap-1">
+                    {allowedSymbols.slice(0, 4).map((symbol, index) => (
+                      <Button
+                        key={index}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => insertSymbol(symbol)}
+                        className="h-8 px-2 text-sm"
+                      >
+                        {symbol}
+                      </Button>
+                    ))}
+                  </div>
+
+                  {/* Spacer para empurrar botões de ação para a direita */}
+                  <div className="flex-1"></div>
+
+                  {/* Botões de Ação à Direita */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={generateWithAI}
+                      disabled={isGenerating || !textInput.trim()}
+                      className="flex items-center gap-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 h-8"
+                      size="sm"
+                    >
+                      {isGenerating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Wand2 className="h-4 w-4" />
+                      )}
+                      {isGenerating ? 'Gerando...' : 'Gerar com IA'}
+                    </Button>
+                    
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={clearAll}
+                      className="flex items-center gap-1 h-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Limpar
+                    </Button>
+                  </div>
                 </div>
+              </div>
+
+              {/* Área de Texto */}
+              <div className="flex-1">
+                <Textarea
+                  id="textInput"
+                  value={textInput}
+                  onChange={(e) => {
+                    if (e.target.value.length <= MAX_CHARS) {
+                      setTextInput(e.target.value);
+                    }
+                  }}
+                  placeholder={placeholder}
+                  className="w-full h-full resize-none border-2 focus:border-blue-500"
+                />
               </div>
             </div>
 
-            {/* Textarea com formatação visual */}
-            <div className="relative flex-1">
-              <Textarea
-                id="textInput"
-                value={textInput}
-                onChange={(e) => {
-                  if (e.target.value.length <= MAX_CHARS) {
-                    setTextInput(e.target.value);
-                  }
-                }}
-                placeholder=""
-                className={`flex-1 resize-none min-h-[300px] text-transparent caret-black selection:bg-blue-200 bg-transparent ${
-                  charCount >= MAX_CHARS ? 'border-red-500' :
-                  charCount > WARNING_THRESHOLD ? 'border-yellow-500' :
-                  'border-gray-300'
-                }`}
-                style={{
-                  fontSize: '14px',
-                  lineHeight: '1.5',
-                  fontFamily: 'inherit'
-                }}
-                maxLength={MAX_CHARS}
-              />
-              
-              {/* Overlay para mostrar formatação visual */}
-              <div 
-                className="absolute top-0 left-0 w-full h-full p-3 pointer-events-none overflow-hidden z-0"
-                style={{
-                  fontSize: '14px',
-                  lineHeight: '1.5',
-                  fontFamily: 'inherit',
-                  whiteSpace: 'pre-wrap'
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: renderFormattedPreview(textInput)
-                }}
-              />
-            </div>
+            {/* Coluna Direita - Output */}
+            <div className="bg-white p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  🔧 Código HTML
+                </h2>
+                <Button
+                  onClick={copyToClipboard}
+                  disabled={!htmlOutput.trim()}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copiar HTML
+                </Button>
+              </div>
 
+              {/* Preview HTML */}
+              <div className="flex-1 overflow-hidden">
+                <div className="h-full border-2 border-gray-300 rounded-lg p-4 bg-gray-50 overflow-y-auto">
+                  {htmlOutput ? (
+                    <pre className="text-sm text-gray-800 whitespace-pre-wrap break-words">
+                      {htmlOutput}
+                    </pre>
+                  ) : (
+                    <p className="text-gray-500 italic">
+                      O código HTML será exibido aqui...
+                    </p>
+                  )}
+                </div>
+              </div>
 
-          </div>
-
-          {/* Coluna Direita - Output */}
-          <div className="bg-white p-6 flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Código HTML Gerado
-              </h2>
-              <Button
-                onClick={copyToClipboard}
-                size="sm"
-                className="flex items-center gap-1"
-                disabled={!htmlOutput}
-              >
-                <Copy className="h-4 w-4" />
-                Copiar HTML
-              </Button>
-            </div>
-
-            {/* Output HTML */}
-            <div 
-              className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm flex-1 overflow-auto whitespace-pre-wrap"
-              id="htmlOutput"
-            >
-              {htmlOutput || 'O código HTML aparecerá aqui conforme você digita...'}
-            </div>
-          </div>
-        </div>
-
-        {/* Regras da Amazon - Sempre Aberta Abaixo */}
-        <div className="bg-white border-t border-gray-200 p-6">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <Info className="h-5 w-5" />
-              📋 Regras da Amazon Brasil
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <h3 className="font-semibold text-green-600 mb-2">✅ PERMITIDO:</h3>
-              <ul className="text-sm space-y-1 text-gray-700">
-                <li>• Tags HTML: &lt;strong&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;</li>
-                <li>• Quebras de linha usando &lt;p&gt; (automático)</li>
-                <li>• Máximo 2000 caracteres (incluindo espaços e tags)</li>
-                <li>• Títulos de até 200 caracteres</li>
-                <li>• Descrições claras e concisas</li>
-                <li>• Símbolos permitidos: ✓ © ® ★ ™ ♥ ① ② ③ ④</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-red-600 mb-2">❌ PROIBIDO:</h3>
-              <ul className="text-sm space-y-1 text-gray-700">
-                <li>• JavaScript, HTML avançado ou CSS</li>
-                <li>• Material promocional, anúncios ou marcas d'água</li>
-                <li>• Reviews, depoimentos ou pedidos de avaliação</li>
-                <li>• Links para outros sites</li>
-                <li>• Informações sobre preço ou disponibilidade</li>
-                <li>• Informações pessoais (emails, telefones, URLs)</li>
-                <li>• Conteúdo obsceno ou ofensivo</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-yellow-600 mb-2">⚠️ IMPORTANTE:</h3>
-              <ul className="text-sm space-y-1 text-gray-700">
-                <li>• Não seguir pode resultar em suspensão da conta</li>
-                <li>• Cada produto deve ter seu próprio listing</li>
-                <li>• Mantenha sempre a experiência do cliente em mente</li>
-              </ul>
+              {/* Regras da Amazon */}
+              <details className="mt-4 border border-gray-200 rounded-lg">
+                <summary className="p-3 bg-blue-50 cursor-pointer flex items-center gap-2 text-blue-700 font-medium">
+                  <Info className="h-4 w-4" />
+                  Diretrizes Amazon Brasil
+                </summary>
+                <div className="p-3 text-sm text-gray-600 space-y-2">
+                  <p><strong>Tags Permitidas:</strong> &lt;strong&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;, &lt;em&gt;</p>
+                  <p><strong>Símbolos Permitidos:</strong> ✓ © ® ★ ™ ♥ ① ② ③ ④</p>
+                  <p><strong>Limite de Caracteres:</strong> Máximo 2000 caracteres</p>
+                  <p><strong>Proibido:</strong> JavaScript, CSS inline, links externos, imagens</p>
+                </div>
+              </details>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Diálogo de Confirmação de Substituição */}
+      {/* Dialog de Confirmação IA */}
       <AlertDialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Substituir Conteúdo Original?</AlertDialogTitle>
-            <AlertDialogDescription>
-              A IA gerou uma nova descrição. Deseja substituir o conteúdo original por esta nova versão?
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Wand2 className="h-5 w-5 text-purple-600" />
+              Descrição Gerada pela IA
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>A IA gerou uma nova descrição otimizada para seu produto. Deseja substituir o conteúdo atual?</p>
               
               <div className="mt-4 p-3 bg-gray-50 rounded-md max-h-40 overflow-y-auto">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
