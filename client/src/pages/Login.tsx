@@ -20,8 +20,16 @@ const Login: React.FC = () => {
   });
   const [loginError, setLoginError] = useState('');
   const [registerError, setRegisterError] = useState('');
+  const [forgotPasswordError, setForgotPasswordError] = useState('');
+  const [magicLinkError, setMagicLinkError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState('');
+  const [magicLinkSuccess, setMagicLinkSuccess] = useState('');
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [magicLinkEmail, setMagicLinkEmail] = useState('');
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -78,6 +86,66 @@ const Login: React.FC = () => {
     setRegisterLoading(false);
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordError('');
+    setForgotPasswordSuccess('');
+    setForgotPasswordLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setForgotPasswordSuccess('Link de recuperação enviado para seu email!');
+        setForgotPasswordEmail('');
+      } else {
+        setForgotPasswordError(data.error || 'Erro ao enviar link de recuperação');
+      }
+    } catch (error) {
+      setForgotPasswordError('Erro de conexão');
+    }
+    
+    setForgotPasswordLoading(false);
+  };
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMagicLinkError('');
+    setMagicLinkSuccess('');
+    setMagicLinkLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: magicLinkEmail }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setMagicLinkSuccess('Magic Link enviado para seu email!');
+        setMagicLinkEmail('');
+      } else {
+        setMagicLinkError(data.error || 'Erro ao enviar Magic Link');
+      }
+    } catch (error) {
+      setMagicLinkError('Erro de conexão');
+    }
+    
+    setMagicLinkLoading(false);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -107,9 +175,11 @@ const Login: React.FC = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-4 text-xs">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Cadastro</TabsTrigger>
+                <TabsTrigger value="forgot">Esqueci</TabsTrigger>
+                <TabsTrigger value="magic">Magic Link</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login" className="space-y-4 mt-6">
@@ -273,6 +343,110 @@ const Login: React.FC = () => {
                       </>
                     ) : (
                       'Criar conta'
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="forgot" className="space-y-4 mt-6">
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold">Esqueci minha senha</h3>
+                    <p className="text-sm text-gray-600">Digite seu email para receber o link de recuperação</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="forgot-email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        className="pl-10"
+                        value={forgotPasswordEmail}
+                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {forgotPasswordError && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{forgotPasswordError}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {forgotPasswordSuccess && (
+                    <Alert className="border-green-200 bg-green-50">
+                      <AlertDescription className="text-green-800">{forgotPasswordSuccess}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={forgotPasswordLoading}
+                  >
+                    {forgotPasswordLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      'Enviar link de recuperação'
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="magic" className="space-y-4 mt-6">
+                <form onSubmit={handleMagicLink} className="space-y-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold">Magic Link</h3>
+                    <p className="text-sm text-gray-600">Receba um link mágico para entrar sem senha</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="magic-email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="magic-email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        className="pl-10"
+                        value={magicLinkEmail}
+                        onChange={(e) => setMagicLinkEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {magicLinkError && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{magicLinkError}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {magicLinkSuccess && (
+                    <Alert className="border-green-200 bg-green-50">
+                      <AlertDescription className="text-green-800">{magicLinkSuccess}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={magicLinkLoading}
+                  >
+                    {magicLinkLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      'Enviar Magic Link'
                     )}
                   </Button>
                 </form>
