@@ -28,6 +28,12 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
   const charCount = textInput.length;
 
+  // Função para validar HTML permitido pela Amazon
+  const validateAmazonHtml = (html: string) => {
+    // Manter apenas tags permitidas pela Amazon
+    return html.replace(/<(?!\/?(strong|i|u|br|p|ul|ol|li|em)\b)[^>]*>/gi, '');
+  };
+
   // Renderizar preview formatado para overlay
   const renderFormattedPreview = (text: string) => {
     if (!text) return '<span style="color: #999;">' + placeholder + '</span>';
