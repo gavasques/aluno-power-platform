@@ -15,8 +15,6 @@ import { VideoCard } from "@/components/youtube/VideoCard";
 import { useQuery } from "@tanstack/react-query";
 import type { News, Update } from "@shared/schema";
 import { SystemAnalytics } from "@/components/analytics/SystemAnalytics";
-import { PerformanceMonitor } from "@/components/PerformanceMonitor";
-import { FontIconOptimizationMonitor } from "@/components/FontIconOptimizationMonitor";
 
 interface StatCardProps {
   title: string;
@@ -338,13 +336,7 @@ const Dashboard = memo(() => {
           </div>
         </div>
 
-        {/* Performance Monitors - Admin Only */}
-        {user?.role === 'admin' && (
-          <div className="mt-8 space-y-6">
-            <PerformanceMonitor />
-            <FontIconOptimizationMonitor />
-          </div>
-        )}
+
 
       </div>
     </div>
