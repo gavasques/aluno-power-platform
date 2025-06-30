@@ -237,9 +237,9 @@ Garantia de 12 meses`;
 Baseando-se na breve descrição que te dei do meu produto, por favor escreva uma descrição de produto PODEROSA e PERSUASIVA para Amazon. A descrição deve captar a atenção dos compradores e convencê-los de que meu produto é a melhor opção disponível na Amazon.
 
 Comprimento da descrição:
-a. Deve ter entre 1500 a 2000 Caracteres
-b. Não pode ter menos de 1500 caracteres no total
-c. Não pode ter mais de 2000 caracteres.
+a. Deve ter entre 1400 a 1800 Caracteres
+b. Não pode ter menos de 1400 caracteres no total
+c. Não pode ter mais de 1800 caracteres.
 
 Tom da Descrição:
 A descrição deve ser envolvente, divertida e atraente, NUNCA entediante ou corporativa. O texto deve brilhar e se destacar da concorrência, transmitindo confiança e emoção ao comprador.

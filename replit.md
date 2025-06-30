@@ -108,7 +108,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: ✅ GERADOR DE DESCRIÇÕES AMAZON HTML IMPLEMENTADO
+- **June 30, 2025**: ✅ SISTEMA DE LOGS DE IA E LIMITES ATUALIZADOS IMPLEMENTADO
+  - **Sistema de Logging Completo**:
+    - Tabela `ai_generation_logs` no PostgreSQL com todos os campos detalhados
+    - API `/api/ai-generation-logs` para salvamento automático de dados
+    - Captura de métricas: usuário, modelo, prompt/resposta, tokens, custos, duração
+    - Logs salvos automaticamente a cada uso do "Gerar com IA"
+    - Identificador de feature para categorização (html-description)
+  - **Limites de Caracteres Atualizados**:
+    - Prompt ajustado para 1400-1800 caracteres (antes 1500-2000)
+    - Instrução rigorosa: nunca menor que 1400, nunca maior que 1800
+    - Validação automática no prompt enviado à IA
+
+- **June 30, 2025 (anterior)**: ✅ GERADOR DE DESCRIÇÕES AMAZON HTML IMPLEMENTADO
   - **Nova Funcionalidade no Hub de Recursos**: "Descrição em HTML"
     - Editor completo em 2 colunas: entrada de texto e saída HTML
     - Contador de caracteres em tempo real com limite de 2000 caracteres
