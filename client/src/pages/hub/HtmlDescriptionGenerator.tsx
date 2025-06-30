@@ -529,7 +529,7 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
                 Código HTML Gerado
               </h2>
               <Button
-                onClick={copyHtml}
+                onClick={copyToClipboard}
                 size="sm"
                 className="flex items-center gap-1"
                 disabled={!htmlOutput}
