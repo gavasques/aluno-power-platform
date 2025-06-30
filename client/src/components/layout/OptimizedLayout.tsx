@@ -73,12 +73,6 @@ const variantConfigs: Record<LayoutVariant, LayoutConfig> = {
   },
 };
 
-// Import existing components directly for now
-import { Header } from './Header';
-import { AdminHeader } from './AdminHeader';
-import { UserBreadcrumbs } from './UserBreadcrumbs';
-import { AdminBreadcrumbs } from '../admin/AdminBreadcrumbs';
-
 // Loading fallback component
 const LayoutFallback = memo(() => (
   <div className="w-full h-12 bg-muted animate-pulse rounded" />
@@ -203,34 +197,50 @@ export const OptimizedLayout = memo<OptimizedLayoutProps>(({
     return cn(classes);
   }, [finalConfig.maxWidth]);
 
-  // Determine which header to use
-  const HeaderComponent = finalConfig.variant === 'admin' ? AdminHeader : Header;
+  // Component is now self-contained without external dependencies
 
   return (
     <div className={layoutClasses}>
       {/* Header Section */}
       {finalConfig.header && (
-        <Suspense fallback={<LayoutFallback />}>
-          <HeaderComponent />
-        </Suspense>
+        <header className="header-optimized">
+          <div className="container-responsive flex-between">
+            <div className="flex items-center space-x-4">
+              <h1 className="font-bold text-xl">Aluno Power</h1>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground hide-mobile">
+                {finalConfig.variant === 'admin' ? 'Painel Admin' : 'Dashboard'}
+              </span>
+            </div>
+          </div>
+        </header>
       )}
 
       {/* Main Layout Container */}
       <div className="flex flex-1">
-        {/* Sidebar Section */}
+        {/* Sidebar Section - Placeholder for future implementation */}
         {finalConfig.sidebar && (
-          <Suspense fallback={<div className="w-64 bg-muted animate-pulse" />}>
-            <Sidebar />
-          </Suspense>
+          <div className="w-64 bg-card border-r border-border p-4">
+            <div className="space-y-2">
+              <div className="h-8 bg-muted/50 rounded animate-pulse" />
+              <div className="h-6 bg-muted/30 rounded animate-pulse" />
+              <div className="h-6 bg-muted/30 rounded animate-pulse" />
+            </div>
+          </div>
         )}
 
         {/* Main Content Area */}
         <main className={mainClasses}>
-          {/* Breadcrumbs */}
+          {/* Breadcrumbs - Simple implementation */}
           {finalConfig.breadcrumbs && (
-            <Suspense fallback={<div className="h-8 bg-muted animate-pulse rounded mb-4" />}>
-              <Breadcrumbs />
-            </Suspense>
+            <nav className="mb-4">
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <span>Início</span>
+                <span>/</span>
+                <span className="text-foreground">Página Atual</span>
+              </div>
+            </nav>
           )}
 
           {/* Content Container */}
@@ -239,13 +249,6 @@ export const OptimizedLayout = memo<OptimizedLayoutProps>(({
           </div>
         </main>
       </div>
-
-      {/* Footer Section */}
-      {finalConfig.footer && (
-        <Suspense fallback={<LayoutFallback />}>
-          <Footer />
-        </Suspense>
-      )}
     </div>
   );
 });

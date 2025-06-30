@@ -42,6 +42,7 @@ const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-l
 const AmazonListingsOptimizerNew = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
 const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
+const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 
 // Keep Login as eager import for immediate authentication
 import Login from "./pages/Login";
@@ -229,6 +230,14 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
+                          <Route path="/layout-demo">
+                            <ProtectedRoute>
+                              <Suspense fallback={<PageLoader />}>
+                                <LayoutDemo />
+                              </Suspense>
+                            </ProtectedRoute>
+                          </Route>
+
                           <Route path="/hub/:section">
                             {(params) => (
                               <ProtectedRoute>
