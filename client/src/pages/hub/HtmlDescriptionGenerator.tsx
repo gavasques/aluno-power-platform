@@ -37,8 +37,10 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
     let html = textInput;
     
-    // Aplicar formatação básica
-    html = html.replace(/\n/g, '<br>\n');
+    // Converter quebras de linha simples em <br> apenas se não houver tags HTML
+    if (!html.includes('<')) {
+      html = html.replace(/\n/g, '<br>\n');
+    }
     
     // Limpar HTML não permitido (validação básica)
     html = html.replace(/<(?!\/?(b|i|u|br|p|ul|ol|li|strong|em)\b)[^>]*>/gi, '');
@@ -187,11 +189,11 @@ const HtmlDescriptionGenerator: React.FC = () => {
   const placeholder = `Digite aqui a descrição do seu produto...
 
 Exemplo:
-✅ Produto de alta qualidade
-✅ Disponível em várias cores
-✅ Material resistente e durável
-✅ Ideal para uso diário
-✅ Garantia de 12 meses`;
+Produto de alta qualidade
+Disponível em várias cores
+Material resistente e durável
+Ideal para uso diário
+Garantia de 12 meses`;
 
   return (
     <Layout>
