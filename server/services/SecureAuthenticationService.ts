@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { db } from '../db';
 import { users, userSessions } from '@shared/schema';
-import { eq, and, gt } from 'drizzle-orm';
+import { eq, and, gt, lt } from 'drizzle-orm';
 import type { User, InsertUser } from '@shared/schema';
 
 export interface AuthenticationResult {
@@ -92,7 +92,7 @@ class SessionRepository {
   async cleanupExpiredSessions(): Promise<void> {
     await db
       .delete(userSessions)
-      .where(gt(new Date(), userSessions.expiresAt));
+      .where(lt(userSessions.expiresAt, new Date()));
   }
 }
 

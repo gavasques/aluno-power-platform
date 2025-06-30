@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 import { z } from 'zod';
 
 // Security headers middleware
