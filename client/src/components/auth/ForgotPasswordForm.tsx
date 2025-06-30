@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, CheckCircle } from 'lucide-react';
+import { AuthService } from '@/services/authService';
 
 interface ForgotPasswordFormProps {
   onBack?: () => void;
@@ -21,15 +22,8 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
+      const result = await AuthService.forgotPassword({ email });
+      if (result.success) {
         setIsSuccess(true);
       } else {
         setError(result.error || 'Erro ao enviar email');

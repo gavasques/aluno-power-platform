@@ -1,179 +1,168 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User } from '@shared/schema';
+import { AuthService, LoginCredentials, RegisterData } from '@/services/authService';
 
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  name: string;
-  role: string;
-}
-
-interface AuthContextType {
+// Interfaces seguindo Single Responsibility Principle
+interface AuthState {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string, name: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
   isLoading: boolean;
   isAuthenticated: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthActions {
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (email: string, name: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
+}
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+type AuthContextType = AuthState & AuthActions;
+
+// Token management seguindo Single Responsibility
+class TokenManager {
+  private static readonly TOKEN_KEY = 'auth_token';
+  private static readonly LOGOUT_FLAG = 'user_logged_out';
+
+  static getToken(): string | null {
+    return localStorage.getItem(TokenManager.TOKEN_KEY);
   }
-  return context;
-};
+
+  static setToken(token: string): void {
+    localStorage.setItem(TokenManager.TOKEN_KEY, token);
+    localStorage.removeItem(TokenManager.LOGOUT_FLAG);
+  }
+
+  static removeToken(): void {
+    localStorage.removeItem(TokenManager.TOKEN_KEY);
+    localStorage.setItem(TokenManager.LOGOUT_FLAG, 'true');
+  }
+
+  static wasLoggedOut(): boolean {
+    return localStorage.getItem(TokenManager.LOGOUT_FLAG) === 'true';
+  }
+}
+
+// Context seguindo Dependency Inversion Principle
+const AuthContext = createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    token: TokenManager.getToken(),
+    isLoading: true,
+    isAuthenticated: false,
+  });
 
-  // Check for existing session on mount
+  // Authentication check seguindo Open/Closed Principle
+  const checkAuthStatus = async (): Promise<void> => {
+    console.log('🔥 AuthContext: useEffect triggered, checking authentication state');
+
+    if (TokenManager.wasLoggedOut()) {
+      console.log('🔥 AuthContext: User explicitly logged out, staying logged out');
+      setState(prev => ({ ...prev, isLoading: false }));
+      return;
+    }
+
+    const token = TokenManager.getToken();
+    if (!token) {
+      setState(prev => ({ ...prev, isLoading: false }));
+      return;
+    }
+
+    try {
+      const user = await AuthService.getCurrentUser();
+      setState({
+        user,
+        token,
+        isLoading: false,
+        isAuthenticated: !!user,
+      });
+    } catch (error) {
+      TokenManager.removeToken();
+      setState({
+        user: null,
+        token: null,
+        isLoading: false,
+        isAuthenticated: false,
+      });
+    }
+  };
+
+  // Login action seguindo Single Responsibility
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    const credentials: LoginCredentials = { email, password };
+    const result = await AuthService.login(credentials);
+
+    if (result.success && result.user && result.token) {
+      TokenManager.setToken(result.token);
+      setState({
+        user: result.user,
+        token: result.token,
+        isLoading: false,
+        isAuthenticated: true,
+      });
+    }
+
+    return result;
+  };
+
+  // Register action seguindo Single Responsibility
+  const register = async (email: string, name: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    const userData: RegisterData = { email, name, password };
+    const result = await AuthService.register(userData);
+
+    if (result.success && result.user && result.token) {
+      TokenManager.setToken(result.token);
+      setState({
+        user: result.user,
+        token: result.token,
+        isLoading: false,
+        isAuthenticated: true,
+      });
+    }
+
+    return result;
+  };
+
+  // Logout action seguindo Single Responsibility
+  const logout = (): void => {
+    AuthService.logout().catch(console.error);
+    TokenManager.removeToken();
+    setState({
+      user: null,
+      token: null,
+      isLoading: false,
+      isAuthenticated: false,
+    });
+  };
+
   useEffect(() => {
-    const checkAuth = async () => {
-      console.log('🔥 AuthContext: useEffect triggered, checking authentication state');
-      
-      const storedToken = localStorage.getItem('authToken');
-      const userLoggedOut = localStorage.getItem('userLoggedOut');
-      
-      if (userLoggedOut === 'true') {
-        console.log('🔥 AuthContext: User explicitly logged out, staying logged out');
-        setIsLoading(false);
-        return;
-      }
-      
-      if (!storedToken) {
-        console.log('🔥 AuthContext: No stored token found');
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        console.log('🔥 AuthContext: Validating stored token');
-        const response = await fetch('/api/auth/user', {
-          headers: {
-            'Authorization': `Bearer ${storedToken}`
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('🔥 AuthContext: Token valid, user authenticated:', data.user);
-          setUser(data.user);
-          setToken(storedToken);
-        } else {
-          console.log('🔥 AuthContext: Token invalid, removing from storage');
-          localStorage.removeItem('authToken');
-        }
-      } catch (error) {
-        console.error('🔥 AuthContext: Error validating token:', error);
-        localStorage.removeItem('authToken');
-      }
-      
-      setIsLoading(false);
-    };
-
-    checkAuth();
+    checkAuthStatus();
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setUser(data.user);
-        setToken(data.sessionToken);
-        localStorage.setItem('authToken', data.sessionToken);
-        localStorage.removeItem('userLoggedOut'); // Clear logout flag
-        return { success: true };
-      } else {
-        return { success: false, error: data.error || 'Login failed' };
-      }
-    } catch (error) {
-      return { success: false, error: 'Network error' };
-    }
-  };
-
-  const register = async (email: string, name: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, name, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setUser(data.user);
-        setToken(data.sessionToken);
-        localStorage.setItem('authToken', data.sessionToken);
-        localStorage.removeItem('userLoggedOut'); // Clear logout flag
-        return { success: true };
-      } else {
-        return { success: false, error: data.error || 'Registration failed' };
-      }
-    } catch (error) {
-      return { success: false, error: 'Network error' };
-    }
-  };
-
-  const logout = async () => {
-    try {
-      if (token) {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-
-    // Clear state and storage
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('authToken');
-    localStorage.setItem('userLoggedOut', 'true'); // Set logout flag
-    
-    // Force redirect to login page
-    window.location.href = '/login';
-  };
-
-  const value: AuthContextType = {
-    user,
-    token,
+  const contextValue: AuthContextType = {
+    ...state,
     login,
     register,
     logout,
-    isLoading,
-    isAuthenticated: !!user
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
+
+// Hook seguindo Interface Segregation Principle
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
