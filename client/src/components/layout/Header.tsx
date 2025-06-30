@@ -38,6 +38,8 @@ const menuItems = [
   {
     title: "Hub de Recursos",
     items: [
+      { title: "Agentes IA", href: "/agents", icon: Bot },
+      { title: "Vídeos", href: "/videos", icon: Youtube },
       { title: "Parceiros", href: "/hub/parceiros", icon: Users },
       { title: "Fornecedores", href: "/hub/fornecedores", icon: Truck },
       { title: "Ferramentas", href: "/hub/ferramentas", icon: Wrench },
@@ -102,18 +104,6 @@ export function Header() {
                 </Link>
               </NavigationMenuItem>
               
-              <NavigationMenuItem>
-                <Link to="/agents" className={navigationMenuTriggerStyle()}>
-                  <Bot className="mr-2 h-4 w-4" />
-                  Agentes IA
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/videos" className={navigationMenuTriggerStyle()}>
-                  <Youtube className="mr-2 h-4 w-4" />
-                  Vídeos
-                </Link>
-              </NavigationMenuItem>
               {menuItems.map((section) => (
                 <NavigationMenuItem key={section.title}>
                   <NavigationMenuTrigger>

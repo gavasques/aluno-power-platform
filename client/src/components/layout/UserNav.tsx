@@ -91,7 +91,13 @@ export function UserNav() {
           )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex items-center gap-3 px-4 py-2 text-destructive hover:bg-neutral-100 rounded transition cursor-pointer">
+        <DropdownMenuItem 
+          className="flex items-center gap-3 px-4 py-2 text-destructive hover:bg-neutral-100 rounded transition cursor-pointer"
+          onClick={() => {
+            logout();
+            window.location.href = '/';
+          }}
+        >
           <LogOut className="h-5 w-5" />
           <span>Sair</span>
         </DropdownMenuItem>

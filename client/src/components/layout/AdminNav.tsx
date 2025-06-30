@@ -16,10 +16,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { User, Settings, Headset, LogOut, Home } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function AdminNav() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <DropdownMenu>
@@ -69,7 +69,13 @@ export function AdminNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="bg-border" />
-        <DropdownMenuItem className="text-foreground hover:text-destructive hover:bg-destructive/10 focus:text-destructive focus:bg-destructive/10">
+        <DropdownMenuItem 
+          className="text-foreground hover:text-destructive hover:bg-destructive/10 focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+          onClick={() => {
+            logout();
+            window.location.href = '/';
+          }}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>
