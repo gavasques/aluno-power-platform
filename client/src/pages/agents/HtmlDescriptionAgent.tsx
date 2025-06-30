@@ -54,12 +54,13 @@ const HtmlDescriptionAgent: React.FC = () => {
 
   // Atualizar configurações quando o agente for carregado
   useEffect(() => {
-    if (agent && typeof agent === 'object') {
+    if (agent) {
+      const agentData = agent as any;
       setAgentConfig({
-        provider: (agent as any).provider || 'openai',
-        model: (agent as any).model || 'gpt-4o-mini',
-        temperature: parseFloat((agent as any).temperature) || 0.7,
-        maxTokens: (agent as any).maxTokens || 1000
+        provider: agentData?.provider || 'openai',
+        model: agentData?.model || 'gpt-4o-mini',
+        temperature: parseFloat(agentData?.temperature || '0.7'),
+        maxTokens: agentData?.maxTokens || 1000
       });
     }
   }, [agent]);
@@ -335,7 +336,7 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
   }, []);
 
   return (
-    <Layout title="Gerador de Descrições HTML" description="Agente especializado em criar descrições persuasivas em HTML para produtos Amazon">
+    <Layout>
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header do Agente */}
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border">

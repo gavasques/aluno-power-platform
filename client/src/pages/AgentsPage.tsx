@@ -265,9 +265,9 @@ export default function AgentsPage() {
                 
                 <div className="flex space-x-2 pt-4">
                   <Button asChild size="sm" className="flex-1">
-                    <Link href={`/agents/${agent.id}`}>
+                    <Link href={agent.id === 'html-description-generator' ? '/agents/html-description-generator' : `/agents/${agent.id}`}>
                       <Zap className="w-4 h-4 mr-1" />
-                      Usar
+                      Usar Agente
                     </Link>
                   </Button>
                   

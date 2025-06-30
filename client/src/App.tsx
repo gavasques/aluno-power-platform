@@ -243,11 +243,11 @@ function App() {
                           </Route>
                           
                           <Route path="/hub/descricao-html">
-                            <ProtectedRoute>
-                              <Suspense fallback={<PageLoader />}>
-                                <HtmlDescriptionGenerator />
-                              </Suspense>
-                            </ProtectedRoute>
+                            {() => {
+                              // Redirect to the new agent route
+                              window.location.href = '/agents/html-description-generator';
+                              return null;
+                            }}
                           </Route>
                           
                           <Route path="/layout-demo">
