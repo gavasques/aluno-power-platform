@@ -28,6 +28,7 @@ import {
   Bot,
   School,
   FileDigit,
+  Code2,
   Ship,
   Building,
   ClipboardCheck,
@@ -46,6 +47,7 @@ const menuItems = [
       { title: "Templates", href: "/hub/templates", icon: FileText },
       { title: "Materiais", href: "/hub/materiais", icon: BookCopy },
       { title: "Prompts IA", href: "/hub/prompts-ia", icon: BrainCircuit },
+      { title: "Descrição em HTML", href: "/hub/descricao-html", icon: Code2 },
     ],
   },
   {

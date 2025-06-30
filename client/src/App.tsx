@@ -35,6 +35,7 @@ const MaterialDetailPage = lazy(() => import("./pages/hub/MaterialDetailPage"));
 const SupplierDetail = lazy(() => import("./pages/hub/SupplierDetail"));
 const TemplateDetail = lazy(() => import("./pages/hub/TemplateDetail"));
 const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
+const HtmlDescriptionGenerator = lazy(() => import("./pages/hub/HtmlDescriptionGenerator"));
 const Hub = lazy(() => import("./pages/Hub"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const AgentsPage = lazy(() => import("./pages/agents"));
@@ -229,6 +230,14 @@ function App() {
                                   <Suppliers />
                                 </Suspense>
                               </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/hub/descricao-html">
+                            <ProtectedRoute>
+                              <Suspense fallback={<PageLoader />}>
+                                <HtmlDescriptionGenerator />
+                              </Suspense>
                             </ProtectedRoute>
                           </Route>
                           
