@@ -543,7 +543,7 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
 
       {/* Dialog de Confirmação IA */}
       <AlertDialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
-        <AlertDialogContent className="max-w-2xl">
+        <AlertDialogContent className="max-w-4xl max-h-[85vh] overflow-hidden">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Wand2 className="h-5 w-5 text-purple-600" />
@@ -552,11 +552,18 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
             <AlertDialogDescription className="space-y-3">
               <p>A IA gerou uma nova descrição otimizada para seu produto. Deseja substituir o conteúdo atual?</p>
               
-              <div className="mt-4 p-3 bg-gray-50 rounded-md max-h-40 overflow-y-auto">
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {generatedDescription.substring(0, 300)}
-                  {generatedDescription.length > 300 && '...'}
-                </p>
+              <div className="mt-4 p-4 bg-gray-50 rounded-md border">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-sm font-medium text-gray-700">Prévia da descrição gerada:</p>
+                  <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded">
+                    {generatedDescription.length} caracteres
+                  </span>
+                </div>
+                <div className="max-h-80 overflow-y-auto bg-white p-4 rounded border border-gray-200">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    {generatedDescription}
+                  </p>
+                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
