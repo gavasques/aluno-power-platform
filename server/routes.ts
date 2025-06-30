@@ -3155,6 +3155,309 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // User Management APIs
+  app.get('/api/users', async (req, res) => {
+    try {
+      const result = await db.execute(`
+        SELECT u.id, u.username, u.email, u.name, u.role, u.is_active as "isActive", 
+               u.last_login as "lastLogin", u.created_at as "createdAt"
+        FROM users u
+        ORDER BY u.created_at DESC
+      `);
+      
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  app.get('/api/users/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await db.execute(`
+        SELECT u.id, u.username, u.email, u.name, u.role, u.is_active as "isActive", 
+               u.last_login as "lastLogin", u.created_at as "createdAt"
+        FROM users u
+        WHERE u.id = $1
+      `, [id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ error: 'Failed to fetch user' });
+    }
+  });
+
+  app.post('/api/users', async (req, res) => {
+    try {
+      const { name, email, username, role, isActive, password, groupIds } = req.body;
+      
+      // Hash password
+      const hashedPassword = await bcryptjs.hash(password, 10);
+      
+      // Create user
+      const userResult = await db.execute(`
+        INSERT INTO users (username, email, name, role, is_active, password)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id, username, email, name, role, is_active as "isActive", created_at as "createdAt"
+      `, [username, email, name, role || 'user', isActive !== false, hashedPassword]);
+      
+      const user = userResult.rows[0];
+      
+      // Add user to groups if specified
+      if (groupIds && groupIds.length > 0) {
+        for (const groupId of groupIds) {
+          await db.execute(`
+            INSERT INTO user_group_members (user_id, group_id)
+            VALUES ($1, $2)
+            ON CONFLICT DO NOTHING
+          `, [user.id, groupId]);
+        }
+      }
+      
+      res.status(201).json(user);
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(400).json({ 
+          message: 'Email ou username já existe' 
+        });
+      }
+      
+      res.status(500).json({ error: 'Failed to create user' });
+    }
+  });
+
+  app.put('/api/users/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, email, username, role, isActive, groupIds } = req.body;
+      
+      // Update user
+      const result = await db.execute(`
+        UPDATE users 
+        SET name = $1, email = $2, username = $3, role = $4, is_active = $5, updated_at = NOW()
+        WHERE id = $6
+        RETURNING id, username, email, name, role, is_active as "isActive", updated_at as "updatedAt"
+      `, [name, email, username, role, isActive, id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // Update user groups
+      if (groupIds !== undefined) {
+        // Remove existing group memberships
+        await db.execute('DELETE FROM user_group_members WHERE user_id = $1', [id]);
+        
+        // Add new group memberships
+        if (groupIds.length > 0) {
+          for (const groupId of groupIds) {
+            await db.execute(`
+              INSERT INTO user_group_members (user_id, group_id)
+              VALUES ($1, $2)
+            `, [id, groupId]);
+          }
+        }
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error: any) {
+      console.error('Error updating user:', error);
+      
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(400).json({ 
+          message: 'Email ou username já existe' 
+        });
+      }
+      
+      res.status(500).json({ error: 'Failed to update user' });
+    }
+  });
+
+  app.patch('/api/users/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      
+      const result = await db.execute(`
+        UPDATE users 
+        SET is_active = $1, updated_at = NOW()
+        WHERE id = $2
+        RETURNING id, is_active as "isActive"
+      `, [isActive, id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      res.status(500).json({ error: 'Failed to update user status' });
+    }
+  });
+
+  app.delete('/api/users/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Delete user group memberships first
+      await db.execute('DELETE FROM user_group_members WHERE user_id = $1', [id]);
+      
+      // Delete user sessions
+      await db.execute('DELETE FROM user_sessions WHERE user_id = $1', [id]);
+      
+      // Delete user
+      const result = await db.execute('DELETE FROM users WHERE id = $1 RETURNING id', [id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ error: 'Failed to delete user' });
+    }
+  });
+
+  app.get('/api/users/:id/groups', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await db.execute(`
+        SELECT ugm.group_id as "groupId", ug.name as "groupName"
+        FROM user_group_members ugm
+        JOIN user_groups ug ON ugm.group_id = ug.id
+        WHERE ugm.user_id = $1
+      `, [id]);
+      
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching user groups:', error);
+      res.status(500).json({ error: 'Failed to fetch user groups' });
+    }
+  });
+
+  // User Groups Management APIs
+  app.get('/api/user-groups', async (req, res) => {
+    try {
+      const result = await db.execute(`
+        SELECT id, name, description, permissions, is_active as "isActive", 
+               created_at as "createdAt", updated_at as "updatedAt"
+        FROM user_groups
+        ORDER BY name
+      `);
+      
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching user groups:', error);
+      res.status(500).json({ error: 'Failed to fetch user groups' });
+    }
+  });
+
+  app.get('/api/user-groups/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await db.execute(`
+        SELECT id, name, description, permissions, is_active as "isActive", 
+               created_at as "createdAt", updated_at as "updatedAt"
+        FROM user_groups
+        WHERE id = $1
+      `, [id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Group not found' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error fetching user group:', error);
+      res.status(500).json({ error: 'Failed to fetch user group' });
+    }
+  });
+
+  app.post('/api/user-groups', async (req, res) => {
+    try {
+      const { name, description, permissions, isActive } = req.body;
+      
+      const result = await db.execute(`
+        INSERT INTO user_groups (name, description, permissions, is_active)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, name, description, permissions, is_active as "isActive", created_at as "createdAt"
+      `, [name, description || '', JSON.stringify(permissions || []), isActive !== false]);
+      
+      res.status(201).json(result.rows[0]);
+    } catch (error: any) {
+      console.error('Error creating user group:', error);
+      
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(400).json({ 
+          message: 'Nome do grupo já existe' 
+        });
+      }
+      
+      res.status(500).json({ error: 'Failed to create user group' });
+    }
+  });
+
+  app.put('/api/user-groups/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, description, permissions, isActive } = req.body;
+      
+      const result = await db.execute(`
+        UPDATE user_groups 
+        SET name = $1, description = $2, permissions = $3, is_active = $4, updated_at = NOW()
+        WHERE id = $5
+        RETURNING id, name, description, permissions, is_active as "isActive", updated_at as "updatedAt"
+      `, [name, description || '', JSON.stringify(permissions || []), isActive, id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Group not found' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error: any) {
+      console.error('Error updating user group:', error);
+      
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(400).json({ 
+          message: 'Nome do grupo já existe' 
+        });
+      }
+      
+      res.status(500).json({ error: 'Failed to update user group' });
+    }
+  });
+
+  app.delete('/api/user-groups/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Remove all users from this group first
+      await db.execute('DELETE FROM user_group_members WHERE group_id = $1', [id]);
+      
+      // Delete the group
+      const result = await db.execute('DELETE FROM user_groups WHERE id = $1 RETURNING id', [id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Group not found' });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting user group:', error);
+      res.status(500).json({ error: 'Failed to delete user group' });
+    }
+  });
+
   // Admin Dashboard Stats API - Real data from database
   app.get('/api/admin/dashboard-stats', async (req, res) => {
     try {

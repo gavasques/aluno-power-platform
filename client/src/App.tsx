@@ -22,6 +22,8 @@ const Updates = lazy(() => import("./pages/Updates"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const Admin = lazy(() => import("./pages/Admin"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
+const UserEdit = lazy(() => import("./pages/admin/UserEdit"));
+const GroupEdit = lazy(() => import("./pages/admin/GroupEdit"));
 const SupportManagement = lazy(() => import("./pages/admin/SupportManagement"));
 const GeneralSettings = lazy(() => import("./pages/admin/GeneralSettings"));
 const ContentManagement = lazy(() => import("./pages/admin/ContentManagement"));
@@ -289,6 +291,50 @@ function App() {
                               <AdminLayout>
                                 <Suspense fallback={<PageLoader />}>
                                   <UserManagement />
+                                </Suspense>
+                              </AdminLayout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/admin/usuarios/:id/editar">
+                            {(params) => (
+                              <ProtectedRoute requireAdmin>
+                                <AdminLayout>
+                                  <Suspense fallback={<PageLoader />}>
+                                    <UserEdit />
+                                  </Suspense>
+                                </AdminLayout>
+                              </ProtectedRoute>
+                            )}
+                          </Route>
+                          
+                          <Route path="/admin/usuarios/novo">
+                            <ProtectedRoute requireAdmin>
+                              <AdminLayout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <UserEdit />
+                                </Suspense>
+                              </AdminLayout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/admin/usuarios/grupos/:id">
+                            {(params) => (
+                              <ProtectedRoute requireAdmin>
+                                <AdminLayout>
+                                  <Suspense fallback={<PageLoader />}>
+                                    <GroupEdit />
+                                  </Suspense>
+                                </AdminLayout>
+                              </ProtectedRoute>
+                            )}
+                          </Route>
+                          
+                          <Route path="/admin/usuarios/grupos/novo">
+                            <ProtectedRoute requireAdmin>
+                              <AdminLayout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <GroupEdit />
                                 </Suspense>
                               </AdminLayout>
                             </ProtectedRoute>
