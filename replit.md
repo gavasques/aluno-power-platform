@@ -108,7 +108,31 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: ✅ SISTEMA ADMINISTRATIVO ULTRA-LEVE E PADRONIZADO IMPLEMENTADO
+- **June 30, 2025**: ✅ GERADOR DE DESCRIÇÕES AMAZON HTML IMPLEMENTADO
+  - **Nova Funcionalidade no Hub de Recursos**: "Descrição em HTML"
+    - Editor completo em 2 colunas: entrada de texto e saída HTML
+    - Contador de caracteres em tempo real com limite de 2000 caracteres
+    - Alertas visuais: verde (normal), amarelo (>1800), vermelho (=2000)
+    - Barra de ferramentas com formatação: negrito, itálico, listas, quebras
+    - Símbolos permitidos pela Amazon: ✅ ❌ ⚠️ 📦 🚚 💯 ⭐ 🔥 💪 🎯
+    - Seção expansível com regras completas da Amazon Brasil
+    - Validação automática removendo tags não permitidas
+    - Função copiar HTML para área de transferência
+    - Interface responsiva seguindo design system do projeto
+  - **Integração Completa**:
+    - Rota /hub/descricao-html implementada
+    - Menu "Hub de Recursos" atualizado com ícone Code2
+    - Breadcrumbs configurados para navegação
+    - Layout padrão do sistema mantido
+  - **Funcionalidades Avançadas**:
+    - Aplicação de formatação via seleção de texto
+    - Criação automática de listas (ordenadas/não ordenadas)
+    - Inserção de símbolos no cursor
+    - Feedback visual com toasts informativos
+    - Prevenção de excesso de caracteres
+    - Validação em tempo real
+
+- **June 30, 2025 (anterior)**: ✅ SISTEMA ADMINISTRATIVO ULTRA-LEVE E PADRONIZADO IMPLEMENTADO
   - **AdminStandardLayout**: Novo layout dedicado para área administrativa extremamente otimizado
     - Zero shadows, transições mínimas, máxima performance
     - Componentes AdminCard, AdminGrid, AdminLoader ultra-leves
