@@ -12,7 +12,7 @@ import {
   Shield, 
   Users
 } from 'lucide-react';
-import { useLocation, useParams } from 'wouter';
+import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminStandardLayout, { AdminCard, AdminLoader } from '@/components/layout/AdminStandardLayout';
 
@@ -26,10 +26,14 @@ interface UserForm {
   groupIds: number[];
 }
 
-const UserEdit = memo(() => {
+interface UserEditProps {
+  params?: { id?: string };
+}
+
+const UserEdit = memo(({ params }: UserEditProps = {}) => {
   const [, setLocation] = useLocation();
-  const { id: userId } = useParams();
   const queryClient = useQueryClient();
+  const userId = params?.id;
   const isNewUser = userId === 'novo';
 
   const [form, setForm] = useState<UserForm>({
@@ -66,14 +70,14 @@ const UserEdit = memo(() => {
 
   // Set form data when user is loaded
   useEffect(() => {
-    if (user) {
+    if (user && typeof user === 'object') {
       setForm({
-        name: user.name || '',
-        email: user.email || '',
-        username: user.username || '',
-        role: user.role || 'user',
-        isActive: user.isActive !== false,
-        groupIds: userGroups?.map((ug: any) => ug.groupId) || []
+        name: (user as any).name || '',
+        email: (user as any).email || '',
+        username: (user as any).username || '',
+        role: (user as any).role || 'user',
+        isActive: (user as any).isActive !== false,
+        groupIds: Array.isArray(userGroups) ? userGroups.map((ug: any) => ug.groupId) : []
       });
     }
   }, [user, userGroups]);
@@ -266,7 +270,7 @@ const UserEdit = memo(() => {
         </div>
 
         {/* Groups */}
-        {groups && groups.length > 0 && (
+        {groups && Array.isArray(groups) && groups.length > 0 && (
           <AdminCard title="Grupos de Usuário">
             <div className="space-y-3">
               <p className="text-sm text-gray-600 mb-4">

@@ -301,7 +301,7 @@ function App() {
                               <ProtectedRoute requireAdmin>
                                 <AdminLayout>
                                   <Suspense fallback={<PageLoader />}>
-                                    <UserEdit />
+                                    <UserEdit params={params} />
                                   </Suspense>
                                 </AdminLayout>
                               </ProtectedRoute>
@@ -323,7 +323,7 @@ function App() {
                               <ProtectedRoute requireAdmin>
                                 <AdminLayout>
                                   <Suspense fallback={<PageLoader />}>
-                                    <GroupEdit />
+                                    <GroupEdit params={params} />
                                   </Suspense>
                                 </AdminLayout>
                               </ProtectedRoute>
