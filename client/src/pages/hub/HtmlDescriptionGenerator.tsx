@@ -43,95 +43,38 @@ const HtmlDescriptionGenerator: React.FC = () => {
     return formatted;
   };
 
-  // Função para gerar HTML do contentEditable
+  // Função para gerar HTML do markdown
   const generateHtml = () => {
     if (!textInput.trim()) {
       setHtmlOutput('');
       return;
     }
 
-    // Obter HTML do contentEditable
-    const editor = document.getElementById('textInput') as HTMLDivElement;
-    let html = '';
-    
-    if (editor && editor.innerHTML && !editor.innerHTML.includes('color: #999')) {
-      // Usar o HTML real do editor que contém as tags de formatação
-      let editorHtml = editor.innerHTML;
-      
-      // Normalizar tags HTML
-      editorHtml = editorHtml
-        .replace(/<div>/gi, '<p>')
-        .replace(/<\/div>/gi, '</p>')
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<b\b[^>]*>/gi, '<strong>')
-        .replace(/<\/b>/gi, '</strong>')
-        .replace(/<em\b[^>]*>/gi, '<i>')
-        .replace(/<\/em>/gi, '</i>')
-        .replace(/<span[^>]*font-weight:\s*bold[^>]*>(.*?)<\/span>/gi, '<strong>$1</strong>')
-        .replace(/<span[^>]*font-style:\s*italic[^>]*>(.*?)<\/span>/gi, '<i>$1</i>')
-        .replace(/<span[^>]*>(.*?)<\/span>/gi, '$1'); // Remove spans sem formatação
-      
-      // Processar linha por linha mantendo a formatação HTML
-      const lines = editorHtml.split(/\n|<\/p><p>|<\/div><div>/);
-      const processedLines: string[] = [];
-      let currentList: { type: string; items: string[] } = { type: '', items: [] };
-      
-      for (let line of lines) {
-        // Limpar tags de parágrafo no início/fim
-        line = line.replace(/^<p[^>]*>|<\/p>$/gi, '').trim();
+    // Dividir por linhas
+    const lines = textInput.split('\n');
+    let htmlLines: string[] = [];
+
+    for (const line of lines) {
+      if (line.trim() === '') {
+        // Linha vazia vira parágrafo com espaço
+        htmlLines.push('<p>&nbsp;</p>');
+      } else {
+        // Aplicar formatação markdown para HTML
+        let formatted = line
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<i>$1</i>')
+          .replace(/• (.*)/g, '• $1')
+          .replace(/(\d+)\. (.*)/g, '$1. $2');
         
-        if (!line) {
-          // Linha vazia
-          if (currentList.type && currentList.items.length > 0) {
-            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-            currentList = { type: '', items: [] };
-          }
-          processedLines.push('<p>&nbsp;</p>');
-        } else if (line.startsWith('• ')) {
-          // Lista não numerada
-          if (currentList.type !== 'ul') {
-            if (currentList.type && currentList.items.length > 0) {
-              processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-            }
-            currentList = { type: 'ul', items: [] };
-          }
-          currentList.items.push(`<li>${line.substring(2)}</li>`);
-        } else if (/^\d+\.\s/.test(line)) {
-          // Lista numerada
-          if (currentList.type !== 'ol') {
-            if (currentList.type && currentList.items.length > 0) {
-              processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-            }
-            currentList = { type: 'ol', items: [] };
-          }
-          currentList.items.push(`<li>${line.replace(/^\d+\.\s/, '')}</li>`);
-        } else {
-          // Linha normal com possível formatação
-          if (currentList.type && currentList.items.length > 0) {
-            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-            currentList = { type: '', items: [] };
-          }
-          processedLines.push(`<p>${line}</p>`);
-        }
+        htmlLines.push(`<p>${formatted}</p>`);
       }
-      
-      // Finalizar lista pendente
-      if (currentList.type && currentList.items.length > 0) {
-        processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-      }
-      
-      html = processedLines.join('');
-    } else {
-      // Fallback para texto simples
-      html = textInput.split('\n').map(line => 
-        line.trim() === '' ? '<p>&nbsp;</p>' : `<p>${line}</p>`
-      ).join('');
     }
+
+    const finalHtml = htmlLines.join('\n');
     
-    // Limpar HTML não permitido mantendo formatação
-    html = html.replace(/<(?!\/?(strong|i|u|br|p|ul|ol|li|em)\b)[^>]*>/gi, '');
-    
-    setHtmlOutput(html);
+    // Validar HTML (remover tags não permitidas)
+    const cleanHtml = validateAmazonHtml(finalHtml);
+    setHtmlOutput(cleanHtml);
   };
 
   // Gerar HTML em tempo real
