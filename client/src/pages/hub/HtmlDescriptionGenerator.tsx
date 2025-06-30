@@ -37,12 +37,64 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
     let html = textInput;
     
-    // Se não contém tags HTML, converter cada linha em parágrafo <p>
-    if (!html.includes('<')) {
-      // Dividir por quebras de linha, filtrar linhas vazias e envolver cada linha em <p>
-      const lines = html.split('\n').filter(line => line.trim() !== '');
-      html = lines.map(line => `<p>${line.trim()}</p>`).join('');
+    // Converter texto visual formatado para HTML
+    // Dividir por quebras de linha e filtrar linhas completamente vazias
+    const lines = html.split('\n').filter(line => line.trim() !== '');
+    
+    // Processar linhas e agrupar listas
+    const processedLines = [];
+    let currentList = { type: '', items: [] };
+    
+    for (const line of lines) {
+      let processedLine = line.trim();
+      
+      // Converter formatação visual para HTML
+      // **texto** para <b>texto</b>
+      processedLine = processedLine.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+      // *texto* para <i>texto</i>
+      processedLine = processedLine.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<i>$1</i>');
+      
+      // Verificar se é item de lista
+      if (processedLine.startsWith('• ')) {
+        if (currentList.type !== 'ul') {
+          // Finalizar lista anterior se existir
+          if (currentList.type && currentList.items.length > 0) {
+            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
+          }
+          currentList = { type: 'ul', items: [] };
+        }
+        currentList.items.push(`<li>${processedLine.substring(2)}</li>`);
+      } else if (/^\d+\.\s/.test(processedLine)) {
+        if (currentList.type !== 'ol') {
+          // Finalizar lista anterior se existir
+          if (currentList.type && currentList.items.length > 0) {
+            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
+          }
+          currentList = { type: 'ol', items: [] };
+        }
+        currentList.items.push(`<li>${processedLine.replace(/^\d+\.\s/, '')}</li>`);
+      } else {
+        // Não é item de lista, finalizar lista atual se existir
+        if (currentList.type && currentList.items.length > 0) {
+          processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
+          currentList = { type: '', items: [] };
+        }
+        
+        // Processar linha normal
+        if (processedLine.includes('<')) {
+          processedLines.push(processedLine);
+        } else {
+          processedLines.push(`<p>${processedLine}</p>`);
+        }
+      }
     }
+    
+    // Finalizar lista se houver uma pendente
+    if (currentList.type && currentList.items.length > 0) {
+      processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
+    }
+    
+    html = processedLines.join('');
     
     // Limpar HTML não permitido (validação básica)
     html = html.replace(/<(?!\/?(b|i|u|br|p|ul|ol|li|strong|em)\b)[^>]*>/gi, '');
@@ -50,8 +102,8 @@ const HtmlDescriptionGenerator: React.FC = () => {
     setHtmlOutput(html);
   }, [textInput]);
 
-  // Aplicar formatação
-  const applyFormatting = (tag: string) => {
+  // Aplicar formatação visual
+  const applyFormatting = (type: string) => {
     const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
     if (!textarea) return;
 
@@ -62,7 +114,14 @@ const HtmlDescriptionGenerator: React.FC = () => {
     if (selectedText) {
       const beforeText = textInput.substring(0, start);
       const afterText = textInput.substring(end);
-      const formattedText = `<${tag}>${selectedText}</${tag}>`;
+      
+      let formattedText = '';
+      if (type === 'b') {
+        formattedText = `**${selectedText}**`; // Para negrito visual
+      } else if (type === 'i') {
+        formattedText = `*${selectedText}*`; // Para itálico visual
+      }
+      
       const newText = beforeText + formattedText + afterText;
       
       if (newText.length <= MAX_CHARS) {
@@ -78,18 +137,47 @@ const HtmlDescriptionGenerator: React.FC = () => {
     }
   };
 
-  // Inserir lista
+  // Inserir lista (visual)
   const insertList = (ordered = false) => {
-    const listType = ordered ? 'ol' : 'ul';
-    const listHtml = `<${listType}>
-<li>Item 1</li>
-<li>Item 2</li>
-<li>Item 3</li>
-</${listType}>`;
+    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textInput.substring(start, end);
     
-    const newText = textInput + '\n' + listHtml;
+    let listText = '';
+    
+    if (selectedText.trim()) {
+      // Se há texto selecionado, converter para lista
+      const lines = selectedText.split('\n').filter(line => line.trim() !== '');
+      if (ordered) {
+        listText = lines.map((line, index) => `${index + 1}. ${line.trim()}`).join('\n');
+      } else {
+        listText = lines.map(line => `• ${line.trim()}`).join('\n');
+      }
+    } else {
+      // Inserir lista vazia
+      if (ordered) {
+        listText = '1. Item 1\n2. Item 2\n3. Item 3';
+      } else {
+        listText = '• Item 1\n• Item 2\n• Item 3';
+      }
+    }
+    
+    const beforeText = textInput.substring(0, start);
+    const afterText = textInput.substring(end);
+    const newText = beforeText + listText + afterText;
+    
     if (newText.length <= MAX_CHARS) {
       setTextInput(newText);
+      
+      // Reposicionar cursor
+      setTimeout(() => {
+        const newPos = start + listText.length;
+        textarea.setSelectionRange(newPos, newPos);
+        textarea.focus();
+      }, 0);
     }
   };
 
