@@ -118,22 +118,16 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/agents/html-description">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <HtmlDescriptionAgent />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
                           <Route path="/agents/:id">
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
                                   <Suspense fallback={<PageLoader />}>
-                                    <AgentProcessorPage />
+                                    {params.id === 'agent-html-description' ? (
+                                      <HtmlDescriptionAgent />
+                                    ) : (
+                                      <AgentProcessorPage />
+                                    )}
                                   </Suspense>
                                 </Layout>
                               </ProtectedRoute>
