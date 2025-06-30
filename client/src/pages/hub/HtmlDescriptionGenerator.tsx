@@ -239,13 +239,14 @@ A descrição deve gerar urgência e levar o cliente a querer comprar o produto 
 Fechamento Persuasivo:
 Termine a descrição com uma chamada para ação direta e convincente, motivando o cliente a adicionar o produto ao carrinho imediatamente.`;
 
-      const response = await fetch('/api/openai/generate', {
+      const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
+          provider: 'openai',
           model: 'gpt-4.1-mini',
           prompt: prompt,
           maxTokens: 1000,
@@ -258,7 +259,7 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
       }
 
       const data = await response.json();
-      setGeneratedDescription(data.response);
+      setGeneratedDescription(data.response || data.content || '');
       setShowReplaceDialog(true);
       
     } catch (error) {
