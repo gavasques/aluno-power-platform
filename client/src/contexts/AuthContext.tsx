@@ -76,7 +76,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     if (!token) {
       console.log('🔥 AuthContext: No token found, setting as logged out');
-      setState(prev => ({ ...prev, isLoading: false }));
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false,
+        user: null,
+        token: null,
+        isAuthenticated: false
+      }));
       return;
     }
 
@@ -90,12 +96,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         userEmail: user?.email
       });
 
-      setState({
-        user,
-        token,
-        isLoading: false,
-        isAuthenticated: !!user,
-      });
+      if (user) {
+        setState({
+          user,
+          token,
+          isLoading: false,
+          isAuthenticated: true,
+        });
+      } else {
+        throw new Error('No user returned from API');
+      }
     } catch (error) {
       console.log('🔥 AuthContext: Authentication failed, clearing token:', {
         error: error instanceof Error ? error.message : 'Unknown error'

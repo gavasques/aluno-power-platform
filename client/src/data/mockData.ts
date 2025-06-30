@@ -9,6 +9,20 @@ export const mockCategories = [
   { id: 5, name: 'Roupas', slug: 'clothing' }
 ];
 
+export const mockSuppliers = [];
+
+export const mockPartners = [];
+
+export const mockMaterials = [];
+
+export const mockTools = [];
+
+export const mockTemplates = [];
+
+export const mockPrompts = [];
+
+export const mockProducts = [];
+
 export const mockData = {
   // Empty arrays for components that expect data structures
   products: [],

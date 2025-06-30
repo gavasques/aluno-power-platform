@@ -37,14 +37,29 @@ export class AuthService {
     url: string,
     options: RequestInit = {}
   ): Promise<T> {
+    const token = localStorage.getItem('auth_token');
+    
+    const defaultHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      defaultHeaders['Authorization'] = `Bearer ${token}`;
+    }
+
     const defaultOptions: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: defaultHeaders,
       credentials: 'include',
     };
 
-    const response = await fetch(url, { ...defaultOptions, ...options });
+    const response = await fetch(url, { 
+      ...defaultOptions, 
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...(options.headers || {})
+      }
+    });
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
