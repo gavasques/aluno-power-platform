@@ -1,24 +1,21 @@
 import React, { memo, useMemo, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   Users, 
   FileText, 
-  Database, 
   Activity, 
   TrendingUp, 
   ArrowRight, 
   Settings,
-  MessageSquare,
   ExternalLink,
-  Package,
   Bot,
-  Youtube
+  Youtube,
+  Database
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import { StandardizedLayout, PageWrapper, ResponsiveGrid } from '@/components/layout/StandardizedLayout';
+import AdminStandardLayout, { AdminCard, AdminGrid, AdminLoader } from '@/components/layout/AdminStandardLayout';
 
 // Dashboard data interface
 interface DashboardData {
@@ -145,192 +142,152 @@ const AdminDashboard = memo(() => {
     }));
   }, [dashboardData?.recentActivity, getActivityBadge]);
 
-  // Loading skeleton
+  // Ultra-lightweight loading state
   if (isLoading) {
     return (
-      <StandardizedLayout variant="admin">
-        <PageWrapper title="Dashboard Administrativo" description="Carregando dados...">
-          <ResponsiveGrid columns={4} gap="md">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i} className="card-optimized">
-                <CardContent className="p-6">
-                  <div className="skeleton-optimized h-4 w-3/4 mb-2" />
-                  <div className="skeleton-optimized h-8 w-1/2 mb-2" />
-                  <div className="skeleton-optimized h-3 w-2/3" />
-                </CardContent>
-              </Card>
-            ))}
-          </ResponsiveGrid>
-        </PageWrapper>
-      </StandardizedLayout>
+      <AdminStandardLayout title="Dashboard Administrativo">
+        <AdminLoader />
+      </AdminStandardLayout>
     );
   }
 
   return (
-    <StandardizedLayout variant="admin">
-      <PageWrapper 
-        title="Dashboard Administrativo"
-        description="Visão geral da plataforma e métricas principais"
-      >
-        <div className="space-y-8">
-          {/* Key Metrics */}
-          <section>
-            <h2 className="text-lg font-semibold mb-4">Métricas Principais</h2>
-            <ResponsiveGrid columns={4} gap="md">
-              {metrics.map((metric, index) => (
-                <Card key={index} className="card-optimized hover:shadow-lg transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`p-3 rounded-lg ${metric.bgColor}`}>
-                        <metric.icon className={`h-6 w-6 ${metric.textColor}`} />
-                      </div>
-                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        {metric.title}
-                      </p>
-                      <p className="text-2xl font-bold">{metric.value}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {metric.change}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </ResponsiveGrid>
-          </section>
+    <AdminStandardLayout 
+      title="Dashboard Administrativo"
+      description="Visão geral da plataforma"
+    >
+      <div className="space-y-6">
+        {/* Metrics - Simplified */}
+        <section>
+          <h2 className="text-base font-medium mb-3 text-gray-700">Métricas</h2>
+          <AdminGrid>
+            {metrics.map((metric, index) => (
+              <AdminCard key={index}>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-1">{metric.title}</p>
+                    <p className="text-2xl font-semibold">{metric.value}</p>
+                    <p className="text-xs text-gray-400">{metric.change}</p>
+                  </div>
+                  <div className={`p-2 rounded ${metric.bgColor}`}>
+                    <metric.icon className={`h-4 w-4 ${metric.textColor}`} />
+                  </div>
+                </div>
+              </AdminCard>
+            ))}
+          </AdminGrid>
+        </section>
 
-          {/* Quick Actions */}
-          <section>
-            <h2 className="text-lg font-semibold mb-4">Ações Rápidas</h2>
-            <ResponsiveGrid columns={4} gap="md">
-              {quickActions.map((action, index) => (
-                <Card 
-                  key={index} 
-                  className={`card-optimized cursor-pointer transition-all duration-200 ${action.color}`}
-                  onClick={() => setLocation(action.href)}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="p-3 rounded-full bg-muted/50">
-                        <action.icon className="h-6 w-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{action.title}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {action.description}
-                        </p>
-                      </div>
-                      <Button variant="ghost" size="sm" className="mt-2">
-                        Acessar
-                        <ArrowRight className="h-3 w-3 ml-1" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </ResponsiveGrid>
-          </section>
+        {/* Quick Actions - Minimal */}
+        <section>
+          <h2 className="text-base font-medium mb-3 text-gray-700">Ações Rápidas</h2>
+          <AdminGrid>
+            {quickActions.map((action, index) => (
+              <AdminCard 
+                key={index}
+                className="cursor-pointer hover:bg-gray-50/50 transition-colors"
+                onClick={() => setLocation(action.href)}
+              >
+                <div className="text-center space-y-2">
+                  <action.icon className="h-5 w-5 mx-auto text-gray-600" />
+                  <div>
+                    <h3 className="text-sm font-medium">{action.title}</h3>
+                    <p className="text-xs text-gray-500">{action.description}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" className="w-full mt-2">
+                    Acessar
+                    <ArrowRight className="h-3 w-3 ml-1" />
+                  </Button>
+                </div>
+              </AdminCard>
+            ))}
+          </AdminGrid>
+        </section>
 
-          {/* Recent Activity */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Atividade Recente</h2>
-              <Button variant="outline" size="sm">
+        {/* Recent Activity - Simplified */}
+        <section>
+          <AdminCard 
+            title="Atividade Recente"
+            actions={
+              <Button variant="ghost" size="sm">
                 Ver Todas
                 <ExternalLink className="h-3 w-3 ml-1" />
               </Button>
-            </div>
-            <Card className="card-optimized">
-              <CardContent className="p-6">
-                {recentActivity.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentActivity.map((activity: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium">
-                              {activity.action}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {activity.details}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {activity.badge}
-                          <span className="text-xs text-muted-foreground">
-                            {activity.timestamp}
-                          </span>
-                        </div>
+            }
+          >
+            {recentActivity.length > 0 ? (
+              <div className="space-y-3">
+                {recentActivity.map((activity: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                      <div>
+                        <p className="text-sm">{activity.action}</p>
+                        <p className="text-xs text-gray-500">{activity.details}</p>
                       </div>
-                    ))}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {activity.badge}
+                      <span className="text-xs text-gray-400">{activity.timestamp}</span>
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-muted-foreground">Nenhuma atividade recente</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </section>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <Activity className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">Nenhuma atividade recente</p>
+              </div>
+            )}
+          </AdminCard>
+        </section>
 
-          {/* System Status */}
-          <section>
-            <h2 className="text-lg font-semibold mb-4">Status do Sistema</h2>
-            <div className="layout-grid-3">
-              <Card className="card-optimized">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Database className="h-4 w-4" />
-                    Banco de Dados
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-sm">Operacional</span>
+        {/* System Status - Minimal */}
+        <section>
+          <h2 className="text-base font-medium mb-3 text-gray-700">Status</h2>
+          <AdminGrid columns={3}>
+            <AdminCard>
+              <div className="flex items-center space-x-2">
+                <Database className="h-4 w-4 text-gray-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">Banco</p>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                    <span className="text-xs text-gray-500">Online</span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </AdminCard>
 
-              <Card className="card-optimized">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Bot className="h-4 w-4" />
-                    APIs de IA
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-sm">Funcionando</span>
+            <AdminCard>
+              <div className="flex items-center space-x-2">
+                <Bot className="h-4 w-4 text-gray-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">APIs IA</p>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                    <span className="text-xs text-gray-500">Ativo</span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </AdminCard>
 
-              <Card className="card-optimized">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Youtube className="h-4 w-4" />
-                    Sync YouTube
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                    <span className="text-sm">Configuração necessária</span>
+            <AdminCard>
+              <div className="flex items-center space-x-2">
+                <Youtube className="h-4 w-4 text-gray-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">YouTube</p>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
+                    <span className="text-xs text-gray-500">Config</span>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-        </div>
-      </PageWrapper>
-    </StandardizedLayout>
+                </div>
+              </div>
+            </AdminCard>
+          </AdminGrid>
+        </section>
+      </div>
+    </AdminStandardLayout>
   );
 });
 
