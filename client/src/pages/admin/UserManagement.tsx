@@ -26,39 +26,39 @@ const UserManagement = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100">Gestão de Usuários</h1>
-          <p className="text-slate-400">Controle de usuários, grupos e permissões</p>
+          <h1 className="text-3xl font-bold text-gray-900">Gestão de Usuários</h1>
+          <p className="text-gray-600">Controle de usuários, grupos e permissões</p>
         </div>
-        <Button className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" variant="outline">
+        <Button className="bg-blue-600 text-white hover:bg-blue-700">
           <UserPlus className="h-4 w-4 mr-2" />
           Novo Usuário
         </Button>
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="bg-slate-700/50 border-red-500/20">
-          <TabsTrigger value="users" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400 text-slate-300">
+        <TabsList className="bg-gray-100 border-gray-200">
+          <TabsTrigger value="users" className="data-[state=active]:bg-white data-[state=active]:text-blue-600 text-gray-700">
             <Users className="h-4 w-4 mr-2" />
             Usuários
           </TabsTrigger>
-          <TabsTrigger value="groups" className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400 text-slate-300">
+          <TabsTrigger value="groups" className="data-[state=active]:bg-white data-[state=active]:text-blue-600 text-gray-700">
             <Shield className="h-4 w-4 mr-2" />
             Grupos
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
-          <Card className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+          <Card className="bg-white border-gray-200 shadow-sm">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle className="text-slate-100">Lista de Usuários</CardTitle>
+                <CardTitle className="text-gray-900">Lista de Usuários</CardTitle>
                 <div className="flex items-center space-x-2">
-                  <Search className="h-4 w-4 text-slate-400" />
+                  <Search className="h-4 w-4 text-gray-400" />
                   <Input 
                     placeholder="Buscar usuários..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-slate-600/50 border-red-500/20 text-slate-100 placeholder-slate-400 w-64"
+                    className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 w-64"
                   />
                 </div>
               </div>
@@ -66,14 +66,14 @@ const UserManagement = () => {
             <CardContent>
               <div className="space-y-4">
                 {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 bg-slate-600/30 border border-red-500/20 rounded-lg">
+                  <div key={user.id} className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                        <Users className="h-5 w-5 text-red-400" />
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Users className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <h3 className="font-medium text-slate-100">{user.name}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-slate-400">
+                        <h3 className="font-medium text-gray-900">{user.name}</h3>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <span className="flex items-center space-x-1">
                             <Mail className="h-3 w-3" />
                             <span>{user.email}</span>
@@ -84,16 +84,16 @@ const UserManagement = () => {
                     </div>
                     <div className="flex items-center space-x-3">
                       <Badge className={
-                        user.role === 'Admin' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
-                        user.role === 'Support' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                        'bg-green-500/20 text-green-400 border-green-500/30'
+                        user.role === 'Admin' ? 'bg-red-100 text-red-800 border-red-200' :
+                        user.role === 'Support' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                        'bg-green-100 text-green-800 border-green-200'
                       }>
                         {user.role}
                       </Badge>
-                      <Badge className={user.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}>
+                      <Badge className={user.status === 'active' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-800 border-gray-200'}>
                         {user.status === 'active' ? 'Ativo' : 'Inativo'}
                       </Badge>
-                      <Button size="sm" variant="outline" className="bg-slate-600/50 border-slate-500/30 text-slate-300 hover:bg-slate-500/50">
+                      <Button size="sm" variant="outline" className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
                         Editar
                       </Button>
                     </div>
@@ -107,14 +107,14 @@ const UserManagement = () => {
         <TabsContent value="groups">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {groups.map((group) => (
-              <Card key={group.id} className="bg-slate-700/50 border-red-500/20 shadow-lg shadow-red-500/10">
+              <Card key={group.id} className="bg-white border-gray-200 shadow-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Shield className="h-5 w-5 text-red-400" />
-                      <CardTitle className="text-slate-100">{group.name}</CardTitle>
+                      <Shield className="h-5 w-5 text-blue-600" />
+                      <CardTitle className="text-gray-900">{group.name}</CardTitle>
                     </div>
-                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                    <Badge className="bg-blue-100 text-blue-800 border-blue-200">
                       {group.members} membros
                     </Badge>
                   </div>
@@ -122,20 +122,20 @@ const UserManagement = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-sm font-medium text-slate-300 mb-2">Permissões:</h4>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Permissões:</h4>
                       <div className="flex flex-wrap gap-2">
                         {group.permissions.map((permission, index) => (
-                          <Badge key={index} className="bg-slate-600/50 text-slate-300 border-slate-500/30">
+                          <Badge key={index} className="bg-gray-100 text-gray-700 border-gray-200">
                             {permission}
                           </Badge>
                         ))}
                       </div>
                     </div>
                     <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" className="bg-slate-600/50 border-slate-500/30 text-slate-300 hover:bg-slate-500/50">
+                      <Button size="sm" variant="outline" className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
                         Editar
                       </Button>
-                      <Button size="sm" variant="outline" className="bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30">
+                      <Button size="sm" variant="outline" className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600">
                         Gerenciar
                       </Button>
                     </div>
