@@ -3,6 +3,7 @@ import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +33,7 @@ const HtmlDescriptionGenerator: React.FC = () => {
   const [generatedDescription, setGeneratedDescription] = useState('');
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const MAX_CHARS = 2000;
   const WARNING_THRESHOLD = 1800;
@@ -217,7 +219,17 @@ Garantia de 12 meses`;
       return;
     }
 
+    if (!user?.id) {
+      toast({
+        variant: "destructive",
+        title: "❌ Erro",
+        description: "Usuário não autenticado"
+      });
+      return;
+    }
+
     setIsGenerating(true);
+    const startTime = Date.now();
     
     try {
       const prompt = `${textInput}
@@ -262,7 +274,42 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
       if (!data.success) {
         throw new Error(data.message || 'Erro na resposta da API');
       }
-      setGeneratedDescription(data.response || '');
+
+      const responseText = data.response || '';
+      const duration = Date.now() - startTime;
+
+      // Salvar log da geração de IA
+      try {
+        await fetch('/api/ai-generation-logs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            provider: 'openai',
+            model: 'gpt-4o-mini',
+            prompt: prompt,
+            response: responseText,
+            promptCharacters: prompt.length,
+            responseCharacters: responseText.length,
+            inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
+            outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
+            totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
+            cost: data.cost || 0,
+            duration: duration,
+            feature: 'html-description'
+          })
+        });
+        
+        console.log(`💾 Log salvo - Usuário: ${user.id}, Custo: $${data.cost}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
+      } catch (logError) {
+        console.error('Erro ao salvar log de IA:', logError);
+        // Não quebra a funcionalidade se o log falhar
+      }
+
+      setGeneratedDescription(responseText);
       setShowReplaceDialog(true);
       
     } catch (error) {
