@@ -17,7 +17,7 @@ import {
   BarChart3,
   MessageSquare
 } from 'lucide-react';
-import { useLocation, useParams } from 'wouter';
+import { useLocation } from 'wouter';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import AdminStandardLayout, { AdminCard, AdminLoader } from '@/components/layout/AdminStandardLayout';
 
@@ -36,10 +36,14 @@ interface GroupForm {
   isActive: boolean;
 }
 
-const GroupEdit = memo(() => {
+interface GroupEditProps {
+  params?: { id?: string };
+}
+
+const GroupEdit = memo(({ params }: GroupEditProps = {}) => {
   const [, setLocation] = useLocation();
-  const { id: groupId } = useParams();
   const queryClient = useQueryClient();
+  const groupId = params?.id;
   const isNewGroup = groupId === 'novo';
 
   const [form, setForm] = useState<GroupForm>({
@@ -112,12 +116,12 @@ const GroupEdit = memo(() => {
 
   // Set form data when group is loaded
   useEffect(() => {
-    if (group) {
+    if (group && typeof group === 'object') {
       setForm({
-        name: group.name || '',
-        description: group.description || '',
-        permissions: Array.isArray(group.permissions) ? group.permissions : [],
-        isActive: group.isActive !== false
+        name: (group as any).name || '',
+        description: (group as any).description || '',
+        permissions: Array.isArray((group as any).permissions) ? (group as any).permissions : [],
+        isActive: (group as any).isActive !== false
       });
     }
   }, [group]);
@@ -191,7 +195,7 @@ const GroupEdit = memo(() => {
     setForm(prev => ({
       ...prev,
       permissions: checked
-        ? [...new Set([...prev.permissions, ...categoryPermissions])]
+        ? Array.from(new Set([...prev.permissions, ...categoryPermissions]))
         : prev.permissions.filter(id => !categoryPermissions.includes(id))
     }));
   };
@@ -265,11 +269,11 @@ const GroupEdit = memo(() => {
               Selecione as permissões que os membros deste grupo terão no sistema
             </p>
 
-            {Object.entries(permissionsByCategory).map(([category, permissions]) => (
+            {Object.entries(permissionsByCategory).map(([category, categoryPermissions]) => (
               <div key={category} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-medium text-gray-900 flex items-center space-x-2">
-                    <permissions[0].icon className="h-5 w-5" />
+                    {categoryPermissions[0] && React.createElement(categoryPermissions[0].icon, { className: "h-5 w-5" })}
                     <span>{category}</span>
                   </h3>
                   <Checkbox
@@ -280,7 +284,7 @@ const GroupEdit = memo(() => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {permissions.map((permission) => (
+                  {categoryPermissions.map((permission) => (
                     <div key={permission.id} className="flex items-start space-x-3">
                       <Checkbox
                         id={permission.id}
