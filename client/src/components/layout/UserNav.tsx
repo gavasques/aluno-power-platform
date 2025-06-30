@@ -94,8 +94,10 @@ export function UserNav() {
         <DropdownMenuItem 
           className="flex items-center gap-3 px-4 py-2 text-destructive hover:bg-neutral-100 rounded transition cursor-pointer"
           onClick={() => {
+            console.log('🔥 UserNav: Logout button clicked');
+            console.log('🔥 UserNav: Current user before logout:', user);
             logout();
-            window.location.href = '/';
+            console.log('🔥 UserNav: Logout function called, redirecting to /login');
           }}
         >
           <LogOut className="h-5 w-5" />

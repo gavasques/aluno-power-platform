@@ -25,31 +25,86 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Simulando um usuário admin para desenvolvimento
   // Em produção, isso viria de uma API de autenticação
   useEffect(() => {
-    // Simular usuário admin logado
-    const mockAdmin: User = {
-      id: 1,
-      username: 'admin',
-      email: 'admin@example.com',
-      name: 'Administrador',
-      role: 'admin'
-    };
-    setUser(mockAdmin);
+    console.log('🔥 AuthContext: useEffect triggered, checking authentication state');
+    
+    // Verificar se o usuário fez logout explicitamente
+    const loggedOut = localStorage.getItem('loggedOut');
+    
+    if (loggedOut === 'true') {
+      console.log('🔥 AuthContext: User explicitly logged out, staying logged out');
+      setUser(null);
+      return;
+    }
+    
+    // Verificar se há um usuário salvo no localStorage
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedUser) {
+      console.log('🔥 AuthContext: Found saved user in localStorage');
+      setUser(JSON.parse(savedUser));
+    } else {
+      console.log('🔥 AuthContext: No saved user found, creating mock admin');
+      // Simular usuário admin logado apenas se não há logout em andamento
+      const mockAdmin: User = {
+        id: 1,
+        username: 'admin',
+        email: 'admin@example.com',
+        name: 'Administrador',
+        role: 'admin'
+      };
+      setUser(mockAdmin);
+      localStorage.setItem('user', JSON.stringify(mockAdmin));
+    }
   }, []);
 
   const isAdmin = user?.role === 'admin';
   const isAuthenticated = !!user;
 
   const login = async (username: string, password: string) => {
-    // Implementar lógica de login aqui
-    console.log('Login attempt:', username);
+    console.log('🔥 AuthContext: login() called for:', username);
+    
+    // Limpar flag de logout
+    localStorage.removeItem('loggedOut');
+    console.log('🔥 AuthContext: Cleared logout flag');
+    
+    // Simular login bem-sucedido
+    const mockAdmin: User = {
+      id: 1,
+      username: username,
+      email: `${username}@example.com`,
+      name: username === 'admin' ? 'Administrador' : 'Usuário',
+      role: username === 'admin' ? 'admin' : 'user'
+    };
+    
+    setUser(mockAdmin);
+    localStorage.setItem('user', JSON.stringify(mockAdmin));
+    console.log('🔥 AuthContext: User logged in successfully:', mockAdmin);
   };
 
   const logout = () => {
+    console.log('🔥 AuthContext: logout() called');
+    console.log('🔥 AuthContext: Current user before logout:', user);
+    
+    // Marcar que o usuário fez logout explicitamente
+    localStorage.setItem('loggedOut', 'true');
+    console.log('🔥 AuthContext: Marked as logged out');
+    
     setUser(null);
+    console.log('🔥 AuthContext: setUser(null) called');
+    
     // Limpar localStorage se houver dados salvos
     localStorage.removeItem('user');
     localStorage.removeItem('authToken');
+    localStorage.removeItem('session');
+    localStorage.removeItem('token');
+    console.log('🔥 AuthContext: localStorage cleared');
+    
+    // Limpar sessionStorage também
+    sessionStorage.clear();
+    console.log('🔥 AuthContext: sessionStorage cleared');
+    
     // Redirecionar para página de login
+    console.log('🔥 AuthContext: Redirecting to /login');
     window.location.href = '/login';
   };
 
