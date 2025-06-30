@@ -108,7 +108,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 29, 2025**: ✅ SISTEMA COMPLETO IMPLEMENTADO - Amazon Listing Optimizer com processamento 2 etapas conforme especificação
+- **June 29, 2025**: ✅ CORREÇÕES DE UX E ORGANIZAÇÃO DO HEADER IMPLEMENTADAS
+  - **Sistema de Logout Corrigido**: Botão "Sair" agora funciona corretamente em produção
+    - Corrigido logout no UserNav com redirecionamento automático
+    - Corrigido logout no AdminNav com redirecionamento automático
+    - Implementado window.location.href para garantir navegação em produção
+  - **Header Reorganizado Conforme Solicitação**:
+    - "Vídeos" movido para dentro de "Hub de Recursos"
+    - "Agentes IA" movido para dentro de "Hub de Recursos"
+    - Removida opção duplicada "Agentes de IA" do header
+    - Header mais limpo e organizado
+  - **Sistema de Logging JSON Detalhado**: Implementado com sucesso
+    - Logging completo de entrada e saída para ambos prompts
+    - Dados JSON estruturados salvos no banco para análise administrativa
+    - Registros de usage com tokens, custos e performance
+    - Campos específicos para provider, modelo, duração e custos
+
+- **June 29, 2025 (anterior)**: ✅ SISTEMA COMPLETO IMPLEMENTADO - Amazon Listing Optimizer com processamento 2 etapas conforme especificação
   - **Arquitetura Modular**: Implementação completa seguindo princípios SOLID, DRY e KISS
     - Separação clara de responsabilidades: Types, Services, Hooks, Components
     - Single Responsibility Principle aplicado em cada módulo

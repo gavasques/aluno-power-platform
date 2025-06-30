@@ -34,9 +34,9 @@ export function AdminNav() {
       <DropdownMenuContent className="w-56 bg-white border-border shadow-lg" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none text-foreground">{user.name}</p>
+            <p className="text-sm font-medium leading-none text-foreground">{user?.name || 'Admin'}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {user?.email || 'admin@example.com'}
             </p>
           </div>
         </DropdownMenuLabel>
