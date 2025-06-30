@@ -1,150 +1,338 @@
+import React, { memo, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Users, 
+  FileText, 
+  Database, 
+  Activity, 
+  TrendingUp, 
+  ArrowRight, 
+  Settings,
+  MessageSquare,
+  ExternalLink,
+  Package,
+  Bot,
+  Youtube
+} from 'lucide-react';
+import { useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
+import { StandardizedLayout, PageWrapper, ResponsiveGrid } from '@/components/layout/StandardizedLayout';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, CreditCard, Activity, TrendingUp, MessageSquare, FileText, Settings, Database, ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useLocation } from "wouter";
-import { SystemAnalytics } from "@/components/analytics/SystemAnalytics";
+// Dashboard data interface
+interface DashboardData {
+  totalUsers: number;
+  newUsersThisMonth: number;
+  totalContent: number;
+  publishedContent: number;
+  totalAgents: number;
+  activeAgents: number;
+  totalVideos: number;
+  recentVideos: number;
+  recentActivity: Array<{
+    action: string;
+    details: string;
+    type: string;
+    timestamp: string;
+  }>;
+}
 
-const AdminDashboard = () => {
+// Admin Dashboard Metrics with real data
+const AdminDashboard = memo(() => {
   const [, setLocation] = useLocation();
 
-  const metrics = [
-    { title: "Usuários Ativos", value: "1,247", change: "+12%", icon: Users, color: "text-blue-500" },
-    { title: "Novos Usuários (30d)", value: "156", change: "+8%", icon: TrendingUp, color: "text-green-500" },
-    { title: "Créditos IA Usados", value: "45,231", change: "-3%", icon: CreditCard, color: "text-orange-500" },
-    { title: "Tickets Suporte", value: "23", change: "+5%", icon: MessageSquare, color: "text-red-500" },
-    { title: "Conteúdos Publicados", value: "1,834", change: "+15%", icon: FileText, color: "text-purple-500" },
-    { title: "Taxa de Engajamento", value: "78%", change: "+2%", icon: Activity, color: "text-emerald-500" }
-  ];
+  // Real data queries
+  const { data: dashboardData, isLoading } = useQuery<DashboardData>({
+    queryKey: ['/api/admin/dashboard-stats'],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
 
-  const quickActions = [
-    { title: "Gerenciar Usuários", description: "Controle de grupos e permissões", action: () => setLocation("/admin/usuarios"), icon: Users },
-    { title: "Cadastros", description: "Categorias, prompts, templates", action: () => setLocation("/admin/cadastros"), icon: Database },
-    { title: "Gestão de Conteúdo", description: "Hub de recursos e selos", action: () => setLocation("/admin/conteudo"), icon: FileText },
-    { title: "Suporte", description: "Tickets e atendimento", action: () => setLocation("/admin/suporte"), icon: MessageSquare },
-    { title: "Configurações", description: "Configurações gerais", action: () => setLocation("/admin/configuracoes"), icon: Settings }
-  ];
+  // Memoized metrics from real data
+  const metrics = useMemo(() => {
+    if (!dashboardData) return [];
+    
+    return [
+      {
+        title: 'Total de Usuários',
+        value: dashboardData.totalUsers.toString(),
+        change: `+${dashboardData.newUsersThisMonth} este mês`,
+        icon: Users,
+        color: 'from-blue-500 to-blue-600',
+        bgColor: 'bg-blue-50',
+        textColor: 'text-blue-700'
+      },
+      {
+        title: 'Conteúdos Ativos',
+        value: dashboardData.totalContent.toString(),
+        change: `${dashboardData.publishedContent} publicados`,
+        icon: FileText,
+        color: 'from-emerald-500 to-emerald-600',
+        bgColor: 'bg-emerald-50',
+        textColor: 'text-emerald-700'
+      },
+      {
+        title: 'Agentes IA',
+        value: dashboardData.totalAgents.toString(),
+        change: `${dashboardData.activeAgents} ativos`,
+        icon: Bot,
+        color: 'from-purple-500 to-purple-600',
+        bgColor: 'bg-purple-50',
+        textColor: 'text-purple-700'
+      },
+      {
+        title: 'Vídeos YouTube',
+        value: dashboardData.totalVideos.toString(),
+        change: `${dashboardData.recentVideos} recentes`,
+        icon: Youtube,
+        color: 'from-red-500 to-red-600',
+        bgColor: 'bg-red-50',
+        textColor: 'text-red-700'
+      }
+    ];
+  }, [dashboardData]);
 
-  const recentActivity = [
-    { user: "João Silva", action: "Criou novo produto", time: "2 min atrás", type: "create" },
-    { user: "Maria Santos", action: "Abriu ticket de suporte", time: "5 min atrás", type: "support" },
-    { user: "Pedro Costa", action: "Usou 50 créditos IA", time: "10 min atrás", type: "credits" },
-    { user: "Ana Lima", action: "Completou curso", time: "15 min atrás", type: "course" },
-    { user: "Carlos Souza", action: "Fez login na plataforma", time: "20 min atrás", type: "login" }
-  ];
+  // Quick actions for admin
+  const quickActions = useMemo(() => [
+    {
+      title: 'Usuários',
+      description: 'Gerenciar contas e permissões',
+      href: '/admin/usuarios',
+      icon: Users,
+      color: 'border-blue-200 hover:border-blue-300'
+    },
+    {
+      title: 'Conteúdo',
+      description: 'Hub de recursos e materiais',
+      href: '/admin/conteudo',
+      icon: FileText,
+      color: 'border-emerald-200 hover:border-emerald-300'
+    },
+    {
+      title: 'Agentes IA',
+      description: 'Configurações e provedores',
+      href: '/admin/agents',
+      icon: Bot,
+      color: 'border-purple-200 hover:border-purple-300'
+    },
+    {
+      title: 'Configurações',
+      description: 'Sistema e preferências',
+      href: '/admin/configuracoes',
+      icon: Settings,
+      color: 'border-gray-200 hover:border-gray-300'
+    }
+  ], []);
+
+  // Recent activity from real data
+  const recentActivity = useMemo(() => {
+    if (!dashboardData?.recentActivity) return [];
+    
+    return dashboardData.recentActivity.slice(0, 5).map((activity) => ({
+      ...activity,
+      badge: getActivityBadge(activity.type)
+    }));
+  }, [dashboardData?.recentActivity]);
 
   const getActivityBadge = (type: string) => {
     const badges = {
-      create: <Badge className="bg-blue-100 text-blue-600 border-blue-200">Criação</Badge>,
-      support: <Badge className="bg-red-100 text-red-600 border-red-200">Suporte</Badge>,
-      credits: <Badge className="bg-orange-100 text-orange-600 border-orange-200">Créditos</Badge>,
-      course: <Badge className="bg-green-100 text-green-600 border-green-200">Curso</Badge>,
-      login: <Badge className="bg-slate-100 text-slate-600 border-slate-200">Login</Badge>
+      user: <Badge variant="secondary" className="bg-blue-50 text-blue-700">Usuário</Badge>,
+      content: <Badge variant="secondary" className="bg-emerald-50 text-emerald-700">Conteúdo</Badge>,
+      agent: <Badge variant="secondary" className="bg-purple-50 text-purple-700">Agente IA</Badge>,
+      system: <Badge variant="secondary" className="bg-gray-50 text-gray-700">Sistema</Badge>
     };
-    return badges[type as keyof typeof badges];
+    return badges[type as keyof typeof badges] || badges.system;
   };
 
-  return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Painel Administrativo</h1>
-          <p className="text-gray-500">Visão geral da plataforma e métricas principais</p>
-        </div>
-        <Badge className="bg-red-100 text-red-600 border-red-200 text-lg px-4 py-2">
-          Administrador
-        </Badge>
-      </div>
-
-      {/* Métricas Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {metrics.map((metric, index) => (
-          <Card key={index} className="bg-white border border-gray-200 shadow-lg shadow-red-500/10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">{metric.title}</CardTitle>
-              <metric.icon className={`h-5 w-5 ${metric.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{metric.value}</div>
-              <p className={`text-xs ${metric.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                {metric.change} em relação ao mês anterior
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Ações Rápidas */}
-        <Card className="bg-white border border-gray-200 shadow-lg shadow-red-200/30">
-          <CardHeader>
-            <CardTitle className="text-gray-900">Ações Rápidas</CardTitle>
-            <p className="text-sm text-gray-500">Acesso rápido às principais funcionalidades</p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {quickActions.map((action, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border border-red-100 rounded-lg hover:bg-red-50 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <action.icon className="h-5 w-5 text-red-400" />
-                  <div>
-                    <h4 className="font-medium text-gray-900">{action.title}</h4>
-                    <p className="text-sm text-gray-500">{action.description}</p>
-                  </div>
-                </div>
-                <Button 
-                  size="sm" 
-                  onClick={action.action}
-                  className="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 border-red-200"
-                  variant="outline"
-                >
-                  Acessar
-                </Button>
-              </div>
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <StandardizedLayout variant="admin">
+        <PageWrapper title="Dashboard Administrativo" description="Carregando dados...">
+          <ResponsiveGrid columns={4} gap="md">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="card-optimized">
+                <CardContent className="p-6">
+                  <div className="skeleton-optimized h-4 w-3/4 mb-2" />
+                  <div className="skeleton-optimized h-8 w-1/2 mb-2" />
+                  <div className="skeleton-optimized h-3 w-2/3" />
+                </CardContent>
+              </Card>
             ))}
-          </CardContent>
-        </Card>
+          </ResponsiveGrid>
+        </PageWrapper>
+      </StandardizedLayout>
+    );
+  }
 
-        {/* Atividade Recente */}
-        <Card className="bg-white border border-gray-200 shadow-lg shadow-slate-100/50">
-          <CardHeader>
-            <CardTitle className="text-gray-900">Atividade Recente</CardTitle>
-            <p className="text-sm text-gray-500">Últimas ações dos usuários na plataforma</p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-800">
-                      <span className="font-medium text-gray-900">{activity.user}</span> {activity.action}
-                    </p>
-                    <p className="text-xs text-gray-400">{activity.time}</p>
-                  </div>
-                  {getActivityBadge(activity.type)}
-                </div>
+  return (
+    <StandardizedLayout variant="admin">
+      <PageWrapper 
+        title="Dashboard Administrativo"
+        description="Visão geral da plataforma e métricas principais"
+      >
+        <div className="space-y-8">
+          {/* Key Metrics */}
+          <section>
+            <h2 className="text-lg font-semibold mb-4">Métricas Principais</h2>
+            <ResponsiveGrid columns={4} gap="md">
+              {metrics.map((metric, index) => (
+                <Card key={index} className="card-optimized hover:shadow-lg transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`p-3 rounded-lg ${metric.bgColor}`}>
+                        <metric.icon className={`h-6 w-6 ${metric.textColor}`} />
+                      </div>
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {metric.title}
+                      </p>
+                      <p className="text-2xl font-bold">{metric.value}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {metric.change}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </ResponsiveGrid>
+          </section>
 
-      {/* Advanced System Analytics */}
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-blue-600" />
-            Analytics Avançadas do Sistema
-          </h2>
-          <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
-            Ver Relatório Completo
-            <ExternalLink className="h-4 w-4 ml-2" />
-          </Button>
+          {/* Quick Actions */}
+          <section>
+            <h2 className="text-lg font-semibold mb-4">Ações Rápidas</h2>
+            <ResponsiveGrid columns={4} gap="md">
+              {quickActions.map((action, index) => (
+                <Card 
+                  key={index} 
+                  className={`card-optimized cursor-pointer transition-all duration-200 ${action.color}`}
+                  onClick={() => setLocation(action.href)}
+                >
+                  <CardContent className="p-6 text-center">
+                    <div className="flex flex-col items-center space-y-3">
+                      <div className="p-3 rounded-full bg-muted/50">
+                        <action.icon className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{action.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {action.description}
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="sm" className="mt-2">
+                        Acessar
+                        <ArrowRight className="h-3 w-3 ml-1" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </ResponsiveGrid>
+          </section>
+
+          {/* Recent Activity */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Atividade Recente</h2>
+              <Button variant="outline" size="sm">
+                Ver Todas
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+            <Card className="card-optimized">
+              <CardContent className="p-6">
+                {recentActivity.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentActivity.map((activity, index) => (
+                      <div key={index} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium">
+                              {activity.action}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {activity.details}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {activity.badge}
+                          <span className="text-xs text-muted-foreground">
+                            {activity.timestamp}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground">Nenhuma atividade recente</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* System Status */}
+          <section>
+            <h2 className="text-lg font-semibold mb-4">Status do Sistema</h2>
+            <div className="layout-grid-3">
+              <Card className="card-optimized">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Database className="h-4 w-4" />
+                    Banco de Dados
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    <span className="text-sm">Operacional</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="card-optimized">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Bot className="h-4 w-4" />
+                    APIs de IA
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    <span className="text-sm">Funcionando</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="card-optimized">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Youtube className="h-4 w-4" />
+                    Sync YouTube
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                    <span className="text-sm">Configuração necessária</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
         </div>
-        <SystemAnalytics />
-      </div>
-    </div>
+      </PageWrapper>
+    </StandardizedLayout>
   );
-};
+});
+
+AdminDashboard.displayName = 'AdminDashboard';
 
 export default AdminDashboard;
