@@ -270,14 +270,14 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
         </div>
 
         {/* Groups */}
-        {groups && Array.isArray(groups) && groups.length > 0 && (
+        {groups && Array.isArray(groups) && (groups as any[]).length > 0 && (
           <AdminCard title="Grupos de Usuário">
             <div className="space-y-3">
               <p className="text-sm text-gray-600 mb-4">
                 Selecione os grupos aos quais este usuário pertence
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {groups.map((group: any) => (
+                {(groups as any[]).map((group: any) => (
                   <div key={group.id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
                     <Checkbox
                       id={`group-${group.id}`}

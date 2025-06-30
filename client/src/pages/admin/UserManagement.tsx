@@ -258,8 +258,8 @@ const UserManagement = memo(() => {
             }
           >
             <div className="space-y-4">
-              {groups && groups.length > 0 ? (
-                groups.map((group: any) => (
+              {groups && Array.isArray(groups) && groups.length > 0 ? (
+                (groups as any[]).map((group: any) => (
                   <div key={group.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <Shield className="h-5 w-5 text-gray-600" />
