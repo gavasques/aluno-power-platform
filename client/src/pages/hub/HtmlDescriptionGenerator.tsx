@@ -28,6 +28,20 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
   const charCount = textInput.length;
 
+  // Renderizar preview formatado para overlay
+  const renderFormattedPreview = (text: string) => {
+    if (!text) return '';
+    
+    // Aplicar formatação visual simples
+    let formatted = text
+      .replace(/\*\*(.*?)\*\*/g, '<span style="font-weight: bold; color: #000;">$1</span>')
+      .replace(/\*(.*?)\*/g, '<span style="font-style: italic; color: #000;">$1</span>')
+      .replace(/• (.*?)(\n|$)/g, '<span style="color: #0066cc;">• </span><span style="color: #000;">$1</span>$2')
+      .replace(/(\d+)\. (.*?)(\n|$)/g, '<span style="color: #0066cc;">$1. </span><span style="color: #000;">$2</span>$3');
+    
+    return formatted;
+  };
+
   // Função para gerar HTML do contentEditable
   const generateHtml = () => {
     if (!textInput.trim()) {
@@ -124,51 +138,49 @@ const HtmlDescriptionGenerator: React.FC = () => {
     generateHtml();
   }, [textInput]);
 
-  // Aplicar formatação visual usando execCommand
+  // Aplicar formatação usando markdown
   const applyFormatting = (type: string) => {
-    const editor = document.getElementById('textInput') as HTMLDivElement;
-    if (!editor) return;
+    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
+    if (!textarea) return;
 
-    // Verificar se há seleção
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-
-    // Focar no editor primeiro
-    editor.focus();
-
-    try {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textInput.substring(start, end);
+    
+    if (selectedText) {
+      const beforeText = textInput.substring(0, start);
+      const afterText = textInput.substring(end);
+      
+      let formattedText = '';
       if (type === 'b') {
-        document.execCommand('bold', false);
+        formattedText = `**${selectedText}**`;
       } else if (type === 'i') {
-        document.execCommand('italic', false);
+        formattedText = `*${selectedText}*`;
       }
       
-      // Atualizar o estado baseado no conteúdo HTML
-      setTimeout(() => {
-        const text = editor.innerText || '';
-        if (text.length <= MAX_CHARS) {
-          setTextInput(text);
-          // Gerar HTML após formatação
-          setTimeout(() => generateHtml(), 100);
-        }
-      }, 0);
-    } catch (error) {
-      console.warn('execCommand not supported:', error);
+      const newText = beforeText + formattedText + afterText;
+      
+      if (newText.length <= MAX_CHARS) {
+        setTextInput(newText);
+        
+        // Reposicionar cursor
+        setTimeout(() => {
+          const newPos = start + formattedText.length;
+          textarea.setSelectionRange(newPos, newPos);
+          textarea.focus();
+        }, 0);
+      }
     }
   };
 
   // Inserir lista (visual)
   const insertList = (ordered = false) => {
-    const editor = document.getElementById('textInput') as HTMLDivElement;
-    if (!editor) return;
+    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
+    if (!textarea) return;
 
-    editor.focus();
-    
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-    
-    const range = selection.getRangeAt(0);
-    const selectedText = range.toString();
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textInput.substring(start, end);
     
     let listText = '';
     
@@ -189,19 +201,19 @@ const HtmlDescriptionGenerator: React.FC = () => {
       }
     }
     
-    try {
-      range.deleteContents();
-      range.insertNode(document.createTextNode(listText));
+    const beforeText = textInput.substring(0, start);
+    const afterText = textInput.substring(end);
+    const newText = beforeText + listText + afterText;
+    
+    if (newText.length <= MAX_CHARS) {
+      setTextInput(newText);
       
-      // Atualizar estado
+      // Reposicionar cursor
       setTimeout(() => {
-        const text = editor.innerText || '';
-        if (text.length <= MAX_CHARS) {
-          setTextInput(text);
-        }
+        const newPos = start + listText.length;
+        textarea.setSelectionRange(newPos, newPos);
+        textarea.focus();
       }, 0);
-    } catch (error) {
-      console.warn('Lista não pôde ser inserida:', error);
     }
   };
 
@@ -209,35 +221,23 @@ const HtmlDescriptionGenerator: React.FC = () => {
 
   // Inserir símbolo
   const insertSymbol = (symbol: string) => {
-    const editor = document.getElementById('textInput') as HTMLDivElement;
-    if (!editor) return;
+    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
+    if (!textarea) return;
 
-    editor.focus();
+    const start = textarea.selectionStart;
+    const beforeText = textInput.substring(0, start);
+    const afterText = textInput.substring(start);
+    const newText = beforeText + symbol + afterText;
     
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-    
-    const range = selection.getRangeAt(0);
-    
-    try {
-      const textNode = document.createTextNode(symbol);
-      range.insertNode(textNode);
+    if (newText.length <= MAX_CHARS) {
+      setTextInput(newText);
       
-      // Mover cursor para depois do símbolo
-      range.setStartAfter(textNode);
-      range.setEndAfter(textNode);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      
-      // Atualizar estado
+      // Reposicionar cursor
       setTimeout(() => {
-        const text = editor.innerText || '';
-        if (text.length <= MAX_CHARS) {
-          setTextInput(text);
-        }
+        const newPos = start + symbol.length;
+        textarea.setSelectionRange(newPos, newPos);
+        textarea.focus();
       }, 0);
-    } catch (error) {
-      console.warn('Símbolo não pôde ser inserido:', error);
     }
   };
 
@@ -394,44 +394,40 @@ Garantia de 12 meses`;
               </div>
             </div>
 
-            {/* Rich Text Area */}
-            <div
-              id="textInput"
-              contentEditable
-              suppressContentEditableWarning={true}
-              onInput={(e) => {
-                const target = e.target as HTMLDivElement;
-                const text = target.innerText || '';
-                if (text.length <= MAX_CHARS) {
-                  setTextInput(text);
-                  // Forçar atualização do HTML após mudança no editor
-                  setTimeout(() => {
-                    generateHtml();
-                  }, 100);
-                }
-              }}
-              onPaste={(e) => {
-                e.preventDefault();
-                const text = e.clipboardData.getData('text/plain');
-                if ((textInput + text).length <= MAX_CHARS) {
-                  document.execCommand('insertText', false, text);
-                }
-              }}
-              className={`flex-1 resize-none p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[300px] overflow-y-auto ${
-                charCount >= MAX_CHARS ? 'border-red-500' :
-                charCount > WARNING_THRESHOLD ? 'border-yellow-500' :
-                'border-gray-300'
-              }`}
-              style={{ 
-                whiteSpace: 'pre-wrap',
-                fontSize: '14px',
-                lineHeight: '1.5',
-                fontFamily: 'inherit'
-              }}
-              dangerouslySetInnerHTML={{
-                __html: textInput || `<span style="color: #999;">${placeholder}</span>`
-              }}
-            />
+            {/* Textarea com formatação visual */}
+            <div className="relative flex-1">
+              <Textarea
+                id="textInput"
+                value={textInput}
+                onChange={(e) => {
+                  if (e.target.value.length <= MAX_CHARS) {
+                    setTextInput(e.target.value);
+                  }
+                }}
+                placeholder={placeholder}
+                className={`flex-1 resize-none min-h-[300px] ${
+                  charCount >= MAX_CHARS ? 'border-red-500' :
+                  charCount > WARNING_THRESHOLD ? 'border-yellow-500' :
+                  'border-gray-300'
+                }`}
+                maxLength={MAX_CHARS}
+              />
+              
+              {/* Overlay para mostrar formatação visual */}
+              <div 
+                className="absolute top-0 left-0 w-full h-full p-3 pointer-events-none overflow-hidden z-10"
+                style={{
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                  fontFamily: 'inherit',
+                  whiteSpace: 'pre-wrap',
+                  color: 'transparent'
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: renderFormattedPreview(textInput)
+                }}
+              />
+            </div>
 
             {/* Botões de Ação */}
             <div className="flex gap-3 mt-4">
