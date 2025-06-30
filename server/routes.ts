@@ -2392,8 +2392,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     });
   });
   
-  // Add heartbeat to detect broken connections
+  // Optimized heartbeat - only run when there are connections
   const interval = setInterval(() => {
+    // Skip heartbeat if no connections
+    if (connectedClients.size === 0) {
+      return;
+    }
+
     console.log(`💓 [WS_HEARTBEAT] Checking ${connectedClients.size} connections`);
     let activeConnections = 0;
     let removedConnections = 0;

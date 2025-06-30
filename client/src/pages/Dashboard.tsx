@@ -38,11 +38,14 @@ const StatCard: React.FC<StatCardProps> = memo(({ title, value, icon: Icon, grad
 ));
 StatCard.displayName = 'StatCard';
 
-const Dashboard = () => {
+const Dashboard = memo(() => {
   const { videos, loading } = useYoutube();
-  const recentVideos = videos
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-    .slice(0, 6);
+  const recentVideos = React.useMemo(() => 
+    videos
+      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      .slice(0, 6),
+    [videos]
+  );
 
   // Fetch published news preview (lightweight)
   const { data: newsData = [], isLoading: newsLoading } = useQuery<Partial<News>[]>({
@@ -335,6 +338,7 @@ const Dashboard = () => {
       </div>
     </div>
   );
-};
+});
+Dashboard.displayName = 'Dashboard';
 
 export default Dashboard;

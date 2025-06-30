@@ -33,6 +33,10 @@ export class AuthService {
     MAGIC_LINK: `${AuthService.API_BASE}/magic-link`,
   } as const;
 
+  // Cache for user data to reduce API calls
+  private static userCache: { user: User | null; timestamp: number } | null = null;
+  private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
   private static async makeRequest<T = any>(
     url: string,
     options: RequestInit = {}
