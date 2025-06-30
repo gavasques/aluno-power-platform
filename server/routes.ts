@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
+import bcryptjs from "bcryptjs";
 import { storage } from "./storage";
 import { 
   insertSupplierSchema, 
@@ -46,7 +47,7 @@ import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema } from '@shared/schema';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers } from '@shared/schema';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -3158,14 +3159,21 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // User Management APIs
   app.get('/api/users', async (req, res) => {
     try {
-      const result = await db.execute(`
-        SELECT u.id, u.username, u.email, u.name, u.role, u.is_active as "isActive", 
-               u.last_login as "lastLogin", u.created_at as "createdAt"
-        FROM users u
-        ORDER BY u.created_at DESC
-      `);
+      const result = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          name: users.name,
+          role: users.role,
+          isActive: users.isActive,
+          lastLogin: users.lastLogin,
+          createdAt: users.createdAt
+        })
+        .from(users)
+        .orderBy(desc(users.createdAt));
       
-      res.json(result.rows);
+      res.json(result);
     } catch (error) {
       console.error('Error fetching users:', error);
       res.status(500).json({ error: 'Failed to fetch users' });
@@ -3175,18 +3183,25 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   app.get('/api/users/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await db.execute(`
-        SELECT u.id, u.username, u.email, u.name, u.role, u.is_active as "isActive", 
-               u.last_login as "lastLogin", u.created_at as "createdAt"
-        FROM users u
-        WHERE u.id = $1
-      `, [id]);
+      const result = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          name: users.name,
+          role: users.role,
+          isActive: users.isActive,
+          lastLogin: users.lastLogin,
+          createdAt: users.createdAt
+        })
+        .from(users)
+        .where(eq(users.id, parseInt(id)));
       
-      if (result.rows.length === 0) {
+      if (result.length === 0) {
         return res.status(404).json({ error: 'User not found' });
       }
       
-      res.json(result.rows[0]);
+      res.json(result[0]);
     } catch (error) {
       console.error('Error fetching user:', error);
       res.status(500).json({ error: 'Failed to fetch user' });
@@ -3201,23 +3216,33 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const hashedPassword = await bcryptjs.hash(password, 10);
       
       // Create user
-      const userResult = await db.execute(`
-        INSERT INTO users (username, email, name, role, is_active, password)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id, username, email, name, role, is_active as "isActive", created_at as "createdAt"
-      `, [username, email, name, role || 'user', isActive !== false, hashedPassword]);
-      
-      const user = userResult.rows[0];
+      const [user] = await db
+        .insert(users)
+        .values({
+          username,
+          email,
+          name,
+          role: role || 'user',
+          isActive: isActive !== false,
+          password: hashedPassword
+        })
+        .returning({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          name: users.name,
+          role: users.role,
+          isActive: users.isActive,
+          createdAt: users.createdAt
+        });
       
       // Add user to groups if specified
       if (groupIds && groupIds.length > 0) {
-        for (const groupId of groupIds) {
-          await db.execute(`
-            INSERT INTO user_group_members (user_id, group_id)
-            VALUES ($1, $2)
-            ON CONFLICT DO NOTHING
-          `, [user.id, groupId]);
-        }
+        const groupMemberships = groupIds.map((groupId: number) => ({
+          userId: user.id,
+          groupId
+        }));
+        await db.insert(userGroupMembers).values(groupMemberships);
       }
       
       res.status(201).json(user);
@@ -3286,12 +3311,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { id } = req.params;
       const { isActive } = req.body;
       
-      const result = await db.execute(`
-        UPDATE users 
-        SET is_active = $1, updated_at = NOW()
-        WHERE id = $2
-        RETURNING id, is_active as "isActive"
-      `, [isActive, id]);
+      const result = await db.execute(
+        `UPDATE users 
+         SET is_active = $1, updated_at = NOW()
+         WHERE id = $2
+         RETURNING id, is_active as "isActive"`,
+        [isActive, id]
+      );
       
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'User not found' });
