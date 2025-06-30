@@ -1,0 +1,35 @@
+import { ReactNode } from 'react';
+
+interface AuthLayoutProps {
+  children: ReactNode;
+}
+
+export function AuthLayout({ children }: AuthLayoutProps) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Aluno Power Platform
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            Sua plataforma de aprendizado para Amazon FBA
+          </p>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Bem-vindo
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              Faça login ou crie sua conta para começar
+            </p>
+          </div>
+          
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
