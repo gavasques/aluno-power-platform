@@ -47,7 +47,7 @@ import AmazonListingsOptimizerNew from "./pages/agents/amazon-listings-optimizer
 import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
 import GeneratedImages from "./pages/admin/GeneratedImages";
 import TestImagePage from "./components/TestImagePage";
-import { Login } from "./pages/Login";
+import Login from "./pages/Login";
 
 function App() {
   return (

@@ -2854,6 +2854,184 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Authentication Routes - Production System
+  
+  // Schemas for authentication
+  const loginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(6)
+  });
+
+  const registerSchema = z.object({
+    username: z.string().min(3),
+    email: z.string().email(),
+    name: z.string().min(1),
+    password: z.string().min(6)
+  });
+
+  // Login route
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = loginSchema.parse(req.body);
+      
+      const user = await AuthService.authenticateUserByEmail(email, password);
+      if (!user) {
+        return res.status(401).json({ error: 'Credenciais inválidas' });
+      }
+
+      // Create session token
+      const sessionToken = await AuthService.createSession(user.id);
+      
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        },
+        sessionToken
+      });
+    } catch (error: any) {
+      console.error('Login error:', error);
+      res.status(400).json({ error: 'Dados inválidos' });
+    }
+  });
+
+  // Register route
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const userData = registerSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await AuthService.getUserByEmail(userData.email);
+      if (existingUser) {
+        return res.status(400).json({ error: 'Email já está em uso' });
+      }
+
+      const existingUsername = await AuthService.getUserByUsername(userData.username);
+      if (existingUsername) {
+        return res.status(400).json({ error: 'Nome de usuário já está em uso' });
+      }
+
+      // Create user
+      const user = await AuthService.createUser({
+        ...userData,
+        role: 'user',
+        isActive: true,
+        emailVerified: false
+      });
+
+      // Create session token
+      const sessionToken = await AuthService.createSession(user.id);
+
+      res.status(201).json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        },
+        sessionToken
+      });
+    } catch (error: any) {
+      console.error('Register error:', error);
+      res.status(400).json({ error: 'Dados inválidos' });
+    }
+  });
+
+  // Get current user route
+  app.get('/api/auth/user', async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Token não fornecido' });
+      }
+
+      const token = authHeader.substring(7);
+      const user = await AuthService.validateSession(token);
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Token inválido' });
+      }
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        }
+      });
+    } catch (error: any) {
+      console.error('Get user error:', error);
+      res.status(401).json({ error: 'Token inválido' });
+    }
+  });
+
+  // Logout route
+  app.post('/api/auth/logout', async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        await AuthService.revokeSession(token);
+      }
+      
+      res.json({ success: true, message: 'Logout realizado com sucesso' });
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      res.json({ success: true, message: 'Logout realizado com sucesso' });
+    }
+  });
+
+  // Password reset request
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = z.object({ email: z.string().email() }).parse(req.body);
+      
+      const resetToken = await AuthService.generatePasswordResetToken(email);
+      if (!resetToken) {
+        return res.status(404).json({ error: 'Email não encontrado' });
+      }
+
+      // In production, send email here
+      res.json({ 
+        success: true, 
+        message: 'Token de reset enviado por email',
+        resetToken // Remove this in production
+      });
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+      res.status(400).json({ error: 'Dados inválidos' });
+    }
+  });
+
+  // Password reset
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { resetToken, newPassword } = z.object({
+        resetToken: z.string(),
+        newPassword: z.string().min(6)
+      }).parse(req.body);
+      
+      const success = await AuthService.resetPassword(resetToken, newPassword);
+      if (!success) {
+        return res.status(400).json({ error: 'Token inválido ou expirado' });
+      }
+
+      res.json({ success: true, message: 'Senha alterada com sucesso' });
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+      res.status(400).json({ error: 'Dados inválidos' });
+    }
+  });
+
   return httpServer;
 }
 

@@ -19,7 +19,8 @@ import { User, Settings, Headset, LogOut, Home, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function UserNav() {
-  const { user, isAdmin, toggleRole, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   return (
     <DropdownMenu>
