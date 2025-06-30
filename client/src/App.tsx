@@ -43,7 +43,6 @@ const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
 const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer"));
 const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
 const AmazonListingsOptimizerNew = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
-const HtmlDescriptionAgent = lazy(() => import("./pages/agents/HtmlDescriptionAgent"));
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
 const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
@@ -123,11 +122,7 @@ function App() {
                               <ProtectedRoute>
                                 <Layout>
                                   <Suspense fallback={<PageLoader />}>
-                                    {params.id === 'agent-html-description' ? (
-                                      <HtmlDescriptionAgent />
-                                    ) : (
-                                      <AgentProcessorPage />
-                                    )}
+                                    <AgentProcessorPage />
                                   </Suspense>
                                 </Layout>
                               </ProtectedRoute>

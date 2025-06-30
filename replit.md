@@ -108,20 +108,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: ✅ GERADOR DE DESCRIÇÕES HTML MOVIDO PARA AGENTES IA
-  - **Reestruturação Arquitetural**: HTML Description Generator agora é um agente IA
-    - Criado novo agente 'agent-html-description' no banco de dados
-    - Movido de /hub/descricao-html para /agents/html-description
-    - Removido do menu "Hub de Recursos", agora está em "Agentes IA"
-    - Mantidas todas as funcionalidades: formatação visual, HTML automático, regras Amazon
-    - Interface adaptada para contexto de agente IA com header dedicado
-  - **Benefícios da Mudança**:
-    - Melhor organização: ferramentas de geração de conteúdo agrupadas
-    - Preparação para futura integração com OpenAI para geração automática
-    - Consistência: todos os geradores de conteúdo Amazon em um local
-    - Escalabilidade: base para adicionar mais agentes de conteúdo
-
-- **June 30, 2025 (anterior)**: ✅ GERADOR DE DESCRIÇÕES AMAZON HTML IMPLEMENTADO
+- **June 30, 2025**: ✅ GERADOR DE DESCRIÇÕES AMAZON HTML IMPLEMENTADO
   - **Nova Funcionalidade no Hub de Recursos**: "Descrição em HTML"
     - Editor completo em 2 colunas: entrada de texto e saída HTML
     - Contador de caracteres em tempo real com limite de 2000 caracteres

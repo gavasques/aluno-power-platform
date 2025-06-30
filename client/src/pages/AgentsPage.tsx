@@ -265,13 +265,7 @@ export default function AgentsPage() {
                 
                 <div className="flex space-x-2 pt-4">
                   <Button asChild size="sm" className="flex-1">
-                    <Link href={
-                      agent.id === 'agent-html-description' 
-                        ? '/agents/html-description'
-                        : agent.id === 'agent-amazon-listings'
-                        ? '/agents/amazon-listings-optimizer'
-                        : `/agents/${agent.id}`
-                    }>
+                    <Link href={`/agents/${agent.id}`}>
                       <Zap className="w-4 h-4 mr-1" />
                       Usar
                     </Link>
