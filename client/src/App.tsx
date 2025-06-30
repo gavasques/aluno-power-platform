@@ -56,6 +56,11 @@ const PageLoader = () => (
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
+  // Initialize background prefetching for common data
+  useEffect(() => {
+    backgroundPrefetch();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Router>

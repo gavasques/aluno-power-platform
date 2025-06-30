@@ -6,11 +6,13 @@ import { VideoCard } from "./VideoCard";
 import { useYoutube } from "@/contexts/YoutubeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { RoleToggle } from "@/components/ui/role-toggle";
-import { useState } from "react";
+import { VirtualVideoList } from "@/components/ui/VirtualList";
+import { useState, useMemo } from "react";
 
 export function VideosSection() {
   const { videos, channelInfo, loading, channelLoading, syncVideos } = useYoutube();
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [syncing, setSyncing] = useState(false);
 
   const handleSync = async () => {
@@ -22,19 +24,25 @@ export function VideosSection() {
     }
   };
 
-  const groupedVideos = videos.reduce((acc, video) => {
-    const category = video.category || 'Outros';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(video);
-    return acc;
-  }, {} as Record<string, typeof videos>);
+  // Memoized expensive computations for better performance
+  const groupedVideos = useMemo(() => {
+    return videos.reduce((acc, video) => {
+      const category = video.category || 'Outros';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(video);
+      return acc;
+    }, {} as Record<string, typeof videos>);
+  }, [videos]);
 
-  const categories = Object.keys(groupedVideos);
-  const latestVideos = videos
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-    .slice(0, 6);
+  const categories = useMemo(() => Object.keys(groupedVideos), [groupedVideos]);
+  
+  const latestVideos = useMemo(() => {
+    return videos
+      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      .slice(0, 6);
+  }, [videos]);
 
   return (
     <div className="space-y-6">
