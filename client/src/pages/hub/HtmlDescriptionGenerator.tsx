@@ -405,18 +405,23 @@ Garantia de 12 meses`;
                     setTextInput(e.target.value);
                   }
                 }}
-                placeholder={placeholder}
-                className={`flex-1 resize-none min-h-[300px] ${
+                placeholder=""
+                className={`flex-1 resize-none min-h-[300px] text-transparent caret-black selection:bg-blue-200 bg-transparent ${
                   charCount >= MAX_CHARS ? 'border-red-500' :
                   charCount > WARNING_THRESHOLD ? 'border-yellow-500' :
                   'border-gray-300'
                 }`}
+                style={{
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                  fontFamily: 'inherit'
+                }}
                 maxLength={MAX_CHARS}
               />
               
               {/* Overlay para mostrar formatação visual */}
               <div 
-                className="absolute top-0 left-0 w-full h-full p-3 pointer-events-none overflow-hidden z-10 bg-white/95"
+                className="absolute top-0 left-0 w-full h-full p-3 pointer-events-none overflow-hidden z-0"
                 style={{
                   fontSize: '14px',
                   lineHeight: '1.5',
