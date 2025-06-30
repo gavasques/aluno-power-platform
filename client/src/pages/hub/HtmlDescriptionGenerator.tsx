@@ -247,7 +247,7 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
         },
         body: JSON.stringify({
           provider: 'openai',
-          model: 'gpt-4.1-mini',
+          model: 'gpt-4o-mini',
           prompt: prompt,
           maxTokens: 1000,
           temperature: 0.7
@@ -259,7 +259,10 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
       }
 
       const data = await response.json();
-      setGeneratedDescription(data.response || data.content || '');
+      if (!data.success) {
+        throw new Error(data.message || 'Erro na resposta da API');
+      }
+      setGeneratedDescription(data.response || '');
       setShowReplaceDialog(true);
       
     } catch (error) {
