@@ -48,6 +48,7 @@ import AgentProviderSettings from "./pages/admin/agents/AgentProviderSettings";
 import GeneratedImages from "./pages/admin/GeneratedImages";
 import TestImagePage from "./components/TestImagePage";
 import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -69,203 +70,257 @@ function App() {
 
                           {/* Agents routes */}
                           <Route path="/agents/amazon-listings-optimizer-new">
-                            <Layout>
-                              <AmazonListingsOptimizerNew />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <AmazonListingsOptimizerNew />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/agents/amazon-listings-optimizer/result">
-                            <Layout>
-                              <AmazonListingsOptimizerResult />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <AmazonListingsOptimizerResult />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/agents/amazon-listings-optimizer">
-                            <Layout>
-                              <AmazonListingsOptimizer />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <AmazonListingsOptimizer />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/agents/:id">
                             {(params) => (
-                              <Layout>
-                                <AgentProcessorPage />
-                              </Layout>
+                              <ProtectedRoute>
+                                <Layout>
+                                  <AgentProcessorPage />
+                                </Layout>
+                              </ProtectedRoute>
                             )}
                           </Route>
                           
                           <Route path="/agents">
-                            <Layout>
-                              <AgentsPage />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <AgentsPage />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
 
-                          {/* Detail routes with Layout */}
+                          {/* Detail routes with Layout - Protected */}
                           <Route path="/hub/materiais/:id">
                             {(params) => (
-                              <Layout>
-                                <MaterialDetailPage />
-                              </Layout>
+                              <ProtectedRoute>
+                                <Layout>
+                                  <MaterialDetailPage />
+                                </Layout>
+                              </ProtectedRoute>
                             )}
                           </Route>
                           
                           <Route path="/hub/parceiros/:id">
                             {(params) => (
-                              <Layout>
-                                <PartnerDetail />
-                              </Layout>
+                              <ProtectedRoute>
+                                <Layout>
+                                  <PartnerDetail />
+                                </Layout>
+                              </ProtectedRoute>
                             )}
                           </Route>
                           
                           <Route path="/hub/ferramentas/:id">
                             {(params) => (
-                              <Layout>
-                                <ToolDetail />
-                              </Layout>
+                              <ProtectedRoute>
+                                <Layout>
+                                  <ToolDetail />
+                                </Layout>
+                              </ProtectedRoute>
                             )}
                           </Route>
                           
                           <Route path="/hub/fornecedores/:id">
                             {(params) => (
-                              <Layout>
-                                <SupplierDetail />
-                              </Layout>
+                              <ProtectedRoute>
+                                <Layout>
+                                  <SupplierDetail />
+                                </Layout>
+                              </ProtectedRoute>
                             )}
                           </Route>
                           
                           <Route path="/hub/templates/:id">
                             {(params) => (
-                              <Layout>
-                                <TemplateDetail />
-                              </Layout>
+                              <ProtectedRoute>
+                                <Layout>
+                                  <TemplateDetail />
+                                </Layout>
+                              </ProtectedRoute>
                             )}
                           </Route>
                           
                           <Route path="/hub/prompts-ia/:id">
                             {(params) => (
-                              <Layout>
-                                <PromptDetail />
-                              </Layout>
+                              <ProtectedRoute>
+                                <Layout>
+                                  <PromptDetail />
+                                </Layout>
+                              </ProtectedRoute>
                             )}
                           </Route>
 
-                          {/* Hub section routes */}
+                          {/* Hub section routes - Protected */}
                           <Route path="/hub/parceiros">
-                            <Layout>
-                              <Partners />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <Partners />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/hub/fornecedores">
-                            <Layout>
-                              <Suppliers />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suppliers />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/hub/:section">
                             {(params) => (
-                              <Layout>
-                                <Hub />
-                              </Layout>
+                              <ProtectedRoute>
+                                <Layout>
+                                  <Hub />
+                                </Layout>
+                              </ProtectedRoute>
                             )}
                           </Route>
 
-                          {/* Minha Área routes */}
+                          {/* Minha Área routes - Protected */}
                           <Route path="/minha-area/:section/:id?/:action?">
                             {(params) => (
-                              <Layout>
-                                <MyArea />
-                              </Layout>
+                              <ProtectedRoute>
+                                <Layout>
+                                  <MyArea />
+                                </Layout>
+                              </ProtectedRoute>
                             )}
                           </Route>
 
-                          {/* Admin routes */}
+                          {/* Admin routes - Protected with admin requirement */}
                           <Route path="/admin/images">
-                            <AdminLayout>
-                              <GeneratedImages />
-                            </AdminLayout>
+                            <ProtectedRoute requireAdmin>
+                              <AdminLayout>
+                                <GeneratedImages />
+                              </AdminLayout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/admin/agents/providers">
-                            <AdminLayout>
-                              <AgentProviderSettings />
-                            </AdminLayout>
+                            <ProtectedRoute requireAdmin>
+                              <AdminLayout>
+                                <AgentProviderSettings />
+                              </AdminLayout>
+                            </ProtectedRoute>
                           </Route>
                           
-
-                          
                           <Route path="/admin/usuarios">
-                            <AdminLayout>
-                              <UserManagement />
-                            </AdminLayout>
+                            <ProtectedRoute requireAdmin>
+                              <AdminLayout>
+                                <UserManagement />
+                              </AdminLayout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/admin/suporte">
-                            <AdminLayout>
-                              <SupportManagement />
-                            </AdminLayout>
+                            <ProtectedRoute requireAdmin>
+                              <AdminLayout>
+                                <SupportManagement />
+                              </AdminLayout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/admin/configuracoes/:section?">
                             {(params) => (
-                              <AdminLayout>
-                                <GeneralSettings />
-                              </AdminLayout>
+                              <ProtectedRoute requireAdmin>
+                                <AdminLayout>
+                                  <GeneralSettings />
+                                </AdminLayout>
+                              </ProtectedRoute>
                             )}
                           </Route>
                           
                           <Route path="/admin/conteudo/:subsection?/:id?/:action?">
                             {(params) => (
-                              <AdminLayout>
-                                <ContentManagement />
-                              </AdminLayout>
+                              <ProtectedRoute requireAdmin>
+                                <AdminLayout>
+                                  <ContentManagement />
+                                </AdminLayout>
+                              </ProtectedRoute>
                             )}
                           </Route>
                           
                           <Route path="/admin/:section/:subsection?/:id?/:action?">
                             {(params) => (
-                              <AdminLayout>
-                                <Admin />
-                              </AdminLayout>
+                              <ProtectedRoute requireAdmin>
+                                <AdminLayout>
+                                  <Admin />
+                                </AdminLayout>
+                              </ProtectedRoute>
                             )}
                           </Route>
                           
                           <Route path="/admin">
-                            <AdminLayout>
-                              <AdminDashboard />
-                            </AdminLayout>
+                            <ProtectedRoute requireAdmin>
+                              <AdminLayout>
+                                <AdminDashboard />
+                              </AdminLayout>
+                            </ProtectedRoute>
                           </Route>
 
-                          {/* Main user routes */}
+                          {/* Main user routes - Protected */}
                           <Route path="/videos">
-                            <Layout>
-                              <Videos />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <Videos />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/noticias">
-                            <Layout>
-                              <News />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <News />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/novidades">
-                            <Layout>
-                              <Updates />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <Updates />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/fornecedores">
-                            <Layout>
-                              <Suppliers />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suppliers />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
 
-                          {/* Home route */}
+                          {/* Home route - Protected */}
                           <Route path="/">
-                            <Layout>
-                              <Dashboard />
-                            </Layout>
+                            <ProtectedRoute>
+                              <Layout>
+                                <Dashboard />
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
 
                             </Switch>
