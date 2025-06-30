@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -124,6 +124,17 @@ const AdminDashboard = memo(() => {
     }
   ], []);
 
+  // Helper function for activity badges
+  const getActivityBadge = useCallback((type: string) => {
+    const badges = {
+      user: <Badge variant="secondary" className="bg-blue-50 text-blue-700">Usuário</Badge>,
+      content: <Badge variant="secondary" className="bg-emerald-50 text-emerald-700">Conteúdo</Badge>,
+      agent: <Badge variant="secondary" className="bg-purple-50 text-purple-700">Agente IA</Badge>,
+      system: <Badge variant="secondary" className="bg-gray-50 text-gray-700">Sistema</Badge>
+    };
+    return badges[type as keyof typeof badges] || badges.system;
+  }, []);
+
   // Recent activity from real data
   const recentActivity = useMemo(() => {
     if (!dashboardData?.recentActivity) return [];
@@ -132,17 +143,7 @@ const AdminDashboard = memo(() => {
       ...activity,
       badge: getActivityBadge(activity.type)
     }));
-  }, [dashboardData?.recentActivity]);
-
-  const getActivityBadge = (type: string) => {
-    const badges = {
-      user: <Badge variant="secondary" className="bg-blue-50 text-blue-700">Usuário</Badge>,
-      content: <Badge variant="secondary" className="bg-emerald-50 text-emerald-700">Conteúdo</Badge>,
-      agent: <Badge variant="secondary" className="bg-purple-50 text-purple-700">Agente IA</Badge>,
-      system: <Badge variant="secondary" className="bg-gray-50 text-gray-700">Sistema</Badge>
-    };
-    return badges[type as keyof typeof badges] || badges.system;
-  };
+  }, [dashboardData?.recentActivity, getActivityBadge]);
 
   // Loading skeleton
   if (isLoading) {
