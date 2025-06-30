@@ -3311,19 +3311,23 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { id } = req.params;
       const { isActive } = req.body;
       
-      const result = await db.execute(
-        `UPDATE users 
-         SET is_active = $1, updated_at = NOW()
-         WHERE id = $2
-         RETURNING id, is_active as "isActive"`,
-        [isActive, id]
-      );
+      const [result] = await db
+        .update(users)
+        .set({ 
+          isActive, 
+          updatedAt: new Date() 
+        })
+        .where(eq(users.id, parseInt(id)))
+        .returning({
+          id: users.id,
+          isActive: users.isActive
+        });
       
-      if (result.rows.length === 0) {
+      if (!result) {
         return res.status(404).json({ error: 'User not found' });
       }
       
-      res.json(result.rows[0]);
+      res.json(result);
     } catch (error) {
       console.error('Error updating user status:', error);
       res.status(500).json({ error: 'Failed to update user status' });
