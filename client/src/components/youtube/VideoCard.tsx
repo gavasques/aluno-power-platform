@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Clock, Eye, ThumbsUp, ExternalLink } from "lucide-react";
+import { Play, ExternalLink } from "lucide-react";
 import type { YoutubeVideo } from "@shared/schema";
 
 interface VideoCardProps {
@@ -10,20 +10,6 @@ interface VideoCardProps {
 }
 
 export function VideoCard({ video, onPlay }: VideoCardProps) {
-  const formatViews = (views: number | null) => {
-    if (!views) return '0';
-    if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
-    if (views >= 1000) return `${(views / 1000).toFixed(1)}K`;
-    return views.toString();
-  };
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
 
   const handlePlayClick = () => {
     if (onPlay) {
@@ -70,26 +56,7 @@ export function VideoCard({ video, onPlay }: VideoCardProps) {
             </p>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center space-x-3">
-              {video.viewCount && (
-                <div className="flex items-center">
-                  <Eye className="h-3 w-3 mr-1" />
-                  {formatViews(video.viewCount)}
-                </div>
-              )}
-              {video.likeCount && (
-                <div className="flex items-center">
-                  <ThumbsUp className="h-3 w-3 mr-1" />
-                  {formatViews(video.likeCount)}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center">
-              <Clock className="h-3 w-3 mr-1" />
-              {formatDate(video.publishedAt)}
-            </div>
-          </div>
+
 
           {video.category && (
             <Badge variant="secondary" className="text-xs">
