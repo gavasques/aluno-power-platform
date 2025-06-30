@@ -76,14 +76,13 @@ export class AuthService {
       .from(users)
       .where(eq(users.email, email));
 
-    console.log('🔍 AUTH SERVICE - User search result:', JSON.stringify({
+    console.log('🔍 AUTH SERVICE - User search result:', {
       email,
       userFound: !!user,
       userId: user?.id,
       userActive: user?.isActive,
-      userRole: user?.role,
-      passwordHashPresent: !!user?.password
-    }));
+      userRole: user?.role
+    });
 
     if (!user) {
       console.log('🔍 AUTH SERVICE - User not found in database');
