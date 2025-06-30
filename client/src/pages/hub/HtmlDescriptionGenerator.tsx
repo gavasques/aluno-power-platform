@@ -42,15 +42,15 @@ const HtmlDescriptionGenerator: React.FC = () => {
     const lines = html.split('\n').filter(line => line.trim() !== '');
     
     // Processar linhas e agrupar listas
-    const processedLines = [];
-    let currentList = { type: '', items: [] };
+    const processedLines: string[] = [];
+    let currentList: { type: string; items: string[] } = { type: '', items: [] };
     
     for (const line of lines) {
       let processedLine = line.trim();
       
       // Converter formatação visual para HTML
-      // **texto** para <b>texto</b>
-      processedLine = processedLine.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+      // **texto** para <strong>texto</strong>
+      processedLine = processedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       // *texto* para <i>texto</i>
       processedLine = processedLine.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<i>$1</i>');
       
@@ -97,7 +97,7 @@ const HtmlDescriptionGenerator: React.FC = () => {
     html = processedLines.join('');
     
     // Limpar HTML não permitido (validação básica)
-    html = html.replace(/<(?!\/?(b|i|u|br|p|ul|ol|li|strong|em)\b)[^>]*>/gi, '');
+    html = html.replace(/<(?!\/?(strong|i|u|br|p|ul|ol|li|em)\b)[^>]*>/gi, '');
     
     setHtmlOutput(html);
   }, [textInput]);
@@ -456,7 +456,7 @@ Garantia de 12 meses`;
             <div>
               <h3 className="font-semibold text-green-600 mb-2">✅ PERMITIDO:</h3>
               <ul className="text-sm space-y-1 text-gray-700">
-                <li>• Tags HTML: &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;</li>
+                <li>• Tags HTML: &lt;strong&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;</li>
                 <li>• Quebras de linha usando &lt;br&gt;</li>
                 <li>• Máximo 2000 caracteres (incluindo espaços e tags)</li>
                 <li>• Títulos de até 200 caracteres</li>
