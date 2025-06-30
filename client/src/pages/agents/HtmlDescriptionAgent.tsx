@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import Layout from '@/components/layout/Layout';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Bold, 
@@ -11,454 +9,383 @@ import {
   Trash2,
   Copy,
   Info,
+  ArrowLeft,
   Code2
 } from 'lucide-react';
+import { Link } from 'wouter';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Separator } from '@/components/ui/separator';
 
 export default function HtmlDescriptionAgent() {
   const { toast } = useToast();
-  const [textInput, setTextInput] = useState('');
+  const editorRef = useRef<HTMLDivElement>(null);
   const [htmlOutput, setHtmlOutput] = useState('');
+  const [charCount, setCharCount] = useState(0);
+  const [rulesOpen, setRulesOpen] = useState(false);
   
   const MAX_CHARS = 2000;
   const WARNING_THRESHOLD = 1800;
-  const placeholder = 'Digite sua descrição do produto aqui...\n\nDicas:\n• Use **texto** para negrito\n• Use *texto* para itálico\n• Use • para listas\n• Use 1. 2. 3. para listas numeradas';
 
   const allowedSymbols = [
-    '✓', '©', '®', '★', '™', '♥', '①', '②', '③', '④'
+    { symbol: '✅', desc: 'Check/OK' },
+    { symbol: '❌', desc: 'X/Não' },
+    { symbol: '⚠️', desc: 'Aviso' },
+    { symbol: '📦', desc: 'Produto' },
+    { symbol: '🚚', desc: 'Entrega' },
+    { symbol: '💯', desc: 'Qualidade' },
+    { symbol: '⭐', desc: 'Estrela' },
+    { symbol: '🔥', desc: 'Destaque' },
+    { symbol: '💪', desc: 'Força' },
+    { symbol: '🎯', desc: 'Alvo' }
   ];
 
-  const charCount = textInput.length;
-
-  // Renderizar preview formatado para overlay
-  const renderFormattedPreview = (text: string) => {
-    if (!text) return '';
+  // Aplicar formatação com execCommand
+  const applyFormat = (command: string, value?: string) => {
+    if (!editorRef.current) return;
     
-    // Aplicar formatação visual simples
-    let formatted = text
-      .replace(/\*\*(.*?)\*\*/g, '<span style="font-weight: bold; color: #000;">$1</span>')
-      .replace(/\*(.*?)\*/g, '<span style="font-style: italic; color: #000;">$1</span>')
-      .replace(/• (.*?)(\n|$)/g, '<span style="color: #0066cc;">• </span><span style="color: #000;">$1</span>$2')
-      .replace(/(\d+)\. (.*?)(\n|$)/g, '<span style="color: #0066cc;">$1. </span><span style="color: #000;">$2</span>$3');
-    
-    return formatted;
-  };
-
-  // Função para gerar HTML do contentEditable
-  const generateHtml = () => {
-    if (!textInput.trim()) {
-      setHtmlOutput('');
-      return;
-    }
-
-    // Processar o conteúdo linha por linha
-    const lines = textInput.split('\n');
-    const processedLines: string[] = [];
-    let currentList: { type: string; items: string[] } = { type: '', items: [] };
-    
-    for (const line of lines) {
-      let processedLine = line.trim();
-      
-      // Converter formatação markdown para HTML
-      processedLine = processedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      processedLine = processedLine.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<i>$1</i>');
-      
-      // Verificar se é item de lista
-      if (processedLine.startsWith('• ')) {
-        if (currentList.type !== 'ul') {
-          if (currentList.type && currentList.items.length > 0) {
-            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-          }
-          currentList = { type: 'ul', items: [] };
-        }
-        currentList.items.push(`<li>${processedLine.substring(2)}</li>`);
-      } else if (/^\d+\.\s/.test(processedLine)) {
-        if (currentList.type !== 'ol') {
-          if (currentList.type && currentList.items.length > 0) {
-            processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-          }
-          currentList = { type: 'ol', items: [] };
-        }
-        currentList.items.push(`<li>${processedLine.replace(/^\d+\.\s/, '')}</li>`);
-      } else {
-        // Finalizar lista atual se existir
-        if (currentList.type && currentList.items.length > 0) {
-          processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-          currentList = { type: '', items: [] };
-        }
-        
-        // Processar linha normal
-        if (processedLine.trim() === '') {
-          processedLines.push('<p>&nbsp;</p>');
-        } else {
-          processedLines.push(`<p>${processedLine}</p>`);
-        }
-      }
-    }
-    
-    // Finalizar lista pendente
-    if (currentList.type && currentList.items.length > 0) {
-      processedLines.push(`<${currentList.type}>${currentList.items.join('')}</${currentList.type}>`);
-    }
-    
-    let html = processedLines.join('');
-    
-    // Limpar HTML não permitido mantendo formatação
-    html = html.replace(/<(?!\/?(strong|i|u|br|p|ul|ol|li|em)\b)[^>]*>/gi, '');
-    
-    setHtmlOutput(html);
-  };
-
-  // Gerar HTML em tempo real
-  useEffect(() => {
+    editorRef.current.focus();
+    document.execCommand(command, false, value);
     generateHtml();
-  }, [textInput]);
-
-  // Aplicar formatação usando markdown
-  const applyFormatting = (type: string) => {
-    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textInput.substring(start, end);
-    
-    if (selectedText) {
-      const beforeText = textInput.substring(0, start);
-      const afterText = textInput.substring(end);
-      
-      let formattedText = '';
-      if (type === 'b') {
-        formattedText = `**${selectedText}**`;
-      } else if (type === 'i') {
-        formattedText = `*${selectedText}*`;
-      }
-      
-      const newText = beforeText + formattedText + afterText;
-      
-      if (newText.length <= MAX_CHARS) {
-        setTextInput(newText);
-        
-        // Reposicionar cursor
-        setTimeout(() => {
-          const newPos = start + formattedText.length;
-          textarea.setSelectionRange(newPos, newPos);
-          textarea.focus();
-        }, 0);
-      }
-    }
   };
 
-  // Inserir lista (visual)
-  const insertList = (ordered = false) => {
-    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textInput.substring(start, end);
-    
-    let listText = '';
-    
-    if (selectedText.trim()) {
-      // Se há texto selecionado, converter para lista
-      const lines = selectedText.split('\n').filter(line => line.trim() !== '');
-      if (ordered) {
-        listText = lines.map((line, index) => `${index + 1}. ${line.trim()}`).join('\n');
-      } else {
-        listText = lines.map(line => `• ${line.trim()}`).join('\n');
-      }
-    } else {
-      // Inserir lista vazia
-      if (ordered) {
-        listText = '1. Item 1\n2. Item 2\n3. Item 3';
-      } else {
-        listText = '• Item 1\n• Item 2\n• Item 3';
-      }
-    }
-    
-    const beforeText = textInput.substring(0, start);
-    const afterText = textInput.substring(end);
-    const newText = beforeText + listText + afterText;
-    
-    if (newText.length <= MAX_CHARS) {
-      setTextInput(newText);
-      
-      // Reposicionar cursor
-      setTimeout(() => {
-        const newPos = start + listText.length;
-        textarea.setSelectionRange(newPos, newPos);
-        textarea.focus();
-      }, 0);
-    }
-  };
-
-  // Inserir símbolo
+  // Inserir símbolo na posição do cursor
   const insertSymbol = (symbol: string) => {
-    const textarea = document.getElementById('textInput') as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const beforeText = textInput.substring(0, start);
-    const afterText = textInput.substring(start);
-    const newText = beforeText + symbol + afterText;
+    if (!editorRef.current) return;
     
-    if (newText.length <= MAX_CHARS) {
-      setTextInput(newText);
-      
-      // Reposicionar cursor
-      setTimeout(() => {
-        const newPos = start + symbol.length;
-        textarea.setSelectionRange(newPos, newPos);
-        textarea.focus();
-      }, 0);
+    editorRef.current.focus();
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const textNode = document.createTextNode(symbol);
+      range.deleteContents();
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
     }
+    generateHtml();
   };
 
-  // Copiar HTML
-  const copyHtml = async () => {
-    if (!htmlOutput) {
+  // Inserir lista
+  const insertList = (ordered = false) => {
+    applyFormat(ordered ? 'insertOrderedList' : 'insertUnorderedList');
+  };
+
+  // Gerar HTML limpo
+  const generateHtml = () => {
+    if (!editorRef.current) return;
+    
+    const content = editorRef.current.innerHTML;
+    let cleanHtml = content;
+
+    // Limpar HTML desnecessário e converter para formato Amazon
+    cleanHtml = cleanHtml
+      .replace(/<div><br><\/div>/g, '<p>&nbsp;</p>')
+      .replace(/<div>/g, '<p>')
+      .replace(/<\/div>/g, '</p>')
+      .replace(/<br>/g, '</p><p>')
+      .replace(/<p><\/p>/g, '<p>&nbsp;</p>')
+      .replace(/style="[^"]*"/g, '') // Remover estilos inline
+      .replace(/<span[^>]*>/g, '') // Remover spans
+      .replace(/<\/span>/g, '')
+      .replace(/<font[^>]*>/g, '') // Remover tags font
+      .replace(/<\/font>/g, '')
+      .replace(/&nbsp;/g, ' ') // Converter nbsp para espaço
+      .trim();
+
+    // Validar tags permitidas pela Amazon
+    const allowedTags = ['p', 'strong', 'b', 'i', 'em', 'ul', 'ol', 'li', 'br'];
+    cleanHtml = cleanHtml.replace(/<(\/?)([\w]+)[^>]*>/g, (match, slash, tag) => {
+      if (allowedTags.includes(tag.toLowerCase())) {
+        return `<${slash}${tag.toLowerCase()}>`;
+      }
+      return '';
+    });
+
+    // Contar caracteres (texto puro)
+    const textContent = editorRef.current.textContent || '';
+    setCharCount(textContent.length);
+    
+    // Verificar limite de caracteres
+    if (textContent.length >= MAX_CHARS) {
+      // Limitar conteúdo
+      const limitedText = textContent.substring(0, MAX_CHARS);
+      editorRef.current.textContent = limitedText;
       toast({
-        title: "Nada para copiar",
-        description: "Digite algum texto primeiro para gerar o HTML.",
-        variant: "destructive",
+        title: "Limite atingido",
+        description: "Máximo de 2000 caracteres atingido",
+        variant: "destructive"
       });
-      return;
     }
 
+    setHtmlOutput(cleanHtml);
+  };
+
+  // Copiar HTML para clipboard
+  const copyHtml = async () => {
     try {
       await navigator.clipboard.writeText(htmlOutput);
       toast({
         title: "HTML copiado!",
-        description: "O código HTML foi copiado para a área de transferência.",
+        description: "HTML copiado para área de transferência"
       });
     } catch (error) {
       toast({
         title: "Erro ao copiar",
-        description: "Não foi possível copiar o HTML.",
-        variant: "destructive",
+        description: "Não foi possível copiar o HTML",
+        variant: "destructive"
       });
     }
   };
 
-  // Limpar tudo
-  const clearAll = () => {
-    setTextInput('');
-    setHtmlOutput('');
+  // Limpar editor
+  const clearEditor = () => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = '';
+      setHtmlOutput('');
+      setCharCount(0);
+    }
   };
 
-  return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Code2 className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gerador de Descrições HTML Amazon</h1>
-              <p className="text-gray-600 mt-1">
-                Agente especializado em criar descrições HTML formatadas para produtos da Amazon
-              </p>
-            </div>
-          </div>
-        </div>
+  // Handler para mudanças no editor
+  const handleEditorChange = () => {
+    generateHtml();
+  };
 
-        {/* Main Editor */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Input Column */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg border p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Editor de Texto</h2>
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm font-medium ${
-                    charCount >= MAX_CHARS ? 'text-red-600' :
-                    charCount > WARNING_THRESHOLD ? 'text-yellow-600' :
-                    'text-green-600'
-                  }`}>
-                    {charCount}/{MAX_CHARS}
-                  </span>
+  // Prevenir cola de HTML formatado
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+    generateHtml();
+  };
+
+  // Cor do contador baseada no limite
+  const getCounterColor = () => {
+    if (charCount >= MAX_CHARS) return 'text-red-600';
+    if (charCount >= WARNING_THRESHOLD) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+
+  const amazonRules = [
+    "Use apenas tags HTML permitidas: <p>, <strong>, <b>, <i>, <em>, <ul>, <ol>, <li>, <br>",
+    "Máximo de 2000 caracteres incluindo tags HTML",
+    "Evite usar CSS inline ou JavaScript",
+    "Use <p> para parágrafos e <p>&nbsp;</p> para linhas vazias",
+    "Use <strong> ou <b> para texto em negrito",
+    "Use <i> ou <em> para texto em itálico", 
+    "Use <ul><li> para listas com marcadores",
+    "Use <ol><li> para listas numeradas",
+    "Símbolos permitidos: ✅ ❌ ⚠️ 📦 🚚 💯 ⭐ 🔥 💪 🎯",
+    "Evite caracteres especiais não suportados",
+    "Teste sempre no Seller Central antes de publicar"
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <Link href="/agents">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Voltar aos Agentes
+                </Button>
+              </Link>
+              <div className="flex items-center space-x-2">
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <Code2 className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-semibold text-gray-900">
+                    Gerador de Descrições HTML Amazon
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    Agente especializado em criar descrições HTML formatadas seguindo as regras da Amazon Brasil
+                  </p>
                 </div>
               </div>
+            </div>
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+              AGENTE IA
+            </Badge>
+          </div>
+        </div>
+      </div>
 
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* Editor */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center space-x-2">
+                  <span>Editor de Texto</span>
+                </CardTitle>
+                <span className={`text-sm font-medium ${getCounterColor()}`}>
+                  {charCount}/{MAX_CHARS}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              
               {/* Toolbar */}
-              <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                {/* Formatação */}
+              <div className="space-y-3">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Formatação</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <label className="text-xs font-medium text-gray-700 uppercase tracking-wide">
+                    Formatação
+                  </label>
+                  <div className="flex flex-wrap gap-2 mt-1">
                     <Button
+                      type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => applyFormatting('b')}
+                      onClick={() => applyFormat('bold')}
                     >
-                      <Bold className="h-4 w-4" />
+                      <Bold className="h-4 w-4 mr-1" />
                       Negrito
                     </Button>
                     <Button
+                      type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => applyFormatting('i')}
+                      onClick={() => applyFormat('italic')}
                     >
-                      <Italic className="h-4 w-4" />
+                      <Italic className="h-4 w-4 mr-1" />
                       Itálico
                     </Button>
                     <Button
+                      type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => insertList(false)}
                     >
-                      <List className="h-4 w-4" />
+                      <List className="h-4 w-4 mr-1" />
                       Lista
                     </Button>
                     <Button
+                      type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => insertList(true)}
                     >
-                      <ListOrdered className="h-4 w-4" />
+                      <ListOrdered className="h-4 w-4 mr-1" />
                       Numerada
                     </Button>
                   </div>
                 </div>
 
-                {/* Símbolos Permitidos pela Amazon */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Símbolos</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {allowedSymbols.map((symbol) => (
+                  <label className="text-xs font-medium text-gray-700 uppercase tracking-wide">
+                    Símbolos
+                  </label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {allowedSymbols.map((item, index) => (
                       <Button
-                        key={symbol}
+                        key={index}
+                        type="button"
                         variant="outline"
                         size="sm"
-                        className="px-3 py-1 text-lg"
-                        onClick={() => insertSymbol(symbol)}
+                        className="text-lg p-2 h-8 w-8"
+                        onClick={() => insertSymbol(item.symbol)}
+                        title={item.desc}
                       >
-                        {symbol}
+                        {item.symbol}
                       </Button>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Textarea com formatação visual */}
-              <div className="relative flex-1">
-                <Textarea
-                  id="textInput"
-                  value={textInput}
-                  onChange={(e) => {
-                    if (e.target.value.length <= MAX_CHARS) {
-                      setTextInput(e.target.value);
-                    }
-                  }}
-                  placeholder={placeholder}
-                  className={`flex-1 resize-none min-h-[300px] ${
-                    charCount >= MAX_CHARS ? 'border-red-500' :
-                    charCount > WARNING_THRESHOLD ? 'border-yellow-500' :
-                    'border-gray-300'
-                  }`}
-                  maxLength={MAX_CHARS}
-                />
-                
-                {/* Overlay para mostrar formatação visual */}
-                <div 
-                  className="absolute top-0 left-0 w-full h-full p-3 pointer-events-none overflow-hidden z-10"
-                  style={{
-                    fontSize: '14px',
-                    lineHeight: '1.5',
-                    fontFamily: 'inherit',
-                    whiteSpace: 'pre-wrap',
-                    color: 'transparent'
-                  }}
-                  dangerouslySetInnerHTML={{
-                    __html: renderFormattedPreview(textInput)
-                  }}
-                />
-              </div>
+              {/* Editor */}
+              <div
+                ref={editorRef}
+                contentEditable
+                className="min-h-[300px] p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                style={{
+                  lineHeight: '1.6',
+                  fontSize: '14px'
+                }}
+                onInput={handleEditorChange}
+                onPaste={handlePaste}
+                placeholder="Digite sua descrição do produto aqui..."
+                suppressContentEditableWarning={true}
+              />
 
-              {/* Botões de Ação */}
-              <div className="flex gap-3 mt-4">
-                <Button
-                  onClick={copyHtml}
-                  disabled={!htmlOutput}
-                  className="flex-1"
-                >
+              {/* Actions */}
+              <div className="flex space-x-2">
+                <Button onClick={copyHtml} className="flex-1">
                   <Copy className="h-4 w-4 mr-2" />
                   Copiar HTML
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={clearAll}
-                  disabled={!textInput}
+                <Button 
+                  variant="outline" 
+                  onClick={clearEditor}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Limpar
                 </Button>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Output Column */}
+          {/* Output & Rules */}
           <div className="space-y-6">
-            {/* HTML Output */}
-            <div className="bg-white rounded-lg border p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">HTML Gerado</h2>
-              <div className="bg-gray-50 rounded-lg p-4 min-h-[300px] font-mono text-sm">
-                {htmlOutput || <span className="text-gray-400">O HTML aparecerá aqui...</span>}
-              </div>
-            </div>
-
-            {/* Preview Visual */}
-            <div className="bg-white rounded-lg border p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Preview Visual</h2>
-              <div 
-                className="bg-gray-50 rounded-lg p-4 min-h-[200px] prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: htmlOutput }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Regras da Amazon */}
-        <div className="mt-8 bg-white rounded-lg border p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Info className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Regras da Amazon Brasil</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-green-600 mb-2">✅ PERMITIDO:</h3>
-              <ul className="text-sm space-y-1 text-gray-700">
-                <li>• Tags HTML: &lt;strong&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;</li>
-                <li>• Quebras de linha usando &lt;p&gt; (automático)</li>
-                <li>• Máximo 2000 caracteres (incluindo espaços e tags)</li>
-                <li>• Títulos de até 200 caracteres</li>
-                <li>• Descrições claras e concisas</li>
-                <li>• Símbolos permitidos: ✓ © ® ★ ™ ♥ ① ② ③ ④</li>
-                <li>• Listas ordenadas e não ordenadas</li>
-                <li>• Formatação em negrito e itálico</li>
-              </ul>
-            </div>
             
-            <div>
-              <h3 className="font-semibold text-red-600 mb-2">❌ PROIBIDO:</h3>
-              <ul className="text-sm space-y-1 text-gray-700">
-                <li>• JavaScript ou qualquer código executável</li>
-                <li>• Links externos ou URLs</li>
-                <li>• Imagens ou vídeos incorporados</li>
-                <li>• CSS inline ou folhas de estilo</li>
-                <li>• Tags &lt;script&gt;, &lt;style&gt;, &lt;iframe&gt;</li>
-                <li>• Mencionar preços ou promoções</li>
-                <li>• Informações de contato ou redes sociais</li>
-                <li>• Comparações diretas com concorrentes</li>
-                <li>• Caracteres especiais não autorizados</li>
-              </ul>
-            </div>
+            {/* HTML Output */}
+            <Card>
+              <CardHeader>
+                <CardTitle>HTML Gerado</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <pre className="text-sm font-mono whitespace-pre-wrap break-words text-gray-800">
+                    {htmlOutput || 'O HTML aparecerá aqui conforme você digita...'}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Amazon Rules */}
+            <Card>
+              <CardHeader>
+                <Collapsible open={rulesOpen} onOpenChange={setRulesOpen}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+                      <div className="flex items-center space-x-2">
+                        <Info className="h-4 w-4" />
+                        <span className="font-semibold">Regras da Amazon Brasil</span>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {rulesOpen ? 'Recolher' : 'Expandir'}
+                      </span>
+                    </Button>
+                  </CollapsibleTrigger>
+                </Collapsible>
+              </CardHeader>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  <div className="space-y-2">
+                    {amazonRules.map((rule, index) => (
+                      <div key={index} className="flex items-start space-x-2">
+                        <span className="text-blue-500 text-xs mt-1">•</span>
+                        <span className="text-sm text-gray-700">{rule}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 }
