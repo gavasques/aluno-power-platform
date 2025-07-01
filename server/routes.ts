@@ -3086,7 +3086,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // API para logs de uso de ferramentas
   app.post('/api/tool-usage-logs', async (req: any, res: any) => {
     try {
-      const { userId, userName, userEmail, toolName, asin, country, additionalData } = req.body;
+      const { userId, userName, userEmail, toolName, asin, keyword, country, additionalData } = req.body;
 
       if (!userId || !userName || !userEmail || !toolName) {
         return res.status(400).json({ 
@@ -3101,11 +3101,12 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         userEmail,
         toolName,
         asin: asin || null,
+        keyword: keyword || null,
         country: country || null,
         additionalData: additionalData || null,
       }).returning();
 
-      console.log(`📊 [TOOL_USAGE] Log salvo: User ${userName} (${userEmail}) usou ${toolName} - ASIN: ${asin || 'N/A'} - País: ${country || 'N/A'}`);
+      console.log(`📊 [TOOL_USAGE] Log salvo: User ${userName} (${userEmail}) usou ${toolName} - ASIN: ${asin || 'N/A'} - Keyword: ${keyword || 'N/A'} - País: ${country || 'N/A'}`);
 
       res.json({ 
         success: true, 
@@ -3117,6 +3118,44 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.error('❌ [TOOL_USAGE] Erro ao salvar log:', error);
       res.status(500).json({ 
         error: 'Erro interno do servidor ao salvar log' 
+      });
+    }
+  });
+
+  // API para buscar logs de uso de ferramentas
+  app.get('/api/tool-usage-logs', async (req: any, res: any) => {
+    try {
+      const { tool, user, limit = 100, offset = 0 } = req.query;
+
+      let query = db.select().from(toolUsageLogs);
+
+      // Filtros opcionais
+      if (tool) {
+        query = query.where(like(toolUsageLogs.toolName, `%${tool}%`));
+      }
+      if (user) {
+        query = query.where(or(
+          like(toolUsageLogs.userName, `%${user}%`),
+          like(toolUsageLogs.userEmail, `%${user}%`)
+        ));
+      }
+
+      const logs = await query
+        .orderBy(desc(toolUsageLogs.createdAt))
+        .limit(parseInt(limit))
+        .offset(parseInt(offset));
+
+      res.json({
+        success: true,
+        logs,
+        total: logs.length
+      });
+
+    } catch (error) {
+      console.error('❌ [TOOL_USAGE] Erro ao buscar logs:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        details: error instanceof Error ? error.message : 'Erro desconhecido'
       });
     }
   });
@@ -3890,24 +3929,34 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log(`✅ [AMAZON_KEYWORDS] ${data.data.products?.length || 0} produtos encontrados - Query: ${query}, Página: ${page}`);
 
-      // Log usage (sem autenticação por enquanto)
-      try {
-        await db.insert(toolUsageLogs).values({
-          userId: 1, // ID temporário
-          userName: 'Usuário Sistema',
-          userEmail: 'sistema@exemplo.com',
-          toolName: 'Relatório de Busca por Keywords',
-          additionalData: {
-            query,
-            country,
-            page,
-            sort_by,
-            total_products: data.data.total_products,
-            products_found: data.data.products?.length || 0
-          }
-        });
-      } catch (logError) {
-        console.error('Error logging tool usage:', logError);
+      // Log usage (primeira página apenas para evitar spam)
+      if (page === 1) {
+        try {
+          await db.insert(toolUsageLogs).values({
+            userId: 2, // ID do usuário admin padrão
+            userName: 'Guilherme Vasques',
+            userEmail: 'gavasques@gmail.com',
+            toolName: 'Relatório de Busca por Keywords',
+            keyword: query,
+            country: country,
+            additionalData: {
+              query,
+              country,
+              sort_by,
+              brand: brand || null,
+              min_price: req.body.min_price || null,
+              max_price: req.body.max_price || null,
+              is_prime: req.body.is_prime || false,
+              seller_id: req.body.seller_id || null,
+              deals_and_discounts: req.body.deals_and_discounts || 'NONE',
+              total_products: data.data.total_products,
+              products_found: data.data.products?.length || 0
+            }
+          });
+          console.log(`📊 [TOOL_USAGE] Log salvo - Keyword: ${query}, País: ${country}, Produtos: ${data.data.products?.length || 0}`);
+        } catch (logError) {
+          console.error('Error logging tool usage:', logError);
+        }
       }
 
       res.json({

@@ -979,8 +979,9 @@ export const toolUsageLogs = pgTable("tool_usage_logs", {
   userId: integer("user_id").references(() => users.id).notNull(),
   userName: text("user_name").notNull(),
   userEmail: text("user_email").notNull(),
-  toolName: text("tool_name").notNull(), // "Extrator de Reviews Amazon", etc
+  toolName: text("tool_name").notNull(), // "Extrator de Reviews Amazon", "Relatório de Busca por Keywords", etc
   asin: text("asin"), // For Amazon tools
+  keyword: text("keyword"), // For keyword-based tools
   country: text("country"), // For Amazon tools
   additionalData: jsonb("additional_data"), // Flexible data for different tools
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -989,6 +990,7 @@ export const toolUsageLogs = pgTable("tool_usage_logs", {
   createdIdx: index("tool_usage_created_idx").on(table.createdAt),
   toolIdx: index("tool_usage_tool_idx").on(table.toolName),
   asinIdx: index("tool_usage_asin_idx").on(table.asin),
+  keywordIdx: index("tool_usage_keyword_idx").on(table.keyword),
 }));
 
 // Insert schemas for generated images
