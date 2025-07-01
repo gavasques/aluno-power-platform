@@ -241,15 +241,15 @@ const ContentManagement = () => {
           <CardHeader>
             <div className="flex items-center space-x-2">
               <Building2 className="h-5 w-5 text-primary" />
-              <CardTitle className="text-foreground">Exportação Amazon</CardTitle>
+              <CardTitle className="text-foreground">🚀 Exportação Amazon</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-sm mb-4">Exportar departamentos e categorias da Amazon para Excel</p>
+            <p className="text-muted-foreground text-sm mb-4">Exportar departamentos e categorias da Amazon para Excel via API loop</p>
             <div className="flex justify-between items-center">
-              <Badge className="bg-amber-100 text-amber-800 border-amber-200">API Loop</Badge>
+              <Badge className="bg-amber-100 text-amber-800 border-amber-200">🔄 API Loop</Badge>
               <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Exportar
+                Exportar Excel
               </Button>
             </div>
           </CardContent>
