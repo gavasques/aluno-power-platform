@@ -39,9 +39,9 @@ Criar 8 bullet points poderosos, focados em benefícios reais, que façam o clie
 ##  FORMATO E ESTILO
 
 - Cada bullet point começa com o BENEFÍCIO PRINCIPAL EM MAIÚSCULAS, seguido de hífen e características que sustentam o benefício.
-- Caracteres: 170–195 caracteres (com espaços) por bullet.
-- NUNCA deixa o bullet points com menos de 170 caracteres
-- NUNCA exceda 200 caracteres no Bullet Point. 
+- Caracteres: 200–275 caracteres (com espaços) por bullet.
+- NUNCA deixa o bullet points com menos de 200 caracteres
+- NUNCA exceda 275 caracteres no Bullet Point. 
 - Bullet 3: Sempre termina com "ADICIONAR AO CARRINHO".
 - Bullet da Garantia: Um bullet dedicado à garantia, reforçando que só é válida para compras de vendedores autorizados.
 - Tom: Comercial, direto, urgência máxima, fácil de entender. 
@@ -117,7 +117,7 @@ Preencha antes de gerar os bullets:
 
 ## ETAPA 2: GERAR OS BULLET POINTS
 
-Com base na análise acima, crie os 8 bullets nesta ordem (cada um com 150–200 caracteres):
+Com base na análise acima, crie os 8 bullets nesta ordem (cada um com 200–275 caracteres):
 
 1. PÚBLICO-ALVO + PROPOSTA ÚNICA DE VALOR – [benefício + característica]
 2. BENEFÍCIO EMOCIONAL PRINCIPAL – [benefício sensorial + característica]
@@ -131,8 +131,8 @@ Com base na análise acima, crie os 8 bullets nesta ordem (cada um com 150–200
 O RETORNO, será apenas o BULLET POINTS, a ETAPA 1 é apenas para você ter base para a ETAPA 2. 
 
 Lembre-se
-- NUNCA deixa o bullet points com menos de 170 caracteres
-- NUNCA exceda 200 caracteres no Bullet Point. 
+- NUNCA deixa o bullet points com menos de 200 caracteres
+- NUNCA exceda 275 caracteres no Bullet Point. 
 
 Agora siga as etapas e gere bullets prontos para dominar seu nicho. Sem enrolação, só alta conversão.
 
