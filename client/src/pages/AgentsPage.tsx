@@ -248,6 +248,7 @@ export default function AgentsPage() {
             
             <CardContent>
               <div className="space-y-3">
+                {/* Only show category - removed model and cost info for user-friendly interface */}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Categoria:</span>
                   <span className="font-medium">{agent.category}</span>
