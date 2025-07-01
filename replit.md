@@ -108,24 +108,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ GERADOR DE BULLET POINTS AMAZON IMPLEMENTADO
-  - **Novo Agente de IA Completo**:
-    - Agente "bullet-points-generator" criado no banco de dados
-    - Interface dedicada em `/agents/bullet-points-generator`
-    - Prompt especializado para criar 8 bullet points persuasivos Amazon
-    - Integração completa com sistema de configurações de IA (provedor, modelo, temperatura)
-  - **Template de Copywriting Avançado**:
-    - Estrutura de 8 bullet points com técnicas de conversão específicas
-    - Limite de 180-250 caracteres por bullet point
-    - Formato obrigatório terminando em "ADICIONAR AO CARRINHO"
-    - Técnicas psicológicas: agitação da dor, prova social, urgência, propriedade mental
-  - **Funcionalidades Técnicas**:
+- **July 01, 2025**: ✅ GERADOR DE BULLET POINTS AMAZON OTIMIZADO E MELHORADO
+  - **Melhorias de UX Implementadas**:
+    - Limite aumentado para 4000 caracteres com validação e alertas
+    - Campos de entrada e saída expandidos (400px altura) para mais conforto
+    - Validação inteligente que impede excesso e informa o usuário
+    - Remoção dos prefixos "BULLET POINT X:" na saída final
+  - **Prompt Atualizado com Template Avançado**:
+    - Estrutura detalhada de 8 bullet points com técnicas específicas
+    - Instruções para terminação APENAS no terceiro bullet point
+    - Técnicas psicológicas aprimoradas: agitação da dor, prova social, urgência
+    - Palavras de poder e evitações específicas para Amazon Brasil
+  - **Sistema Técnico Robusto**:
+    - Agente "bullet-points-generator" totalmente funcional
+    - Interface responsiva com 2 colunas otimizada
     - Sistema de logs automático na tabela ai_generation_logs
-    - Endpoint correto `/api/ai-providers/test` para geração
-    - Interface responsiva com 2 colunas (entrada/saída)
+    - Endpoint `/api/ai-providers/test` com autenticação
     - Botão "Copiar Bullet Points" funcional
-    - Contador de caracteres com validação de 2000 caracteres máximo
-  - **Interface Limpa**: Removido botão "Configurações" desnecessário na interface do usuário
+  - **Interface Profissional**: Layout limpo sem elementos desnecessários
 
 - **July 01, 2025 (anterior)**: ✅ LIMPEZA COMPLETA DE ARQUIVOS DUPLICADOS E ORGANIZAÇÃO DO SISTEMA
   - **Arquivos Duplicados Removidos**:

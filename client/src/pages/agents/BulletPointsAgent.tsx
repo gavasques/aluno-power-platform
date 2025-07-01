@@ -39,8 +39,8 @@ const BulletPointsAgent: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const MAX_CHARS = 2000;
-  const WARNING_THRESHOLD = 1800;
+  const MAX_CHARS = 4000;
+  const WARNING_THRESHOLD = 3500;
 
   // Buscar configurações do agente
   const { data: agent } = useQuery<Agent>({
@@ -117,7 +117,7 @@ BENEFÍCIO EM MAIÚSCULAS - Características que respaldem esse benefício de ma
 ESPECIFICAÇÕES TÉCNICAS:
 
 • Cada bullet point deve ter entre 180 e 250 caracteres
-• SEMPRE terminar com "ADICIONAR AO CARRINHO"
+• SEMPRE terminar o terceiro Bullet Points com "ADICIONAR AO CARRINHO"
 • Benefício principal em MAIÚSCULAS no início
 • Características de apoio após o hífen
 • Tom comercial e persuasivo extremamente forte
@@ -202,6 +202,8 @@ PASSO 8: Revise o tom para máxima persuasão comercial
 
 EXEMPLO DE APLICAÇÃO:
 ALÍVIO INSTANTÂNEO E DURADOURO DA DOR COMPROVADO CLINICAMENTE - Tecnologia de alta frequência penetra profundamente como massagem suave, superior a TENS tradicionais. ADICIONAR AO CARRINHO
+
+IMPORTANTE: Na sua resposta, escreva APENAS os 8 bullet points, sem prefixos como "BULLET POINT 1:", "BULLET POINT 2:", etc. Comece diretamente com o benefício em maiúsculas.
 
 Agora, com base nas informações do produto abaixo, crie 8 bullet points seguindo exatamente as especificações:
 
@@ -345,12 +347,19 @@ ${textInput}`;
                 <Textarea
                   value={textInput}
                   onChange={(e) => {
-                    if (e.target.value.length <= MAX_CHARS) {
-                      setTextInput(e.target.value);
+                    const value = e.target.value;
+                    if (value.length > MAX_CHARS) {
+                      toast({
+                        variant: "destructive",
+                        title: "❌ Limite excedido",
+                        description: `O limite é de ${MAX_CHARS} caracteres. Digite menos informações.`
+                      });
+                      return;
                     }
+                    setTextInput(value);
                   }}
                   placeholder="Descreva as características, benefícios e informações técnicas do seu produto. Inclua público-alvo, materiais, dimensões, funcionalidades e qualquer diferencial competitivo..."
-                  className="min-h-[300px] resize-none text-sm"
+                  className="min-h-[400px] resize-none text-sm"
                 />
                 
                 <div className="flex gap-2 mt-4">
@@ -399,7 +408,7 @@ ${textInput}`;
                   value={bulletPointsOutput}
                   onChange={(e) => setBulletPointsOutput(e.target.value)}
                   placeholder="Os bullet points gerados aparecerão aqui. Você pode editá-los conforme necessário..."
-                  className="min-h-[300px] resize-none text-sm font-mono"
+                  className="min-h-[400px] resize-none text-sm font-mono"
                 />
               </div>
             </div>
