@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Search, 
@@ -209,6 +208,40 @@ const AmazonProductDetails: React.FC = () => {
     );
   };
 
+  const ExpandableSection = ({ 
+    title, 
+    icon: Icon, 
+    isExpanded, 
+    onToggle, 
+    children 
+  }: {
+    title: string;
+    icon: React.ComponentType<any>;
+    isExpanded: boolean;
+    onToggle: () => void;
+    children: React.ReactNode;
+  }) => (
+    <Card>
+      <CardHeader 
+        className="cursor-pointer hover:bg-gray-50 transition-colors"
+        onClick={onToggle}
+      >
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Icon className="h-5 w-5" />
+            {title}
+          </div>
+          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </CardTitle>
+      </CardHeader>
+      {isExpanded && (
+        <CardContent className="pt-0">
+          {children}
+        </CardContent>
+      )}
+    </Card>
+  );
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
       <div className="mb-6">
@@ -285,333 +318,245 @@ const AmazonProductDetails: React.FC = () => {
       {productData && (
         <div className="space-y-6">
           {/* Informações Básicas */}
-          <Card>
-            <Collapsible 
-              open={expandedSections.basicInfo} 
-              onOpenChange={() => toggleSection('basicInfo')}
-            >
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-gray-50">
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Package className="h-5 w-5" />
-                      Informações Básicas
-                    </div>
-                    {expandedSections.basicInfo ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </CardTitle>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-xl font-semibold mb-3">{productData.data.product_title}</h3>
-                      
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-gray-500" />
-                          <span>ASIN: <strong>{productData.data.asin}</strong></span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-gray-500" />
-                          <span>País: <strong>{COUNTRIES.find(c => c.code === productData.data.country)?.name}</strong></span>
-                        </div>
-                        
-                        {productData.data.product_star_rating && (
-                          <div className="flex items-center gap-2">
-                            {renderStarRating(productData.data.product_star_rating)}
-                            <span className="text-sm text-gray-600">
-                              ({productData.data.product_num_ratings?.toLocaleString()} avaliações)
-                            </span>
-                          </div>
-                        )}
-                        
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {productData.data.is_best_seller && (
-                            <Badge variant="destructive" className="flex items-center gap-1">
-                              <Award className="h-3 w-3" />
-                              Best Seller
-                            </Badge>
-                          )}
-                          {productData.data.is_amazon_choice && (
-                            <Badge variant="secondary" className="flex items-center gap-1">
-                              <Award className="h-3 w-3" />
-                              Amazon's Choice
-                            </Badge>
-                          )}
-                          {productData.data.is_prime && (
-                            <Badge variant="outline" className="flex items-center gap-1">
-                              <Truck className="h-3 w-3" />
-                              Prime
-                            </Badge>
-                          )}
-                          {productData.data.climate_pledge_friendly && (
-                            <Badge variant="outline" className="text-green-700 border-green-300">
-                              Climate Pledge Friendly
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-center">
-                      {productData.data.product_photo && (
-                        <img 
-                          src={productData.data.product_photo} 
-                          alt={productData.data.product_title}
-                          className="max-w-full h-auto max-h-64 rounded-lg shadow-md"
-                        />
-                      )}
-                    </div>
+          <ExpandableSection
+            title="Informações Básicas"
+            icon={Package}
+            isExpanded={expandedSections.basicInfo}
+            onToggle={() => toggleSection('basicInfo')}
+          >
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-3">{productData.data.product_title}</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <span>ASIN: <strong>{productData.data.asin}</strong></span>
                   </div>
                   
-                  <Separator className="my-4" />
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-gray-500" />
+                    <span>País: <strong>{COUNTRIES.find(c => c.code === productData.data.country)?.name}</strong></span>
+                  </div>
                   
-                  <div className="grid md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <strong>Disponibilidade:</strong> {productData.data.product_availability}
+                  {productData.data.product_star_rating && (
+                    <div className="flex items-center gap-2">
+                      {renderStarRating(productData.data.product_star_rating)}
+                      <span className="text-sm text-gray-600">
+                        ({productData.data.product_num_ratings?.toLocaleString()} avaliações)
+                      </span>
                     </div>
-                    <div>
-                      <strong>Ofertas:</strong> {productData.data.product_num_offers} ofertas
-                    </div>
-                    {productData.data.sales_volume && (
-                      <div className="md:col-span-2">
-                        <strong>Volume de vendas:</strong> {productData.data.sales_volume}
-                      </div>
+                  )}
+                  
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {productData.data.is_best_seller && (
+                      <Badge variant="destructive" className="flex items-center gap-1">
+                        <Award className="h-3 w-3" />
+                        Best Seller
+                      </Badge>
+                    )}
+                    {productData.data.is_amazon_choice && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Award className="h-3 w-3" />
+                        Amazon's Choice
+                      </Badge>
+                    )}
+                    {productData.data.is_prime && (
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        <Truck className="h-3 w-3" />
+                        Prime
+                      </Badge>
+                    )}
+                    {productData.data.climate_pledge_friendly && (
+                      <Badge variant="outline" className="text-green-700 border-green-300">
+                        Climate Pledge Friendly
+                      </Badge>
                     )}
                   </div>
-                  
-                  <div className="mt-4">
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={productData.data.product_url} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Ver na Amazon
-                      </a>
-                    </Button>
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
+                </div>
+              </div>
+              
+              <div className="flex justify-center">
+                {productData.data.product_photo && (
+                  <img 
+                    src={productData.data.product_photo} 
+                    alt={productData.data.product_title}
+                    className="max-w-full h-auto max-h-64 rounded-lg shadow-md"
+                  />
+                )}
+              </div>
+            </div>
+            
+            <Separator className="my-4" />
+            
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <strong>Disponibilidade:</strong> {productData.data.product_availability}
+              </div>
+              <div>
+                <strong>Ofertas:</strong> {productData.data.product_num_offers} ofertas
+              </div>
+              {productData.data.sales_volume && (
+                <div className="md:col-span-2">
+                  <strong>Volume de vendas:</strong> {productData.data.sales_volume}
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-4">
+              <Button variant="outline" size="sm" asChild>
+                <a href={productData.data.product_url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Ver na Amazon
+                </a>
+              </Button>
+            </div>
+          </ExpandableSection>
 
           {/* Preços */}
-          <Card>
-            <Collapsible 
-              open={expandedSections.pricing} 
-              onOpenChange={() => toggleSection('pricing')}
-            >
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-gray-50">
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5" />
-                      Informações de Preço
-                    </div>
-                    {expandedSections.pricing ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </CardTitle>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {formatPrice(productData.data.product_price)}
-                      </div>
-                      <div className="text-sm text-gray-600">Preço Atual</div>
-                      <div className="text-xs text-gray-500">{productData.data.currency}</div>
-                    </div>
-                    
-                    {productData.data.product_original_price && (
-                      <div className="text-center p-4 bg-gray-50 rounded-lg">
-                        <div className="text-xl font-semibold text-gray-600 line-through">
-                          {formatPrice(productData.data.product_original_price)}
-                        </div>
-                        <div className="text-sm text-gray-600">Preço Original</div>
-                      </div>
-                    )}
-                    
-                    {productData.data.product_price_max && (
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <div className="text-xl font-semibold text-green-600">
-                          {formatPrice(productData.data.product_price_max)}
-                        </div>
-                        <div className="text-sm text-gray-600">Preço Máximo</div>
-                      </div>
-                    )}
+          <ExpandableSection
+            title="Informações de Preço"
+            icon={DollarSign}
+            isExpanded={expandedSections.pricing}
+            onToggle={() => toggleSection('pricing')}
+          >
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">
+                  {formatPrice(productData.data.product_price)}
+                </div>
+                <div className="text-sm text-gray-600">Preço Atual</div>
+                <div className="text-xs text-gray-500">{productData.data.currency}</div>
+              </div>
+              
+              {productData.data.product_original_price && (
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-xl font-semibold text-gray-600 line-through">
+                    {formatPrice(productData.data.product_original_price)}
                   </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
+                  <div className="text-sm text-gray-600">Preço Original</div>
+                </div>
+              )}
+              
+              {productData.data.product_price_max && (
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-xl font-semibold text-green-600">
+                    {formatPrice(productData.data.product_price_max)}
+                  </div>
+                  <div className="text-sm text-gray-600">Preço Máximo</div>
+                </div>
+              )}
+            </div>
+          </ExpandableSection>
 
           {/* Descrição e Características */}
-          <Card>
-            <Collapsible 
-              open={expandedSections.description} 
-              onOpenChange={() => toggleSection('description')}
-            >
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-gray-50">
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Info className="h-5 w-5" />
-                      Descrição e Características
-                    </div>
-                    {expandedSections.description ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </CardTitle>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="space-y-4">
-                  {productData.data.product_description && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Descrição</h4>
-                      <p className="text-gray-700 leading-relaxed">
-                        {productData.data.product_description}
-                      </p>
-                    </div>
-                  )}
-                  
-                  {productData.data.about_product?.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Sobre este produto</h4>
-                      <ul className="space-y-2">
-                        {productData.data.about_product.map((item, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="text-blue-500 mt-1">•</span>
-                            <span className="text-gray-700">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
+          <ExpandableSection
+            title="Descrição e Características"
+            icon={Info}
+            isExpanded={expandedSections.description}
+            onToggle={() => toggleSection('description')}
+          >
+            <div className="space-y-4">
+              {productData.data.product_description && (
+                <div>
+                  <h4 className="font-semibold mb-2">Descrição</h4>
+                  <p className="text-gray-700 leading-relaxed">
+                    {productData.data.product_description}
+                  </p>
+                </div>
+              )}
+              
+              {productData.data.about_product?.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-2">Sobre este produto</h4>
+                  <ul className="space-y-2">
+                    {productData.data.about_product.map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="text-blue-500 mt-1">•</span>
+                        <span className="text-gray-700">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </ExpandableSection>
 
           {/* Especificações Técnicas */}
           {productData.data.product_information && Object.keys(productData.data.product_information).length > 0 && (
-            <Card>
-              <Collapsible 
-                open={expandedSections.specifications} 
-                onOpenChange={() => toggleSection('specifications')}
-              >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-gray-50">
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Tags className="h-5 w-5" />
-                        Especificações Técnicas
-                      </div>
-                      {expandedSections.specifications ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </CardTitle>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {Object.entries(productData.data.product_information).map(([key, value]) => (
-                        <div key={key} className="border-b border-gray-100 pb-2">
-                          <div className="text-sm font-medium text-gray-600">{key}</div>
-                          <div className="text-gray-900">{value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
+            <ExpandableSection
+              title="Especificações Técnicas"
+              icon={Tags}
+              isExpanded={expandedSections.specifications}
+              onToggle={() => toggleSection('specifications')}
+            >
+              <div className="grid md:grid-cols-2 gap-4">
+                {Object.entries(productData.data.product_information).map(([key, value]) => (
+                  <div key={key} className="border-b border-gray-100 pb-2">
+                    <div className="text-sm font-medium text-gray-600">{key}</div>
+                    <div className="text-gray-900">{value}</div>
+                  </div>
+                ))}
+              </div>
+            </ExpandableSection>
           )}
 
           {/* Imagens */}
           {productData.data.product_photos?.length > 0 && (
-            <Card>
-              <Collapsible 
-                open={expandedSections.images} 
-                onOpenChange={() => toggleSection('images')}
-              >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-gray-50">
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <ImageIcon className="h-5 w-5" />
-                        Imagens do Produto ({productData.data.product_photos.length})
-                      </div>
-                      {expandedSections.images ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </CardTitle>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {productData.data.product_photos.map((photo, index) => (
-                        <div key={index} className="aspect-square">
-                          <img 
-                            src={photo} 
-                            alt={`${productData.data.product_title} - Imagem ${index + 1}`}
-                            className="w-full h-full object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => window.open(photo, '_blank')}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
+            <ExpandableSection
+              title={`Imagens do Produto (${productData.data.product_photos.length})`}
+              icon={ImageIcon}
+              isExpanded={expandedSections.images}
+              onToggle={() => toggleSection('images')}
+            >
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {productData.data.product_photos.map((photo, index) => (
+                  <div key={index} className="aspect-square">
+                    <img 
+                      src={photo} 
+                      alt={`${productData.data.product_title} - Imagem ${index + 1}`}
+                      className="w-full h-full object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => window.open(photo, '_blank')}
+                    />
+                  </div>
+                ))}
+              </div>
+            </ExpandableSection>
           )}
 
           {/* Vídeos */}
           {(productData.data.product_videos?.length > 0 || productData.data.user_uploaded_videos?.length > 0) && (
-            <Card>
-              <Collapsible 
-                open={expandedSections.videos} 
-                onOpenChange={() => toggleSection('videos')}
-              >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-gray-50">
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Video className="h-5 w-5" />
-                        Vídeos do Produto ({(productData.data.product_videos?.length || 0) + (productData.data.user_uploaded_videos?.length || 0)})
-                      </div>
-                      {expandedSections.videos ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </CardTitle>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent>
-                    {productData.data.user_uploaded_videos?.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold mb-3">Vídeos de Usuários</h4>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                          {productData.data.user_uploaded_videos.slice(0, 6).map((video: any, index: number) => (
-                            <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                              <div className="aspect-video bg-gray-200 rounded mb-2 flex items-center justify-center">
-                                {video.video_image_url ? (
-                                  <img 
-                                    src={video.video_image_url} 
-                                    alt={video.title}
-                                    className="w-full h-full object-cover rounded"
-                                  />
-                                ) : (
-                                  <Video className="h-8 w-8 text-gray-400" />
-                                )}
-                              </div>
-                              <h5 className="font-medium text-sm mb-1">{video.title}</h5>
-                              <p className="text-xs text-gray-600">por {video.public_name}</p>
-                            </div>
-                          ))}
+            <ExpandableSection
+              title={`Vídeos do Produto (${(productData.data.product_videos?.length || 0) + (productData.data.user_uploaded_videos?.length || 0)})`}
+              icon={Video}
+              isExpanded={expandedSections.videos}
+              onToggle={() => toggleSection('videos')}
+            >
+              {productData.data.user_uploaded_videos?.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3">Vídeos de Usuários</h4>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    {productData.data.user_uploaded_videos.slice(0, 6).map((video: any, index: number) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                        <div className="aspect-video bg-gray-200 rounded mb-2 flex items-center justify-center">
+                          {video.video_image_url ? (
+                            <img 
+                              src={video.video_image_url} 
+                              alt={video.title}
+                              className="w-full h-full object-cover rounded"
+                            />
+                          ) : (
+                            <Video className="h-8 w-8 text-gray-400" />
+                          )}
                         </div>
+                        <h5 className="font-medium text-sm mb-1">{video.title}</h5>
+                        <p className="text-xs text-gray-600">por {video.public_name}</p>
                       </div>
-                    )}
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </ExpandableSection>
           )}
         </div>
       )}
