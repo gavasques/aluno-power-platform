@@ -200,10 +200,31 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       return;
     }
 
-    console.log('🚀 [BULLET_POINTS] Starting generation with config:', agentConfig);
     updateState({ isGenerating: true });
 
     try {
+      // SEMPRE buscar as configurações mais recentes do agente antes de gerar
+      const agentResponse = await fetch('/api/agents/bullet-points-generator', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (!agentResponse.ok) {
+        throw new Error('Erro ao buscar configurações do agente');
+      }
+      
+      const agentData = await agentResponse.json();
+      const currentConfig = {
+        provider: agentData.provider || 'openai',
+        model: agentData.model || 'gpt-4o-mini',
+        temperature: typeof agentData.temperature === 'string' ? parseFloat(agentData.temperature) : agentData.temperature || 0.7,
+        maxTokens: agentData.maxTokens || 2000
+      };
+
+      console.log('🚀 [BULLET_POINTS] Starting generation with FRESH config:', currentConfig);
+      setAgentConfig(currentConfig); // Atualizar o estado local também
+
       const startTime = Date.now();
 
       const productInfo = `
@@ -228,11 +249,11 @@ ${state.textInput}
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          provider: agentConfig.provider,
-          model: agentConfig.model,
+          provider: currentConfig.provider,
+          model: currentConfig.model,
           prompt: prompt,
-          maxTokens: agentConfig.maxTokens,
-          temperature: agentConfig.temperature
+          maxTokens: currentConfig.maxTokens,
+          temperature: currentConfig.temperature
         })
       });
 
@@ -249,29 +270,31 @@ ${state.textInput}
       const duration = endTime - startTime;
       const responseText = data.response;
 
-      // Salvar log da geração
-      await fetch('/api/ai-generation-logs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          provider: agentConfig.provider,
-          model: agentConfig.model,
-          prompt: prompt,
-          response: responseText,
-          promptCharacters: prompt.length,
-          responseCharacters: responseText.length,
-          inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
-          outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
-          totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
-          cost: data.cost || 0,
-          duration: duration,
-          feature: 'bullet-points-generator'
-        })
-      });
+      // Salvar log da geração (somente se usuário estiver logado)
+      if (user && user.id) {
+        await fetch('/api/ai-generation-logs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            provider: currentConfig.provider,
+            model: currentConfig.model,
+            prompt: prompt,
+            response: responseText,
+            promptCharacters: prompt.length,
+            responseCharacters: responseText.length,
+            inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
+            outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
+            totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
+            cost: data.cost || 0,
+            duration: duration,
+            feature: 'bullet-points-generator'
+          })
+        });
+      }
 
       if (state.bulletPointsOutput && state.bulletPointsOutput.trim()) {
         updateState({ 
