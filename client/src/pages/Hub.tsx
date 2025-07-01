@@ -6,6 +6,7 @@ import Templates from "./hub/Templates";
 import Tools from "./hub/Tools";
 import Suppliers from "./hub/Suppliers";
 import Partners from "./hub/Partners";
+import AmazonReviewExtractor from "./hub/AmazonReviewExtractor";
 
 const Hub = () => {
   const { section } = useParams();
@@ -24,6 +25,8 @@ const Hub = () => {
       return <Tools />;
     case "fornecedores":
       return <Suppliers />;
+    case "amazon-reviews":
+      return <AmazonReviewExtractor />;
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Hub de Recursos";
       return (

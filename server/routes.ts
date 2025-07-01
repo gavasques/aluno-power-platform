@@ -2912,6 +2912,176 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // ==========================================
+  // AMAZON REVIEWS EXTRACTOR ROUTES
+  // ==========================================
+
+  interface ReviewData {
+    review_title: string;
+    review_star_rating: string;
+    review_comment: string;
+  }
+
+  interface AmazonAPIResponse {
+    status: string;
+    data: {
+      reviews: Array<{
+        review_title?: string;
+        review_star_rating?: string;
+        review_comment?: string;
+      }>;
+    };
+  }
+
+  // Endpoint para extrair reviews da Amazon
+  app.post('/api/amazon-reviews/extract', async (req: any, res: any) => {
+    try {
+      const { asin, page = 1, country = 'BR', sort_by = 'MOST_RECENT' } = req.body;
+
+      if (!asin) {
+        return res.status(400).json({
+          success: false,
+          message: 'ASIN é obrigatório'
+        });
+      }
+
+      // Validar ASIN format (10 caracteres alfanuméricos)
+      if (!/^[A-Z0-9]{10}$/.test(asin)) {
+        return res.status(400).json({
+          success: false,
+          message: 'ASIN deve ter 10 caracteres alfanuméricos'
+        });
+      }
+
+      console.log(`🔍 [AMAZON_REVIEWS] Buscando reviews - ASIN: ${asin}, Página: ${page}, País: ${country}`);
+
+      // Configurar parâmetros da API
+      const params = new URLSearchParams({
+        asin,
+        country,
+        page: page.toString(),
+        sort_by,
+        star_rating: 'ALL',
+        verified_purchases_only: 'false',
+        images_or_videos_only: 'false',
+        current_format_only: 'false'
+      });
+
+      // Fazer requisição para a RapidAPI
+      const response = await fetch(`https://real-time-amazon-data.p.rapidapi.com/product-reviews?${params}`, {
+        method: 'GET',
+        headers: {
+          'X-Rapidapi-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+          'X-Rapidapi-Host': 'real-time-amazon-data.p.rapidapi.com'
+        }
+      });
+
+      if (!response.ok) {
+        console.error(`❌ [AMAZON_REVIEWS] Erro API: ${response.status} - ${response.statusText}`);
+        return res.status(response.status).json({
+          success: false,
+          message: `Erro da API Amazon: ${response.statusText}`
+        });
+      }
+
+      const data: AmazonAPIResponse = await response.json();
+
+      if (data.status !== 'OK') {
+        console.error(`❌ [AMAZON_REVIEWS] Status não OK:`, data);
+        return res.status(400).json({
+          success: false,
+          message: 'API retornou status de erro'
+        });
+      }
+
+      // Filtrar apenas os dados necessários
+      const filteredReviews: ReviewData[] = data.data.reviews.map(review => ({
+        review_title: review.review_title || '',
+        review_star_rating: review.review_star_rating || '',
+        review_comment: review.review_comment || ''
+      }));
+
+      console.log(`✅ [AMAZON_REVIEWS] ${filteredReviews.length} reviews extraídos - ASIN: ${asin}, Página: ${page}`);
+
+      res.json({
+        success: true,
+        status: 'OK',
+        data: {
+          reviews: filteredReviews
+        },
+        metadata: {
+          asin,
+          page,
+          country,
+          sort_by,
+          total_reviews: filteredReviews.length
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ [AMAZON_REVIEWS] Erro interno:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor',
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // Endpoint para validar ASIN
+  app.post('/api/amazon-reviews/validate-asin', async (req: any, res: any) => {
+    try {
+      const { url } = req.body;
+
+      if (!url) {
+        return res.status(400).json({
+          success: false,
+          message: 'URL é obrigatória'
+        });
+      }
+
+      // Padrões para extrair ASIN
+      const asinPatterns = [
+        /\/dp\/([A-Z0-9]{10})/,
+        /\/product\/([A-Z0-9]{10})/,
+        /asin=([A-Z0-9]{10})/,
+        /\/([A-Z0-9]{10})(?:\/|\?|$)/
+      ];
+
+      let asin = null;
+      for (const pattern of asinPatterns) {
+        const match = url.match(pattern);
+        if (match) {
+          asin = match[1];
+          break;
+        }
+      }
+
+      if (!asin) {
+        return res.status(400).json({
+          success: false,
+          message: 'ASIN não encontrado na URL'
+        });
+      }
+
+      console.log(`🔍 [AMAZON_REVIEWS] ASIN extraído: ${asin} da URL: ${url}`);
+
+      res.json({
+        success: true,
+        asin,
+        url
+      });
+
+    } catch (error) {
+      console.error('❌ [AMAZON_REVIEWS] Erro na validação:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor',
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
   // Authentication Routes - Production System
   
   // Schemas for authentication

@@ -232,6 +232,16 @@ function App() {
                           </Route>
 
                           {/* Hub section routes - Protected */}
+                          <Route path="/hub/amazon-reviews">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonReviewExtractor />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
                           <Route path="/hub/parceiros">
                             <ProtectedRoute>
                               <Layout>
