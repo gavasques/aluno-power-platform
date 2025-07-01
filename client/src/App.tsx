@@ -37,6 +37,7 @@ const TemplateDetail = lazy(() => import("./pages/hub/TemplateDetail"));
 const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
 
 const HtmlDescriptionAgent = lazy(() => import("./pages/agents/HtmlDescriptionAgent"));
+const BulletPointsAgent = lazy(() => import("./pages/agents/BulletPointsAgent"));
 const Hub = lazy(() => import("./pages/Hub"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const AgentsPage = lazy(() => import("./pages/agents"));
@@ -122,6 +123,14 @@ function App() {
                             <ProtectedRoute>
                               <Suspense fallback={<PageLoader />}>
                                 <HtmlDescriptionAgent />
+                              </Suspense>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agents/bullet-points-generator">
+                            <ProtectedRoute>
+                              <Suspense fallback={<PageLoader />}>
+                                <BulletPointsAgent />
                               </Suspense>
                             </ProtectedRoute>
                           </Route>
