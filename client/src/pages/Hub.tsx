@@ -7,6 +7,7 @@ import Tools from "./hub/Tools";
 import Suppliers from "./hub/Suppliers";
 import Partners from "./hub/Partners";
 import AmazonReviewExtractor from "./hub/AmazonReviewExtractor";
+import KeywordSearchReport from "./hub/KeywordSearchReport";
 
 const Hub = () => {
   const { section } = useParams();

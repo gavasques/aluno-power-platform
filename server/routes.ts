@@ -3826,7 +3826,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   });
 
   // Amazon Keywords Search Routes
-  app.post('/api/amazon-keywords/search', requireAuth, async (req: any, res: Response) => {
+  app.post('/api/amazon-keywords/search', async (req, res) => {
     try {
       const {
         query,
