@@ -126,6 +126,8 @@ export default function AmazonReviewExtractor() {
   const saveUsageLog = async (asin: string) => {
     if (!user) return;
     
+    const maxPages = (selectedCountry === 'BR' || selectedCountry === 'MX') ? 1 : 10;
+    
     try {
       await fetch('/api/tool-usage-logs', {
         method: 'POST',
@@ -141,7 +143,7 @@ export default function AmazonReviewExtractor() {
           country: selectedCountry,
           additionalData: {
             country: selectedCountry,
-            totalPages: 10
+            totalPages: maxPages
           }
         })
       });
@@ -217,19 +219,22 @@ export default function AmazonReviewExtractor() {
         // Salvar log de uso
         await saveUsageLog(asin);
 
+        // Definir número máximo de páginas baseado no país
+        const maxPages = (selectedCountry === 'BR' || selectedCountry === 'MX') ? 1 : 10;
+
         setState(prev => ({
           ...prev,
           currentProduct: `Produto ${urlIndex + 1}/${state.urls.length} (${asin})`,
-          totalPages: 10
+          totalPages: maxPages
         }));
 
-        // Buscar até 10 páginas de reviews para cada produto
-        for (let page = 1; page <= 10; page++) {
+        // Buscar páginas de reviews para cada produto (limitado por país)
+        for (let page = 1; page <= maxPages; page++) {
           try {
             setState(prev => ({
               ...prev,
               currentPage: page,
-              progress: ((urlIndex * 10 + page) / (state.urls.length * 10)) * 100
+              progress: ((urlIndex * maxPages + page) / (state.urls.length * maxPages)) * 100
             }));
 
             const reviews = await fetchReviews(asin, page);
@@ -339,7 +344,7 @@ export default function AmazonReviewExtractor() {
         <CardHeader>
           <CardTitle>Produtos para Análise</CardTitle>
           <CardDescription>
-            Adicione URLs da Amazon ou ASINs diretos. Serão coletadas até 10 páginas de reviews por produto.
+            Adicione URLs da Amazon ou ASINs diretos. Avaliações do Brasil e México são limitadas a 1 página. Os demais países irão puxar até 10 páginas de avaliações.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -370,6 +375,19 @@ export default function AmazonReviewExtractor() {
               </Select>
             </div>
           </div>
+          
+          {/* Alerta sobre limitações por país */}
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Limitações por país:</strong> {' '}
+              {selectedCountry === 'BR' || selectedCountry === 'MX' 
+                ? `${COUNTRIES.find(c => c.code === selectedCountry)?.flag} ${COUNTRIES.find(c => c.code === selectedCountry)?.name} está limitado a 1 página de avaliações.`
+                : `${COUNTRIES.find(c => c.code === selectedCountry)?.flag} ${COUNTRIES.find(c => c.code === selectedCountry)?.name} irá extrair até 10 páginas de avaliações.`
+              }
+            </AlertDescription>
+          </Alert>
+          
           <div className="flex justify-end">
             <Button onClick={addUrl} disabled={state.isExtracting}>
               Adicionar Produto

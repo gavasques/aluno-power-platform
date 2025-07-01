@@ -30,8 +30,6 @@ import {
   insertNewsSchema,
   insertAiGenerationLogSchema,
   aiGenerationLogs,
-  insertToolUsageLogSchema,
-  toolUsageLogs,
   insertUpdateSchema,
   insertGeneratedImageSchema,
   insertWebhookConfigSchema,
@@ -51,7 +49,7 @@ import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs } from '@shared/schema';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema } from '@shared/schema';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
