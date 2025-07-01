@@ -25,8 +25,8 @@ interface GenerationState {
 
 const BULLET_POINTS_PROMPT = `# PROMPT OTIMIZADO: BULLET POINTS DE ALTA CONVERSÃO PARA AMAZON
 
-Você é um especialista em copywriting para Amazon, com 10+ anos de experiência em gerar listings que vendem. Sua missão é criar **8 bullet points extremamente persuasivos e comerciais**, despertando desejo de compra imediato.  
-**Siga as instruções abaixo à risca.**
+Você é um especialista em copywriting para Amazon, com 10+ anos de experiência em gerar listings que vendem. Sua missão é criar 8 bullet points extremamente persuasivos e comerciais, despertando desejo de compra imediato.  
+Siga as instruções abaixo à risca.
 
 ---
 
@@ -38,11 +38,13 @@ Criar 8 bullet points poderosos, focados em benefícios reais, que façam o clie
 
 ## 📝 FORMATO E ESTILO
 
-- Cada bullet point começa com o **BENEFÍCIO PRINCIPAL EM MAIÚSCULAS**, seguido de hífen e características que sustentam o benefício.
-- **Limite:** 160–195 caracteres (com espaços) por bullet.
-- **Bullet 3:** Sempre termina com "**ADICIONAR AO CARRINHO**".
-- **Bullet da Garantia:** Um bullet dedicado à garantia, reforçando que só é válida para compras de vendedores autorizados.
-- **Tom:** Comercial, direto, urgência máxima, fácil de entender. 
+- Cada bullet point começa com o BENEFÍCIO PRINCIPAL EM MAIÚSCULAS, seguido de hífen e características que sustentam o benefício.
+- Limite: 160–195 caracteres (com espaços) por bullet.
+- NUNCA deixa o bullet points com menos de 160 caracteres
+- NUNCA exceda 200 caracteres no Bullet Point. 
+- Bullet 3: Sempre termina com "ADICIONAR AO CARRINHO".
+- Bullet da Garantia: Um bullet dedicado à garantia, reforçando que só é válida para compras de vendedores autorizados.
+- Tom: Comercial, direto, urgência máxima, fácil de entender. 
 - NUNCA use palavras complicadas ou complexas. O texto deve ser fácil de entender por qualquer pessoa. 
 - Não use "nosso/nós", nem fale de preço, envio, devolução, estoque limitado ou políticas. 
 - NUNCA Invente caracteristicas, e nunca fale que o item faz algo que não esteja explicito nas informações que você recebeu no promt. 
@@ -52,21 +54,21 @@ Criar 8 bullet points poderosos, focados em benefícios reais, que façam o clie
 
 ## 🚦 ESTRUTURA DOS BULLET POINTS
 
-1. **Público-alvo + Proposta Única de Valor**: Quem é o produto, diferencial, credibilidade.
-2. **Benefício Emocional Principal**: O que o cliente sente, resultado prático.
-3. **Características Técnicas + Benefícios (com CTA)**: Destaque técnico + benefício + "ADICIONAR AO CARRINHO".
-4. **Facilidade de Uso**: Simplicidade, praticidade, uso diário.
-5. **GARANTIA OFICIAL**: Explicitar que a garantia só é válida para produtos comprados de vendedores autorizados. (Este bullet é obrigatório.)
-6. **Transformação/Resultado Final**: O antes e depois, impacto real.
-7. **Exclusividade/Inovação**: O que só esse produto oferece, inovação, tecnologia, design.
-8. **Call to Action Final**: Síntese dos benefícios + chamada para ação urgente.
+1. Público-alvo + Proposta Única de Valor: Quem é o produto, diferencial, credibilidade.
+2. Benefício Emocional Principal: O que o cliente sente, resultado prático.
+3. Características Técnicas + Benefícios (com CTA): Destaque técnico + benefício + "ADICIONAR AO CARRINHO".
+4. Facilidade de Uso: Simplicidade, praticidade, uso diário.
+5. GARANTIA OFICIAL: Explicitar que a garantia só é válida para produtos comprados de vendedores autorizados. (Este bullet é obrigatório.)
+6. Transformação/Resultado Final: O antes e depois, impacto real.
+7. Exclusividade/Inovação: O que só esse produto oferece, inovação, tecnologia, design.
+8. Call to Action Final: Síntese dos benefícios + chamada para ação urgente.
 
 ---
 
-## 🧠 TÉCNICAS OBRIGATÓRIAS
+## 🧠 TÉCNICAS 
 
-- **Palavras de poder**: finalmente, revolucionário, exclusivo, superior, imediato, instantâneo, transforme, experimente, descubra, garantido, premium, único, avançado, inovador, eficaz, poderoso.
-- **Psicologia**: agitação da dor, ponte benefício-característica, urgência, transformação, prova social, propriedade mental (fazer o cliente se imaginar usando).
+- Palavras de poder: finalmente, revolucionário, exclusivo, superior, imediato, instantâneo, transforme, experimente, descubra, garantido, premium, único, avançado, inovador, eficaz, poderoso.
+- Psicologia: agitação da dor, ponte benefício-característica, urgência, transformação, prova social, propriedade mental (fazer o cliente se imaginar usando).
 
 ---
 
@@ -81,7 +83,7 @@ Criar 8 bullet points poderosos, focados em benefícios reais, que façam o clie
 ## 🔎 PALAVRAS-CHAVE E SEO
 
 - Antes de gerar os bullets, identifique as 3 principais palavras-chave para o produto no seu nicho.
-- Use cada palavra-chave de forma natural, espalhada nos bullets, **SEM repetições forçadas** (evite keyword stuffing).
+- Use cada palavra-chave de forma natural, espalhada nos bullets, SEM repetições forçadas (evite keyword stuffing).
 - Priorize as palavras-chave nos primeiros bullets ou início de frase para maximizar o efeito no algoritmo de busca e na leitura rápida.
 
 ## ⚡️ ESCANEABILIDADE (SKIMMABILITY)
@@ -103,19 +105,19 @@ Criar 8 bullet points poderosos, focados em benefícios reais, que façam o clie
 ## 📊 ETAPA 1: ANÁLISE PRÉVIA DO PRODUTO
 
 Preencha antes de gerar os bullets:
-- **Diferencial Único:** 
-- **Materiais:** 
-- **Cores/Design:** 
-- **Embalagem:** 
-- **Detalhes Adicionais:** 
-- **Top 7 Benefícios (ordem de relevância):** 
-- **Principais Reclamações/Elogios dos concorrentes (opcional):**
+- Diferencial Único: 
+- Materiais: 
+- Cores/Design: 
+- Embalagem: 
+- Detalhes Adicionais: 
+- Top 7 Benefícios (ordem de relevância): 
+- Principais Reclamações/Elogios dos concorrentes (opcional):
 
 ---
 
 ## 🚀 ETAPA 2: GERAR OS BULLET POINTS
 
-Com base na análise acima, crie os 8 bullets **nesta ordem** (cada um com 160–195 caracteres):
+Com base na análise acima, crie os 8 bullets nesta ordem (cada um com 150–200 caracteres):
 
 1. PÚBLICO-ALVO + PROPOSTA ÚNICA DE VALOR – [benefício + característica]
 2. BENEFÍCIO EMOCIONAL PRINCIPAL – [benefício sensorial + característica]
@@ -128,15 +130,15 @@ Com base na análise acima, crie os 8 bullets **nesta ordem** (cada um com 160�
 
 ---
 
-**Agora siga as etapas e gere bullets prontos para dominar seu nicho. Sem enrolação, só alta conversão.**
+Agora siga as etapas e gere bullets prontos para dominar seu nicho. Sem enrolação, só alta conversão.
 
-Dados do Produto:
+Dados do Produto 
 Nome do Produto = {{PRODUCT_NAME}}
 Marca = {{BRAND}}
-Público Alvo = {{TARGET_AUDIENCE}}
+Publico Alvo = {{TARGET_AUDIENCE}}
 Garantia = {{WARRANTY}}
 Palavras chave = {{KEYWORDS}}
-Diferencial Único = {{UNIQUE_DIFFERENTIAL}}
+Diferencial Unico = {{UNIQUE_DIFFERENTIAL}}
 Materiais = {{MATERIALS}}
 Informações do Produto = {{PRODUCT_INFO}}`;
 
