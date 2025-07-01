@@ -121,8 +121,10 @@ Preferred communication style: Simple, everyday language.
     - Dados financeiros: capital social e CNAEs principal/secundários
     - Sócios e administradores: nomes, documentos, qualificações, datas de entrada
   - **Integração com API RapidAPI**:
-    - Endpoint `/api/cnpj-consulta` usando API de dados CNPJ brasileira
-    - Sistema de logging automático com CNPJ, razão social e status
+    - Endpoint `/api/cnpj-consulta` usando `/buscar-base.php` da API dados-cnpj
+    - Sistema de logging automático na tabela `tool_usage_logs`
+    - Log estruturado: userId, toolName='Consulta de CNPJ', keyword=null, asin=null, country=null
+    - additionalData contém CNPJ pesquisado, razão social, situação e nome fantasia
     - Tratamento robusto de erros com mensagens informativas
     - Validação rigorosa de entrada (14 dígitos numéricos)
   - **UX/UI Otimizada**:

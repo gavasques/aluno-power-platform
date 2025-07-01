@@ -4097,23 +4097,25 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const data = await response.json();
         console.log(`✅ [CNPJ_CONSULTA] Dados recebidos para CNPJ: ${cnpjNumbers}`, data.status ? 'SUCESSO' : 'FALHA');
         
-        // Log da consulta para analytics
+        // Log da consulta na tabela tool_usage_logs
         try {
           await db.insert(toolUsageLogs).values({
-            userId: 2,
+            userId: 2, // ID do usuário admin padrão
             userName: 'Guilherme Vasques',
             userEmail: 'gavasques@gmail.com',
             toolName: 'Consulta de CNPJ',
-            keyword: cnpjNumbers,
-            country: 'BR',
+            keyword: null, // keyword null conforme solicitado
+            asin: null, // asin null conforme solicitado
+            country: null, // country null conforme solicitado
             additionalData: {
-              cnpj: cnpjNumbers,
+              cnpj: cnpjNumbers, // CNPJ pesquisado nos dados adicionais
               razao_social: data.dados?.razao_social,
               situacao: data.dados?.situacao,
-              status: data.status
-            }
+              nome_fantasia: data.dados?.nome_fantasia
+            },
+            createdAt: new Date() // data e hora da pesquisa
           });
-          console.log(`📊 [TOOL_USAGE] Log salvo - CNPJ: ${cnpjNumbers}`);
+          console.log(`📊 [TOOL_USAGE] Log salvo - Consulta CNPJ: ${cnpjNumbers}`);
         } catch (logError) {
           console.error('❌ Erro ao salvar log de uso:', logError);
         }
@@ -4174,24 +4176,26 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           "status": true
         };
 
-        // Log da consulta demo para analytics
+        // Log da consulta demo na tabela tool_usage_logs
         try {
           await db.insert(toolUsageLogs).values({
-            userId: 2,
+            userId: 2, // ID do usuário admin padrão
             userName: 'Guilherme Vasques',
             userEmail: 'gavasques@gmail.com',
             toolName: 'Consulta de CNPJ (Demo)',
-            keyword: cnpjNumbers,
-            country: 'BR',
+            keyword: null, // keyword null conforme solicitado
+            asin: null, // asin null conforme solicitado
+            country: null, // country null conforme solicitado
             additionalData: {
-              cnpj: cnpjNumbers,
+              cnpj: cnpjNumbers, // CNPJ pesquisado nos dados adicionais
               razao_social: demoData.dados.razao_social,
               situacao: demoData.dados.situacao,
-              status: demoData.status,
-              demo: true
-            }
+              nome_fantasia: demoData.dados.nome_fantasia,
+              demo: true // Indicador de dados de demonstração
+            },
+            createdAt: new Date() // data e hora da pesquisa
           });
-          console.log(`📊 [TOOL_USAGE] Log demo salvo - CNPJ: ${cnpjNumbers}`);
+          console.log(`📊 [TOOL_USAGE] Log demo salvo - Consulta CNPJ: ${cnpjNumbers}`);
         } catch (logError) {
           console.error('❌ Erro ao salvar log de uso demo:', logError);
         }
