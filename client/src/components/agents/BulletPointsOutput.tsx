@@ -15,7 +15,7 @@ export const BulletPointsOutput: React.FC<BulletPointsOutputProps> = ({
   onCopy
 }) => {
   return (
-    <div className="bg-white rounded-lg border shadow-sm p-6">
+    <div className="bg-white rounded-lg border shadow-sm p-6 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-900">
           Bullet Points Gerados
@@ -35,7 +35,7 @@ export const BulletPointsOutput: React.FC<BulletPointsOutputProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Os bullet points gerados aparecerão aqui. Você pode editá-los conforme necessário..."
-        className="min-h-[400px] resize-none text-sm font-mono"
+        className="flex-1 resize-none text-sm font-mono"
       />
     </div>
   );

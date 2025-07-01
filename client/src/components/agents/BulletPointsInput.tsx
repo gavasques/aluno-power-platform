@@ -58,13 +58,13 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
   const isFormValid = formData.productName.trim() && formData.textInput.trim();
 
   return (
-    <div className="bg-white rounded-lg border shadow-sm p-6">
-      <div className="mb-6">
+    <div className="bg-white rounded-lg border shadow-sm p-6 h-full flex flex-col">
+      <div className="flex-1 flex flex-col">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           Informações do Produto
         </h2>
         
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1 flex flex-col">
           {/* Nome do Produto - Obrigatório */}
           <div>
             <Label htmlFor="productName" className="text-sm font-medium text-gray-700">
@@ -122,7 +122,7 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
           </div>
 
           {/* Informações do Produto - Obrigatório */}
-          <div>
+          <div className="flex-1 flex flex-col">
             <div className="flex justify-between items-center mb-2">
               <Label htmlFor="productInfo" className="text-sm font-medium text-gray-700">
                 Informações do Produto <span className="text-red-500">*</span>
@@ -136,7 +136,7 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
               value={formData.textInput}
               onChange={handleTextInputChange}
               placeholder="Descreva as características, benefícios e informações técnicas do seu produto. Inclua materiais, dimensões, funcionalidades e qualquer diferencial competitivo..."
-              className="min-h-[300px] resize-none text-sm"
+              className="flex-1 resize-none text-sm"
             />
           </div>
         </div>

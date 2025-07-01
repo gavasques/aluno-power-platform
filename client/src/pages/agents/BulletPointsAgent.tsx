@@ -51,7 +51,7 @@ const BulletPointsAgent: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-8 min-h-[calc(100vh-300px)]">
             <BulletPointsInput
               formData={{
                 productName: state.productName,
