@@ -8,6 +8,7 @@ import Suppliers from "./hub/Suppliers";
 import Partners from "./hub/Partners";
 import AmazonReviewExtractor from "./hub/AmazonReviewExtractor";
 import KeywordSearchReport from "./hub/KeywordSearchReport";
+import AmazonProductDetails from "./hub/AmazonProductDetails";
 
 const Hub = () => {
   const { section } = useParams();
@@ -30,6 +31,8 @@ const Hub = () => {
       return <AmazonReviewExtractor />;
     case "relatorio-keywords":
       return <KeywordSearchReport />;
+    case "produto-detalhes":
+      return <AmazonProductDetails />;
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Hub de Recursos";
       return (

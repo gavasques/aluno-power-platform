@@ -108,7 +108,37 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ EXTRATOR DE REVIEWS AMAZON IMPLEMENTADO NO HUB DE RECURSOS
+- **July 01, 2025**: ✅ DETALHES DO PRODUTO AMAZON - NOVA FERRAMENTA COMPLETA IMPLEMENTADA
+  - **Nova Ferramenta no Hub de Recursos**: "Detalhes do Produto Amazon"
+    - Busca completa de informações de produtos Amazon por ASIN
+    - Suporte a 22 países com seleção via bandeiras (US, BR, CA, MX, GB, DE, FR, IT, ES, etc.)
+    - Interface moderna com seções colapsáveis e navegação intuitiva
+    - Validação automática de ASIN (10 caracteres alfanuméricos)
+  - **Dados Extraídos Organizados**:
+    - Informações básicas: título, ASIN, país, avaliações, badges (Best Seller, Prime, etc.)
+    - Preços: atual, original, máximo com códigos de cores
+    - Descrição completa e características do produto
+    - Especificações técnicas detalhadas em grid responsivo
+    - Galeria de imagens com click para ampliar
+    - Vídeos de usuários com thumbnails e informações do criador
+  - **Integração com API RapidAPI**:
+    - Endpoint `/api/amazon-product-details` usando Real-time Amazon Data API
+    - Sistema de logging automático com ASIN, país e dados básicos do produto
+    - Tratamento robusto de erros com mensagens informativas
+    - Cache de respostas para melhor performance
+  - **UX/UI Otimizada**:
+    - Layout responsivo com máximo 6xl container
+    - Sistema de estrelas para avaliações com design profissional
+    - Cards colapsáveis com animações suaves
+    - Formatação inteligente de preços removendo símbolos desnecessários
+    - Links diretos para visualização na Amazon
+    - Toast notifications para feedback imediato
+  - **Navegação Integrada**:
+    - Menu "Detalhes do Produto" adicionado ao Hub de Recursos
+    - Rota `/hub/produto-detalhes` configurada com lazy loading
+    - Ícone Package para identificação visual
+
+- **July 01, 2025 (anterior)**: ✅ EXTRATOR DE REVIEWS AMAZON IMPLEMENTADO NO HUB DE RECURSOS
   - **Nova Funcionalidade Completa**:
     - Extração automática de reviews de produtos Amazon via API RapidAPI
     - Suporte a múltiplas URLs com extração automática de ASIN
