@@ -315,8 +315,8 @@ export default function AmazonReviewExtractor() {
     }
   };
 
-  // Função para baixar CSV
-  const downloadCSV = () => {
+  // Função para baixar TXT
+  const downloadTXT = () => {
     if (state.extractedReviews.length === 0) {
       toast({
         title: "Nenhum dado",
@@ -326,22 +326,26 @@ export default function AmazonReviewExtractor() {
       return;
     }
 
-    const csvHeader = 'review_title,review_star_rating,review_comment\n';
-    const csvData = state.extractedReviews.map(review => {
-      const title = `"${(review.review_title || '').replace(/"/g, '""')}"`;
-      const rating = review.review_star_rating || '';
-      const comment = `"${(review.review_comment || '').replace(/"/g, '""')}"`;
-      return `${title},${rating},${comment}`;
-    }).join('\n');
+    const txtContent = state.extractedReviews.map((review, index) => {
+      const title = review.review_title || 'Sem título';
+      const rating = review.review_star_rating || 'Sem avaliação';
+      const comment = review.review_comment || 'Sem comentário';
+      
+      return `=== REVIEW ${index + 1} ===
+Título: ${title}
+Avaliação: ${rating} estrelas
+Comentário: ${comment}
 
-    const csvContent = csvHeader + csvData;
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+`;
+    }).join('');
+
+    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8;' });
     const link = document.createElement('a');
     
     if (link.download !== undefined) {
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `amazon_reviews_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `amazon_reviews_${new Date().toISOString().split('T')[0]}.txt`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -350,7 +354,7 @@ export default function AmazonReviewExtractor() {
 
     toast({
       title: "Download iniciado",
-      description: `Arquivo CSV com ${state.extractedReviews.length} reviews baixado.`
+      description: `Arquivo TXT com ${state.extractedReviews.length} reviews baixado.`
     });
   };
 
@@ -533,9 +537,9 @@ export default function AmazonReviewExtractor() {
                   <div className="text-lg font-semibold">
                     {state.extractedReviews.length} reviews extraídos
                   </div>
-                  <Button onClick={downloadCSV}>
+                  <Button onClick={downloadTXT}>
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar CSV
+                    Baixar TXT
                   </Button>
                 </div>
                 
