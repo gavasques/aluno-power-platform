@@ -14,6 +14,9 @@ interface GenerationState {
   textInput: string;
   targetAudience: string;
   keywords: string;
+  uniqueDifferential: string;
+  materials: string;
+  warranty: string;
   bulletPointsOutput: string;
   isGenerating: boolean;
   generatedBulletPoints: string;
@@ -137,6 +140,9 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
     textInput: '',
     targetAudience: '',
     keywords: '',
+    uniqueDifferential: '',
+    materials: '',
+    warranty: '',
     bulletPointsOutput: '',
     isGenerating: false,
     generatedBulletPoints: '',

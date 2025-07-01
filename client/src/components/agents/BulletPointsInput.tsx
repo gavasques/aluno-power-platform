@@ -13,6 +13,9 @@ interface ProductFormData {
   textInput: string;
   targetAudience: string;
   keywords: string;
+  uniqueDifferential: string;
+  materials: string;
+  warranty: string;
 }
 
 interface BulletPointsInputProps {
@@ -67,58 +70,100 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
         </h2>
         
         <div className="space-y-4 flex-1 flex flex-col">
-          {/* Nome do Produto - Obrigatório */}
-          <div>
-            <Label htmlFor="productName" className="text-sm font-medium text-gray-700">
-              Nome do Produto <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="productName"
-              value={formData.productName}
-              onChange={(e) => onChange('productName', e.target.value)}
-              placeholder="Ex: Smartphone Samsung Galaxy S24 128GB"
-              className="mt-1"
-            />
+          {/* Linha 1: Nome do Produto e Marca */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="productName" className="text-sm font-medium text-gray-700">
+                Nome do Produto <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="productName"
+                value={formData.productName}
+                onChange={(e) => onChange('productName', e.target.value)}
+                placeholder="Ex: Smartphone Samsung Galaxy S24 128GB"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="brand" className="text-sm font-medium text-gray-700">
+                Marca
+              </Label>
+              <Input
+                id="brand"
+                value={formData.brand}
+                onChange={(e) => onChange('brand', e.target.value)}
+                placeholder="Ex: Samsung, Apple, Nike..."
+                className="mt-1"
+              />
+            </div>
           </div>
 
-          {/* Marca */}
-          <div>
-            <Label htmlFor="brand" className="text-sm font-medium text-gray-700">
-              Marca
-            </Label>
-            <Input
-              id="brand"
-              value={formData.brand}
-              onChange={(e) => onChange('brand', e.target.value)}
-              placeholder="Ex: Samsung, Apple, Nike..."
-              className="mt-1"
-            />
+          {/* Linha 2: Público Alvo e Palavras-Chave */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="targetAudience" className="text-sm font-medium text-gray-700">
+                Público Alvo
+              </Label>
+              <Input
+                id="targetAudience"
+                value={formData.targetAudience}
+                onChange={(e) => onChange('targetAudience', e.target.value)}
+                placeholder="Ex: Jovens adultos, Profissionais de tecnologia..."
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="keywords" className="text-sm font-medium text-gray-700">
+                Palavras-Chave
+              </Label>
+              <Input
+                id="keywords"
+                value={formData.keywords}
+                onChange={(e) => onChange('keywords', e.target.value)}
+                placeholder="Ex: smartphone, 5G, câmera, bateria..."
+                className="mt-1"
+              />
+            </div>
           </div>
 
-          {/* Público Alvo */}
-          <div>
-            <Label htmlFor="targetAudience" className="text-sm font-medium text-gray-700">
-              Público Alvo
-            </Label>
-            <Input
-              id="targetAudience"
-              value={formData.targetAudience}
-              onChange={(e) => onChange('targetAudience', e.target.value)}
-              placeholder="Ex: Jovens adultos, Profissionais de tecnologia..."
-              className="mt-1"
-            />
+          {/* Linha 3: Diferencial Único e Materiais */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="uniqueDifferential" className="text-sm font-medium text-gray-700">
+                Diferencial Único
+              </Label>
+              <Input
+                id="uniqueDifferential"
+                value={formData.uniqueDifferential}
+                onChange={(e) => onChange('uniqueDifferential', e.target.value)}
+                placeholder="Ex: Tecnologia exclusiva, Inovação única..."
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="materials" className="text-sm font-medium text-gray-700">
+                Materiais
+              </Label>
+              <Input
+                id="materials"
+                value={formData.materials}
+                onChange={(e) => onChange('materials', e.target.value)}
+                placeholder="Ex: Alumínio, Aço inoxidável, Silicone..."
+                className="mt-1"
+              />
+            </div>
           </div>
 
-          {/* Palavras Chave */}
+          {/* Linha 4: Garantia */}
           <div>
-            <Label htmlFor="keywords" className="text-sm font-medium text-gray-700">
-              Palavras-Chave
+            <Label htmlFor="warranty" className="text-sm font-medium text-gray-700">
+              Garantia
             </Label>
             <Input
-              id="keywords"
-              value={formData.keywords}
-              onChange={(e) => onChange('keywords', e.target.value)}
-              placeholder="Ex: smartphone, 5G, câmera, bateria..."
+              id="warranty"
+              value={formData.warranty}
+              onChange={(e) => onChange('warranty', e.target.value)}
+              placeholder="Ex: 12 meses, 2 anos, Garantia vitalícia..."
               className="mt-1"
             />
           </div>
