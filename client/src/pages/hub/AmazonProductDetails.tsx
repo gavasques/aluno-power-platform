@@ -271,24 +271,45 @@ const AmazonProductDetails: React.FC = () => {
     onToggle: () => void;
     children: React.ReactNode;
   }) => (
-    <Card>
+    <Card className="border border-gray-200 bg-white shadow-sm">
       <CardHeader 
-        className="cursor-pointer hover:bg-gray-50 transition-colors"
+        className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50 transition-all duration-200 p-4 sm:p-6"
         onClick={onToggle}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+        aria-expanded={isExpanded}
       >
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Icon className="h-5 w-5" />
-            {title}
+        <CardTitle className="flex items-center justify-between text-sm sm:text-base">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+            <span className="font-medium sm:font-semibold text-gray-900 truncate">{title}</span>
           </div>
-          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          <div className="flex-shrink-0 ml-2">
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4 text-gray-600 transition-transform duration-200" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-gray-600 transition-transform duration-200" />
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
-      {isExpanded && (
-        <CardContent className="pt-0">
-          {children}
-        </CardContent>
-      )}
+      <div 
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        {isExpanded && (
+          <CardContent className="pt-0 p-4 sm:p-6 border-t border-gray-100">
+            {children}
+          </CardContent>
+        )}
+      </div>
     </Card>
   );
 
@@ -374,25 +395,31 @@ const AmazonProductDetails: React.FC = () => {
             isExpanded={expandedSections.basicInfo}
             onToggle={() => toggleSection('basicInfo')}
           >
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-3">{productData.data.product_title}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="order-2 md:order-1">
+                <h3 className="text-lg sm:text-xl font-semibold mb-3 break-words leading-tight">
+                  {productData.data.product_title}
+                </h3>
                 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-gray-500" />
-                    <span>ASIN: <strong>{productData.data.asin}</strong></span>
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-start sm:items-center gap-2 flex-wrap">
+                    <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0 mt-0.5 sm:mt-0" />
+                    <span className="text-sm">ASIN: </span>
+                    <strong className="text-sm font-mono break-all">{productData.data.asin}</strong>
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-gray-500" />
-                    <span>País: <strong>{COUNTRIES.find(c => c.code === productData.data.country)?.name}</strong></span>
+                  <div className="flex items-start sm:items-center gap-2 flex-wrap">
+                    <Globe className="h-4 w-4 text-gray-500 flex-shrink-0 mt-0.5 sm:mt-0" />
+                    <span className="text-sm">País: </span>
+                    <strong className="text-sm">{COUNTRIES.find(c => c.code === productData.data.country)?.name}</strong>
                   </div>
                   
                   {productData.data.product_star_rating && (
-                    <div className="flex items-center gap-2">
-                      {renderStarRating(productData.data.product_star_rating)}
-                      <span className="text-sm text-gray-600">
+                    <div className="flex items-start sm:items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        {renderStarRating(productData.data.product_star_rating)}
+                      </div>
+                      <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
                         ({productData.data.product_num_ratings?.toLocaleString()} avaliações)
                       </span>
                     </div>
@@ -470,27 +497,29 @@ const AmazonProductDetails: React.FC = () => {
             isExpanded={expandedSections.pricing}
             onToggle={() => toggleSection('pricing')}
           >
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+              <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <div className="text-xl sm:text-2xl font-bold text-blue-600 break-all">
                   {formatPrice(productData.data.product_price)}
                 </div>
-                <div className="text-sm text-gray-600">Preço Atual</div>
-                <div className="text-xs text-gray-500">{productData.data.currency}</div>
+                <div className="text-xs sm:text-sm text-gray-600 mt-1">Preço Atual</div>
+                {productData.data.currency && (
+                  <div className="text-xs text-gray-500 mt-0.5">{productData.data.currency}</div>
+                )}
               </div>
               
               {productData.data.product_original_price && (
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-xl font-semibold text-gray-600 line-through">
+                <div className="text-center p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="text-lg sm:text-xl font-semibold text-gray-600 line-through break-all">
                     {formatPrice(productData.data.product_original_price)}
                   </div>
-                  <div className="text-sm text-gray-600">Preço Original</div>
+                  <div className="text-xs sm:text-sm text-gray-600 mt-1">Preço Original</div>
                 </div>
               )}
               
               {productData.data.product_price_max && (
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-xl font-semibold text-green-600">
+                <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg border border-green-100">
+                  <div className="text-lg sm:text-xl font-semibold text-green-600 break-all">
                     {formatPrice(productData.data.product_price_max)}
                   </div>
                   <div className="text-sm text-gray-600">Preço Máximo</div>
@@ -571,14 +600,18 @@ const AmazonProductDetails: React.FC = () => {
                 </Button>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
                 {productData.data.product_photos.map((photo, index) => (
-                  <div key={index} className="aspect-square">
+                  <div key={index} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                     <img 
                       src={photo} 
                       alt={`${productData.data.product_title} - Imagem ${index + 1}`}
-                      className="w-full h-full object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-200 cursor-pointer"
                       onClick={() => window.open(photo, '_blank')}
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
                     />
                   </div>
                 ))}
