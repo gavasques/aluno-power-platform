@@ -4062,6 +4062,71 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Amazon Keyword Suggestions API
+  app.get('/api/amazon-keyword-suggestions', async (req: Request, res: Response) => {
+    try {
+      const { prefix, region = 'BR' } = req.query;
+      
+      if (!prefix || typeof prefix !== 'string') {
+        return res.status(400).json({ 
+          error: 'Parâmetro prefix é obrigatório' 
+        });
+      }
+
+      console.log(`🔍 [KEYWORD_SUGGESTIONS] Buscando sugestões para: "${prefix}" na região: ${region}`);
+
+      const response = await fetch(
+        `https://amazon-data-scraper141.p.rapidapi.com/v1/keywords/suggestions?prefix=${encodeURIComponent(prefix)}&region=${region}`,
+        {
+          headers: {
+            'X-RapidAPI-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+            'X-RapidAPI-Host': 'amazon-data-scraper141.p.rapidapi.com'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ [KEYWORD_SUGGESTIONS] ${data.data?.suggestions?.length || 0} sugestões encontradas para: "${prefix}"`);
+
+      // Log da consulta na tabela tool_usage_logs
+      try {
+        await db.insert(toolUsageLogs).values({
+          userId: 2, // ID do usuário admin padrão
+          userName: 'Guilherme Vasques',
+          userEmail: 'gavasques@gmail.com',
+          toolName: 'Amazon Keyword Suggestions',
+          keyword: prefix, // palavra-chave pesquisada
+          asin: null, // asin null conforme padrão
+          country: region as string, // país/região da busca
+          additionalData: {
+            prefix: prefix,
+            region: region,
+            suggestions_count: data.data?.suggestions?.length || 0,
+            hostname: data.data?.meta?.hostname,
+            currency: data.data?.meta?.currency_code
+          },
+          createdAt: new Date() // data e hora da pesquisa
+        });
+        console.log(`📊 [TOOL_USAGE] Log salvo - Keyword Suggestions: "${prefix}" (${region})`);
+      } catch (logError) {
+        console.error('❌ Erro ao salvar log de uso:', logError);
+      }
+
+      res.json(data);
+
+    } catch (error) {
+      console.error('❌ Erro ao buscar sugestões de palavras-chave:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor ao buscar sugestões',
+        details: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
   // CNPJ Consulta API
   app.get('/api/cnpj-consulta', async (req: Request, res: Response) => {
     try {

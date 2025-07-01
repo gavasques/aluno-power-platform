@@ -42,6 +42,7 @@ const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtract
 const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
 const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
 const CNPJConsulta = lazy(() => import("./pages/hub/CNPJConsulta"));
+const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSuggestions"));
 const Hub = lazy(() => import("./pages/Hub"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const AgentsPage = lazy(() => import("./pages/agents"));
@@ -270,6 +271,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <CNPJConsulta />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/hub/keyword-suggestions">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonKeywordSuggestions />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

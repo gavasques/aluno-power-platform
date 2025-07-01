@@ -34,6 +34,7 @@ import {
   ClipboardCheck,
   Youtube,
   Star,
+  Tag,
 } from "lucide-react";
 
 const menuItems = [
@@ -46,6 +47,7 @@ const menuItems = [
       { title: "Relatório de Keywords", href: "/hub/relatorio-keywords", icon: FileDigit },
       { title: "Detalhes do Produto", href: "/hub/produto-detalhes", icon: Package },
       { title: "Consulta de CNPJ", href: "/hub/consulta-cnpj", icon: Building },
+      { title: "Amazon Keyword Suggestions", href: "/hub/keyword-suggestions", icon: Tag },
       { title: "Parceiros", href: "/hub/parceiros", icon: Users },
       { title: "Fornecedores", href: "/hub/fornecedores", icon: Truck },
       { title: "Ferramentas", href: "/hub/ferramentas", icon: Wrench },
