@@ -25,6 +25,7 @@ interface ExtractorState {
   currentProduct: string;
   extractedReviews: ReviewData[];
   errors: string[];
+  countryLocked: boolean;
 }
 
 const COUNTRIES = [
@@ -47,10 +48,11 @@ export default function AmazonReviewExtractor() {
     isExtracting: false,
     progress: 0,
     currentPage: 0,
-    totalPages: 10, // Mudado para 10 como solicitado
+    totalPages: 10,
     currentProduct: '',
     extractedReviews: [],
-    errors: []
+    errors: [],
+    countryLocked: false
   });
 
   // Função para extrair ASIN da URL da Amazon ou validar ASIN direto
@@ -104,22 +106,27 @@ export default function AmazonReviewExtractor() {
 
     setState(prev => ({
       ...prev,
-      urls: [...prev.urls, urlInput]
+      urls: [...prev.urls, urlInput],
+      countryLocked: true // Bloquear país após adicionar o primeiro produto
     }));
     setUrlInput('');
     
     toast({
       title: "Produto adicionado",
-      description: `ASIN ${asin} adicionado à lista.`
+      description: `ASIN ${asin} adicionado à lista. País fixado para esta extração.`
     });
   };
 
   // Remover URL da lista
   const removeUrl = (index: number) => {
-    setState(prev => ({
-      ...prev,
-      urls: prev.urls.filter((_, i) => i !== index)
-    }));
+    setState(prev => {
+      const newUrls = prev.urls.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        urls: newUrls,
+        countryLocked: newUrls.length > 0 // Desbloquear país se não há mais URLs
+      };
+    });
   };
 
   // Função para salvar log de uso
@@ -344,7 +351,7 @@ export default function AmazonReviewExtractor() {
         <CardHeader>
           <CardTitle>Produtos para Análise</CardTitle>
           <CardDescription>
-            Adicione URLs da Amazon ou ASINs diretos. Avaliações do Brasil e México são limitadas a 1 página. Os demais países irão puxar até 10 páginas de avaliações.
+            Adicione URLs da Amazon ou ASINs diretos. <strong>Uma extração por país</strong> - após adicionar o primeiro produto, o país ficará fixo. Avaliações do Brasil e México são limitadas a 1 página. Os demais países irão puxar até 10 páginas de avaliações.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -360,8 +367,17 @@ export default function AmazonReviewExtractor() {
               />
             </div>
             <div>
-              <Label htmlFor="country-select">País da Amazon</Label>
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+              <Label htmlFor="country-select">
+                País da Amazon
+                {state.countryLocked && (
+                  <span className="text-sm text-muted-foreground ml-2">(Fixado)</span>
+                )}
+              </Label>
+              <Select 
+                value={selectedCountry} 
+                onValueChange={setSelectedCountry}
+                disabled={state.countryLocked}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -380,11 +396,14 @@ export default function AmazonReviewExtractor() {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Limitações por país:</strong> {' '}
+              <strong>
+                {state.countryLocked ? 'País fixado para esta extração:' : 'Limitações por país:'}
+              </strong> {' '}
               {selectedCountry === 'BR' || selectedCountry === 'MX' 
                 ? `${COUNTRIES.find(c => c.code === selectedCountry)?.flag} ${COUNTRIES.find(c => c.code === selectedCountry)?.name} está limitado a 1 página de avaliações.`
                 : `${COUNTRIES.find(c => c.code === selectedCountry)?.flag} ${COUNTRIES.find(c => c.code === selectedCountry)?.name} irá extrair até 10 páginas de avaliações.`
               }
+              {state.countryLocked && ' Remova todos os produtos para alterar o país.'}
             </AlertDescription>
           </Alert>
           
