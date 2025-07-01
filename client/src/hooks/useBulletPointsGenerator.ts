@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Agent } from '@shared/schema';
@@ -163,59 +163,49 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
     setState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  const updateAgentConfig = useCallback(() => {
+  // Atualizar configuração automaticamente quando o agente mudar
+  useEffect(() => {
     if (agent) {
-      setAgentConfig({
+      const newConfig = {
         provider: agent.provider || 'openai',
         model: agent.model || 'gpt-4o-mini',
-        temperature: parseFloat(agent.temperature || '0.7'),
+        temperature: typeof agent.temperature === 'string' ? parseFloat(agent.temperature) : agent.temperature || 0.7,
         maxTokens: agent.maxTokens || 2000
-      });
+      };
+      console.log('🔧 [BULLET_POINTS] Auto-updating agent config:', newConfig);
+      setAgentConfig(newConfig);
+    }
+  }, [agent]);
+
+  const updateAgentConfig = useCallback(() => {
+    if (agent) {
+      const newConfig = {
+        provider: agent.provider || 'openai',
+        model: agent.model || 'gpt-4o-mini',
+        temperature: typeof agent.temperature === 'string' ? parseFloat(agent.temperature) : agent.temperature || 0.7,
+        maxTokens: agent.maxTokens || 2000
+      };
+      console.log('🔧 [BULLET_POINTS] Manual update agent config:', newConfig);
+      setAgentConfig(newConfig);
     }
   }, [agent]);
 
   const generateWithAI = useCallback(async () => {
-    if (!state.productName.trim()) {
+    if (!state.productName.trim() || !state.textInput.trim()) {
       toast({
         variant: "destructive",
-        title: "❌ Erro",
-        description: "Por favor, insira o nome do produto",
+        title: "❌ Campos obrigatórios",
+        description: "Preencha o nome do produto e as informações detalhadas.",
       });
       return;
     }
 
-    if (!state.textInput.trim()) {
-      toast({
-        variant: "destructive",
-        title: "❌ Erro",
-        description: "Por favor, insira as informações do produto",
-      });
-      return;
-    }
-
-    if (state.textInput.trim().length < BULLET_POINTS_CONFIG.MIN_CHARS) {
-      toast({
-        variant: "destructive",
-        title: "❌ Erro",
-        description: `Informações do produto deve ter pelo menos ${BULLET_POINTS_CONFIG.MIN_CHARS} caracteres. Você tem ${state.textInput.trim().length} caracteres.`,
-      });
-      return;
-    }
-
-    if (!user) {
-      toast({
-        variant: "destructive",
-        title: "❌ Erro",
-        description: "Usuário não autenticado",
-      });
-      return;
-    }
-
+    console.log('🚀 [BULLET_POINTS] Starting generation with config:', agentConfig);
     updateState({ isGenerating: true });
 
     try {
       const startTime = Date.now();
-      
+
       const productInfo = `
 NOME DO PRODUTO: ${state.productName}
 ${state.brand ? `MARCA: ${state.brand}` : ''}
