@@ -108,7 +108,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 30, 2025**: ✅ SISTEMA DE LOGS DE IA E LIMITES ATUALIZADOS IMPLEMENTADO
+- **July 01, 2025**: ✅ MIGRAÇÃO COMPLETA DO GERADOR DE DESCRIÇÕES HTML PARA AGENTES DE IA
+  - **Migração Estrutural Completa**:
+    - "Descrição em HTML" movido do Hub de Recursos para seção Agentes de IA
+    - Criado agente específico "html-description-generator" no banco de dados
+    - Nova rota dedicada `/agents/html-description-generator` com interface especializada
+    - Redirecionamento automático da rota antiga `/hub/descricao-html`
+  - **Interface de Agente Otimizada**:
+    - Cards de agentes simplificados removendo informações técnicas (modelo, preços)
+    - Mantida apenas categoria visível para usuários finais
+    - Configurações de IA dinâmicas (provedor, modelo, temperatura, tokens)
+    - Header especializado com configurações, logs e métricas de performance
+  - **Navegação Atualizada**:
+    - Removido "Descrição em HTML" do menu Hub de Recursos
+    - Botão "Usar Agente" redireciona corretamente para rota especializada
+    - Funcionalidade 100% mantida com nova estrutura organizacional
+  - **Sistema de Logs Mantido**:
+    - Integração completa com `ai_generation_logs` para tracking de uso
+    - Métricas de performance, custos e tokens preservadas
+    - Limites de caracteres 1400-1800 mantidos conforme especificação
+
+- **June 30, 2025 (anterior)**: ✅ SISTEMA DE LOGS DE IA E LIMITES ATUALIZADOS IMPLEMENTADO
   - **Sistema de Logging Completo**:
     - Tabela `ai_generation_logs` no PostgreSQL com todos os campos detalhados
     - API `/api/ai-generation-logs` para salvamento automático de dados

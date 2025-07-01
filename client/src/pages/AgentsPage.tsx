@@ -249,18 +249,8 @@ export default function AgentsPage() {
             <CardContent>
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Modelo:</span>
-                  <span className="font-medium">{agent.model}</span>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Categoria:</span>
                   <span className="font-medium">{agent.category}</span>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Custo/1k tokens:</span>
-                  <span className="font-medium">${agent.costPer1kTokens}</span>
                 </div>
                 
                 <div className="flex space-x-2 pt-4">
