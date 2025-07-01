@@ -152,17 +152,7 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
           {agent.description || "Agente de IA para automação e otimização"}
         </p>
         
-        {/* Informações técnicas */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-          <span className="flex items-center">
-            <Bot className="w-3 h-3 mr-1" />
-            {agent.model || 'GPT-4'}
-          </span>
-          <span className="flex items-center">
-            <Zap className="w-3 h-3 mr-1" />
-            ${typeof agent.costPer1kTokens === 'number' ? agent.costPer1kTokens.toFixed(3) : '0.030'}/1k tokens
-          </span>
-        </div>
+        {/* Informações técnicas removidas para interface mais limpa */}
         
         {/* Botão de ação */}
         <Button 
