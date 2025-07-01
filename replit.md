@@ -108,7 +108,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ LIMPEZA COMPLETA DE ARQUIVOS DUPLICADOS E ORGANIZAÇÃO DO SISTEMA
+- **July 01, 2025**: ✅ GERADOR DE BULLET POINTS AMAZON IMPLEMENTADO
+  - **Novo Agente de IA Completo**:
+    - Agente "bullet-points-generator" criado no banco de dados
+    - Interface dedicada em `/agents/bullet-points-generator`
+    - Prompt especializado para criar 8 bullet points persuasivos Amazon
+    - Integração completa com sistema de configurações de IA (provedor, modelo, temperatura)
+  - **Template de Copywriting Avançado**:
+    - Estrutura de 8 bullet points com técnicas de conversão específicas
+    - Limite de 180-250 caracteres por bullet point
+    - Formato obrigatório terminando em "ADICIONAR AO CARRINHO"
+    - Técnicas psicológicas: agitação da dor, prova social, urgência, propriedade mental
+  - **Funcionalidades Técnicas**:
+    - Sistema de logs automático na tabela ai_generation_logs
+    - Endpoint correto `/api/ai-providers/test` para geração
+    - Interface responsiva com 2 colunas (entrada/saída)
+    - Botão "Copiar Bullet Points" funcional
+    - Contador de caracteres com validação de 2000 caracteres máximo
+  - **Interface Limpa**: Removido botão "Configurações" desnecessário na interface do usuário
+
+- **July 01, 2025 (anterior)**: ✅ LIMPEZA COMPLETA DE ARQUIVOS DUPLICADOS E ORGANIZAÇÃO DO SISTEMA
   - **Arquivos Duplicados Removidos**:
     - `AIAgents.tsx`: Stub não utilizado removido
     - `AuthContextOld.tsx`: Versão antiga do contexto de autenticação

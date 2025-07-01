@@ -207,56 +207,63 @@ Agora, com base nas informações do produto abaixo, crie 8 bullet points seguin
 
 ${textInput}`;
 
-      const response = await fetch('/api/ai/generate', {
+      const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          prompt,
           provider: agentConfig.provider,
           model: agentConfig.model,
-          temperature: agentConfig.temperature,
+          prompt: prompt,
           maxTokens: agentConfig.maxTokens,
-        }),
+          temperature: agentConfig.temperature
+        })
       });
 
       if (!response.ok) {
-        throw new Error('Erro na requisição');
+        throw new Error('Erro na API da IA');
       }
 
       const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Erro na geração de bullet points');
+      }
+
       const endTime = Date.now();
       const duration = endTime - startTime;
+      const responseText = data.response;
 
       // Salvar log da geração
       await fetch('/api/ai-generation-logs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           userId: user.id,
-          feature: 'bullet-points-generator',
           provider: agentConfig.provider,
           model: agentConfig.model,
-          promptText: prompt,
-          responseText: data.response,
-          promptTokens: data.usage?.prompt_tokens || 0,
-          responseTokens: data.usage?.completion_tokens || 0,
-          totalTokens: data.usage?.total_tokens || 0,
-          estimatedCost: data.cost || 0,
-          processingTime: duration,
-          temperature: agentConfig.temperature,
-          maxTokens: agentConfig.maxTokens,
-        }),
+          prompt: prompt,
+          response: responseText,
+          promptCharacters: prompt.length,
+          responseCharacters: responseText.length,
+          inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
+          outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
+          totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
+          cost: data.cost || 0,
+          duration: duration,
+          feature: 'bullet-points-generator'
+        })
       });
 
       if (bulletPointsOutput && bulletPointsOutput.trim()) {
-        setGeneratedBulletPoints(data.response);
+        setGeneratedBulletPoints(responseText);
         setShowReplaceDialog(true);
       } else {
-        setBulletPointsOutput(data.response);
+        setBulletPointsOutput(responseText);
         toast({
           title: "✓ Bullet Points Gerados!",
           description: "Bullet points criados com sucesso usando IA",
@@ -308,16 +315,7 @@ ${textInput}`;
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open('/admin/agents/providers', '_blank')}
-              >
-                <Settings className="h-4 w-4 mr-1" />
-                Configurações
-              </Button>
-            </div>
+
           </div>
 
           {/* Grid de 2 colunas */}
