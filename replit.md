@@ -108,7 +108,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ SEGURANÇA RAPIDAPI - CHAVES MOVIDAS PARA SECRETS ENVIRONMENT
+- **July 01, 2025**: ✅ EXPORTAÇÃO AMAZON - SISTEMA COMPLETO DE GESTÃO DE CONTEÚDO IMPLEMENTADO
+  - **Nova Funcionalidade**: Exportação Excel de departamentos e categorias Amazon
+    - API completa `/api/admin/export-amazon-departments` com loop pelos departamentos
+    - Busca automática de categorias para cada departamento via RapidAPI
+    - Interface moderna com progresso em tempo real e preview dos dados
+    - Exportação Excel com colunas: Departamento, Categoria, Código da Categoria
+    - Integrada na área administrativa: Admin → Gestão de Conteúdo → "Exportação Amazon"
+  - **Estrutura Técnica**:
+    - Componente React `AmazonDepartmentExport.tsx` com interface otimizada
+    - Sistema de delays entre requisições para evitar rate limiting
+    - Tratamento robusto de erros com logs detalhados
+    - Biblioteca XLSX para geração de arquivos Excel nativos
+    - Navegação integrada no painel administrativo
+  - **Como Acessar**:
+    - Avatar do usuário → "Administrador" → "Conteúdo" → Card "Exportação Amazon"
+    - Rota direta: `/admin/conteudo/export-amazon`
+
+- **July 01, 2025 (anterior)**: ✅ SEGURANÇA RAPIDAPI - CHAVES MOVIDAS PARA SECRETS ENVIRONMENT
   - **Segurança Aprimorada**:
     - Removidas todas as chaves RapidAPI hard-coded do código fonte
     - Implementada variável de ambiente RAPIDAPI_KEY para máxima segurança
