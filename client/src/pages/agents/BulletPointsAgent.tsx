@@ -43,19 +43,19 @@ const BulletPointsAgent: React.FC = () => {
   const WARNING_THRESHOLD = 1800;
 
   // Buscar configurações do agente
-  const { data: agent } = useQuery({
+  const { data: agent } = useQuery<Agent>({
     queryKey: ['/api/agents/bullet-points-generator'],
     enabled: true,
   });
 
   // Atualizar configurações quando o agente for carregado
   useEffect(() => {
-    if (agent && typeof agent === 'object') {
+    if (agent) {
       setAgentConfig({
-        provider: (agent as any).provider || 'openai',
-        model: (agent as any).model || 'gpt-4o-mini',
-        temperature: (agent as any).temperature || 0.7,
-        maxTokens: (agent as any).maxTokens || 2000
+        provider: agent.provider || 'openai',
+        model: agent.model || 'gpt-4o-mini',
+        temperature: parseFloat(agent.temperature) || 0.7,
+        maxTokens: agent.maxTokens || 2000
       });
     }
   }, [agent]);
