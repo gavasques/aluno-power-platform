@@ -108,7 +108,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ PROMPT GERADOR DE BULLET POINTS AMAZON REFINADO PARA MÁXIMA CONVERSÃO
+- **July 01, 2025**: ✅ EXTRATOR DE REVIEWS AMAZON IMPLEMENTADO NO HUB DE RECURSOS
+  - **Nova Funcionalidade Completa**:
+    - Extração automática de reviews de produtos Amazon via API RapidAPI
+    - Suporte a múltiplas URLs com extração automática de ASIN
+    - Coleta de até 10 páginas de reviews por produto
+    - Download de dados em formato CSV com campos: review_title, review_star_rating, review_comment
+    - Interface intuitiva com progresso em tempo real e gestão de erros
+  - **Arquitetura Técnica**:
+    - Componente React AmazonReviewExtractor em /hub/amazon-reviews
+    - APIs REST: /api/amazon-reviews/extract e /api/amazon-reviews/validate-asin
+    - Integração com RapidAPI Real-time Amazon Data service
+    - Validação rigorosa de ASIN (10 caracteres alfanuméricos)
+    - Sistema de throttling com delays para evitar rate limiting
+  - **UX Otimizada**:
+    - Gerenciamento de múltiplas URLs com visualização de ASIN extraído
+    - Barra de progresso com informações detalhadas (produto atual, página)
+    - Sistema de logs de erros para troubleshooting
+    - Preview dos primeiros 10 reviews antes do download completo
+    - Validação automática de URLs Amazon com feedback imediato
+
+- **July 01, 2025 (anterior)**: ✅ PROMPT GERADOR DE BULLET POINTS AMAZON REFINADO PARA MÁXIMA CONVERSÃO
   - **Prompt Ultra-Refinado com Regras Rigorosas**:
     - Limite rigoroso: NUNCA menos de 200 caracteres, NUNCA mais de 275 caracteres
     - Linguagem simples e direta: NUNCA usar palavras complicadas ou complexas
