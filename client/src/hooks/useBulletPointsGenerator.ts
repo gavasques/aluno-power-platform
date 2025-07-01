@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Agent } from '@shared/schema';
+import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
 
 interface UseBulletPointsGeneratorProps {
   agent?: Agent;
@@ -182,6 +183,15 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         variant: "destructive",
         title: "❌ Erro",
         description: "Por favor, insira as informações do produto",
+      });
+      return;
+    }
+
+    if (state.textInput.trim().length < BULLET_POINTS_CONFIG.MIN_CHARS) {
+      toast({
+        variant: "destructive",
+        title: "❌ Erro",
+        description: `Informações do produto deve ter pelo menos ${BULLET_POINTS_CONFIG.MIN_CHARS} caracteres. Você tem ${state.textInput.trim().length} caracteres.`,
       });
       return;
     }

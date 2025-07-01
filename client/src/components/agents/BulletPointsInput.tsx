@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Wand2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
 
 interface ProductFormData {
   productName: string;
@@ -52,10 +53,11 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
   const getCharCountColor = () => {
     if (charCount >= maxChars) return 'text-red-600';
     if (charCount >= warningThreshold) return 'text-yellow-600';
+    if (charCount < BULLET_POINTS_CONFIG.MIN_CHARS) return 'text-orange-600';
     return 'text-gray-500';
   };
 
-  const isFormValid = formData.productName.trim() && formData.textInput.trim();
+  const isFormValid = formData.productName.trim() && formData.textInput.trim() && formData.textInput.trim().length >= BULLET_POINTS_CONFIG.MIN_CHARS;
 
   return (
     <div className="bg-white rounded-lg border shadow-sm p-6 h-full flex flex-col">
@@ -126,6 +128,7 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
             <div className="flex justify-between items-center mb-2">
               <Label htmlFor="productInfo" className="text-sm font-medium text-gray-700">
                 Informações do Produto <span className="text-red-500">*</span>
+                <span className="text-xs text-gray-500 ml-1">(mín. 100 caracteres)</span>
               </Label>
               <span className={`text-sm font-medium ${getCharCountColor()}`}>
                 {charCount}/{maxChars} caracteres

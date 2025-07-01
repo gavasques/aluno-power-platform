@@ -1,5 +1,6 @@
 export const BULLET_POINTS_CONFIG = {
   MAX_CHARS: 4000,
+  MIN_CHARS: 100,
   WARNING_THRESHOLD: 3500,
   FEATURE_NAME: 'bullet-points-generator'
 } as const;
