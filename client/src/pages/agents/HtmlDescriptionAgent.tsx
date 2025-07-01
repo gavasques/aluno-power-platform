@@ -67,7 +67,7 @@ const HtmlDescriptionAgent: React.FC = () => {
 
   // Símbolos permitidos pela Amazon
   const allowedSymbols = [
-    '✅', '❌', '⚠️', '📦', '🚚', '💯', '⭐', '🔥', '💪', '🎯'
+    '✓', '©', '®', '★', '™', '♥', '①', '②', '③', '④'
   ];
 
   const charCount = textInput.length;
