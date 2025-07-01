@@ -108,7 +108,36 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ COMPATIBILIDADE CROSS-BROWSER E CROSS-PLATFORM GARANTIDA
+- **July 01, 2025**: ✅ CONSULTA DE CNPJ - NOVA FERRAMENTA COMPLETA IMPLEMENTADA
+  - **Nova Ferramenta no Hub de Recursos**: "Consulta de CNPJ"
+    - Busca completa de informações de empresas brasileiras por CNPJ
+    - Validação automática de CNPJ com formatação em tempo real
+    - Interface moderna com seções colapsáveis e navegação intuitiva
+    - Suporte completo a todos os dados empresariais disponíveis
+  - **Dados Extraídos Organizados**:
+    - Informações básicas: razão social, nome fantasia, CNPJ, situação, porte
+    - Endereço completo: logradouro, número, bairro, município, UF, CEP
+    - Contato: telefones e email quando disponíveis
+    - Dados financeiros: capital social e CNAEs principal/secundários
+    - Sócios e administradores: nomes, documentos, qualificações, datas de entrada
+  - **Integração com API RapidAPI**:
+    - Endpoint `/api/cnpj-consulta` usando API de dados CNPJ brasileira
+    - Sistema de logging automático com CNPJ, razão social e status
+    - Tratamento robusto de erros com mensagens informativas
+    - Validação rigorosa de entrada (14 dígitos numéricos)
+  - **UX/UI Otimizada**:
+    - Layout responsivo com formatação automática de CNPJ
+    - Seções expansíveis com dados categorizados
+    - Formatação inteligente de datas e qualificações
+    - Indicadores visuais de situação da empresa (ativo/inativo)
+    - Sistema de máscaras para CNPJ e validação em tempo real
+    - Cross-browser compatibility garantida
+  - **Navegação Integrada**:
+    - Menu "Consulta de CNPJ" adicionado ao Hub de Recursos
+    - Rota `/hub/consulta-cnpj` configurada com lazy loading
+    - Ícone Building para identificação visual
+
+- **July 01, 2025 (anterior)**: ✅ COMPATIBILIDADE CROSS-BROWSER E CROSS-PLATFORM GARANTIDA
   - **Melhorias de Interface**:
     - Componentes expansíveis com acessibilidade completa (aria-expanded, role, tabIndex)
     - Navegação por teclado funcional (Enter/Space para expandir/recolher)

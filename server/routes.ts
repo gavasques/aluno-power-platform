@@ -4062,6 +4062,71 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // CNPJ Consulta API
+  app.get('/api/cnpj-consulta', async (req: Request, res: Response) => {
+    try {
+      const { cnpj } = req.query;
+      
+      if (!cnpj || typeof cnpj !== 'string') {
+        return res.status(400).json({ error: 'CNPJ é obrigatório' });
+      }
+
+      // Validar CNPJ (14 dígitos)
+      const cnpjNumbers = cnpj.replace(/\D/g, '');
+      if (cnpjNumbers.length !== 14) {
+        return res.status(400).json({ error: 'CNPJ deve ter 14 dígitos' });
+      }
+
+      console.log(`🔍 [CNPJ_CONSULTA] Consultando CNPJ: ${cnpjNumbers}`);
+
+      const response = await fetch(`https://dados-cnpj.p.rapidapi.com/product-details?cnpj=${cnpjNumbers}`, {
+        method: 'GET',
+        headers: {
+          'X-Rapidapi-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+          'X-Rapidapi-Host': 'dados-cnpj.p.rapidapi.com',
+          'Host': 'dados-cnpj.p.rapidapi.com'
+        }
+      });
+
+      if (!response.ok) {
+        console.error(`❌ [CNPJ_CONSULTA] Erro na API: ${response.status} ${response.statusText}`);
+        throw new Error(`Erro na consulta: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ [CNPJ_CONSULTA] Dados recebidos para CNPJ: ${cnpjNumbers}`, data.status ? 'SUCESSO' : 'FALHA');
+
+      // Log da consulta para analytics
+      try {
+        await db.insert(toolUsageLogs).values({
+          userId: 2, // ID do usuário admin padrão
+          userName: 'Guilherme Vasques',
+          userEmail: 'gavasques@gmail.com',
+          toolName: 'Consulta de CNPJ',
+          keyword: cnpjNumbers,
+          country: 'BR',
+          additionalData: {
+            cnpj: cnpjNumbers,
+            razao_social: data.dados?.razao_social,
+            situacao: data.dados?.situacao,
+            status: data.status
+          }
+        });
+        console.log(`📊 [TOOL_USAGE] Log salvo - CNPJ: ${cnpjNumbers}`);
+      } catch (logError) {
+        console.error('❌ Erro ao salvar log de uso:', logError);
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error('❌ [CNPJ_CONSULTA] Erro:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        message: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
   return httpServer;
 }
 

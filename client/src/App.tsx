@@ -41,6 +41,7 @@ const BulletPointsAgent = lazy(() => import("./pages/agents/BulletPointsAgent"))
 const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtractor"));
 const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
 const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
+const CNPJConsulta = lazy(() => import("./pages/hub/CNPJConsulta"));
 const Hub = lazy(() => import("./pages/Hub"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const AgentsPage = lazy(() => import("./pages/agents"));
@@ -259,6 +260,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <AmazonProductDetails />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/hub/consulta-cnpj">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <CNPJConsulta />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

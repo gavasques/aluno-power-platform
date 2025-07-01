@@ -45,6 +45,7 @@ const menuItems = [
       { title: "Amazon Reviews", href: "/hub/amazon-reviews", icon: Star },
       { title: "Relatório de Keywords", href: "/hub/relatorio-keywords", icon: FileDigit },
       { title: "Detalhes do Produto", href: "/hub/produto-detalhes", icon: Package },
+      { title: "Consulta de CNPJ", href: "/hub/consulta-cnpj", icon: Building },
       { title: "Parceiros", href: "/hub/parceiros", icon: Users },
       { title: "Fornecedores", href: "/hub/fornecedores", icon: Truck },
       { title: "Ferramentas", href: "/hub/ferramentas", icon: Wrench },
