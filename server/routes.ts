@@ -3903,6 +3903,80 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Amazon Product Details API
+  app.post('/api/amazon-product-details', async (req, res) => {
+    try {
+      const { asin, country } = req.body;
+
+      if (!asin || !country) {
+        return res.status(400).json({ 
+          error: 'Campos obrigatórios: asin, country' 
+        });
+      }
+
+      // Validar ASIN (10 caracteres alfanuméricos)
+      if (!/^[A-Z0-9]{10}$/i.test(asin)) {
+        return res.status(400).json({ 
+          error: 'ASIN inválido. Deve ter 10 caracteres alfanuméricos.' 
+        });
+      }
+
+      console.log(`🔍 [AMAZON_PRODUCT] Buscando produto - ASIN: ${asin}, País: ${country}`);
+
+      const response = await fetch(`https://real-time-amazon-data.p.rapidapi.com/product-details?asin=${asin}&country=${country}`, {
+        method: 'GET',
+        headers: {
+          'X-RapidAPI-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+          'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com',
+          'Host': 'real-time-amazon-data.p.rapidapi.com'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.status === 'OK' && data.data) {
+        console.log(`✅ [AMAZON_PRODUCT] Produto encontrado - Título: ${data.data.product_title}`);
+        
+        // Log da busca de produto
+        try {
+          await db.insert(toolUsageLogs).values({
+            userId: 2, // ID do usuário admin padrão
+            userName: 'Guilherme Vasques',
+            userEmail: 'gavasques@gmail.com',
+            toolName: 'Detalhes do Produto Amazon',
+            keyword: asin,
+            country: country,
+            additionalData: {
+              asin,
+              country,
+              product_title: data.data.product_title,
+              product_price: data.data.product_price,
+              product_star_rating: data.data.product_star_rating
+            }
+          });
+          console.log(`📊 [TOOL_USAGE] Log salvo - ASIN: ${asin}, País: ${country}`);
+        } catch (logError) {
+          console.error('Error logging tool usage:', logError);
+        }
+      } else {
+        console.log(`❌ [AMAZON_PRODUCT] Produto não encontrado - ASIN: ${asin}, País: ${country}`);
+      }
+
+      res.json(data);
+
+    } catch (error) {
+      console.error('❌ [AMAZON_PRODUCT] Erro na busca:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        details: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
   app.post('/api/amazon-keywords/search', async (req, res) => {
     try {
       const {
