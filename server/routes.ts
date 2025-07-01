@@ -2972,7 +2972,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const response = await fetch(`https://real-time-amazon-data.p.rapidapi.com/product-reviews?${params}`, {
         method: 'GET',
         headers: {
-          'X-Rapidapi-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+          'X-Rapidapi-Key': process.env.RAPIDAPI_KEY!,
           'X-Rapidapi-Host': 'real-time-amazon-data.p.rapidapi.com'
         }
       });
@@ -3926,7 +3926,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const response = await fetch(`https://real-time-amazon-data.p.rapidapi.com/product-details?asin=${asin}&country=${country}`, {
         method: 'GET',
         headers: {
-          'X-RapidAPI-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+          'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
           'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com',
           'Host': 'real-time-amazon-data.p.rapidapi.com'
         }
@@ -4022,7 +4022,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'X-RapidAPI-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+          'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
           'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com'
         }
       });
@@ -4079,7 +4079,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         `https://amazon-data-scraper141.p.rapidapi.com/v1/keywords/suggestions?prefix=${encodeURIComponent(prefix)}&region=${region}`,
         {
           headers: {
-            'X-RapidAPI-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+            'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
             'X-RapidAPI-Host': 'amazon-data-scraper141.p.rapidapi.com'
           }
         }
@@ -4145,7 +4145,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const response = await fetch(`https://dados-cnpj.p.rapidapi.com/buscar-base.php?cnpj=${cnpjNumbers}`, {
           method: 'GET',
           headers: {
-            'X-RapidAPI-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+            'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
             'X-RapidAPI-Host': 'dados-cnpj.p.rapidapi.com'
           }
         });
