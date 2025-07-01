@@ -173,6 +173,13 @@ export default function KeywordSearchReport() {
           const products = await searchProducts(page);
           allProducts = [...allProducts, ...products];
           
+          // Atualizar estado em tempo real
+          setState(prev => ({
+            ...prev,
+            products: allProducts,
+            totalProducts: allProducts.length
+          }));
+          
           // Delay entre requests para evitar rate limiting
           if (page < totalPages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
