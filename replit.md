@@ -119,6 +119,8 @@ Preferred communication style: Simple, everyday language.
     - Instruções para terminação APENAS no terceiro bullet point
     - Técnicas psicológicas aprimoradas: agitação da dor, prova social, urgência
     - Palavras de poder e evitações específicas para Amazon Brasil
+    - Regras rigorosas: nunca inventar funcionalidades não mencionadas
+    - Foco absoluto no tema do produto fornecido
   - **Sistema Técnico Robusto**:
     - Agente "bullet-points-generator" totalmente funcional
     - Interface responsiva com 2 colunas otimizada
