@@ -133,6 +133,8 @@ Preferred communication style: Simple, everyday language.
     - Formatação inteligente de preços removendo símbolos desnecessários
     - Links diretos para visualização na Amazon
     - Toast notifications para feedback imediato
+    - Botão "Baixar todas as imagens" para download automático
+    - Exibição aprimorada de vídeos oficiais e de usuários
   - **Navegação Integrada**:
     - Menu "Detalhes do Produto" adicionado ao Hub de Recursos
     - Rota `/hub/produto-detalhes` configurada com lazy loading

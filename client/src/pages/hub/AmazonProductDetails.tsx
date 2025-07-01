@@ -22,7 +22,8 @@ import {
   Video,
   Info,
   Tags,
-  Globe
+  Globe,
+  Download
 } from "lucide-react";
 
 // Países com suas bandeiras (emoji)
@@ -182,6 +183,55 @@ const AmazonProductDetails: React.FC = () => {
 
   const formatPrice = (price: string) => {
     return price?.replace(/^\$/, '') || 'N/A';
+  };
+
+  const downloadAllImages = async () => {
+    if (!productData?.data.product_photos?.length) {
+      toast({
+        title: "Nenhuma imagem disponível",
+        description: "Este produto não possui imagens para download.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: "Iniciando download...",
+        description: `Preparando ${productData.data.product_photos.length} imagens para download.`
+      });
+
+      for (let i = 0; i < productData.data.product_photos.length; i++) {
+        const imageUrl = productData.data.product_photos[i];
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${productData.data.asin}_imagem_${i + 1}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        // Pequeno delay entre downloads para evitar problemas
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      toast({
+        title: "Download concluído!",
+        description: `${productData.data.product_photos.length} imagens baixadas com sucesso.`
+      });
+
+    } catch (error) {
+      console.error('Erro ao baixar imagens:', error);
+      toast({
+        title: "Erro no download",
+        description: "Ocorreu um erro ao baixar as imagens. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   const renderStarRating = (rating: string) => {
@@ -509,6 +559,18 @@ const AmazonProductDetails: React.FC = () => {
               isExpanded={expandedSections.images}
               onToggle={() => toggleSection('images')}
             >
+              <div className="mb-4">
+                <Button 
+                  onClick={downloadAllImages}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Baixar todas as imagens ({productData.data.product_photos.length})
+                </Button>
+              </div>
+              
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {productData.data.product_photos.map((photo, index) => (
                   <div key={index} className="aspect-square">
@@ -532,28 +594,99 @@ const AmazonProductDetails: React.FC = () => {
               isExpanded={expandedSections.videos}
               onToggle={() => toggleSection('videos')}
             >
-              {productData.data.user_uploaded_videos?.length > 0 && (
-                <div>
-                  <h4 className="font-semibold mb-3">Vídeos de Usuários</h4>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                    {productData.data.user_uploaded_videos.slice(0, 6).map((video: any, index: number) => (
-                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
+              {/* Vídeos Oficiais */}
+              {productData.data.product_videos?.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-semibold mb-3">Vídeos Oficiais</h4>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {productData.data.product_videos.map((video: any, index: number) => (
+                      <div key={`official-${index}`} className="bg-gray-50 p-4 rounded-lg">
                         <div className="aspect-video bg-gray-200 rounded mb-2 flex items-center justify-center">
-                          {video.video_image_url ? (
+                          {video.video_url ? (
+                            <video 
+                              controls 
+                              poster={video.video_thumbnail || ''}
+                              className="w-full h-full rounded"
+                            >
+                              <source src={video.video_url} type="video/mp4" />
+                              Seu navegador não suporta vídeos.
+                            </video>
+                          ) : video.video_thumbnail ? (
                             <img 
-                              src={video.video_image_url} 
-                              alt={video.title}
-                              className="w-full h-full object-cover rounded"
+                              src={video.video_thumbnail} 
+                              alt={video.video_title || 'Vídeo do produto'}
+                              className="w-full h-full object-cover rounded cursor-pointer"
+                              onClick={() => video.video_url && window.open(video.video_url, '_blank')}
                             />
                           ) : (
                             <Video className="h-8 w-8 text-gray-400" />
                           )}
                         </div>
-                        <h5 className="font-medium text-sm mb-1">{video.title}</h5>
-                        <p className="text-xs text-gray-600">por {video.public_name}</p>
+                        {video.video_title && (
+                          <h5 className="font-medium text-sm mb-1">{video.video_title}</h5>
+                        )}
+                        {video.video_duration && (
+                          <p className="text-xs text-gray-600">Duração: {video.video_duration}</p>
+                        )}
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Vídeos de Usuários */}
+              {productData.data.user_uploaded_videos?.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3">Vídeos de Usuários</h4>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {productData.data.user_uploaded_videos.slice(0, 6).map((video: any, index: number) => (
+                      <div key={`user-${index}`} className="bg-gray-50 p-4 rounded-lg">
+                        <div className="aspect-video bg-gray-200 rounded mb-2 flex items-center justify-center">
+                          {video.video_url ? (
+                            <video 
+                              controls 
+                              poster={video.video_image_url || ''}
+                              className="w-full h-full rounded"
+                            >
+                              <source src={video.video_url} type="video/mp4" />
+                              Seu navegador não suporta vídeos.
+                            </video>
+                          ) : video.video_image_url ? (
+                            <img 
+                              src={video.video_image_url} 
+                              alt={video.title || 'Vídeo de usuário'}
+                              className="w-full h-full object-cover rounded cursor-pointer"
+                              onClick={() => video.video_url && window.open(video.video_url, '_blank')}
+                            />
+                          ) : (
+                            <Video className="h-8 w-8 text-gray-400" />
+                          )}
+                        </div>
+                        {video.title && (
+                          <h5 className="font-medium text-sm mb-1">{video.title}</h5>
+                        )}
+                        {video.public_name && (
+                          <p className="text-xs text-gray-600">por {video.public_name}</p>
+                        )}
+                        {video.date && (
+                          <p className="text-xs text-gray-500">{video.date}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {productData.data.user_uploaded_videos.length > 6 && (
+                    <p className="text-sm text-gray-600 mt-3">
+                      Mostrando 6 de {productData.data.user_uploaded_videos.length} vídeos de usuários
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Caso não haja vídeos */}
+              {(!productData.data.product_videos?.length && !productData.data.user_uploaded_videos?.length) && (
+                <div className="text-center py-8 text-gray-500">
+                  <Video className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p>Nenhum vídeo disponível para este produto</p>
                 </div>
               )}
             </ExpandableSection>
