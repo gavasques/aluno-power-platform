@@ -207,12 +207,15 @@ export default function AmazonReviewExtractor() {
     try {
       for (let urlIndex = 0; urlIndex < state.urls.length; urlIndex++) {
         const url = state.urls[urlIndex];
-        const asin = extractASIN(url);
+        const asin = extractOrValidateASIN(url);
         
         if (!asin) {
           errors.push(`URL ${urlIndex + 1}: ASIN não encontrado`);
           continue;
         }
+
+        // Salvar log de uso
+        await saveUsageLog(asin);
 
         setState(prev => ({
           ...prev,
@@ -334,28 +337,43 @@ export default function AmazonReviewExtractor() {
       {/* Adição de URLs */}
       <Card>
         <CardHeader>
-          <CardTitle>URLs dos Produtos</CardTitle>
+          <CardTitle>Produtos para Análise</CardTitle>
           <CardDescription>
-            Adicione URLs de produtos da Amazon. O ASIN será extraído automaticamente.
+            Adicione URLs da Amazon ou ASINs diretos. Serão coletadas até 10 páginas de reviews por produto.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Label htmlFor="url-input">URL do Produto Amazon</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2">
+              <Label htmlFor="url-input">URL da Amazon ou ASIN</Label>
               <Input
                 id="url-input"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="https://www.amazon.com.br/dp/B0CGJKTB6K"
+                placeholder="URL: https://amazon.com.br/dp/B0CGJKTB6K ou ASIN: B0CGJKTB6K"
                 onKeyDown={(e) => e.key === 'Enter' && addUrl()}
               />
             </div>
-            <div className="flex items-end">
-              <Button onClick={addUrl} disabled={state.isExtracting}>
-                Adicionar
-              </Button>
+            <div>
+              <Label htmlFor="country-select">País da Amazon</Label>
+              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map(country => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.flag} {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={addUrl} disabled={state.isExtracting}>
+              Adicionar Produto
+            </Button>
           </div>
 
           {/* Lista de URLs */}
@@ -363,7 +381,7 @@ export default function AmazonReviewExtractor() {
             <div className="space-y-2">
               <Label>URLs Adicionadas ({state.urls.length})</Label>
               {state.urls.map((url, index) => {
-                const asin = extractASIN(url);
+                const asin = extractOrValidateASIN(url);
                 return (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex-1">

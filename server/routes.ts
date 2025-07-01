@@ -30,6 +30,8 @@ import {
   insertNewsSchema,
   insertAiGenerationLogSchema,
   aiGenerationLogs,
+  insertToolUsageLogSchema,
+  toolUsageLogs,
   insertUpdateSchema,
   insertGeneratedImageSchema,
   insertWebhookConfigSchema,
@@ -49,7 +51,7 @@ import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers } from '@shared/schema';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs } from '@shared/schema';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -3078,6 +3080,44 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         success: false,
         message: 'Erro interno do servidor',
         error: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // API para logs de uso de ferramentas
+  app.post('/api/tool-usage-logs', async (req: any, res: any) => {
+    try {
+      const { userId, userName, userEmail, toolName, asin, country, additionalData } = req.body;
+
+      if (!userId || !userName || !userEmail || !toolName) {
+        return res.status(400).json({ 
+          error: 'Campos obrigatórios: userId, userName, userEmail, toolName' 
+        });
+      }
+
+      // Salvar log na tabela tool_usage_logs
+      const [logEntry] = await db.insert(toolUsageLogs).values({
+        userId,
+        userName,
+        userEmail,
+        toolName,
+        asin: asin || null,
+        country: country || null,
+        additionalData: additionalData || null,
+      }).returning();
+
+      console.log(`📊 [TOOL_USAGE] Log salvo: User ${userName} (${userEmail}) usou ${toolName} - ASIN: ${asin || 'N/A'} - País: ${country || 'N/A'}`);
+
+      res.json({ 
+        success: true, 
+        logId: logEntry.id,
+        message: 'Log de uso salvo com sucesso' 
+      });
+
+    } catch (error) {
+      console.error('❌ [TOOL_USAGE] Erro ao salvar log:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor ao salvar log' 
       });
     }
   });
