@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import { Search, Building, Users, MapPin, Phone, Mail, Calendar, DollarSign, FileText, ChevronDown, ChevronRight } from 'lucide-react';
-import { useApiRequest } from '@/hooks/useApiRequest';
-import { CNPJInput, validateCNPJ } from '@/components/common/CNPJInput';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
-// Types
 interface EnderecoData {
   bairro: string;
   cep: string;
@@ -49,7 +48,6 @@ interface CNPJResponse {
   status: boolean;
 }
 
-// Components
 interface ExpandableSectionProps {
   title: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -63,35 +61,47 @@ const ExpandableSection: React.FC<ExpandableSectionProps> = ({
   icon: Icon,
   isExpanded,
   onToggle,
-  children
-}) => (
-  <Card className="w-full">
-    <CardHeader 
-      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-      onClick={onToggle}
-    >
-      <div className="flex items-center justify-between">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Icon className="h-5 w-5" />
-          {title}
-        </CardTitle>
-        {isExpanded ? (
-          <ChevronDown className="h-5 w-5 text-muted-foreground" />
-        ) : (
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-        )}
-      </div>
-    </CardHeader>
-    {isExpanded && (
-      <CardContent className="border-t">
-        {children}
-      </CardContent>
-    )}
-  </Card>
-);
+  children,
+}) => {
+  return (
+    <Card className="mb-4">
+      <CardHeader 
+        className="cursor-pointer hover:bg-gray-50 transition-colors cross-browser-transition"
+        onClick={onToggle}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Icon className="h-5 w-5 text-blue-600" />
+            <CardTitle className="text-lg">{title}</CardTitle>
+          </div>
+          {isExpanded ? (
+            <ChevronDown className="h-5 w-5 text-gray-500 cross-browser-transition" />
+          ) : (
+            <ChevronRight className="h-5 w-5 text-gray-500 cross-browser-transition" />
+          )}
+        </div>
+      </CardHeader>
+      {isExpanded && (
+        <CardContent className="pt-0">
+          {children}
+        </CardContent>
+      )}
+    </Card>
+  );
+};
 
 export default function CNPJConsulta() {
   const [cnpj, setCnpj] = useState('');
+  const [loading, setLoading] = useState(false);
   const [cnpjData, setCnpjData] = useState<CNPJResponse | null>(null);
   const [expandedSections, setExpandedSections] = useState({
     basicInfo: true,
@@ -100,23 +110,7 @@ export default function CNPJConsulta() {
     financial: false,
     partners: false,
   });
-
-  const { execute, loading, error } = useApiRequest<CNPJResponse>({
-    successMessage: 'Dados da empresa consultados com sucesso!',
-  });
-
-  const handleSubmit = async () => {
-    if (!validateCNPJ(cnpj)) return;
-
-    const data = await execute(
-      () => fetch(`/api/cnpj-consulta?cnpj=${cnpj}`),
-    );
-
-    if (data) {
-      setCnpjData(data);
-      setExpandedSections(prev => ({ ...prev, basicInfo: true }));
-    }
-  };
+  const { toast } = useToast();
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -125,70 +119,151 @@ export default function CNPJConsulta() {
     }));
   };
 
-  const formatDate = (dateStr: string): string => {
-    return dateStr || 'Não informado';
+  const formatCNPJ = (value: string) => {
+    // Remove todos os caracteres não numéricos
+    const numbers = value.replace(/\D/g, '');
+    
+    // Limita a 14 dígitos
+    const limited = numbers.slice(0, 14);
+    
+    // Aplica a máscara
+    if (limited.length <= 2) return limited;
+    if (limited.length <= 5) return `${limited.slice(0, 2)}.${limited.slice(2)}`;
+    if (limited.length <= 8) return `${limited.slice(0, 2)}.${limited.slice(2, 5)}.${limited.slice(5)}`;
+    if (limited.length <= 12) return `${limited.slice(0, 2)}.${limited.slice(2, 5)}.${limited.slice(5, 8)}/${limited.slice(8)}`;
+    return `${limited.slice(0, 2)}.${limited.slice(2, 5)}.${limited.slice(5, 8)}/${limited.slice(8, 12)}-${limited.slice(12)}`;
   };
 
-  const formatPhone = (phone: string): string => {
-    const numbers = phone.replace(/\D/g, '');
-    if (numbers.length === 10) {
-      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
+  const validateCNPJ = (cnpj: string): boolean => {
+    const numbers = cnpj.replace(/\D/g, '');
+    return numbers.length === 14;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateCNPJ(cnpj)) {
+      toast({
+        title: "CNPJ inválido",
+        description: "Por favor, insira um CNPJ válido com 14 dígitos.",
+        variant: "destructive",
+      });
+      return;
     }
-    if (numbers.length === 11) {
-      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
+
+    setLoading(true);
+    
+    try {
+      const cnpjNumbers = cnpj.replace(/\D/g, '');
+      
+      const response = await fetch(`/api/cnpj-consulta?cnpj=${cnpjNumbers}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao consultar CNPJ');
+      }
+
+      const data: CNPJResponse = await response.json();
+      
+      if (!data.status) {
+        throw new Error(data.mensagem || 'Erro na consulta');
+      }
+
+      setCnpjData(data);
+      
+      // Expandir seção básica automaticamente
+      setExpandedSections(prev => ({
+        ...prev,
+        basicInfo: true
+      }));
+
+      toast({
+        title: "Consulta realizada com sucesso",
+        description: `Dados encontrados para ${data.dados.razao_social}`,
+      });
+
+    } catch (error) {
+      console.error('Erro na consulta:', error);
+      toast({
+        title: "Erro na consulta",
+        description: error instanceof Error ? error.message : "Erro desconhecido ao consultar CNPJ",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    return phone;
+  };
+
+  const formatQualificacao = (qualificacao: string) => {
+    return qualificacao.charAt(0).toUpperCase() + qualificacao.slice(1).toLowerCase();
+  };
+
+  const formatDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split('/');
+    return `${day}/${month}/${year}`;
   };
 
   return (
-    <div className="container mx-auto max-w-6xl p-4 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
-          <Building className="h-8 w-8" />
+    <div className="product-details-container container mx-auto px-4 py-6 max-w-6xl cross-browser-scrollbar">
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 cross-browser-break-words">
           Consulta de CNPJ
         </h1>
-        <p className="text-muted-foreground">
-          Consulte informações completas de empresas brasileiras através do CNPJ
+        <p className="text-sm sm:text-base text-gray-600 cross-browser-break-words">
+          Consulte informações detalhadas de empresas brasileiras através do CNPJ
         </p>
       </div>
 
-      <Card>
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Consultar Empresa</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Buscar Empresa
+          </CardTitle>
           <CardDescription>
-            Digite o CNPJ da empresa que deseja consultar (apenas números)
+            Digite o CNPJ da empresa para consultar suas informações
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <CNPJInput
-              value={cnpj}
-              onChange={setCnpj}
-              placeholder="Digite o CNPJ (apenas números)"
-              className="w-full"
-            />
-          </div>
-
-          <Button 
-            onClick={handleSubmit} 
-            disabled={loading || !validateCNPJ(cnpj)}
-            className="w-full"
-          >
-            <Search className="mr-2 h-4 w-4" />
-            {loading ? 'Consultando...' : 'Consultar CNPJ'}
-          </Button>
-
-          {loading && <LoadingSpinner message="Consultando dados da empresa..." />}
-
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-              {error}
+            <Label htmlFor="cnpj">CNPJ</Label>
+            <div className="flex gap-2">
+              <Input
+                id="cnpj"
+                placeholder="00.000.000/0000-00"
+                value={cnpj}
+                onChange={(e) => setCnpj(formatCNPJ(e.target.value))}
+                className="flex-1"
+                maxLength={18}
+              />
+              <Button 
+                onClick={handleSubmit} 
+                disabled={loading || !validateCNPJ(cnpj)}
+                className="cross-browser-button"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Consultando...
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-4 w-4 mr-2" />
+                    Consultar
+                  </>
+                )}
+              </Button>
             </div>
-          )}
+            {cnpj && !validateCNPJ(cnpj) && (
+              <p className="text-sm text-red-600">CNPJ deve ter 14 dígitos</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
-      {cnpjData && cnpjData.status && (
+      {cnpjData && (
         <div className="space-y-4">
           {/* Informações Básicas */}
           <ExpandableSection
@@ -197,31 +272,29 @@ export default function CNPJConsulta() {
             isExpanded={expandedSections.basicInfo}
             onToggle={() => toggleSection('basicInfo')}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Razão Social:</span>
-                    <p className="font-semibold">{cnpjData.dados.razao_social}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Nome Fantasia:</span>
-                    <p>{cnpjData.dados.nome_fantasia || 'Não informado'}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">CNPJ:</span>
-                    <p className="font-mono">{cnpjData.dados.cnpj}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Situação:</span>
-                    <span className={`inline-block px-2 py-1 rounded text-sm font-medium ${
-                      cnpjData.dados.situacao?.toLowerCase().includes('ativa') 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {cnpjData.dados.situacao}
-                    </span>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-3">
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Razão Social:</span>
+                  <p className="font-semibold cross-browser-break-words">{cnpjData.dados.razao_social}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Nome Fantasia:</span>
+                  <p className="cross-browser-break-words">{cnpjData.dados.nome_fantasia || 'Não informado'}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">CNPJ:</span>
+                  <p className="font-mono text-sm">{formatCNPJ(cnpjData.dados.cnpj)}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Situação:</span>
+                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                    cnpjData.dados.situacao === 'Ativa' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {cnpjData.dados.situacao}
+                  </span>
                 </div>
               </div>
               
@@ -240,7 +313,7 @@ export default function CNPJConsulta() {
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-500">Natureza Jurídica:</span>
-                  <p className="break-words">{cnpjData.dados.natureza_juridica}</p>
+                  <p className="cross-browser-break-words">{cnpjData.dados.natureza_juridica}</p>
                 </div>
               </div>
             </div>
@@ -253,79 +326,97 @@ export default function CNPJConsulta() {
             isExpanded={expandedSections.address}
             onToggle={() => toggleSection('address')}
           >
-            <div className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-gray-500">Logradouro:</span>
-                <p>{cnpjData.dados.endereco.logradouro}, {cnpjData.dados.endereco.numero}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Logradouro:</span>
+                  <p className="cross-browser-break-words">{cnpjData.dados.endereco.logradouro}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Número:</span>
+                  <p>{cnpjData.dados.endereco.numero}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Complemento:</span>
+                  <p>{cnpjData.dados.endereco.complemento || 'Não informado'}</p>
+                </div>
               </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500">Complemento:</span>
-                <p>{cnpjData.dados.endereco.complemento || 'Não informado'}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500">Bairro:</span>
-                <p>{cnpjData.dados.endereco.bairro}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500">Cidade/UF:</span>
-                <p>{cnpjData.dados.endereco.municipio} - {cnpjData.dados.endereco.uf}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500">CEP:</span>
-                <p>{cnpjData.dados.endereco.cep}</p>
+              
+              <div className="space-y-3">
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Bairro:</span>
+                  <p>{cnpjData.dados.endereco.bairro}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Município/UF:</span>
+                  <p>{cnpjData.dados.endereco.municipio}/{cnpjData.dados.endereco.uf}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">CEP:</span>
+                  <p className="font-mono text-sm">{cnpjData.dados.endereco.cep}</p>
+                </div>
               </div>
             </div>
           </ExpandableSection>
 
           {/* Contato */}
           <ExpandableSection
-            title="Contato"
+            title="Informações de Contato"
             icon={Phone}
             isExpanded={expandedSections.contact}
             onToggle={() => toggleSection('contact')}
           >
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <span className="text-sm font-medium text-gray-500">Telefones:</span>
-                {cnpjData.dados.telefones?.length > 0 ? (
-                  <div className="space-y-1">
-                    {cnpjData.dados.telefones.map((telefone, index) => (
-                      <p key={index}>{formatPhone(telefone)}</p>
-                    ))}
-                  </div>
-                ) : (
-                  <p>Não informado</p>
-                )}
+                <span className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email:
+                </span>
+                <p className="mt-1 cross-browser-break-words">{cnpjData.dados.email || 'Não informado'}</p>
               </div>
+              
               <div>
-                <span className="text-sm font-medium text-gray-500">Email:</span>
-                <p>{cnpjData.dados.email || 'Não informado'}</p>
+                <span className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Telefones:
+                </span>
+                <div className="mt-1 space-y-1">
+                  {cnpjData.dados.telefones.length > 0 ? (
+                    cnpjData.dados.telefones.map((telefone, index) => (
+                      <p key={index} className="font-mono text-sm">{telefone}</p>
+                    ))
+                  ) : (
+                    <p>Não informado</p>
+                  )}
+                </div>
               </div>
             </div>
           </ExpandableSection>
 
-          {/* Dados Financeiros */}
+          {/* Informações Financeiras */}
           <ExpandableSection
-            title="Dados Financeiros e Atividades"
+            title="Informações Financeiras e Atividades"
             icon={DollarSign}
             isExpanded={expandedSections.financial}
             onToggle={() => toggleSection('financial')}
           >
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
                 <span className="text-sm font-medium text-gray-500">Capital Social:</span>
-                <p>{cnpjData.dados.capital_social}</p>
+                <p className="text-lg font-semibold text-green-600">{cnpjData.dados.capital_social}</p>
               </div>
+              
               <div>
                 <span className="text-sm font-medium text-gray-500">CNAE Principal:</span>
-                <p className="break-words">{cnpjData.dados.cnae_principal}</p>
+                <p className="cross-browser-break-words">{cnpjData.dados.cnae_principal}</p>
               </div>
-              {cnpjData.dados.cnaes_secundarios?.length > 0 && (
+              
+              {cnpjData.dados.cnaes_secundarios.length > 0 && (
                 <div>
                   <span className="text-sm font-medium text-gray-500">CNAEs Secundários:</span>
-                  <div className="space-y-1 mt-1">
+                  <div className="mt-2 space-y-1">
                     {cnpjData.dados.cnaes_secundarios.map((cnae, index) => (
-                      <p key={index} className="text-sm break-words">{cnae}</p>
+                      <p key={index} className="text-sm cross-browser-break-words">{cnae}</p>
                     ))}
                   </div>
                 </div>
@@ -334,28 +425,28 @@ export default function CNPJConsulta() {
           </ExpandableSection>
 
           {/* Sócios */}
-          {cnpjData.socios?.length > 0 && (
+          {cnpjData.socios.length > 0 && (
             <ExpandableSection
-              title="Sócios e Administradores"
+              title={`Sócios e Administradores (${cnpjData.socios.length})`}
               icon={Users}
               isExpanded={expandedSections.partners}
               onToggle={() => toggleSection('partners')}
             >
               <div className="space-y-4">
                 {cnpjData.socios.map((socio, index) => (
-                  <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <span className="text-sm font-medium text-gray-500">Nome:</span>
-                        <p className="font-semibold break-words">{socio.nome_socio}</p>
+                        <p className="font-semibold cross-browser-break-words">{socio.nome_socio}</p>
                       </div>
                       <div>
                         <span className="text-sm font-medium text-gray-500">Qualificação:</span>
-                        <p>{socio.qualificacao}</p>
+                        <p className="cross-browser-break-words">{formatQualificacao(socio.qualificacao)}</p>
                       </div>
                       <div>
                         <span className="text-sm font-medium text-gray-500">Documento:</span>
-                        <p className="font-mono">{socio.documento_socio}</p>
+                        <p className="font-mono text-sm">{socio.documento_socio}</p>
                       </div>
                       <div>
                         <span className="text-sm font-medium text-gray-500">Data de Entrada:</span>

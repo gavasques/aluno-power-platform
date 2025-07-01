@@ -4,16 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 import { Search, Download, AlertCircle, Globe, Star, Package, TrendingUp } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { useApiRequest } from '@/hooks/useApiRequest';
-import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
-// Types
 interface Product {
   asin: string;
   product_title: string;
@@ -44,11 +42,35 @@ interface SearchState {
   errors: string[];
 }
 
-// Constants
+const COUNTRIES = [
+  { code: 'BR', name: 'Brasil', flag: '🇧🇷' },
+  { code: 'US', name: 'Estados Unidos', flag: '🇺🇸' },
+  { code: 'CA', name: 'Canadá', flag: '🇨🇦' },
+  { code: 'MX', name: 'México', flag: '🇲🇽' },
+  { code: 'GB', name: 'Reino Unido', flag: '🇬🇧' },
+  { code: 'DE', name: 'Alemanha', flag: '🇩🇪' },
+  { code: 'FR', name: 'França', flag: '🇫🇷' },
+  { code: 'IT', name: 'Itália', flag: '🇮🇹' },
+  { code: 'ES', name: 'Espanha', flag: '🇪🇸' },
+  { code: 'JP', name: 'Japão', flag: '🇯🇵' },
+  { code: 'AU', name: 'Austrália', flag: '🇦🇺' },
+  { code: 'IN', name: 'Índia', flag: '🇮🇳' },
+  { code: 'CN', name: 'China', flag: '🇨🇳' },
+  { code: 'NL', name: 'Holanda', flag: '🇳🇱' },
+  { code: 'SG', name: 'Singapura', flag: '🇸🇬' },
+  { code: 'TR', name: 'Turquia', flag: '🇹🇷' },
+  { code: 'AE', name: 'Emirados Árabes', flag: '🇦🇪' },
+  { code: 'SA', name: 'Arábia Saudita', flag: '🇸🇦' },
+  { code: 'PL', name: 'Polônia', flag: '🇵🇱' },
+  { code: 'SE', name: 'Suécia', flag: '🇸🇪' },
+  { code: 'BE', name: 'Bélgica', flag: '🇧🇪' },
+  { code: 'EG', name: 'Egito', flag: '🇪🇬' }
+];
+
 const SORT_OPTIONS = [
   { value: 'RELEVANCE', label: 'Relevância' },
-  { value: 'PRICE_LOW_TO_HIGH', label: 'Menor Preço' },
-  { value: 'PRICE_HIGH_TO_LOW', label: 'Maior Preço' },
+  { value: 'LOWEST_PRICE', label: 'Menor Preço' },
+  { value: 'HIGHEST_PRICE', label: 'Maior Preço' },
   { value: 'REVIEWS', label: 'Avaliações' },
   { value: 'NEWEST', label: 'Novos' },
   { value: 'BEST_SELLERS', label: 'Mais Vendidos' }
@@ -61,6 +83,7 @@ const DEALS_OPTIONS = [
 ];
 
 export default function KeywordSearchReport() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useState({
     query: '',
     country: 'BR',
@@ -83,35 +106,46 @@ export default function KeywordSearchReport() {
     errors: []
   });
 
-  const { execute, loading } = useApiRequest();
-
   const updateSearchParam = (key: string, value: any) => {
     setSearchParams(prev => ({ ...prev, [key]: value }));
   };
 
   const searchProducts = async (page: number): Promise<Product[]> => {
-    const data = await execute(
-      () => fetch('/api/amazon-keywords/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...searchParams,
-          page,
-          min_price: searchParams.min_price ? parseInt(searchParams.min_price) : undefined,
-          max_price: searchParams.max_price ? parseInt(searchParams.max_price) : undefined,
-        })
+    const response = await fetch('/api/amazon-keywords/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...searchParams,
+        page,
+        min_price: searchParams.min_price ? parseInt(searchParams.min_price) : undefined,
+        max_price: searchParams.max_price ? parseInt(searchParams.max_price) : undefined,
       })
-    );
+    });
 
-    if (data?.success) {
-      return data.data.products || [];
+    if (!response.ok) {
+      throw new Error(`Erro ${response.status}: ${response.statusText}`);
     }
+
+    const data = await response.json();
     
-    throw new Error('Falha na busca de produtos');
+    if (!data.success) {
+      throw new Error(data.error || 'Erro desconhecido');
+    }
+
+    return data.data.products || [];
   };
 
   const startSearch = async () => {
-    if (!searchParams.query.trim()) return;
+    if (!searchParams.query.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Digite uma palavra-chave para buscar.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setState(prev => ({
       ...prev,
@@ -123,11 +157,13 @@ export default function KeywordSearchReport() {
       searchParams: { ...searchParams }
     }));
 
-    // Log da busca inicial
+    // Log da busca (uma vez apenas)
     try {
       await fetch('/api/amazon-keywords/log-search', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           query: searchParams.query,
           country: searchParams.country,
@@ -160,12 +196,14 @@ export default function KeywordSearchReport() {
           const products = await searchProducts(page);
           allProducts = [...allProducts, ...products];
           
+          // Atualizar estado em tempo real
           setState(prev => ({
             ...prev,
             products: allProducts,
             totalProducts: allProducts.length
           }));
           
+          // Delay entre requests para evitar rate limiting
           if (page < totalPages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
           }
@@ -186,12 +224,23 @@ export default function KeywordSearchReport() {
         progress: 100
       }));
 
+      toast({
+        title: "Busca concluída",
+        description: `${allProducts.length} produtos encontrados em ${totalPages} páginas.`
+      });
+
     } catch (error) {
       setState(prev => ({
         ...prev,
         isSearching: false,
         errors: [...prev.errors, `Erro geral: ${error instanceof Error ? error.message : 'Erro desconhecido'}`]
       }));
+      
+      toast({
+        title: "Erro na busca",
+        description: "Ocorreu um erro durante a busca. Verifique os logs abaixo.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -200,6 +249,11 @@ export default function KeywordSearchReport() {
       ...prev,
       isSearching: false
     }));
+    
+    toast({
+      title: "Busca interrompida",
+      description: "A busca foi cancelada pelo usuário."
+    });
   };
 
   const formatPrice = (price: string | null | undefined): string => {
@@ -207,8 +261,20 @@ export default function KeywordSearchReport() {
     return price.replace(/[^\d.,]/g, '');
   };
 
+  const formatRating = (rating: string | null | undefined): string => {
+    if (!rating) return 'N/A';
+    return `${rating} ⭐`;
+  };
+
   const downloadXLSX = () => {
-    if (state.products.length === 0) return;
+    if (state.products.length === 0) {
+      toast({
+        title: "Nenhum dado",
+        description: "Não há produtos para exportar.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     const workbookData = state.products.map((product, index) => ({
       'Nº': index + 1,
@@ -233,12 +299,28 @@ export default function KeywordSearchReport() {
     const worksheet = XLSX.utils.json_to_sheet(workbookData);
     const workbook = XLSX.utils.book_new();
     
-    worksheet['!cols'] = [
-      { wch: 5 }, { wch: 12 }, { wch: 50 }, { wch: 12 }, { wch: 12 },
-      { wch: 8 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
-      { wch: 8 }, { wch: 20 }, { wch: 30 }, { wch: 15 }, { wch: 30 },
-      { wch: 40 }, { wch: 40 }
+    // Configurar larguras das colunas
+    const colWidths = [
+      { wch: 5 },   // Nº
+      { wch: 12 },  // ASIN
+      { wch: 50 },  // Título
+      { wch: 12 },  // Preço
+      { wch: 12 },  // Preço Original
+      { wch: 8 },   // Moeda
+      { wch: 10 },  // Avaliação
+      { wch: 12 },  // Nº Avaliações
+      { wch: 12 },  // Best Seller
+      { wch: 12 },  // Amazon Choice
+      { wch: 8 },   // Prime
+      { wch: 20 },  // Volume
+      { wch: 30 },  // Entrega
+      { wch: 15 },  // Badge
+      { wch: 30 },  // Descrição
+      { wch: 40 },  // URL Produto
+      { wch: 40 }   // URL Imagem
     ];
+    
+    worksheet['!cols'] = colWidths;
 
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório de Produtos');
     
@@ -247,6 +329,11 @@ export default function KeywordSearchReport() {
     const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     
     saveAs(blob, fileName);
+
+    toast({
+      title: "Download iniciado",
+      description: `Arquivo XLSX com ${state.products.length} produtos exportado.`
+    });
   };
 
   return (
@@ -285,11 +372,18 @@ export default function KeywordSearchReport() {
 
             <div className="space-y-2">
               <Label htmlFor="country">País *</Label>
-              <CountrySelector
-                value={searchParams.country}
-                onValueChange={(value) => updateSearchParam('country', value)}
-                placeholder="Selecione o país"
-              />
+              <Select value={searchParams.country} onValueChange={(value) => updateSearchParam('country', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {COUNTRIES.map(country => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.flag} {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -411,8 +505,6 @@ export default function KeywordSearchReport() {
         </Card>
       )}
 
-      {loading && <LoadingSpinner message="Buscando produtos..." />}
-
       {/* Resultados */}
       {(state.products.length > 0 || state.errors.length > 0) && (
         <Card>
@@ -422,85 +514,66 @@ export default function KeywordSearchReport() {
               {state.products.length > 0 && (
                 <Button onClick={downloadXLSX}>
                   <Download className="w-4 h-4 mr-2" />
-                  Exportar XLSX ({state.products.length} produtos)
+                  Exportar XLSX
                 </Button>
               )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Produtos */}
             {state.products.length > 0 && (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {state.products.slice(0, 12).map((product, index) => (
-                    <div key={product.asin} className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
-                      <div className="flex items-start gap-3">
-                        <img
-                          src={product.product_photo}
+                <div className="text-lg font-semibold">
+                  {state.products.length} produtos encontrados
+                </div>
+                
+                {/* Prévia dos produtos */}
+                <div className="max-h-80 overflow-y-auto border rounded-lg">
+                  <div className="grid gap-2 p-4">
+                    {state.products.slice(0, 10).map((product, index) => (
+                      <div key={index} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50">
+                        <img 
+                          src={product.product_photo} 
                           alt={product.product_title}
                           className="w-16 h-16 object-cover rounded"
                         />
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium line-clamp-2 mb-1">
-                            {product.product_title}
-                          </h4>
-                          <div className="text-sm text-muted-foreground mb-2">
-                            ASIN: {product.asin}
-                          </div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-bold text-green-600">
-                              {formatPrice(product.product_price)}
-                            </span>
+                          <div className="font-medium truncate">{product.product_title}</div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>{formatPrice(product.product_price)}</span>
                             {product.product_star_rating && (
-                              <div className="flex items-center gap-1">
+                              <span className="flex items-center gap-1">
                                 <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                <span className="text-xs">{product.product_star_rating}</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {product.is_best_seller && (
-                              <span className="text-xs bg-red-100 text-red-800 px-1 rounded">
-                                Best Seller
+                                {product.product_star_rating}
                               </span>
                             )}
-                            {product.is_amazon_choice && (
-                              <span className="text-xs bg-blue-100 text-blue-800 px-1 rounded">
-                                Choice
-                              </span>
-                            )}
-                            {product.is_prime && (
-                              <span className="text-xs bg-yellow-100 text-yellow-800 px-1 rounded">
-                                Prime
-                              </span>
-                            )}
+                            {product.is_best_seller && <span className="text-orange-600">Best Seller</span>}
                           </div>
                         </div>
+                        <div className="text-xs text-muted-foreground">
+                          ASIN: {product.asin}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                    {state.products.length > 10 && (
+                      <div className="text-center text-sm text-muted-foreground p-4">
+                        ... e mais {state.products.length - 10} produtos
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {state.products.length > 12 && (
-                  <p className="text-center text-sm text-muted-foreground">
-                    ... e mais {state.products.length - 12} produtos no arquivo XLSX
-                  </p>
-                )}
               </div>
             )}
 
-            {/* Erros */}
             {state.errors.length > 0 && (
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  <div className="space-y-1">
-                    <p className="font-medium">Erros durante a busca:</p>
-                    <ul className="text-sm space-y-1">
-                      {state.errors.map((error, index) => (
-                        <li key={index}>• {error}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  <div className="font-semibold mb-2">Erros encontrados:</div>
+                  <ul className="list-disc pl-4 space-y-1">
+                    {state.errors.map((error, index) => (
+                      <li key={index} className="text-sm">{error}</li>
+                    ))}
+                  </ul>
                 </AlertDescription>
               </Alert>
             )}

@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, Download, ExternalLink, Trash2, MessageSquare } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertCircle, Download, ExternalLink, Trash2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useApiRequest } from '@/hooks/useApiRequest';
-import { CountrySelector } from '@/components/common/CountrySelector';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
-// Types
 interface ReviewData {
   review_title: string;
   review_star_rating: string;
@@ -29,31 +28,18 @@ interface ExtractorState {
   countryLocked: boolean;
 }
 
-// Helper functions
-const extractOrValidateASIN = (input: string): string | null => {
-  // ASIN direto (10 caracteres alfanuméricos)
-  if (/^[A-Z0-9]{10}$/.test(input.trim())) {
-    return input.trim();
-  }
-
-  // Extração de URL
-  const asinPatterns = [
-    /\/dp\/([A-Z0-9]{10})/,
-    /\/product\/([A-Z0-9]{10})/,
-    /asin=([A-Z0-9]{10})/,
-    /\/([A-Z0-9]{10})(?:\/|\?|$)/
-  ];
-
-  for (const pattern of asinPatterns) {
-    const match = input.match(pattern);
-    if (match) {
-      return match[1];
-    }
-  }
-  return null;
-};
+const COUNTRIES = [
+  { code: 'BR', name: 'Brasil', flag: '🇧🇷' },
+  { code: 'US', name: 'Estados Unidos', flag: '🇺🇸' },
+  { code: 'CA', name: 'Canada', flag: '🇨🇦' },
+  { code: 'FR', name: 'França', flag: '🇫🇷' },
+  { code: 'DE', name: 'Alemanha', flag: '🇩🇪' },
+  { code: 'ES', name: 'Espanha', flag: '🇪🇸' },
+  { code: 'MX', name: 'México', flag: '🇲🇽' },
+];
 
 export default function AmazonReviewExtractor() {
+  const { toast } = useToast();
   const { user } = useAuth();
   const [urlInput, setUrlInput] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('BR');
@@ -69,63 +55,171 @@ export default function AmazonReviewExtractor() {
     countryLocked: false
   });
 
-  const { execute, loading } = useApiRequest();
+  // Função para extrair ASIN da URL da Amazon ou validar ASIN direto
+  const extractOrValidateASIN = (input: string): string | null => {
+    // Se for um ASIN direto (10 caracteres alfanuméricos)
+    if (/^[A-Z0-9]{10}$/.test(input.trim())) {
+      return input.trim();
+    }
 
+    // Se for uma URL, tenta extrair o ASIN
+    const asinPatterns = [
+      /\/dp\/([A-Z0-9]{10})/,
+      /\/product\/([A-Z0-9]{10})/,
+      /asin=([A-Z0-9]{10})/,
+      /\/([A-Z0-9]{10})(?:\/|\?|$)/
+    ];
+
+    for (const pattern of asinPatterns) {
+      const match = input.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
+    return null;
+  };
+
+  // Adicionar URL ou ASIN à lista
   const addUrl = () => {
     if (!urlInput.trim()) return;
 
     const asin = extractOrValidateASIN(urlInput);
     if (!asin) {
+      toast({
+        title: "Entrada inválida",
+        description: "Insira uma URL da Amazon válida ou um ASIN de 10 caracteres.",
+        variant: "destructive"
+      });
       return;
     }
 
-    if (state.urls.includes(urlInput)) {
+    // Verifica se o ASIN já existe na lista
+    const existingAsins = state.urls.map(url => extractOrValidateASIN(url));
+    if (existingAsins.includes(asin)) {
+      toast({
+        title: "ASIN duplicado",
+        description: "Este ASIN já foi adicionado à lista.",
+        variant: "destructive"
+      });
       return;
     }
 
     setState(prev => ({
       ...prev,
       urls: [...prev.urls, urlInput],
-      countryLocked: prev.urls.length === 0
+      countryLocked: true // Bloquear país após adicionar o primeiro produto
     }));
     setUrlInput('');
+    
+    toast({
+      title: "Produto adicionado",
+      description: `ASIN ${asin} adicionado à lista. País fixado para esta extração.`
+    });
   };
 
+  // Remover URL da lista
   const removeUrl = (index: number) => {
+    setState(prev => {
+      const newUrls = prev.urls.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        urls: newUrls,
+        countryLocked: newUrls.length > 0 // Desbloquear país se não há mais URLs
+      };
+    });
+  };
+
+  // Limpar tudo - resetar para nova extração
+  const clearAll = () => {
     setState(prev => ({
       ...prev,
-      urls: prev.urls.filter((_, i) => i !== index),
-      countryLocked: prev.urls.length > 1
+      urls: [],
+      extractedReviews: [],
+      errors: [],
+      progress: 0,
+      currentPage: 0,
+      currentProduct: '',
+      countryLocked: false
+    }));
+    
+    toast({
+      title: "Lista limpa",
+      description: "Todos os produtos foram removidos. Você pode selecionar um novo país."
+    });
+  };
+
+  // Função para salvar log de uso
+  const saveUsageLog = async (asin: string) => {
+    if (!user) return;
+    
+    const maxPages = (selectedCountry === 'BR' || selectedCountry === 'MX') ? 1 : 10;
+    
+    try {
+      await fetch('/api/tool-usage-logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          userName: user.name,
+          userEmail: user.email,
+          toolName: 'Extrator de Reviews Amazon',
+          asin,
+          country: selectedCountry,
+          additionalData: {
+            country: selectedCountry,
+            totalPages: maxPages
+          }
+        })
+      });
+    } catch (error) {
+      console.error('Erro ao salvar log de uso:', error);
+    }
+  };
+
+  // Função para buscar reviews de uma página específica
+  const fetchReviews = async (asin: string, page: number): Promise<ReviewData[]> => {
+    const response = await fetch('/api/amazon-reviews/extract', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        asin,
+        page,
+        country: selectedCountry,
+        sort_by: 'MOST_RECENT'
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao buscar reviews: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.status !== 'OK') {
+      throw new Error(`API retornou erro: ${data.message || 'Erro desconhecido'}`);
+    }
+
+    return data.data.reviews.map((review: any) => ({
+      review_title: review.review_title || '',
+      review_star_rating: review.review_star_rating || '',
+      review_comment: review.review_comment || ''
     }));
   };
 
-  const fetchReviews = async (asin: string, page: number): Promise<ReviewData[]> => {
-    const data = await execute(
-      () => fetch('/api/amazon-reviews/extract', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          asin,
-          page,
-          country: selectedCountry,
-          sort_by: 'MOST_RECENT'
-        })
-      })
-    );
-
-    if (data?.status === 'OK') {
-      return data.data.reviews.map((review: any) => ({
-        review_title: review.review_title || '',
-        review_star_rating: review.review_star_rating || '',
-        review_comment: review.review_comment || ''
-      }));
-    }
-    
-    throw new Error('Falha na extração de reviews');
-  };
-
+  // Função principal para extrair reviews
   const extractReviews = async () => {
-    if (state.urls.length === 0) return;
+    if (state.urls.length === 0) {
+      toast({
+        title: "Nenhuma URL",
+        description: "Adicione pelo menos uma URL antes de iniciar a extração.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setState(prev => ({
       ...prev,
@@ -135,40 +229,57 @@ export default function AmazonReviewExtractor() {
       errors: []
     }));
 
-    try {
-      const totalOperations = state.urls.length * state.totalPages;
-      let currentOperation = 0;
-      const allReviews: ReviewData[] = [];
-      const errors: string[] = [];
+    const allReviews: ReviewData[] = [];
+    const errors: string[] = [];
 
-      for (const url of state.urls) {
+    try {
+      for (let urlIndex = 0; urlIndex < state.urls.length; urlIndex++) {
+        const url = state.urls[urlIndex];
         const asin = extractOrValidateASIN(url);
+        
         if (!asin) {
-          errors.push(`URL inválida: ${url}`);
+          errors.push(`URL ${urlIndex + 1}: ASIN não encontrado`);
           continue;
         }
 
-        setState(prev => ({ ...prev, currentProduct: asin }));
+        // Salvar log de uso
+        await saveUsageLog(asin);
 
-        for (let page = 1; page <= state.totalPages; page++) {
+        // Definir número máximo de páginas baseado no país
+        const maxPages = (selectedCountry === 'BR' || selectedCountry === 'MX') ? 1 : 10;
+
+        setState(prev => ({
+          ...prev,
+          currentProduct: `Produto ${urlIndex + 1}/${state.urls.length} (${asin})`,
+          totalPages: maxPages
+        }));
+
+        // Buscar páginas de reviews para cada produto (limitado por país)
+        for (let page = 1; page <= maxPages; page++) {
           try {
-            setState(prev => ({ ...prev, currentPage: page }));
-            
-            const reviews = await fetchReviews(asin, page);
-            allReviews.push(...reviews);
-            
-            // Delay para evitar rate limiting
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-          } catch (error: any) {
-            errors.push(`Erro página ${page} - ASIN ${asin}: ${error.message}`);
-          }
+            setState(prev => ({
+              ...prev,
+              currentPage: page,
+              progress: ((urlIndex * maxPages + page) / (state.urls.length * maxPages)) * 100
+            }));
 
-          currentOperation++;
-          setState(prev => ({ 
-            ...prev, 
-            progress: (currentOperation / totalOperations) * 100 
-          }));
+            const reviews = await fetchReviews(asin, page);
+            
+            if (reviews.length === 0) {
+              // Se não há mais reviews, parar de buscar páginas
+              break;
+            }
+
+            allReviews.push(...reviews);
+
+            // Pequeno delay para não sobrecarregar a API
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+          } catch (error) {
+            errors.push(`${asin} - Página ${page}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+            // Se der erro numa página, tentar a próxima
+            continue;
+          }
         }
       }
 
@@ -176,21 +287,44 @@ export default function AmazonReviewExtractor() {
         ...prev,
         extractedReviews: allReviews,
         errors,
-        isExtracting: false,
         progress: 100
       }));
 
-    } catch (error: any) {
+      toast({
+        title: "Extração concluída",
+        description: `${allReviews.length} reviews extraídos com sucesso.`
+      });
+
+    } catch (error) {
+      errors.push(`Erro geral: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
       setState(prev => ({
         ...prev,
-        isExtracting: false,
-        errors: [...prev.errors, `Erro geral: ${error.message}`]
+        errors
+      }));
+      
+      toast({
+        title: "Erro na extração",
+        description: "Ocorreu um erro durante a extração. Verifique os detalhes.",
+        variant: "destructive"
+      });
+    } finally {
+      setState(prev => ({
+        ...prev,
+        isExtracting: false
       }));
     }
   };
 
+  // Função para baixar TXT
   const downloadTXT = () => {
-    if (state.extractedReviews.length === 0) return;
+    if (state.extractedReviews.length === 0) {
+      toast({
+        title: "Nenhum dado",
+        description: "Não há reviews para baixar.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     const txtContent = state.extractedReviews.map((review, index) => {
       const title = review.review_title || 'Sem título';
@@ -217,88 +351,154 @@ Comentário: ${comment}
       link.click();
       document.body.removeChild(link);
     }
+
+    toast({
+      title: "Download iniciado",
+      description: `Arquivo TXT com ${state.extractedReviews.length} reviews baixado.`
+    });
   };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <MessageSquare className="h-8 w-8" />
-            Extrator de Reviews Amazon
-          </h1>
+          <h1 className="text-3xl font-bold">Extrator de Reviews Amazon</h1>
           <p className="text-muted-foreground mt-2">
-            Extraia reviews de produtos Amazon para análise competitiva
+            Extraia reviews de produtos da Amazon para análise e insights
           </p>
         </div>
       </div>
 
-      {/* Configuração */}
+      {/* Adição de URLs */}
       <Card>
         <CardHeader>
-          <CardTitle>Configuração da Extração</CardTitle>
+          <CardTitle>Produtos para Análise</CardTitle>
           <CardDescription>
-            Adicione URLs ou ASINs de produtos e selecione o país de origem
+            Adicione URLs da Amazon ou ASINs diretos. <strong>Uma extração por país</strong> - após adicionar o primeiro produto, o país ficará fixo. Avaliações do Brasil e México são limitadas a 1 página. Os demais países irão puxar até 10 páginas de avaliações.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
+              <Label htmlFor="url-input">URL da Amazon ou ASIN</Label>
               <Input
-                placeholder="URL da Amazon ou ASIN do produto"
+                id="url-input"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addUrl()}
+                placeholder="URL: https://amazon.com.br/dp/B0CGJKTB6K ou ASIN: B0CGJKTB6K"
+                onKeyDown={(e) => e.key === 'Enter' && addUrl()}
               />
             </div>
-            <CountrySelector
-              value={selectedCountry}
-              onValueChange={setSelectedCountry}
-              className={state.countryLocked ? "opacity-50" : ""}
-            />
-            <Button onClick={addUrl} disabled={!urlInput.trim()}>
-              Adicionar
-            </Button>
+            <div>
+              <Label htmlFor="country-select">
+                País da Amazon
+                {state.countryLocked && (
+                  <span className="text-sm text-muted-foreground ml-2">(Fixado)</span>
+                )}
+              </Label>
+              <Select 
+                value={selectedCountry} 
+                onValueChange={setSelectedCountry}
+                disabled={state.countryLocked}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map(country => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.flag} {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          {/* Alerta sobre limitações por país */}
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>
+                {state.countryLocked ? 'País fixado para esta extração:' : 'Limitações por país:'}
+              </strong> {' '}
+              {selectedCountry === 'BR' || selectedCountry === 'MX' 
+                ? `${COUNTRIES.find(c => c.code === selectedCountry)?.flag} ${COUNTRIES.find(c => c.code === selectedCountry)?.name} está limitado a 1 página de avaliações.`
+                : `${COUNTRIES.find(c => c.code === selectedCountry)?.flag} ${COUNTRIES.find(c => c.code === selectedCountry)?.name} irá extrair até 10 páginas de avaliações.`
+              }
+              {state.countryLocked && ' Remova todos os produtos para alterar o país.'}
+            </AlertDescription>
+          </Alert>
+          
+          <div className="flex justify-between">
+            {state.urls.length > 0 && (
+              <Button 
+                variant="outline" 
+                onClick={clearAll} 
+                disabled={state.isExtracting}
+              >
+                Limpar Tudo
+              </Button>
+            )}
+            <div className={state.urls.length === 0 ? "w-full flex justify-end" : ""}>
+              <Button onClick={addUrl} disabled={state.isExtracting}>
+                Adicionar Produto
+              </Button>
+            </div>
           </div>
 
+          {/* Lista de URLs */}
           {state.urls.length > 0 && (
             <div className="space-y-2">
-              <h3 className="font-medium">Produtos para extração:</h3>
-              <div className="space-y-2">
-                {state.urls.map((url, index) => {
-                  const asin = extractOrValidateASIN(url);
-                  return (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono text-sm bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
-                          ASIN: {asin}
-                        </span>
-                        <ExternalLink 
-                          className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground"
-                          onClick={() => window.open(url, '_blank')}
-                        />
-                      </div>
+              <Label>URLs Adicionadas ({state.urls.length})</Label>
+              {state.urls.map((url, index) => {
+                const asin = extractOrValidateASIN(url);
+                return (
+                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex-1">
+                      <div className="font-medium">ASIN: {asin}</div>
+                      <div className="text-sm text-muted-foreground truncate">{url}</div>
+                    </div>
+                    <div className="flex gap-2">
                       <Button
-                        variant="ghost"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(url, '_blank')}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => removeUrl(index)}
                         disabled={state.isExtracting}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           )}
+        </CardContent>
+      </Card>
 
+      {/* Botão de Extração */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Extração de Reviews</CardTitle>
+          <CardDescription>
+            Inicie a extração de reviews. Serão coletadas até 10 páginas por produto.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <Button 
-            onClick={extractReviews}
-            disabled={state.urls.length === 0 || state.isExtracting}
+            onClick={extractReviews} 
+            disabled={state.isExtracting || state.urls.length === 0}
             className="w-full"
           >
-            {state.isExtracting ? 'Extraindo...' : `Extrair Reviews (${state.urls.length} produtos)`}
+            {state.isExtracting ? 'Extraindo...' : 'Iniciar Extração'}
           </Button>
         </CardContent>
       </Card>
@@ -306,76 +506,77 @@ Comentário: ${comment}
       {/* Progresso */}
       {state.isExtracting && (
         <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex justify-between text-sm">
-                <span>Progresso da extração</span>
-                <span>{Math.round(state.progress)}%</span>
-              </div>
-              <Progress value={state.progress} />
-              <div className="text-sm text-muted-foreground">
-                Produto atual: {state.currentProduct} | Página: {state.currentPage}/{state.totalPages}
-              </div>
+          <CardHeader>
+            <CardTitle>Progresso da Extração</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Progress value={state.progress} className="w-full" />
+            <div className="text-sm text-muted-foreground">
+              {state.currentProduct && (
+                <div>Produto atual: {state.currentProduct}</div>
+              )}
+              {state.currentPage > 0 && (
+                <div>Página: {state.currentPage}/{state.totalPages}</div>
+              )}
+              <div>{Math.round(state.progress)}% concluído</div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {loading && <LoadingSpinner message="Extraindo reviews..." />}
-
-      {/* Erros */}
-      {state.errors.length > 0 && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <div className="space-y-1">
-              <p className="font-medium">Erros durante a extração:</p>
-              {state.errors.map((error, index) => (
-                <p key={index} className="text-sm">{error}</p>
-              ))}
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-
       {/* Resultados */}
-      {state.extractedReviews.length > 0 && (
+      {(state.extractedReviews.length > 0 || state.errors.length > 0) && (
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle>Reviews Extraídos</CardTitle>
-                <CardDescription>
-                  {state.extractedReviews.length} reviews coletados
-                </CardDescription>
-              </div>
-              <Button onClick={downloadTXT}>
-                <Download className="mr-2 h-4 w-4" />
-                Baixar TXT
-              </Button>
-            </div>
+            <CardTitle>Resultados</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {state.extractedReviews.slice(0, 10).map((review, index) => (
-                <div key={index} className="p-4 border rounded-lg">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium">{review.review_title || 'Sem título'}</h4>
-                    <span className="text-sm text-muted-foreground">
-                      {review.review_star_rating} ⭐
-                    </span>
+          <CardContent className="space-y-4">
+            {state.extractedReviews.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-lg font-semibold">
+                    {state.extractedReviews.length} reviews extraídos
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {review.review_comment || 'Sem comentário'}
-                  </p>
+                  <Button onClick={downloadTXT}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Baixar TXT
+                  </Button>
                 </div>
-              ))}
-              {state.extractedReviews.length > 10 && (
-                <p className="text-center text-sm text-muted-foreground">
-                  ... e mais {state.extractedReviews.length - 10} reviews
-                </p>
-              )}
-            </div>
+                
+                <div className="max-h-60 overflow-y-auto border rounded-lg p-4">
+                  {state.extractedReviews.slice(0, 10).map((review, index) => (
+                    <div key={index} className="border-b pb-2 mb-2 last:border-b-0">
+                      <div className="font-medium">{review.review_title}</div>
+                      <div className="text-sm text-muted-foreground">
+                        ⭐ {review.review_star_rating} estrelas
+                      </div>
+                      <div className="text-sm text-muted-foreground truncate">
+                        {review.review_comment.substring(0, 100)}...
+                      </div>
+                    </div>
+                  ))}
+                  {state.extractedReviews.length > 10 && (
+                    <div className="text-center text-sm text-muted-foreground">
+                      ... e mais {state.extractedReviews.length - 10} reviews
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {state.errors.length > 0 && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="font-semibold mb-2">Erros encontrados:</div>
+                  <ul className="list-disc pl-4 space-y-1">
+                    {state.errors.map((error, index) => (
+                      <li key={index} className="text-sm">{error}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
       )}
