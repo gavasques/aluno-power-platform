@@ -143,13 +143,22 @@ export class OpenAIProvider extends BaseProvider {
       messages: request.messages
     };
 
+    // Calculate safe max tokens - never exceed model's actual limit
+    const requestedTokens = request.maxTokens || modelConfig.maxTokens;
+    const safeMaxTokens = Math.min(requestedTokens, modelConfig.maxTokens);
+
     // Reasoning models use max_completion_tokens, others use max_tokens
     if (isReasoningModel) {
-      params.max_completion_tokens = request.maxTokens || modelConfig.maxTokens;
+      params.max_completion_tokens = safeMaxTokens;
       // Reasoning models don't support temperature
     } else {
-      params.max_tokens = request.maxTokens || modelConfig.maxTokens;
+      params.max_tokens = safeMaxTokens;
       params.temperature = request.temperature ?? 0.7;
+    }
+
+    // Log if we had to reduce the token limit
+    if (requestedTokens > modelConfig.maxTokens) {
+      console.log(`⚠️ [OPENAI] Reduced maxTokens for ${request.model} from ${requestedTokens} to ${safeMaxTokens}`);
     }
 
     console.log(`🔧 [OPENAI] Request params for ${request.model}:`, JSON.stringify(params, null, 2));
