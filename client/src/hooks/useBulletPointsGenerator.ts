@@ -8,7 +8,11 @@ interface UseBulletPointsGeneratorProps {
 }
 
 interface GenerationState {
+  productName: string;
+  brand: string;
   textInput: string;
+  targetAudience: string;
+  keywords: string;
   bulletPointsOutput: string;
   isGenerating: boolean;
   generatedBulletPoints: string;
@@ -127,7 +131,11 @@ Agora, com base nas informações do produto abaixo, crie 8 bullet points seguin
 
 export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProps) => {
   const [state, setState] = useState<GenerationState>({
+    productName: '',
+    brand: '',
     textInput: '',
+    targetAudience: '',
+    keywords: '',
     bulletPointsOutput: '',
     isGenerating: false,
     generatedBulletPoints: '',
@@ -160,11 +168,20 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
   }, [agent]);
 
   const generateWithAI = useCallback(async () => {
+    if (!state.productName.trim()) {
+      toast({
+        variant: "destructive",
+        title: "❌ Erro",
+        description: "Por favor, insira o nome do produto",
+      });
+      return;
+    }
+
     if (!state.textInput.trim()) {
       toast({
         variant: "destructive",
         title: "❌ Erro",
-        description: "Por favor, insira informações sobre o produto antes de gerar bullet points",
+        description: "Por favor, insira as informações do produto",
       });
       return;
     }
@@ -182,7 +199,18 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
 
     try {
       const startTime = Date.now();
-      const prompt = BULLET_POINTS_PROMPT.replace('{{PRODUCT_INFO}}', state.textInput);
+      
+      const productInfo = `
+NOME DO PRODUTO: ${state.productName}
+${state.brand ? `MARCA: ${state.brand}` : ''}
+${state.targetAudience ? `PÚBLICO-ALVO: ${state.targetAudience}` : ''}
+${state.keywords ? `PALAVRAS-CHAVE: ${state.keywords}` : ''}
+
+INFORMAÇÕES DETALHADAS DO PRODUTO:
+${state.textInput}
+      `.trim();
+
+      const prompt = BULLET_POINTS_PROMPT.replace('{{PRODUCT_INFO}}', productInfo);
 
       const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
@@ -257,7 +285,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
     } finally {
       updateState({ isGenerating: false });
     }
-  }, [state.textInput, state.bulletPointsOutput, user, agentConfig, toast, updateState]);
+  }, [state.productName, state.textInput, state.brand, state.targetAudience, state.keywords, state.bulletPointsOutput, user, agentConfig, toast, updateState]);
 
   const copyBulletPoints = useCallback(async () => {
     try {
@@ -302,7 +330,11 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
 
   const handleClearAll = useCallback(() => {
     updateState({
+      productName: '',
+      brand: '',
       textInput: '',
+      targetAudience: '',
+      keywords: '',
       bulletPointsOutput: '',
       generatedBulletPoints: '',
       showReplaceDialog: false

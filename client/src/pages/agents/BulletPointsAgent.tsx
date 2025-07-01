@@ -53,8 +53,14 @@ const BulletPointsAgent: React.FC = () => {
 
           <div className="grid lg:grid-cols-2 gap-8">
             <BulletPointsInput
-              value={state.textInput}
-              onChange={(value) => updateState({ textInput: value })}
+              formData={{
+                productName: state.productName,
+                brand: state.brand,
+                textInput: state.textInput,
+                targetAudience: state.targetAudience,
+                keywords: state.keywords
+              }}
+              onChange={(field, value) => updateState({ [field]: value })}
               onGenerate={generateWithAI}
               onClear={handleClearAll}
               isGenerating={state.isGenerating}
