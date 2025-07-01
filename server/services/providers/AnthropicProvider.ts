@@ -42,29 +42,54 @@ export class AnthropicProvider extends BaseProvider {
       temperature = 1.0;
     }
 
-    const response = await this.client.messages.create({
-      model: request.model,
-      max_tokens: request.maxTokens || 4000,
-      temperature: temperature,
-      messages: request.messages.map(msg => ({
-        role: msg.role === 'system' ? 'user' : msg.role,
-        content: msg.role === 'system' ? `System: ${msg.content}` : msg.content
-      }))
-    });
+    // Limit max_tokens to avoid timeout issues - Anthropic recommends streaming for large responses
+    let maxTokens = request.maxTokens || 4000;
+    if (maxTokens > 8000) {
+      console.log(`⚠️ [ANTHROPIC] Limiting maxTokens for ${request.model} from ${maxTokens} to 8000 to avoid timeout`);
+      maxTokens = 8000;
+    }
 
-    const content = response.content[0]?.type === 'text' ? response.content[0].text : '';
-    const usage = response.usage || { input_tokens: 0, output_tokens: 0 };
-    const cost = this.calculateCost(usage.input_tokens, usage.output_tokens, modelConfig);
+    try {
+      const response = await this.client.messages.create({
+        model: request.model,
+        max_tokens: maxTokens,
+        temperature: temperature,
+        messages: request.messages.map(msg => ({
+          role: msg.role === 'system' ? 'user' : msg.role,
+          content: msg.role === 'system' ? `System: ${msg.content}` : msg.content
+        }))
+      });
 
-    return {
-      content,
-      usage: {
-        inputTokens: usage.input_tokens,
-        outputTokens: usage.output_tokens,
-        totalTokens: usage.input_tokens + usage.output_tokens
-      },
-      cost
-    };
+      const content = response.content[0]?.type === 'text' ? response.content[0].text : '';
+      const usage = response.usage || { input_tokens: 0, output_tokens: 0 };
+      const cost = this.calculateCost(usage.input_tokens, usage.output_tokens, modelConfig);
+
+      return {
+        content,
+        usage: {
+          inputTokens: usage.input_tokens,
+          outputTokens: usage.output_tokens,
+          totalTokens: usage.input_tokens + usage.output_tokens
+        },
+        cost
+      };
+    } catch (error: any) {
+      // Log the actual error details for debugging
+      console.error(`❌ [ANTHROPIC] API Error for model ${request.model}:`, {
+        message: error.message,
+        type: error.type,
+        status: error.status,
+        requestParams: {
+          model: request.model,
+          maxTokens,
+          temperature,
+          messageCount: request.messages.length
+        }
+      });
+      
+      // Re-throw with more context
+      throw new Error(`Anthropic API Error: ${error.message}`);
+    }
   }
 
   private getModelConfig(model: string): ModelConfig {
