@@ -91,7 +91,6 @@ export default function KeywordSearchReport() {
     min_price: '',
     max_price: '',
     brand: '',
-    is_prime: false,
     seller_id: '',
     deals_and_discounts: 'NONE'
   });
@@ -173,7 +172,6 @@ export default function KeywordSearchReport() {
             brand: searchParams.brand,
             min_price: searchParams.min_price,
             max_price: searchParams.max_price,
-            is_prime: searchParams.is_prime,
             seller_id: searchParams.seller_id,
             deals_and_discounts: searchParams.deals_and_discounts,
           }
@@ -453,32 +451,21 @@ export default function KeywordSearchReport() {
             </div>
           </div>
 
-          {/* Switches e Ofertas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is_prime"
-                checked={searchParams.is_prime}
-                onCheckedChange={(checked) => updateSearchParam('is_prime', checked)}
-              />
-              <Label htmlFor="is_prime">Apenas produtos Prime</Label>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="deals">Ofertas e Descontos</Label>
-              <Select value={searchParams.deals_and_discounts} onValueChange={(value) => updateSearchParam('deals_and_discounts', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DEALS_OPTIONS.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Ofertas */}
+          <div className="space-y-2">
+            <Label htmlFor="deals">Ofertas e Descontos</Label>
+            <Select value={searchParams.deals_and_discounts} onValueChange={(value) => updateSearchParam('deals_and_discounts', value)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DEALS_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Botão de Busca */}
@@ -559,7 +546,6 @@ export default function KeywordSearchReport() {
                                 {product.product_star_rating}
                               </span>
                             )}
-                            {product.is_prime && <span className="text-blue-600">Prime</span>}
                             {product.is_best_seller && <span className="text-orange-600">Best Seller</span>}
                           </div>
                         </div>

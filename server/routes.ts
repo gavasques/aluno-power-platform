@@ -3913,7 +3913,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         min_price,
         max_price,
         brand,
-        is_prime,
         seller_id,
         deals_and_discounts
       } = req.body as any;
@@ -3939,7 +3938,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       if (min_price) params.append('min_price', min_price.toString());
       if (max_price) params.append('max_price', max_price.toString());
       if (brand) params.append('brand', brand);
-      if (is_prime !== undefined) params.append('is_prime', is_prime.toString());
       if (seller_id) params.append('seller_id', seller_id);
       if (deals_and_discounts && deals_and_discounts !== 'NONE') {
         params.append('deals_and_discounts', deals_and_discounts);
