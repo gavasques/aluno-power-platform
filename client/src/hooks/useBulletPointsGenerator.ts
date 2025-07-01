@@ -30,17 +30,17 @@ Siga as instruções abaixo à risca.
 
 ---
 
-## 🎯 OBJETIVO PRINCIPAL
+##  OBJETIVO PRINCIPAL
 
 Criar 8 bullet points poderosos, focados em benefícios reais, que façam o cliente querer comprar AGORA. Vamos atingir o subconciente do consumidor. Usando tambem gatilhos mentais que levem ele a querer esse produto. 
 
 ---
 
-## 📝 FORMATO E ESTILO
+##  FORMATO E ESTILO
 
 - Cada bullet point começa com o BENEFÍCIO PRINCIPAL EM MAIÚSCULAS, seguido de hífen e características que sustentam o benefício.
-- Limite: 160–195 caracteres (com espaços) por bullet.
-- NUNCA deixa o bullet points com menos de 160 caracteres
+- Caracteres: 170–195 caracteres (com espaços) por bullet.
+- NUNCA deixa o bullet points com menos de 170 caracteres
 - NUNCA exceda 200 caracteres no Bullet Point. 
 - Bullet 3: Sempre termina com "ADICIONAR AO CARRINHO".
 - Bullet da Garantia: Um bullet dedicado à garantia, reforçando que só é válida para compras de vendedores autorizados.
@@ -52,7 +52,7 @@ Criar 8 bullet points poderosos, focados em benefícios reais, que façam o clie
 
 ---
 
-## 🚦 ESTRUTURA DOS BULLET POINTS
+##  ESTRUTURA DOS BULLET POINTS
 
 1. Público-alvo + Proposta Única de Valor: Quem é o produto, diferencial, credibilidade.
 2. Benefício Emocional Principal: O que o cliente sente, resultado prático.
@@ -65,7 +65,7 @@ Criar 8 bullet points poderosos, focados em benefícios reais, que façam o clie
 
 ---
 
-## 🧠 TÉCNICAS 
+##  TÉCNICAS 
 
 - Palavras de poder: finalmente, revolucionário, exclusivo, superior, imediato, instantâneo, transforme, experimente, descubra, garantido, premium, único, avançado, inovador, eficaz, poderoso.
 - Psicologia: agitação da dor, ponte benefício-característica, urgência, transformação, prova social, propriedade mental (fazer o cliente se imaginar usando).
@@ -86,7 +86,7 @@ Criar 8 bullet points poderosos, focados em benefícios reais, que façam o clie
 - Use cada palavra-chave de forma natural, espalhada nos bullets, SEM repetições forçadas (evite keyword stuffing).
 - Priorize as palavras-chave nos primeiros bullets ou início de frase para maximizar o efeito no algoritmo de busca e na leitura rápida.
 
-## ⚡️ ESCANEABILIDADE (SKIMMABILITY)
+##  ESCANEABILIDADE (SKIMMABILITY)
 
 - O benefício principal deve aparecer logo no começo de cada bullet (primeiras 5-7 palavras).
 - Escreva como se o cliente só fosse ler a primeira linha ou metade do bullet.
@@ -96,13 +96,13 @@ Criar 8 bullet points poderosos, focados em benefícios reais, que façam o clie
 - Evite expressões absolutas ("o melhor", "top 1", "o único") a não ser que haja comprovação real.
 - Foque em benefícios concretos, ancorados em fatos e recursos do produto.
 
-## 💡 PERGUNTAS IMPACTANTES (OPCIONAL)
+##  PERGUNTAS IMPACTANTES (OPCIONAL)
 
 - Pode começar o primeiro bullet com uma pergunta direta que aponte para a dor do cliente, seguida imediatamente do benefício que resolve.
 
 ---
 
-## 📊 ETAPA 1: ANÁLISE PRÉVIA DO PRODUTO
+##  ETAPA 1: ANÁLISE PRÉVIA DO PRODUTO
 
 Preencha antes de gerar os bullets:
 - Diferencial Único: 
@@ -115,7 +115,7 @@ Preencha antes de gerar os bullets:
 
 ---
 
-## 🚀 ETAPA 2: GERAR OS BULLET POINTS
+## ETAPA 2: GERAR OS BULLET POINTS
 
 Com base na análise acima, crie os 8 bullets nesta ordem (cada um com 150–200 caracteres):
 
@@ -128,7 +128,11 @@ Com base na análise acima, crie os 8 bullets nesta ordem (cada um com 150–200
 7. EXCLUSIVIDADE/INOVAÇÃO – [tecnologia, diferencial, inovação]
 8. CALL TO ACTION FINAL – [resumo dos benefícios + convite à ação imediata]
 
----
+O RETORNO, será apenas o BULLET POINTS, a ETAPA 1 é apenas para você ter base para a ETAPA 2. 
+
+Lembre-se
+- NUNCA deixa o bullet points com menos de 170 caracteres
+- NUNCA exceda 200 caracteres no Bullet Point. 
 
 Agora siga as etapas e gere bullets prontos para dominar seu nicho. Sem enrolação, só alta conversão.
 

@@ -110,11 +110,12 @@ Preferred communication style: Simple, everyday language.
 
 - **July 01, 2025**: ✅ PROMPT GERADOR DE BULLET POINTS AMAZON REFINADO PARA MÁXIMA CONVERSÃO
   - **Prompt Ultra-Refinado com Regras Rigorosas**:
-    - Limite rigoroso: NUNCA menos de 160 caracteres, NUNCA mais de 200 caracteres
+    - Limite rigoroso: NUNCA menos de 170 caracteres, NUNCA mais de 200 caracteres
     - Linguagem simples e direta: NUNCA usar palavras complicadas ou complexas
     - Restrições absolutas: NUNCA inventar características não mencionadas
     - Bullet dedicado à garantia (obrigatório) com foco em vendedores autorizados
     - Tom comercial direto com urgência máxima para conversão imediata
+    - Especificação de retorno: APENAS os bullet points, sem a análise prévia
   - **Mapeamento Dinâmico de Campos Implementado**:
     - {{PRODUCT_NAME}} → Nome do Produto
     - {{BRAND}} → Marca  
