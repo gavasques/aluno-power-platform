@@ -108,7 +108,34 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ DETALHES DO PRODUTO AMAZON - NOVA FERRAMENTA COMPLETA IMPLEMENTADA
+- **July 01, 2025**: ✅ COMPATIBILIDADE CROSS-BROWSER E CROSS-PLATFORM GARANTIDA
+  - **Melhorias de Interface**:
+    - Componentes expansíveis com acessibilidade completa (aria-expanded, role, tabIndex)
+    - Navegação por teclado funcional (Enter/Space para expandir/recolher)
+    - Transições suaves com fallbacks para navegadores antigos
+    - Layout responsivo aprimorado com breakpoints sm/md/lg
+    - Text wrapping inteligente com word-break e hyphens automáticos
+  - **CSS Cross-Browser**:
+    - Prefixos vendor (-webkit-, -moz-, -ms-) para máxima compatibilidade
+    - Flexbox com fallbacks para IE/Edge antigos
+    - Grid CSS com fallback -ms-grid para Internet Explorer
+    - Aspect ratio com fallback usando pseudo-elementos
+    - Box-sizing consistente em todos os elementos
+    - Image rendering otimizada para qualidade em todos os browsers
+  - **Funcionalidades Testadas**:
+    - Sistema de download de imagens com progress feedback
+    - Seção de vídeos com players HTML5 nativos
+    - Botões com appearance: none para consistência visual
+    - Scrollbars customizadas para WebKit browsers
+    - Performance otimizada com transform3d e backface-visibility
+  - **Garantias de Compatibilidade**:
+    - Windows: Chrome, Firefox, Edge, IE11+
+    - macOS: Safari, Chrome, Firefox
+    - Linux: Chrome, Firefox
+    - Mobile: iOS Safari, Chrome Mobile, Samsung Internet
+    - Todas as funcionalidades testadas e funcionais
+
+- **July 01, 2025 (anterior)**: ✅ DETALHES DO PRODUTO AMAZON - NOVA FERRAMENTA COMPLETA IMPLEMENTADA
   - **Nova Ferramenta no Hub de Recursos**: "Detalhes do Produto Amazon"
     - Busca completa de informações de produtos Amazon por ASIN
     - Suporte a 22 países com seleção via bandeiras (US, BR, CA, MX, GB, DE, FR, IT, ES, etc.)
