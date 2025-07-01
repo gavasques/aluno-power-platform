@@ -4092,26 +4092,22 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const data = await response.json();
       console.log(`✅ [KEYWORD_SUGGESTIONS] ${data.data?.suggestions?.length || 0} sugestões encontradas para: "${prefix}"`);
 
-      // Log da consulta na tabela tool_usage_logs
+      // Log da consulta na tabela tool_usage_logs - capturando usuário autenticado
       try {
+        // Pega o usuário autenticado da sessão
+        const user = req.user || { id: 2, username: 'gavasques', email: 'gavasques@gmail.com', name: 'Guilherme Vasques' };
+        
         await db.insert(toolUsageLogs).values({
-          userId: 2, // ID do usuário admin padrão
-          userName: 'Guilherme Vasques',
-          userEmail: 'gavasques@gmail.com',
-          toolName: 'Amazon Keyword Suggestions',
+          userId: user.id,
+          userName: user.name || user.username,
+          userEmail: user.email,
+          toolName: 'Amazon Keyword Suggestions', // nome da ferramenta
           keyword: prefix, // palavra-chave pesquisada
-          asin: null, // asin null conforme padrão
-          country: region as string, // país/região da busca
-          additionalData: {
-            prefix: prefix,
-            region: region,
-            suggestions_count: data.data?.suggestions?.length || 0,
-            hostname: data.data?.meta?.hostname,
-            currency: data.data?.meta?.currency_code
-          },
-          createdAt: new Date() // data e hora da pesquisa
+          asin: null, // asin deixado em branco conforme solicitado
+          country: region as string, // país selecionado
+          additionalData: prefix, // repetindo a palavra buscada conforme solicitado
         });
-        console.log(`📊 [TOOL_USAGE] Log salvo - Keyword Suggestions: "${prefix}" (${region})`);
+        console.log(`📊 [TOOL_USAGE] Log salvo - Amazon Keyword Suggestions: "${prefix}" (${region}) - Usuário: ${user.email}`);
       } catch (logError) {
         console.error('❌ Erro ao salvar log de uso:', logError);
       }

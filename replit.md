@@ -108,7 +108,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ CONSULTA DE CNPJ - NOVA FERRAMENTA COMPLETA IMPLEMENTADA
+- **July 01, 2025**: ✅ AMAZON KEYWORD SUGGESTIONS - SISTEMA DE LOGGING COMPLETO IMPLEMENTADO
+  - **Sistema de Logging Detalhado**:
+    - Integração completa com tabela `tool_usage_logs` existente
+    - Captura automática de dados do usuário autenticado da sessão
+    - Mapeamento exato conforme especificação: tool_name, asin (null), country, additional_data, keyword
+    - Log estruturado: userId, userName, userEmail, toolName='Amazon Keyword Suggestions'
+    - Campo keyword = palavra-chave pesquisada, country = país selecionado (BR, US, etc.)
+    - Campo additional_data = repete a palavra buscada para análise posterior
+    - Timestamp automático para tracking temporal das consultas
+  - **Funcionalidade Completa Confirmada**:
+    - Interface moderna com 22 países e bandeiras funcionando
+    - API amazon-data-scraper141.p.rapidapi.com integrada e testada
+    - Logging automático salvando todas as consultas com sucesso
+    - Sistema de cópia de dados funcionando (individual e em lote)
+    - Navegação integrada no Hub de Recursos com ícone Tag
+  - **Dados de Teste Confirmados**:
+    - Testes realizados com palavras "maca" e "maca estetica"
+    - Logs salvos corretamente com estrutura adequada
+    - Performance API: 850ms-4325ms dependendo da complexidade da busca
+    - Total de 10 sugestões retornadas por consulta conforme padrão Amazon
+
+- **July 01, 2025 (anterior)**: ✅ CONSULTA DE CNPJ - NOVA FERRAMENTA COMPLETA IMPLEMENTADA
   - **Nova Ferramenta no Hub de Recursos**: "Consulta de CNPJ"
     - Busca completa de informações de empresas brasileiras por CNPJ
     - Validação automática de CNPJ com formatação em tempo real
