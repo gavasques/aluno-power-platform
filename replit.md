@@ -108,7 +108,32 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ GERADOR DE BULLET POINTS AMAZON REFATORADO E OTIMIZADO
+- **July 01, 2025**: ✅ PROMPT GERADOR DE BULLET POINTS AMAZON COMPLETAMENTE ATUALIZADO
+  - **Novo Prompt Profissional Implementado**:
+    - Estrutura em 2 etapas: Análise Prévia + Criação dos Bullet Points
+    - Limite ajustado para 150-200 caracteres (antes 180-250)
+    - Formatação em Markdown com numeração clara
+    - 8 tipos específicos de bullet points com focos distintos
+  - **Técnicas de Copywriting Avançadas**:
+    - Agitação da dor, ponte benefício-característica, prova social
+    - Urgência temporal, propriedade mental, transformação
+    - Palavras de poder: Finalmente, Revolucionário, Exclusivo, etc.
+    - Restrições rigorosas: proibições claras (preço, estoque, cores, etc.)
+  - **Sistema Dinâmico de Configuração Corrigido**:
+    - Busca configurações em tempo real do banco antes de cada geração
+    - Mudanças no admin refletem instantaneamente no gerador
+    - Logs salvam sempre com as configurações atuais corretas
+  - **Estrutura Profissional dos 8 Bullet Points**:
+    - 1. Público-alvo + Proposta única de valor
+    - 2. Benefício emocional principal  
+    - 3. Características técnicas + CTA "ADICIONAR AO CARRINHO"
+    - 4. Facilidade de uso
+    - 5. Redução de risco + Garantias
+    - 6. Transformação / Resultado final
+    - 7. Exclusividade + Inovação
+    - 8. Call to action final (resumo dos benefícios)
+
+- **July 01, 2025 (anterior)**: ✅ GERADOR DE BULLET POINTS AMAZON REFATORADO E OTIMIZADO
   - **Melhorias de UX Implementadas**:
     - Limite aumentado para 4000 caracteres com validação e alertas
     - Campos de entrada e saída expandidos (400px altura) para mais conforto
