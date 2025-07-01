@@ -47,6 +47,7 @@ import { openaiService } from "./services/openaiService";
 import { aiProviderService } from "./services/aiProviderService";
 import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
+import { requireAuth } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
 import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema } from '@shared/schema';
@@ -3821,6 +3822,114 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     } catch (error) {
       console.error('Error fetching admin dashboard stats:', error);
       res.status(500).json({ error: 'Failed to fetch dashboard statistics' });
+    }
+  });
+
+  // Amazon Keywords Search Routes
+  app.post('/api/amazon-keywords/search', requireAuth, async (req: any, res: Response) => {
+    try {
+      const {
+        query,
+        page = 1,
+        country = 'BR',
+        sort_by = 'RELEVANCE',
+        min_price,
+        max_price,
+        brand,
+        is_prime,
+        seller_id,
+        deals_and_discounts
+      } = req.body as any;
+
+      if (!query) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Query parameter is required' 
+        });
+      }
+
+      console.log(`🔍 [AMAZON_KEYWORDS] Buscando produtos - Query: ${query}, Página: ${page}, País: ${country}`);
+
+      // Construir parâmetros da query
+      const params = new URLSearchParams({
+        query,
+        page: page.toString(),
+        country,
+        sort_by,
+        product_condition: 'NEW'
+      });
+
+      if (min_price) params.append('min_price', min_price.toString());
+      if (max_price) params.append('max_price', max_price.toString());
+      if (brand) params.append('brand', brand);
+      if (is_prime !== undefined) params.append('is_prime', is_prime.toString());
+      if (seller_id) params.append('seller_id', seller_id);
+      if (deals_and_discounts && deals_and_discounts !== 'NONE') {
+        params.append('deals_and_discounts', deals_and_discounts);
+      }
+
+      const url = `https://real-time-amazon-data.p.rapidapi.com/search?${params.toString()}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'X-RapidAPI-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+          'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Amazon API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.status !== 'OK') {
+        throw new Error(`Amazon API returned status: ${data.status}`);
+      }
+
+      console.log(`✅ [AMAZON_KEYWORDS] ${data.data.products?.length || 0} produtos encontrados - Query: ${query}, Página: ${page}`);
+
+      // Log usage
+      if (req.user) {
+        try {
+          await db.insert(toolUsageLogs).values({
+            userId: req.user.id,
+            userName: req.user.name,
+            userEmail: req.user.email,
+            toolName: 'Relatório de Busca por Keywords',
+            additionalData: {
+              query,
+              country,
+              page,
+              sort_by,
+              total_products: data.data.total_products,
+              products_found: data.data.products?.length || 0
+            }
+          });
+        } catch (logError) {
+          console.error('Error logging tool usage:', logError);
+        }
+      }
+
+      res.json({
+        success: true,
+        status: data.status,
+        data: {
+          total_products: data.data.total_products,
+          country: data.data.country,
+          domain: data.data.domain,
+          products: data.data.products || [],
+          parameters: data.parameters
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ [AMAZON_KEYWORDS] Error searching products:', error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to search Amazon products'
+      });
     }
   });
 
