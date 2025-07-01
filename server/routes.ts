@@ -4079,12 +4079,11 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log(`🔍 [CNPJ_CONSULTA] Consultando CNPJ: ${cnpjNumbers}`);
 
-      const response = await fetch(`https://dados-cnpj.p.rapidapi.com/product-details?cnpj=${cnpjNumbers}`, {
+      const response = await fetch(`https://dados-cnpj.p.rapidapi.com?cnpj=${cnpjNumbers}`, {
         method: 'GET',
         headers: {
-          'X-Rapidapi-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
-          'X-Rapidapi-Host': 'dados-cnpj.p.rapidapi.com',
-          'Host': 'dados-cnpj.p.rapidapi.com'
+          'X-RapidAPI-Key': '501b94a7b4mshbfb241ad53d8ffep1df41cjsn74e905cd859b',
+          'X-RapidAPI-Host': 'dados-cnpj.p.rapidapi.com'
         }
       });
 
