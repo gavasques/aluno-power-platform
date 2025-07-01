@@ -98,9 +98,9 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
             </div>
           </div>
 
-          {/* Linha 2: Público Alvo e Palavras-Chave */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div>
+          {/* Linha 2: Público Alvo e Garantia */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
               <Label htmlFor="targetAudience" className="text-sm font-medium text-gray-700">
                 Público Alvo
               </Label>
@@ -113,20 +113,35 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
               />
             </div>
             <div>
-              <Label htmlFor="keywords" className="text-sm font-medium text-gray-700">
-                Palavras-Chave
+              <Label htmlFor="warranty" className="text-sm font-medium text-gray-700">
+                Garantia
               </Label>
               <Input
-                id="keywords"
-                value={formData.keywords}
-                onChange={(e) => onChange('keywords', e.target.value)}
-                placeholder="Ex: smartphone, 5G, câmera, bateria..."
+                id="warranty"
+                value={formData.warranty}
+                onChange={(e) => onChange('warranty', e.target.value)}
+                placeholder="Ex: 12 meses, 2 anos..."
                 className="mt-1"
               />
             </div>
           </div>
 
-          {/* Linha 3: Diferencial Único e Materiais */}
+          {/* Linha 3: Palavras-Chave (campo maior) */}
+          <div>
+            <Label htmlFor="keywords" className="text-sm font-medium text-gray-700">
+              Palavras-Chave
+              <span className="text-xs text-gray-500 ml-1">(separadas por vírgula)</span>
+            </Label>
+            <Input
+              id="keywords"
+              value={formData.keywords}
+              onChange={(e) => onChange('keywords', e.target.value)}
+              placeholder="Ex: smartphone, 5G, câmera, bateria, tecnologia, resistente à água, alta qualidade..."
+              className="mt-1"
+            />
+          </div>
+
+          {/* Linha 4: Diferencial Único e Materiais */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="uniqueDifferential" className="text-sm font-medium text-gray-700">
@@ -154,20 +169,6 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
             </div>
           </div>
 
-          {/* Linha 4: Garantia */}
-          <div>
-            <Label htmlFor="warranty" className="text-sm font-medium text-gray-700">
-              Garantia
-            </Label>
-            <Input
-              id="warranty"
-              value={formData.warranty}
-              onChange={(e) => onChange('warranty', e.target.value)}
-              placeholder="Ex: 12 meses, 2 anos, Garantia vitalícia..."
-              className="mt-1"
-            />
-          </div>
-
           {/* Informações do Produto - Obrigatório */}
           <div className="flex-1 flex flex-col">
             <div className="flex justify-between items-center mb-2">
@@ -188,28 +189,30 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
             />
           </div>
         </div>
-      </div>
-      
-      <div className="flex gap-2">
-        <Button
-          onClick={onGenerate}
-          disabled={isGenerating || !isFormValid}
-          className="flex-1 bg-blue-600 hover:bg-blue-700"
-        >
-          {isGenerating ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Wand2 className="h-4 w-4 mr-2" />
-          )}
-          {isGenerating ? 'Gerando...' : 'Criar Bullet Points'}
-        </Button>
         
-        <Button
-          variant="outline"
-          onClick={onClear}
-        >
-          Limpar Tudo
-        </Button>
+        {/* Botões de Ação */}
+        <div className="flex gap-3 pt-4 mt-4 border-t border-gray-200">
+          <Button
+            onClick={onGenerate}
+            disabled={isGenerating || !isFormValid}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 h-11"
+          >
+            {isGenerating ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Wand2 className="h-4 w-4 mr-2" />
+            )}
+            {isGenerating ? 'Gerando...' : 'Criar Bullet Points'}
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={onClear}
+            className="h-11 px-6"
+          >
+            Limpar Tudo
+          </Button>
+        </div>
       </div>
     </div>
   );
