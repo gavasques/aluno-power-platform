@@ -129,6 +129,25 @@ export default function AmazonReviewExtractor() {
     });
   };
 
+  // Limpar tudo - resetar para nova extração
+  const clearAll = () => {
+    setState(prev => ({
+      ...prev,
+      urls: [],
+      extractedReviews: [],
+      errors: [],
+      progress: 0,
+      currentPage: 0,
+      currentProduct: '',
+      countryLocked: false
+    }));
+    
+    toast({
+      title: "Lista limpa",
+      description: "Todos os produtos foram removidos. Você pode selecionar um novo país."
+    });
+  };
+
   // Função para salvar log de uso
   const saveUsageLog = async (asin: string) => {
     if (!user) return;
@@ -407,10 +426,21 @@ export default function AmazonReviewExtractor() {
             </AlertDescription>
           </Alert>
           
-          <div className="flex justify-end">
-            <Button onClick={addUrl} disabled={state.isExtracting}>
-              Adicionar Produto
-            </Button>
+          <div className="flex justify-between">
+            {state.urls.length > 0 && (
+              <Button 
+                variant="outline" 
+                onClick={clearAll} 
+                disabled={state.isExtracting}
+              >
+                Limpar Tudo
+              </Button>
+            )}
+            <div className={state.urls.length === 0 ? "w-full flex justify-end" : ""}>
+              <Button onClick={addUrl} disabled={state.isExtracting}>
+                Adicionar Produto
+              </Button>
+            </div>
           </div>
 
           {/* Lista de URLs */}
