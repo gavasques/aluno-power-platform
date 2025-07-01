@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, FileText, Users, Wrench, Package, BrainCircuit, Building2 } from "lucide-react";
+import { Plus, FileText, Users, Wrench, Package, BrainCircuit } from "lucide-react";
 import { useRoute, useLocation } from "wouter";
 import { usePartners } from "@/contexts/PartnersContext";
 import { useSuppliers } from "@/contexts/SuppliersContext";
@@ -24,7 +24,6 @@ import PromptsAIManager from "@/components/admin/cadastros/PromptsAIManager";
 import PromptForm from "@/components/admin/cadastros/PromptForm";
 import { NewsCenter } from "./content/NewsCenter";
 import { UpdatesCenter } from "./content/UpdatesCenter";
-import AmazonDepartmentExport from "./content/AmazonDepartmentExport";
 
 const ContentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,10 +86,6 @@ const ContentManagement = () => {
 
   if (subsection === 'novidades') {
     return <UpdatesCenter />;
-  }
-
-  if (subsection === 'export-amazon') {
-    return <AmazonDepartmentExport />;
   }
 
   // Exibe direto o hub de recursos, sem tabs
@@ -229,27 +224,6 @@ const ContentManagement = () => {
               <Badge className="bg-purple-100 text-purple-800 border-purple-200">{prompts.length} prompts</Badge>
               <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Gerenciar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => setLocation('/admin/conteudo/export-amazon')}
-        >
-          <CardHeader>
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-5 w-5 text-primary" />
-              <CardTitle className="text-foreground">🚀 Exportação Amazon</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm mb-4">Exportar departamentos e categorias da Amazon para Excel via API loop</p>
-            <div className="flex justify-between items-center">
-              <Badge className="bg-amber-100 text-amber-800 border-amber-200">🔄 API Loop</Badge>
-              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Exportar Excel
               </Button>
             </div>
           </CardContent>
