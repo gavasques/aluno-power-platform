@@ -138,6 +138,20 @@ Preferred communication style: Simple, everyday language.
     - 6. Transformação / Resultado final (antes vs depois)
     - 7. Exclusividade / Inovação
     - 8. Call to action final (síntese + urgência)
+  - **Limites de Caracteres Implementados**:
+    - Nome do Produto: 120 caracteres
+    - Marca: 40 caracteres
+    - Público Alvo: 150 caracteres
+    - Garantia: 15 caracteres
+    - Palavras-chave: 150 caracteres
+    - Diferencial Único: 100 caracteres
+    - Materiais: 120 caracteres
+    - Informações do Produto: 2000 caracteres
+  - **UX Aprimorada com Feedback Visual**:
+    - Contadores de caracteres em tempo real para todos os campos
+    - Cores indicativas: cinza (normal), amarelo (80% do limite), vermelho (limite excedido)
+    - Validação automática impedindo excesso de caracteres
+    - Mensagens de erro informativas com limites específicos por campo
 
 - **July 01, 2025 (anterior)**: ✅ GERADOR DE BULLET POINTS AMAZON REFATORADO E OTIMIZADO
   - **Melhorias de UX Implementadas**:

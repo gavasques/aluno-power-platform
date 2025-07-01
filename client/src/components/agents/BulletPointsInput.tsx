@@ -40,6 +40,20 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
   const { toast } = useToast();
   const charCount = formData.textInput.length;
 
+  const handleFieldChange = (field: keyof ProductFormData, value: string) => {
+    const limit = BULLET_POINTS_CONFIG.FIELD_LIMITS[field];
+    
+    if (value.length > limit) {
+      toast({
+        variant: "destructive",
+        title: "❌ Limite excedido",
+        description: `O limite para este campo é de ${limit} caracteres.`
+      });
+      return;
+    }
+    onChange(field, value);
+  };
+
   const handleTextInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     if (newValue.length > maxChars) {
@@ -51,6 +65,19 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
       return;
     }
     onChange('textInput', newValue);
+  };
+
+  const getFieldCharCount = (field: keyof ProductFormData, value: string) => {
+    const limit = BULLET_POINTS_CONFIG.FIELD_LIMITS[field];
+    const count = value.length;
+    const isNearLimit = count >= limit * 0.8;
+    const isOverLimit = count >= limit;
+    
+    return {
+      count,
+      limit,
+      color: isOverLimit ? 'text-red-600' : isNearLimit ? 'text-yellow-600' : 'text-gray-500'
+    };
   };
 
   const getCharCountColor = () => {
@@ -73,27 +100,35 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
           {/* Linha 1: Nome do Produto e Marca */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="productName" className="text-sm font-medium text-gray-700">
-                Nome do Produto <span className="text-red-500">*</span>
-              </Label>
+              <div className="flex justify-between items-center mb-1">
+                <Label htmlFor="productName" className="text-sm font-medium text-gray-700">
+                  Nome do Produto <span className="text-red-500">*</span>
+                </Label>
+                <span className={`text-xs ${getFieldCharCount('productName', formData.productName).color}`}>
+                  {getFieldCharCount('productName', formData.productName).count}/{getFieldCharCount('productName', formData.productName).limit}
+                </span>
+              </div>
               <Input
                 id="productName"
                 value={formData.productName}
-                onChange={(e) => onChange('productName', e.target.value)}
+                onChange={(e) => handleFieldChange('productName', e.target.value)}
                 placeholder="Ex: Smartphone Samsung Galaxy S24 128GB"
-                className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="brand" className="text-sm font-medium text-gray-700">
-                Marca
-              </Label>
+              <div className="flex justify-between items-center mb-1">
+                <Label htmlFor="brand" className="text-sm font-medium text-gray-700">
+                  Marca
+                </Label>
+                <span className={`text-xs ${getFieldCharCount('brand', formData.brand).color}`}>
+                  {getFieldCharCount('brand', formData.brand).count}/{getFieldCharCount('brand', formData.brand).limit}
+                </span>
+              </div>
               <Input
                 id="brand"
                 value={formData.brand}
-                onChange={(e) => onChange('brand', e.target.value)}
+                onChange={(e) => handleFieldChange('brand', e.target.value)}
                 placeholder="Ex: Samsung, Apple, Nike..."
-                className="mt-1"
               />
             </div>
           </div>
@@ -101,70 +136,90 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
           {/* Linha 2: Público Alvo e Garantia */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
-              <Label htmlFor="targetAudience" className="text-sm font-medium text-gray-700">
-                Público Alvo
-              </Label>
+              <div className="flex justify-between items-center mb-1">
+                <Label htmlFor="targetAudience" className="text-sm font-medium text-gray-700">
+                  Público Alvo
+                </Label>
+                <span className={`text-xs ${getFieldCharCount('targetAudience', formData.targetAudience).color}`}>
+                  {getFieldCharCount('targetAudience', formData.targetAudience).count}/{getFieldCharCount('targetAudience', formData.targetAudience).limit}
+                </span>
+              </div>
               <Input
                 id="targetAudience"
                 value={formData.targetAudience}
-                onChange={(e) => onChange('targetAudience', e.target.value)}
+                onChange={(e) => handleFieldChange('targetAudience', e.target.value)}
                 placeholder="Ex: Jovens adultos, Profissionais de tecnologia..."
-                className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="warranty" className="text-sm font-medium text-gray-700">
-                Garantia
-              </Label>
+              <div className="flex justify-between items-center mb-1">
+                <Label htmlFor="warranty" className="text-sm font-medium text-gray-700">
+                  Garantia
+                </Label>
+                <span className={`text-xs ${getFieldCharCount('warranty', formData.warranty).color}`}>
+                  {getFieldCharCount('warranty', formData.warranty).count}/{getFieldCharCount('warranty', formData.warranty).limit}
+                </span>
+              </div>
               <Input
                 id="warranty"
                 value={formData.warranty}
-                onChange={(e) => onChange('warranty', e.target.value)}
+                onChange={(e) => handleFieldChange('warranty', e.target.value)}
                 placeholder="Ex: 12 meses, 2 anos..."
-                className="mt-1"
               />
             </div>
           </div>
 
           {/* Linha 3: Palavras-Chave (campo maior) */}
           <div>
-            <Label htmlFor="keywords" className="text-sm font-medium text-gray-700">
-              Palavras-Chave
-              <span className="text-xs text-gray-500 ml-1">(separadas por vírgula)</span>
-            </Label>
+            <div className="flex justify-between items-center mb-1">
+              <Label htmlFor="keywords" className="text-sm font-medium text-gray-700">
+                Palavras-Chave
+                <span className="text-xs text-gray-500 ml-1">(separadas por vírgula)</span>
+              </Label>
+              <span className={`text-xs ${getFieldCharCount('keywords', formData.keywords).color}`}>
+                {getFieldCharCount('keywords', formData.keywords).count}/{getFieldCharCount('keywords', formData.keywords).limit}
+              </span>
+            </div>
             <Input
               id="keywords"
               value={formData.keywords}
-              onChange={(e) => onChange('keywords', e.target.value)}
+              onChange={(e) => handleFieldChange('keywords', e.target.value)}
               placeholder="Ex: smartphone, 5G, câmera, bateria, tecnologia, resistente à água, alta qualidade..."
-              className="mt-1"
             />
           </div>
 
           {/* Linha 4: Diferencial Único e Materiais */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="uniqueDifferential" className="text-sm font-medium text-gray-700">
-                Diferencial Único
-              </Label>
+              <div className="flex justify-between items-center mb-1">
+                <Label htmlFor="uniqueDifferential" className="text-sm font-medium text-gray-700">
+                  Diferencial Único
+                </Label>
+                <span className={`text-xs ${getFieldCharCount('uniqueDifferential', formData.uniqueDifferential).color}`}>
+                  {getFieldCharCount('uniqueDifferential', formData.uniqueDifferential).count}/{getFieldCharCount('uniqueDifferential', formData.uniqueDifferential).limit}
+                </span>
+              </div>
               <Input
                 id="uniqueDifferential"
                 value={formData.uniqueDifferential}
-                onChange={(e) => onChange('uniqueDifferential', e.target.value)}
+                onChange={(e) => handleFieldChange('uniqueDifferential', e.target.value)}
                 placeholder="Ex: Tecnologia exclusiva, Inovação única..."
-                className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="materials" className="text-sm font-medium text-gray-700">
-                Materiais
-              </Label>
+              <div className="flex justify-between items-center mb-1">
+                <Label htmlFor="materials" className="text-sm font-medium text-gray-700">
+                  Materiais
+                </Label>
+                <span className={`text-xs ${getFieldCharCount('materials', formData.materials).color}`}>
+                  {getFieldCharCount('materials', formData.materials).count}/{getFieldCharCount('materials', formData.materials).limit}
+                </span>
+              </div>
               <Input
                 id="materials"
                 value={formData.materials}
-                onChange={(e) => onChange('materials', e.target.value)}
+                onChange={(e) => handleFieldChange('materials', e.target.value)}
                 placeholder="Ex: Alumínio, Aço inoxidável, Silicone..."
-                className="mt-1"
               />
             </div>
           </div>
