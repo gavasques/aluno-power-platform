@@ -221,6 +221,9 @@ NOME DO PRODUTO: ${state.productName}
 ${state.brand ? `MARCA: ${state.brand}` : ''}
 ${state.targetAudience ? `PÚBLICO-ALVO: ${state.targetAudience}` : ''}
 ${state.keywords ? `PALAVRAS-CHAVE: ${state.keywords}` : ''}
+${state.uniqueDifferential ? `DIFERENCIAL ÚNICO: ${state.uniqueDifferential}` : ''}
+${state.materials ? `MATERIAIS: ${state.materials}` : ''}
+${state.warranty ? `GARANTIA: ${state.warranty}` : ''}
 
 INFORMAÇÕES DETALHADAS DO PRODUTO:
 ${state.textInput}
