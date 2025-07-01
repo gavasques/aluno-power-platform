@@ -158,6 +158,31 @@ export default function KeywordSearchReport() {
       searchParams: { ...searchParams }
     }));
 
+    // Log da busca (uma vez apenas)
+    try {
+      await fetch('/api/amazon-keywords/log-search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: searchParams.query,
+          country: searchParams.country,
+          filters: {
+            sort_by: searchParams.sort_by,
+            brand: searchParams.brand,
+            min_price: searchParams.min_price,
+            max_price: searchParams.max_price,
+            is_prime: searchParams.is_prime,
+            seller_id: searchParams.seller_id,
+            deals_and_discounts: searchParams.deals_and_discounts,
+          }
+        })
+      });
+    } catch (logError) {
+      console.warn('Erro ao salvar log da busca:', logError);
+    }
+
     try {
       let allProducts: Product[] = [];
       const totalPages = 7;
