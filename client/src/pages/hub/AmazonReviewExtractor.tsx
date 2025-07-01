@@ -4,9 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertCircle, Download, ExternalLink, Trash2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ReviewData {
   review_title: string;
@@ -25,22 +27,40 @@ interface ExtractorState {
   errors: string[];
 }
 
+const COUNTRIES = [
+  { code: 'BR', name: 'Brasil', flag: '🇧🇷' },
+  { code: 'US', name: 'Estados Unidos', flag: '🇺🇸' },
+  { code: 'CA', name: 'Canada', flag: '🇨🇦' },
+  { code: 'FR', name: 'França', flag: '🇫🇷' },
+  { code: 'DE', name: 'Alemanha', flag: '🇩🇪' },
+  { code: 'ES', name: 'Espanha', flag: '🇪🇸' },
+  { code: 'MX', name: 'México', flag: '🇲🇽' },
+];
+
 export default function AmazonReviewExtractor() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [urlInput, setUrlInput] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('BR');
   const [state, setState] = useState<ExtractorState>({
     urls: [],
     isExtracting: false,
     progress: 0,
     currentPage: 0,
-    totalPages: 0,
+    totalPages: 10, // Mudado para 10 como solicitado
     currentProduct: '',
     extractedReviews: [],
     errors: []
   });
 
-  // Função para extrair ASIN da URL da Amazon
-  const extractASIN = (url: string): string | null => {
+  // Função para extrair ASIN da URL da Amazon ou validar ASIN direto
+  const extractOrValidateASIN = (input: string): string | null => {
+    // Se for um ASIN direto (10 caracteres alfanuméricos)
+    if (/^[A-Z0-9]{10}$/.test(input.trim())) {
+      return input.trim();
+    }
+
+    // Se for uma URL, tenta extrair o ASIN
     const asinPatterns = [
       /\/dp\/([A-Z0-9]{10})/,
       /\/product\/([A-Z0-9]{10})/,
@@ -49,7 +69,7 @@ export default function AmazonReviewExtractor() {
     ];
 
     for (const pattern of asinPatterns) {
-      const match = url.match(pattern);
+      const match = input.match(pattern);
       if (match) {
         return match[1];
       }
@@ -57,24 +77,26 @@ export default function AmazonReviewExtractor() {
     return null;
   };
 
-  // Adicionar URL à lista
+  // Adicionar URL ou ASIN à lista
   const addUrl = () => {
     if (!urlInput.trim()) return;
 
-    const asin = extractASIN(urlInput);
+    const asin = extractOrValidateASIN(urlInput);
     if (!asin) {
       toast({
-        title: "URL inválida",
-        description: "Não foi possível extrair o ASIN da URL fornecida.",
+        title: "Entrada inválida",
+        description: "Insira uma URL da Amazon válida ou um ASIN de 10 caracteres.",
         variant: "destructive"
       });
       return;
     }
 
-    if (state.urls.includes(urlInput)) {
+    // Verifica se o ASIN já existe na lista
+    const existingAsins = state.urls.map(url => extractOrValidateASIN(url));
+    if (existingAsins.includes(asin)) {
       toast({
-        title: "URL duplicada",
-        description: "Esta URL já foi adicionada à lista.",
+        title: "ASIN duplicado",
+        description: "Este ASIN já foi adicionado à lista.",
         variant: "destructive"
       });
       return;
@@ -87,7 +109,7 @@ export default function AmazonReviewExtractor() {
     setUrlInput('');
     
     toast({
-      title: "URL adicionada",
+      title: "Produto adicionado",
       description: `ASIN ${asin} adicionado à lista.`
     });
   };
@@ -100,6 +122,34 @@ export default function AmazonReviewExtractor() {
     }));
   };
 
+  // Função para salvar log de uso
+  const saveUsageLog = async (asin: string) => {
+    if (!user) return;
+    
+    try {
+      await fetch('/api/tool-usage-logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          userName: user.name,
+          userEmail: user.email,
+          toolName: 'Extrator de Reviews Amazon',
+          asin,
+          country: selectedCountry,
+          additionalData: {
+            country: selectedCountry,
+            totalPages: 10
+          }
+        })
+      });
+    } catch (error) {
+      console.error('Erro ao salvar log de uso:', error);
+    }
+  };
+
   // Função para buscar reviews de uma página específica
   const fetchReviews = async (asin: string, page: number): Promise<ReviewData[]> => {
     const response = await fetch('/api/amazon-reviews/extract', {
@@ -110,7 +160,7 @@ export default function AmazonReviewExtractor() {
       body: JSON.stringify({
         asin,
         page,
-        country: 'BR',
+        country: selectedCountry,
         sort_by: 'MOST_RECENT'
       })
     });

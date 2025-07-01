@@ -973,6 +973,24 @@ export const aiGenerationLogs = pgTable("ai_generation_logs", {
   featureIdx: index("ai_logs_feature_idx").on(table.feature),
 }));
 
+// Tool Usage Logs
+export const toolUsageLogs = pgTable("tool_usage_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  userName: text("user_name").notNull(),
+  userEmail: text("user_email").notNull(),
+  toolName: text("tool_name").notNull(), // "Extrator de Reviews Amazon", etc
+  asin: text("asin"), // For Amazon tools
+  country: text("country"), // For Amazon tools
+  additionalData: jsonb("additional_data"), // Flexible data for different tools
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("tool_usage_user_idx").on(table.userId),
+  createdIdx: index("tool_usage_created_idx").on(table.createdAt),
+  toolIdx: index("tool_usage_tool_idx").on(table.toolName),
+  asinIdx: index("tool_usage_asin_idx").on(table.asin),
+}));
+
 // Insert schemas for generated images
 export const insertGeneratedImageSchema = createInsertSchema(generatedImages);
 export type InsertGeneratedImage = z.infer<typeof insertGeneratedImageSchema>;
@@ -985,6 +1003,14 @@ export const insertAiGenerationLogSchema = createInsertSchema(aiGenerationLogs).
 });
 export type InsertAiGenerationLog = z.infer<typeof insertAiGenerationLogSchema>;
 export type AiGenerationLog = typeof aiGenerationLogs.$inferSelect;
+
+// Insert schemas for tool usage logs
+export const insertToolUsageLogSchema = createInsertSchema(toolUsageLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertToolUsageLog = z.infer<typeof insertToolUsageLogSchema>;
+export type ToolUsageLog = typeof toolUsageLogs.$inferSelect;
 
 // Insert schemas (moved to end of file to avoid conflicts)
 
