@@ -23,93 +23,122 @@ interface GenerationState {
   showReplaceDialog: boolean;
 }
 
-const BULLET_POINTS_PROMPT = `Gerar 8 bullet points convincentes que destaquem os benefícios do produto e levem o cliente a agir agora.
+const BULLET_POINTS_PROMPT = `# PROMPT OTIMIZADO: BULLET POINTS DE ALTA CONVERSÃO PARA AMAZON
 
-## 📝 Formato e Estilo dos Bullet Points
+Você é um especialista em copywriting para Amazon, com 10+ anos de experiência em gerar listings que vendem. Sua missão é criar **8 bullet points extremamente persuasivos e comerciais**, despertando desejo de compra imediato.  
+**Siga as instruções abaixo à risca.**
 
-**Estrutura:** BENEFÍCIO PRINCIPAL EM MAIÚSCULAS – seguido de hífen "-" e então uma descrição com características de suporte que comprovem esse benefício.
+---
 
-**Tom:** Comercial, extremamente persuasivo e envolvente, focado em despertar urgência e desejo de compra agora. Fale diretamente com o cliente usando "você"/"seu".
+## 🎯 OBJETIVO PRINCIPAL
 
-**Quantidade e Tamanho:** Escreva 8 bullet points, cada um com entre 150 e 200 caracteres (contando espaços). Nunca menos de 150 ou mais de 200 caracteres por bullet.
+Criar 8 bullet points poderosos, focados em benefícios reais, que façam o cliente querer comprar AGORA. Vamos atingir o subconciente do consumidor. Usando tambem gatilhos mentais que levem ele a querer esse produto. 
 
-**Call to Action:** O 3º bullet point deve terminar com "ADICIONAR AO CARRINHO" (em maiúsculas). Os demais não precisam incluir este texto.
+---
 
-**Formatação:** Forneça a resposta final em Markdown, com os bullet points listados claramente (pode numerar de 1 a 8 ou usar "-" para cada bullet). Separe a parte de análise prévia e os bullet points por seções, conforme Etapas definidas abaixo.
+## 📝 FORMATO E ESTILO
 
-## 📦 Conteúdo e Estrutura dos 8 Bullet Points
+- Cada bullet point começa com o **BENEFÍCIO PRINCIPAL EM MAIÚSCULAS**, seguido de hífen e características que sustentam o benefício.
+- **Limite:** 160–195 caracteres (com espaços) por bullet.
+- **Bullet 3:** Sempre termina com "**ADICIONAR AO CARRINHO**".
+- **Bullet da Garantia:** Um bullet dedicado à garantia, reforçando que só é válida para compras de vendedores autorizados.
+- **Tom:** Comercial, direto, urgência máxima, fácil de entender. 
+- NUNCA use palavras complicadas ou complexas. O texto deve ser fácil de entender por qualquer pessoa. 
+- Não use "nosso/nós", nem fale de preço, envio, devolução, estoque limitado ou políticas. 
+- NUNCA Invente caracteristicas, e nunca fale que o item faz algo que não esteja explicito nas informações que você recebeu no promt. 
+- LEMBRANDO: Só use informações fornecidas. Nunca invente funcionalidades/benefícios.
 
-Cada bullet point terá um foco específico, conforme abaixo:
+---
 
-1. **PÚBLICO-ALVO + PROPOSTA ÚNICA DE VALOR:** Quem é o cliente ideal e qual o diferencial único do produto. Estabeleça autoridade e confiança, mostrando como este produto é superior aos concorrentes e feito sob medida para o cliente. Tom: Transformacional (prometa uma mudança significativa, não apenas melhoria incremental).
+## 🚦 ESTRUTURA DOS BULLET POINTS
 
-2. **BENEFÍCIO EMOCIONAL PRINCIPAL:** Destaque o principal benefício emocional que o cliente terá. Foque no resultado real e sensorial que ele vai sentir ao usar o produto e conecte brevemente como alguma característica do produto proporciona esse resultado. Tom: Experiencial, evocando sentimentos positivos.
+1. **Público-alvo + Proposta Única de Valor**: Quem é o produto, diferencial, credibilidade.
+2. **Benefício Emocional Principal**: O que o cliente sente, resultado prático.
+3. **Características Técnicas + Benefícios (com CTA)**: Destaque técnico + benefício + "ADICIONAR AO CARRINHO".
+4. **Facilidade de Uso**: Simplicidade, praticidade, uso diário.
+5. **GARANTIA OFICIAL**: Explicitar que a garantia só é válida para produtos comprados de vendedores autorizados. (Este bullet é obrigatório.)
+6. **Transformação/Resultado Final**: O antes e depois, impacto real.
+7. **Exclusividade/Inovação**: O que só esse produto oferece, inovação, tecnologia, design.
+8. **Call to Action Final**: Síntese dos benefícios + chamada para ação urgente.
 
-3. **CARACTERÍSTICAS TÉCNICAS + BENEFÍCIOS (com CTA):** Apresente as principais características técnicas ou funcionais do produto e ligue cada recurso a um benefício concreto. Se possível, responda a alguma dúvida frequente ou objeção do cliente através dessas características. Termine este bullet point com uma chamada para ação "ADICIONAR AO CARRINHO". Tom: Educativo e persuasivo.
+---
 
-4. **FACILIDADE DE USO:** Explique como o produto é fácil de usar ou manter. Destaque a conveniência e praticidade, removendo medos ou barreiras de uso. Tom: Tranquilizador e encorajador.
+## 🧠 TÉCNICAS OBRIGATÓRIAS
 
-5. **REDUÇÃO DE RISCO + GARANTIAS:** Reforce elementos que passem segurança ao cliente. Inclua garantias, certificações, qualidade premium, origem confiável ou suporte que venha com o produto. Conecte também com valores do cliente se relevante. Tom: Confiável e seguro.
+- **Palavras de poder**: finalmente, revolucionário, exclusivo, superior, imediato, instantâneo, transforme, experimente, descubra, garantido, premium, único, avançado, inovador, eficaz, poderoso.
+- **Psicologia**: agitação da dor, ponte benefício-característica, urgência, transformação, prova social, propriedade mental (fazer o cliente se imaginar usando).
 
-6. **TRANSFORMAÇÃO / RESULTADO FINAL:** Pinte um quadro da transformação completa que o produto proporciona. Use contraste de antes e depois para mostrar o impacto na vida do cliente após o uso. Crie um senso de urgência para aproveitar essa transformação agora. Tom: Inspiracional e empolgante.
+---
 
-7. **EXCLUSIVIDADE + INOVAÇÃO:** Destaque o que torna o produto único ou exclusivo. Isso pode ser uma tecnologia avançada, design inovador, edição limitada ou parceria exclusiva. Invoque a sensação de que este produto é especial e difícil de encontrar em outro lugar. Tom: Urgente e exclusivo.
+## 🚫 NUNCA FAZER
 
-8. **CALL TO ACTION FINAL (Resumo dos Benefícios):** Uma chamada final irresistível à ação. Faça uma síntese poderosa dos principais benefícios já mencionados, lembrando o cliente do quanto ele tem a ganhar. Termine convidando-o a agir imediatamente. Tom: Extremamente urgente e convincente, irresistível.
+- Não usar "nós", "nosso".
+- Não citar preço, estoque, envio, devolução, cor disponível.
+- Não usar termos técnicos sem explicação clara do benefício.
+- Não inventar características.
+- Não sair do tema do produto.
 
-## 🧠 Técnicas de Copywriting Obrigatórias
+## 🔎 PALAVRAS-CHAVE E SEO
 
-Incorpore as seguintes estratégias psicológicas:
+- Antes de gerar os bullets, identifique as 3 principais palavras-chave para o produto no seu nicho.
+- Use cada palavra-chave de forma natural, espalhada nos bullets, **SEM repetições forçadas** (evite keyword stuffing).
+- Priorize as palavras-chave nos primeiros bullets ou início de frase para maximizar o efeito no algoritmo de busca e na leitura rápida.
 
-- **Agitação da Dor:** Mencione brevemente o problema ou dor que o produto resolve
-- **Ponte Benefício-Característica:** Sempre que citar uma característica técnica, imediatamente conecte-a a como isso beneficia o cliente na prática
-- **Prova Social/Autoridade:** Reforce a credibilidade com prova social ou autoridade relacionada
-- **Urgência:** Utilize palavras que criem senso de urgência temporal, incentivando o cliente a não adiar a compra
-- **Propriedade Mental:** Leve o cliente a se imaginar usando o produto e desfrutando dos benefícios
-- **Transformação:** Reforce a ideia de que o produto traz uma mudança transformadora na vida do cliente
+## ⚡️ ESCANEABILIDADE (SKIMMABILITY)
 
-## 💥 Palavras de Poder (Power Words)
+- O benefício principal deve aparecer logo no começo de cada bullet (primeiras 5-7 palavras).
+- Escreva como se o cliente só fosse ler a primeira linha ou metade do bullet.
 
-Inclua, quando adequado: Finalmente, Revolucionário, Exclusivo, Comprovado, Superior, Imediato, Instantâneo, Transforme, Experimente, Descubra, Garantido, Clinicamente Testado, Premium, Profissional, Único, Avançado, Inovador, Eficaz, Poderoso.
+## ❗️ RESTRIÇÃO DE PROMESSAS EXAGERADAS
 
-## 🚫 Restrições (O que NÃO fazer)
+- Evite expressões absolutas ("o melhor", "top 1", "o único") a não ser que haja comprovação real.
+- Foque em benefícios concretos, ancorados em fatos e recursos do produto.
 
-❌ Falar em 1ª pessoa plural: Não use "nós" ou "nosso(a)". Aborde sempre o cliente diretamente como "você"
-❌ Menções de preço, promoção ou envio: Não mencione valores, descontos, frete, parcelamento, cupons, ou políticas de devolução
-❌ Pressão de estoque explícita: Não use frases como "somente X unidades" ou "estoque limitado"
-❌ Listar cores disponíveis: Não faça listagens do tipo "Disponível nas cores X, Y..."
-❌ Jargões técnicos sem explicação: Se precisar citar termos técnicos, explique o benefício que eles trazem
-❌ Linguagem genérica ou promessas vagas: Evite termos como "alta qualidade" sem contexto
-❌ Fugir do tema do produto: Não inclua informações que não estejam relacionadas ao produto
-❌ Inventar funcionalidades/benefícios não fornecidos: Use apenas informações fornecidas sobre o produto
+## 💡 PERGUNTAS IMPACTANTES (OPCIONAL)
 
-## 📊 Etapa 1: Análise Prévia do Produto
+- Pode começar o primeiro bullet com uma pergunta direta que aponte para a dor do cliente, seguida imediatamente do benefício que resolve.
 
-Antes de redigir os bullet points, analise as informações do produto e identifique:
+---
 
-- **Diferencial Único:** O que torna este produto melhor ou diferente dos concorrentes?
-- **Materiais:** Do que o produto é feito? Esses materiais trazem alguma vantagem?
-- **Cores/Design:** Qual é o design ou as cores do produto e por que isso importa para o cliente?
-- **Embalagem:** Como é a embalagem e qual o valor agregado dela?
-- **Detalhes Adicionais:** Informações extras relevantes
-- **Top 7 Benefícios para o Cliente:** Liste os 7 benefícios mais fortes e desejados que esse produto oferece
+## 📊 ETAPA 1: ANÁLISE PRÉVIA DO PRODUTO
 
-## 🚀 Etapa 2: Criação dos Bullet Points de Alta Conversão
+Preencha antes de gerar os bullets:
+- **Diferencial Único:** 
+- **Materiais:** 
+- **Cores/Design:** 
+- **Embalagem:** 
+- **Detalhes Adicionais:** 
+- **Top 7 Benefícios (ordem de relevância):** 
+- **Principais Reclamações/Elogios dos concorrentes (opcional):**
 
-Com base na análise acima, redija os 8 bullet points seguindo estritamente o formato e conteúdo especificado:
+---
 
-- Iniciar cada bullet com o benefício principal em maiúsculas, seguido de "–" e detalhes persuasivos
-- Incorporar palavras de poder e técnicas psicológicas conforme adequado
-- Manter o limite de caracteres (150 a 200) em cada bullet, sem exceder
-- Revisar o tom para garantir que está fortemente persuasivo, focado no cliente
-- Especial atenção ao 3º bullet: inclua no final a frase "ADICIONAR AO CARRINHO"
-- Bullet 8 deve concluir amarrando os principais benefícios e convidando à ação imediata
+## 🚀 ETAPA 2: GERAR OS BULLET POINTS
 
-**IMPORTANTE:** Execute primeiro a Etapa 1 (análise) e em seguida a Etapa 2 (bullet points).
+Com base na análise acima, crie os 8 bullets **nesta ordem** (cada um com 160–195 caracteres):
 
-Agora, utilizando as informações fornecidas sobre o produto abaixo, execute a Etapa 1 (análise) e em seguida a Etapa 2 (bullet points):
+1. PÚBLICO-ALVO + PROPOSTA ÚNICA DE VALOR – [benefício + característica]
+2. BENEFÍCIO EMOCIONAL PRINCIPAL – [benefício sensorial + característica]
+3. CARACTERÍSTICA TÉCNICA + BENEFÍCIO – [destaque técnico + benefício]. ADICIONAR AO CARRINHO
+4. FACILIDADE DE USO – [simplicidade, praticidade]
+5. GARANTIA OFICIAL – Garantia válida exclusivamente para produtos adquiridos de vendedores autorizados, proporcionando total segurança e tranquilidade.
+6. TRANSFORMAÇÃO/RESULTADO FINAL – [antes/depois, impacto]
+7. EXCLUSIVIDADE/INOVAÇÃO – [tecnologia, diferencial, inovação]
+8. CALL TO ACTION FINAL – [resumo dos benefícios + convite à ação imediata]
 
-{{PRODUCT_INFO}}`;
+---
+
+**Agora siga as etapas e gere bullets prontos para dominar seu nicho. Sem enrolação, só alta conversão.**
+
+Dados do Produto:
+Nome do Produto = {{PRODUCT_NAME}}
+Marca = {{BRAND}}
+Público Alvo = {{TARGET_AUDIENCE}}
+Garantia = {{WARRANTY}}
+Palavras chave = {{KEYWORDS}}
+Diferencial Único = {{UNIQUE_DIFFERENTIAL}}
+Materiais = {{MATERIALS}}
+Informações do Produto = {{PRODUCT_INFO}}`;
 
 export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProps) => {
   const [state, setState] = useState<GenerationState>({
@@ -205,20 +234,16 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
 
       const startTime = Date.now();
 
-      const productInfo = `
-NOME DO PRODUTO: ${state.productName}
-${state.brand ? `MARCA: ${state.brand}` : ''}
-${state.targetAudience ? `PÚBLICO-ALVO: ${state.targetAudience}` : ''}
-${state.keywords ? `PALAVRAS-CHAVE: ${state.keywords}` : ''}
-${state.uniqueDifferential ? `DIFERENCIAL ÚNICO: ${state.uniqueDifferential}` : ''}
-${state.materials ? `MATERIAIS: ${state.materials}` : ''}
-${state.warranty ? `GARANTIA: ${state.warranty}` : ''}
-
-INFORMAÇÕES DETALHADAS DO PRODUTO:
-${state.textInput}
-      `.trim();
-
-      const prompt = BULLET_POINTS_PROMPT.replace('{{PRODUCT_INFO}}', productInfo);
+      // Substituir as variáveis no prompt com os dados do formulário
+      let prompt = BULLET_POINTS_PROMPT
+        .replace('{{PRODUCT_NAME}}', state.productName || 'Não informado')
+        .replace('{{BRAND}}', state.brand || 'Não informado')
+        .replace('{{TARGET_AUDIENCE}}', state.targetAudience || 'Não informado')
+        .replace('{{WARRANTY}}', state.warranty || 'Não informado')
+        .replace('{{KEYWORDS}}', state.keywords || 'Não informado')
+        .replace('{{UNIQUE_DIFFERENTIAL}}', state.uniqueDifferential || 'Não informado')
+        .replace('{{MATERIALS}}', state.materials || 'Não informado')
+        .replace('{{PRODUCT_INFO}}', state.textInput || 'Não informado');
 
       const response = await fetch('/api/ai-providers/test', {
         method: 'POST',

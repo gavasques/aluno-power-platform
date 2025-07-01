@@ -108,30 +108,36 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ PROMPT GERADOR DE BULLET POINTS AMAZON COMPLETAMENTE ATUALIZADO
-  - **Novo Prompt Profissional Implementado**:
-    - Estrutura em 2 etapas: Análise Prévia + Criação dos Bullet Points
-    - Limite ajustado para 150-200 caracteres (antes 180-250)
-    - Formatação em Markdown com numeração clara
-    - 8 tipos específicos de bullet points com focos distintos
+- **July 01, 2025**: ✅ PROMPT GERADOR DE BULLET POINTS AMAZON OTIMIZADO PARA ALTA CONVERSÃO
+  - **Prompt Profissional Ultra-Otimizado Implementado**:
+    - Limite refinado para 160-195 caracteres (otimização Amazon)
+    - Sistema de variáveis dinâmicas com mapeamento direto dos campos do formulário
+    - Bullet dedicado à garantia (obrigatório) com foco em vendedores autorizados
+    - Técnicas de escaneabilidade e SEO integradas ao prompt
+  - **Mapeamento Dinâmico de Campos Implementado**:
+    - {{PRODUCT_NAME}} → Nome do Produto
+    - {{BRAND}} → Marca  
+    - {{TARGET_AUDIENCE}} → Público Alvo
+    - {{WARRANTY}} → Garantia
+    - {{KEYWORDS}} → Palavras-chave
+    - {{UNIQUE_DIFFERENTIAL}} → Diferencial Único
+    - {{MATERIALS}} → Materiais
+    - {{PRODUCT_INFO}} → Informações do Produto
   - **Técnicas de Copywriting Avançadas**:
-    - Agitação da dor, ponte benefício-característica, prova social
-    - Urgência temporal, propriedade mental, transformação
-    - Palavras de poder: Finalmente, Revolucionário, Exclusivo, etc.
-    - Restrições rigorosas: proibições claras (preço, estoque, cores, etc.)
-  - **Sistema Dinâmico de Configuração Corrigido**:
-    - Busca configurações em tempo real do banco antes de cada geração
-    - Mudanças no admin refletem instantaneamente no gerador
-    - Logs salvam sempre com as configurações atuais corretas
-  - **Estrutura Profissional dos 8 Bullet Points**:
+    - Palavras de poder específicas: finalmente, revolucionário, exclusivo, superior, etc.
+    - Gatilhos mentais para atingir subconsciência do consumidor
+    - Escaneabilidade: benefício principal nas primeiras 5-7 palavras
+    - SEO otimizado: palavras-chave distribuídas naturalmente nos bullets
+    - Restrições rigorosas contra promessas exageradas e invenção de características
+  - **Estrutura Obrigatória dos 8 Bullet Points**:
     - 1. Público-alvo + Proposta única de valor
-    - 2. Benefício emocional principal  
-    - 3. Características técnicas + CTA "ADICIONAR AO CARRINHO"
-    - 4. Facilidade de uso
-    - 5. Redução de risco + Garantias
-    - 6. Transformação / Resultado final
-    - 7. Exclusividade + Inovação
-    - 8. Call to action final (resumo dos benefícios)
+    - 2. Benefício emocional principal
+    - 3. Características técnicas + "ADICIONAR AO CARRINHO" (obrigatório)
+    - 4. Facilidade de uso  
+    - 5. GARANTIA OFICIAL (bullet obrigatório com foco em vendedores autorizados)
+    - 6. Transformação / Resultado final (antes vs depois)
+    - 7. Exclusividade / Inovação
+    - 8. Call to action final (síntese + urgência)
 
 - **July 01, 2025 (anterior)**: ✅ GERADOR DE BULLET POINTS AMAZON REFATORADO E OTIMIZADO
   - **Melhorias de UX Implementadas**:
