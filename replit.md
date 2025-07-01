@@ -108,7 +108,25 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 01, 2025**: ✅ AMAZON KEYWORD SUGGESTIONS - SISTEMA DE LOGGING COMPLETO IMPLEMENTADO
+- **July 01, 2025**: ✅ SEGURANÇA RAPIDAPI - CHAVES MOVIDAS PARA SECRETS ENVIRONMENT
+  - **Segurança Aprimorada**:
+    - Removidas todas as chaves RapidAPI hard-coded do código fonte
+    - Implementada variável de ambiente RAPIDAPI_KEY para máxima segurança
+    - Todas as 5 ferramentas atualizadas: Amazon Reviews, Relatório Keywords, Detalhes Produto, Consulta CNPJ, Keyword Suggestions
+    - Secret key configurada no Replit Secrets e acessível via process.env.RAPIDAPI_KEY
+  - **Ferramentas Protegidas**:
+    - Amazon Review Extractor: real-time-amazon-data.p.rapidapi.com
+    - Relatório de Keywords: real-time-amazon-data.p.rapidapi.com
+    - Detalhes do Produto: real-time-amazon-data.p.rapidapi.com  
+    - Amazon Keyword Suggestions: amazon-data-scraper141.p.rapidapi.com
+    - Consulta de CNPJ: dados-cnpj.p.rapidapi.com
+  - **Benefícios de Segurança**:
+    - Chaves não expostas no repositório de código
+    - Fácil rotação de chaves sem alterar código
+    - Conformidade com melhores práticas de segurança
+    - Proteção contra vazamento acidental de credenciais
+
+- **July 01, 2025 (anterior)**: ✅ AMAZON KEYWORD SUGGESTIONS - SISTEMA DE LOGGING COMPLETO IMPLEMENTADO
   - **Sistema de Logging Detalhado**:
     - Integração completa com tabela `tool_usage_logs` existente
     - Captura automática de dados do usuário autenticado da sessão
