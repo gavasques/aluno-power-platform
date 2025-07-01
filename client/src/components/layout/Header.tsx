@@ -43,6 +43,7 @@ const menuItems = [
       { title: "Agentes IA", href: "/agents", icon: Bot },
       { title: "Vídeos", href: "/videos", icon: Youtube },
       { title: "Amazon Reviews", href: "/hub/amazon-reviews", icon: Star },
+      { title: "Relatório de Keywords", href: "/hub/relatorio-keywords", icon: FileDigit },
       { title: "Parceiros", href: "/hub/parceiros", icon: Users },
       { title: "Fornecedores", href: "/hub/fornecedores", icon: Truck },
       { title: "Ferramentas", href: "/hub/ferramentas", icon: Wrench },

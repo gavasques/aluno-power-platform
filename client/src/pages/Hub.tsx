@@ -28,6 +28,8 @@ const Hub = () => {
       return <Suppliers />;
     case "amazon-reviews":
       return <AmazonReviewExtractor />;
+    case "relatorio-keywords":
+      return <KeywordSearchReport />;
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Hub de Recursos";
       return (

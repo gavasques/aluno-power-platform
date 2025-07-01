@@ -3890,26 +3890,24 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log(`✅ [AMAZON_KEYWORDS] ${data.data.products?.length || 0} produtos encontrados - Query: ${query}, Página: ${page}`);
 
-      // Log usage
-      if (req.user) {
-        try {
-          await db.insert(toolUsageLogs).values({
-            userId: req.user.id,
-            userName: req.user.name,
-            userEmail: req.user.email,
-            toolName: 'Relatório de Busca por Keywords',
-            additionalData: {
-              query,
-              country,
-              page,
-              sort_by,
-              total_products: data.data.total_products,
-              products_found: data.data.products?.length || 0
-            }
-          });
-        } catch (logError) {
-          console.error('Error logging tool usage:', logError);
-        }
+      // Log usage (sem autenticação por enquanto)
+      try {
+        await db.insert(toolUsageLogs).values({
+          userId: 1, // ID temporário
+          userName: 'Usuário Sistema',
+          userEmail: 'sistema@exemplo.com',
+          toolName: 'Relatório de Busca por Keywords',
+          additionalData: {
+            query,
+            country,
+            page,
+            sort_by,
+            total_products: data.data.total_products,
+            products_found: data.data.products?.length || 0
+          }
+        });
+      } catch (logError) {
+        console.error('Error logging tool usage:', logError);
       }
 
       res.json({
