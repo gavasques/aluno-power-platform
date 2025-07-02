@@ -61,7 +61,9 @@ export function UpscaleControls({
                 className={cn(
                   "flex items-center space-x-4 p-4 rounded-lg border-2 cursor-pointer transition-all",
                   isSelected
-                    ? `border-${option.color}-500 bg-${option.color}-50 dark:bg-${option.color}-950`
+                    ? option.color === "blue"
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
+                      : "border-purple-500 bg-purple-50 dark:bg-purple-950"
                     : "border-border hover:border-muted-foreground",
                   isProcessing && "pointer-events-none opacity-60"
                 )}
@@ -69,12 +71,18 @@ export function UpscaleControls({
                 <div className={cn(
                   "p-3 rounded-lg flex items-center justify-center",
                   isSelected 
-                    ? `bg-${option.color}-100 dark:bg-${option.color}-900` 
+                    ? option.color === "blue"
+                      ? "bg-blue-100 dark:bg-blue-900"
+                      : "bg-purple-100 dark:bg-purple-900"
                     : "bg-muted"
                 )}>
                   <IconComponent className={cn(
                     "h-6 w-6",
-                    isSelected ? `text-${option.color}-600` : "text-muted-foreground"
+                    isSelected 
+                      ? option.color === "blue"
+                        ? "text-blue-600"
+                        : "text-purple-600"
+                      : "text-muted-foreground"
                   )} />
                 </div>
                 
@@ -82,14 +90,20 @@ export function UpscaleControls({
                   <div className="flex items-center justify-between">
                     <h3 className={cn(
                       "font-semibold",
-                      isSelected ? `text-${option.color}-900 dark:text-${option.color}-100` : ""
+                      isSelected 
+                        ? option.color === "blue"
+                          ? "text-blue-900 dark:text-blue-100"
+                          : "text-purple-900 dark:text-purple-100"
+                        : ""
                     )}>
                       {option.title}
                     </h3>
                     <span className={cn(
                       "text-sm px-2 py-1 rounded-full",
                       isSelected 
-                        ? `bg-${option.color}-100 text-${option.color}-700 dark:bg-${option.color}-800 dark:text-${option.color}-200`
+                        ? option.color === "blue"
+                          ? "bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-200"
+                          : "bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-200"
                         : "bg-muted text-muted-foreground"
                     )}>
                       {option.time}
@@ -98,7 +112,9 @@ export function UpscaleControls({
                   <p className={cn(
                     "text-sm mt-1",
                     isSelected 
-                      ? `text-${option.color}-700 dark:text-${option.color}-300`
+                      ? option.color === "blue"
+                        ? "text-blue-700 dark:text-blue-300"
+                        : "text-purple-700 dark:text-purple-300"
                       : "text-muted-foreground"
                   )}>
                     {option.description}
@@ -108,7 +124,7 @@ export function UpscaleControls({
                 {isSelected && (
                   <div className={cn(
                     "w-4 h-4 rounded-full border-2 border-white",
-                    `bg-${option.color}-500`
+                    option.color === "blue" ? "bg-blue-500" : "bg-purple-500"
                   )} />
                 )}
               </Label>

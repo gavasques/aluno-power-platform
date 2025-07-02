@@ -208,3 +208,5 @@ function ImageUpscale() {
     </div>
   );
 }
+
+export default ImageUpscale;
