@@ -108,7 +108,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 02, 2025**: ✅ SISTEMA DE DOWNLOAD E LOGS DE IMAGENS IA IMPLEMENTADOS
+- **July 02, 2025**: ✅ PROBLEMA CRÍTICO DE PERFORMANCE CORRIGIDO - BASE64 REMOVIDO DOS LOGS
+  - **Problema Identificado**: Erro HTTP 507 "response too large (max 67MB)" causado por campos JSONB contendo imagens base64 de até 17MB
+  - **Solução Implementada**: 
+    - Removidos registros existentes com dados base64 da tabela ai_img_generation_logs
+    - Modificado código para salvar apenas metadados: '[Base64 Image - Not Stored]' no lugar de imagens
+    - Background removal e upscale agora salvam apenas informações estruturadas no apiResponse
+    - Sistema de logging otimizado para eficiência de consulta
+  - **Impacto**: 
+    - Interface de logs agora carrega instantaneamente sem erro de memória
+    - Banco de dados otimizado sem dados binários desnecessários
+    - Logs mantêm informações importantes: usuário, custos, duração, status, nomes de arquivos
+    - API /api/ai-img-logs funcionando perfeitamente com dados limpos
+  - **Dados Preservados**: usuário, provider, modelo, feature, custos, duração, status, metadata essencial
+  - **Performance**: Eliminado gargalo que impedia visualização dos logs administrativos
+
+- **July 02, 2025 (anterior)**: ✅ SISTEMA DE DOWNLOAD E LOGS DE IMAGENS IA IMPLEMENTADOS
   - **Download Corrigido**: 
     - Sistema de download via fetch implementado para evitar abertura de nova página
     - Download de imagens processadas agora funciona na mesma página

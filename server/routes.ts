@@ -31,7 +31,7 @@ import {
   insertAiGenerationLogSchema,
   aiGenerationLogs,
   insertAiImgGenerationLogSchema,
-  aiImgGenerationLogs,
+
   insertUpdateSchema,
   insertGeneratedImageSchema,
   insertWebhookConfigSchema,
@@ -4495,7 +4495,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           height: 0,
           fileSize: uploadedImage.metadata?.fileSize || 0
         },
-        generatedImageUrl: resultUrl,
+        generatedImageUrl: resultUrl.startsWith('data:') ? '[Base64 Image - Not Stored]' : resultUrl,
         generatedImageSize: {
           width: 0, // Would calculate from scale
           height: 0,
@@ -4503,7 +4503,12 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         },
         scale: scale,
         quality: 'high',
-        apiResponse: pixelcutResult,
+        apiResponse: {
+          has_result: true,
+          status: 'success',
+          url_type: resultUrl.startsWith('data:') ? 'base64' : 'external',
+          scale: scale
+        },
         status: 'success',
         cost: '0.10',
         duration: Date.now() - startTime,
@@ -5025,7 +5030,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const processingTime = Date.now() - startTime;
       const user = (req as any).user;
 
-      // Save success log to database
+      // Save success log to database (without storing large data)
       try {
         await storage.createAiImgGenerationLog({
           userId: user.id,
@@ -5038,14 +5043,15 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             width: null,
             height: null
           },
-          generatedImageUrl: processedImageUrl,
+          generatedImageUrl: processedImageUrl.startsWith('data:') ? '[Base64 Image - Not Stored]' : processedImageUrl,
           generatedImageSize: null,
           prompt: null,
           scale: null,
           quality: 'high',
           apiResponse: {
-            result_url: processedImageUrl,
-            status: 'success'
+            has_result: true,
+            status: 'success',
+            url_type: processedImageUrl.startsWith('data:') ? 'base64' : 'external'
           },
           status: 'success',
           errorMessage: null,
