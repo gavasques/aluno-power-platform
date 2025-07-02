@@ -4471,6 +4471,45 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         }
       });
 
+      // Save detailed AI Image Generation Log
+      const logData = {
+        userId: userId,
+        provider: 'pixelcut',
+        model: 'upscale-api',
+        feature: 'image-upscale',
+        originalImageName: uploadedImage.metadata?.fileName || `image-${imageId}`,
+        originalImageSize: {
+          width: 0, // Would analyze from image
+          height: 0,
+          fileSize: uploadedImage.metadata?.fileSize || 0
+        },
+        generatedImageUrl: resultUrl,
+        generatedImageSize: {
+          width: 0, // Would calculate from scale
+          height: 0,
+          fileSize: 0 // Would get from result if available
+        },
+        scale: scale,
+        quality: 'high',
+        apiResponse: pixelcutResult,
+        status: 'success',
+        cost: '0.10',
+        duration: Date.now() - startTime,
+        requestId: upscaledRecord.id,
+        sessionId: req.sessionId || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown',
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+        metadata: {
+          endpoint: 'image-upscale/process',
+          originalImageId: imageId,
+          requestTimestamp: new Date().toISOString(),
+          responseSize: JSON.stringify(pixelcutResult).length
+        }
+      };
+
+      await storage.createAiImgGenerationLog(logData);
+      console.log(`📊 [AI_IMG_LOG] Saved upscale log - User: ${userId}, Scale: ${scale}x, Cost: $0.10, Duration: ${Date.now() - startTime}ms`);
+
       // Clean up temporary image
       await storage.deleteGeneratedImage(imageId);
 
@@ -4489,8 +4528,158 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
     } catch (error) {
       console.error('❌ [IMAGE_UPSCALE] Error:', error);
+      
+      // Log the error in AI Image Generation Logs
+      try {
+        const userId = req.user?.id;
+        if (userId) {
+          const uploadedImage = await storage.getGeneratedImageById(req.body.imageId);
+          const errorLogData = {
+            userId: userId,
+            provider: 'pixelcut',
+            model: 'upscale-api',
+            feature: 'image-upscale',
+            originalImageName: uploadedImage?.metadata?.fileName || `image-${req.body.imageId}`,
+            originalImageSize: {
+              width: 0,
+              height: 0,
+              fileSize: uploadedImage?.metadata?.fileSize || 0
+            },
+            scale: req.body.scale || 0,
+            quality: 'high',
+            apiResponse: { error: error instanceof Error ? error.message : 'Unknown error' },
+            status: 'failed',
+            errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+            cost: '0.00',
+            duration: Date.now() - startTime,
+            sessionId: req.sessionId || 'unknown',
+            userAgent: req.headers['user-agent'] || 'unknown',
+            ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+            metadata: {
+              endpoint: 'image-upscale/process',
+              error: true,
+              errorType: error instanceof Error ? error.constructor.name : 'UnknownError',
+              requestTimestamp: new Date().toISOString()
+            }
+          };
+          
+          await storage.createAiImgGenerationLog(errorLogData);
+          console.log(`📊 [AI_IMG_LOG] Saved error log - User: ${userId}, Error: ${error instanceof Error ? error.message : 'Unknown'}`);
+        }
+      } catch (logError) {
+        console.error('❌ [AI_IMG_LOG] Failed to save error log:', logError);
+      }
+      
       res.status(500).json({ 
         error: 'Erro no processamento da imagem',
+        message: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // AI Image Generation Logs APIs
+  
+  // Get AI image generation logs with filters
+  app.get('/api/ai-img-logs', requireAuth, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const {
+        provider,
+        feature,
+        status,
+        limit = '50',
+        offset = '0',
+        includeAll = 'false'
+      } = req.query;
+
+      const options = {
+        userId: includeAll === 'true' && req.user?.role === 'admin' ? undefined : userId,
+        provider: provider as string,
+        feature: feature as string,
+        status: status as string,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      };
+
+      const logs = await storage.getAiImgGenerationLogs(options);
+      res.json({ logs, total: logs.length });
+
+    } catch (error) {
+      console.error('❌ [AI_IMG_LOGS] Error fetching logs:', error);
+      res.status(500).json({ 
+        error: 'Erro ao buscar logs de geração de imagens',
+        message: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // Get AI image generation statistics
+  app.get('/api/ai-img-logs/stats', requireAuth, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const {
+        provider,
+        feature,
+        dateFrom,
+        dateTo,
+        includeAll = 'false'
+      } = req.query;
+
+      const options = {
+        userId: includeAll === 'true' && req.user?.role === 'admin' ? undefined : userId,
+        provider: provider as string,
+        feature: feature as string,
+        dateFrom: dateFrom ? new Date(dateFrom as string) : undefined,
+        dateTo: dateTo ? new Date(dateTo as string) : undefined
+      };
+
+      const stats = await storage.getAiImgGenerationStats(options);
+      res.json(stats);
+
+    } catch (error) {
+      console.error('❌ [AI_IMG_STATS] Error fetching stats:', error);
+      res.status(500).json({ 
+        error: 'Erro ao buscar estatísticas de geração de imagens',
+        message: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // Get specific AI image generation log by ID
+  app.get('/api/ai-img-logs/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const log = await storage.getAiImgGenerationLogById(parseInt(id));
+      
+      if (!log) {
+        return res.status(404).json({ error: 'Log não encontrado' });
+      }
+
+      // Check permission - users can only see their own logs, admins can see all
+      if (log.userId !== userId && req.user?.role !== 'admin') {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+
+      res.json(log);
+
+    } catch (error) {
+      console.error('❌ [AI_IMG_LOG] Error fetching log:', error);
+      res.status(500).json({ 
+        error: 'Erro ao buscar log de geração',
         message: error instanceof Error ? error.message : 'Erro desconhecido'
       });
     }
