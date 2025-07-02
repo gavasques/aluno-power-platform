@@ -77,6 +77,7 @@ export default function BackgroundRemoval() {
     error,
     processingDuration,
     uploadImage,
+    removeImage,
     removeBackground,
     reset,
   } = useBackgroundRemoval();
@@ -149,7 +150,7 @@ export default function BackgroundRemoval() {
         <div className="space-y-6">
           {processedImage ? (
             <BackgroundRemovalResult
-              originalImage={originalImage!}
+              originalImage={originalImage!.url}
               processedImage={processedImage}
               processingDuration={processingDuration}
               originalFileName={uploadedFileName}
