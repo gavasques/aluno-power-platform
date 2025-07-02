@@ -47,6 +47,14 @@ export function ImageUploader({ onImageUploaded, uploadedImage }: ImageUploaderP
     setIsUploading(true);
     
     try {
+      // Show immediate local preview while uploading
+      const localUrl = URL.createObjectURL(file);
+      onImageUploaded({
+        id: 'local-preview',
+        url: localUrl,
+        name: file.name
+      });
+
       // Validate file
       const validationError = await validateFile(file);
       if (validationError) {
@@ -85,9 +93,10 @@ export function ImageUploader({ onImageUploaded, uploadedImage }: ImageUploaderP
 
           const data = await response.json();
           
+          // Update with real server ID, keeping the same preview
           onImageUploaded({
             id: data.imageId,
-            url: imageData,
+            url: localUrl, // Keep local URL for instant display
             name: file.name,
           });
 

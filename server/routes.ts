@@ -4382,27 +4382,21 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         hasApiKey: !!process.env.PIXELCUT_API_KEY
       });
 
-      // Create FormData for multipart upload to PixelCut API
-      const { default: FormData } = await import('form-data');
-      const formData = new FormData();
+      // Try alternative approach: Send as base64 in JSON first
+      console.log(`🔍 [PIXELCUT_API] Trying JSON approach with base64...`);
       
-      // Add image file to form data
-      formData.append('image', imageBuffer, {
-        filename: `image.${fileExtension}`,
-        contentType: mimeType
-      });
-      
-      // Add scale parameter
-      formData.append('scale', scale.toString());
+      const jsonPayload = {
+        image: imageBase64, // Send the full data URL
+        scale: scale
+      };
 
-      // Call PixelCut API with multipart form data
       const pixelcutResponse = await fetch('https://api.developer.pixelcut.ai/v1/upscale', {
         method: 'POST',
         headers: {
-          'X-API-KEY': process.env.PIXELCUT_API_KEY || '',
-          ...formData.getHeaders()
+          'Content-Type': 'application/json',
+          'X-API-KEY': process.env.PIXELCUT_API_KEY || ''
         },
-        body: formData as any
+        body: JSON.stringify(jsonPayload)
       });
 
       console.log(`🔍 [PIXELCUT_API] Response status: ${pixelcutResponse.status}`);
