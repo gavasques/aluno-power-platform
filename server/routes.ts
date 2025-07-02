@@ -4279,22 +4279,33 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
   // Image Upscaling API endpoints
   
-  // Configure multer for file uploads
-  const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 25 * 1024 * 1024 }, // 25MB limit
-    fileFilter: (req, file, cb) => {
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-      if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Tipo de arquivo não suportado. Use PNG, JPG, JPEG ou WebP.'));
+  // Upload image and store temporarily (unified endpoint) - with direct multer integration
+  app.post('/api/temp-image/upload', requireAuth, (req, res, next) => {
+    // Configure multer for this specific route
+    const upload = multer({
+      storage: multer.memoryStorage(),
+      limits: { fileSize: 25 * 1024 * 1024 }, // 25MB limit
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+        if (allowedTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Tipo de arquivo não suportado. Use PNG, JPG, JPEG ou WebP.'));
+        }
       }
-    }
-  });
-  
-  // Upload image and store temporarily (unified endpoint)
-  app.post('/api/temp-image/upload', requireAuth, upload.single('image'), async (req, res) => {
+    }).single('image');
+    
+    upload(req, res, (err) => {
+      if (err) {
+        console.error('🔥 [MULTER_ERROR]:', err.message);
+        return res.status(400).json({ 
+          error: err.message || 'Erro no upload da imagem',
+          success: false 
+        });
+      }
+      next();
+    });
+  }, async (req, res) => {
     const startTime = Date.now();
     
     try {
