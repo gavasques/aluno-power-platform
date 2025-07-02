@@ -53,6 +53,7 @@ const AmazonListingsOptimizerNew = lazy(() => import("./pages/agents/amazon-list
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
 const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
+const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 
 // Keep Login as eager import for immediate authentication
 import Login from "./pages/Login";
@@ -92,6 +93,17 @@ function App() {
                             <Switch>
                           <Route path="/login" component={Login} />
                           <Route path="/auth" component={Login} />
+
+                          {/* AI routes */}
+                          <Route path="/ai/image-upscale">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ImageUpscale />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
 
                           {/* Agents routes */}
                           <Route path="/agents/amazon-listings-optimizer-new">
