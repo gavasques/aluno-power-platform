@@ -59,9 +59,9 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   const token = localStorage.getItem('auth_token');
   
   // Don't set Content-Type for FormData - browser will set it automatically with boundary
-  const headers: Record<string, string> = {
+  const headers: HeadersInit = {
     ...(token && { 'Authorization': `Bearer ${token}` }),
-    ...options?.headers,
+    ...(options?.headers || {}),
   };
   
   // Only add Content-Type for non-FormData requests

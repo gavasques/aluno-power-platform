@@ -42,7 +42,6 @@ export class AIImageService {
   ): Promise<ProcessedImage> {
     const response = await apiRequest('/api/background-removal/process', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageId, ...options }),
     });
 
@@ -66,7 +65,6 @@ export class AIImageService {
   ): Promise<ProcessedImage> {
     const response = await apiRequest('/api/image-upscale/process', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageId, scale: options.scale }),
     });
 
