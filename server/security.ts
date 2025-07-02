@@ -112,7 +112,7 @@ export const sanitizeError = (error: any): { error: string; details?: string } =
 };
 
 // Authentication middleware
-export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   
   if (!token) {
@@ -122,8 +122,34 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
     });
   }
   
-  // Token will be validated by the route handler
-  next();
+  try {
+    // Import storage here to avoid circular dependency
+    const { storage } = await import('./storage.js');
+    
+    // Validate the session token
+    const sessionResult = await storage.validateSession(token);
+    
+    if (!sessionResult.userFound) {
+      return res.status(401).json({ 
+        error: 'Invalid or expired token',
+        details: 'Please login again'
+      });
+    }
+    
+    // Set user information on request object
+    (req as any).user = {
+      id: sessionResult.userId,
+      email: sessionResult.userEmail
+    };
+    
+    next();
+  } catch (error) {
+    console.error('❌ [AUTH] Token validation error:', error);
+    return res.status(401).json({ 
+      error: 'Authentication failed',
+      details: 'Please login again'
+    });
+  }
 };
 
 // Role-based authorization middleware
