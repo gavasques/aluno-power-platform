@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import bcryptjs from "bcryptjs";
+import multer from "multer";
 import { storage } from "./storage";
 import { 
   insertSupplierSchema, 
@@ -4278,14 +4279,41 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
   // Image Upscaling API endpoints
   
-  // Upload image and store temporarily
-  app.post('/api/image-upscale/upload', requireAuth, async (req, res) => {
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 25 * 1024 * 1024 }, // 25MB limit
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Tipo de arquivo não suportado. Use PNG, JPG, JPEG ou WebP.'));
+      }
+    }
+  });
+  
+  // Upload image and store temporarily (unified endpoint)
+  app.post('/api/temp-image/upload', requireAuth, upload.single('image'), async (req, res) => {
     const startTime = Date.now();
     
     try {
       console.log('🔍 [IMAGE_UPLOAD] Starting image upload process');
       
-      const { imageData, fileName, fileSize } = req.body;
+      if (!req.file) {
+        return res.status(400).json({ 
+          error: 'Nenhum arquivo foi enviado' 
+        });
+      }
+      
+      const fileName = req.file.originalname;
+      const fileSize = req.file.size;
+      const buffer = req.file.buffer;
+      
+      // Convert buffer to base64 data URL
+      const mimeType = req.file.mimetype;
+      const base64 = buffer.toString('base64');
+      const imageData = `data:${mimeType};base64,${base64}`;
       
       if (!imageData || !fileName) {
         return res.status(400).json({ 
@@ -4323,7 +4351,16 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       
       res.json({
         success: true,
-        imageId: imageRecord.id,
+        data: {
+          id: imageRecord.id,
+          url: imageData,
+          metadata: {
+            fileName,
+            fileSize,
+            width: null, // Will be set if needed
+            height: null // Will be set if needed
+          }
+        },
         message: 'Imagem carregada com sucesso',
         duration: Date.now() - startTime
       });
