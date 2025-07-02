@@ -4756,6 +4756,149 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Background Removal API Routes
+  app.post('/api/background-removal/process', requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('🔍 [BACKGROUND_REMOVAL] Starting background removal process');
+      
+      const { imageId } = req.body;
+      
+      if (!imageId) {
+        return res.status(400).json({ 
+          error: 'ID da imagem é obrigatório',
+          code: 'MISSING_IMAGE_ID'
+        });
+      }
+
+      console.log('🔍 [BACKGROUND_REMOVAL] Processing image ID:', imageId);
+
+      // Retrieve the uploaded image from temporary storage
+      const tempImages = global.tempImages || new Map();
+      const tempImage = tempImages.get(imageId);
+      
+      if (!tempImage) {
+        return res.status(404).json({ 
+          error: 'Imagem não encontrada ou expirada',
+          code: 'IMAGE_NOT_FOUND'
+        });
+      }
+
+      // Check if API key is available
+      if (!process.env.PIXELCUT_API_KEY) {
+        console.log('❌ [PIXELCUT_API] No API key configured');
+        return res.status(400).json({
+          error: 'Erro no processamento, aguarde 24 horas e tente novamente. Pedimos desculpas.',
+          code: 'API_NOT_CONFIGURED'
+        });
+      }
+
+      console.log('🔍 [PIXELCUT_API] Sending background removal request with:', {
+        imageSize: tempImage.imageData.length,
+        mimeType: tempImage.mimeType,
+        hasApiKey: !!process.env.PIXELCUT_API_KEY
+      });
+
+      const startTime = Date.now();
+      let processedImageUrl: string;
+
+      try {
+        // Convert base64 to buffer and then back to base64 without data URL prefix
+        const base64Data = tempImage.imageData.replace(/^data:image\/[a-z]+;base64,/, '');
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+        
+        // Create a temporary URL to send to PixelCut
+        const tempImageUrl = `data:${tempImage.mimeType};base64,${base64Data}`;
+        
+        console.log('🔍 [PIXELCUT_API] Trying background removal with base64...');
+        
+        const response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-API-KEY': process.env.PIXELCUT_API_KEY
+          },
+          body: JSON.stringify({
+            image_url: tempImageUrl,
+            format: 'png'
+          })
+        });
+
+        console.log('🔍 [PIXELCUT_API] Response status:', response.status);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.log('❌ [PIXELCUT_API] Error:', response.status, '-', JSON.stringify(errorData));
+          
+          if (response.status === 403 && errorData.error_code === 'insufficient_api_credits') {
+            throw new Error('Créditos da API PixelCut esgotados. Entre em contato com o administrador para recarregar os créditos.');
+          }
+          
+          throw new Error(`Erro da API PixelCut: ${errorData.error || 'Erro desconhecido'}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.data || !result.data.result_url) {
+          throw new Error('Resposta inválida da API PixelCut');
+        }
+
+        processedImageUrl = result.data.result_url;
+        console.log('✅ [PIXELCUT_API] Background removal successful');
+
+      } catch (apiError) {
+        console.log('❌ [BACKGROUND_REMOVAL] Error:', apiError);
+        return res.status(400).json({
+          error: 'Erro no processamento, aguarde 24 horas e tente novamente. Pedimos desculpas.',
+          code: 'PROCESSING_ERROR'
+        });
+      }
+
+      const processingTime = Date.now() - startTime;
+
+      // Save log to database
+      try {
+        const user = (req as any).user;
+        
+        await db.insert(aiImgGenerationLogs).values({
+          userId: user.id,
+          originalImageUrl: `temp://${imageId}`,
+          processedImageUrl: processedImageUrl,
+          fileSize: tempImage.fileSize,
+          fileName: tempImage.fileName,
+          processingType: 'background_removal',
+          processingTime: processingTime,
+          cost: 0.02, // Estimated cost for background removal
+          status: 'success'
+        });
+      } catch (dbError) {
+        console.error('❌ [DB] Error saving background removal log:', dbError);
+        // Continue with response even if logging fails
+      }
+
+      // Clean up temporary image
+      tempImages.delete(imageId);
+
+      const originalImageUrl = `data:${tempImage.mimeType};base64,${tempImage.imageData.replace(/^data:image\/[a-z]+;base64,/, '')}`;
+
+      res.json({
+        success: true,
+        originalImageUrl,
+        processedImageUrl,
+        duration: processingTime,
+        cost: 0.02,
+        message: 'Background removido com sucesso!'
+      });
+
+    } catch (error) {
+      console.error('❌ [BACKGROUND_REMOVAL] Error:', error);
+      res.status(500).json({ 
+        error: 'Erro no processamento, aguarde 24 horas e tente novamente. Pedimos desculpas.',
+        code: 'INTERNAL_ERROR'
+      });
+    }
+  });
+
   return httpServer;
 }
 
