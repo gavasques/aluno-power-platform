@@ -40,10 +40,13 @@ The system uses PostgreSQL with the following core tables:
 - **Models**: Configurable OpenAI models with temperature and token limits
 
 ### Content Management
-- **Hub Resources**: Tools, materials, templates, prompts, partners, and suppliers
+- **Hub Resources**: Tools, materials, templates, prompts, partners, and suppliers (public/administrative content)
 - **News & Updates**: Publishing system with categorization and featured content
 - **Video Integration**: YouTube channel synchronization with automated content fetching
 - **User Area**: Personal content management and product catalog
+- **Supplier Management**: Two distinct areas:
+  - **Hub de Recursos / Fornecedores**: Public supplier directory for general reference
+  - **Minha Área / Meus Fornecedores**: Personal supplier management with user-specific data, brands, contacts, and files
 
 ### Admin Panel
 - **Dashboard**: Analytics and system overview
