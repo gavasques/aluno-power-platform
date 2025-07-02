@@ -4871,8 +4871,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         
         console.log('🔍 [PIXELCUT_API] Trying background removal with base64...');
         
-        // Use application/json format with base64 data (as used in upscale)
-        const response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
+        // Try different approaches based on PixelCut API documentation
+        
+        // First attempt: image_url with data URL format
+        let response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -4880,9 +4882,25 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             'X-API-KEY': process.env.PIXELCUT_API_KEY
           },
           body: JSON.stringify({
-            image: base64Data // Send raw base64 without data URL prefix
+            image_url: tempImageUrl // Send with data URL prefix
           })
         });
+        
+        // If first attempt fails, try second approach: image with base64
+        if (!response.ok) {
+          console.log('🔄 [PIXELCUT_API] First attempt failed, trying alternative format...');
+          response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-API-KEY': process.env.PIXELCUT_API_KEY
+            },
+            body: JSON.stringify({
+              image: base64Data // Send raw base64 without data URL prefix
+            })
+          });
+        }
 
         console.log('🔍 [PIXELCUT_API] Response status:', response.status);
 
