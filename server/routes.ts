@@ -4408,13 +4408,23 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
 
       const pixelcutResult = await pixelcutResponse.json();
-      console.log(`✅ [PIXELCUT_API] Upscale successful`);
+      console.log(`✅ [PIXELCUT_API] Upscale successful, response:`, JSON.stringify(pixelcutResult, null, 2));
+
+      // Extract the result URL from the response
+      const resultUrl = pixelcutResult.result_url || pixelcutResult.image_url || pixelcutResult.url;
+      
+      if (!resultUrl) {
+        console.error(`❌ [PIXELCUT_API] No result URL found in response:`, pixelcutResult);
+        throw new Error('PixelCut API did not return a valid result URL');
+      }
+
+      console.log(`🔍 [PIXELCUT_API] Extracted result URL: ${resultUrl}`);
 
       // Store the upscaled image result
       const upscaledRecord = await storage.createUpscaledImage({
         userId: userId,
         originalImageUrl: imageBase64,
-        upscaledImageUrl: pixelcutResult.result_url,
+        upscaledImageUrl: resultUrl,
         scale: scale,
         originalSize: { width: 0, height: 0 }, // Would get from image analysis
         upscaledSize: { width: 0, height: 0 }, // Would calculate from scale
@@ -4437,7 +4447,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         data: {
           id: upscaledRecord.id,
           originalImageUrl: imageBase64,
-          upscaledImageUrl: pixelcutResult.result_url,
+          upscaledImageUrl: resultUrl,
           scale: scale,
           processingTime: Date.now() - startTime,
           cost: upscaledRecord.cost
