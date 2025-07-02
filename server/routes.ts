@@ -4424,11 +4424,11 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
 
       const pixelcutResult = await pixelcutResponse.json();
-      console.log(`✅ [PIXELCUT_API] Upscale successful, response keys:`, Object.keys(pixelcutResult));
+      console.log(`✅ [PIXELCUT_API] Upscale successful, has data:`, !!pixelcutResult.data);
 
       // PixelCut returns data in { data: ... } structure
       const imageData = pixelcutResult.data || pixelcutResult;
-      console.log(`🔍 [PIXELCUT_API] Image data keys:`, Object.keys(imageData || {}));
+      console.log(`🔍 [PIXELCUT_API] Image data available:`, !!imageData);
 
       let resultUrl = null;
       
@@ -4458,13 +4458,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
       
       if (!resultUrl) {
-        console.error(`❌ [PIXELCUT_API] No result found. Full response structure:`, {
-          mainKeys: Object.keys(pixelcutResult),
-          dataKeys: imageData ? Object.keys(imageData) : 'no data field',
-          dataType: typeof imageData,
-          dataLength: imageData ? (typeof imageData === 'string' ? imageData.length : JSON.stringify(imageData).length) : 0,
-          sampleData: imageData ? (typeof imageData === 'string' ? imageData.substring(0, 100) : Object.keys(imageData)) : null
-        });
+        console.error(`❌ [PIXELCUT_API] No result found`);
+        console.error(`❌ [PIXELCUT_API] Data type: ${typeof imageData}`);
+        console.error(`❌ [PIXELCUT_API] Has data field: ${!!pixelcutResult.data}`);
         throw new Error('PixelCut API did not return a valid result');
       }
 
@@ -4482,7 +4478,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         cost: '0.10', // Estimate based on PixelCut pricing
         status: 'completed',
         metadata: {
-          pixelcutResponse: pixelcutResult,
+          hasPixelcutResponse: true,
           originalImageId: imageId
         }
       });
