@@ -4410,29 +4410,44 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const pixelcutResult = await pixelcutResponse.json();
       console.log(`✅ [PIXELCUT_API] Upscale successful, response keys:`, Object.keys(pixelcutResult));
 
-      // PixelCut returns the image as base64 data, not URL
-      let resultUrl = pixelcutResult.result_url || pixelcutResult.image_url || pixelcutResult.url;
+      // PixelCut returns data in { data: ... } structure
+      const imageData = pixelcutResult.data || pixelcutResult;
+      console.log(`🔍 [PIXELCUT_API] Image data keys:`, Object.keys(imageData || {}));
+
+      let resultUrl = null;
       
-      // If no URL, check if we got base64 image data directly
-      if (!resultUrl && pixelcutResult.image) {
-        if (pixelcutResult.image.startsWith('data:image/')) {
-          resultUrl = pixelcutResult.image;
-        } else {
-          // Add data URL prefix if missing
-          resultUrl = `data:image/png;base64,${pixelcutResult.image}`;
+      // Try different possible image data locations
+      if (imageData) {
+        // Check for direct URL fields
+        resultUrl = imageData.result_url || imageData.image_url || imageData.url;
+        
+        // Check for base64 image data
+        if (!resultUrl && imageData.image) {
+          if (imageData.image.startsWith('data:image/')) {
+            resultUrl = imageData.image;
+          } else {
+            // Add data URL prefix if missing
+            resultUrl = `data:image/png;base64,${imageData.image}`;
+          }
+        }
+        
+        // Check if imageData itself is a base64 string
+        if (!resultUrl && typeof imageData === 'string' && imageData.length > 100000) {
+          if (imageData.startsWith('data:image/')) {
+            resultUrl = imageData;
+          } else {
+            resultUrl = `data:image/png;base64,${imageData}`;
+          }
         }
       }
       
-      // If still no result, check if the whole response IS the image data
-      if (!resultUrl && typeof pixelcutResult === 'string' && pixelcutResult.length > 100000) {
-        resultUrl = `data:image/png;base64,${pixelcutResult}`;
-      }
-      
       if (!resultUrl) {
-        console.error(`❌ [PIXELCUT_API] No result found. Response structure:`, {
-          keys: Object.keys(pixelcutResult),
-          responseType: typeof pixelcutResult,
-          responseLength: JSON.stringify(pixelcutResult).length
+        console.error(`❌ [PIXELCUT_API] No result found. Full response structure:`, {
+          mainKeys: Object.keys(pixelcutResult),
+          dataKeys: imageData ? Object.keys(imageData) : 'no data field',
+          dataType: typeof imageData,
+          dataLength: imageData ? (typeof imageData === 'string' ? imageData.length : JSON.stringify(imageData).length) : 0,
+          sampleData: imageData ? (typeof imageData === 'string' ? imageData.substring(0, 100) : Object.keys(imageData)) : null
         });
         throw new Error('PixelCut API did not return a valid result');
       }
