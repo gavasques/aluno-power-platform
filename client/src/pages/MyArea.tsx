@@ -5,7 +5,7 @@ import MyProducts from "./myarea/MyProducts";
 import MyMaterials from "./myarea/MyMaterials";
 import ProductForm from "./myarea/ProductForm";
 import ProductDetail from "./myarea/ProductDetail";
-import SupplierDetail from "./myarea/SupplierDetail";
+import SupplierDetailPage from "./myarea/SupplierDetailPage";
 import MaterialDetail from "./myarea/MaterialDetail";
 import MaterialForm from "./myarea/MaterialForm";
 
@@ -16,7 +16,7 @@ const MyArea = () => {
   switch (section) {
     case "fornecedores":
       if (id) {
-        return <SupplierDetail />;
+        return <SupplierDetailPage />;
       }
       return <MySuppliers />;
     case "produtos":

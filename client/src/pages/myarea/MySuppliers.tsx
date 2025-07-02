@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Link } from 'wouter';
 import { SearchIcon, Building2, Globe, Mail, Star, Plus, Eye } from 'lucide-react';
 import { Supplier } from '@shared/schema';
 
@@ -103,89 +103,12 @@ const MySuppliers = () => {
                 )}
 
                 <div className="flex gap-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setSelectedSupplier(supplier)}>
-                        <Eye className="h-3 w-3 mr-1" />
-                        Ver Detalhes
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>{supplier.tradeName}</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Informações Básicas</h4>
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600">Nome Comercial:</span>
-                              <p className="font-medium">{supplier.tradeName}</p>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Razão Social:</span>
-                              <p className="font-medium">{supplier.corporateName}</p>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Status:</span>
-                              <p className="font-medium">
-                                {supplier.isVerified ? (
-                                  <Badge className="bg-green-100 text-green-700">Verificado</Badge>
-                                ) : (
-                                  <Badge variant="outline">Não verificado</Badge>
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {supplier.description && (
-                          <div>
-                            <h4 className="font-medium text-gray-900 mb-2">Descrição</h4>
-                            <p className="text-sm text-gray-600">{supplier.description}</p>
-                          </div>
-                        )}
-
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Contatos</h4>
-                          <div className="space-y-2 text-sm">
-                            {supplier.commercialEmail && (
-                              <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4 text-gray-400" />
-                                <span className="text-gray-600">Comercial:</span>
-                                <span>{supplier.commercialEmail}</span>
-                              </div>
-                            )}
-                            {supplier.supportEmail && (
-                              <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4 text-gray-400" />
-                                <span className="text-gray-600">Suporte:</span>
-                                <span>{supplier.supportEmail}</span>
-                              </div>
-                            )}
-                            {supplier.website && (
-                              <div className="flex items-center gap-2">
-                                <Globe className="h-4 w-4 text-gray-400" />
-                                <span className="text-gray-600">Website:</span>
-                                <a href={supplier.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                  {supplier.website}
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {supplier.notes && (
-                          <div>
-                            <h4 className="font-medium text-gray-900 mb-2">Notas</h4>
-                            <div className="bg-yellow-50 p-3 rounded border-l-2 border-yellow-400">
-                              <p className="text-sm text-gray-700">{supplier.notes}</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <Link href={`/minha-area/fornecedores/${supplier.id}`}>
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Eye className="h-3 w-3 mr-1" />
+                      Ver Detalhes
+                    </Button>
+                  </Link>
                   
                   {supplier.commercialEmail && (
                     <Button size="sm" variant="outline" asChild>
