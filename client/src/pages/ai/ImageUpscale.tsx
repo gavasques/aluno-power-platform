@@ -41,7 +41,7 @@ function ImageUpscale() {
     setIsProcessing(true);
     
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('auth_token');
       const response = await fetch('/api/image-upscale/process', {
         method: 'POST',
         headers: {

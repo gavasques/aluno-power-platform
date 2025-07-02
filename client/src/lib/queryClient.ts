@@ -20,7 +20,7 @@ export const queryClient = new QueryClient({
       },
       queryFn: async ({ queryKey, signal }) => {
         const url = queryKey[0] as string;
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('auth_token');
         
         try {
           const response = await fetch(url, {
