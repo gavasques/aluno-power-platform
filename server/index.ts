@@ -6,9 +6,25 @@ import { scheduler } from "./services/scheduler";
 
 const app = express();
 app.use(compression()); // Enable gzip compression
-// Increase payload size limit to handle large images and data
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+
+// Conditional middleware for JSON parsing - skip for upload routes
+app.use((req, res, next) => {
+  // Skip JSON parsing for file upload routes
+  if (req.path === '/api/temp-image/upload' && req.method === 'POST') {
+    return next();
+  }
+  // Apply JSON parsing for all other routes
+  express.json({ limit: '50mb' })(req, res, next);
+});
+
+app.use((req, res, next) => {
+  // Skip URL encoding for file upload routes
+  if (req.path === '/api/temp-image/upload' && req.method === 'POST') {
+    return next();
+  }
+  // Apply URL encoding for all other routes
+  express.urlencoded({ extended: false, limit: '50mb' })(req, res, next);
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
