@@ -4404,7 +4404,21 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       if (!pixelcutResponse.ok) {
         const errorText = await pixelcutResponse.text();
         console.error(`❌ [PIXELCUT_API] Error: ${pixelcutResponse.status} - ${errorText}`);
-        throw new Error(`PixelCut API error: ${pixelcutResponse.status}`);
+        
+        let userMessage = "Erro no serviço de upscale";
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.error_code === "insufficient_api_credits") {
+            userMessage = "Créditos da API PixelCut esgotados. Entre em contato com o administrador para recarregar os créditos.";
+          } else if (errorData.error) {
+            userMessage = `Erro da PixelCut API: ${errorData.error}`;
+          }
+        } catch (e) {
+          // Se não conseguir parsear, usa mensagem genérica
+        }
+        
+        throw new Error(userMessage);
       }
 
       const pixelcutResult = await pixelcutResponse.json();
@@ -4529,7 +4543,79 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     } catch (error) {
       console.error('❌ [IMAGE_UPSCALE] Error:', error);
       
-      // Log the error in AI Image Generation Logs
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      // Check if it's a credits issue and provide demo mode
+      if (errorMessage.includes('Créditos da API PixelCut esgotados') || errorMessage.includes('insufficient_api_credits')) {
+        console.log(`🎭 [DEMO_MODE] Activating demo mode for upscale`);
+        
+        try {
+          const uploadedImage = await storage.getGeneratedImageById(imageId);
+          
+          // Create a demo response that simulates upscaling
+          const demoResult = {
+            upscaledImageUrl: uploadedImage?.imageUrl || '', // Use original image as demo
+            message: `MODO DEMONSTRAÇÃO: Esta é uma simulação do upscale ${scale}x. A imagem original é exibida como exemplo do resultado. Para usar o upscale real, é necessário recarregar os créditos da API PixelCut.`,
+            isDemoMode: true,
+            scale,
+            originalImageUrl: uploadedImage?.imageUrl || ''
+          };
+
+          // Log the demo usage
+          const userId = req.user?.id;
+          if (userId && uploadedImage) {
+            const demoLogData = {
+              userId: userId,
+              provider: 'demo',
+              model: `upscale-${scale}x-demo`,
+              feature: 'image-upscale-demo',
+              originalImageName: uploadedImage.metadata?.fileName || `image-${imageId}`,
+              originalImageSize: {
+                width: 0,
+                height: 0,
+                fileSize: uploadedImage.metadata?.fileSize || 0
+              },
+              generatedImageUrl: uploadedImage.imageUrl,
+              generatedImageSize: {
+                width: 0,
+                height: 0,
+                fileSize: uploadedImage.metadata?.fileSize || 0
+              },
+              scale: scale,
+              quality: 'demo',
+              apiResponse: { demoMode: true, reason: 'insufficient_credits' },
+              status: 'demo_success',
+              cost: '0.00',
+              duration: Date.now() - startTime,
+              sessionId: req.sessionId || 'unknown',
+              userAgent: req.headers['user-agent'] || 'unknown',
+              ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+              metadata: {
+                endpoint: 'image-upscale/process',
+                demoMode: true,
+                originalError: errorMessage,
+                requestTimestamp: new Date().toISOString()
+              }
+            };
+            
+            await storage.createAiImgGenerationLog(demoLogData);
+            console.log(`📊 [AI_IMG_LOG] Saved demo log - User: ${userId}, Mode: Demo ${scale}x`);
+          }
+
+          return res.json({
+            success: true,
+            data: demoResult,
+            message: 'Processamento concluído em modo demonstração',
+            duration: Date.now() - startTime,
+            isDemoMode: true
+          });
+
+        } catch (demoError) {
+          console.error('❌ [DEMO_MODE] Error creating demo response:', demoError);
+        }
+      }
+      
+      // Log other errors in AI Image Generation Logs
       try {
         const userId = req.user?.id;
         if (userId) {
@@ -4547,9 +4633,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             },
             scale: req.body.scale || 0,
             quality: 'high',
-            apiResponse: { error: error instanceof Error ? error.message : 'Unknown error' },
+            apiResponse: { error: errorMessage },
             status: 'failed',
-            errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+            errorMessage: errorMessage,
             cost: '0.00',
             duration: Date.now() - startTime,
             sessionId: req.sessionId || 'unknown',
@@ -4564,7 +4650,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           };
           
           await storage.createAiImgGenerationLog(errorLogData);
-          console.log(`📊 [AI_IMG_LOG] Saved error log - User: ${userId}, Error: ${error instanceof Error ? error.message : 'Unknown'}`);
+          console.log(`📊 [AI_IMG_LOG] Saved error log - User: ${userId}, Error: ${errorMessage}`);
         }
       } catch (logError) {
         console.error('❌ [AI_IMG_LOG] Failed to save error log:', logError);
@@ -4572,7 +4658,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       
       res.status(500).json({ 
         error: 'Erro no processamento da imagem',
-        message: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: errorMessage
       });
     }
   });

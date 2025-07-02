@@ -1,10 +1,12 @@
 export interface UpscaleData {
-  id: string;
+  id?: string;
   originalImageUrl: string;
   upscaledImageUrl: string;
   scale: number;
   processingTime?: number;
   cost?: string;
+  message?: string;
+  isDemoMode?: boolean;
 }
 
 export interface UploadedImage {
@@ -41,4 +43,6 @@ export interface ProcessResponse {
   success: boolean;
   data: UpscaleData;
   message: string;
+  duration?: number;
+  isDemoMode?: boolean;
 }
