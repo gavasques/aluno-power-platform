@@ -5,7 +5,7 @@ import MyProducts from "./myarea/MyProducts";
 import MyMaterials from "./myarea/MyMaterials";
 import ProductForm from "./myarea/ProductForm";
 import ProductDetail from "./myarea/ProductDetail";
-import SupplierDetailPage from "./myarea/SupplierDetailPage";
+import SupplierDetailPage from "./myarea/SupplierDetailPageNew";
 import MaterialDetail from "./myarea/MaterialDetail";
 import MaterialForm from "./myarea/MaterialForm";
 

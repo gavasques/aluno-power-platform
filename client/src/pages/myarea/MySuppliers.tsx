@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'wouter';
-import { SearchIcon, Building2, Globe, Mail, Star, Plus, Eye } from 'lucide-react';
+import { SearchIcon, Building2, Globe, Star, Plus, Eye } from 'lucide-react';
 import { Supplier } from '@shared/schema';
 
 const MySuppliers = () => {
@@ -109,14 +109,6 @@ const MySuppliers = () => {
                       Ver Detalhes
                     </Button>
                   </Link>
-                  
-                  {supplier.commercialEmail && (
-                    <Button size="sm" variant="outline" asChild>
-                      <a href={`mailto:${supplier.commercialEmail}`}>
-                        <Mail className="h-3 w-3" />
-                      </a>
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </Card>

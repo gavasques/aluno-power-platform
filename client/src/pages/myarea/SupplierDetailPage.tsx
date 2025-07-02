@@ -47,6 +47,52 @@ const SupplierDetailPage = () => {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Supplier>>({});
+  
+  // Dialog states
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [conversationDialogOpen, setConversationDialogOpen] = useState(false);
+  const [editBrandDialogOpen, setEditBrandDialogOpen] = useState(false);
+  const [editContactDialogOpen, setEditContactDialogOpen] = useState(false);
+  const [editConversationDialogOpen, setEditConversationDialogOpen] = useState(false);
+  
+  // Forms
+  const [brandForm, setBrandForm] = useState<InsertSupplierBrand>({
+    supplierId: parseInt(id || '0'),
+    userId: 1,
+    name: '',
+    description: '',
+    logo: '',
+  });
+  
+  const [contactForm, setContactForm] = useState<InsertSupplierContact>({
+    supplierId: parseInt(id || '0'),
+    userId: 1,
+    name: '',
+    email: '',
+    phone: '',
+    whatsapp: '',
+    position: '',
+    notes: '',
+  });
+  
+  const [conversationForm, setConversationForm] = useState<InsertSupplierConversation>({
+    supplierId: parseInt(id || '0'),
+    userId: 1,
+    subject: '',
+    message: '',
+    type: 'note',
+    attachmentUrl: '',
+  });
+  
+  // Edit states
+  const [editingBrand, setEditingBrand] = useState<SupplierBrand | null>(null);
+  const [editingContact, setEditingContact] = useState<SupplierContact | null>(null);
+  const [editingConversation, setEditingConversation] = useState<SupplierConversation | null>(null);
+  
+  // Pagination
+  const [conversationPage, setConversationPage] = useState(1);
+  const conversationsPerPage = 10;
 
   // Fetch supplier details
   const { data: supplier, isLoading } = useQuery<Supplier>({
@@ -88,14 +134,7 @@ const SupplierDetailPage = () => {
     },
   });
 
-  const addContactMutation = useMutation({
-    mutationFn: (data: InsertSupplierContact) => 
-      apiRequest(`/api/suppliers/${id}/contacts`, { method: 'POST', body: data }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/contacts`] });
-      toast({ title: "Contato adicionado com sucesso!" });
-    },
-  });
+  // Mutation replaced by updateContactMutation below
 
   const deleteContactMutation = useMutation({
     mutationFn: (contactId: number) => 
@@ -131,6 +170,153 @@ const SupplierDetailPage = () => {
       toast({ title: "Marca removida com sucesso!" });
     },
   });
+
+  // #1 - Delete supplier mutation
+  const deleteSupplierMutation = useMutation({
+    mutationFn: () => 
+      apiRequest(`/api/suppliers/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      toast({ title: "Fornecedor removido com sucesso!" });
+      // Navigate back to suppliers list
+      window.location.href = '/myarea/suppliers';
+    },
+  });
+
+  // #2 - Edit brand mutation
+  const updateBrandMutation = useMutation({
+    mutationFn: (data: { brandId: number; brand: Partial<SupplierBrand> }) => 
+      apiRequest(`/api/supplier-brands/${data.brandId}`, { method: 'PUT', body: data.brand }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/brands`] });
+      setEditBrandDialogOpen(false);
+      setEditingBrand(null);
+      toast({ title: "Marca atualizada com sucesso!" });
+    },
+  });
+
+  // #3 - Fix contact dialog - update contact mutation with dialog close
+  const updateContactMutation = useMutation({
+    mutationFn: (data: InsertSupplierContact) => 
+      apiRequest(`/api/suppliers/${id}/contacts`, { method: 'POST', body: data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/contacts`] });
+      setContactDialogOpen(false); // Close dialog
+      setContactForm({ // Reset form
+        supplierId: parseInt(id || '0'),
+        userId: 1,
+        name: '',
+        email: '',
+        phone: '',
+        whatsapp: '',
+        position: '',
+        notes: '',
+      });
+      toast({ title: "Contato adicionado com sucesso!" });
+    },
+  });
+
+  // #4 - Edit contact mutation
+  const editContactMutation = useMutation({
+    mutationFn: (data: { contactId: number; contact: Partial<SupplierContact> }) => 
+      apiRequest(`/api/supplier-contacts/${data.contactId}`, { method: 'PUT', body: data.contact }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/contacts`] });
+      setEditContactDialogOpen(false);
+      setEditingContact(null);
+      toast({ title: "Contato atualizado com sucesso!" });
+    },
+  });
+
+  // #5 - Conversation mutations with file attachments
+  const addConversationMutation = useMutation({
+    mutationFn: (data: InsertSupplierConversation) => 
+      apiRequest(`/api/suppliers/${id}/conversations`, { method: 'POST', body: data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/conversations`] });
+      setConversationDialogOpen(false);
+      setConversationForm({
+        supplierId: parseInt(id || '0'),
+        userId: 1,
+        subject: '',
+        message: '',
+        type: 'note',
+        attachmentUrl: '',
+      });
+      toast({ title: "Conversa adicionada com sucesso!" });
+    },
+  });
+
+  const updateConversationMutation = useMutation({
+    mutationFn: (data: { conversationId: number; conversation: Partial<SupplierConversation> }) => 
+      apiRequest(`/api/supplier-conversations/${data.conversationId}`, { method: 'PUT', body: data.conversation }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/conversations`] });
+      setEditConversationDialogOpen(false);
+      setEditingConversation(null);
+      toast({ title: "Conversa atualizada com sucesso!" });
+    },
+  });
+
+  // Helper functions
+  const handleSaveSupplier = () => {
+    updateSupplierMutation.mutate(editForm);
+  };
+
+  const handleDeleteSupplier = () => {
+    if (confirm('Tem certeza que deseja remover este fornecedor? Esta ação não pode ser desfeita.')) {
+      deleteSupplierMutation.mutate();
+    }
+  };
+
+  const handleEditBrand = (brand: SupplierBrand) => {
+    setEditingBrand(brand);
+    setEditBrandDialogOpen(true);
+  };
+
+  const handleSaveBrand = () => {
+    if (editingBrand) {
+      updateBrandMutation.mutate({
+        brandId: editingBrand.id,
+        brand: editingBrand
+      });
+    }
+  };
+
+  const handleEditContact = (contact: SupplierContact) => {
+    setEditingContact(contact);
+    setEditContactDialogOpen(true);
+  };
+
+  const handleSaveContact = () => {
+    if (editingContact) {
+      editContactMutation.mutate({
+        contactId: editingContact.id,
+        contact: editingContact
+      });
+    }
+  };
+
+  const handleEditConversation = (conversation: SupplierConversation) => {
+    setEditingConversation(conversation);
+    setEditConversationDialogOpen(true);
+  };
+
+  const handleSaveConversation = () => {
+    if (editingConversation) {
+      updateConversationMutation.mutate({
+        conversationId: editingConversation.id,
+        conversation: editingConversation
+      });
+    }
+  };
+
+  // Pagination for conversations
+  const paginatedConversations = conversations.slice(
+    (conversationPage - 1) * conversationsPerPage,
+    conversationPage * conversationsPerPage
+  );
+
+  const totalPages = Math.ceil(conversations.length / conversationsPerPage);
 
   const uploadFileMutation = useMutation({
     mutationFn: (formData: FormData) => 
