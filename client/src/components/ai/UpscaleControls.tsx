@@ -12,6 +12,8 @@ interface UpscaleControlsProps {
   onScaleChange: (scale: ScaleOption) => void;
   onUpscale: () => void;
   isProcessing: boolean;
+  isUploading: boolean;
+  hasUploadedImage: boolean;
 }
 
 const ScaleOptionCard = ({ 
@@ -126,33 +128,69 @@ const ProcessingInfo = () => (
   </Card>
 );
 
+const UploadingInfo = () => (
+  <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+    <CardContent className="pt-6">
+      <div className="flex items-center gap-3">
+        <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+        <div>
+          <p className="font-medium text-blue-900 dark:text-blue-100">
+            Carregando imagem...
+          </p>
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            Por favor, aguarde enquanto sua imagem é carregada.
+          </p>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
 const UpscaleButton = ({ 
   selectedScale, 
   isProcessing, 
+  isUploading,
+  hasUploadedImage,
   onUpscale 
 }: {
   selectedScale: ScaleOption;
   isProcessing: boolean;
+  isUploading: boolean;
+  hasUploadedImage: boolean;
   onUpscale: () => void;
-}) => (
-  <Button
-    onClick={onUpscale}
-    disabled={isProcessing}
-    className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-  >
-    {isProcessing ? (
-      <>
-        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-        Processando...
-      </>
-    ) : (
-      <>
-        <Zap className="mr-2 h-5 w-5" />
-        Fazer Upscale {selectedScale}x
-      </>
-    )}
-  </Button>
-);
+}) => {
+  const isDisabled = isProcessing || isUploading || !hasUploadedImage;
+
+  return (
+    <Button
+      onClick={onUpscale}
+      disabled={isDisabled}
+      className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50"
+    >
+      {isProcessing ? (
+        <>
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          Processando...
+        </>
+      ) : isUploading ? (
+        <>
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          Carregando imagem...
+        </>
+      ) : !hasUploadedImage ? (
+        <>
+          <Zap className="mr-2 h-5 w-5" />
+          Selecione uma imagem primeiro
+        </>
+      ) : (
+        <>
+          <Zap className="mr-2 h-5 w-5" />
+          Fazer Upscale {selectedScale}x
+        </>
+      )}
+    </Button>
+  );
+};
 
 const UpscaleTips = () => (
   <div className="space-y-2 text-xs text-muted-foreground">
@@ -176,6 +214,8 @@ export function UpscaleControls({
   onScaleChange,
   onUpscale,
   isProcessing,
+  isUploading,
+  hasUploadedImage,
 }: UpscaleControlsProps) {
   return (
     <div className="space-y-6">
@@ -189,16 +229,19 @@ export function UpscaleControls({
             key={option.value}
             option={option}
             isSelected={selectedScale === option.value}
-            isProcessing={isProcessing}
+            isProcessing={isProcessing || isUploading}
           />
         ))}
       </RadioGroup>
 
+      {isUploading && <UploadingInfo />}
       {isProcessing && <ProcessingInfo />}
       
       <UpscaleButton
         selectedScale={selectedScale}
         isProcessing={isProcessing}
+        isUploading={isUploading}
+        hasUploadedImage={hasUploadedImage}
         onUpscale={onUpscale}
       />
 

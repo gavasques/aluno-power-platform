@@ -134,6 +134,8 @@ export default function ImageUpscale() {
                     onScaleChange={setSelectedScale}
                     onUpscale={handleUpscale}
                     isProcessing={isProcessing}
+                    isUploading={isUploading}
+                    hasUploadedImage={hasUploadedImage}
                   />
                 </CardContent>
               </Card>
