@@ -20,7 +20,9 @@ import {
   partnerReviews,
   partnerReviewReplies,
   supplierReviews,
+  supplierContacts,
   supplierBrands,
+  supplierFiles,
   toolReviews,
   toolReviewReplies,
   toolDiscounts,
@@ -116,7 +118,13 @@ import {
   type InsertAgentSession,
   type AgentSessionFile,
   type InsertAgentSessionFile,
-  type AgentSessionWithFiles
+  type AgentSessionWithFiles,
+  type SupplierContact,
+  type InsertSupplierContact,
+  type SupplierBrand,
+  type InsertSupplierBrand,
+  type SupplierFile,
+  type InsertSupplierFile
 } from "@shared/schema";
 import { db } from "./db";
 
@@ -2400,6 +2408,107 @@ export class DatabaseStorage implements IStorage {
       .from(agentSessionFiles)
       .where(eq(agentSessionFiles.sessionId, sessionId))
       .orderBy(desc(agentSessionFiles.uploadedAt));
+  }
+
+  // Supplier Contacts
+  async getSupplierContacts(supplierId: number, userId: number): Promise<SupplierContact[]> {
+    const contacts = await db
+      .select()
+      .from(supplierContacts)
+      .where(and(
+        eq(supplierContacts.supplierId, supplierId),
+        eq(supplierContacts.userId, userId)
+      ))
+      .orderBy(desc(supplierContacts.createdAt));
+    return contacts;
+  }
+
+  async createSupplierContact(contactData: InsertSupplierContact): Promise<SupplierContact> {
+    const [contact] = await db
+      .insert(supplierContacts)
+      .values({
+        ...contactData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return contact;
+  }
+
+  async deleteSupplierContact(contactId: number, userId: number): Promise<void> {
+    await db
+      .delete(supplierContacts)
+      .where(and(
+        eq(supplierContacts.id, contactId),
+        eq(supplierContacts.userId, userId)
+      ));
+  }
+
+  // Supplier Brands
+  async getSupplierBrands(supplierId: number, userId: number): Promise<SupplierBrand[]> {
+    const brands = await db
+      .select()
+      .from(supplierBrands)
+      .where(and(
+        eq(supplierBrands.supplierId, supplierId),
+        eq(supplierBrands.userId, userId)
+      ))
+      .orderBy(desc(supplierBrands.createdAt));
+    return brands;
+  }
+
+  async createSupplierBrand(brandData: InsertSupplierBrand): Promise<SupplierBrand> {
+    const [brand] = await db
+      .insert(supplierBrands)
+      .values({
+        ...brandData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return brand;
+  }
+
+  async deleteSupplierBrand(brandId: number, userId: number): Promise<void> {
+    await db
+      .delete(supplierBrands)
+      .where(and(
+        eq(supplierBrands.id, brandId),
+        eq(supplierBrands.userId, userId)
+      ));
+  }
+
+  // Supplier Files
+  async getSupplierFiles(supplierId: number, userId: number): Promise<SupplierFile[]> {
+    const files = await db
+      .select()
+      .from(supplierFiles)
+      .where(and(
+        eq(supplierFiles.supplierId, supplierId),
+        eq(supplierFiles.userId, userId)
+      ))
+      .orderBy(desc(supplierFiles.uploadedAt));
+    return files;
+  }
+
+  async createSupplierFile(fileData: InsertSupplierFile): Promise<SupplierFile> {
+    const [file] = await db
+      .insert(supplierFiles)
+      .values({
+        ...fileData,
+        uploadedAt: new Date(),
+      })
+      .returning();
+    return file;
+  }
+
+  async deleteSupplierFile(fileId: number, userId: number): Promise<void> {
+    await db
+      .delete(supplierFiles)
+      .where(and(
+        eq(supplierFiles.id, fileId),
+        eq(supplierFiles.userId, userId)
+      ));
   }
 }
 

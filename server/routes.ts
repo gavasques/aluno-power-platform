@@ -4,6 +4,26 @@ import { WebSocketServer, WebSocket } from "ws";
 import bcryptjs from "bcryptjs";
 import multer from "multer";
 import { storage } from "./storage";
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/') // Make sure this directory exists
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      cb(null, file.fieldname + '-' + uniqueSuffix + '.' + file.originalname.split('.').pop())
+    }
+  }),
+  fileFilter: function (req, file, cb) {
+    // Accept any file type for supplier files
+    cb(null, true);
+  },
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit
+  }
+});
 import { 
   insertSupplierSchema, 
   insertPartnerSchema, 
@@ -5150,6 +5170,151 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         error: 'Erro no processamento, aguarde 24 horas e tente novamente. Pedimos desculpas.',
         code: 'INTERNAL_ERROR'
       });
+    }
+  });
+
+  // Supplier Contacts API
+  app.get('/api/suppliers/:id/contacts', async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      const contacts = await storage.getSupplierContacts(supplierId, userId);
+      res.json(contacts);
+    } catch (error) {
+      console.error('Error fetching supplier contacts:', error);
+      res.status(500).json({ error: 'Failed to fetch contacts' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/contacts', async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      const contactData = {
+        ...req.body,
+        supplierId,
+        userId
+      };
+      
+      const contact = await storage.createSupplierContact(contactData);
+      res.json(contact);
+    } catch (error) {
+      console.error('Error creating supplier contact:', error);
+      res.status(500).json({ error: 'Failed to create contact' });
+    }
+  });
+
+  app.delete('/api/supplier-contacts/:id', async (req: any, res: any) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      await storage.deleteSupplierContact(contactId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting supplier contact:', error);
+      res.status(500).json({ error: 'Failed to delete contact' });
+    }
+  });
+
+  // Supplier Brands API
+  app.get('/api/suppliers/:id/brands', async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      const brands = await storage.getSupplierBrands(supplierId, userId);
+      res.json(brands);
+    } catch (error) {
+      console.error('Error fetching supplier brands:', error);
+      res.status(500).json({ error: 'Failed to fetch brands' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/brands', async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      const brandData = {
+        ...req.body,
+        supplierId,
+        userId
+      };
+      
+      const brand = await storage.createSupplierBrand(brandData);
+      res.json(brand);
+    } catch (error) {
+      console.error('Error creating supplier brand:', error);
+      res.status(500).json({ error: 'Failed to create brand' });
+    }
+  });
+
+  app.delete('/api/supplier-brands/:id', async (req: any, res: any) => {
+    try {
+      const brandId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      await storage.deleteSupplierBrand(brandId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting supplier brand:', error);
+      res.status(500).json({ error: 'Failed to delete brand' });
+    }
+  });
+
+  // Supplier Files API
+  app.get('/api/suppliers/:id/files', async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      const files = await storage.getSupplierFiles(supplierId, userId);
+      res.json(files);
+    } catch (error) {
+      console.error('Error fetching supplier files:', error);
+      res.status(500).json({ error: 'Failed to fetch files' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/files', upload.single('file'), async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+      
+      const fileData = {
+        supplierId,
+        userId,
+        name: req.file.originalname,
+        fileUrl: `/uploads/${req.file.filename}`,
+        fileSize: req.file.size,
+        type: req.body.type || 'other'
+      };
+      
+      const file = await storage.createSupplierFile(fileData);
+      res.json(file);
+    } catch (error) {
+      console.error('Error uploading supplier file:', error);
+      res.status(500).json({ error: 'Failed to upload file' });
+    }
+  });
+
+  app.delete('/api/supplier-files/:id', async (req: any, res: any) => {
+    try {
+      const fileId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      await storage.deleteSupplierFile(fileId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting supplier file:', error);
+      res.status(500).json({ error: 'Failed to delete file' });
     }
   });
 
