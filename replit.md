@@ -108,6 +108,33 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 02, 2025**: ✅ SISTEMA COMPLETO DE UPSCALE DE IMAGENS COM IA IMPLEMENTADO
+  - **Nova Funcionalidade IA**: Sistema completo de upscale de imagens usando PixelCut API
+    - Interface moderna com upload drag & drop de imagens (máx. 25MB)
+    - Suporte a formatos PNG, JPG, JPEG, WEBP com validação automática
+    - Opções de upscale 2x (rápido ~30s) e 4x (alta qualidade ~60s)
+    - Visualização comparativa lado a lado (original vs upscaled)
+    - Download automático com preview em tempo real
+  - **Arquitetura Técnica Completa**:
+    - Tabela `upscaled_images` no PostgreSQL com metadata completa
+    - APIs REST: `/api/image-upscale/upload` e `/api/image-upscale/process`
+    - Integração com PixelCut API usando environment variable PIXELCUT_API_KEY
+    - Sistema de tracking: custos, tempo de processamento, qualidade
+    - Componentes modulares: ImageUploader, UpscaleControls, UpscaleResult
+  - **UX/UI Otimizada**:
+    - Novo menu "IA" no header com acesso direto via `/ai/image-upscale`
+    - Validação em tempo real: dimensões mínimas (64x64), formatos suportados
+    - Estados de loading com feedback visual e progresso
+    - Comparação visual com opções: original, upscaled, lado a lado
+    - Sistema de notificações toast para feedback do usuário
+    - Interface responsiva com layout em 2 colunas (controles + resultado)
+  - **Segurança e Performance**:
+    - Autenticação obrigatória com Bearer tokens
+    - Validação rigorosa de arquivos no frontend e backend
+    - Armazenamento seguro com URLs temporárias (1 hora de expiração)
+    - Processamento assíncrono com tracking de status
+    - Error handling robusto com mensagens informativas
+
 - **July 01, 2025**: ✅ REFATORAÇÃO COMPLETA FINALIZADA - TODAS AS 5 FERRAMENTAS MODERNIZADAS
   - **Arquitetura Modular Implementada**:
     - Criado hook customizado `useApiRequest` para padronização de requisições API

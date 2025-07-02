@@ -41,10 +41,12 @@ function ImageUpscale() {
     setIsProcessing(true);
     
     try {
+      const token = localStorage.getItem('authToken');
       const response = await fetch('/api/image-upscale/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           imageId: uploadedImage.id,
