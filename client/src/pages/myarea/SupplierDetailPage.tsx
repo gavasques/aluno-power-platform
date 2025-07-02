@@ -111,6 +111,14 @@ const SupplierDetailPage = () => {
       apiRequest(`/api/suppliers/${id}/brands`, { method: 'POST', body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/brands`] });
+      setBrandDialogOpen(false);
+      setBrandForm({
+        supplierId: parseInt(id || '0'),
+        userId: 1,
+        name: '',
+        description: '',
+        logo: '',
+      });
       toast({ title: "Marca adicionada com sucesso!" });
     },
   });
@@ -185,7 +193,7 @@ const SupplierDetailPage = () => {
     notes: '',
   });
 
-  // Brand form
+  // Brand form and dialog state
   const [brandForm, setBrandForm] = useState<InsertSupplierBrand>({
     supplierId: parseInt(id || '0'),
     userId: 1, // TODO: Get from auth context
@@ -193,6 +201,7 @@ const SupplierDetailPage = () => {
     description: '',
     logo: '',
   });
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false);
 
   // Conversation form
   const [conversationForm, setConversationForm] = useState<InsertSupplierConversation>({
@@ -530,7 +539,7 @@ const SupplierDetailPage = () => {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium">Marcas do Fornecedor</h3>
-                    <Dialog>
+                    <Dialog open={brandDialogOpen} onOpenChange={setBrandDialogOpen}>
                       <DialogTrigger asChild>
                         <Button size="sm">
                           <Plus className="h-4 w-4 mr-2" />
@@ -560,8 +569,17 @@ const SupplierDetailPage = () => {
                             />
                           </div>
                           <div className="flex justify-end gap-2">
-                            <Button onClick={handleAddBrand}>
-                              Adicionar Marca
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setBrandDialogOpen(false)}
+                            >
+                              Cancelar
+                            </Button>
+                            <Button 
+                              onClick={handleAddBrand}
+                              disabled={addBrandMutation.isPending}
+                            >
+                              {addBrandMutation.isPending ? "Adicionando..." : "Adicionar Marca"}
                             </Button>
                           </div>
                         </div>

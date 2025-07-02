@@ -5221,51 +5221,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // Supplier Brands API
-  app.get('/api/suppliers/:id/brands', async (req: any, res: any) => {
-    try {
-      const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      const brands = await storage.getSupplierBrands(supplierId, userId);
-      res.json(brands);
-    } catch (error) {
-      console.error('Error fetching supplier brands:', error);
-      res.status(500).json({ error: 'Failed to fetch brands' });
-    }
-  });
 
-  app.post('/api/suppliers/:id/brands', async (req: any, res: any) => {
-    try {
-      const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      const brandData = {
-        ...req.body,
-        supplierId,
-        userId
-      };
-      
-      const brand = await storage.createSupplierBrand(brandData);
-      res.json(brand);
-    } catch (error) {
-      console.error('Error creating supplier brand:', error);
-      res.status(500).json({ error: 'Failed to create brand' });
-    }
-  });
-
-  app.delete('/api/supplier-brands/:id', async (req: any, res: any) => {
-    try {
-      const brandId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      await storage.deleteSupplierBrand(brandId, userId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting supplier brand:', error);
-      res.status(500).json({ error: 'Failed to delete brand' });
-    }
-  });
 
   // Supplier Files API
   app.get('/api/suppliers/:id/files', async (req: any, res: any) => {

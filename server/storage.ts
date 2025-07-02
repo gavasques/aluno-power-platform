@@ -2461,40 +2461,6 @@ export class DatabaseStorage implements IStorage {
       ));
   }
 
-  // Supplier Brands
-  async getSupplierBrands(supplierId: number, userId: number): Promise<SupplierBrand[]> {
-    const brands = await db
-      .select()
-      .from(supplierBrands)
-      .where(and(
-        eq(supplierBrands.supplierId, supplierId),
-        eq(supplierBrands.userId, userId)
-      ))
-      .orderBy(desc(supplierBrands.createdAt));
-    return brands;
-  }
-
-  async createSupplierBrand(brandData: InsertSupplierBrand): Promise<SupplierBrand> {
-    const [brand] = await db
-      .insert(supplierBrands)
-      .values({
-        ...brandData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning();
-    return brand;
-  }
-
-  async deleteSupplierBrand(brandId: number, userId: number): Promise<void> {
-    await db
-      .delete(supplierBrands)
-      .where(and(
-        eq(supplierBrands.id, brandId),
-        eq(supplierBrands.userId, userId)
-      ));
-  }
-
   // Supplier Files
   async getSupplierFiles(supplierId: number, userId: number): Promise<SupplierFile[]> {
     const files = await db
