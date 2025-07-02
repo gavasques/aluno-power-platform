@@ -1,9 +1,6 @@
 import { 
   users, 
-  suppliers,
-  supplierContacts,
-  supplierBrands,
-  supplierFiles,
+  suppliers, 
   partners, 
   materials, 
   tools, 
@@ -23,6 +20,7 @@ import {
   partnerReviews,
   partnerReviewReplies,
   supplierReviews,
+  supplierBrands,
   toolReviews,
   toolReviewReplies,
   toolDiscounts,
@@ -44,12 +42,6 @@ import {
   type InsertUser,
   type Supplier,
   type InsertSupplier,
-  type SupplierContact,
-  type InsertSupplierContact,
-  type SupplierBrand,
-  type InsertSupplierBrand,
-  type SupplierFile,
-  type InsertSupplierFile,
   type Partner,
   type InsertPartner,
   type Material,
@@ -162,22 +154,6 @@ export interface IStorage {
   updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier>;
   deleteSupplier(id: number): Promise<void>;
   searchSuppliers(query: string): Promise<Supplier[]>;
-
-  // Supplier Contacts
-  getSupplierContacts(supplierId: number): Promise<SupplierContact[]>;
-  createSupplierContact(contact: InsertSupplierContact): Promise<SupplierContact>;
-  updateSupplierContact(id: number, contact: Partial<InsertSupplierContact>): Promise<SupplierContact>;
-  deleteSupplierContact(id: number): Promise<void>;
-
-  // Supplier Brands
-  getSupplierBrands(supplierId: number): Promise<SupplierBrand[]>;
-  createSupplierBrand(brand: InsertSupplierBrand): Promise<SupplierBrand>;
-  deleteSupplierBrand(id: number): Promise<void>;
-
-  // Supplier Files
-  getSupplierFiles(supplierId: number): Promise<SupplierFile[]>;
-  createSupplierFile(file: InsertSupplierFile): Promise<SupplierFile>;
-  deleteSupplierFile(id: number): Promise<void>;
   getSuppliersWithPagination(options: {
     limit: number;
     offset: number;
@@ -428,17 +404,15 @@ export class DatabaseStorage implements IStorage {
 
   // Suppliers
   async getSuppliers(): Promise<Supplier[]> {
-    try {
-      console.log('🔍 [STORAGE] Starting getSuppliers...');
-      const result = await db.select().from(suppliers);
-      console.log('✅ [STORAGE] getSuppliers completed:', result.length);
-      return result;
-    } catch (error) {
-      console.error('❌ [STORAGE] Error in getSuppliers:', error);
-      console.error('[STORAGE] Error details:', error.message);
-      console.error('[STORAGE] Stack trace:', error.stack);
-      throw error;
-    }
+    return await db.query.suppliers.findMany({
+      with: {
+        category: true,
+        brands: true,
+        contacts: true,
+        files: true,
+        reviews: true
+      }
+    });
   }
 
   async getSupplier(id: number): Promise<Supplier | undefined> {
@@ -485,78 +459,6 @@ export class DatabaseStorage implements IStorage {
           ilike(suppliers.description, `%${query}%`)
         )
       );
-  }
-
-  // Supplier Contacts
-  async getSupplierContacts(supplierId: number): Promise<SupplierContact[]> {
-    return await db
-      .select()
-      .from(supplierContacts)
-      .where(eq(supplierContacts.supplierId, supplierId))
-      .orderBy(supplierContacts.createdAt);
-  }
-
-  async createSupplierContact(contact: InsertSupplierContact): Promise<SupplierContact> {
-    const [newContact] = await db
-      .insert(supplierContacts)
-      .values(contact)
-      .returning();
-    return newContact;
-  }
-
-  async updateSupplierContact(id: number, contact: Partial<InsertSupplierContact>): Promise<SupplierContact> {
-    const [updatedContact] = await db
-      .update(supplierContacts)
-      .set(contact)
-      .where(eq(supplierContacts.id, id))
-      .returning();
-    return updatedContact;
-  }
-
-  async deleteSupplierContact(id: number): Promise<void> {
-    await db.delete(supplierContacts).where(eq(supplierContacts.id, id));
-  }
-
-  // Supplier Brands
-  async getSupplierBrands(supplierId: number): Promise<SupplierBrand[]> {
-    return await db
-      .select()
-      .from(supplierBrands)
-      .where(eq(supplierBrands.supplierId, supplierId))
-      .orderBy(supplierBrands.createdAt);
-  }
-
-  async createSupplierBrand(brand: InsertSupplierBrand): Promise<SupplierBrand> {
-    const [newBrand] = await db
-      .insert(supplierBrands)
-      .values(brand)
-      .returning();
-    return newBrand;
-  }
-
-  async deleteSupplierBrand(id: number): Promise<void> {
-    await db.delete(supplierBrands).where(eq(supplierBrands.id, id));
-  }
-
-  // Supplier Files
-  async getSupplierFiles(supplierId: number): Promise<SupplierFile[]> {
-    return await db
-      .select()
-      .from(supplierFiles)
-      .where(eq(supplierFiles.supplierId, supplierId))
-      .orderBy(supplierFiles.uploadedAt);
-  }
-
-  async createSupplierFile(file: InsertSupplierFile): Promise<SupplierFile> {
-    const [newFile] = await db
-      .insert(supplierFiles)
-      .values(file)
-      .returning();
-    return newFile;
-  }
-
-  async deleteSupplierFile(id: number): Promise<void> {
-    await db.delete(supplierFiles).where(eq(supplierFiles.id, id));
   }
 
   async getSuppliersWithPagination(options: {
@@ -701,7 +603,31 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
+  // Supplier Brands
+  async getSupplierBrands(supplierId: number) {
+    return await db
+      .select()
+      .from(supplierBrands)
+      .where(eq(supplierBrands.supplierId, supplierId))
+      .orderBy(supplierBrands.name);
+  }
 
+  async createSupplierBrand(brandData: any) {
+    const [created] = await db
+      .insert(supplierBrands)
+      .values({
+        ...brandData,
+        createdAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async deleteSupplierBrand(brandId: number) {
+    await db
+      .delete(supplierBrands)
+      .where(eq(supplierBrands.id, brandId));
+  }
 
   // Partners
   async getPartners(): Promise<Partner[]> {
