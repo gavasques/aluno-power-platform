@@ -63,7 +63,7 @@ export class AIImageService {
     imageId: string, 
     options: UpscaleOptions
   ): Promise<ProcessedImage> {
-    const response = await apiRequest('/api/image-upscale/process', {
+    const response: any = await apiRequest('/api/image-upscale/process', {
       method: 'POST',
       body: JSON.stringify({ imageId, scale: options.scale }),
     });
@@ -73,13 +73,13 @@ export class AIImageService {
     }
 
     return {
-      id: response.data.id,
-      url: response.data.upscaledImageUrl,
+      id: response.data?.id || imageId,
+      url: response.data?.upscaledImageUrl || '',
       metadata: {
-        scale: options.scale,
-        processingTime: response.data.processingTime,
-        width: response.data.metadata?.width,
-        height: response.data.metadata?.height,
+        scale: response.data?.scale || options.scale,
+        processingTime: response.duration || response.data?.processingTime,
+        width: response.data?.metadata?.width,
+        height: response.data?.metadata?.height,
       }
     };
   }
