@@ -5,7 +5,10 @@ import bcryptjs from "bcryptjs";
 import multer from "multer";
 import { storage } from "./storage";
 import { 
-  insertSupplierSchema, 
+  insertSupplierSchema,
+  insertSupplierContactSchema,
+  insertSupplierBrandSchema,
+  insertSupplierFileSchema,
   insertPartnerSchema, 
   insertMaterialSchema, 
   insertToolSchema, 
@@ -104,9 +107,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Suppliers
   app.get('/api/suppliers', async (req, res) => {
     try {
+      console.log('🔍 Starting to fetch suppliers...');
       const suppliers = await storage.getSuppliers();
+      console.log('✅ Suppliers fetched successfully:', suppliers.length);
       res.json(suppliers);
     } catch (error) {
+      console.error('❌ Error fetching suppliers:', error);
+      console.error('Error details:', error.message);
+      console.error('Stack trace:', error.stack);
       res.status(500).json({ error: 'Failed to fetch suppliers' });
     }
   });
@@ -236,15 +244,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/suppliers/:id/brands', async (req, res) => {
     try {
       const supplierId = parseInt(req.params.id);
-      const brandData = {
+      const validatedData = insertSupplierBrandSchema.parse({
         ...req.body,
         supplierId,
-      };
-      const brand = await storage.createSupplierBrand(brandData);
+      });
+      const brand = await storage.createSupplierBrand(validatedData);
       res.status(201).json(brand);
     } catch (error) {
       console.error('Error creating supplier brand:', error);
-      res.status(500).json({ error: 'Failed to create brand' });
+      res.status(400).json({ error: 'Invalid brand data' });
+    }
+  });
+
+  app.delete('/api/supplier-brands/:id', async (req, res) => {
+    try {
+      await storage.deleteSupplierBrand(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting supplier brand:', error);
+      res.status(500).json({ error: 'Failed to delete brand' });
+    }
+  });
+
+  // Supplier Contacts routes
+  app.get('/api/suppliers/:id/contacts', async (req, res) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const contacts = await storage.getSupplierContacts(supplierId);
+      res.json(contacts);
+    } catch (error) {
+      console.error('Error fetching supplier contacts:', error);
+      res.status(500).json({ error: 'Failed to fetch contacts' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/contacts', async (req, res) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const validatedData = insertSupplierContactSchema.parse({
+        ...req.body,
+        supplierId,
+      });
+      const contact = await storage.createSupplierContact(validatedData);
+      res.status(201).json(contact);
+    } catch (error) {
+      console.error('Error creating supplier contact:', error);
+      res.status(400).json({ error: 'Invalid contact data' });
+    }
+  });
+
+  app.put('/api/supplier-contacts/:id', async (req, res) => {
+    try {
+      const validatedData = insertSupplierContactSchema.partial().parse(req.body);
+      const contact = await storage.updateSupplierContact(parseInt(req.params.id), validatedData);
+      res.json(contact);
+    } catch (error) {
+      console.error('Error updating supplier contact:', error);
+      res.status(400).json({ error: 'Invalid contact data' });
+    }
+  });
+
+  app.delete('/api/supplier-contacts/:id', async (req, res) => {
+    try {
+      await storage.deleteSupplierContact(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting supplier contact:', error);
+      res.status(500).json({ error: 'Failed to delete contact' });
+    }
+  });
+
+  // Supplier Files routes
+  app.get('/api/suppliers/:id/files', async (req, res) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const files = await storage.getSupplierFiles(supplierId);
+      res.json(files);
+    } catch (error) {
+      console.error('Error fetching supplier files:', error);
+      res.status(500).json({ error: 'Failed to fetch files' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/files', async (req, res) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const validatedData = insertSupplierFileSchema.parse({
+        ...req.body,
+        supplierId,
+      });
+      const file = await storage.createSupplierFile(validatedData);
+      res.status(201).json(file);
+    } catch (error) {
+      console.error('Error creating supplier file:', error);
+      res.status(400).json({ error: 'Invalid file data' });
+    }
+  });
+
+  app.delete('/api/supplier-files/:id', async (req, res) => {
+    try {
+      await storage.deleteSupplierFile(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting supplier file:', error);
+      res.status(500).json({ error: 'Failed to delete file' });
+    }
+  });
+
+  // Edit supplier information
+  app.put('/api/suppliers/:id', async (req, res) => {
+    try {
+      const validatedData = insertSupplierSchema.partial().parse(req.body);
+      const supplier = await storage.updateSupplier(parseInt(req.params.id), validatedData);
+      res.json(supplier);
+    } catch (error) {
+      console.error('Error updating supplier:', error);
+      res.status(400).json({ error: 'Invalid supplier data' });
     }
   });
 
