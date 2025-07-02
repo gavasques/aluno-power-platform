@@ -4526,8 +4526,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       await storage.createAiImgGenerationLog(logData);
       console.log(`📊 [AI_IMG_LOG] Saved upscale log - User: ${userId}, Scale: ${scale}x, Cost: $0.10, Duration: ${Date.now() - startTime}ms`);
 
-      // Clean up temporary image
-      await storage.deleteGeneratedImage(imageId);
+      // Keep temporary image for potential reprocessing
+      // await storage.deleteGeneratedImage(imageId); // Only delete when user explicitly removes/changes image
 
       console.log(`✅ [IMAGE_UPSCALE] Process completed in ${Date.now() - startTime}ms`);
       
@@ -4940,12 +4940,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         // Continue with response even if logging fails
       }
 
-      // Clean up temporary image from database
-      try {
-        await storage.deleteGeneratedImage(imageId);
-      } catch (cleanupError) {
-        console.log('⚠️ [BACKGROUND_REMOVAL] Failed to cleanup temporary image:', cleanupError);
-      }
+      // Keep temporary image for potential reprocessing
+      // Only delete when user explicitly removes/changes image
+      // try {
+      //   await storage.deleteGeneratedImage(imageId);
+      // } catch (cleanupError) {
+      //   console.log('⚠️ [BACKGROUND_REMOVAL] Failed to cleanup temporary image:', cleanupError);
+      // }
 
       const originalImageUrl = tempImage.imageUrl;
 

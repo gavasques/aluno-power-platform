@@ -108,7 +108,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 02, 2025**: ✅ SISTEMA DE UPSCALE COMPLETO COM UX OTIMIZADA E CONTROLE DE ESTADO
+- **July 02, 2025**: ✅ LAYOUT SIMPLIFICADO E PERSISTÊNCIA DE IMAGEM CORRIGIDA
+  - **Layout do Resultado Otimizado**: Interface simplificada conforme solicitação do usuário
+    - Removidos seletores de visualização e comparações desnecessárias
+    - Exibe apenas o resultado final da imagem processada com sucesso
+    - Botões de ação reduzidos: apenas "Baixar Imagem" e "Visualizar"
+    - Badge visual mostrando escala de processamento (2x/4x)
+  - **Persistência de Imagem Corrigida**: Sistema de reprocessamento implementado
+    - Imagem original mantida após primeiro processamento
+    - Permite múltiplos processamentos com escalas diferentes
+    - Imagem só é removida quando usuário explicitamente trocar, remover ou sair
+    - Comentada limpeza automática de imagens temporárias no backend
+  - **APIs Corrigidas**: Background removal e upscale mantêm consistência
+    - server/routes.ts linha 4530: Comentada remoção automática em image-upscale
+    - server/routes.ts linha 4945: Comentada remoção automática em background-removal
+    - Imagens temporárias preservadas para reprocessamento
+
+- **July 02, 2025 (anterior)**: ✅ SISTEMA DE UPSCALE COMPLETO COM UX OTIMIZADA E CONTROLE DE ESTADO
   - **Modo Demo Completamente Removido**: Sistema limpo sem fallbacks de demonstração
     - Removidas todas as referências a isDemoMode dos tipos TypeScript
     - Backend retorna apenas erro personalizado: "Erro no processamento, aguarde 24 horas"

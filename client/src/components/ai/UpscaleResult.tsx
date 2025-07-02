@@ -185,8 +185,6 @@ export function UpscaleResult({
   originalImage,
   scale,
 }: UpscaleResultProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>("comparison");
-
   const handleDownload = async () => {
     try {
       const filename = generateFileName(scale);
@@ -200,64 +198,32 @@ export function UpscaleResult({
     createImageViewer(result.upscaledImageUrl, scale);
   };
 
-
-
-  const renderImageView = () => {
-    switch (viewMode) {
-      case "original":
-        return (
-          <SingleImageView
-            src={originalImage.url}
-            alt="Imagem original"
-          />
-        );
-      case "upscaled":
-        return (
-          <SingleImageView
-            src={result.upscaledImageUrl}
-            alt={`Imagem upscaled ${scale}x`}
-          />
-        );
-      case "comparison":
-        return (
-          <ComparisonView
-            originalImage={originalImage}
-            result={result}
-            scale={scale}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Resultado do Upscale</h3>
-        <ViewModeSelector
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
+      <div className="text-center">
+        <h3 className="text-lg font-semibold mb-2">Resultado Final</h3>
+        <p className="text-sm text-muted-foreground">Sua imagem foi processada com sucesso</p>
+      </div>
+
+      {/* Imagem Resultado Final */}
+      <div className="relative rounded-lg overflow-hidden border-2 border-border bg-muted">
+        <img
+          src={result.upscaledImageUrl}
+          alt={`Imagem upscaled ${scale}x`}
+          className="w-full h-80 object-contain"
         />
-      </div>
-
-      {renderImageView()}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <ActionButtons
-            result={result}
-            scale={scale}
-            onDownload={handleDownload}
-            onView={handleView}
-          />
-        </div>
-        <div>
-          <ResultStats result={result} scale={scale} />
+        <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium">
+          {scale}x Processado
         </div>
       </div>
 
-      <QualityTips scale={scale} />
+      {/* Botões de Ação */}
+      <ActionButtons
+        result={result}
+        scale={scale}
+        onDownload={handleDownload}
+        onView={handleView}
+      />
     </div>
   );
 }
