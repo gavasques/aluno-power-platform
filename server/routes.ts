@@ -4871,6 +4871,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         
         console.log('🔍 [PIXELCUT_API] Trying background removal with base64...');
         
+        // Use application/json format with base64 data (as used in upscale)
         const response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
           method: 'POST',
           headers: {
@@ -4879,8 +4880,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             'X-API-KEY': process.env.PIXELCUT_API_KEY
           },
           body: JSON.stringify({
-            image: base64Data,
-            format: 'png'
+            image: base64Data // Send raw base64 without data URL prefix
           })
         });
 
