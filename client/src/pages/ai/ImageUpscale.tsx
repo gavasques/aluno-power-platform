@@ -1,195 +1,196 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles } from "lucide-react";
 import { ImageUploader } from "@/components/ai/ImageUploader";
-import { UpscaleControls } from "@/components/ai/UpscaleControls";
 import { UpscaleResult } from "@/components/ai/UpscaleResult";
-import { useUpscale } from "@/hooks/useUpscale";
-import { Sparkles, RotateCcw } from "lucide-react";
+import { AIPageHeader } from "@/components/ai/common/AIPageHeader";
+import { ProcessingFeedback } from "@/components/ai/common/ProcessingFeedback";
+import { ResetButton } from "@/components/ai/common/ResetButton";
+import { useImageProcessing } from "@/hooks/useImageProcessing";
+import { UPSCALE_CONFIG } from "@/config/ai-image";
 
-const PageHeader = () => (
-  <div className="text-center space-y-4 mb-8">
-    <div className="flex items-center justify-center gap-3">
-      <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-        <Sparkles className="h-8 w-8 text-white" />
-      </div>
-      <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-        Upscale de Imagens com IA
-      </h1>
-    </div>
-    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-      Aumente a resolução das suas imagens usando inteligência artificial avançada. 
-      Ideal para melhorar fotos para impressão ou uso profissional.
-    </p>
-  </div>
-);
-
-const ProcessingFeedback = ({ 
-  step, 
-  isProcessing 
-}: { 
-  step: string; 
-  isProcessing: boolean; 
-}) => {
-  if (!isProcessing || !step) return null;
-
-  return (
-    <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
-      <CardContent className="pt-6">
-        <div className="flex items-center gap-3">
-          <div className="h-5 w-5 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-          <div>
-            <p className="font-medium text-blue-900 dark:text-blue-100">
-              {step}
-            </p>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              Aguarde enquanto processamos sua imagem...
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-const ResetButton = ({ 
-  onReset, 
-  disabled 
-}: { 
-  onReset: () => void; 
-  disabled: boolean; 
+// Componente para controles de upscale
+const UpscaleControls = ({ 
+  onProcess, 
+  isProcessing, 
+  isUploading, 
+  hasUploadedImage,
+  scale,
+  setScale
+}: {
+  onProcess: (scale: 2 | 4) => void;
+  isProcessing: boolean;
+  isUploading: boolean;
+  hasUploadedImage: boolean;
+  scale: 2 | 4;
+  setScale: (scale: 2 | 4) => void;
 }) => (
-  <div className="flex justify-center pt-6">
-    <Button
-      variant="outline"
-      onClick={onReset}
-      disabled={disabled}
-      className="gap-2"
+  <div className="space-y-6">
+    {/* Seleção de escala */}
+    <div className="space-y-3">
+      <h3 className="font-medium">Escala de Upscale</h3>
+      <div className="grid grid-cols-2 gap-3">
+        {UPSCALE_CONFIG.scales.map((option) => (
+          <button
+            key={option.value}
+            onClick={() => setScale(option.value)}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              scale === option.value
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                : 'border-gray-200 hover:border-gray-300'
+            }`}
+          >
+            <div className="text-center space-y-1">
+              <div className="font-medium">{option.label}</div>
+              <div className="text-sm text-muted-foreground">{option.time}</div>
+              <Badge variant="outline" className="text-xs">
+                ${UPSCALE_CONFIG.costs[option.value]}
+              </Badge>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    {/* Botão de processamento */}
+    <Button 
+      onClick={() => onProcess(scale)}
+      disabled={!hasUploadedImage || isProcessing || isUploading}
+      className="w-full"
+      size="lg"
     >
-      <RotateCcw className="h-4 w-4" />
-      Começar Novamente
+      <Sparkles className="h-4 w-4 mr-2" />
+      {isProcessing ? `Processando ${scale}x...` : `Processar Upscale ${scale}x`}
     </Button>
   </div>
 );
 
 export default function ImageUpscale() {
   const {
-    // State
     uploadedImage,
-    selectedScale,
-    isProcessing,
-    isUploading,
-    processingStep,
-    result,
-    
-    // Actions
-    handleFileUpload,
-    handleUpscale,
-    setSelectedScale,
-    resetState,
-    removeImage,
-  } = useUpscale();
+    processedImage,
+    state,
+    uploadImage,
+    processUpscale,
+    downloadImage,
+    reset
+  } = useImageProcessing();
 
-  const hasUploadedImage = uploadedImage?.url;
-  const hasResult = result?.upscaledImageUrl;
+  const [scale, setScale] = useState<2 | 4>(UPSCALE_CONFIG.defaultScale);
+
+  const { isProcessing, isUploading, error, step } = state;
+  const hasUploadedImage = !!uploadedImage;
+
+  const handleProcess = (selectedScale: 2 | 4) => {
+    processUpscale({ scale: selectedScale });
+  };
+
+  const handleDownload = () => {
+    if (uploadedImage && processedImage) {
+      const fileName = `upscaled_${scale}x_${uploadedImage.metadata.fileName}`;
+      downloadImage(fileName);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <PageHeader />
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <AIPageHeader 
+        icon={Sparkles}
+        title="Upscale de Imagens com IA"
+        description="Aumente a resolução das suas imagens usando inteligência artificial avançada. Ideal para melhorar fotos para impressão ou uso profissional."
+        gradient={true}
+      />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Upload and Controls */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  Upload da Imagem
-                </CardTitle>
-                <CardDescription>
-                  Selecione uma imagem para fazer o upscale com IA
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ImageUploader
-                  onFileSelect={handleFileUpload}
-                  uploadedImage={uploadedImage}
-                  onRemoveImage={removeImage}
-                  isUploading={isUploading}
-                />
-              </CardContent>
-            </Card>
+      <ProcessingFeedback 
+        isProcessing={isProcessing}
+        isUploading={isUploading}
+        error={error}
+        step={step}
+        processingColor="blue"
+      />
 
-            {hasUploadedImage && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Configurações de Upscale</CardTitle>
-                  <CardDescription>
-                    Escolha o nível de ampliação desejado
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <UpscaleControls
-                    selectedScale={selectedScale}
-                    onScaleChange={setSelectedScale}
-                    onUpscale={handleUpscale}
-                    isProcessing={isProcessing}
-                    isUploading={isUploading}
-                    hasUploadedImage={hasUploadedImage}
-                  />
-                </CardContent>
-              </Card>
-            )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {/* Coluna Esquerda: Upload e Controles */}
+        <div className="space-y-6">
+          {/* Upload da Imagem */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload da Imagem</CardTitle>
+              <CardDescription>
+                Selecione uma imagem para aumentar sua resolução
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ImageUploader
+                onFileSelect={uploadImage}
+                uploadedImage={uploadedImage}
+                onRemoveImage={reset}
+                isUploading={isUploading}
+              />
+            </CardContent>
+          </Card>
 
-            <ProcessingFeedback 
-              step={processingStep} 
-              isProcessing={isProcessing} 
-            />
-          </div>
-
-          {/* Right Column - Result */}
-          <div className="space-y-6">
-            {hasResult && hasUploadedImage ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Resultado do Processamento</CardTitle>
-                  <CardDescription>
-                    Sua imagem foi processada com sucesso
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <UpscaleResult
-                    result={result}
-                    originalImage={uploadedImage}
-                    scale={selectedScale}
-                  />
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="border-dashed">
-                <CardContent className="pt-6">
-                  <div className="text-center py-12">
-                    <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-lg font-medium text-muted-foreground mb-2">
-                      Resultado aparecerá aqui
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Faça upload de uma imagem para começar
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          {/* Controles de Upscale */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Configurações de Upscale</CardTitle>
+              <CardDescription>
+                Escolha a escala de aumento desejada
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UpscaleControls
+                onProcess={handleProcess}
+                isProcessing={isProcessing}
+                isUploading={isUploading}
+                hasUploadedImage={hasUploadedImage}
+                scale={scale}
+                setScale={setScale}
+              />
+            </CardContent>
+          </Card>
         </div>
 
-        {(hasUploadedImage || hasResult) && (
-          <ResetButton 
-            onReset={resetState} 
-            disabled={isProcessing || isUploading} 
-          />
-        )}
+        {/* Coluna Direita: Resultado */}
+        <div className="space-y-6">
+          {processedImage && uploadedImage ? (
+            <UpscaleResult
+              originalImage={uploadedImage.url}
+              processedImage={processedImage.url}
+              processingDuration={processedImage.metadata?.processingTime}
+              originalFileName={uploadedImage.metadata.fileName}
+              scale={processedImage.metadata?.scale || scale}
+              onDownload={handleDownload}
+            />
+          ) : (
+            <Card className="h-full min-h-[400px] flex items-center justify-center">
+              <CardContent>
+                <div className="text-center space-y-4">
+                  <Sparkles className="h-16 w-16 text-muted-foreground mx-auto" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-muted-foreground">
+                      Resultado aparecerá aqui
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Faça o upload de uma imagem e escolha a escala para ver o resultado
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
+
+      {/* Botão de Reset */}
+      {(hasUploadedImage || processedImage) && (
+        <ResetButton 
+          onReset={reset}
+          disabled={isProcessing || isUploading}
+        />
+      )}
     </div>
   );
 }

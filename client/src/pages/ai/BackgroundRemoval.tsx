@@ -1,109 +1,84 @@
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RotateCcw, Scissors } from "lucide-react";
+import { Scissors } from "lucide-react";
 import { ImageUploader } from "@/components/ai/ImageUploader";
-import { BackgroundRemovalControls } from "@/components/ai/BackgroundRemovalControls";
 import { BackgroundRemovalResult } from "@/components/ai/BackgroundRemovalResult";
-import { useBackgroundRemoval } from "@/hooks/useBackgroundRemoval";
-import { BACKGROUND_REMOVAL_CONFIG } from "@/config/background-removal";
+import { AIPageHeader } from "@/components/ai/common/AIPageHeader";
+import { ProcessingFeedback } from "@/components/ai/common/ProcessingFeedback";
+import { ResetButton } from "@/components/ai/common/ResetButton";
+import { useImageProcessing } from "@/hooks/useImageProcessing";
+import { BACKGROUND_REMOVAL_CONFIG } from "@/config/ai-image";
 
-const PageHeader = () => (
-  <div className="text-center space-y-2 mb-8">
-    <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
-      <Scissors className="h-8 w-8 text-purple-600" />
-      Remover Background com IA
-    </h1>
-    <p className="text-muted-foreground max-w-2xl mx-auto">
-      Remova automaticamente o fundo de suas imagens usando inteligência artificial avançada. 
-      Ideal para fotos de produtos, retratos e criação de conteúdo profissional.
-    </p>
-  </div>
-);
-
-const ProcessingFeedback = ({ isProcessing, isUploading, error }: {
+// Componente inline para controles de background removal
+const BackgroundRemovalControls = ({ 
+  onProcess, 
+  isProcessing, 
+  isUploading, 
+  hasUploadedImage 
+}: {
+  onProcess: () => void;
   isProcessing: boolean;
   isUploading: boolean;
-  error: string | null;
-}) => {
-  if (!isProcessing && !isUploading && !error) return null;
-
-  return (
-    <div className="mb-6">
-      {error && (
-        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-              <div>
-                <p className="font-medium text-red-900 dark:text-red-100">
-                  Erro no processamento
-                </p>
-                <p className="text-sm text-red-700 dark:text-red-300">
-                  {error}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+  hasUploadedImage: boolean;
+}) => (
+  <div className="space-y-4">
+    <div className="text-sm text-muted-foreground space-y-2">
+      <p>• Custo: {BACKGROUND_REMOVAL_CONFIG.cost}</p>
+      <p>• Tempo estimado: {BACKGROUND_REMOVAL_CONFIG.estimatedTime}</p>
+      <p>• Formato de saída: PNG transparente</p>
     </div>
-  );
-};
-
-const ResetButton = ({ onReset, disabled }: { onReset: () => void; disabled: boolean }) => (
-  <div className="text-center">
-    <Button
-      onClick={onReset}
-      variant="outline"
-      disabled={disabled}
-      className="w-full sm:w-auto"
+    
+    <Button 
+      onClick={onProcess}
+      disabled={!hasUploadedImage || isProcessing || isUploading}
+      className="w-full"
+      size="lg"
     >
-      <RotateCcw className="mr-2 h-4 w-4" />
-      Começar Nova Remoção
+      <Scissors className="h-4 w-4 mr-2" />
+      {isProcessing ? 'Removendo Background...' : 'Remover Background'}
     </Button>
   </div>
 );
 
 export default function BackgroundRemoval() {
-  const [uploadedFileName, setUploadedFileName] = useState<string>('');
-  
   const {
-    originalImage,
+    uploadedImage,
     processedImage,
-    isProcessing,
-    isUploading,
-    hasUploadedImage,
-    error,
-    processingDuration,
+    state,
     uploadImage,
-    removeImage,
-    removeBackground,
-    reset,
-  } = useBackgroundRemoval();
+    processBackgroundRemoval,
+    downloadImage,
+    reset
+  } = useImageProcessing();
 
-  const handleImageUpload = async (file: File) => {
-    setUploadedFileName(file.name);
-    return await uploadImage(file);
+  const { isProcessing, isUploading, error, step } = state;
+  const hasUploadedImage = !!uploadedImage;
+
+  const handleProcess = () => {
+    processBackgroundRemoval({ format: 'png' });
   };
 
-  const handleRemoveBackground = async () => {
-    await removeBackground();
-  };
-
-  const handleReset = () => {
-    setUploadedFileName('');
-    reset();
+  const handleDownload = () => {
+    if (uploadedImage && processedImage) {
+      const fileName = `removed_bg_${uploadedImage.metadata.fileName}`;
+      downloadImage(fileName);
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <PageHeader />
-      
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <AIPageHeader 
+        icon={Scissors}
+        title="Remover Background com IA"
+        description="Remova automaticamente o fundo de suas imagens usando inteligência artificial avançada. Ideal para fotos de produtos, retratos e criação de conteúdo profissional."
+      />
+
       <ProcessingFeedback 
         isProcessing={isProcessing}
         isUploading={isUploading}
         error={error}
+        step={step}
+        processingColor="purple"
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -119,9 +94,9 @@ export default function BackgroundRemoval() {
             </CardHeader>
             <CardContent>
               <ImageUploader
-                onFileSelect={handleImageUpload}
-                uploadedImage={originalImage}
-                onRemoveImage={removeImage}
+                onFileSelect={uploadImage}
+                uploadedImage={uploadedImage}
+                onRemoveImage={reset}
                 isUploading={isUploading}
               />
             </CardContent>
@@ -137,7 +112,7 @@ export default function BackgroundRemoval() {
             </CardHeader>
             <CardContent>
               <BackgroundRemovalControls
-                onRemoveBackground={handleRemoveBackground}
+                onProcess={handleProcess}
                 isProcessing={isProcessing}
                 isUploading={isUploading}
                 hasUploadedImage={hasUploadedImage}
@@ -148,12 +123,12 @@ export default function BackgroundRemoval() {
 
         {/* Coluna Direita: Resultado */}
         <div className="space-y-6">
-          {processedImage ? (
+          {processedImage && uploadedImage ? (
             <BackgroundRemovalResult
-              originalImage={originalImage!.url}
+              originalImage={uploadedImage.url}
               processedImage={processedImage}
-              processingDuration={processingDuration}
-              originalFileName={uploadedFileName}
+              processingDuration={processedImage.metadata?.processingTime}
+              originalFileName={uploadedImage.metadata.fileName}
             />
           ) : (
             <Card className="h-full min-h-[400px] flex items-center justify-center">
@@ -178,7 +153,7 @@ export default function BackgroundRemoval() {
       {/* Botão de Reset */}
       {(hasUploadedImage || processedImage) && (
         <ResetButton 
-          onReset={handleReset}
+          onReset={reset}
           disabled={isProcessing || isUploading}
         />
       )}

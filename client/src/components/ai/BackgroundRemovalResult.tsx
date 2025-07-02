@@ -5,10 +5,12 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Download, Eye, Split } from "lucide-react";
 import { downloadProcessedImage } from '@/utils/background-removal';
 
+import type { ProcessedImage } from "@/types/ai-image";
+
 interface BackgroundRemovalResultProps {
   originalImage: string;
-  processedImage: string;
-  processingDuration: number;
+  processedImage: ProcessedImage;
+  processingDuration?: number;
   originalFileName?: string;
 }
 
@@ -109,12 +111,14 @@ const ActionButtons = ({ processedImage, originalFileName }: {
   </div>
 );
 
-const QualityTips = ({ processingDuration }: { processingDuration: number }) => (
+const QualityTips = ({ processingDuration }: { processingDuration?: number }) => (
   <div className="space-y-2 text-xs text-muted-foreground">
-    <div className="flex items-center gap-2">
-      <div className="h-1 w-1 bg-green-500 rounded-full" />
-      <span>Processamento concluído em {Math.round(processingDuration / 1000)}s</span>
-    </div>
+    {processingDuration && (
+      <div className="flex items-center gap-2">
+        <div className="h-1 w-1 bg-green-500 rounded-full" />
+        <span>Processamento concluído em {Math.round(processingDuration / 1000)}s</span>
+      </div>
+    )}
     <div className="flex items-center gap-2">
       <div className="h-1 w-1 bg-blue-500 rounded-full" />
       <span>Formato PNG com transparência preservada</span>
@@ -145,17 +149,17 @@ export function BackgroundRemovalResult({
       <CardContent className="space-y-6">
         {/* Image Display */}
         {viewMode === 'comparison' && (
-          <ComparisonView originalImage={originalImage} processedImage={processedImage} />
+          <ComparisonView originalImage={originalImage} processedImage={processedImage.url} />
         )}
         {viewMode === 'original' && (
           <SingleImageView imageUrl={originalImage} alt="Imagem original" />
         )}
         {viewMode === 'processed' && (
-          <SingleImageView imageUrl={processedImage} alt="Imagem sem fundo" showTransparentBg={true} />
+          <SingleImageView imageUrl={processedImage.url} alt="Imagem sem fundo" showTransparentBg={true} />
         )}
 
         {/* Action Buttons */}
-        <ActionButtons processedImage={processedImage} originalFileName={originalFileName} />
+        <ActionButtons processedImage={processedImage.url} originalFileName={originalFileName} />
 
         {/* Quality Tips */}
         <QualityTips processingDuration={processingDuration} />
