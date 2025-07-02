@@ -4759,6 +4759,65 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   });
 
   // Background Removal API Routes
+  app.post('/api/background-removal/upload', requireAuth, async (req, res) => {
+    const startTime = Date.now();
+    
+    try {
+      console.log('🔍 [BACKGROUND_REMOVAL_UPLOAD] Starting image upload process');
+      
+      const { imageData, fileName, fileSize } = req.body;
+      
+      if (!imageData || !fileName) {
+        return res.status(400).json({ 
+          error: 'Dados da imagem e nome do arquivo são obrigatórios' 
+        });
+      }
+
+      // Validate file size (25MB max)
+      if (fileSize > 25 * 1024 * 1024) {
+        return res.status(400).json({ 
+          error: 'Tamanho da imagem excede o limite de 25MB' 
+        });
+      }
+
+      // Store image in generatedImages table temporarily
+      const imageRecord = await storage.createGeneratedImage({
+        agentId: 'background-removal-temp',
+        sessionId: req.sessionId || 'temp-session',
+        model: 'pixelcut-upload',
+        prompt: `Uploaded image for background removal: ${fileName}`,
+        imageUrl: imageData, // Store base64 data temporarily
+        size: 'original',
+        quality: 'original',
+        format: 'original',
+        cost: '0',
+        metadata: { 
+          fileName, 
+          fileSize, 
+          uploadedAt: new Date().toISOString(),
+          isTemporary: true,
+          operation: 'background-removal'
+        }
+      });
+
+      console.log(`✅ [BACKGROUND_REMOVAL_UPLOAD] Image stored temporarily with ID: ${imageRecord.id}`);
+      
+      res.json({
+        success: true,
+        imageId: imageRecord.id,
+        message: 'Imagem carregada com sucesso',
+        duration: Date.now() - startTime
+      });
+
+    } catch (error) {
+      console.error('❌ [BACKGROUND_REMOVAL_UPLOAD] Error:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        message: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
   app.post('/api/background-removal/process', requireAuth, async (req: Request, res: Response) => {
     try {
       console.log('🔍 [BACKGROUND_REMOVAL] Starting background removal process');

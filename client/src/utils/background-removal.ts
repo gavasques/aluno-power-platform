@@ -29,7 +29,7 @@ export const uploadImageForBackgroundRemoval = async (file: File): Promise<{ suc
         try {
           const base64Data = fileReader.result as string;
           
-          const response = await fetch('/api/image-upscale/upload', {
+          const response = await fetch('/api/background-removal/upload', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
