@@ -71,7 +71,7 @@ function ImageUpscale() {
       
       toast({
         title: "Sucesso!",
-        description: `Imagem upscaled ${selectedScale}x com sucesso em ${(data.data.processingTime / 1000).toFixed(1)}s`,
+        description: `Imagem upscaled ${selectedScale}x com sucesso!`,
       });
 
     } catch (error) {

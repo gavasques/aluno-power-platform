@@ -7,8 +7,6 @@ import {
   Download, 
   ExternalLink, 
   RotateCcw, 
-  Clock, 
-  DollarSign, 
   Zap,
   Eye,
   Copy,
@@ -67,7 +65,52 @@ export function UpscaleResult({ result, onNewUpscale }: UpscaleResultProps) {
   };
 
   const handleOpenInNewTab = () => {
-    window.open(result.upscaledImageUrl, '_blank');
+    // Create a temporary HTML page with the image for better viewing
+    const imageWindow = window.open('', '_blank');
+    if (imageWindow) {
+      imageWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Imagem Upscaled - ${result.scale}x</title>
+            <style>
+              body { 
+                margin: 0; 
+                padding: 20px; 
+                display: flex; 
+                justify-content: center; 
+                align-items: center; 
+                min-height: 100vh; 
+                background: #f5f5f5; 
+                font-family: Arial, sans-serif;
+              }
+              img { 
+                max-width: 100%; 
+                max-height: 90vh; 
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+                border-radius: 8px;
+              }
+              .info {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                padding: 10px 15px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                font-size: 14px;
+                color: #666;
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${result.upscaledImageUrl}" alt="Imagem Upscaled ${result.scale}x" />
+            <div class="info">Upscaled ${result.scale}x</div>
+          </body>
+        </html>
+      `);
+      imageWindow.document.close();
+    }
   };
 
   const handleCopyUrl = async () => {
@@ -86,15 +129,7 @@ export function UpscaleResult({ result, onNewUpscale }: UpscaleResultProps) {
     }
   };
 
-  const formatProcessingTime = (ms: number) => {
-    const seconds = (ms / 1000).toFixed(1);
-    return `${seconds}s`;
-  };
 
-  const formatCost = (cost: string) => {
-    const numCost = parseFloat(cost);
-    return `$${numCost.toFixed(3)}`;
-  };
 
   return (
     <div className="space-y-6">
@@ -203,35 +238,13 @@ export function UpscaleResult({ result, onNewUpscale }: UpscaleResultProps) {
       {/* Processing Info */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <Zap className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="font-medium">{result.scale}x Upscale</p>
-                <p className="text-sm text-muted-foreground">Escala aplicada</p>
-              </div>
+          <div className="flex items-center justify-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+              <Zap className="h-5 w-5 text-blue-600" />
             </div>
-
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                <Clock className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="font-medium">{formatProcessingTime(result.processingTime)}</p>
-                <p className="text-sm text-muted-foreground">Tempo processamento</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                <DollarSign className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="font-medium">{formatCost(result.cost)}</p>
-                <p className="text-sm text-muted-foreground">Custo processamento</p>
-              </div>
+            <div>
+              <p className="font-medium">{result.scale}x Upscale</p>
+              <p className="text-sm text-muted-foreground">Escala aplicada</p>
             </div>
           </div>
         </CardContent>
@@ -287,22 +300,7 @@ export function UpscaleResult({ result, onNewUpscale }: UpscaleResultProps) {
         Fazer Novo Upscale
       </Button>
 
-      {/* Important Notice */}
-      <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <Clock className="h-5 w-5 text-yellow-600 mt-0.5" />
-            <div>
-              <p className="font-medium text-yellow-900 dark:text-yellow-100">
-                Aviso Importante
-              </p>
-              <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                O link da imagem upscaled expira em 1 hora. Faça o download agora para não perder o resultado.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }

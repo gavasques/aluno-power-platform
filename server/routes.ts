@@ -4482,9 +4482,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           id: upscaledRecord.id,
           originalImageUrl: imageBase64,
           upscaledImageUrl: resultUrl,
-          scale: scale,
-          processingTime: Date.now() - startTime,
-          cost: upscaledRecord.cost
+          scale: scale
         },
         message: 'Imagem upscaled com sucesso'
       });
