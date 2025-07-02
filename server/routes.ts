@@ -4833,9 +4833,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log('🔍 [BACKGROUND_REMOVAL] Processing image ID:', imageId);
 
-      // Retrieve the uploaded image from temporary storage
-      const tempImages = global.tempImages || new Map();
-      const tempImage = tempImages.get(imageId);
+      // Retrieve the uploaded image from database
+      const tempImage = await storage.getGeneratedImageById(imageId);
       
       if (!tempImage) {
         return res.status(404).json({ 
@@ -4854,8 +4853,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
 
       console.log('🔍 [PIXELCUT_API] Sending background removal request with:', {
-        imageSize: tempImage.imageData.length,
-        mimeType: tempImage.mimeType,
+        imageSize: tempImage.imageUrl.length,
+        fileName: tempImage.metadata?.fileName || 'unknown',
         hasApiKey: !!process.env.PIXELCUT_API_KEY
       });
 
@@ -4863,12 +4862,16 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       let processedImageUrl: string;
 
       try {
-        // Convert base64 to buffer and then back to base64 without data URL prefix
-        const base64Data = tempImage.imageData.replace(/^data:image\/[a-z]+;base64,/, '');
+        // Get the base64 data from imageUrl (which contains the full data URL)
+        const base64Data = tempImage.imageUrl.replace(/^data:image\/[a-z]+;base64,/, '');
         const imageBuffer = Buffer.from(base64Data, 'base64');
         
+        // Extract MIME type from data URL
+        const mimeMatch = tempImage.imageUrl.match(/^data:([^;]+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+        
         // Create a temporary URL to send to PixelCut
-        const tempImageUrl = `data:${tempImage.mimeType};base64,${base64Data}`;
+        const tempImageUrl = `data:${mimeType};base64,${base64Data}`;
         
         console.log('🔍 [PIXELCUT_API] Trying background removal with base64...');
         
@@ -4926,7 +4929,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           provider: 'pixelcut',
           model: 'background-removal',
           feature: 'background_removal',
-          originalImageName: tempImage.fileName,
+          originalImageName: tempImage.metadata?.fileName || 'unknown.png',
           generatedImageUrl: processedImageUrl,
           status: 'success',
           cost: '0.02',
@@ -4937,10 +4940,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         // Continue with response even if logging fails
       }
 
-      // Clean up temporary image
-      tempImages.delete(imageId);
+      // Clean up temporary image from database
+      try {
+        await storage.deleteGeneratedImage(imageId);
+      } catch (cleanupError) {
+        console.log('⚠️ [BACKGROUND_REMOVAL] Failed to cleanup temporary image:', cleanupError);
+      }
 
-      const originalImageUrl = `data:${tempImage.mimeType};base64,${tempImage.imageData.replace(/^data:image\/[a-z]+;base64,/, '')}`;
+      const originalImageUrl = tempImage.imageUrl;
 
       res.json({
         success: true,
