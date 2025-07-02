@@ -4,30 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SearchIcon, Building2, Globe, Mail, Star, Phone, MapPin, Filter, Users } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { SearchIcon, Building2, Globe, Mail, Star, Plus, Eye } from 'lucide-react';
 import { Supplier } from '@shared/schema';
 
 const MySuppliers = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
 
   // Buscar fornecedores
   const { data: suppliers = [], isLoading } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
   });
 
-  // Função para renderizar estrelas de avaliação
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-3 w-3 ${
-          i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-        }`}
-      />
-    ));
-  };
+
 
   // Filtros simplificados
   const filteredSuppliers = suppliers.filter(supplier => {
@@ -54,11 +44,17 @@ const MySuppliers = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Meus Fornecedores</h1>
-          <p className="text-gray-600">
-            Gerencie sua rede de fornecedores e parcerias comerciais
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Meus Fornecedores</h1>
+            <p className="text-gray-600">
+              Gerencie sua rede de fornecedores e parcerias comerciais
+            </p>
+          </div>
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Fornecedor
+          </Button>
         </div>
 
         {/* Filtros */}
@@ -74,144 +70,130 @@ const MySuppliers = () => {
           </div>
         </div>
 
-        {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total de Fornecedores</p>
-                  <p className="text-2xl font-bold text-blue-600">{suppliers.length}</p>
-                </div>
-                <Building2 className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Fornecedores Verificados</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {suppliers.filter(s => s.isVerified).length}
-                  </p>
-                </div>
-                <Badge className="h-8 w-8 rounded-full bg-green-100 text-green-600">✓</Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Resultados</p>
-                  <p className="text-2xl font-bold text-purple-600">{filteredSuppliers.length}</p>
-                </div>
-                <Filter className="h-8 w-8 text-purple-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Com Notas</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {suppliers.filter(s => s.notes).length}
-                  </p>
-                </div>
-                <Star className="h-8 w-8 text-orange-600" />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Estatísticas Simples */}
+        <div className="mb-6 flex gap-4 text-sm text-gray-600">
+          <span>{suppliers.length} fornecedores</span>
+          <span>•</span>
+          <span>{filteredSuppliers.length} resultados</span>
+          <span>•</span>
+          <span>{suppliers.filter(s => s.isVerified).length} verificados</span>
         </div>
 
         {/* Lista de Fornecedores */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredSuppliers.map((supplier) => (
-            <Card key={supplier.id} className="hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
+            <Card key={supplier.id} className="hover:shadow-md transition-shadow duration-200">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-1">
-                      {supplier.tradeName}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                      {supplier.corporateName}
-                    </p>
+                    <h3 className="font-semibold text-gray-900 mb-1">{supplier.tradeName}</h3>
+                    <p className="text-sm text-gray-600">{supplier.corporateName}</p>
                   </div>
                   {supplier.isVerified && (
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-300">
-                      <Badge className="h-3 w-3 rounded-full bg-green-500 mr-1" />
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
                       Verificado
                     </Badge>
                   )}
                 </div>
-              </CardHeader>
 
-              <CardContent className="pt-0">
-                {/* Descrição */}
                 {supplier.description && (
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                     {supplier.description}
                   </p>
                 )}
 
-                {/* Notas */}
-                {supplier.notes && (
-                  <p className="text-sm text-gray-700 mb-4 bg-yellow-50 p-2 rounded border-l-2 border-yellow-400 line-clamp-2">
-                    {supplier.notes}
-                  </p>
-                )}
-
-                {/* Contatos */}
-                <div className="flex gap-2 text-xs text-muted-foreground mb-4">
-                  {supplier.commercialEmail && (
-                    <div className="flex items-center gap-1">
-                      <Mail className="h-3 w-3" />
-                      Comercial
-                    </div>
-                  )}
-                  {supplier.supportEmail && (
-                    <div className="flex items-center gap-1">
-                      <Mail className="h-3 w-3" />
-                      Suporte
-                    </div>
-                  )}
-                  {supplier.website && (
-                    <div className="flex items-center gap-1">
-                      <Globe className="h-3 w-3" />
-                      Site
-                    </div>
-                  )}
-                  {supplier.instagram && (
-                    <div className="flex items-center gap-1">
-                      <Globe className="h-3 w-3" />
-                      Instagram
-                    </div>
-                  )}
-                </div>
-
-                {/* Avaliação simplificada */}
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex">{renderStars(Number(supplier.averageRating) || 0)}</div>
-                  <span className="text-sm text-muted-foreground">
-                    {(Number(supplier.averageRating) || 0).toFixed(1)} ({supplier.totalReviews || 0} avaliações)
-                  </span>
-                </div>
-
-                {/* Ações */}
                 <div className="flex gap-2">
-                  <Button size="sm" className="flex-1">
-                    <Users className="h-3 w-3 mr-1" />
-                    Ver Detalhes
-                  </Button>
-                  <Button size="sm" variant="outline">
-                    <Mail className="h-3 w-3" />
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setSelectedSupplier(supplier)}>
+                        <Eye className="h-3 w-3 mr-1" />
+                        Ver Detalhes
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>{supplier.tradeName}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Informações Básicas</h4>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-600">Nome Comercial:</span>
+                              <p className="font-medium">{supplier.tradeName}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Razão Social:</span>
+                              <p className="font-medium">{supplier.corporateName}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Status:</span>
+                              <p className="font-medium">
+                                {supplier.isVerified ? (
+                                  <Badge className="bg-green-100 text-green-700">Verificado</Badge>
+                                ) : (
+                                  <Badge variant="outline">Não verificado</Badge>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {supplier.description && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-2">Descrição</h4>
+                            <p className="text-sm text-gray-600">{supplier.description}</p>
+                          </div>
+                        )}
+
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Contatos</h4>
+                          <div className="space-y-2 text-sm">
+                            {supplier.commercialEmail && (
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-gray-400" />
+                                <span className="text-gray-600">Comercial:</span>
+                                <span>{supplier.commercialEmail}</span>
+                              </div>
+                            )}
+                            {supplier.supportEmail && (
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-gray-400" />
+                                <span className="text-gray-600">Suporte:</span>
+                                <span>{supplier.supportEmail}</span>
+                              </div>
+                            )}
+                            {supplier.website && (
+                              <div className="flex items-center gap-2">
+                                <Globe className="h-4 w-4 text-gray-400" />
+                                <span className="text-gray-600">Website:</span>
+                                <a href={supplier.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                  {supplier.website}
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {supplier.notes && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-2">Notas</h4>
+                            <div className="bg-yellow-50 p-3 rounded border-l-2 border-yellow-400">
+                              <p className="text-sm text-gray-700">{supplier.notes}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  {supplier.commercialEmail && (
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={`mailto:${supplier.commercialEmail}`}>
+                        <Mail className="h-3 w-3" />
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
