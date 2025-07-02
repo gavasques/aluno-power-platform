@@ -4868,34 +4868,20 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         // Create a temporary URL to send to PixelCut
         const tempImageUrl = `data:${mimeType};base64,${base64Data}`;
         
-        console.log('🔍 [PIXELCUT_API] Trying background removal with multiple approaches...');
+        console.log('🔍 [PIXELCUT_API] Sending background removal request with correct format...');
         
-        // First approach: try with data URL
-        let response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
+        // Use the correct format as per PixelCut API documentation
+        const response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-API-KEY': process.env.PIXELCUT_API_KEY || ''
           },
           body: JSON.stringify({
-            image_url: tempImageUrl // Full data URL
+            image_url: tempImageUrl, // Data URL should work
+            format: "png" // Required parameter
           })
         });
-
-        // If first approach fails, try with raw base64
-        if (!response.ok) {
-          console.log('🔄 [PIXELCUT_API] Data URL failed, trying raw base64...');
-          response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-API-KEY': process.env.PIXELCUT_API_KEY || ''
-            },
-            body: JSON.stringify({
-              image: base64Data // Raw base64
-            })
-          });
-        }
 
         console.log('🔍 [PIXELCUT_API] Response status:', response.status);
 
@@ -4905,6 +4891,11 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           
           if (response.status === 403 && errorData.error_code === 'insufficient_api_credits') {
             throw new Error('Créditos da API PixelCut esgotados. Entre em contato com o administrador para recarregar os créditos.');
+          }
+          
+          // For "Unsupported format" errors, provide a helpful message to the user
+          if (errorData.error_code === 'invalid_parameter' && errorData.error === 'Unsupported format') {
+            throw new Error('Formato de imagem não suportado pela API PixelCut. Tente com uma imagem JPG ou PNG de alta qualidade.');
           }
           
           throw new Error(`Erro da API PixelCut: ${errorData.error || 'Erro desconhecido'}`);
