@@ -4371,14 +4371,25 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const imageBase64 = uploadedImage.imageUrl;
       const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
       
+      // Determine the correct MIME type from the original image
+      const mimeType = imageBase64.split(';')[0].split(':')[1] || 'image/png';
+      const fileExtension = mimeType.split('/')[1] || 'png';
+      
+      console.log(`🔍 [PIXELCUT_API] Sending request with:`, {
+        imageSize: imageBuffer.length,
+        mimeType,
+        scale,
+        hasApiKey: !!process.env.PIXELCUT_API_KEY
+      });
+
       // Create FormData for multipart upload to PixelCut API
       const { default: FormData } = await import('form-data');
       const formData = new FormData();
       
       // Add image file to form data
       formData.append('image', imageBuffer, {
-        filename: uploadedImage.fileName || 'image.png',
-        contentType: 'image/png'
+        filename: `image.${fileExtension}`,
+        contentType: mimeType
       });
       
       // Add scale parameter
@@ -4391,8 +4402,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           'X-API-KEY': process.env.PIXELCUT_API_KEY || '',
           ...formData.getHeaders()
         },
-        body: formData
+        body: formData as any
       });
+
+      console.log(`🔍 [PIXELCUT_API] Response status: ${pixelcutResponse.status}`);
 
       if (!pixelcutResponse.ok) {
         const errorText = await pixelcutResponse.text();
