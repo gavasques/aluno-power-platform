@@ -4408,14 +4408,33 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
 
       const pixelcutResult = await pixelcutResponse.json();
-      console.log(`✅ [PIXELCUT_API] Upscale successful, response:`, JSON.stringify(pixelcutResult, null, 2));
+      console.log(`✅ [PIXELCUT_API] Upscale successful, response keys:`, Object.keys(pixelcutResult));
 
-      // Extract the result URL from the response
-      const resultUrl = pixelcutResult.result_url || pixelcutResult.image_url || pixelcutResult.url;
+      // PixelCut returns the image as base64 data, not URL
+      let resultUrl = pixelcutResult.result_url || pixelcutResult.image_url || pixelcutResult.url;
+      
+      // If no URL, check if we got base64 image data directly
+      if (!resultUrl && pixelcutResult.image) {
+        if (pixelcutResult.image.startsWith('data:image/')) {
+          resultUrl = pixelcutResult.image;
+        } else {
+          // Add data URL prefix if missing
+          resultUrl = `data:image/png;base64,${pixelcutResult.image}`;
+        }
+      }
+      
+      // If still no result, check if the whole response IS the image data
+      if (!resultUrl && typeof pixelcutResult === 'string' && pixelcutResult.length > 100000) {
+        resultUrl = `data:image/png;base64,${pixelcutResult}`;
+      }
       
       if (!resultUrl) {
-        console.error(`❌ [PIXELCUT_API] No result URL found in response:`, pixelcutResult);
-        throw new Error('PixelCut API did not return a valid result URL');
+        console.error(`❌ [PIXELCUT_API] No result found. Response structure:`, {
+          keys: Object.keys(pixelcutResult),
+          responseType: typeof pixelcutResult,
+          responseLength: JSON.stringify(pixelcutResult).length
+        });
+        throw new Error('PixelCut API did not return a valid result');
       }
 
       console.log(`🔍 [PIXELCUT_API] Extracted result URL: ${resultUrl}`);

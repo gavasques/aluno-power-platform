@@ -21,6 +21,7 @@ function ImageUpscale() {
   const [uploadedImage, setUploadedImage] = useState<{ id: string; url: string; name: string } | null>(null);
   const [selectedScale, setSelectedScale] = useState<2 | 4>(2);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState('');
   const [result, setResult] = useState<UpscaleData | null>(null);
 
   const handleImageUploaded = (imageData: { id: string; url: string; name: string }) => {
@@ -39,9 +40,12 @@ function ImageUpscale() {
     }
 
     setIsProcessing(true);
+    setProcessingStep('Conectando com PixelCut AI...');
     
     try {
       const token = localStorage.getItem('auth_token');
+      
+      setProcessingStep('Enviando imagem para processamento...');
       const response = await fetch('/api/image-upscale/process', {
         method: 'POST',
         headers: {
@@ -59,8 +63,10 @@ function ImageUpscale() {
         throw new Error(errorData.error || 'Erro no processamento');
       }
 
+      setProcessingStep('Finalizando processamento...');
       const data = await response.json();
       
+      setProcessingStep('Concluído!');
       setResult(data.data);
       
       toast({
@@ -77,6 +83,7 @@ function ImageUpscale() {
       });
     } finally {
       setIsProcessing(false);
+      setProcessingStep('');
     }
   };
 
@@ -137,6 +144,25 @@ function ImageUpscale() {
                   onUpscale={handleUpscale}
                   isProcessing={isProcessing}
                 />
+                
+                {/* Processing Status */}
+                {isProcessing && (
+                  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-3">
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+                      <div>
+                        <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                          Processando imagem...
+                        </div>
+                        {processingStep && (
+                          <div className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                            {processingStep}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
