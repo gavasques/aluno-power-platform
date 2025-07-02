@@ -58,12 +58,19 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   // Get token from localStorage for authenticated requests
   const token = localStorage.getItem('auth_token');
   
+  // Don't set Content-Type for FormData - browser will set it automatically with boundary
+  const headers: Record<string, string> = {
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+    ...options?.headers,
+  };
+  
+  // Only add Content-Type for non-FormData requests
+  if (!(options?.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
   const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-      ...options?.headers,
-    },
+    headers,
     ...options,
   });
 
