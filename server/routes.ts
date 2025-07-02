@@ -4372,7 +4372,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
       
       // Create FormData for multipart upload to PixelCut API
-      const FormData = require('form-data');
+      const { default: FormData } = await import('form-data');
       const formData = new FormData();
       
       // Add image file to form data
