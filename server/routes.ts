@@ -4936,12 +4936,23 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         }
 
         const result = await response.json();
+        console.log('🔍 [PIXELCUT_API] Response structure:', JSON.stringify(result, null, 2));
         
-        if (!result.data || !result.data.result_url) {
-          throw new Error('Resposta inválida da API PixelCut');
+        // Handle different response formats from PixelCut API
+        let resultUrl = null;
+        
+        if (result.result_url) {
+          // Direct format: {"result_url": "..."}
+          resultUrl = result.result_url;
+        } else if (result.data && result.data.result_url) {
+          // Nested format: {"data": {"result_url": "..."}}
+          resultUrl = result.data.result_url;
+        } else {
+          console.log('❌ [PIXELCUT_API] Unexpected response format:', result);
+          throw new Error('Resposta inválida da API PixelCut - formato não reconhecido');
         }
 
-        processedImageUrl = result.data.result_url;
+        processedImageUrl = resultUrl;
         console.log('✅ [PIXELCUT_API] Background removal successful');
 
       } catch (apiError) {
