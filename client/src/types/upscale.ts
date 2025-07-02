@@ -6,7 +6,6 @@ export interface UpscaleData {
   processingTime?: number;
   cost?: string;
   message?: string;
-  isDemoMode?: boolean;
 }
 
 export interface UploadedImage {
@@ -44,5 +43,4 @@ export interface ProcessResponse {
   data: UpscaleData;
   message: string;
   duration?: number;
-  isDemoMode?: boolean;
 }

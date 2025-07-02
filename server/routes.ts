@@ -4545,74 +4545,12 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       
-      // Check if it's a credits issue and provide demo mode
+      // Check if it's a credits issue and return error message
       if (errorMessage.includes('Créditos da API PixelCut esgotados') || errorMessage.includes('insufficient_api_credits')) {
-        console.log(`🎭 [DEMO_MODE] Activating demo mode for upscale`);
-        
-        try {
-          const uploadedImage = await storage.getGeneratedImageById(req.body.imageId);
-          
-          // Create a demo response that simulates upscaling
-          const demoResult = {
-            upscaledImageUrl: uploadedImage?.imageUrl || '', // Use original image as demo
-            message: `MODO DEMONSTRAÇÃO: Esta é uma simulação do upscale ${req.body.scale}x. A imagem original é exibida como exemplo do resultado. Para usar o upscale real, é necessário recarregar os créditos da API PixelCut.`,
-            isDemoMode: true,
-            scale: req.body.scale,
-            originalImageUrl: uploadedImage?.imageUrl || ''
-          };
-
-          // Log the demo usage
-          const userId = req.user?.id;
-          if (userId && uploadedImage) {
-            const demoLogData = {
-              userId: userId,
-              provider: 'demo',
-              model: `upscale-${req.body.scale}x-demo`,
-              feature: 'image-upscale-demo',
-              originalImageName: uploadedImage.metadata?.fileName || `image-${req.body.imageId}`,
-              originalImageSize: {
-                width: 0,
-                height: 0,
-                fileSize: uploadedImage.metadata?.fileSize || 0
-              },
-              generatedImageUrl: uploadedImage.imageUrl,
-              generatedImageSize: {
-                width: 0,
-                height: 0,
-                fileSize: uploadedImage.metadata?.fileSize || 0
-              },
-              scale: req.body.scale,
-              quality: 'demo',
-              apiResponse: { demoMode: true, reason: 'insufficient_credits' },
-              status: 'demo_success',
-              cost: '0.00',
-              duration: Date.now() - startTime,
-              sessionId: req.sessionId || 'unknown',
-              userAgent: req.headers['user-agent'] || 'unknown',
-              ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
-              metadata: {
-                endpoint: 'image-upscale/process',
-                demoMode: true,
-                originalError: errorMessage,
-                requestTimestamp: new Date().toISOString()
-              }
-            };
-            
-            await storage.createAiImgGenerationLog(demoLogData);
-            console.log(`📊 [AI_IMG_LOG] Saved demo log - User: ${userId}, Mode: Demo ${req.body.scale}x`);
-          }
-
-          return res.json({
-            success: true,
-            data: demoResult,
-            message: 'Processamento concluído em modo demonstração',
-            duration: Date.now() - startTime,
-            isDemoMode: true
-          });
-
-        } catch (demoError) {
-          console.error('❌ [DEMO_MODE] Error creating demo response:', demoError);
-        }
+        return res.status(400).json({
+          error: "Erro no processamento, aguarde 24 horas e tente novamente. Pedimos desculpas.",
+          code: "INSUFFICIENT_CREDITS"
+        });
       }
       
       // Log other errors in AI Image Generation Logs

@@ -163,31 +163,6 @@ export default function ImageUpscale() {
                   />
                 </CardContent>
               </Card>
-            ) : hasUploadedImage ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Preview da Imagem</CardTitle>
-                  <CardDescription>
-                    Imagem carregada e pronta para processamento
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="relative rounded-lg overflow-hidden border-2 border-border bg-muted">
-                      <img
-                        src={uploadedImage.url}
-                        alt={uploadedImage.name}
-                        className="w-full h-64 object-contain"
-                      />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground">
-                        {uploadedImage.name}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             ) : (
               <Card className="border-dashed">
                 <CardContent className="pt-6">

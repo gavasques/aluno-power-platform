@@ -200,22 +200,7 @@ export function UpscaleResult({
     createImageViewer(result.upscaledImageUrl, scale);
   };
 
-  // Demo mode warning component
-  const DemoModeWarning = () => (
-    result.isDemoMode ? (
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-        <div className="flex items-start gap-3">
-          <div className="text-amber-500 text-xl">⚠️</div>
-          <div>
-            <h3 className="font-semibold text-amber-800 mb-2">Modo Demonstração Ativo</h3>
-            <p className="text-amber-700 text-sm leading-relaxed">
-              {result.message || 'Os créditos da API PixelCut foram esgotados. Esta é uma simulação do resultado do upscale. Para usar o upscale real, entre em contato com o administrador para recarregar os créditos.'}
-            </p>
-          </div>
-        </div>
-      </div>
-    ) : null
-  );
+
 
   const renderImageView = () => {
     switch (viewMode) {
@@ -255,8 +240,6 @@ export function UpscaleResult({
           onViewModeChange={setViewMode}
         />
       </div>
-
-      <DemoModeWarning />
 
       {renderImageView()}
 
