@@ -4883,7 +4883,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             'X-API-KEY': process.env.PIXELCUT_API_KEY
           },
           body: JSON.stringify({
-            image_url: tempImageUrl,
+            image: base64Data,
             format: 'png'
           })
         });
