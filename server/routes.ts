@@ -2302,7 +2302,16 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Get all generated images
   app.get('/api/generated-images', async (req, res) => {
     try {
-      const images = await db.select().from(generatedImages).orderBy(desc(generatedImages.createdAt));
+      const images = await db.select({
+        id: generatedImages.id,
+        agentId: generatedImages.agentId,
+        sessionId: generatedImages.sessionId,
+        model: generatedImages.model,
+        prompt: generatedImages.prompt,
+        cost: generatedImages.cost,
+        createdAt: generatedImages.createdAt,
+        metadata: generatedImages.metadata
+      }).from(generatedImages).orderBy(desc(generatedImages.createdAt));
       res.json(images);
     } catch (error) {
       console.error('Error fetching generated images:', error);

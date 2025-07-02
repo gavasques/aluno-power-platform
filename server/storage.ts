@@ -404,7 +404,15 @@ export class DatabaseStorage implements IStorage {
 
   // Suppliers
   async getSuppliers(): Promise<Supplier[]> {
-    return await db.select().from(suppliers);
+    return await db.query.suppliers.findMany({
+      with: {
+        category: true,
+        brands: true,
+        contacts: true,
+        files: true,
+        reviews: true
+      }
+    });
   }
 
   async getSupplier(id: number): Promise<Supplier | undefined> {
@@ -2197,7 +2205,22 @@ export class DatabaseStorage implements IStorage {
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const query = db
-      .select()
+      .select({
+        id: aiImgGenerationLogs.id,
+        userId: aiImgGenerationLogs.userId,
+        provider: aiImgGenerationLogs.provider,
+        model: aiImgGenerationLogs.model,
+        feature: aiImgGenerationLogs.feature,
+        originalImageName: aiImgGenerationLogs.originalImageName,
+        quality: aiImgGenerationLogs.quality,
+        scale: aiImgGenerationLogs.scale,
+        cost: aiImgGenerationLogs.cost,
+        duration: aiImgGenerationLogs.duration,
+        status: aiImgGenerationLogs.status,
+        createdAt: aiImgGenerationLogs.createdAt,
+        ipAddress: aiImgGenerationLogs.ipAddress,
+        userAgent: aiImgGenerationLogs.userAgent
+      })
       .from(aiImgGenerationLogs)
       .limit(limit)
       .offset(offset)
