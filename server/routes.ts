@@ -4905,11 +4905,12 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         console.log('🔍 [PIXELCUT_API] Using public URL for background removal:', publicImageUrl);
         
         // Use the correct format as per PixelCut API documentation
-        const response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
+        const response = await fetch('https://api.pixelcut.ai/bg-remover/v2', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-API-KEY': process.env.PIXELCUT_API_KEY || ''
+            'Accept': 'application/json',
+            'X-API-Key': process.env.PIXELCUT_API_KEY || ''
           },
           body: JSON.stringify({
             image_url: publicImageUrl,
