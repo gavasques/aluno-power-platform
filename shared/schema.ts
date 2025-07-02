@@ -80,6 +80,7 @@ export const departments = pgTable("departments", {
 // Suppliers
 export const suppliers = pgTable("suppliers", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
   tradeName: text("trade_name").notNull(),
   corporateName: text("corporate_name").notNull(),
   categoryId: integer("category_id").references(() => categories.id),

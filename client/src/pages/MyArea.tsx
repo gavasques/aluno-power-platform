@@ -15,12 +15,14 @@ const MyArea = () => {
 
   switch (section) {
     case "fornecedores":
+    case "suppliers":
       if (id) {
         return <SupplierDetailPage />;
       }
       return <MySuppliers />;
     case "produtos":
-      if (id === "novo") {
+    case "products":
+      if (id === "novo" || id === "new") {
         return <ProductForm />;
       }
       if (id) {
@@ -28,7 +30,8 @@ const MyArea = () => {
       }
       return <MyProducts />;
     case "materiais":
-      if (id === "novo") {
+    case "materials":
+      if (id === "novo" || id === "new") {
         return <MaterialForm />;
       }
       if (fullPath.includes("/edit")) {

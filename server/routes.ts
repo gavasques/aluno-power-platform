@@ -122,11 +122,13 @@ function broadcastNotification(type: string, data: any) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Suppliers
-  app.get('/api/suppliers', async (req, res) => {
+  app.get('/api/suppliers', requireAuth, async (req: any, res: any) => {
     try {
-      const suppliers = await storage.getSuppliers();
+      const userId = req.user?.id;
+      const suppliers = await storage.getSuppliers(userId);
       res.json(suppliers);
     } catch (error) {
+      console.error('Error fetching suppliers:', error);
       res.status(500).json({ error: 'Failed to fetch suppliers' });
     }
   });
@@ -5293,6 +5295,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         userId,
         name: req.file.originalname,
         fileUrl: `/uploads/${req.file.filename}`,
+        fileType: req.file.mimetype,
         fileSize: req.file.size,
         type: req.body.type || 'other'
       };

@@ -156,7 +156,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
 
   // Suppliers
-  getSuppliers(): Promise<Supplier[]>;
+  getSuppliers(userId?: number): Promise<Supplier[]>;
   getSupplier(id: number): Promise<Supplier | undefined>;
   createSupplier(supplier: InsertSupplier): Promise<Supplier>;
   updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier>;
@@ -411,7 +411,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Suppliers
-  async getSuppliers(): Promise<Supplier[]> {
+  async getSuppliers(userId?: number): Promise<Supplier[]> {
+    if (userId) {
+      return await db.query.suppliers.findMany({
+        where: eq(suppliers.userId, userId),
+        with: {
+          category: true,
+          brands: true,
+          contacts: true,
+          files: true,
+          reviews: true
+        }
+      });
+    }
+    
+    // For admin or when no userId specified, return all
     return await db.query.suppliers.findMany({
       with: {
         category: true,

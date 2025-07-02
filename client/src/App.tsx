@@ -370,6 +370,19 @@ function App() {
                             )}
                           </Route>
 
+                          {/* MyArea routes (English alias) - Protected */}
+                          <Route path="/myarea/:section/:id?/:action?">
+                            {(params) => (
+                              <ProtectedRoute>
+                                <Layout>
+                                  <Suspense fallback={<PageLoader />}>
+                                    <MyArea />
+                                  </Suspense>
+                                </Layout>
+                              </ProtectedRoute>
+                            )}
+                          </Route>
+
                           {/* Admin routes - Protected with admin requirement */}
                           <Route path="/admin/images">
                             <ProtectedRoute requireAdmin>
