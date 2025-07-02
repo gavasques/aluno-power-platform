@@ -1013,10 +1013,49 @@ export const upscaledImages = pgTable("upscaled_images", {
   createdIdx: index("upscaled_images_created_idx").on(table.createdAt),
 }));
 
+// AI Image Generation Logs - Specialized table for AI image generation tracking
+export const aiImgGenerationLogs = pgTable("ai_img_generation_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  provider: text("provider").notNull(), // pixelcut, openai, etc
+  model: text("model").notNull(), // specific model/endpoint used
+  feature: text("feature").notNull(), // upscale, generate, edit, etc
+  originalImageName: text("original_image_name"), // name of uploaded image
+  originalImageSize: jsonb("original_image_size"), // {width, height, fileSize}
+  generatedImageUrl: text("generated_image_url"), // URL of generated/processed image
+  generatedImageSize: jsonb("generated_image_size"), // {width, height, fileSize}
+  prompt: text("prompt"), // prompt used (if applicable)
+  scale: integer("scale"), // upscale factor (2x, 4x, etc)
+  quality: text("quality"), // high, medium, low
+  apiResponse: jsonb("api_response"), // full API response for debugging
+  status: text("status").notNull().default("success"), // success, failed, timeout
+  errorMessage: text("error_message"), // error details if failed
+  cost: decimal("cost", { precision: 10, scale: 6 }).notNull().default("0"), // processing cost
+  duration: integer("duration").notNull().default(0), // processing time in milliseconds
+  requestId: text("request_id"), // unique request identifier
+  sessionId: text("session_id"), // user session tracking
+  userAgent: text("user_agent"), // browser/client info
+  ipAddress: text("ip_address"), // client IP
+  metadata: jsonb("metadata"), // additional tracking data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("ai_img_logs_user_idx").on(table.userId),
+  providerIdx: index("ai_img_logs_provider_idx").on(table.provider),
+  featureIdx: index("ai_img_logs_feature_idx").on(table.feature),
+  statusIdx: index("ai_img_logs_status_idx").on(table.status),
+  createdIdx: index("ai_img_logs_created_idx").on(table.createdAt),
+  costIdx: index("ai_img_logs_cost_idx").on(table.cost),
+}));
+
 // Insert schemas for generated images
 export const insertGeneratedImageSchema = createInsertSchema(generatedImages);
 export type InsertGeneratedImage = z.infer<typeof insertGeneratedImageSchema>;
 export type GeneratedImage = typeof generatedImages.$inferSelect;
+
+// Insert schemas for AI image generation logs
+export const insertAiImgGenerationLogSchema = createInsertSchema(aiImgGenerationLogs);
+export type InsertAiImgGenerationLog = z.infer<typeof insertAiImgGenerationLogSchema>;
+export type AiImgGenerationLog = typeof aiImgGenerationLogs.$inferSelect;
 
 // Insert schemas for upscaled images
 export const insertUpscaledImageSchema = createInsertSchema(upscaledImages).omit({

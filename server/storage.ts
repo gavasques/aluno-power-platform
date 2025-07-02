@@ -37,6 +37,7 @@ import {
   agentSessionFiles,
   generatedImages,
   upscaledImages,
+  aiImgGenerationLogs,
   type User, 
   type InsertUser,
   type Supplier,
@@ -109,6 +110,8 @@ import {
   type InsertGeneratedImage,
   type UpscaledImage,
   type InsertUpscaledImage,
+  type AiImgGenerationLog,
+  type InsertAiImgGenerationLog,
   type AgentSession,
   type InsertAgentSession,
   type AgentSessionFile,
@@ -2161,6 +2164,140 @@ export class DatabaseStorage implements IStorage {
         eq(upscaledImages.userId, userId)
       ));
     return result.rowCount > 0;
+  }
+
+  // AI Image Generation Logs
+  async createAiImgGenerationLog(log: InsertAiImgGenerationLog): Promise<AiImgGenerationLog> {
+    const [created] = await db
+      .insert(aiImgGenerationLogs)
+      .values({
+        ...log,
+        createdAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async getAiImgGenerationLogs(options: {
+    userId?: number;
+    provider?: string;
+    feature?: string;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<AiImgGenerationLog[]> {
+    const { userId, provider, feature, status, limit = 50, offset = 0 } = options;
+    
+    const conditions = [];
+    if (userId) conditions.push(eq(aiImgGenerationLogs.userId, userId));
+    if (provider) conditions.push(eq(aiImgGenerationLogs.provider, provider));
+    if (feature) conditions.push(eq(aiImgGenerationLogs.feature, feature));
+    if (status) conditions.push(eq(aiImgGenerationLogs.status, status));
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const query = db
+      .select()
+      .from(aiImgGenerationLogs)
+      .limit(limit)
+      .offset(offset)
+      .orderBy(desc(aiImgGenerationLogs.createdAt));
+
+    if (whereClause) {
+      query.where(whereClause);
+    }
+
+    return await query;
+  }
+
+  async getAiImgGenerationLogById(id: number): Promise<AiImgGenerationLog | null> {
+    const [log] = await db
+      .select()
+      .from(aiImgGenerationLogs)
+      .where(eq(aiImgGenerationLogs.id, id));
+    return log || null;
+  }
+
+  async getAiImgGenerationStats(options: {
+    userId?: number;
+    provider?: string;
+    feature?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+  }): Promise<{
+    totalRequests: number;
+    successfulRequests: number;
+    failedRequests: number;
+    totalCost: number;
+    averageDuration: number;
+    topProviders: Array<{ provider: string; count: number; cost: number }>;
+    topFeatures: Array<{ feature: string; count: number; cost: number }>;
+  }> {
+    const { userId, provider, feature, dateFrom, dateTo } = options;
+    
+    const conditions = [];
+    if (userId) conditions.push(eq(aiImgGenerationLogs.userId, userId));
+    if (provider) conditions.push(eq(aiImgGenerationLogs.provider, provider));
+    if (feature) conditions.push(eq(aiImgGenerationLogs.feature, feature));
+    if (dateFrom) conditions.push(sql`${aiImgGenerationLogs.createdAt} >= ${dateFrom}`);
+    if (dateTo) conditions.push(sql`${aiImgGenerationLogs.createdAt} <= ${dateTo}`);
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // Get basic stats
+    const baseQuery = db.select({
+      totalRequests: count(),
+      successfulRequests: sql<number>`count(case when ${aiImgGenerationLogs.status} = 'success' then 1 end)`,
+      failedRequests: sql<number>`count(case when ${aiImgGenerationLogs.status} = 'failed' then 1 end)`,
+      totalCost: sql<number>`sum(${aiImgGenerationLogs.cost})`,
+      averageDuration: sql<number>`avg(${aiImgGenerationLogs.duration})`,
+    }).from(aiImgGenerationLogs);
+
+    if (whereClause) {
+      baseQuery.where(whereClause);
+    }
+
+    const [stats] = await baseQuery;
+
+    // Get top providers
+    const providersQuery = db.select({
+      provider: aiImgGenerationLogs.provider,
+      count: count(),
+      cost: sql<number>`sum(${aiImgGenerationLogs.cost})`,
+    }).from(aiImgGenerationLogs)
+      .groupBy(aiImgGenerationLogs.provider)
+      .orderBy(desc(count()));
+
+    if (whereClause) {
+      providersQuery.where(whereClause);
+    }
+
+    const topProviders = await providersQuery;
+
+    // Get top features
+    const featuresQuery = db.select({
+      feature: aiImgGenerationLogs.feature,
+      count: count(),
+      cost: sql<number>`sum(${aiImgGenerationLogs.cost})`,
+    }).from(aiImgGenerationLogs)
+      .groupBy(aiImgGenerationLogs.feature)
+      .orderBy(desc(count()));
+
+    if (whereClause) {
+      featuresQuery.where(whereClause);
+    }
+
+    const topFeatures = await featuresQuery;
+
+    return {
+      totalRequests: stats.totalRequests || 0,
+      successfulRequests: stats.successfulRequests || 0,
+      failedRequests: stats.failedRequests || 0,
+      totalCost: Number(stats.totalCost) || 0,
+      averageDuration: Number(stats.averageDuration) || 0,
+      topProviders,
+      topFeatures,
+    };
   }
 
   // Agent Sessions
