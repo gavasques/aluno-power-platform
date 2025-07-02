@@ -37,7 +37,8 @@ import {
   insertAgentPromptSchema,
   insertAgentUsageSchema,
   insertAgentGenerationSchema,
-  insertUserSchema
+  insertUserSchema,
+  insertUpscaledImageSchema
 } from "@shared/schema";
 import { AuthService } from "./services/authService";
 import bcrypt from 'bcryptjs';
@@ -4268,6 +4269,221 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.error('❌ [CNPJ_CONSULTA] Erro:', error);
       res.status(500).json({ 
         error: 'Erro interno do servidor',
+        message: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // Image Upscaling API endpoints
+  
+  // Upload image and store temporarily
+  app.post('/api/image-upscale/upload', requireAuth, async (req, res) => {
+    const startTime = Date.now();
+    
+    try {
+      console.log('🔍 [IMAGE_UPLOAD] Starting image upload process');
+      
+      const { imageData, fileName, fileSize } = req.body;
+      
+      if (!imageData || !fileName) {
+        return res.status(400).json({ 
+          error: 'Dados da imagem e nome do arquivo são obrigatórios' 
+        });
+      }
+
+      // Validate file size (25MB max)
+      if (fileSize > 25 * 1024 * 1024) {
+        return res.status(400).json({ 
+          error: 'Tamanho da imagem excede o limite de 25MB' 
+        });
+      }
+
+      // Store image in generatedImages table temporarily
+      const imageRecord = await storage.createGeneratedImage({
+        agentId: 'image-upscale-temp',
+        sessionId: req.sessionId || 'temp-session',
+        model: 'pixelcut-upload',
+        prompt: `Uploaded image: ${fileName}`,
+        imageUrl: imageData, // Store base64 data temporarily
+        size: 'original',
+        quality: 'original',
+        format: 'original',
+        cost: '0',
+        metadata: { 
+          fileName, 
+          fileSize, 
+          uploadedAt: new Date().toISOString(),
+          isTemporary: true
+        }
+      });
+
+      console.log(`✅ [IMAGE_UPLOAD] Image stored temporarily with ID: ${imageRecord.id}`);
+      
+      res.json({
+        success: true,
+        imageId: imageRecord.id,
+        message: 'Imagem carregada com sucesso',
+        duration: Date.now() - startTime
+      });
+
+    } catch (error) {
+      console.error('❌ [IMAGE_UPLOAD] Error:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        message: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // Upscale image using PixelCut API
+  app.post('/api/image-upscale/process', requireAuth, async (req, res) => {
+    const startTime = Date.now();
+    
+    try {
+      console.log('🔍 [IMAGE_UPSCALE] Starting upscale process');
+      
+      const { imageId, scale } = req.body;
+      const userId = req.user?.id;
+      
+      if (!imageId || !scale || !userId) {
+        return res.status(400).json({ 
+          error: 'ID da imagem, escala e usuário são obrigatórios' 
+        });
+      }
+
+      if (![2, 4].includes(scale)) {
+        return res.status(400).json({ 
+          error: 'Escala deve ser 2x ou 4x' 
+        });
+      }
+
+      // Get the uploaded image
+      const uploadedImage = await storage.getGeneratedImageById(imageId);
+      if (!uploadedImage) {
+        return res.status(404).json({ 
+          error: 'Imagem não encontrada' 
+        });
+      }
+
+      console.log(`🔍 [IMAGE_UPSCALE] Processing image ID: ${imageId} with ${scale}x scale`);
+
+      // Convert base64 to blob URL for PixelCut API
+      const imageBase64 = uploadedImage.imageUrl;
+      const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
+      
+      // Create a temporary URL - In production, you'd use a cloud storage service
+      // For now, we'll use a data URL directly with PixelCut
+      const tempImageUrl = imageBase64;
+
+      // Call PixelCut API
+      const pixelcutResponse = await fetch('https://api.developer.pixelcut.ai/v1/upscale', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-API-KEY': process.env.PIXELCUT_API_KEY || ''
+        },
+        body: JSON.stringify({
+          image_url: tempImageUrl,
+          scale: scale
+        })
+      });
+
+      if (!pixelcutResponse.ok) {
+        const errorText = await pixelcutResponse.text();
+        console.error(`❌ [PIXELCUT_API] Error: ${pixelcutResponse.status} - ${errorText}`);
+        throw new Error(`PixelCut API error: ${pixelcutResponse.status}`);
+      }
+
+      const pixelcutResult = await pixelcutResponse.json();
+      console.log(`✅ [PIXELCUT_API] Upscale successful`);
+
+      // Store the upscaled image result
+      const upscaledRecord = await storage.createUpscaledImage({
+        userId: userId,
+        originalImageUrl: imageBase64,
+        upscaledImageUrl: pixelcutResult.result_url,
+        scale: scale,
+        originalSize: { width: 0, height: 0 }, // Would get from image analysis
+        upscaledSize: { width: 0, height: 0 }, // Would calculate from scale
+        processingTime: Date.now() - startTime,
+        cost: '0.10', // Estimate based on PixelCut pricing
+        status: 'completed',
+        metadata: {
+          pixelcutResponse: pixelcutResult,
+          originalImageId: imageId
+        }
+      });
+
+      // Clean up temporary image
+      await storage.deleteGeneratedImage(imageId);
+
+      console.log(`✅ [IMAGE_UPSCALE] Process completed in ${Date.now() - startTime}ms`);
+      
+      res.json({
+        success: true,
+        data: {
+          id: upscaledRecord.id,
+          originalImageUrl: imageBase64,
+          upscaledImageUrl: pixelcutResult.result_url,
+          scale: scale,
+          processingTime: Date.now() - startTime,
+          cost: upscaledRecord.cost
+        },
+        message: 'Imagem upscaled com sucesso'
+      });
+
+    } catch (error) {
+      console.error('❌ [IMAGE_UPSCALE] Error:', error);
+      res.status(500).json({ 
+        error: 'Erro no processamento da imagem',
+        message: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // Get user's upscaled images history
+  app.get('/api/image-upscale/history', requireAuth, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const history = await storage.getUserUpscaledImages(userId);
+      res.json(history);
+
+    } catch (error) {
+      console.error('❌ [IMAGE_UPSCALE_HISTORY] Error:', error);
+      res.status(500).json({ 
+        error: 'Erro ao buscar histórico de imagens',
+        message: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // Delete upscaled image
+  app.delete('/api/image-upscale/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const deleted = await storage.deleteUpscaledImage(id, userId);
+      
+      if (deleted) {
+        res.json({ success: true, message: 'Imagem removida com sucesso' });
+      } else {
+        res.status(404).json({ error: 'Imagem não encontrada' });
+      }
+
+    } catch (error) {
+      console.error('❌ [IMAGE_UPSCALE_DELETE] Error:', error);
+      res.status(500).json({ 
+        error: 'Erro ao remover imagem',
         message: error instanceof Error ? error.message : 'Erro desconhecido'
       });
     }

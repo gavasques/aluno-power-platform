@@ -993,10 +993,38 @@ export const toolUsageLogs = pgTable("tool_usage_logs", {
   keywordIdx: index("tool_usage_keyword_idx").on(table.keyword),
 }));
 
+// Upscaled Images table for PixelCut API
+export const upscaledImages = pgTable("upscaled_images", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  originalImageUrl: text("original_image_url").notNull(),
+  upscaledImageUrl: text("upscaled_image_url").notNull(),
+  scale: integer("scale").notNull(), // 2 or 4
+  originalSize: jsonb("original_size").notNull(), // {width, height}
+  upscaledSize: jsonb("upscaled_size").notNull(), // {width, height}
+  processingTime: integer("processing_time"), // in milliseconds
+  cost: decimal("cost", { precision: 10, scale: 6 }).notNull().default("0"),
+  status: text("status").notNull().default("completed"), // 'processing', 'completed', 'failed'
+  metadata: jsonb("metadata"), // Additional processing info
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("upscaled_images_user_idx").on(table.userId),
+  statusIdx: index("upscaled_images_status_idx").on(table.status),
+  createdIdx: index("upscaled_images_created_idx").on(table.createdAt),
+}));
+
 // Insert schemas for generated images
 export const insertGeneratedImageSchema = createInsertSchema(generatedImages);
 export type InsertGeneratedImage = z.infer<typeof insertGeneratedImageSchema>;
 export type GeneratedImage = typeof generatedImages.$inferSelect;
+
+// Insert schemas for upscaled images
+export const insertUpscaledImageSchema = createInsertSchema(upscaledImages).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertUpscaledImage = z.infer<typeof insertUpscaledImageSchema>;
+export type UpscaledImage = typeof upscaledImages.$inferSelect;
 
 // Insert schemas for AI generation logs
 export const insertAiGenerationLogSchema = createInsertSchema(aiGenerationLogs).omit({
