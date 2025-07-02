@@ -54,6 +54,7 @@ const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProvi
 const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
+const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
 
 // Keep Login as eager import for immediate authentication
 import Login from "./pages/Login";
@@ -100,6 +101,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <ImageUpscale />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/ai/background-removal">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <BackgroundRemoval />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

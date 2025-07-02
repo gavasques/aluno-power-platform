@@ -30,6 +30,8 @@ import {
   insertNewsSchema,
   insertAiGenerationLogSchema,
   aiGenerationLogs,
+  insertAiImgGenerationLogSchema,
+  aiImgGenerationLogs,
   insertUpdateSchema,
   insertGeneratedImageSchema,
   insertWebhookConfigSchema,
@@ -4862,14 +4864,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         
         await db.insert(aiImgGenerationLogs).values({
           userId: user.id,
-          originalImageUrl: `temp://${imageId}`,
-          processedImageUrl: processedImageUrl,
-          fileSize: tempImage.fileSize,
-          fileName: tempImage.fileName,
-          processingType: 'background_removal',
-          processingTime: processingTime,
-          cost: 0.02, // Estimated cost for background removal
-          status: 'success'
+          provider: 'pixelcut',
+          model: 'background-removal',
+          feature: 'background_removal',
+          originalImageName: tempImage.fileName,
+          generatedImageUrl: processedImageUrl,
+          status: 'success',
+          cost: '0.02',
+          duration: processingTime
         });
       } catch (dbError) {
         console.error('❌ [DB] Error saving background removal log:', dbError);

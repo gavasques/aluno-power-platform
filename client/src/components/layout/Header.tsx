@@ -44,6 +44,7 @@ const menuItems = [
     title: "IA",
     items: [
       { title: "Upscale de Imagem", href: "/ai/image-upscale", icon: ImageIcon },
+      { title: "Remover Background", href: "/ai/background-removal", icon: Zap },
     ],
   },
   {
