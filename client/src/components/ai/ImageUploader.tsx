@@ -64,7 +64,7 @@ export function ImageUploader({ onImageUploaded, uploadedImage }: ImageUploaderP
         const imageData = e.target?.result as string;
         
         try {
-          const token = localStorage.getItem('authToken');
+          const token = localStorage.getItem('auth_token');
           const response = await fetch('/api/image-upscale/upload', {
             method: 'POST',
             headers: {

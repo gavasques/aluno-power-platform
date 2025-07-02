@@ -56,7 +56,7 @@ export const queryClient = new QueryClient({
 // Enhanced API request helper with automatic auth headers
 export async function apiRequest<T>(url: string, options?: RequestInit): Promise<T> {
   // Get token from localStorage for authenticated requests
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('auth_token');
   
   const response = await fetch(url, {
     headers: {
