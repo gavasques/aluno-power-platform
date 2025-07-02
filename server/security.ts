@@ -113,7 +113,13 @@ export const sanitizeError = (error: any): { error: string; details?: string } =
 
 // Authentication middleware
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+  console.log('🔍 [AUTH] Request headers:', JSON.stringify({
+    authorization: req.headers.authorization,
+    'user-agent': req.headers['user-agent']?.substring(0, 50) + '...'
+  }));
+  
   const token = req.headers.authorization?.replace('Bearer ', '');
+  console.log('🔍 [AUTH] Extracted token:', token ? token.substring(0, 10) + '...' : 'null');
   
   if (!token) {
     return res.status(401).json({ 
