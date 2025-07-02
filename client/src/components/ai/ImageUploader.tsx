@@ -24,37 +24,40 @@ const UploadedImageDisplay = ({
   isUploading: boolean;
 }) => (
   <div className="space-y-4">
-    <div className="relative rounded-lg overflow-hidden border-2 border-border">
-      <img
-        src={image.url}
-        alt={image.name}
-        className="w-full h-64 object-contain bg-muted"
-      />
-      <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-opacity flex items-center justify-center opacity-0 hover:opacity-100">
+    <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <Upload className="h-5 w-5 text-green-600" />
+          </div>
+          <div>
+            <div className="font-medium text-green-800">Imagem carregada</div>
+            <div className="text-sm text-green-600">{image.name}</div>
+          </div>
+        </div>
         <div className="flex gap-2">
           <Button
-            variant="secondary"
+            variant="outline"
             size="sm"
             onClick={onChange}
             disabled={isUploading}
+            className="border-green-300 text-green-700 hover:bg-green-100"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Trocar
           </Button>
           <Button
-            variant="destructive"
+            variant="outline"
             size="sm"
             onClick={onRemove}
             disabled={isUploading}
+            className="border-red-300 text-red-700 hover:bg-red-100"
           >
             <X className="h-4 w-4 mr-2" />
             Remover
           </Button>
         </div>
       </div>
-    </div>
-    <div className="text-center">
-      <p className="text-sm text-muted-foreground">{image.name}</p>
     </div>
   </div>
 );
