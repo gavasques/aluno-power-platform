@@ -13,8 +13,10 @@ export interface BackgroundRemovalResponse {
   code?: string;
 }
 
+import type { UploadedImage } from './upscale';
+
 export interface BackgroundRemovalState {
-  originalImage: string | null;
+  originalImage: UploadedImage | null;
   processedImage: string | null;
   isProcessing: boolean;
   isUploading: boolean;

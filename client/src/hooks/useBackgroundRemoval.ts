@@ -61,7 +61,13 @@ export const useBackgroundRemoval = () => {
       const imageUrl = URL.createObjectURL(file);
       setState(prev => ({
         ...prev,
-        originalImage: imageUrl,
+        originalImage: {
+          id: `temp-${Date.now()}`,
+          url: imageUrl,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        },
         uploadedImageId: result.imageId || null,
         hasUploadedImage: true,
         processedImage: null,
@@ -136,12 +142,26 @@ export const useBackgroundRemoval = () => {
     }
   }, [state.uploadedImageId, toast, setError, setIsProcessing]);
 
+  const removeImage = useCallback(() => {
+    if (state.originalImage?.url) {
+      URL.revokeObjectURL(state.originalImage.url);
+    }
+    setState(prev => ({
+      ...prev,
+      originalImage: null,
+      processedImage: null,
+      hasUploadedImage: false,
+      uploadedImageId: null,
+      error: null,
+    }));
+  }, [state.originalImage?.url]);
+
   const reset = useCallback(() => {
-    if (state.originalImage) {
-      URL.revokeObjectURL(state.originalImage);
+    if (state.originalImage?.url) {
+      URL.revokeObjectURL(state.originalImage.url);
     }
     setState(initialState);
-  }, [state.originalImage]);
+  }, [state.originalImage?.url]);
 
   return {
     // State
@@ -155,6 +175,7 @@ export const useBackgroundRemoval = () => {
     
     // Actions
     uploadImage,
+    removeImage,
     removeBackground,
     reset,
   };

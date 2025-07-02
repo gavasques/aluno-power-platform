@@ -118,13 +118,10 @@ export default function BackgroundRemoval() {
             </CardHeader>
             <CardContent>
               <ImageUploader
-                onImageUpload={handleImageUpload}
-                isUploading={isUploading}
-                isProcessing={isProcessing}
-                maxSizeMB={BACKGROUND_REMOVAL_CONFIG.MAX_FILE_SIZE_MB}
-                supportedFormats={BACKGROUND_REMOVAL_CONFIG.SUPPORTED_FORMATS}
+                onFileSelect={handleImageUpload}
                 uploadedImage={originalImage}
-                uploadedFileName={uploadedFileName}
+                onRemoveImage={removeImage}
+                isUploading={isUploading}
               />
             </CardContent>
           </Card>
