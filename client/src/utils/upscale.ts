@@ -2,7 +2,7 @@ import { FILE_VALIDATION, API_ENDPOINTS } from "@/config/upscale";
 import type { ValidationError, UploadResponse, ProcessResponse } from "@/types/upscale";
 
 export const validateFile = async (file: File): Promise<ValidationError | null> => {
-  if (!FILE_VALIDATION.allowedTypes.includes(file.type)) {
+  if (!FILE_VALIDATION.allowedTypes.includes(file.type as any)) {
     return {
       message: 'Formato não suportado. Use PNG, JPG, JPEG ou WEBP.',
       type: 'format'
