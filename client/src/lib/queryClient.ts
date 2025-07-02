@@ -66,7 +66,7 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   
   // Only add Content-Type for non-FormData requests
   if (!(options?.body instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
+    (headers as any)['Content-Type'] = 'application/json';
   }
   
   const response = await fetch(url, {

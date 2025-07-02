@@ -13,7 +13,7 @@ export class AIImageService {
     const formData = new FormData();
     formData.append('image', file);
 
-    const response = await apiRequest('/api/temp-image/upload', {
+    const response: any = await apiRequest('/api/temp-image/upload', {
       method: 'POST',
       body: formData,
     });
@@ -40,7 +40,7 @@ export class AIImageService {
     imageId: string, 
     options: BackgroundRemovalOptions = {}
   ): Promise<ProcessedImage> {
-    const response = await apiRequest('/api/background-removal/process', {
+    const response: any = await apiRequest('/api/background-removal/process', {
       method: 'POST',
       body: JSON.stringify({ imageId, ...options }),
     });
@@ -50,10 +50,10 @@ export class AIImageService {
     }
 
     return {
-      id: response.data.id,
-      url: response.data.processedImageUrl,
+      id: imageId,
+      url: response.processedImageUrl,
       metadata: {
-        processingTime: response.data.processingTime,
+        processingTime: response.processingTime,
       }
     };
   }
