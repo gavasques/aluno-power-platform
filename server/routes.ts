@@ -4550,14 +4550,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         console.log(`🎭 [DEMO_MODE] Activating demo mode for upscale`);
         
         try {
-          const uploadedImage = await storage.getGeneratedImageById(imageId);
+          const uploadedImage = await storage.getGeneratedImageById(req.body.imageId);
           
           // Create a demo response that simulates upscaling
           const demoResult = {
             upscaledImageUrl: uploadedImage?.imageUrl || '', // Use original image as demo
-            message: `MODO DEMONSTRAÇÃO: Esta é uma simulação do upscale ${scale}x. A imagem original é exibida como exemplo do resultado. Para usar o upscale real, é necessário recarregar os créditos da API PixelCut.`,
+            message: `MODO DEMONSTRAÇÃO: Esta é uma simulação do upscale ${req.body.scale}x. A imagem original é exibida como exemplo do resultado. Para usar o upscale real, é necessário recarregar os créditos da API PixelCut.`,
             isDemoMode: true,
-            scale,
+            scale: req.body.scale,
             originalImageUrl: uploadedImage?.imageUrl || ''
           };
 
@@ -4567,9 +4567,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             const demoLogData = {
               userId: userId,
               provider: 'demo',
-              model: `upscale-${scale}x-demo`,
+              model: `upscale-${req.body.scale}x-demo`,
               feature: 'image-upscale-demo',
-              originalImageName: uploadedImage.metadata?.fileName || `image-${imageId}`,
+              originalImageName: uploadedImage.metadata?.fileName || `image-${req.body.imageId}`,
               originalImageSize: {
                 width: 0,
                 height: 0,
@@ -4581,7 +4581,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
                 height: 0,
                 fileSize: uploadedImage.metadata?.fileSize || 0
               },
-              scale: scale,
+              scale: req.body.scale,
               quality: 'demo',
               apiResponse: { demoMode: true, reason: 'insufficient_credits' },
               status: 'demo_success',
@@ -4599,7 +4599,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             };
             
             await storage.createAiImgGenerationLog(demoLogData);
-            console.log(`📊 [AI_IMG_LOG] Saved demo log - User: ${userId}, Mode: Demo ${scale}x`);
+            console.log(`📊 [AI_IMG_LOG] Saved demo log - User: ${userId}, Mode: Demo ${req.body.scale}x`);
           }
 
           return res.json({
