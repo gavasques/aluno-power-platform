@@ -4862,7 +4862,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       try {
         const user = (req as any).user;
         
-        await db.insert(aiImgGenerationLogs).values({
+        await storage.createAiImgGenerationLog({
           userId: user.id,
           provider: 'pixelcut',
           model: 'background-removal',
