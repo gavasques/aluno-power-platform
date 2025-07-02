@@ -108,7 +108,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 02, 2025**: ⚠️ LIMITAÇÃO DE CONECTIVIDADE IDENTIFICADA - REPLIT DNS
+- **July 02, 2025**: ✅ SISTEMA DE DOWNLOAD E LOGS DE IMAGENS IA IMPLEMENTADOS
+  - **Download Corrigido**: 
+    - Sistema de download via fetch implementado para evitar abertura de nova página
+    - Download de imagens processadas agora funciona na mesma página
+    - Função downloadProcessedImage usa blob e URL.createObjectURL
+    - Fallback para nova aba apenas em caso de erro no fetch
+  - **Sistema de Logs AI Imagens Completo**:
+    - Tabela ai_img_generation_logs já existente sendo utilizada corretamente
+    - Logging automático para todos os processamentos (sucesso e falha)
+    - Dados salvos: usuário, modelo, feature, nome da imagem, custos, duração
+    - Logs incluem resposta da API, qualidade, escala, IP, user-agent
+    - Sistema de logging para background removal implementado
+    - API endpoint preparado para relatórios de custos e análises
+  - **Monitoramento Completo**:
+    - Background removal: logs detalhados com provider "pixelcut"
+    - Custos rastreados: $0.02 para sucesso, $0.00 para falhas
+    - Tempo de processamento e status (success/failed) registrados
+    - Preparação para dashboard de análise de custos de IA
+
+- **July 02, 2025 (anterior)**: ⚠️ LIMITAÇÃO DE CONECTIVIDADE IDENTIFICADA - REPLIT DNS
   - **Problema de DNS Confirmado**: 
     - Ambiente Replit não consegue resolver DNS para api.pixelcut.ai
     - Erro ENOTFOUND indica bloqueio/limitação de rede no ambiente

@@ -98,14 +98,34 @@ export const processBackgroundRemoval = async (imageId: string): Promise<Backgro
   }
 };
 
-export const downloadProcessedImage = (imageUrl: string, originalFileName: string) => {
-  const link = document.createElement('a');
-  link.href = imageUrl;
-  
-  const nameWithoutExtension = originalFileName.split('.').slice(0, -1).join('.');
-  link.download = `${nameWithoutExtension}_sem_fundo.png`;
-  
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+export const downloadProcessedImage = async (imageUrl: string, originalFileName: string) => {
+  try {
+    // Fetch the image
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error('Failed to fetch image');
+    
+    // Get the blob
+    const blob = await response.blob();
+    
+    // Create download link
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    
+    // Set filename
+    const nameWithoutExtension = originalFileName.split('.').slice(0, -1).join('.');
+    link.download = `${nameWithoutExtension}_sem_fundo.png`;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error('Error downloading image:', error);
+    // Fallback to opening in new tab
+    window.open(imageUrl, '_blank');
+  }
 };

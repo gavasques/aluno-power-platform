@@ -52,8 +52,8 @@ import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
 import { requireAuth } from "./security";
 import { db } from './db';
-import { eq, desc, like, and, isNull, or, not, sql, asc } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema } from '@shared/schema';
+import { eq, desc, like, and, isNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs } from '@shared/schema';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -4963,6 +4963,44 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       } catch (apiError) {
         console.log('❌ [BACKGROUND_REMOVAL] Error:', apiError);
+        const processingTime = Date.now() - startTime;
+        const user = (req as any).user;
+        
+        // Save error log to database
+        try {
+          await storage.createAiImgGenerationLog({
+            userId: user.id,
+            provider: 'pixelcut',
+            model: 'bg-remover-v1',
+            feature: 'background_removal',
+            originalImageName: tempImage.metadata?.fileName || 'unknown.png',
+            originalImageSize: {
+              fileSize: tempImage.metadata?.fileSize || 0,
+              width: null,
+              height: null
+            },
+            generatedImageUrl: null,
+            generatedImageSize: null,
+            prompt: null,
+            scale: null,
+            quality: 'high',
+            apiResponse: {
+              error: apiError instanceof Error ? apiError.message : 'Unknown error',
+              status: 'failed'
+            },
+            status: 'failed',
+            errorMessage: apiError instanceof Error ? apiError.message : 'Unknown error',
+            cost: '0.00', // No cost for failed requests
+            duration: processingTime,
+            requestId: `bg_${Date.now()}`,
+            sessionId: tempImage.sessionId,
+            userAgent: (req as any).get('user-agent'),
+            ipAddress: (req as any).ip
+          });
+          console.log('✅ [DB] Background removal error log saved successfully');
+        } catch (dbError) {
+          console.error('❌ [DB] Error saving background removal error log:', dbError);
+        }
         
         // Check if it's a DNS/network issue
         if (apiError instanceof Error && (
@@ -4985,22 +5023,40 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
 
       const processingTime = Date.now() - startTime;
+      const user = (req as any).user;
 
-      // Save log to database
+      // Save success log to database
       try {
-        const user = (req as any).user;
-        
         await storage.createAiImgGenerationLog({
           userId: user.id,
           provider: 'pixelcut',
-          model: 'background-removal',
+          model: 'bg-remover-v1',
           feature: 'background_removal',
           originalImageName: tempImage.metadata?.fileName || 'unknown.png',
+          originalImageSize: {
+            fileSize: tempImage.metadata?.fileSize || 0,
+            width: null,
+            height: null
+          },
           generatedImageUrl: processedImageUrl,
+          generatedImageSize: null,
+          prompt: null,
+          scale: null,
+          quality: 'high',
+          apiResponse: {
+            result_url: processedImageUrl,
+            status: 'success'
+          },
           status: 'success',
-          cost: '0.02',
-          duration: processingTime
+          errorMessage: null,
+          cost: '0.02', // PixelCut typical cost
+          duration: processingTime,
+          requestId: `bg_${Date.now()}`,
+          sessionId: tempImage.sessionId,
+          userAgent: (req as any).get('user-agent'),
+          ipAddress: (req as any).ip
         });
+        console.log('✅ [DB] Background removal log saved successfully');
       } catch (dbError) {
         console.error('❌ [DB] Error saving background removal log:', dbError);
         // Continue with response even if logging fails
@@ -5072,5 +5128,4 @@ function generateTags(inputData: any): Record<string, string> {
 
   return tags;
 }
-
 
