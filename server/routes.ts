@@ -4904,6 +4904,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         
         console.log('🔍 [PIXELCUT_API] Using public URL for background removal:', publicImageUrl);
         
+        // Test DNS resolution first
+        console.log('🔍 [PIXELCUT_API] Testing DNS resolution for api.pixelcut.ai...');
+        
         // Use the correct format as per PixelCut API documentation
         const response = await fetch('https://api.pixelcut.ai/bg-remover/v2', {
           method: 'POST',
@@ -4958,6 +4961,21 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       } catch (apiError) {
         console.log('❌ [BACKGROUND_REMOVAL] Error:', apiError);
+        
+        // Check if it's a DNS/network issue
+        if (apiError instanceof Error && (
+          apiError.message.includes('ENOTFOUND') || 
+          apiError.message.includes('fetch failed') ||
+          apiError.cause?.code === 'ENOTFOUND'
+        )) {
+          console.log('🔍 [BACKGROUND_REMOVAL] DNS/Network issue detected with PixelCut API');
+          return res.status(503).json({
+            error: 'Serviço temporariamente indisponível. A API PixelCut não está acessível no momento. Tente novamente em alguns minutos.',
+            code: 'SERVICE_UNAVAILABLE',
+            details: 'DNS resolution failed for api.pixelcut.ai'
+          });
+        }
+        
         return res.status(400).json({
           error: 'Erro no processamento, aguarde 24 horas e tente novamente. Pedimos desculpas.',
           code: 'PROCESSING_ERROR'
