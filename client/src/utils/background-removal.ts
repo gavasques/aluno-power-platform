@@ -33,7 +33,7 @@ export const uploadImageForBackgroundRemoval = async (file: File): Promise<{ suc
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
             },
             body: JSON.stringify({
               imageData: base64Data,
@@ -72,7 +72,7 @@ export const processBackgroundRemoval = async (imageId: string): Promise<Backgro
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
       },
       body: JSON.stringify({ imageId } as BackgroundRemovalRequest)
     });
