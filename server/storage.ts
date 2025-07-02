@@ -36,6 +36,7 @@ import {
   agentSessions,
   agentSessionFiles,
   generatedImages,
+  upscaledImages,
   type User, 
   type InsertUser,
   type Supplier,
@@ -106,6 +107,8 @@ import {
   type AgentWithPrompts,
   type GeneratedImage,
   type InsertGeneratedImage,
+  type UpscaledImage,
+  type InsertUpscaledImage,
   type AgentSession,
   type InsertAgentSession,
   type AgentSessionFile,
@@ -2105,6 +2108,59 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return created;
+  }
+
+  async getGeneratedImageById(id: string): Promise<GeneratedImage | null> {
+    const [image] = await db
+      .select()
+      .from(generatedImages)
+      .where(eq(generatedImages.id, id));
+    return image || null;
+  }
+
+  async deleteGeneratedImage(id: string): Promise<boolean> {
+    const result = await db
+      .delete(generatedImages)
+      .where(eq(generatedImages.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Upscaled Images
+  async createUpscaledImage(image: InsertUpscaledImage): Promise<UpscaledImage> {
+    const [created] = await db
+      .insert(upscaledImages)
+      .values({
+        ...image,
+        createdAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async getUserUpscaledImages(userId: number): Promise<UpscaledImage[]> {
+    return await db
+      .select()
+      .from(upscaledImages)
+      .where(eq(upscaledImages.userId, userId))
+      .orderBy(desc(upscaledImages.createdAt));
+  }
+
+  async getUpscaledImageById(id: string): Promise<UpscaledImage | null> {
+    const [image] = await db
+      .select()
+      .from(upscaledImages)
+      .where(eq(upscaledImages.id, id));
+    return image || null;
+  }
+
+  async deleteUpscaledImage(id: string, userId: number): Promise<boolean> {
+    const result = await db
+      .delete(upscaledImages)
+      .where(and(
+        eq(upscaledImages.id, id),
+        eq(upscaledImages.userId, userId)
+      ));
+    return result.rowCount > 0;
   }
 
   // Agent Sessions
