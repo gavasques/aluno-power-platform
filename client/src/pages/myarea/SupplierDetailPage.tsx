@@ -25,8 +25,7 @@ import {
   Download,
   Eye,
   Save,
-  X,
-  MessageSquare
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
