@@ -4868,28 +4868,20 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         // Create a temporary URL to send to PixelCut
         const tempImageUrl = `data:${mimeType};base64,${base64Data}`;
         
-        console.log('🔍 [PIXELCUT_API] Trying background removal with multipart/form-data...');
+        console.log('🔍 [PIXELCUT_API] Trying background removal with JSON approach...');
         
-        // Use FormData for multipart/form-data as required by PixelCut API
-        const FormData = require('form-data');
-        const formData = new FormData();
-        
-        // Create buffer from base64 data for FormData
-        const imageBuffer = Buffer.from(base64Data, 'base64');
-        
-        // Add image as buffer with correct filename and content type
-        formData.append('image', imageBuffer, {
-          filename: tempImage.metadata?.fileName || 'image.jpg',
-          contentType: mimeType
-        });
+        // Use same approach as upscale - JSON with base64
+        const jsonPayload = {
+          image: base64Data // Send raw base64 like upscale does
+        };
 
         const response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
           method: 'POST',
           headers: {
-            'X-API-KEY': process.env.PIXELCUT_API_KEY,
-            ...formData.getHeaders() // This sets Content-Type: multipart/form-data with boundary
+            'Content-Type': 'application/json',
+            'X-API-KEY': process.env.PIXELCUT_API_KEY || ''
           },
-          body: formData
+          body: JSON.stringify(jsonPayload)
         });
 
         console.log('🔍 [PIXELCUT_API] Response status:', response.status);
