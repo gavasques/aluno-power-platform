@@ -153,6 +153,23 @@ export const supplierReviews = pgTable("supplier_reviews", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Supplier Conversations (CRM)
+export const supplierConversations = pgTable("supplier_conversations", {
+  id: serial("id").primaryKey(),
+  supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  subject: text("subject").notNull(), // Assunto da conversa
+  content: text("content").notNull(), // O que foi falado
+  outcome: text("outcome"), // O que ficou acertado
+  channel: text("channel").notNull(), // whatsapp, telefone, email, pessoalmente, call, outro
+  contactPerson: text("contact_person"), // Pessoa de contato
+  nextFollowUp: timestamp("next_follow_up"), // Próximo follow-up
+  priority: text("priority").notNull().default('medium'), // low, medium, high
+  status: text("status").notNull().default('completed'), // completed, pending, follow_up_needed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Partners
 export const partners = pgTable("partners", {
   id: serial("id").primaryKey(),
@@ -709,6 +726,7 @@ export const suppliersRelations = relations(suppliers, ({ one, many }) => ({
   files: many(supplierFiles),
   brands: many(supplierBrands),
   reviews: many(supplierReviews),
+  conversations: many(supplierConversations),
   products: many(products),
 }));
 
@@ -729,6 +747,13 @@ export const supplierFilesRelations = relations(supplierFiles, ({ one }) => ({
 export const supplierBrandsRelations = relations(supplierBrands, ({ one }) => ({
   supplier: one(suppliers, {
     fields: [supplierBrands.supplierId],
+    references: [suppliers.id],
+  }),
+}));
+
+export const supplierConversationsRelations = relations(supplierConversations, ({ one }) => ({
+  supplier: one(suppliers, {
+    fields: [supplierConversations.supplierId],
     references: [suppliers.id],
   }),
 }));
@@ -1072,6 +1097,15 @@ export const insertUpscaledImageSchema = createInsertSchema(upscaledImages).omit
 });
 export type InsertUpscaledImage = z.infer<typeof insertUpscaledImageSchema>;
 export type UpscaledImage = typeof upscaledImages.$inferSelect;
+
+// Insert schemas for supplier conversations
+export const insertSupplierConversationSchema = createInsertSchema(supplierConversations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSupplierConversation = z.infer<typeof insertSupplierConversationSchema>;
+export type SupplierConversation = typeof supplierConversations.$inferSelect;
 
 // Insert schemas for AI generation logs
 export const insertAiGenerationLogSchema = createInsertSchema(aiGenerationLogs).omit({

@@ -5321,6 +5321,65 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Supplier Conversations API
+  app.get('/api/suppliers/:id/conversations', async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      const conversations = await storage.getSupplierConversations(supplierId, userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error('Error fetching supplier conversations:', error);
+      res.status(500).json({ error: 'Failed to fetch conversations' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/conversations', async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      const conversationData = {
+        ...req.body,
+        supplierId,
+        userId
+      };
+      
+      const conversation = await storage.createSupplierConversation(conversationData);
+      res.json(conversation);
+    } catch (error) {
+      console.error('Error creating supplier conversation:', error);
+      res.status(500).json({ error: 'Failed to create conversation' });
+    }
+  });
+
+  app.put('/api/supplier-conversations/:id', async (req: any, res: any) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      const conversation = await storage.updateSupplierConversation(conversationId, userId, req.body);
+      res.json(conversation);
+    } catch (error) {
+      console.error('Error updating supplier conversation:', error);
+      res.status(500).json({ error: 'Failed to update conversation' });
+    }
+  });
+
+  app.delete('/api/supplier-conversations/:id', async (req: any, res: any) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user?.id || 1; // TODO: Get from auth
+      
+      await storage.deleteSupplierConversation(conversationId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting supplier conversation:', error);
+      res.status(500).json({ error: 'Failed to delete conversation' });
+    }
+  });
+
   return httpServer;
 }
 

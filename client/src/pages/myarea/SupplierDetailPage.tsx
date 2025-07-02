@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -24,7 +25,8 @@ import {
   Download,
   Eye,
   Save,
-  X
+  X,
+  MessageSquare
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -33,9 +35,11 @@ import {
   SupplierContact, 
   SupplierBrand, 
   SupplierFile,
+  SupplierConversation,
   InsertSupplierContact,
   InsertSupplierBrand,
-  InsertSupplierFile
+  InsertSupplierFile,
+  InsertSupplierConversation
 } from '@shared/schema';
 
 const SupplierDetailPage = () => {
@@ -65,6 +69,12 @@ const SupplierDetailPage = () => {
   // Fetch files
   const { data: files = [] } = useQuery<SupplierFile[]>({
     queryKey: [`/api/suppliers/${id}/files`],
+    enabled: !!id,
+  });
+
+  // Fetch conversations
+  const { data: conversations = [] } = useQuery<SupplierConversation[]>({
+    queryKey: [`/api/suppliers/${id}/conversations`],
     enabled: !!id,
   });
 
@@ -137,6 +147,33 @@ const SupplierDetailPage = () => {
     },
   });
 
+  const addConversationMutation = useMutation({
+    mutationFn: (data: InsertSupplierConversation) => 
+      apiRequest(`/api/suppliers/${id}/conversations`, { method: 'POST', body: JSON.stringify(data) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/conversations`] });
+      toast({ title: "Conversa registrada com sucesso!" });
+    },
+  });
+
+  const updateConversationMutation = useMutation({
+    mutationFn: ({ conversationId, data }: { conversationId: number; data: Partial<InsertSupplierConversation> }) => 
+      apiRequest(`/api/supplier-conversations/${conversationId}`, { method: 'PUT', body: JSON.stringify(data) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/conversations`] });
+      toast({ title: "Conversa atualizada com sucesso!" });
+    },
+  });
+
+  const deleteConversationMutation = useMutation({
+    mutationFn: (conversationId: number) => 
+      apiRequest(`/api/supplier-conversations/${conversationId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${id}/conversations`] });
+      toast({ title: "Conversa removida com sucesso!" });
+    },
+  });
+
   // Contact form
   const [contactForm, setContactForm] = useState<InsertSupplierContact>({
     supplierId: parseInt(id || '0'),
@@ -156,6 +193,20 @@ const SupplierDetailPage = () => {
     name: '',
     description: '',
     logo: '',
+  });
+
+  // Conversation form
+  const [conversationForm, setConversationForm] = useState<InsertSupplierConversation>({
+    supplierId: parseInt(id || '0'),
+    userId: 2, // TODO: Get from auth context
+    subject: '',
+    content: '',
+    outcome: '',
+    channel: 'whatsapp',
+    contactPerson: '',
+    nextFollowUp: undefined,
+    priority: 'medium',
+    status: 'completed',
   });
 
   // File upload
@@ -231,6 +282,62 @@ const SupplierDetailPage = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const handleAddConversation = () => {
+    addConversationMutation.mutate(conversationForm);
+    setConversationForm({
+      supplierId: parseInt(id || '0'),
+      userId: 2,
+      subject: '',
+      content: '',
+      outcome: '',
+      channel: 'whatsapp',
+      contactPerson: '',
+      nextFollowUp: undefined,
+      priority: 'medium',
+      status: 'completed',
+    });
+  };
+
+  const formatDate = (date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getChannelIcon = (channel: string) => {
+    switch (channel) {
+      case 'whatsapp': return '📱';
+      case 'telefone': return '📞';
+      case 'email': return '📧';
+      case 'pessoalmente': return '👥';
+      case 'call': return '🎥';
+      default: return '💬';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'text-red-600 bg-red-50';
+      case 'medium': return 'text-yellow-600 bg-yellow-50';
+      case 'low': return 'text-green-600 bg-green-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'text-green-600 bg-green-50';
+      case 'pending': return 'text-yellow-600 bg-yellow-50';
+      case 'follow_up': return 'text-blue-600 bg-blue-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
@@ -293,11 +400,12 @@ const SupplierDetailPage = () => {
         <Card>
           <CardContent className="p-6">
             <Tabs defaultValue="informacoes" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="informacoes">Informações</TabsTrigger>
                 <TabsTrigger value="marcas">Marcas</TabsTrigger>
                 <TabsTrigger value="contatos">Contatos</TabsTrigger>
                 <TabsTrigger value="arquivos">Arquivos</TabsTrigger>
+                <TabsTrigger value="conversas">Conversas</TabsTrigger>
               </TabsList>
 
               {/* Informações Tab */}
@@ -734,6 +842,188 @@ const SupplierDetailPage = () => {
                   {files.length === 0 && (
                     <div className="text-center py-8">
                       <p className="text-gray-600">Nenhum arquivo enviado para este fornecedor.</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* Conversas Tab */}
+              <TabsContent value="conversas" className="mt-6">
+                {/* Formulário para adicionar conversa */}
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5" />
+                      Nova Conversa
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="subject">Assunto</Label>
+                        <Input
+                          id="subject"
+                          value={conversationForm.subject}
+                          onChange={(e) => setConversationForm({...conversationForm, subject: e.target.value})}
+                          placeholder="Assunto da conversa"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="channel">Canal</Label>
+                        <Select 
+                          value={conversationForm.channel} 
+                          onValueChange={(value) => setConversationForm({...conversationForm, channel: value as any})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                            <SelectItem value="telefone">Telefone</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="pessoalmente">Pessoalmente</SelectItem>
+                            <SelectItem value="call">Videochamada</SelectItem>
+                            <SelectItem value="outro">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="contactPerson">Pessoa de Contato</Label>
+                        <Input
+                          id="contactPerson"
+                          value={conversationForm.contactPerson}
+                          onChange={(e) => setConversationForm({...conversationForm, contactPerson: e.target.value})}
+                          placeholder="Nome da pessoa"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="priority">Prioridade</Label>
+                        <Select 
+                          value={conversationForm.priority} 
+                          onValueChange={(value) => setConversationForm({...conversationForm, priority: value as any})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Baixa</SelectItem>
+                            <SelectItem value="medium">Média</SelectItem>
+                            <SelectItem value="high">Alta</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="content">Conteúdo da Conversa</Label>
+                        <Textarea
+                          id="content"
+                          value={conversationForm.content}
+                          onChange={(e) => setConversationForm({...conversationForm, content: e.target.value})}
+                          placeholder="Descreva o que foi discutido..."
+                          rows={3}
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="outcome">Resultado/Próximos Passos</Label>
+                        <Textarea
+                          id="outcome"
+                          value={conversationForm.outcome}
+                          onChange={(e) => setConversationForm({...conversationForm, outcome: e.target.value})}
+                          placeholder="Qual foi o resultado? Quais são os próximos passos?"
+                          rows={2}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="status">Status</Label>
+                        <Select 
+                          value={conversationForm.status} 
+                          onValueChange={(value) => setConversationForm({...conversationForm, status: value as any})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="completed">Concluída</SelectItem>
+                            <SelectItem value="pending">Pendente</SelectItem>
+                            <SelectItem value="follow_up">Acompanhamento</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-end">
+                        <Button onClick={handleAddConversation} className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Registrar Conversa
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Lista de conversas */}
+                <div className="space-y-4">
+                  {conversations.map((conversation) => (
+                    <Card key={conversation.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{getChannelIcon(conversation.channel)}</span>
+                            <div>
+                              <CardTitle className="text-lg">{conversation.subject}</CardTitle>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(conversation.priority)}`}>
+                                  {conversation.priority === 'high' ? 'Alta' : conversation.priority === 'medium' ? 'Média' : 'Baixa'}
+                                </span>
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(conversation.status)}`}>
+                                  {conversation.status === 'completed' ? 'Concluída' : 
+                                   conversation.status === 'pending' ? 'Pendente' : 'Acompanhamento'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right text-sm text-gray-500">
+                            <p>{formatDate(conversation.createdAt)}</p>
+                            {conversation.contactPerson && (
+                              <p className="font-medium">{conversation.contactPerson}</p>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mb-1">Conversa:</p>
+                            <p className="text-sm text-gray-600">{conversation.content}</p>
+                          </div>
+                          {conversation.outcome && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-700 mb-1">Resultado:</p>
+                              <p className="text-sm text-gray-600">{conversation.outcome}</p>
+                            </div>
+                          )}
+                          {conversation.nextFollowUp && (
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <p className="text-sm font-medium text-blue-800 mb-1">Próximo Acompanhamento:</p>
+                              <p className="text-sm text-blue-700">{formatDate(conversation.nextFollowUp)}</p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex justify-end mt-4 space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => deleteConversationMutation.mutate(conversation.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                  {conversations.length === 0 && (
+                    <div className="text-center py-8">
+                      <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">Nenhuma conversa registrada para este fornecedor.</p>
+                      <p className="text-sm text-gray-500 mt-1">Use o formulário acima para registrar sua primeira conversa.</p>
                     </div>
                   )}
                 </div>

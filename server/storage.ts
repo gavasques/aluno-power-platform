@@ -23,6 +23,7 @@ import {
   supplierContacts,
   supplierBrands,
   supplierFiles,
+  supplierConversations,
   toolReviews,
   toolReviewReplies,
   toolDiscounts,
@@ -124,7 +125,9 @@ import {
   type SupplierBrand,
   type InsertSupplierBrand,
   type SupplierFile,
-  type InsertSupplierFile
+  type InsertSupplierFile,
+  type SupplierConversation,
+  type InsertSupplierConversation
 } from "@shared/schema";
 import { db } from "./db";
 
@@ -2522,6 +2525,55 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(supplierFiles.id, fileId),
         eq(supplierFiles.userId, userId)
+      ));
+  }
+
+  // Supplier Conversations CRUD
+  async getSupplierConversations(supplierId: number, userId: number) {
+    const conversations = await db
+      .select()
+      .from(supplierConversations)
+      .where(and(
+        eq(supplierConversations.supplierId, supplierId),
+        eq(supplierConversations.userId, userId)
+      ))
+      .orderBy(desc(supplierConversations.createdAt));
+    return conversations;
+  }
+
+  async createSupplierConversation(conversationData: InsertSupplierConversation) {
+    const [conversation] = await db
+      .insert(supplierConversations)
+      .values({
+        ...conversationData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return conversation;
+  }
+
+  async updateSupplierConversation(conversationId: number, userId: number, conversationData: Partial<InsertSupplierConversation>) {
+    const [conversation] = await db
+      .update(supplierConversations)
+      .set({
+        ...conversationData,
+        updatedAt: new Date(),
+      })
+      .where(and(
+        eq(supplierConversations.id, conversationId),
+        eq(supplierConversations.userId, userId)
+      ))
+      .returning();
+    return conversation;
+  }
+
+  async deleteSupplierConversation(conversationId: number, userId: number): Promise<void> {
+    await db
+      .delete(supplierConversations)
+      .where(and(
+        eq(supplierConversations.id, conversationId),
+        eq(supplierConversations.userId, userId)
       ));
   }
 }
