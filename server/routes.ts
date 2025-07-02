@@ -4907,17 +4907,19 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         // Test DNS resolution first
         console.log('🔍 [PIXELCUT_API] Testing DNS resolution for api.pixelcut.ai...');
         
-        // Use the correct format as per PixelCut API documentation
-        const response = await fetch('https://api.pixelcut.ai/bg-remover/v2', {
+        // Use the correct PixelCut API endpoint and format
+        console.log('🔍 [PIXELCUT_API] Using official PixelCut API endpoint');
+        
+        const response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'X-API-Key': process.env.PIXELCUT_API_KEY || ''
+            'X-API-KEY': process.env.PIXELCUT_API_KEY || ''
           },
           body: JSON.stringify({
             image_url: publicImageUrl,
-            format: "png" // Required parameter
+            format: "png"
           })
         });
 

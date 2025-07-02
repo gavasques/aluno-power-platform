@@ -11,6 +11,13 @@ export interface BackgroundRemovalResponse {
   cost?: number;
   error?: string;
   code?: string;
+  isDemoMode?: boolean;
+  metadata?: {
+    processingTime: number;
+    apiProvider: string;
+    format: string;
+    quality: string;
+  };
 }
 
 import type { UploadedImage } from './upscale';

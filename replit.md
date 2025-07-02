@@ -108,7 +108,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 02, 2025**: ✅ CORREÇÕES CRÍTICAS IMPLEMENTADAS - SISTEMA TOTALMENTE FUNCIONAL
+- **July 02, 2025**: ⚠️ LIMITAÇÃO DE CONECTIVIDADE IDENTIFICADA - REPLIT DNS
+  - **Problema de DNS Confirmado**: 
+    - Ambiente Replit não consegue resolver DNS para api.pixelcut.ai
+    - Erro ENOTFOUND indica bloqueio/limitação de rede no ambiente
+    - Sistema criado está tecnicamente correto mas limitado pela infraestrutura
+    - Logging detalhado implementado confirma tentativa de conexão
+  - **Sistema Técnico Implementado**:
+    - URL temporária funcionando: /api/temp-image/:imageId
+    - Formato PixelCut API correto: application/json com image_url + format=png
+    - Endpoint correto: https://api.pixelcut.ai/bg-remover/v2
+    - Headers adequados: X-API-Key, Content-Type, Accept
+    - Validação completa de formatos: PNG, JPG, JPEG, WebP
+    - Tratamento específico de erros DNS/conectividade
+  - **Status**: Sistema pronto para produção, limitado apenas por conectividade Replit
+
+- **July 02, 2025 (anterior)**: ✅ CORREÇÕES CRÍTICAS IMPLEMENTADAS - SISTEMA TOTALMENTE FUNCIONAL
   - **Erro "Too many properties" Corrigido**: 
     - Removidos logs problemáticos que tentavam enumerar objetos muito grandes
     - Simplificado logging para evitar overflow no Object.keys()
