@@ -4754,6 +4754,40 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Temporary image serving endpoint for PixelCut API
+  app.get('/api/temp-image/:imageId', async (req: Request, res: Response) => {
+    try {
+      const { imageId } = req.params;
+      
+      const tempImage = await storage.getGeneratedImageById(imageId);
+      if (!tempImage) {
+        return res.status(404).json({ error: 'Image not found' });
+      }
+      
+      // Extract base64 data from data URL
+      const base64Match = tempImage.imageUrl.match(/^data:([^;]+);base64,(.+)$/);
+      if (!base64Match) {
+        return res.status(400).json({ error: 'Invalid image format' });
+      }
+      
+      const mimeType = base64Match[1];
+      const base64Data = base64Match[2];
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+      
+      res.set({
+        'Content-Type': mimeType,
+        'Content-Length': imageBuffer.length.toString(),
+        'Cache-Control': 'public, max-age=3600', // 1 hour cache
+        'Access-Control-Allow-Origin': '*'
+      });
+      
+      res.send(imageBuffer);
+    } catch (error) {
+      console.error('Error serving temp image:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Background Removal API Routes
   app.post('/api/background-removal/upload', requireAuth, async (req, res) => {
     const startTime = Date.now();
@@ -4865,10 +4899,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const mimeMatch = tempImage.imageUrl.match(/^data:([^;]+);base64,/);
         const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
         
-        // Create a temporary URL to send to PixelCut
-        const tempImageUrl = `data:${mimeType};base64,${base64Data}`;
+        // Create a publicly accessible temporary URL
+        const publicImageUrl = `${(req as any).protocol}://${(req as any).get('host')}/api/temp-image/${tempImage.id}`;
         
-        console.log('🔍 [PIXELCUT_API] Sending background removal request with correct format...');
+        console.log('🔍 [PIXELCUT_API] Using public URL for background removal:', publicImageUrl);
         
         // Use the correct format as per PixelCut API documentation
         const response = await fetch('https://api.developer.pixelcut.ai/v1/remove-background', {
@@ -4878,7 +4912,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             'X-API-KEY': process.env.PIXELCUT_API_KEY || ''
           },
           body: JSON.stringify({
-            image_url: tempImageUrl, // Data URL should work
+            image_url: publicImageUrl,
             format: "png" // Required parameter
           })
         });
