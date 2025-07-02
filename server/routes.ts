@@ -4367,26 +4367,31 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log(`🔍 [IMAGE_UPSCALE] Processing image ID: ${imageId} with ${scale}x scale`);
 
-      // Convert base64 to blob URL for PixelCut API
+      // Convert base64 to buffer for PixelCut API
       const imageBase64 = uploadedImage.imageUrl;
       const imageBuffer = Buffer.from(imageBase64.split(',')[1], 'base64');
       
-      // Create a temporary URL - In production, you'd use a cloud storage service
-      // For now, we'll use a data URL directly with PixelCut
-      const tempImageUrl = imageBase64;
+      // Create FormData for multipart upload to PixelCut API
+      const FormData = require('form-data');
+      const formData = new FormData();
+      
+      // Add image file to form data
+      formData.append('image', imageBuffer, {
+        filename: uploadedImage.fileName || 'image.png',
+        contentType: 'image/png'
+      });
+      
+      // Add scale parameter
+      formData.append('scale', scale.toString());
 
-      // Call PixelCut API
+      // Call PixelCut API with multipart form data
       const pixelcutResponse = await fetch('https://api.developer.pixelcut.ai/v1/upscale', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-API-KEY': process.env.PIXELCUT_API_KEY || ''
+          'X-API-KEY': process.env.PIXELCUT_API_KEY || '',
+          ...formData.getHeaders()
         },
-        body: JSON.stringify({
-          image_url: tempImageUrl,
-          scale: scale
-        })
+        body: formData
       });
 
       if (!pixelcutResponse.ok) {
