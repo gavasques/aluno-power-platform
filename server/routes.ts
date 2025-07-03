@@ -2320,9 +2320,26 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const processingTime = Math.round((endTime - startTime) / 1000);
         
         // Get real cost from OpenAI response usage (gpt-image-1 pricing)
-        const realCost = response.usage ? 
-          (response.usage.input_tokens * 0.00000625) + (response.usage.output_tokens * 0.01875) : 
-          5.167; // Default to documented gpt-image-1 cost if no usage data
+        // Text input: $5.00/1M, Image input: $10.00/1M, Image output: $40.00/1M
+        let realCost = 5.167; // Default fallback
+        
+        if (response.usage) {
+          const textInputTokens = response.usage.input_tokens_details?.text_tokens || 0;
+          const imageInputTokens = response.usage.input_tokens_details?.image_tokens || 0;
+          const imageOutputTokens = response.usage.output_tokens || 0;
+          
+          realCost = (textInputTokens * 0.000005) + (imageInputTokens * 0.00001) + (imageOutputTokens * 0.00004);
+        }
+
+        console.log('💰 [PRODUCT_PHOTOGRAPHY] Cost calculation details:', {
+          textTokens: response.usage?.input_tokens_details?.text_tokens || 0,
+          imageTokens: response.usage?.input_tokens_details?.image_tokens || 0,
+          outputTokens: response.usage?.output_tokens || 0,
+          textCost: ((response.usage?.input_tokens_details?.text_tokens || 0) * 0.000005).toFixed(6),
+          imageCost: ((response.usage?.input_tokens_details?.image_tokens || 0) * 0.00001).toFixed(6),
+          outputCost: ((response.usage?.output_tokens || 0) * 0.00004).toFixed(6),
+          totalCost: realCost.toFixed(6)
+        });
 
         console.log('✅ [PRODUCT_PHOTOGRAPHY] Processing completed:', {
           processingTime: `${processingTime}s`,
