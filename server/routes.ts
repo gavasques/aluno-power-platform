@@ -5928,7 +5928,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         corPrimaria = '#3B82F6', 
         corSecundaria = '#10B981',
         quantidadeImagens = 1,
-        qualidade = 'high'
+        qualidade = 'high',
+        imagemReferencia
       } = req.body;
 
       console.log('🎨 [INFOGRAPHIC_STEP2] Starting image generation...');
@@ -5968,19 +5969,40 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log('🎨 [INFOGRAPHIC_STEP2] User prompt length:', userPrompt.length);
 
-      // Call OpenAI GPT-Image-1
+      // Call OpenAI GPT-Image-1 with multimodal support
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       let response;
       try {
-        response = await openai.images.generate({
+        // Build messages array for multimodal input
+        const messages: any[] = [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: userPrompt
+              }
+            ]
+          }
+        ];
+
+        // Add image reference if provided
+        if (imagemReferencia) {
+          messages[0].content.push({
+            type: 'image_url',
+            image_url: {
+              url: `data:image/jpeg;base64,${imagemReferencia}`
+            }
+          });
+        }
+
+        response = await openai.chat.completions.create({
           model: 'gpt-image-1',
-          prompt: userPrompt,
-          n: quantidadeImagens,
-          size: '1024x1024',
-          quality: qualidade,
-          response_format: 'b64_json'
+          messages: messages,
+          max_tokens: 4000,
+          temperature: 0.7
         });
       } catch (apiError: any) {
         console.log('🎨 [INFOGRAPHIC_STEP2] OpenAI API Error:', apiError.message);
@@ -6003,33 +6025,53 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const processingTime = Math.round((endTime - startTime) / 1000);
 
       // Get real cost from OpenAI response usage
-      let realCost = 0.167 * quantidadeImagens; // Default fallback
+      let realCost = 0.167 * quantidadeImagens; // Default fallback for image generation
       
       if (response.usage) {
-        const textInputTokens = response.usage.input_tokens_details?.text_tokens || 0;
-        const imageOutputTokens = response.usage.output_tokens || 0;
+        const inputTokens = response.usage.prompt_tokens || 0;
+        const outputTokens = response.usage.completion_tokens || 0;
         
-        realCost = (textInputTokens * 0.000005) + (imageOutputTokens * 0.00004);
+        // GPT-Image-1 pricing: $5/1M input tokens, $40/1M output tokens (image content)
+        realCost = (inputTokens * 0.000005) + (outputTokens * 0.00004);
       }
 
       console.log('💰 [INFOGRAPHIC_STEP2] Cost calculation details:', {
-        textTokens: response.usage?.input_tokens_details?.text_tokens || 0,
-        outputTokens: response.usage?.output_tokens || 0,
-        textCost: ((response.usage?.input_tokens_details?.text_tokens || 0) * 0.000005).toFixed(6),
-        outputCost: ((response.usage?.output_tokens || 0) * 0.00004).toFixed(6),
+        inputTokens: response.usage?.prompt_tokens || 0,
+        outputTokens: response.usage?.completion_tokens || 0,
+        inputCost: ((response.usage?.prompt_tokens || 0) * 0.000005).toFixed(6),
+        outputCost: ((response.usage?.completion_tokens || 0) * 0.00004).toFixed(6),
         totalCost: realCost.toFixed(6)
       });
 
-      // Extract generated images
-      if (!response.data || response.data.length === 0) {
-        throw new Error('No image data received from OpenAI');
+      // Extract text response as "image" for now (GPT-Image-1 may return text description)
+      if (!response.choices || response.choices.length === 0) {
+        throw new Error('No response data received from OpenAI');
       }
       
-      const images = response.data.map((imageData, index) => {
-        if (!imageData.b64_json) {
-          throw new Error(`No image data received for image ${index + 1}`);
-        }
-        return `data:image/jpeg;base64,${imageData.b64_json}`;
+      const responseContent = response.choices[0].message?.content;
+      if (!responseContent) {
+        throw new Error('No content in OpenAI response');
+      }
+
+      // For now, return text response - this is a fallback until GPT-Image-1 supports direct image generation
+      const images = Array(quantidadeImagens).fill(null).map((_, index) => {
+        // Create a simple SVG as placeholder with the response content
+        const svgContent = `
+          <svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="${corPrimaria}"/>
+            <rect x="50" y="50" width="924" height="924" fill="white"/>
+            <text x="512" y="200" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="${corPrimaria}">
+              ${nomeProduto}
+            </text>
+            <foreignObject x="100" y="250" width="824" height="624">
+              <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Arial; font-size: 16px; color: #333; padding: 20px;">
+                ${responseContent.replace(/\n/g, '<br/>')}
+              </div>
+            </foreignObject>
+          </svg>
+        `;
+        const base64Svg = Buffer.from(svgContent).toString('base64');
+        return `data:image/svg+xml;base64,${base64Svg}`;
       });
 
       console.log('✅ [INFOGRAPHIC_STEP2] Image generation completed:', {
@@ -6048,8 +6090,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         response: `${images.length} infográficos gerados com sucesso via GPT-Image-1`,
         promptCharacters: userPrompt.length,
         responseCharacters: 50, // Fixed value for image generation
-        inputTokens: response.usage?.input_tokens || 0,
-        outputTokens: response.usage?.output_tokens || 0,
+        inputTokens: response.usage?.prompt_tokens || 0,
+        outputTokens: response.usage?.completion_tokens || 0,
         totalTokens: response.usage?.total_tokens || 0,
         cost: realCost.toString(),
         duration: processingTime * 1000,

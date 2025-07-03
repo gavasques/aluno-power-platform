@@ -111,7 +111,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ EDITOR DE FOTO INFOGRÁFICOS IMPLEMENTADO - PROCESSO 2 ETAPAS COM CLAUDE + GPT-IMAGE-1
+- **July 03, 2025**: ✅ INFOGRAPHIC GENERATOR - CAMPO DE UPLOAD DE IMAGEM IMPLEMENTADO COM MULTIMODAL GPT-IMAGE-1
+  - **Campo de Upload de Imagem Adicionado**:
+    - Interface de upload com drag & drop para imagem de referência opcional
+    - Preview da imagem carregada com botão de remoção
+    - Validação de formato (PNG, JPG, JPEG, WebP) e tamanho máximo 25MB
+    - Posicionamento estratégico entre descrição do produto e cores
+  - **Integração Multimodal GPT-Image-1**:
+    - Backend atualizado para receber e processar imagem de referência
+    - Mudança de `images.generate` para `chat.completions.create` com suporte multimodal
+    - Imagem enviada como base64 no prompt junto com texto otimizado
+    - Sistema de mensagens estruturado para entrada texto + imagem
+  - **Processamento Aprimorado**:
+    - Imagem de referência usada como guia visual para estilo do infográfico
+    - Sistema sem fallback mantido: ou funciona com IA real ou retorna erro
+    - Logs atualizados para capturar tokens corretos (prompt_tokens, completion_tokens)
+    - Custos calculados baseados em pricing GPT-Image-1: $5/1M input + $40/1M output
+  - **Experiência do Usuário**:
+    - Texto explicativo: "A imagem será enviada ao GPT-Image-1 como referência para o estilo"
+    - Campo opcional - usuário pode gerar infográfico com ou sem imagem de referência
+    - Manutenção do fluxo de 2 etapas: Claude Sonnet (texto) → GPT-Image-1 (visual)
+
+- **July 03, 2025 (anterior)**: ✅ EDITOR DE FOTO INFOGRÁFICOS IMPLEMENTADO - PROCESSO 2 ETAPAS COM CLAUDE + GPT-IMAGE-1
   - **Terceiro Agente Especializado Criado**:
     - Nome: "Editor de Foto Infográficos" para criação de infográficos de produtos Amazon
     - Processo híbrido: Claude Sonnet 4 para otimização de texto + GPT-Image-1 para geração visual

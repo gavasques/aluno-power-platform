@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Download, Users, Sparkles, Zap, AlertTriangle } from 'lucide-react';
+import { Download, Users, Sparkles, Zap, AlertTriangle, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -19,6 +19,7 @@ interface InfographicData {
     corSecundaria?: string;
     quantidadeImagens: number;
     qualidade: 'low' | 'medium' | 'high';
+    imagemReferencia?: string;
   };
   etapa1Response?: {
     nome: string;
@@ -42,12 +43,53 @@ export default function InfographicGenerator() {
     quantidadeImagens: 1,
     qualidade: 'high' as 'low' | 'medium' | 'high'
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [infographicData, setInfographicData] = useState<InfographicData | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState<'form' | 'step1' | 'step2' | 'complete'>('form');
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Arquivo inválido",
+          description: "Por favor, selecione apenas arquivos de imagem.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Validate file size (max 25MB)
+      if (file.size > 25 * 1024 * 1024) {
+        toast({
+          title: "Arquivo muito grande",
+          description: "O arquivo deve ter no máximo 25MB.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setImageFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview('');
   };
 
   const handleGenerateInfographic = async () => {
@@ -73,6 +115,16 @@ export default function InfographicGenerator() {
     setCurrentStep('step1');
 
     try {
+      // Converte imagem para base64 se fornecida
+      let imagemBase64 = '';
+      if (imageFile) {
+        imagemBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
+          reader.readAsDataURL(imageFile);
+        });
+      }
+
       // Etapa 1: Otimização de texto com Claude Sonnet
       const etapa1Response = await apiRequest('/api/agents/infographic-generator/step1', {
         method: 'POST',
@@ -83,7 +135,7 @@ export default function InfographicGenerator() {
       }) as any;
 
       setInfographicData({
-        originalData: formData,
+        originalData: {...formData, imagemReferencia: imagePreview},
         etapa1Response: etapa1Response.optimizedContent
       });
 
@@ -98,7 +150,8 @@ export default function InfographicGenerator() {
           corPrimaria: formData.corPrimaria,
           corSecundaria: formData.corSecundaria,
           quantidadeImagens: formData.quantidadeImagens,
-          qualidade: formData.qualidade
+          qualidade: formData.qualidade,
+          imagemReferencia: imagemBase64
         })
       }) as any;
 
@@ -238,6 +291,60 @@ export default function InfographicGenerator() {
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Inclua todas as informações disponíveis: características, benefícios, especificações técnicas, etc.
+                </p>
+              </div>
+
+              <Separator />
+
+              {/* Imagem de Referência */}
+              <div>
+                <Label htmlFor="imagemReferencia">Imagem de Referência (Opcional)</Label>
+                <div className="space-y-3">
+                  {imagePreview ? (
+                    <div className="relative">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-full h-32 object-cover rounded-lg border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={removeImage}
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                      <input
+                        type="file"
+                        id="imagemReferencia"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <Label 
+                        htmlFor="imagemReferencia" 
+                        className="cursor-pointer flex flex-col items-center gap-2"
+                      >
+                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                          <Upload className="h-5 w-5 text-gray-500" />
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          Clique para adicionar imagem
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          PNG, JPG até 25MB
+                        </span>
+                      </Label>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  A imagem será enviada ao GPT-Image-1 como referência para o estilo do infográfico
                 </p>
               </div>
 
