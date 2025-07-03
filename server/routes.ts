@@ -5996,8 +5996,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           image: imageFile,
           prompt: userPrompt,
           n: quantidadeImagens,
-          size: '1024x1024',
-          response_format: 'b64_json'
+          size: '1024x1024'
         });
       } catch (apiError: any) {
         console.log('🎨 [INFOGRAPHIC_STEP2] OpenAI API Error:', apiError.message);
@@ -6035,12 +6034,19 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         throw new Error('No image data received from GPT-Image-1');
       }
       
-      const images = response.data.map((imageData, index) => {
-        if (!imageData.b64_json) {
+      const images = await Promise.all(response.data.map(async (imageData, index) => {
+        if (imageData.url) {
+          // Convert URL to base64
+          const imageResponse = await fetch(imageData.url);
+          const arrayBuffer = await imageResponse.arrayBuffer();
+          const base64 = Buffer.from(arrayBuffer).toString('base64');
+          return `data:image/jpeg;base64,${base64}`;
+        } else if (imageData.b64_json) {
+          return `data:image/jpeg;base64,${imageData.b64_json}`;
+        } else {
           throw new Error(`No image data received for image ${index + 1}`);
         }
-        return `data:image/jpeg;base64,${imageData.b64_json}`;
-      });
+      }));
 
       console.log('✅ [INFOGRAPHIC_STEP2] GPT-Image-1 image generation completed:', {
         processingTime: `${processingTime}s`,
