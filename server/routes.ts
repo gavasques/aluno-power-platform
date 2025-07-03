@@ -5969,41 +5969,40 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log('🎨 [INFOGRAPHIC_STEP2] User prompt length:', userPrompt.length);
 
-      // Call OpenAI GPT-Image-1 with multimodal support
+      // Call OpenAI for image generation/editing
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       let response;
       try {
-        // Build messages array for multimodal input
-        const messages: any[] = [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: userPrompt
-              }
-            ]
-          }
-        ];
-
-        // Add image reference if provided
         if (imagemReferencia) {
-          messages[0].content.push({
-            type: 'image_url',
-            image_url: {
-              url: `data:image/jpeg;base64,${imagemReferencia}`
-            }
+          // Use image editing with reference image
+          console.log('🎨 [INFOGRAPHIC_STEP2] Using image editing with reference');
+          
+          // Convert base64 to File object for OpenAI
+          const imageBuffer = Buffer.from(imagemReferencia, 'base64');
+          const imageFile = await OpenAI.toFile(imageBuffer, 'reference.png');
+          
+          response = await openai.images.edit({
+            image: imageFile,
+            prompt: userPrompt,
+            n: quantidadeImagens,
+            size: '1024x1024',
+            response_format: 'b64_json'
+          });
+        } else {
+          // Use standard image generation without reference
+          console.log('🎨 [INFOGRAPHIC_STEP2] Using standard image generation');
+          
+          response = await openai.images.generate({
+            model: 'dall-e-3',
+            prompt: userPrompt,
+            n: quantidadeImagens,
+            size: '1024x1024',
+            quality: qualidade === 'high' ? 'hd' : 'standard',
+            response_format: 'b64_json'
           });
         }
-
-        response = await openai.chat.completions.create({
-          model: 'gpt-image-1',
-          messages: messages,
-          max_tokens: 4000,
-          temperature: 0.7
-        });
       } catch (apiError: any) {
         console.log('🎨 [INFOGRAPHIC_STEP2] OpenAI API Error:', apiError.message);
         
@@ -6024,54 +6023,33 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const endTime = Date.now();
       const processingTime = Math.round((endTime - startTime) / 1000);
 
-      // Get real cost from OpenAI response usage
-      let realCost = 0.167 * quantidadeImagens; // Default fallback for image generation
-      
-      if (response.usage) {
-        const inputTokens = response.usage.prompt_tokens || 0;
-        const outputTokens = response.usage.completion_tokens || 0;
-        
-        // GPT-Image-1 pricing: $5/1M input tokens, $40/1M output tokens (image content)
-        realCost = (inputTokens * 0.000005) + (outputTokens * 0.00004);
+      // Calculate cost based on image generation/editing
+      let realCost;
+      if (imagemReferencia) {
+        // Image editing cost is typically higher
+        realCost = 0.20 * quantidadeImagens; // $0.20 per image edit
+      } else {
+        // Standard DALL-E 3 generation cost
+        realCost = 0.04 * quantidadeImagens; // $0.04 per 1024x1024 image
       }
 
       console.log('💰 [INFOGRAPHIC_STEP2] Cost calculation details:', {
-        inputTokens: response.usage?.prompt_tokens || 0,
-        outputTokens: response.usage?.completion_tokens || 0,
-        inputCost: ((response.usage?.prompt_tokens || 0) * 0.000005).toFixed(6),
-        outputCost: ((response.usage?.completion_tokens || 0) * 0.00004).toFixed(6),
+        method: imagemReferencia ? 'image_editing' : 'image_generation',
+        model: imagemReferencia ? 'dall-e-2-edit' : 'dall-e-3',
+        quantity: quantidadeImagens,
         totalCost: realCost.toFixed(6)
       });
 
-      // Extract text response as "image" for now (GPT-Image-1 may return text description)
-      if (!response.choices || response.choices.length === 0) {
-        throw new Error('No response data received from OpenAI');
+      // Extract generated images
+      if (!response.data || response.data.length === 0) {
+        throw new Error('No image data received from OpenAI');
       }
       
-      const responseContent = response.choices[0].message?.content;
-      if (!responseContent) {
-        throw new Error('No content in OpenAI response');
-      }
-
-      // For now, return text response - this is a fallback until GPT-Image-1 supports direct image generation
-      const images = Array(quantidadeImagens).fill(null).map((_, index) => {
-        // Create a simple SVG as placeholder with the response content
-        const svgContent = `
-          <svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
-            <rect width="100%" height="100%" fill="${corPrimaria}"/>
-            <rect x="50" y="50" width="924" height="924" fill="white"/>
-            <text x="512" y="200" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="${corPrimaria}">
-              ${nomeProduto}
-            </text>
-            <foreignObject x="100" y="250" width="824" height="624">
-              <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Arial; font-size: 16px; color: #333; padding: 20px;">
-                ${responseContent.replace(/\n/g, '<br/>')}
-              </div>
-            </foreignObject>
-          </svg>
-        `;
-        const base64Svg = Buffer.from(svgContent).toString('base64');
-        return `data:image/svg+xml;base64,${base64Svg}`;
+      const images = response.data.map((imageData, index) => {
+        if (!imageData.b64_json) {
+          throw new Error(`No image data received for image ${index + 1}`);
+        }
+        return `data:image/jpeg;base64,${imageData.b64_json}`;
       });
 
       console.log('✅ [INFOGRAPHIC_STEP2] Image generation completed:', {
@@ -6090,8 +6068,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         response: `${images.length} infográficos gerados com sucesso via GPT-Image-1`,
         promptCharacters: userPrompt.length,
         responseCharacters: 50, // Fixed value for image generation
-        inputTokens: response.usage?.prompt_tokens || 0,
-        outputTokens: response.usage?.completion_tokens || 0,
+        inputTokens: 0, // Image generation doesn't provide token usage
+        outputTokens: 0, // Image generation doesn't provide token usage
         totalTokens: response.usage?.total_tokens || 0,
         cost: realCost.toString(),
         duration: processingTime * 1000,
