@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, MessageCircle, Clock, User, Tag, FileText, Paperclip, X, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -65,6 +65,7 @@ const Support = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -152,6 +153,10 @@ const Support = () => {
         title: 'Mensagem enviada!',
         description: 'Sua mensagem foi adicionada ao ticket.',
       });
+      // Auto scroll to bottom after adding message
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     },
     onError: () => {
       toast({
@@ -161,6 +166,15 @@ const Support = () => {
       });
     },
   });
+
+  // Auto scroll to bottom when ticket changes or messages update
+  useEffect(() => {
+    if (selectedTicket && selectedTicket.messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [selectedTicket?.messages.length, selectedTicket?.id]);
 
   // Close ticket mutation
   const closeTicketMutation = useMutation({
@@ -564,64 +578,113 @@ const Support = () => {
                     </div>
                   )}
 
-                  {/* Messages */}
-                  {selectedTicket.messages.length > 0 && (
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-900 mb-2">Mensagens</h4>
-                      <div className="max-h-40 overflow-y-auto space-y-2">
-                        {selectedTicket.messages.map((message) => (
-                          <div 
-                            key={message.id} 
-                            className={`p-2 rounded text-sm ${
-                              message.isStaffReply 
-                                ? 'bg-blue-50 border-l-4 border-blue-400' 
-                                : 'bg-gray-50 border-l-4 border-gray-300'
-                            }`}
-                          >
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="font-medium text-xs">
-                                {message.user.name}
-                                {message.isStaffReply && (
-                                  <Badge variant="secondary" className="ml-1 text-xs">Suporte</Badge>
-                                )}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {new Date(message.createdAt).toLocaleDateString('pt-BR')}
-                              </span>
+                  {/* Messages History */}
+                  <div>
+                    <h4 className="font-medium text-sm text-gray-900 mb-2">Histórico de Mensagens</h4>
+                    <div className="max-h-96 overflow-y-auto space-y-3 border rounded-lg p-3 bg-gray-50">
+                      {selectedTicket.messages.length > 0 ? (
+                        selectedTicket.messages
+                          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                          .map((message) => (
+                            <div 
+                              key={message.id} 
+                              className={`flex ${message.isStaffReply ? 'justify-start' : 'justify-end'}`}
+                            >
+                              <div 
+                                className={`max-w-[80%] p-3 rounded-lg text-sm ${
+                                  message.isStaffReply 
+                                    ? 'bg-white border border-blue-200 text-gray-800' 
+                                    : 'bg-blue-600 text-white'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className={`font-medium text-xs ${
+                                    message.isStaffReply ? 'text-blue-600' : 'text-blue-100'
+                                  }`}>
+                                    {message.user.name}
+                                    {message.isStaffReply && (
+                                      <Badge variant="secondary" className="ml-1 text-xs bg-blue-100 text-blue-800">
+                                        Suporte
+                                      </Badge>
+                                    )}
+                                  </span>
+                                  <span className={`text-xs ${
+                                    message.isStaffReply ? 'text-gray-500' : 'text-blue-100'
+                                  }`}>
+                                    {new Date(message.createdAt).toLocaleString('pt-BR', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                </div>
+                                <p className="leading-relaxed">{message.message}</p>
+                              </div>
                             </div>
-                            <p className="text-gray-700">{message.message}</p>
-                          </div>
-                        ))}
-                      </div>
+                          ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <MessageCircle className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">Nenhuma mensagem ainda</p>
+                          <p className="text-xs">Inicie a conversa enviando um comentário</p>
+                        </div>
+                      )}
+                      <div ref={messagesEndRef} />
                     </div>
-                  )}
+                  </div>
 
                   {/* Add New Message - Only if ticket is not closed */}
                   {selectedTicket.status !== 'closed' && (
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-900 mb-2">Adicionar Comentário</h4>
+                    <div className="border-t pt-4">
+                      <h4 className="font-medium text-sm text-gray-900 mb-3">Enviar Nova Mensagem</h4>
                       <div className="space-y-3">
                         <Textarea
                           value={newMessage}
                           onChange={(e) => setNewMessage(e.target.value)}
-                          placeholder="Digite seu comentário..."
-                          rows={3}
-                          className="text-sm resize-none"
-                        />
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            if (newMessage.trim() && selectedTicket) {
-                              addMessageMutation.mutate({
-                                ticketId: selectedTicket.id,
-                                message: newMessage.trim(),
-                              });
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              if (newMessage.trim() && selectedTicket && !addMessageMutation.isPending) {
+                                addMessageMutation.mutate({
+                                  ticketId: selectedTicket.id,
+                                  message: newMessage.trim(),
+                                });
+                              }
                             }
                           }}
-                          disabled={!newMessage.trim() || addMessageMutation.isPending}
-                        >
-                          {addMessageMutation.isPending ? 'Enviando...' : 'Enviar Comentário'}
-                        </Button>
+                          placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
+                          rows={4}
+                          className="text-sm resize-none focus:ring-2 focus:ring-blue-500 border-gray-200"
+                        />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">
+                            {newMessage.length > 0 && `${newMessage.length} caracteres`}
+                          </span>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (newMessage.trim() && selectedTicket) {
+                                addMessageMutation.mutate({
+                                  ticketId: selectedTicket.id,
+                                  message: newMessage.trim(),
+                                });
+                              }
+                            }}
+                            disabled={!newMessage.trim() || addMessageMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                          >
+                            {addMessageMutation.isPending ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Enviando...
+                              </div>
+                            ) : (
+                              'Enviar Mensagem'
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
