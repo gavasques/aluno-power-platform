@@ -5956,18 +5956,39 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         throw new Error('User prompt not found for infographic generator');
       }
 
-      // Replace variables in prompt
+      // Parse optimizedContent if it's a string (from Claude response)
+      let parsedContent;
+      if (typeof optimizedContent === 'string') {
+        try {
+          parsedContent = JSON.parse(optimizedContent);
+        } catch {
+          // If not JSON, treat as raw text
+          parsedContent = { texto_completo: optimizedContent };
+        }
+      } else {
+        parsedContent = optimizedContent;
+      }
+
+      // Replace variables in prompt with optimized content from Claude
       const userPrompt = userPromptResult.content
         .replace(/\{\{NOME_PRODUTO\}\}/g, nomeProduto)
-        .replace(/\{\{NOME_OTIMIZADO\}\}/g, optimizedContent.nome || nomeProduto)
-        .replace(/\{\{BENEFICIOS_OTIMIZADOS\}\}/g, optimizedContent.beneficios || '')
-        .replace(/\{\{ESPECIFICACOES_OTIMIZADAS\}\}/g, optimizedContent.especificacoes || '')
-        .replace(/\{\{CTA_OTIMIZADO\}\}/g, optimizedContent.cta || '')
-        .replace(/\{\{ICONS_OTIMIZADOS\}\}/g, optimizedContent.icons || '')
+        .replace(/\{\{NOME_OTIMIZADO\}\}/g, parsedContent.titulo || parsedContent.nome || nomeProduto)
+        .replace(/\{\{BENEFICIOS_OTIMIZADOS\}\}/g, parsedContent.beneficios || '')
+        .replace(/\{\{ESPECIFICACOES_OTIMIZADAS\}\}/g, parsedContent.especificacoes || '')
+        .replace(/\{\{CTA_OTIMIZADO\}\}/g, parsedContent.cta || parsedContent.call_to_action || '')
+        .replace(/\{\{ICONS_OTIMIZADOS\}\}/g, parsedContent.icons || parsedContent.icones || '')
+        .replace(/\{\{TEXTO_OTIMIZADO_COMPLETO\}\}/g, parsedContent.texto_completo || JSON.stringify(parsedContent))
         .replace(/\{\{COR_PRIMARIA\}\}/g, corPrimaria)
         .replace(/\{\{COR_SECUNDARIA\}\}/g, corSecundaria);
 
       console.log('🎨 [INFOGRAPHIC_STEP2] User prompt length:', userPrompt.length);
+      console.log('🎨 [INFOGRAPHIC_STEP2] Optimized content received:', {
+        type: typeof optimizedContent,
+        keys: parsedContent ? Object.keys(parsedContent) : 'none',
+        titulo: parsedContent?.titulo?.substring(0, 100) + '...',
+        beneficios: parsedContent?.beneficios?.substring(0, 100) + '...'
+      });
+      console.log('🎨 [INFOGRAPHIC_STEP2] Final prompt preview:', userPrompt.substring(0, 300) + '...');
 
       // VALIDATE: Image is MANDATORY - never generate without reference
       if (!imagemReferencia) {
