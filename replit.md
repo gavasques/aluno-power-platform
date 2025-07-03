@@ -111,7 +111,36 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ SISTEMA DE AGENTES LIFESTYLE CORRIGIDO - GPT-IMAGE-1 REAL SEM FALLBACK
+- **July 03, 2025**: ✅ EDITOR DE FOTO INFOGRÁFICOS IMPLEMENTADO - PROCESSO 2 ETAPAS COM CLAUDE + GPT-IMAGE-1
+  - **Terceiro Agente Especializado Criado**:
+    - Nome: "Editor de Foto Infográficos" para criação de infográficos de produtos Amazon
+    - Processo híbrido: Claude Sonnet 4 para otimização de texto + GPT-Image-1 para geração visual
+    - Interface completa com formulário especializado e processo de 2 etapas
+    - Sistema sem fallbacks: ou funciona com IA real ou retorna erro informativo
+  - **Processo Técnico de 2 Etapas**:
+    - Etapa 1 (Claude Sonnet): Otimização de texto do produto para infográfico vendável
+    - Análise de nome do produto + descrição longa (até 2000 chars)
+    - Geração de título, benefícios, especificações, CTA e ícones otimizados
+    - Etapa 2 (GPT-Image-1): Criação de infográfico profissional 1024x1024px
+    - Uso do texto otimizado + cores personalizáveis + configurações de qualidade
+  - **Banco de Dados e APIs**:
+    - Agente registrado como "agent-infographic-generator" com prompts especializados
+    - APIs REST: `/api/agents/infographic-generator/step1` e `/step2`
+    - Logs automáticos separados por etapa para tracking de custos e performance
+    - Custo estimado: ~$0.003-0.015 (Claude) + ~$0.167 (GPT-Image-1) por infográfico
+  - **Interface UX Otimizada**:
+    - Formulário com campos: nome produto, descrição, cores primária/secundária
+    - Controles: quantidade de imagens (1-4), qualidade (low/medium/high)
+    - Progresso visual das 2 etapas com feedback em tempo real
+    - Tratamento inteligente de erros: rate limiting, autenticação, conectividade
+    - Comparação lado a lado e download em formato JPG
+  - **Integração no Sistema**:
+    - Rota `/agents/agent-infographic-generator` adicionada na navegação
+    - Lazy loading implementado para performance otimizada
+    - Seguindo padrão dos outros editores: mesmo layout e experiência do usuário
+  - **Regra Crítica Mantida**: Sistema nunca mostra fallback - ou funciona com IA real ou dá erro
+
+- **July 03, 2025 (anterior)**: ✅ SISTEMA DE AGENTES LIFESTYLE CORRIGIDO - GPT-IMAGE-1 REAL SEM FALLBACK
   - **Correção Crítica Implementada**:
     - Removido completamente sistema de fallback SVG conforme regra estabelecida
     - Implementado mesmo método do Editor de Imagem Principal usando OpenAI toFile

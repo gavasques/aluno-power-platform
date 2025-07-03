@@ -5972,14 +5972,32 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      const response = await openai.images.generate({
-        model: 'gpt-image-1',
-        prompt: userPrompt,
-        n: quantidadeImagens,
-        size: '1024x1024',
-        quality: qualidade,
-        response_format: 'b64_json'
-      });
+      let response;
+      try {
+        response = await openai.images.generate({
+          model: 'gpt-image-1',
+          prompt: userPrompt,
+          n: quantidadeImagens,
+          size: '1024x1024',
+          quality: qualidade,
+          response_format: 'b64_json'
+        });
+      } catch (apiError: any) {
+        console.log('🎨 [INFOGRAPHIC_STEP2] OpenAI API Error:', apiError.message);
+        
+        // Check if it's a rate limiting error
+        if (apiError.message?.includes('rate limited') || apiError.status === 429) {
+          throw new Error('OpenAI está com limite de rate. Aguarde alguns minutos e tente novamente.');
+        }
+        
+        // Check if it's an authentication error
+        if (apiError.status === 401) {
+          throw new Error('Erro de autenticação da OpenAI. Verifique a configuração da API key.');
+        }
+        
+        // Generic OpenAI error
+        throw new Error(`Erro da OpenAI: ${apiError.message || 'Erro desconhecido'}`);
+      }
 
       const endTime = Date.now();
       const processingTime = Math.round((endTime - startTime) / 1000);
@@ -6003,6 +6021,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       });
 
       // Extract generated images
+      if (!response.data || response.data.length === 0) {
+        throw new Error('No image data received from OpenAI');
+      }
+      
       const images = response.data.map((imageData, index) => {
         if (!imageData.b64_json) {
           throw new Error(`No image data received for image ${index + 1}`);

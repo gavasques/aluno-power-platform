@@ -80,7 +80,7 @@ export default function InfographicGenerator() {
           nomeProduto: formData.nomeProduto,
           descricaoLonga: formData.descricaoLonga
         })
-      });
+      }) as any;
 
       setInfographicData({
         originalData: formData,
@@ -100,7 +100,7 @@ export default function InfographicGenerator() {
           quantidadeImagens: formData.quantidadeImagens,
           qualidade: formData.qualidade
         })
-      });
+      }) as any;
 
       setInfographicData(prev => ({
         ...prev!,
@@ -118,9 +118,23 @@ export default function InfographicGenerator() {
 
     } catch (error: any) {
       console.error('Erro ao gerar infográfico:', error);
+      
+      let errorMessage = "Erro interno do servidor";
+      let errorTitle = "Erro no processamento";
+      
+      if (error.message?.includes('rate limited') || error.message?.includes('limite de rate')) {
+        errorTitle = "OpenAI temporariamente indisponível";
+        errorMessage = "A OpenAI está com limite de requisições. Aguarde alguns minutos e tente novamente.";
+      } else if (error.message?.includes('autenticação')) {
+        errorTitle = "Erro de configuração";
+        errorMessage = "Problema na configuração da API OpenAI. Entre em contato com o suporte.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "Erro no processamento",
-        description: error.message || "Erro interno do servidor",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive"
       });
       setCurrentStep('form');
