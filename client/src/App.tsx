@@ -56,6 +56,7 @@ const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
+const Support = lazy(() => import("./pages/Support"));
 
 // Keep Login as eager import for immediate authentication
 import Login from "./pages/Login";
@@ -561,6 +562,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <Suppliers />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/suporte">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Support />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
