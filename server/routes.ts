@@ -2318,11 +2318,16 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
         const endTime = Date.now();
         const processingTime = Math.round((endTime - startTime) / 1000);
-        const cost = 5.167; // Base cost for gpt-image-1
+        
+        // Get real cost from OpenAI response usage
+        const realCost = response.usage ? 
+          (response.usage.prompt_tokens * 0.00000625) + (response.usage.completion_tokens * 0.01875) : 
+          0.00; // Default to 0 if no usage data
 
         console.log('✅ [PRODUCT_PHOTOGRAPHY] Processing completed:', {
           processingTime: `${processingTime}s`,
-          cost: `$${cost}`
+          cost: `$${realCost.toFixed(6)}`,
+          usage: response.usage
         });
 
         // Debug: Log the OpenAI response structure
@@ -2330,7 +2335,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           hasData: !!response.data,
           dataLength: response.data?.length,
           firstItem: response.data?.[0] ? Object.keys(response.data[0]) : 'none',
-          responseKeys: Object.keys(response)
+          responseKeys: Object.keys(response),
+          usage: response.usage
         });
 
         // Extract generated image from response - images.edit can return base64 or URL
@@ -2347,18 +2353,22 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           ? (imageBase64.startsWith('data:') ? imageBase64 : `data:image/png;base64,${imageBase64}`)
           : imageUrl;
         
-        // Save to ai_img_generation_logs
-        await storage.createAiImgGenerationLog({
+        // Save to ai_generation_logs with correct structure
+        await db.insert(aiGenerationLogs).values({
           userId: user.id,
           provider: 'openai',
           model: 'gpt-image-1',
-          feature: 'amazon-product-photography',
-          originalImageName: fileName,
-          quality: 'high',
-          scale: null,
-          cost: cost.toString(),
-          duration: processingTime,
-          status: 'success'
+          prompt: systemPrompt.content,
+          response: 'Imagem gerada com sucesso via GPT-Image-1',
+          promptCharacters: systemPrompt.content.length,
+          responseCharacters: 50, // Fixed value for image generation
+          inputTokens: response.usage?.prompt_tokens || 0,
+          outputTokens: response.usage?.completion_tokens || 0,
+          totalTokens: response.usage?.total_tokens || 0,
+          cost: realCost.toString(),
+          duration: processingTime * 1000, // Convert to milliseconds
+          feature: 'gerador-imagem-principal',
+          createdAt: new Date()
         });
 
         // Return result
@@ -2366,7 +2376,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           originalImage: `data:image/jpeg;base64,${base64Image}`,
           processedImage: generatedImageUrl,
           processingTime,
-          cost
+          cost: realCost
         });
 
       } finally {
@@ -2374,6 +2384,30 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
     } catch (error: any) {
       console.error('❌ [PRODUCT_PHOTOGRAPHY] Error:', error);
+      
+      // Save error log to ai_generation_logs
+      try {
+        const errorDuration = Date.now() - startTime;
+        await db.insert(aiGenerationLogs).values({
+          userId: user.id,
+          provider: 'openai',
+          model: 'gpt-image-1',
+          prompt: 'Erro no processamento da imagem',
+          response: `Erro: ${error.message}`,
+          promptCharacters: 0,
+          responseCharacters: error.message?.length || 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          cost: '0.00',
+          duration: errorDuration,
+          feature: 'gerador-imagem-principal',
+          createdAt: new Date()
+        });
+      } catch (logError) {
+        console.error('❌ [PRODUCT_PHOTOGRAPHY] Error saving error log:', logError);
+      }
+      
       res.status(500).json({ 
         error: 'Erro no processamento da imagem',
         details: error.message
