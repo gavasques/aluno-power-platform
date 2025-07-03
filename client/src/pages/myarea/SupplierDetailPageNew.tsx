@@ -504,11 +504,11 @@ const SupplierDetailPage = () => {
           </Card>
 
           {/* Tabs for additional content */}
-          <Tabs defaultValue="brands" className="w-full">
+          <Tabs defaultValue="conversations" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="conversations">Conversas</TabsTrigger>
               <TabsTrigger value="brands">Marcas</TabsTrigger>
               <TabsTrigger value="contacts">Contatos</TabsTrigger>
-              <TabsTrigger value="conversations">Conversas</TabsTrigger>
               <TabsTrigger value="files">Arquivos</TabsTrigger>
             </TabsList>
 
@@ -1006,55 +1006,7 @@ const SupplierDetailPage = () => {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Quick Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Estatísticas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Marcas:</span>
-                <Badge variant="secondary">{brands.length}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Contatos:</span>
-                <Badge variant="secondary">{contacts.length}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Conversas:</span>
-                <Badge variant="secondary">{conversations.length}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Arquivos:</span>
-                <Badge variant="secondary">{files.length}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Atividade Recente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm">
-                {conversations.slice(0, 3).map((conversation) => (
-                  <div key={conversation.id} className="flex items-start space-x-2">
-                    <MessageSquare className="h-4 w-4 mt-0.5 text-gray-400" />
-                    <div>
-                      <p className="font-medium">{conversation.subject}</p>
-                      <p className="text-gray-500 text-xs">
-                        {new Date(conversation.createdAt).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {conversations.length === 0 && (
-                  <p className="text-gray-500 text-center py-4">Nenhuma atividade recente</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Sidebar content can be added here in the future if needed */}
         </div>
       </div>
 

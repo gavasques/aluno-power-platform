@@ -111,6 +111,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 03, 2025**: ✅ MELHORIAS UX EM MEUS FORNECEDORES IMPLEMENTADAS
+  - **Ordem das Abas Reorganizada**:
+    - "Conversas" agora aparece como primeira aba (defaultValue atualizado)
+    - "Marcas" movida para segunda posição
+    - Ordem final: Conversas → Marcas → Contatos → Arquivos
+  - **Menu Lateral Simplificado**:
+    - Removidas seções "Estatísticas" e "Atividade Recente" conforme solicitação
+    - Sidebar limpo mantendo espaço para futuras adições
+  - **Ícone de Email Removido**:
+    - Botão de email removido dos cards de fornecedores em MySuppliers
+    - Importação Mail removida para otimização
+  - **Sistema Integrado**:
+    - MyArea.tsx atualizado para usar SupplierDetailPageNew.tsx
+    - Todas as funcionalidades preservadas com nova organização UX
+
 - **July 02, 2025**: ✅ CORREÇÕES CRÍTICAS FINALIZADAS - SISTEMA TOTALMENTE FUNCIONAL
   - **Performance Crítica Corrigida**: 
     - Endpoint `/api/generated-images` otimizado removendo dados base64 de 67MB
