@@ -148,7 +148,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/agents/amazon-product-photography">
+                          <Route path="/agents/agent-amazon-product-photography">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
