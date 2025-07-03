@@ -49,6 +49,7 @@ const SupplierDetailRefactored = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Supplier>>({});
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingConversation, setEditingConversation] = useState<any>(null);
 
   // Dialog states
   const [brandDialogOpen, setBrandDialogOpen] = useState(false);
@@ -120,7 +121,12 @@ const SupplierDetailRefactored = () => {
   };
 
   const handleAddConversation = () => setConversationDialogOpen(true);
-  const handleEditConversation = (conversation: any) => console.log('Edit conversation:', conversation);
+  const handleEditConversation = (conversation: any) => {
+    console.log('🔥 Edit conversation clicked:', conversation);
+    setEditingConversation(conversation);
+    setDialogStates(prev => ({ ...prev, editConversation: true }));
+    setConversationDialogOpen(true);
+  };
   const handleDeleteConversation = async (conversationId: number) => {
     try {
       await deleteConversation(conversationId);
@@ -288,11 +294,16 @@ const SupplierDetailRefactored = () => {
 
       <ConversationDialog
         open={conversationDialogOpen}
-        onClose={() => setConversationDialogOpen(false)}
-        onSave={createConversation}
+        onClose={() => {
+          setConversationDialogOpen(false);
+          setEditingConversation(null);
+          setDialogStates(prev => ({ ...prev, editConversation: false }));
+        }}
+        onSave={editingConversation ? updateConversation : createConversation}
         onUploadFile={(file, name, type) => uploadFile({ file, name, type })}
+        conversation={editingConversation}
         supplierId={supplierId}
-        isLoading={isCreatingConversation}
+        isLoading={isCreatingConversation || isUpdating}
       />
 
       <FileUploadDialog
