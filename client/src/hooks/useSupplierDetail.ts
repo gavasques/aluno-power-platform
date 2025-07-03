@@ -116,6 +116,21 @@ export const useSupplierDetail = (supplierId: string) => {
     },
   });
 
+  const updateConversationMutation = useMutation({
+    mutationFn: (data: InsertSupplierConversation & { id: number }) =>
+      apiRequest(`/api/supplier-conversations/${data.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${supplierId}/conversations`] });
+      toast({
+        title: "Sucesso",
+        description: "Conversa atualizada com sucesso",
+      });
+    },
+  });
+
   const deleteBrandMutation = useMutation({
     mutationFn: (brandId: number) =>
       apiRequest(`/api/supplier-brands/${brandId}`, { method: 'DELETE' }),
@@ -196,6 +211,7 @@ export const useSupplierDetail = (supplierId: string) => {
     createBrand: createBrandMutation.mutateAsync,
     createContact: createContactMutation.mutateAsync,
     createConversation: createConversationMutation.mutateAsync,
+    updateConversation: updateConversationMutation.mutateAsync,
     deleteBrand: deleteBrandMutation.mutateAsync,
     deleteContact: deleteContactMutation.mutateAsync,
     deleteConversation: deleteConversationMutation.mutateAsync,

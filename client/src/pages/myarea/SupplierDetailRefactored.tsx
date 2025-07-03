@@ -34,6 +34,7 @@ const SupplierDetailRefactored = () => {
     createBrand,
     createContact,
     createConversation,
+    updateConversation,
     uploadFile,
     deleteBrand,
     deleteContact,
@@ -299,7 +300,10 @@ const SupplierDetailRefactored = () => {
           setEditingConversation(null);
           setDialogStates(prev => ({ ...prev, editConversation: false }));
         }}
-        onSave={editingConversation ? updateConversation : createConversation}
+        onSave={editingConversation ? 
+          (data: any) => updateConversation({ ...data, id: editingConversation.id }) : 
+          createConversation
+        }
         onUploadFile={(file, name, type) => uploadFile({ file, name, type })}
         conversation={editingConversation}
         supplierId={supplierId}
