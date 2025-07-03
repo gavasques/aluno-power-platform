@@ -122,7 +122,7 @@ const MyProducts = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <div className="w-full py-4">
           <div className="flex items-center justify-center h-64">
-            <p className="text-lg text-red-600">Erro: {error.message || 'Erro desconhecido'}</p>
+            <p className="text-lg text-red-600">Erro: {error || 'Erro desconhecido'}</p>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ interface ProductTechSpecsProps {
 
 export const ProductTechSpecs = ({ product }: ProductTechSpecsProps) => {
   const volumeM3 = useMemo(() => {
+    if (!product.dimensions) return 0;
     const { length, width, height } = product.dimensions;
     if (!length || !width || !height) return 0;
     const volumeCm3 = length * width * height;
@@ -22,23 +23,33 @@ export const ProductTechSpecs = ({ product }: ProductTechSpecsProps) => {
     <>
       <div>
         <label className="text-sm font-medium text-muted-foreground">Dimensões (C×L×A)</label>
-        <p>{product.dimensions.length} × {product.dimensions.width} × {product.dimensions.height} cm</p>
+        <p>
+          {product.dimensions 
+            ? `${product.dimensions.length} × ${product.dimensions.width} × ${product.dimensions.height} cm`
+            : 'Não informado'
+          }
+        </p>
       </div>
       <div>
         <label className="text-sm font-medium text-muted-foreground">Peso</label>
-        <p>{product.weight} kg</p>
+        <p>{product.weight || 'Não informado'} {product.weight ? 'kg' : ''}</p>
       </div>
       <div>
         <label className="text-sm font-medium text-muted-foreground">Volume</label>
-        <p>{volumeCm3.toLocaleString('pt-BR')} cm³ ({volumeM3.toFixed(6)} m³)</p>
+        <p>
+          {volumeM3 > 0 
+            ? `${volumeCm3.toLocaleString('pt-BR')} cm³ (${volumeM3.toFixed(6)} m³)`
+            : 'Não calculado'
+          }
+        </p>
       </div>
       <div>
         <label className="text-sm font-medium text-muted-foreground">Peso Cubado (167)</label>
-        <p>{pesoCubado167.toFixed(2)} kg</p>
+        <p>{volumeM3 > 0 ? `${pesoCubado167.toFixed(2)} kg` : 'Não calculado'}</p>
       </div>
       <div>
         <label className="text-sm font-medium text-muted-foreground">Peso Cubado (300)</label>
-        <p>{pesoCubado300.toFixed(2)} kg</p>
+        <p>{volumeM3 > 0 ? `${pesoCubado300.toFixed(2)} kg` : 'Não calculado'}</p>
       </div>
       <div>
         <label className="text-sm font-medium text-muted-foreground">Data de Cadastro</label>

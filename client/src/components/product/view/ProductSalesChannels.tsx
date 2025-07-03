@@ -8,6 +8,14 @@ interface ProductSalesChannelsProps {
 }
 
 export const ProductSalesChannels = ({ product, onEditChannels }: ProductSalesChannelsProps) => {
+  if (!product.channels) {
+    return (
+      <div className="space-y-3">
+        <p className="text-muted-foreground text-sm">Nenhum canal de venda configurado ainda.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {Object.entries(product.channels).map(([channelKey, channel]) => {
