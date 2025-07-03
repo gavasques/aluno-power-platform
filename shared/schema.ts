@@ -98,15 +98,6 @@ export const suppliers = pgTable("suppliers", {
   supportEmail: text("support_email"),
   phone0800Sales: text("phone_0800_sales"),
   phone0800Support: text("phone_0800_support"),
-  cnpj: text("cnpj"),
-  country: text("country").default("Brasil"),
-  state: text("state"),
-  city: text("city"),
-  zipCode: text("zip_code"),
-  address: text("address"),
-  stateRegistration: text("state_registration"),
-  municipalRegistration: text("municipal_registration"),
-  supplierType: text("supplier_type"), // Distribuidora, Importadora, Fabricante, Indústria, Representante
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
