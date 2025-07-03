@@ -2224,6 +2224,128 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Amazon Product Photography - specific route (must be before generic)
+  const photographyUpload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 25 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'), false);
+      }
+    }
+  });
+  
+  app.post('/api/agents/amazon-product-photography/process', photographyUpload.single('image'), requireAuth, async (req: any, res: any) => {
+    console.log('🌐 [REQUEST] POST /api/agents/amazon-product-photography/process');
+    
+    try {
+      const startTime = Date.now();
+      
+      if (!req.file) {
+        return res.status(400).json({ error: 'Nenhuma imagem fornecida' });
+      }
+
+      const user = req.user;
+      const imageBuffer = req.file.buffer;
+      const fileName = req.file.originalname;
+
+      console.log('📸 [PRODUCT_PHOTOGRAPHY] Processing image:', {
+        fileName,
+        fileSize: req.file.size,
+        userId: user.id
+      });
+
+      // Convert image to base64
+      const base64Image = imageBuffer.toString('base64');
+
+      // Get agent configuration
+      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Looking for agent:', 'agent-amazon-product-photography');
+      const agent = await storage.getAgentById('agent-amazon-product-photography');
+      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Agent found:', !!agent);
+      if (!agent) {
+        return res.status(404).json({ error: 'Agente não encontrado' });
+      }
+
+      // Get system prompt
+      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Looking for prompt:', 'agent-amazon-product-photography', 'system');
+      const systemPrompt = await storage.getAgentPrompt('agent-amazon-product-photography', 'system');
+      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Prompt found:', !!systemPrompt);
+      if (!systemPrompt) {
+        return res.status(404).json({ error: 'Prompt do agente não encontrado' });
+      }
+
+      console.log('🤖 [PRODUCT_PHOTOGRAPHY] Using model:', agent.model);
+
+      // Call OpenAI GPT-Image-1 API
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const response = await openai.chat.completions.create({
+        model: 'gpt-image-1',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: systemPrompt.content
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:image/jpeg;base64,${base64Image}`
+                }
+              }
+            ],
+          },
+        ],
+        max_tokens: 4096,
+      });
+
+      const endTime = Date.now();
+      const processingTime = Math.round((endTime - startTime) / 1000);
+      const cost = 5.167; // Base cost for gpt-image-1
+
+      console.log('✅ [PRODUCT_PHOTOGRAPHY] Processing completed:', {
+        processingTime: `${processingTime}s`,
+        cost: `$${cost}`
+      });
+
+      // Extract generated image from response
+      const generatedImageUrl = response.choices[0]?.message?.content || '';
+      
+      // Save to ai_img_generation_logs
+      await storage.createAiImgGenerationLog({
+        userId: user.id,
+        provider: 'openai',
+        model: 'gpt-image-1',
+        feature: 'amazon-product-photography',
+        originalImageName: fileName,
+        quality: 'high',
+        scale: null,
+        cost: cost.toString(),
+        duration: processingTime,
+        status: 'success'
+      });
+
+      // Return result
+      res.json({
+        originalImage: `data:image/jpeg;base64,${base64Image}`,
+        processedImage: generatedImageUrl,
+        processingTime,
+        cost
+      });
+
+    } catch (error: any) {
+      console.error('❌ [PRODUCT_PHOTOGRAPHY] Error:', error);
+      res.status(500).json({ 
+        error: 'Erro no processamento da imagem',
+        details: error.message
+      });
+    }
+  });
+
   // OpenAI Processing route (generic)
   app.post('/api/agents/:agentId/process', async (req, res) => {
     try {
@@ -5176,344 +5298,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // Amazon Product Photography Agent API
-  const memoryUpload = multer({ 
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 25 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-      if (file.mimetype.startsWith('image/')) {
-        cb(null, true);
-      } else {
-        cb(new Error('Only image files are allowed'), false);
-      }
-    }
-  });
-  
-  app.post('/api/agents/amazon-product-photography/process', memoryUpload.single('image'), requireAuth, async (req: any, res: any) => {
-    console.log('🌐 [REQUEST] POST /api/agents/amazon-product-photography/process');
-    
-    try {
-      const startTime = Date.now();
-      
-      if (!req.file) {
-        return res.status(400).json({ error: 'Nenhuma imagem fornecida' });
-      }
-
-      const user = req.user;
-      const imageBuffer = req.file.buffer;
-      const fileName = req.file.originalname;
-
-      console.log('📸 [PRODUCT_PHOTOGRAPHY] Processing image:', {
-        fileName,
-        fileSize: req.file.size,
-        userId: user.id
-      });
-
-      // Convert image to base64
-      const base64Image = imageBuffer.toString('base64');
-
-      // Get agent configuration
-      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Looking for agent:', 'agent-amazon-product-photography');
-      const agent = await storage.getAgentById('agent-amazon-product-photography');
-      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Agent found:', !!agent);
-      if (!agent) {
-        return res.status(404).json({ error: 'Agente não encontrado' });
-      }
-
-      // Get system prompt
-      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Looking for prompt:', 'agent-amazon-product-photography', 'system');
-      const systemPrompt = await storage.getAgentPrompt('agent-amazon-product-photography', 'system');
-      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Prompt found:', !!systemPrompt);
-      if (!systemPrompt) {
-        return res.status(404).json({ error: 'Prompt do agente não encontrado' });
-      }
-
-      console.log('🤖 [PRODUCT_PHOTOGRAPHY] Using model:', agent.model);
-
-      // Call OpenAI GPT-Image-1 API
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      
-      const response = await openai.chat.completions.create({
-        model: 'gpt-image-1',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: systemPrompt.content
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${base64Image}`
-                }
-              }
-            ],
-          },
-        ],
-        max_tokens: 4096,
-      });
-
-      const endTime = Date.now();
-      const processingTime = Math.round((endTime - startTime) / 1000);
-      const cost = 5.167; // Base cost for gpt-image-1
-
-      console.log('✅ [PRODUCT_PHOTOGRAPHY] Processing completed:', {
-        processingTime: `${processingTime}s`,
-        cost: `$${cost}`
-      });
-
-      // Extract generated image from response
-      const generatedImageUrl = response.choices[0]?.message?.content || '';
-      
-      // Save to ai_img_generation_logs
-      await storage.createAiImgGenerationLog({
-        userId: user.id,
-        provider: 'openai',
-        model: 'gpt-image-1',
-        feature: 'amazon-product-photography',
-        originalImageName: fileName,
-        quality: 'high',
-        scale: null,
-        cost: cost.toString(),
-        duration: processingTime,
-        status: 'success'
-      });
-
-      // Return result
-      res.json({
-        originalImage: `data:image/jpeg;base64,${base64Image}`,
-        processedImage: generatedImageUrl,
-        processingTime,
-        cost
-      });
-
-    } catch (error: any) {
-      const endTime = Date.now();
-      const processingTime = Math.round((endTime - Date.now()) / 1000);
-
-      console.error('❌ [PRODUCT_PHOTOGRAPHY] Error:', error);
-
-      // Save error log
-      if (req.user) {
-        await storage.createAiImgGenerationLog({
-          userId: req.user.id,
-          provider: 'openai',
-          model: 'gpt-image-1',
-          feature: 'amazon-product-photography',
-          originalImageName: req.file?.originalname || 'unknown',
-          quality: null,
-          scale: null,
-          cost: '0',
-          duration: processingTime,
-          status: 'failed'
-        });
-      }
-
-      res.status(500).json({ 
-        error: 'Erro no processamento da imagem. Tente novamente.',
-        details: error.message
-      });
-    }
-  });
-
-  // Supplier Contacts API
-  app.get('/api/suppliers/:id/contacts', async (req: any, res: any) => {
-    try {
-      const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      const contacts = await storage.getSupplierContacts(supplierId, userId);
-      res.json(contacts);
-    } catch (error) {
-      console.error('Error fetching supplier contacts:', error);
-      res.status(500).json({ error: 'Failed to fetch contacts' });
-    }
-  });
-
-  app.post('/api/suppliers/:id/contacts', async (req: any, res: any) => {
-    try {
-      const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      const contactData = {
-        ...req.body,
-        supplierId,
-        userId
-      };
-      
-      const contact = await storage.createSupplierContact(contactData);
-      res.json(contact);
-    } catch (error) {
-      console.error('Error creating supplier contact:', error);
-      res.status(500).json({ error: 'Failed to create contact' });
-    }
-  });
-
-  app.delete('/api/supplier-contacts/:id', async (req: any, res: any) => {
-    try {
-      const contactId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      await storage.deleteSupplierContact(contactId, userId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting supplier contact:', error);
-      res.status(500).json({ error: 'Failed to delete contact' });
-    }
-  });
-
-
-
-  // Supplier Files API
-  app.get('/api/suppliers/:id/files', async (req: any, res: any) => {
-    try {
-      const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      const files = await storage.getSupplierFiles(supplierId, userId);
-      res.json(files);
-    } catch (error) {
-      console.error('Error fetching supplier files:', error);
-      res.status(500).json({ error: 'Failed to fetch files' });
-    }
-  });
-
-  app.post('/api/suppliers/:id/files', upload.single('file'), async (req: any, res: any) => {
-    try {
-      const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-      }
-      
-      const fileData = {
-        supplierId,
-        userId,
-        name: req.file.originalname,
-        fileUrl: `/uploads/${req.file.filename}`,
-        fileType: req.file.mimetype,
-        fileSize: req.file.size,
-        type: req.body.type || 'other'
-      };
-      
-      const file = await storage.createSupplierFile(fileData);
-      res.json(file);
-    } catch (error) {
-      console.error('Error uploading supplier file:', error);
-      res.status(500).json({ error: 'Failed to upload file' });
-    }
-  });
-
-  app.delete('/api/supplier-files/:id', async (req: any, res: any) => {
-    try {
-      const fileId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      await storage.deleteSupplierFile(fileId, userId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting supplier file:', error);
-      res.status(500).json({ error: 'Failed to delete file' });
-    }
-  });
-
-  // Supplier Conversations API
-  app.get('/api/suppliers/:id/conversations', async (req: any, res: any) => {
-    try {
-      const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 2; // TODO: Get from auth
-      
-      const conversations = await storage.getSupplierConversations(supplierId, userId);
-      res.json(conversations);
-    } catch (error) {
-      console.error('Error fetching supplier conversations:', error);
-      res.status(500).json({ error: 'Failed to fetch conversations' });
-    }
-  });
-
-  app.post('/api/suppliers/:id/conversations', async (req: any, res: any) => {
-    try {
-      const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 2; // TODO: Get from auth
-      
-      const conversationData = {
-        ...req.body,
-        supplierId,
-        userId
-      };
-      
-      const conversation = await storage.createSupplierConversation(conversationData);
-      res.json(conversation);
-    } catch (error) {
-      console.error('Error creating supplier conversation:', error);
-      res.status(500).json({ error: 'Failed to create conversation' });
-    }
-  });
-
-  app.put('/api/supplier-conversations/:id', async (req: any, res: any) => {
-    try {
-      const conversationId = parseInt(req.params.id);
-      const userId = req.user?.id || 2; // TODO: Get from auth
-      
-      const conversation = await storage.updateSupplierConversation(conversationId, userId, req.body);
-      res.json(conversation);
-    } catch (error) {
-      console.error('Error updating supplier conversation:', error);
-      res.status(500).json({ error: 'Failed to update conversation' });
-    }
-  });
-
-  app.delete('/api/supplier-conversations/:id', async (req: any, res: any) => {
-    try {
-      const conversationId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
-      
-      await storage.deleteSupplierConversation(conversationId, userId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting supplier conversation:', error);
-      res.status(500).json({ error: 'Failed to delete conversation' });
-    }
-  });
-
   return httpServer;
 }
 
-// Utility functions for session management
-function generateSessionHash(): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 8);
-  return `${timestamp}-${random}`.toUpperCase();
-}
-
-function generateTags(inputData: any): Record<string, string> {
-  const tags: Record<string, string> = {};
-
-  // Tags principais do formulário
-  if (inputData.productName) tags.PRODUCT_NAME = inputData.productName;
-  if (inputData.brand) tags.BRAND = inputData.brand;
-  if (inputData.category) tags.CATEGORY = inputData.category;
-  if (inputData.keywords) tags.KEYWORDS = inputData.keywords;
-  if (inputData.longTailKeywords) tags.LONG_TAIL_KEYWORDS = inputData.longTailKeywords;
-  if (inputData.features) tags.FEATURES = inputData.features;
-  if (inputData.targetAudience) tags.TARGET_AUDIENCE = inputData.targetAudience;
-  if (inputData.reviewsData) tags.REVIEWS_DATA = inputData.reviewsData;
-
-  // Tags adicionais para melhor usabilidade nos prompts
-  if (inputData.productName) tags.PRODUCT_DESCRIPTION = inputData.productName;
-  if (inputData.reviewsData) tags.COMPETITOR_REVIEWS = inputData.reviewsData;
-  
-  // Combinação de palavras-chave
-  if (inputData.keywords && inputData.longTailKeywords) {
-    tags.ALL_KEYWORDS = `${inputData.keywords}, ${inputData.longTailKeywords}`;
-  } else if (inputData.keywords) {
-    tags.ALL_KEYWORDS = inputData.keywords;
-  } else if (inputData.longTailKeywords) {
-    tags.ALL_KEYWORDS = inputData.longTailKeywords;
-  }
-
-  return tags;
-}
