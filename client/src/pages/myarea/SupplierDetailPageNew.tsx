@@ -451,13 +451,13 @@ const SupplierDetailPage = () => {
         {/* Main Content */}
         <div className="space-y-6">
           {/* Tabs for all content */}
-          <Tabs defaultValue="conversations" className="w-full">
+          <Tabs defaultValue="info" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="info">Informações</TabsTrigger>
               <TabsTrigger value="conversations">Conversas</TabsTrigger>
               <TabsTrigger value="brands">Marcas</TabsTrigger>
               <TabsTrigger value="contacts">Contatos</TabsTrigger>
               <TabsTrigger value="files">Arquivos</TabsTrigger>
-              <TabsTrigger value="info">Informações</TabsTrigger>
             </TabsList>
 
             {/* Brands Tab */}
@@ -1160,43 +1160,100 @@ const SupplierDetailPage = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-6">
-                      {/* Display Mode */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Informações Básicas</h4>
-                          <div className="space-y-2 text-sm">
-                            <div><span className="font-medium">Nome Fantasia:</span> {supplier.tradeName}</div>
-                            <div><span className="font-medium">Razão Social:</span> {supplier.corporateName}</div>
-                            {supplier.cnpj && <div><span className="font-medium">CNPJ:</span> {supplier.cnpj}</div>}
-                            {supplier.supplierType && <div><span className="font-medium">Tipo:</span> {supplier.supplierType}</div>}
+                    <div className="space-y-8">
+                      {/* Display Mode - Better Layout */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">Informações Básicas</h4>
+                            <div className="space-y-3">
+                              <div className="flex justify-between">
+                                <span className="font-medium text-gray-700 w-32">Nome Fantasia:</span>
+                                <span className="text-gray-900 flex-1">{supplier.tradeName}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="font-medium text-gray-700 w-32">Razão Social:</span>
+                                <span className="text-gray-900 flex-1">{supplier.corporateName}</span>
+                              </div>
+                              {supplier.cnpj && (
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-700 w-32">CNPJ:</span>
+                                  <span className="text-gray-900 flex-1">{supplier.cnpj}</span>
+                                </div>
+                              )}
+                              {supplier.supplierType && (
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-700 w-32">Tipo:</span>
+                                  <span className="text-gray-900 flex-1 capitalize">{supplier.supplierType}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
+                          
+                          {(supplier.stateRegistration || supplier.municipalRegistration) && (
+                            <div>
+                              <h4 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">Inscrições</h4>
+                              <div className="space-y-3">
+                                {supplier.stateRegistration && (
+                                  <div className="flex justify-between">
+                                    <span className="font-medium text-gray-700 w-32">Inscrição Estadual:</span>
+                                    <span className="text-gray-900 flex-1">{supplier.stateRegistration}</span>
+                                  </div>
+                                )}
+                                {supplier.municipalRegistration && (
+                                  <div className="flex justify-between">
+                                    <span className="font-medium text-gray-700 w-32">Inscrição Municipal:</span>
+                                    <span className="text-gray-900 flex-1">{supplier.municipalRegistration}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                         
                         <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Localização</h4>
-                          <div className="space-y-2 text-sm">
-                            {supplier.country && <div><span className="font-medium">País:</span> {supplier.country}</div>}
-                            {supplier.state && <div><span className="font-medium">Estado:</span> {supplier.state}</div>}
-                            {supplier.city && <div><span className="font-medium">Cidade:</span> {supplier.city}</div>}
-                            {supplier.cep && <div><span className="font-medium">CEP:</span> {supplier.cep}</div>}
-                            {supplier.address && <div><span className="font-medium">Endereço:</span> {supplier.address}</div>}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Inscrições</h4>
-                          <div className="space-y-2 text-sm">
-                            {supplier.stateRegistration && <div><span className="font-medium">IE:</span> {supplier.stateRegistration}</div>}
-                            {supplier.municipalRegistration && <div><span className="font-medium">IM:</span> {supplier.municipalRegistration}</div>}
+                          <h4 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">Localização</h4>
+                          <div className="space-y-3">
+                            {supplier.country && (
+                              <div className="flex justify-between">
+                                <span className="font-medium text-gray-700 w-24">País:</span>
+                                <span className="text-gray-900 flex-1">{supplier.country}</span>
+                              </div>
+                            )}
+                            {supplier.state && (
+                              <div className="flex justify-between">
+                                <span className="font-medium text-gray-700 w-24">Estado:</span>
+                                <span className="text-gray-900 flex-1">{supplier.state}</span>
+                              </div>
+                            )}
+                            {supplier.city && (
+                              <div className="flex justify-between">
+                                <span className="font-medium text-gray-700 w-24">Cidade:</span>
+                                <span className="text-gray-900 flex-1">{supplier.city}</span>
+                              </div>
+                            )}
+                            {supplier.cep && (
+                              <div className="flex justify-between">
+                                <span className="font-medium text-gray-700 w-24">CEP:</span>
+                                <span className="text-gray-900 flex-1">{supplier.cep}</span>
+                              </div>
+                            )}
+                            {supplier.address && (
+                              <div className="flex flex-col">
+                                <span className="font-medium text-gray-700 mb-1">Endereço:</span>
+                                <span className="text-gray-900 p-3 bg-gray-50 rounded border text-sm">{supplier.address}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
                       
                       {supplier.description && (
                         <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Descrição</h4>
-                          <p className="text-gray-600 text-sm">{supplier.description}</p>
+                          <h4 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">Descrição</h4>
+                          <div className="p-4 bg-gray-50 rounded border">
+                            <p className="text-gray-700 leading-relaxed">{supplier.description}</p>
+                          </div>
                         </div>
                       )}
                     </div>

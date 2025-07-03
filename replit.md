@@ -111,7 +111,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ MELHORIAS UX EM MEUS FORNECEDORES IMPLEMENTADAS
+- **July 03, 2025**: ✅ SISTEMA DE INFORMAÇÕES DO FORNECEDOR APRIMORADO E REORGANIZADO
+  - **Aba "Informações" como Primeira Aba**:
+    - Reorganizada ordem das abas: Informações → Conversas → Marcas → Contatos → Arquivos
+    - defaultValue atualizado para "info" tornando as informações a aba principal
+  - **Campos Completos de Fornecedor Implementados**:
+    - CNPJ com máscara automática (00.000.000/0000-00)
+    - Dropdown de países: Brasil, China, Taiwan, Hong Kong, Índia, Turquia, Argentina, Paraguai, Outro
+    - Campos de localização: Estado, Cidade, CEP (com máscara para Brasil), Endereço
+    - Inscrições: Estadual e Municipal
+    - Tipo de fornecedor: Distribuidora, Importadora, Fabricante, Indústria, Representante
+  - **Interface Melhorada para Melhor Legibilidade**:
+    - Layout em 2 colunas responsivo para exibição das informações
+    - Tipografia aumentada com títulos semibold e text-lg
+    - Seções organizadas com bordas e espaçamento adequado
+    - Campos de endereço e descrição destacados com background cinza
+    - Flex layout com larguras fixas para melhor alinhamento
+  - **Banco de Dados Atualizado**:
+    - Adicionados novos campos na tabela suppliers via SQL direto
+    - Sistema de edição completo funcionando com todos os novos campos
+    - Validação e máscaras implementadas no frontend
+
+- **July 03, 2025 (anterior)**: ✅ MELHORIAS UX EM MEUS FORNECEDORES IMPLEMENTADAS
   - **Ordem das Abas Reorganizada**:
     - "Conversas" agora aparece como primeira aba (defaultValue atualizado)
     - "Marcas" movida para segunda posição
