@@ -2325,12 +2325,27 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           cost: `$${cost}`
         });
 
-        // Extract generated image from response - images.edit returns URL by default
-        if (!response.data || !response.data[0] || !response.data[0].url) {
+        // Debug: Log the OpenAI response structure
+        console.log('🔍 [PRODUCT_PHOTOGRAPHY] OpenAI response structure:', {
+          hasData: !!response.data,
+          dataLength: response.data?.length,
+          firstItem: response.data?.[0] ? Object.keys(response.data[0]) : 'none',
+          responseKeys: Object.keys(response)
+        });
+
+        // Extract generated image from response - images.edit can return base64 or URL
+        // Try base64 first, then URL as fallback
+        const imageBase64 = response.data?.[0]?.b64_json;
+        const imageUrl = response.data?.[0]?.url;
+        
+        if (!imageBase64 && !imageUrl) {
           throw new Error('No image data received from OpenAI');
         }
         
-        const generatedImageUrl = response.data[0].url;
+        // Convert to data URL if we got base64, otherwise use URL directly
+        const generatedImageUrl = imageBase64 
+          ? (imageBase64.startsWith('data:') ? imageBase64 : `data:image/png;base64,${imageBase64}`)
+          : imageUrl;
         
         // Save to ai_img_generation_logs
         await storage.createAiImgGenerationLog({
