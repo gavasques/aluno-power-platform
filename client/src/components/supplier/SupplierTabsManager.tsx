@@ -249,11 +249,13 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
 interface FileListProps {
   files: SupplierFile[];
+  onUpload?: () => void;
   isLoading?: boolean;
 }
 
 export const FileList: React.FC<FileListProps> = ({ 
   files, 
+  onUpload,
   isLoading = false 
 }) => {
   const formatFileSize = (bytes: number) => {
@@ -271,7 +273,7 @@ export const FileList: React.FC<FileListProps> = ({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Arquivos ({files.length})</h3>
-        <Button size="sm" disabled={isLoading}>
+        <Button size="sm" onClick={onUpload} disabled={isLoading}>
           <Plus className="h-4 w-4 mr-2" />
           Upload Arquivo
         </Button>

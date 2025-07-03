@@ -13,6 +13,8 @@ import {
   ConversationList, 
   FileList 
 } from '@/components/supplier/SupplierTabsManager';
+import { BrandDialog, ContactDialog, ConversationDialog } from '@/components/supplier/SupplierDialogs';
+import { FileUploadDialog } from '@/components/supplier/FileUploadDialog';
 import type { Supplier } from '@shared/schema';
 
 const SupplierDetailRefactored = () => {
@@ -31,9 +33,14 @@ const SupplierDetailRefactored = () => {
     createBrand,
     createContact,
     createConversation,
+    uploadFile,
     deleteBrand,
     deleteContact,
-    isUpdating
+    isUpdating,
+    isCreatingBrand,
+    isCreatingContact,
+    isCreatingConversation,
+    isUploadingFile
   } = useSupplierDetail(supplierId);
 
   // Local state for editing
@@ -41,6 +48,10 @@ const SupplierDetailRefactored = () => {
   const [editForm, setEditForm] = useState<Partial<Supplier>>({});
 
   // Dialog states
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [conversationDialogOpen, setConversationDialogOpen] = useState(false);
+  const [fileUploadDialogOpen, setFileUploadDialogOpen] = useState(false);
   const [dialogStates, setDialogStates] = useState({
     brand: false,
     contact: false,
@@ -74,8 +85,8 @@ const SupplierDetailRefactored = () => {
     setEditForm(prev => ({ ...prev, ...updates }));
   };
 
-  // Mock handlers for demonstrations (to be implemented)
-  const handleAddBrand = () => setDialogStates(prev => ({ ...prev, brand: true }));
+  // Dialog handlers
+  const handleAddBrand = () => setBrandDialogOpen(true);
   const handleEditBrand = (brand: any) => console.log('Edit brand:', brand);
   const handleDeleteBrand = async (brandId: number) => {
     try {
@@ -85,7 +96,7 @@ const SupplierDetailRefactored = () => {
     }
   };
 
-  const handleAddContact = () => setDialogStates(prev => ({ ...prev, contact: true }));
+  const handleAddContact = () => setContactDialogOpen(true);
   const handleEditContact = (contact: any) => console.log('Edit contact:', contact);
   const handleDeleteContact = async (contactId: number) => {
     try {
@@ -95,8 +106,10 @@ const SupplierDetailRefactored = () => {
     }
   };
 
-  const handleAddConversation = () => setDialogStates(prev => ({ ...prev, conversation: true }));
+  const handleAddConversation = () => setConversationDialogOpen(true);
   const handleEditConversation = (conversation: any) => console.log('Edit conversation:', conversation);
+  
+  const handleUploadFile = () => setFileUploadDialogOpen(true);
 
   if (isLoading) {
     return (
@@ -222,12 +235,46 @@ const SupplierDetailRefactored = () => {
             <TabsContent value="files" className="mt-6">
               <FileList
                 files={files}
+                onUpload={handleUploadFile}
                 isLoading={isLoading}
               />
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Dialogs */}
+      <BrandDialog
+        open={brandDialogOpen}
+        onClose={() => setBrandDialogOpen(false)}
+        onSave={createBrand}
+        supplierId={supplierId}
+        isLoading={isCreatingBrand}
+      />
+
+      <ContactDialog
+        open={contactDialogOpen}
+        onClose={() => setContactDialogOpen(false)}
+        onSave={createContact}
+        supplierId={supplierId}
+        isLoading={isCreatingContact}
+      />
+
+      <ConversationDialog
+        open={conversationDialogOpen}
+        onClose={() => setConversationDialogOpen(false)}
+        onSave={createConversation}
+        supplierId={supplierId}
+        isLoading={isCreatingConversation}
+      />
+
+      <FileUploadDialog
+        open={fileUploadDialogOpen}
+        onClose={() => setFileUploadDialogOpen(false)}
+        onUpload={uploadFile}
+        supplierId={supplierId}
+        isLoading={isUploadingFile}
+      />
     </div>
   );
 };

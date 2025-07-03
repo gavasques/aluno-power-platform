@@ -140,6 +140,30 @@ export const useSupplierDetail = (supplierId: string) => {
     },
   });
 
+  const uploadFileMutation = useMutation({
+    mutationFn: async ({ file, name, type }: { file: File; name: string; type: string }) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('name', name);
+      formData.append('type', type);
+      formData.append('supplierId', supplierId);
+
+      const response = await fetch(`/api/suppliers/${supplierId}/files`, {
+        method: 'POST',
+        body: formData
+      });
+      if (!response.ok) throw new Error('Failed to upload file');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${supplierId}/files`] });
+      toast({
+        title: "Sucesso",
+        description: "Arquivo enviado com sucesso",
+      });
+    },
+  });
+
   return {
     // Data
     supplier: supplierQuery.data,
@@ -162,11 +186,13 @@ export const useSupplierDetail = (supplierId: string) => {
     createConversation: createConversationMutation.mutateAsync,
     deleteBrand: deleteBrandMutation.mutateAsync,
     deleteContact: deleteContactMutation.mutateAsync,
+    uploadFile: uploadFileMutation.mutateAsync,
     
     // Mutation states
     isUpdating: updateSupplierMutation.isPending,
     isCreatingBrand: createBrandMutation.isPending,
     isCreatingContact: createContactMutation.isPending,
     isCreatingConversation: createConversationMutation.isPending,
+    isUploadingFile: uploadFileMutation.isPending,
   };
 };
