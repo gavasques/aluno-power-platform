@@ -5969,40 +5969,31 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log('🎨 [INFOGRAPHIC_STEP2] User prompt length:', userPrompt.length);
 
-      // Call OpenAI for image generation/editing
+      // VALIDATE: Image is MANDATORY - never generate without reference
+      if (!imagemReferencia) {
+        throw new Error('Imagem de referência é OBRIGATÓRIA para gerar infográficos. Upload uma imagem antes de continuar.');
+      }
+
+      // Call OpenAI GPT-Image-1 for image editing with reference
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       let response;
       try {
-        if (imagemReferencia) {
-          // Use image editing with reference image
-          console.log('🎨 [INFOGRAPHIC_STEP2] Using image editing with reference');
-          
-          // Convert base64 to File object for OpenAI
-          const imageBuffer = Buffer.from(imagemReferencia, 'base64');
-          const imageFile = await OpenAI.toFile(imageBuffer, 'reference.png');
-          
-          response = await openai.images.edit({
-            image: imageFile,
-            prompt: userPrompt,
-            n: quantidadeImagens,
-            size: '1024x1024',
-            response_format: 'b64_json'
-          });
-        } else {
-          // Use standard image generation without reference
-          console.log('🎨 [INFOGRAPHIC_STEP2] Using standard image generation');
-          
-          response = await openai.images.generate({
-            model: 'dall-e-3',
-            prompt: userPrompt,
-            n: quantidadeImagens,
-            size: '1024x1024',
-            quality: qualidade === 'high' ? 'hd' : 'standard',
-            response_format: 'b64_json'
-          });
-        }
+        // ALWAYS use GPT-Image-1 with image editing - NEVER DALL-E 3
+        console.log('🎨 [INFOGRAPHIC_STEP2] Using GPT-Image-1 with reference image (MANDATORY)');
+        
+        // Convert base64 to File object for OpenAI
+        const imageBuffer = Buffer.from(imagemReferencia, 'base64');
+        const imageFile = await OpenAI.toFile(imageBuffer, 'reference.png');
+        
+        response = await openai.images.edit({
+          image: imageFile,
+          prompt: userPrompt,
+          n: quantidadeImagens,
+          size: '1024x1024',
+          response_format: 'b64_json'
+        });
       } catch (apiError: any) {
         console.log('🎨 [INFOGRAPHIC_STEP2] OpenAI API Error:', apiError.message);
         
@@ -6023,21 +6014,15 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const endTime = Date.now();
       const processingTime = Math.round((endTime - startTime) / 1000);
 
-      // Calculate cost based on image generation/editing
-      let realCost;
-      if (imagemReferencia) {
-        // Image editing cost is typically higher
-        realCost = 0.20 * quantidadeImagens; // $0.20 per image edit
-      } else {
-        // Standard DALL-E 3 generation cost
-        realCost = 0.04 * quantidadeImagens; // $0.04 per 1024x1024 image
-      }
+      // Calculate cost for GPT-Image-1 image editing (ALWAYS with reference)
+      const realCost = 0.20 * quantidadeImagens; // $0.20 per GPT-Image-1 image edit
 
       console.log('💰 [INFOGRAPHIC_STEP2] Cost calculation details:', {
-        method: imagemReferencia ? 'image_editing' : 'image_generation',
-        model: imagemReferencia ? 'dall-e-2-edit' : 'dall-e-3',
+        method: 'gpt_image_1_editing',
+        model: 'gpt-image-1',
         quantity: quantidadeImagens,
-        totalCost: realCost.toFixed(6)
+        totalCost: realCost.toFixed(6),
+        note: 'SEMPRE com imagem de referência obrigatória'
       });
 
       // Extract generated images

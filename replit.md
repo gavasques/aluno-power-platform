@@ -111,26 +111,29 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ INFOGRAPHIC GENERATOR - CAMPO DE UPLOAD DE IMAGEM IMPLEMENTADO COM MULTIMODAL GPT-IMAGE-1
-  - **Campo de Upload de Imagem Adicionado**:
-    - Interface de upload com drag & drop para imagem de referência opcional
+- **July 03, 2025**: ✅ INFOGRAPHIC GENERATOR - IMAGEM OBRIGATÓRIA + GPT-IMAGE-1 EXCLUSIVO
+  - **Campo de Upload OBRIGATÓRIO Implementado**:
+    - Interface marcada como "OBRIGATÓRIO" com validação rigorosa
+    - Upload drag & drop para imagem de referência SEMPRE necessária
     - Preview da imagem carregada com botão de remoção
     - Validação de formato (PNG, JPG, JPEG, WebP) e tamanho máximo 25MB
     - Posicionamento estratégico entre descrição do produto e cores
-  - **Integração Multimodal GPT-Image-1**:
-    - Backend atualizado para receber e processar imagem de referência
-    - Mudança de `images.generate` para `chat.completions.create` com suporte multimodal
-    - Imagem enviada como base64 no prompt junto com texto otimizado
-    - Sistema de mensagens estruturado para entrada texto + imagem
-  - **Processamento Aprimorado**:
-    - Imagem de referência usada como guia visual para estilo do infográfico
-    - Sistema sem fallback mantido: ou funciona com IA real ou retorna erro
-    - Logs atualizados para capturar tokens corretos (prompt_tokens, completion_tokens)
-    - Custos calculados baseados em pricing GPT-Image-1: $5/1M input + $40/1M output
-  - **Experiência do Usuário**:
-    - Texto explicativo: "A imagem será enviada ao GPT-Image-1 como referência para o estilo"
-    - Campo opcional - usuário pode gerar infográfico com ou sem imagem de referência
-    - Manutenção do fluxo de 2 etapas: Claude Sonnet (texto) → GPT-Image-1 (visual)
+  - **GPT-Image-1 EXCLUSIVO - NUNCA DALL-E 3**:
+    - Backend configurado para SEMPRE usar `openai.images.edit()` com GPT-Image-1
+    - NUNCA usa DALL-E 3 ou qualquer outro modelo de geração
+    - Validação obrigatória: erro se não houver imagem de referência
+    - Imagem enviada como File object via `OpenAI.toFile()` para GPT-Image-1
+    - Sistema de mensagens estruturado para entrada texto + imagem obrigatória
+  - **Processamento Rigorosamente Controlado**:
+    - Imagem de referência SEMPRE obrigatória como guia visual
+    - Sistema sem fallback: ou funciona com GPT-Image-1 real ou retorna erro
+    - Logs específicos: model: 'gpt-image-1' + provider: 'openai'
+    - Custos fixos: $0.20 por imagem GPT-Image-1 edit
+  - **Experiência do Usuário Atualizada**:
+    - Texto: "OBRIGATÓRIO: A imagem será enviada ao GPT-Image-1 como referência"
+    - Botão desabilitado se não houver imagem carregada
+    - Validação frontend e backend para garantir imagem obrigatória
+    - Fluxo mantido: Claude Sonnet (texto) → GPT-Image-1 (visual com referência)
 
 - **July 03, 2025 (anterior)**: ✅ EDITOR DE FOTO INFOGRÁFICOS IMPLEMENTADO - PROCESSO 2 ETAPAS COM CLAUDE + GPT-IMAGE-1
   - **Terceiro Agente Especializado Criado**:

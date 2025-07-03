@@ -298,7 +298,10 @@ export default function InfographicGenerator() {
 
               {/* Imagem de Referência */}
               <div>
-                <Label htmlFor="imagemReferencia">Imagem de Referência (Opcional)</Label>
+                <Label htmlFor="imagemReferencia">
+                  Imagem de Referência *
+                  <span className="text-red-500 text-xs ml-1">(OBRIGATÓRIO)</span>
+                </Label>
                 <div className="space-y-3">
                   {imagePreview ? (
                     <div className="relative">
@@ -344,7 +347,7 @@ export default function InfographicGenerator() {
                   )}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  A imagem será enviada ao GPT-Image-1 como referência para o estilo do infográfico
+                  <span className="font-medium text-red-600">OBRIGATÓRIO:</span> A imagem será enviada ao GPT-Image-1 como referência para o estilo do infográfico
                 </p>
               </div>
 
@@ -432,7 +435,7 @@ export default function InfographicGenerator() {
               {/* Botão Gerar */}
               <Button
                 onClick={handleGenerateInfographic}
-                disabled={isProcessing || !formData.nomeProduto.trim() || !formData.descricaoLonga.trim() || isDescriptionTooLong}
+                disabled={isProcessing || !formData.nomeProduto.trim() || !formData.descricaoLonga.trim() || isDescriptionTooLong || !imageFile}
                 className="w-full h-12"
                 size="lg"
               >
