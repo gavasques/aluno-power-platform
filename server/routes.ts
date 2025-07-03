@@ -2301,15 +2301,19 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       });
       
       try {
-        // Use buffer directly without temporary file to preserve mimetype
-        // Convert buffer to Blob with correct mimetype
-        const imageBlob = new Blob([originalImageBuffer], { type: mimeType });
+        // Import toFile from OpenAI library
+        const { toFile } = await import('openai');
+        
+        // Create file object using OpenAI's toFile utility
+        const imageFile = await toFile(originalImageBuffer, fileName, { type: mimeType });
         
         const response = await openai.images.edit({
           model: 'gpt-image-1',
-          image: imageBlob as any, // Cast needed for OpenAI SDK compatibility
+          image: imageFile,
           prompt: systemPrompt.content,
-          n: 1
+          n: 1,
+          size: 'auto',
+          quality: 'high'
         });
 
         const endTime = Date.now();
@@ -2351,12 +2355,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         });
 
       } finally {
-        // Clean up temporary file
-        try {
-          await fs.unlink(tempFilePath);
-        } catch (cleanupError) {
-          console.warn('⚠️ [PRODUCT_PHOTOGRAPHY] Failed to cleanup temp file:', tempFilePath);
-        }
+        // No cleanup needed - using buffer directly
       }
     } catch (error: any) {
       console.error('❌ [PRODUCT_PHOTOGRAPHY] Error:', error);
