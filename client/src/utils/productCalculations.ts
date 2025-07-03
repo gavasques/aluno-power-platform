@@ -1,95 +1,112 @@
+import { Product, BaseChannel } from "@/types/product";
 
-import { ChannelInput, ChannelResult, Product, BaseChannel } from "@/types/product";
+export const channelNames = {
+  mercadolivre: "Mercado Livre",
+  amazon: "Amazon",
+  shopee: "Shopee",
+  magazineluiza: "Magazine Luiza",
+  americanas: "Americanas",
+  casasbahia: "Casas Bahia",
+  pontofrio: "Ponto Frio",
+  extra: "Extra",
+  carrefour: "Carrefour",
+  ecommerce: "E-commerce Próprio",
+  whatsapp: "WhatsApp",
+  fisico: "Físico",
+};
 
-export function calcChannel(input: ChannelInput, taxPct: number = 0): ChannelResult {
-  const P = input.price;
-  const pct = (p: number | undefined) => (p ?? 0) / 100 * P;
-  
-  const Cperc = pct(input.commissionPct) + pct(input.adsPct) + pct(input.otherPct) + pct(input.gatewayPct) + pct(taxPct);
-  const Cunit = (
-    input.costItem +
-    (input.packCost ?? 0) +
-    (input.inboundFreight ?? 0) +
-    (input.outboundFreight ?? 0) +
-    (input.prepCenter ?? 0) +
-    (input.fixedFee ?? 0) +
-    (input.otherValue ?? 0) -
-    (input.flexRevenue ?? 0) // Para ML Flex
-  );
-  
-  const Ctotal = Cperc + Cunit;
-  const profit = P - Ctotal;
-  const margin = P > 0 ? (profit / P) * 100 : 0;
-  const roi = (input.costItem + (input.inboundFreight ?? 0) + (input.prepCenter ?? 0)) > 0 
-    ? (profit / (input.costItem + (input.inboundFreight ?? 0) + (input.prepCenter ?? 0))) * 100 
-    : 0;
-
-  return { profit, margin, roi };
-}
-
-export function priceForMargin(input: ChannelInput, targetMarginPct: number, taxPct: number = 0): number {
-  const pct = (p: number | undefined) => (p ?? 0);
-  const varPct = pct(input.commissionPct) + pct(input.adsPct) + pct(input.otherPct) + pct(input.gatewayPct) + taxPct;
-  const Cunit = (
-    input.costItem +
-    (input.packCost ?? 0) +
-    (input.inboundFreight ?? 0) +
-    (input.outboundFreight ?? 0) +
-    (input.prepCenter ?? 0) +
-    (input.fixedFee ?? 0) +
-    (input.otherValue ?? 0) -
-    (input.flexRevenue ?? 0)
-  );
-  
-  return Cunit / (1 - (varPct + targetMarginPct) / 100);
-}
-
-export function calculateChannelResults(product: Product, channelType: string, channel: BaseChannel): ChannelResult {
-  const baseInput: ChannelInput = {
-    price: channel.salePrice,
-    costItem: product.costItem,
-    packCost: product.packCost,
-    commissionPct: channel.commissionPct,
-    adsPct: channel.adsPct,
-    otherPct: channel.otherPct,
-    otherValue: channel.otherValue,
-    fixedFee: channel.fixedFee,
+export interface ChannelResults {
+  revenue: number;
+  totalCosts: number;
+  profit: number;
+  margin: number;
+  roi: number;
+  fees: {
+    shipping: number;
+    platform: number;
+    payment: number;
+    advertising: number;
+    operational: number;
+    other: number;
   };
+}
 
-  // Adicionar custos específicos por canal
-  switch (channelType) {
-    case 'sitePropio':
-      baseInput.gatewayPct = (channel as any).gatewayPct || 0;
-      break;
-    case 'amazonFBM':
-    case 'amazonFBAOnSite':
-    case 'amazonDBA':
-      baseInput.outboundFreight = (channel as any).outboundFreight || 0;
-      break;
-    case 'amazonFBA':
-    case 'mlFull':
-      baseInput.inboundFreight = (channel as any).inboundFreight || 0;
-      baseInput.prepCenter = (channel as any).prepCenter || 0;
-      break;
-    case 'mlFlex':
-      baseInput.outboundFreight = (channel as any).outboundFreight || 0;
-      baseInput.flexRevenue = (channel as any).flexRevenue || 0;
-      break;
-    case 'mlEnvios':
-      baseInput.outboundFreight = (channel as any).outboundFreight || 0;
-      break;
-  }
-
-  return calcChannel(baseInput, product.taxPercent);
+export function calculateChannelResults(
+  product: Product,
+  channelKey: string,
+  channel: BaseChannel
+): ChannelResults {
+  const costItem = product.costItem || 0;
+  const packCost = product.packCost || 0;
+  const taxPercent = product.taxPercent || 0;
+  
+  const baseCost = costItem + packCost;
+  const taxCost = baseCost * (taxPercent / 100);
+  const totalProductCost = baseCost + taxCost;
+  
+  const revenue = channel.price;
+  
+  const fees = {
+    shipping: channel.shippingCost || 0,
+    platform: channel.platformFee || 0,
+    payment: channel.paymentFee || 0,
+    advertising: channel.advertisingCost || 0,
+    operational: channel.operationalCost || 0,
+    other: channel.otherCosts || 0,
+  };
+  
+  const totalFees = Object.values(fees).reduce((sum, fee) => sum + fee, 0);
+  const totalCosts = totalProductCost + totalFees;
+  
+  const profit = revenue - totalCosts;
+  const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+  const roi = totalProductCost > 0 ? (profit / totalProductCost) * 100 : 0;
+  
+  return {
+    revenue,
+    totalCosts,
+    profit,
+    margin,
+    roi,
+    fees,
+  };
 }
 
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency: 'BRL'
+    currency: 'BRL',
   }).format(value);
 }
 
 export function formatPercentage(value: number): string {
   return `${value.toFixed(1)}%`;
+}
+
+export function getDefaultChannels() {
+  const defaultChannel: BaseChannel = {
+    enabled: false,
+    price: 0,
+    shippingCost: 0,
+    platformFee: 0,
+    paymentFee: 0,
+    advertisingCost: 0,
+    operationalCost: 0,
+    otherCosts: 0,
+  };
+
+  return {
+    mercadolivre: { ...defaultChannel },
+    amazon: { ...defaultChannel },
+    shopee: { ...defaultChannel },
+    magazineluiza: { ...defaultChannel },
+    americanas: { ...defaultChannel },
+    casasbahia: { ...defaultChannel },
+    pontofrio: { ...defaultChannel },
+    extra: { ...defaultChannel },
+    carrefour: { ...defaultChannel },
+    ecommerce: { ...defaultChannel },
+    whatsapp: { ...defaultChannel },
+    fisico: { ...defaultChannel },
+  };
 }

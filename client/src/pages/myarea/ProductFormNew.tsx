@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Package, Save, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useProducts } from "@/contexts/ProductContext";
+import { getDefaultChannels } from "@/utils/productCalculations";
 import type { InsertProduct } from '@shared/schema';
 
 const productFormSchema = z.object({
@@ -72,7 +73,7 @@ const ProductFormNew = () => {
         supplierId: data.supplierId || null,
         dimensions: null,
         descriptions: null,
-        channels: null,
+        channels: getDefaultChannels(),
       };
 
       await addProduct(productData);
