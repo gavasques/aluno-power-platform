@@ -5213,13 +5213,17 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const base64Image = imageBuffer.toString('base64');
 
       // Get agent configuration
+      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Looking for agent:', 'agent-amazon-product-photography');
       const agent = await storage.getAgentById('agent-amazon-product-photography');
+      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Agent found:', !!agent);
       if (!agent) {
         return res.status(404).json({ error: 'Agente não encontrado' });
       }
 
       // Get system prompt
+      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Looking for prompt:', 'agent-amazon-product-photography', 'system');
       const systemPrompt = await storage.getAgentPrompt('agent-amazon-product-photography', 'system');
+      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Prompt found:', !!systemPrompt);
       if (!systemPrompt) {
         return res.status(404).json({ error: 'Prompt do agente não encontrado' });
       }
