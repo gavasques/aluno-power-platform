@@ -232,12 +232,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                   </div>
                   <span>{formatDate(conversation.createdAt)}</span>
                 </div>
-                
-                {conversation.nextFollowUp && (
-                  <div className="mt-2 text-xs text-blue-600">
-                    🗓 Próximo follow-up: {formatDate(conversation.nextFollowUp)}
-                  </div>
-                )}
               </div>
             </Card>
           ))}

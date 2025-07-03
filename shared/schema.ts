@@ -172,12 +172,8 @@ export const supplierConversations = pgTable("supplier_conversations", {
   userId: integer("user_id").references(() => users.id).notNull(),
   subject: text("subject").notNull(), // Assunto da conversa
   content: text("content").notNull(), // O que foi falado
-  outcome: text("outcome"), // O que ficou acertado
   channel: text("channel").notNull(), // whatsapp, telefone, email, pessoalmente, call, outro
   contactPerson: text("contact_person"), // Pessoa de contato
-  nextFollowUp: timestamp("next_follow_up"), // Próximo follow-up
-  priority: text("priority").notNull().default('medium'), // low, medium, high
-  status: text("status").notNull().default('completed'), // completed, pending, follow_up_needed
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

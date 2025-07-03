@@ -320,11 +320,7 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
     subject: '',
     content: '',
     channel: 'email',
-    contactPerson: '',
-    priority: 'medium',
-    status: 'pending',
-    outcome: '',
-    nextFollowUp: ''
+    contactPerson: ''
   });
 
   useEffect(() => {
@@ -333,23 +329,14 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
         subject: conversation.subject || '',
         content: conversation.content || '',
         channel: conversation.channel || 'email',
-        contactPerson: conversation.contactPerson || '',
-        priority: conversation.priority || 'medium',
-        status: conversation.status || 'pending',
-        outcome: conversation.outcome || '',
-        nextFollowUp: conversation.nextFollowUp ? 
-          new Date(conversation.nextFollowUp).toISOString().split('T')[0] : ''
+        contactPerson: conversation.contactPerson || ''
       });
     } else {
       setFormData({
         subject: '',
         content: '',
         channel: 'email',
-        contactPerson: '',
-        priority: 'medium',
-        status: 'pending',
-        outcome: '',
-        nextFollowUp: ''
+        contactPerson: ''
       });
     }
   }, [conversation, open]);
@@ -370,8 +357,7 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
       const conversationData = {
         ...formData,
         supplierId: parseInt(supplierId),
-        userId: 2, // TODO: Get from auth context
-        nextFollowUp: formData.nextFollowUp ? new Date(formData.nextFollowUp) : null
+        userId: 2 // TODO: Get from auth context
       };
       
       await onSave(conversationData);
@@ -442,24 +428,6 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
               </div>
               
               <div className="grid gap-2">
-                <Label htmlFor="priority">Prioridade</Label>
-                <Select value={formData.priority} onValueChange={(value) => 
-                  setFormData(prev => ({ ...prev, priority: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Baixa</SelectItem>
-                    <SelectItem value="medium">Média</SelectItem>
-                    <SelectItem value="high">Alta</SelectItem>
-                    <SelectItem value="urgent">Urgente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
                 <Label htmlFor="contactPerson">Pessoa de Contato</Label>
                 <Input
                   id="contactPerson"
@@ -468,43 +436,6 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
                   placeholder="Nome da pessoa"
                 />
               </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => 
-                  setFormData(prev => ({ ...prev, status: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pendente</SelectItem>
-                    <SelectItem value="in_progress">Em Andamento</SelectItem>
-                    <SelectItem value="completed">Concluída</SelectItem>
-                    <SelectItem value="cancelled">Cancelada</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="nextFollowUp">Próximo Follow-up</Label>
-              <Input
-                id="nextFollowUp"
-                type="date"
-                value={formData.nextFollowUp}
-                onChange={(e) => setFormData(prev => ({ ...prev, nextFollowUp: e.target.value }))}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="outcome">Resultado</Label>
-              <Textarea
-                id="outcome"
-                value={formData.outcome}
-                onChange={(e) => setFormData(prev => ({ ...prev, outcome: e.target.value }))}
-                placeholder="Resultado ou conclusões da conversa"
-                rows={2}
-              />
             </div>
           </div>
           
