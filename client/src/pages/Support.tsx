@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, MessageCircle, Clock, User, Tag, FileText } from 'lucide-react';
+import { Plus, MessageCircle, Clock, User, Tag, FileText, Paperclip, X, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { apiRequest } from '@/lib/queryClient';
 
 interface SupportCategory {
   id: number;
@@ -24,7 +25,6 @@ interface SupportTicket {
   title: string;
   description: string;
   status: 'open' | 'in_progress' | 'waiting_response' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
   category: string;
   tags: string[] | null;
   createdAt: string;
@@ -34,11 +34,6 @@ interface SupportTicket {
     name: string;
     email: string;
   };
-  assignedTo?: {
-    id: number;
-    name: string;
-    email: string;
-  } | null;
   messages: Array<{
     id: number;
     message: string;
@@ -50,12 +45,26 @@ interface SupportTicket {
       email: string;
     };
   }>;
+  attachments?: Array<{
+    id: number;
+    fileName: string;
+    fileUrl: string;
+    fileSize: number;
+    createdAt: string;
+  }>;
 }
 
 const Support = () => {
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newMessage, setNewMessage] = useState('');
+  const [isNewTicketOpen, setIsNewTicketOpen] = useState(false);
+  const [newTicketForm, setNewTicketForm] = useState({
+    title: '',
+    description: '',
+    category: '',
+  });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -69,32 +78,56 @@ const Support = () => {
     queryKey: ['/api/support/tickets'],
   });
 
+  // Upload file mutation
+  const uploadFileMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'support_attachment');
+      
+      return apiRequest('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Arquivo enviado!',
+        description: 'O anexo foi carregado com sucesso.',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Erro no upload',
+        description: 'Não foi possível enviar o arquivo. Tente novamente.',
+        variant: 'destructive',
+      });
+      setSelectedFile(null);
+    },
+  });
+
   // Create ticket mutation
   const createTicketMutation = useMutation({
-    mutationFn: async (data: { title: string; description: string; category: string; priority: string }) => {
-      const response = await fetch('/api/support/tickets', {
+    mutationFn: async (ticketData: any) => {
+      return apiRequest('/api/support/tickets', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
+        body: JSON.stringify(ticketData),
       });
-      if (!response.ok) throw new Error('Erro ao criar ticket');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/support/tickets'] });
-      setIsCreateDialogOpen(false);
+      setIsNewTicketOpen(false);
+      setNewTicketForm({ title: '', description: '', category: '' });
+      setSelectedFile(null);
       toast({
-        title: 'Ticket criado com sucesso!',
-        description: 'Sua solicitação foi enviada e será analisada pela nossa equipe.',
+        title: 'Ticket criado!',
+        description: 'Seu ticket de suporte foi criado com sucesso.',
       });
     },
     onError: () => {
       toast({
         title: 'Erro ao criar ticket',
-        description: 'Não foi possível criar o ticket. Tente novamente.',
+        description: 'Não foi possível criar o ticket. Verifique os dados e tente novamente.',
         variant: 'destructive',
       });
     },
@@ -103,23 +136,16 @@ const Support = () => {
   // Add message mutation
   const addMessageMutation = useMutation({
     mutationFn: async ({ ticketId, message }: { ticketId: number; message: string }) => {
-      const response = await fetch(`/api/support/tickets/${ticketId}/messages`, {
+      return apiRequest(`/api/support/tickets/${ticketId}/messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
         body: JSON.stringify({ message }),
       });
-      if (!response.ok) throw new Error('Erro ao enviar mensagem');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/support/tickets'] });
       if (selectedTicket) {
         queryClient.invalidateQueries({ queryKey: [`/api/support/tickets/${selectedTicket.id}`] });
       }
-      setNewMessage('');
       toast({
         title: 'Mensagem enviada!',
         description: 'Sua mensagem foi adicionada ao ticket.',
@@ -134,13 +160,67 @@ const Support = () => {
     },
   });
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: 'Arquivo muito grande',
+          description: 'O arquivo deve ter no máximo 10MB.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: 'Tipo de arquivo não suportado',
+          description: 'Apenas imagens, PDFs e documentos de texto são permitidos.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      setSelectedFile(file);
+    }
+  };
+
+  const handleCreateTicket = async () => {
+    if (!newTicketForm.title.trim() || !newTicketForm.description.trim() || !newTicketForm.category) {
+      toast({
+        title: 'Campos obrigatórios',
+        description: 'Preencha todos os campos obrigatórios.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    let attachmentId = null;
+    
+    // Upload file first if selected
+    if (selectedFile) {
+      try {
+        const uploadResult = await uploadFileMutation.mutateAsync(selectedFile);
+        attachmentId = uploadResult.id;
+      } catch (error) {
+        return; // Upload failed, don't create ticket
+      }
+    }
+
+    // Create ticket with or without attachment
+    createTicketMutation.mutate({
+      ...newTicketForm,
+      attachmentId,
+    });
+  };
+
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -166,112 +246,149 @@ const Support = () => {
     }
   };
 
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'Urgente';
-      case 'high': return 'Alta';
-      case 'medium': return 'Média';
-      case 'low': return 'Baixa';
-      default: return priority;
-    }
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Central de Suporte</h1>
             <p className="text-gray-600 mt-2">Gerencie seus tickets de suporte e tire suas dúvidas</p>
           </div>
-          
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog open={isNewTicketOpen} onOpenChange={setIsNewTicketOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
+              <Button size="lg" className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
                 Novo Ticket
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Criar Novo Ticket</DialogTitle>
                 <DialogDescription>
                   Descreva seu problema ou solicitação e nossa equipe irá ajudá-lo.
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                createTicketMutation.mutate({
-                  title: formData.get('title') as string,
-                  description: formData.get('description') as string,
-                  category: formData.get('category') as string,
-                  priority: formData.get('priority') as string,
-                });
-              }} className="space-y-4">
+              
+              <div className="space-y-6 mt-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Título</Label>
+                  <Label htmlFor="title">Título *</Label>
                   <Input
                     id="title"
-                    name="title"
-                    placeholder="Descreva brevemente o problema"
-                    required
+                    value={newTicketForm.title}
+                    onChange={(e) => setNewTicketForm(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="Descreva brevemente o problema..."
+                    className="h-12 text-base"
                   />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Categoria</Label>
-                    <Select name="category" defaultValue="geral">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.name.toLowerCase()}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="priority">Prioridade</Label>
-                    <Select name="priority" defaultValue="medium">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Baixa</SelectItem>
-                        <SelectItem value="medium">Média</SelectItem>
-                        <SelectItem value="high">Alta</SelectItem>
-                        <SelectItem value="urgent">Urgente</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Descrição</Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    placeholder="Descreva detalhadamente o problema ou solicitação"
-                    rows={4}
-                    required
-                  />
+                  <Label htmlFor="category">Categoria *</Label>
+                  <Select 
+                    value={newTicketForm.category} 
+                    onValueChange={(value) => setNewTicketForm(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger className="h-12 text-base">
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição *</Label>
+                  <Textarea
+                    id="description"
+                    value={newTicketForm.description}
+                    onChange={(e) => setNewTicketForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Descreva detalhadamente o problema ou solicitação..."
+                    rows={8}
+                    className="text-base resize-none min-h-[200px]"
+                  />
+                </div>
+
+                {/* File Upload Section */}
+                <div className="space-y-2">
+                  <Label>Anexo (Opcional)</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    {!selectedFile ? (
+                      <div className="text-center">
+                        <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 mb-2">
+                          Clique para selecionar um arquivo ou arraste aqui
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Máximo 10MB • PNG, JPG, PDF, DOC, TXT
+                        </p>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileSelect}
+                          accept="image/*,.pdf,.doc,.docx,.txt"
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="mt-3"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Paperclip className="h-4 w-4 mr-2" />
+                          Selecionar Arquivo
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between bg-blue-50 p-3 rounded">
+                        <div className="flex items-center gap-3">
+                          <FileText className="h-8 w-8 text-blue-600" />
+                          <div>
+                            <p className="font-medium text-sm">{selectedFile.name}</p>
+                            <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={removeSelectedFile}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsNewTicketOpen(false)}
+                    disabled={createTicketMutation.isPending || uploadFileMutation.isPending}
+                  >
                     Cancelar
                   </Button>
-                  <Button type="submit" disabled={createTicketMutation.isPending}>
-                    {createTicketMutation.isPending ? 'Criando...' : 'Criar Ticket'}
+                  <Button 
+                    onClick={handleCreateTicket}
+                    disabled={createTicketMutation.isPending || uploadFileMutation.isPending}
+                  >
+                    {createTicketMutation.isPending || uploadFileMutation.isPending ? 'Criando...' : 'Criar Ticket'}
                   </Button>
                 </div>
-              </form>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -286,11 +403,12 @@ const Support = () => {
               </div>
             ) : tickets.length === 0 ? (
               <Card>
-                <CardContent className="text-center py-8">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum ticket encontrado</h3>
+                <CardContent className="text-center py-12">
+                  <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-medium text-gray-900 mb-2">Nenhum ticket encontrado</h3>
                   <p className="text-gray-600 mb-4">Você ainda não criou nenhum ticket de suporte.</p>
-                  <Button onClick={() => setIsCreateDialogOpen(true)}>
+                  <Button onClick={() => setIsNewTicketOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
                     Criar Primeiro Ticket
                   </Button>
                 </CardContent>
@@ -304,20 +422,15 @@ const Support = () => {
                 >
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{ticket.title}</CardTitle>
-                        <CardDescription className="text-sm text-gray-600 mt-1">
-                          Ticket #{ticket.id} • Criado em {new Date(ticket.createdAt).toLocaleDateString('pt-BR')}
+                      <div className="flex-1">
+                        <CardTitle className="text-lg mb-1">{ticket.title}</CardTitle>
+                        <CardDescription className="text-sm text-gray-600">
+                          Ticket #{ticket.id} • {new Date(ticket.createdAt).toLocaleDateString('pt-BR')}
                         </CardDescription>
                       </div>
-                      <div className="flex gap-2">
-                        <Badge className={getPriorityColor(ticket.priority)}>
-                          {getPriorityText(ticket.priority)}
-                        </Badge>
-                        <Badge className={getStatusColor(ticket.status)}>
-                          {getStatusText(ticket.status)}
-                        </Badge>
-                      </div>
+                      <Badge className={getStatusColor(ticket.status)}>
+                        {getStatusText(ticket.status)}
+                      </Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -334,10 +447,16 @@ const Support = () => {
                             {ticket.messages.length} mensagem{ticket.messages.length !== 1 ? 's' : ''}
                           </span>
                         )}
+                        {ticket.attachments && ticket.attachments.length > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Paperclip className="h-3 w-3" />
+                            {ticket.attachments.length} anexo{ticket.attachments.length !== 1 ? 's' : ''}
+                          </span>
+                        )}
                       </div>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        Atualizado {new Date(ticket.updatedAt).toLocaleDateString('pt-BR')}
+                        {new Date(ticket.updatedAt).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
                   </CardContent>
@@ -356,14 +475,13 @@ const Support = () => {
                       <CardTitle className="text-lg">{selectedTicket.title}</CardTitle>
                       <CardDescription>Ticket #{selectedTicket.id}</CardDescription>
                     </div>
-                    <div className="flex flex-col gap-2">
-                      <Badge className={getStatusColor(selectedTicket.status)}>
-                        {getStatusText(selectedTicket.status)}
-                      </Badge>
-                      <Badge className={getPriorityColor(selectedTicket.priority)}>
-                        {getPriorityText(selectedTicket.priority)}
-                      </Badge>
-                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setSelectedTicket(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -372,83 +490,93 @@ const Support = () => {
                     <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded">{selectedTicket.description}</p>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <User className="h-4 w-4" />
-                    <span>Criado por {selectedTicket.user.name}</span>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-900">Status:</span>
+                      <Badge className={`ml-2 ${getStatusColor(selectedTicket.status)}`}>
+                        {getStatusText(selectedTicket.status)}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900">Categoria:</span>
+                      <p className="text-gray-700">{selectedTicket.category}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900">Criado em:</span>
+                      <p className="text-gray-700">{new Date(selectedTicket.createdAt).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900">Atualizado em:</span>
+                      <p className="text-gray-700">{new Date(selectedTicket.updatedAt).toLocaleDateString('pt-BR')}</p>
+                    </div>
                   </div>
 
-                  {selectedTicket.assignedTo && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <User className="h-4 w-4" />
-                      <span>Atribuído a {selectedTicket.assignedTo.name}</span>
+                  {/* Attachments */}
+                  {selectedTicket.attachments && selectedTicket.attachments.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-900 mb-2">Anexos</h4>
+                      <div className="space-y-2">
+                        {selectedTicket.attachments.map((attachment) => (
+                          <div key={attachment.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-gray-500" />
+                              <div>
+                                <p className="text-sm font-medium">{attachment.fileName}</p>
+                                <p className="text-xs text-gray-500">{formatFileSize(attachment.fileSize)}</p>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => window.open(attachment.fileUrl, '_blank')}
+                            >
+                              Ver
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
-                  {/* Mensagens */}
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-sm text-gray-900">Mensagens</h4>
-                    <div className="max-h-60 overflow-y-auto space-y-3">
-                      {selectedTicket.messages.map((message) => (
-                        <div 
-                          key={message.id} 
-                          className={`p-3 rounded text-sm ${
-                            message.isStaffReply 
-                              ? 'bg-blue-50 border-l-4 border-blue-400' 
-                              : 'bg-gray-50 border-l-4 border-gray-300'
-                          }`}
-                        >
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="font-medium text-xs">
-                              {message.user.name}
-                              {message.isStaffReply && (
-                                <Badge variant="secondary" className="ml-2 text-xs">Suporte</Badge>
-                              )}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {new Date(message.createdAt).toLocaleDateString('pt-BR')}
-                            </span>
+                  {/* Messages */}
+                  {selectedTicket.messages.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-900 mb-2">Mensagens</h4>
+                      <div className="max-h-40 overflow-y-auto space-y-2">
+                        {selectedTicket.messages.map((message) => (
+                          <div 
+                            key={message.id} 
+                            className={`p-2 rounded text-sm ${
+                              message.isStaffReply 
+                                ? 'bg-blue-50 border-l-4 border-blue-400' 
+                                : 'bg-gray-50 border-l-4 border-gray-300'
+                            }`}
+                          >
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="font-medium text-xs">
+                                {message.user.name}
+                                {message.isStaffReply && (
+                                  <Badge variant="secondary" className="ml-1 text-xs">Suporte</Badge>
+                                )}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(message.createdAt).toLocaleDateString('pt-BR')}
+                              </span>
+                            </div>
+                            <p className="text-gray-700">{message.message}</p>
                           </div>
-                          <p className="text-gray-700">{message.message}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Adicionar nova mensagem */}
-                  {selectedTicket.status !== 'closed' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="newMessage">Adicionar mensagem</Label>
-                      <Textarea
-                        id="newMessage"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Digite sua mensagem..."
-                        rows={3}
-                      />
-                      <Button 
-                        size="sm" 
-                        onClick={() => {
-                          if (newMessage.trim()) {
-                            addMessageMutation.mutate({
-                              ticketId: selectedTicket.id,
-                              message: newMessage.trim()
-                            });
-                          }
-                        }}
-                        disabled={!newMessage.trim() || addMessageMutation.isPending}
-                      >
-                        {addMessageMutation.isPending ? 'Enviando...' : 'Enviar Mensagem'}
-                      </Button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </CardContent>
               </Card>
             ) : (
               <Card className="sticky top-6">
-                <CardContent className="text-center py-8">
+                <CardContent className="text-center py-12">
                   <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Selecione um ticket</h3>
-                  <p className="text-gray-600">Clique em um ticket à esquerda para ver os detalhes e mensagens.</p>
+                  <p className="text-gray-600">Clique em um ticket à esquerda para ver os detalhes.</p>
                 </CardContent>
               </Card>
             )}

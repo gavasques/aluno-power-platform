@@ -70,35 +70,16 @@ const AdminSupport = () => {
   // Fetch all support tickets with filters
   const { data: tickets = [], isLoading } = useQuery<SupportTicket[]>({
     queryKey: ['/api/support/tickets', { status: statusFilter, priority: priorityFilter, search: searchTerm }],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (statusFilter !== 'all') params.append('status', statusFilter);
-      if (priorityFilter !== 'all') params.append('priority', priorityFilter);
-      if (searchTerm) params.append('search', searchTerm);
-      
-      const response = await fetch(`/api/support/tickets?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('Erro ao carregar tickets');
-      return response.json();
-    },
   });
 
   // Update ticket mutation
   const updateTicketMutation = useMutation({
     mutationFn: async ({ ticketId, data }: { ticketId: number; data: any }) => {
-      const response = await fetch(`/api/support/tickets/${ticketId}`, {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return apiRequest(`/api/support/tickets/${ticketId}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error('Erro ao atualizar ticket');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/support/tickets'] });
@@ -120,16 +101,11 @@ const AdminSupport = () => {
   // Add message mutation
   const addMessageMutation = useMutation({
     mutationFn: async ({ ticketId, message }: { ticketId: number; message: string }) => {
-      const response = await fetch(`/api/support/tickets/${ticketId}/messages`, {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return apiRequest(`/api/support/tickets/${ticketId}/messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
         body: JSON.stringify({ message }),
       });
-      if (!response.ok) throw new Error('Erro ao enviar mensagem');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/support/tickets'] });
