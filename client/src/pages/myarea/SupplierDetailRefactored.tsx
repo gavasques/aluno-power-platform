@@ -170,7 +170,7 @@ const SupplierDetailRefactored = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Link href="/minha-area">
+          <Link href="/minha-area/fornecedores">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar
