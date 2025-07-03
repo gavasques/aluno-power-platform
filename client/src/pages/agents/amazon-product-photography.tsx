@@ -326,6 +326,11 @@ export default function AmazonProductPhotography() {
                     <li>• Resolução alta para Amazon</li>
                     <li>• Sombra natural realista</li>
                   </ul>
+                  <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs text-amber-800 dark:text-amber-300">
+                      <strong>Importante:</strong> A imagem gerada é limitada a dimensão de 1024x1024px, e para a Amazon é necessário realizar o upscale 2x dessa imagem.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
