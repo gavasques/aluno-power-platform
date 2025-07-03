@@ -1,116 +1,41 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useLocation } from "wouter";
-import { toast } from "@/hooks/use-toast";
-import { Product } from "@/types/product";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { useProducts } from "@/contexts/ProductContext";
-import { usePagination } from "@/hooks/usePagination";
-import { ProductFilters } from "@/components/product/ProductFilters";
+import { Input } from "@/components/ui/input";
+import { Plus, Search, Loader2 } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
+import { useProducts } from "@/hooks/useProducts";
 
-import { ProductEmptyState } from "@/components/product/ProductEmptyState";
-
-const MyProducts = () => {
-  const { products, deleteProduct, toggleProductStatus, loading, error } = useProducts();
+export default function MyProducts() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Todas");
-  
-  // Debug logs
-  console.log("MyProducts: loading =", loading);
-  console.log("MyProducts: error =", error);
-  console.log("MyProducts: products =", products);
+  const { products, isLoading, error, toggleStatus, deleteProduct } = useProducts();
 
-  const [showInactive, setShowInactive] = useState(false);
-  const [, setLocation] = useLocation();
-
-  const filteredProducts = products.filter(product => {
-    const productName = product.name || "";
-    const productBrand = product.brand || "";
-    const productCategory = product.category || "";
-    
-    const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         productBrand.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "Todas" || productCategory === selectedCategory;
-    const matchesActive = showInactive || product.active;
-    return matchesSearch && matchesCategory && matchesActive;
-  });
-
-  const {
-    currentPage,
-    totalPages,
-    paginatedItems: paginatedProducts,
-    handlePageChange,
-    getPaginationGroup
-  } = usePagination({ items: filteredProducts, itemsPerPage: 25 });
-
-  const handleDeleteProduct = (productId: string) => {
-    deleteProduct(productId);
-    toast({
-      title: "Produto removido",
-      description: "O produto foi removido com sucesso."
-    });
+  const handleView = (id: number) => {
+    window.location.href = `/minha-area/produtos/${id}`;
   };
 
-  const handleToggleProductStatus = (productId: string) => {
-    const product = products.find(p => p.id === parseInt(productId));
-    const newStatus = !product?.active;
-    toggleProductStatus(productId);
-    toast({
-      title: newStatus ? "Produto ativado" : "Produto desativado",
-      description: newStatus ? "O produto foi ativado com sucesso." : "O produto foi desativado e ocultado do sistema."
-    });
+  const handleEdit = (id: number) => {
+    window.location.href = `/minha-area/produtos/${id}/editar`;
   };
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    return (
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              href="#"
-              onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
-              className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-            />
-          </PaginationItem>
-          {getPaginationGroup().map((item, index) => (
-            <PaginationItem key={`${item}-${index}`}>
-              {typeof item === 'number' ? (
-                <PaginationLink
-                  href="#"
-                  isActive={item === currentPage}
-                  onClick={(e) => { e.preventDefault(); handlePageChange(item); }}
-                >
-                  {item}
-                </PaginationLink>
-              ) : (
-                <PaginationEllipsis />
-              )}
-            </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              href="#"
-              onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
-              className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
+  const handleCreate = () => {
+    window.location.href = `/minha-area/produtos/novo`;
   };
 
-  // Estados de loading e error
-  if (loading) {
+  const filteredProducts = products.filter(product =>
+    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.brand?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-        <div className="w-full py-4">
+        <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <p className="text-lg">Carregando produtos...</p>
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <p className="text-lg text-muted-foreground">Carregando produtos...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -120,9 +45,9 @@ const MyProducts = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-        <div className="w-full py-4">
+        <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <p className="text-lg text-red-600">Erro: {error || 'Erro desconhecido'}</p>
+            <p className="text-lg text-red-600">Erro: {error?.message || 'Erro desconhecido'}</p>
           </div>
         </div>
       </div>
@@ -131,60 +56,80 @@ const MyProducts = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      <div className="w-full py-4">
-        {/* Header Section */}
-        <div className="mb-6 px-2">
-          <div className="mb-4 px-2">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-1">Meus Produtos</h1>
-                <p className="text-gray-600">
-                  Gerencie seus produtos e analise a viabilidade financeira em diferentes canais
-                </p>
-              </div>
-              <Button 
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200"
-                onClick={() => setLocation("/minha-area/produtos/novo")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Produto
-              </Button>
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Meus Produtos</h1>
+            <p className="text-muted-foreground">
+              Gerencie seu catálogo de produtos
+            </p>
           </div>
+          <Button onClick={handleCreate} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Produto
+          </Button>
+        </div>
 
-          {/* Filters */}
-          <div className="mb-4 px-2">
-            <ProductFilters
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              showInactive={showInactive}
-              setShowInactive={setShowInactive}
-            />
+        {/* Search */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Buscar por nome, SKU ou marca..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white rounded-lg p-4 border">
+            <h3 className="text-sm font-medium text-muted-foreground">Total de Produtos</h3>
+            <p className="text-2xl font-bold text-blue-600">{products.length}</p>
           </div>
-
-          {/* Products Grid/List */}
-          <div className="mb-4 px-2">
-            {filteredProducts.length > 0 ? (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                  {paginatedProducts.map(product => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
-                <div className="mt-8">
-                  {renderPagination()}
-                </div>
-              </>
-            ) : (
-              <ProductEmptyState />
-            )}
+          <div className="bg-white rounded-lg p-4 border">
+            <h3 className="text-sm font-medium text-muted-foreground">Produtos Ativos</h3>
+            <p className="text-2xl font-bold text-green-600">
+              {products.filter(p => p.active).length}
+            </p>
+          </div>
+          <div className="bg-white rounded-lg p-4 border">
+            <h3 className="text-sm font-medium text-muted-foreground">Produtos Inativos</h3>
+            <p className="text-2xl font-bold text-red-600">
+              {products.filter(p => !p.active).length}
+            </p>
           </div>
         </div>
+
+        {/* Products Grid */}
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-lg text-muted-foreground mb-4">
+              {searchTerm ? 'Nenhum produto encontrado' : 'Nenhum produto cadastrado'}
+            </p>
+            {!searchTerm && (
+              <Button onClick={handleCreate} className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Criar Primeiro Produto
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onView={handleView}
+                onEdit={handleEdit}
+                onToggleStatus={toggleStatus}
+                onDelete={deleteProduct}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
-};
-
-export default MyProducts;
+}

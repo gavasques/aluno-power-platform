@@ -1,34 +1,27 @@
-
 import { Product } from "@/types/product";
-import { formatCurrency } from "@/utils/productCalculations";
 
 interface ProductFinancialSummaryProps {
   product: Product;
 }
 
-export const ProductFinancialSummary = ({ product }: ProductFinancialSummaryProps) => {
-  const enabledChannels = Object.entries(product.channels)
-    .filter(([_, channel]) => channel?.enabled)
-    .length;
-
+export default function ProductFinancialSummary({ product }: ProductFinancialSummaryProps) {
   return (
-    <>
-      <div>
-        <label className="text-sm font-medium text-muted-foreground">Custo do Item</label>
-        <p className="text-lg font-semibold text-green-600">{formatCurrency(product.costItem)}</p>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Resumo Financeiro</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <p className="text-sm text-muted-foreground">Preço de Custo</p>
+          <p className="text-lg font-medium">
+            {product.costPrice ? `R$ ${product.costPrice.toFixed(2)}` : 'Não informado'}
+          </p>
+        </div>
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <p className="text-sm text-muted-foreground">Preço de Venda</p>
+          <p className="text-lg font-medium">
+            {product.salePrice ? `R$ ${product.salePrice.toFixed(2)}` : 'Não informado'}
+          </p>
+        </div>
       </div>
-      <div>
-        <label className="text-sm font-medium text-muted-foreground">Custo de Embalagem</label>
-        <p className="text-lg">{formatCurrency(product.packCost)}</p>
-      </div>
-      <div>
-        <label className="text-sm font-medium text-muted-foreground">Imposto Global</label>
-        <p className="text-lg">{product.taxPercent}%</p>
-      </div>
-      <div className="pt-2 border-t">
-        <label className="text-sm font-medium text-muted-foreground">Canais Ativos</label>
-        <p className="text-lg font-semibold">{enabledChannels}</p>
-      </div>
-    </>
+    </div>
   );
-};
+}

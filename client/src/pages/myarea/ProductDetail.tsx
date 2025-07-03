@@ -1,163 +1,218 @@
-
-import { useState } from "react";
-import { useRoute, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Edit, Eye, Power, PowerOff } from "lucide-react";
-import { ProductView } from "@/components/product/ProductView";
-import { ProductMetrics } from "@/components/product/ProductMetrics";
-import { EditProductModal } from "@/components/product/EditProductModal";
-import { EditBasicDataModal } from "@/components/product/EditBasicDataModal";
-import { EditChannelsModal } from "@/components/product/EditChannelsModal";
-import { mockSuppliers, mockCategories } from "@/data/mockData";
-import { toast } from "@/hooks/use-toast";
-import { useProducts } from "@/contexts/ProductContext";
-import type { Product as DbProduct } from '@shared/schema';
+import { ArrowLeft, Edit, Package, Loader2 } from "lucide-react";
+import { Product } from "@/types/product";
 
-const ProductDetail = () => {
-  const [, params] = useRoute("/minha-area/produtos/:id");
-  const [, setLocation] = useLocation();
-  const id = params?.id;
-  const { getProductById, updateProduct, toggleProductStatus } = useProducts();
-  
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isEditBasicDataModalOpen, setIsEditBasicDataModalOpen] = useState(false);
-  const [isEditChannelsModalOpen, setIsEditChannelsModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'overview' | 'metrics'>('overview');
+export default function ProductDetail() {
+  const params = useParams();
+  const productId = params.id;
 
-  const product = getProductById(id || "");
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: [`/api/products/${productId}`],
+    queryFn: async (): Promise<Product> => {
+      const response = await fetch(`/api/products/${productId}`);
+      if (!response.ok) {
+        throw new Error('Produto não encontrado');
+      }
+      return response.json();
+    },
+    enabled: !!productId
+  });
 
-  if (!product) {
+  const handleBack = () => {
+    window.location.href = '/minha-area/produtos';
+  };
+
+  const handleEdit = () => {
+    window.location.href = `/minha-area/produtos/${productId}/editar`;
+  };
+
+  if (isLoading) {
     return (
-      <div className="container mx-auto p-6 max-w-7xl">
-        <div className="text-center py-12">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Produto não encontrado</h1>
-          <Button onClick={() => setLocation("/minha-area/produtos")}>
-            Voltar para Produtos
-          </Button>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <p className="text-lg text-muted-foreground">Carregando produto...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  const handleProductUpdate = (updatedProduct: DbProduct) => {
-    updateProduct(product.id.toString(), updatedProduct);
-    setIsEditModalOpen(false);
-    setIsEditBasicDataModalOpen(false);
-    setIsEditChannelsModalOpen(false);
-  };
-
-  const handleToggleProductStatus = () => {
-    const newStatus = !product.active;
-    toggleProductStatus(product.id.toString());
-    toast({
-      title: newStatus ? "Produto ativado" : "Produto desativado",
-      description: newStatus ? "O produto foi ativado com sucesso." : "O produto foi desativado e ocultado do sistema."
-    });
-  };
-
-  // Nome do fornecedor - simplificado para dados do banco
-  const supplierName = product.brand || "Marca não definida";
-
-  return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => setLocation("/minha-area/produtos")}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar para Produtos
-        </Button>
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold">{product.name || "Produto sem nome"}</h1>
-              <Badge variant={product.active ? "default" : "secondary"}>
-                {product.active ? "Ativo" : "Inativo"}
-              </Badge>
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <p className="text-lg text-red-600 mb-4">Produto não encontrado</p>
+              <Button onClick={handleBack}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
             </div>
-            <p className="text-muted-foreground">
-              {supplierName}
-            </p>
-          </div>
-          
-          <div className="flex gap-2">
-            <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg">
-              <Switch
-                checked={product.active}
-                onCheckedChange={handleToggleProductStatus}
-                className="data-[state=checked]:bg-green-600"
-              />
-              <span className="text-sm font-medium">
-                {product.active ? "Ativo" : "Inativo"}
-              </span>
-            </div>
-            
-            <Button
-              variant={viewMode === 'overview' ? 'default' : 'outline'}
-              onClick={() => setViewMode('overview')}
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Visão Geral
-            </Button>
-            <Button
-              variant={viewMode === 'metrics' ? 'default' : 'outline'}
-              onClick={() => setViewMode('metrics')}
-            >
-              Métricas
-            </Button>
-            <Button onClick={() => setIsEditModalOpen(true)}>
-              <Edit className="h-4 w-4 mr-2" />
-              Editar Tudo
-            </Button>
           </div>
         </div>
       </div>
+    );
+  }
 
-      <div className="space-y-6">
-        {viewMode === 'overview' ? (
-          <ProductView 
-            product={product} 
-            supplierName={supplierName}
-            onEditBasicData={() => setIsEditBasicDataModalOpen(true)}
-            onEditChannels={() => setIsEditChannelsModalOpen(true)}
-          />
-        ) : (
-          <ProductMetrics product={product} />
-        )}
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <Package className="h-6 w-6 text-blue-600" />
+                {product.name}
+              </h1>
+              <p className="text-muted-foreground">Detalhes do produto</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant={product.active ? "default" : "secondary"}>
+              {product.active ? "Ativo" : "Inativo"}
+            </Badge>
+            <Button onClick={handleEdit}>
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </Button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Informações Básicas */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informações Básicas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Nome</label>
+                  <p className="text-base">{product.name || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">SKU</label>
+                  <p className="text-base">{product.sku || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Marca</label>
+                  <p className="text-base">{product.brand || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Categoria</label>
+                  <p className="text-base">{product.category || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">EAN</label>
+                  <p className="text-base">{product.ean || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Peso</label>
+                  <p className="text-base">{product.weight ? `${product.weight} kg` : 'N/A'}</p>
+                </div>
+              </div>
+              {product.observations && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Observações</label>
+                  <p className="text-base">{product.observations}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Custos */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informações Financeiras</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Custo do Item</label>
+                <p className="text-xl font-semibold text-green-600">
+                  R$ {Number(product.costItem || 0).toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Custo de Embalagem</label>
+                <p className="text-base">R$ {Number(product.packCost || 0).toFixed(2)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Taxa de Imposto</label>
+                <p className="text-base">{Number(product.taxPercent || 0).toFixed(2)}%</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dimensões */}
+          {product.dimensions && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Dimensões</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Comprimento</label>
+                    <p className="text-base">{product.dimensions.length || 0} cm</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Largura</label>
+                    <p className="text-base">{product.dimensions.width || 0} cm</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Altura</label>
+                    <p className="text-base">{product.dimensions.height || 0} cm</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Status e Datas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Status</label>
+                <p className="text-base">
+                  <Badge variant={product.active ? "default" : "secondary"}>
+                    {product.active ? "Ativo" : "Inativo"}
+                  </Badge>
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Criado em</label>
+                <p className="text-base">
+                  {new Date(product.createdAt).toLocaleDateString('pt-BR')}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Última atualização</label>
+                <p className="text-base">
+                  {product.updatedAt ? new Date(product.updatedAt).toLocaleDateString('pt-BR') : 'Não disponível'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      <EditProductModal
-        product={product}
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSave={handleProductUpdate}
-        mockSuppliers={mockSuppliers}
-        mockCategories={mockCategories}
-      />
-
-      <EditBasicDataModal
-        product={product}
-        isOpen={isEditBasicDataModalOpen}
-        onClose={() => setIsEditBasicDataModalOpen(false)}
-        onSave={handleProductUpdate}
-        mockSuppliers={mockSuppliers}
-        mockCategories={mockCategories}
-      />
-
-      <EditChannelsModal
-        product={product}
-        isOpen={isEditChannelsModalOpen}
-        onClose={() => setIsEditChannelsModalOpen(false)}
-        onSave={handleProductUpdate}
-      />
     </div>
   );
-};
-
-export default ProductDetail;
+}

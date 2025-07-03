@@ -63,7 +63,7 @@ const ProductEditForm = () => {
 
   useEffect(() => {
     if (id) {
-      const productData = getProductById(parseInt(id));
+      const productData = getProductById(id);
       if (productData) {
         setProduct(productData);
         // Reset form with product data
@@ -108,7 +108,7 @@ const ProductEditForm = () => {
         supplierId: data.supplierId || null,
       };
 
-      await updateProduct(parseInt(id), productData);
+      await updateProduct(String(id), productData);
       
       toast({
         title: "Produto atualizado",
