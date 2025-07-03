@@ -173,10 +173,6 @@ export default function AmazonProductPhotography() {
             </div>
             
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                <Sparkles className="h-3 w-3 mr-1" />
-                GPT-Image-1
-              </Badge>
               <Badge variant="outline">
                 Processamento de Imagens
               </Badge>
@@ -369,14 +365,10 @@ export default function AmazonProductPhotography() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
                     <div className="text-lg font-semibold">{result.processingTime}s</div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">Tempo</div>
-                  </div>
-                  <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="text-lg font-semibold">${result.cost.toFixed(4)}</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">Custo</div>
                   </div>
                   <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
                     <div className="text-lg font-semibold">1:1</div>
@@ -396,7 +388,25 @@ export default function AmazonProductPhotography() {
                   </Button>
                   <Button 
                     variant="outline" 
-                    onClick={() => window.open(result.processedImage, '_blank')}
+                    onClick={() => {
+                      console.log('🔍 Visualizar clicked, URL:', result.processedImage);
+                      if (result.processedImage) {
+                        const newWindow = window.open(result.processedImage, '_blank');
+                        if (!newWindow) {
+                          toast({
+                            title: "Popup bloqueado",
+                            description: "Seu navegador bloqueou o popup. Permita popups para visualizar a imagem.",
+                            variant: "destructive"
+                          });
+                        }
+                      } else {
+                        toast({
+                          title: "Erro",
+                          description: "Imagem não encontrada para visualização.",
+                          variant: "destructive"
+                        });
+                      }
+                    }}
                     className="flex-1"
                   >
                     <Eye className="h-4 w-4 mr-2" />

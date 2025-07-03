@@ -111,7 +111,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ AMAZON PRODUCT PHOTOGRAPHY AGENT IMPLEMENTADO - TRANSFORMAÇÃO PROFISSIONAL DE IMAGENS
+- **July 03, 2025**: ✅ AMAZON PRODUCT PHOTOGRAPHY AGENT FINALIZADO - SISTEMA COMPLETO E OTIMIZADO
+  - **Correção Crítica de Custos**: Implementadas taxas oficiais OpenAI corrigindo erro de $78 para $0.17 USD
+    - Text Input: $5.00/1M tokens (era $6.25)
+    - Image Input: $10.00/1M tokens (correto)
+    - Image Output: $40.00/1M tokens (era $18.75)
+    - Sistema de logs detalhados para transparência dos cálculos
+  - **Interface Limpa e Profissional**:
+    - Removido badge "GPT-Image-1" conforme solicitação do usuário
+    - Removida exibição de custos da interface (mantida apenas no backend)
+    - Layout 3 colunas para estatísticas: Tempo, Proporção, Resolução
+    - Botão "Visualizar" corrigido com detecção de popup bloqueado
+  - **Funcionalidades Validadas**:
+    - API OpenAI GPT-Image-1 estável com 40-57 segundos processamento
+    - Sistema completo de upload, processamento e download funcionando
+    - Custos precisos baseados em tokens reais da OpenAI
+    - Interface responsiva em português otimizada para não-técnicos
+
+- **July 03, 2025 (anterior)**: ✅ AMAZON PRODUCT PHOTOGRAPHY AGENT IMPLEMENTADO - TRANSFORMAÇÃO PROFISSIONAL DE IMAGENS
   - **Agente de IA Especializado**:
     - Criado "agent-amazon-product-photography" no banco de dados com configurações específicas
     - Prompt profissional detalhado para fotografias comerciais de produtos Amazon
