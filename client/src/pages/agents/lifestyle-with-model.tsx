@@ -25,9 +25,10 @@ export default function LifestyleWithModel() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<{
-    processedImageUrl: string;
+    originalImage: string;
+    processedImage: string;
+    processingTime: number;
     cost: number;
-    duration: number;
   } | null>(null);
   const [processingTime, setProcessingTime] = useState(0);
   
@@ -413,20 +414,41 @@ export default function LifestyleWithModel() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="relative">
-                      <img 
-                        src={result.processedImageUrl} 
-                        alt="Imagem lifestyle processada" 
-                        className="w-full h-auto max-h-96 object-contain bg-gray-100 rounded-lg"
-                      />
-                      <Badge className="absolute top-2 left-2 bg-green-100 text-green-800">
-                        1024x1024px
-                      </Badge>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-900">Imagem Original</h4>
+                        <div className="relative">
+                          <img 
+                            src={result.originalImage} 
+                            alt="Imagem original"
+                            className="w-full h-auto max-h-48 object-contain bg-gray-100 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-900">Imagem Lifestyle</h4>
+                        <div className="relative">
+                          <img 
+                            src={result.processedImage} 
+                            alt="Imagem lifestyle processada" 
+                            className="w-full h-auto max-h-48 object-contain bg-gray-100 rounded-lg"
+                          />
+                          <Badge className="absolute top-2 left-2 bg-green-100 text-green-800">
+                            1024x1024px
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                      <p><strong>Custo:</strong> ${result.cost.toFixed(3)}</p>
+                      <p><strong>Tempo:</strong> {result.processingTime}s</p>
                     </div>
                     
                     <div className="flex gap-2">
                       <Button 
-                        onClick={() => downloadImage(result.processedImageUrl)}
+                        onClick={() => downloadImage(result.processedImage)}
                         className="flex-1"
                       >
                         <Download className="h-4 w-4 mr-2" />
