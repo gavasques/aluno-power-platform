@@ -2520,10 +2520,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSupplierConversation(conversationId: number, userId: number, conversationData: Partial<InsertSupplierConversation>) {
+    // Remove userId from update data to prevent changing the original owner
+    const { userId: _, ...updateData } = conversationData;
+    
     const [conversation] = await db
       .update(supplierConversations)
       .set({
-        ...conversationData,
+        ...updateData,
         updatedAt: new Date(),
       })
       .where(and(

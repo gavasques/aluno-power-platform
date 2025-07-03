@@ -5281,7 +5281,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   app.get('/api/suppliers/:id/conversations', async (req: any, res: any) => {
     try {
       const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
+      const userId = req.user?.id || 2; // TODO: Get from auth
       
       const conversations = await storage.getSupplierConversations(supplierId, userId);
       res.json(conversations);
@@ -5294,7 +5294,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   app.post('/api/suppliers/:id/conversations', async (req: any, res: any) => {
     try {
       const supplierId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
+      const userId = req.user?.id || 2; // TODO: Get from auth
       
       const conversationData = {
         ...req.body,
@@ -5313,7 +5313,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   app.put('/api/supplier-conversations/:id', async (req: any, res: any) => {
     try {
       const conversationId = parseInt(req.params.id);
-      const userId = req.user?.id || 1; // TODO: Get from auth
+      const userId = req.user?.id || 2; // TODO: Get from auth
       
       const conversation = await storage.updateSupplierConversation(conversationId, userId, req.body);
       res.json(conversation);
