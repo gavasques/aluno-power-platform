@@ -5750,6 +5750,333 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // ===============================
+  // INFOGRAPHIC GENERATOR ROUTES
+  // ===============================
+
+  // Etapa 1: Otimização de texto com Claude Sonnet
+  app.post('/api/agents/infographic-generator/step1', requireAuth, async (req: Request, res: Response) => {
+    const startTime = Date.now();
+    
+    try {
+      const user = (req as any).user;
+      const { nomeProduto, descricaoLonga } = req.body;
+
+      console.log('📊 [INFOGRAPHIC_STEP1] Starting text optimization...');
+      console.log('📊 [INFOGRAPHIC_STEP1] Product:', nomeProduto?.substring(0, 50) + '...');
+      console.log('📊 [INFOGRAPHIC_STEP1] Description length:', descricaoLonga?.length);
+
+      // Validation
+      if (!nomeProduto?.trim() || !descricaoLonga?.trim()) {
+        return res.status(400).json({ 
+          error: 'Nome do produto e descrição são obrigatórios' 
+        });
+      }
+
+      if (descricaoLonga.length > 2000) {
+        return res.status(400).json({ 
+          error: 'Descrição deve ter no máximo 2000 caracteres' 
+        });
+      }
+
+      // Get system prompt from database
+      const systemPromptResult = await db.query.agentPrompts.findFirst({
+        where: and(
+          eq(agentPrompts.agentId, 'agent-infographic-generator'),
+          eq(agentPrompts.promptType, 'system'),
+          eq(agentPrompts.isActive, true)
+        )
+      });
+
+      if (!systemPromptResult) {
+        throw new Error('System prompt not found for infographic generator');
+      }
+
+      // Replace variables in prompt
+      const systemPrompt = systemPromptResult.content
+        .replace(/\{\{NOME_PRODUTO\}\}/g, nomeProduto)
+        .replace(/\{\{DESCRICAO_LONGA\}\}/g, descricaoLonga);
+
+      console.log('📊 [INFOGRAPHIC_STEP1] System prompt length:', systemPrompt.length);
+
+      // Call Anthropic Claude Sonnet
+      const Anthropic = (await import('@anthropic-ai/sdk')).default;
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      const response = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        temperature: 1.0,
+        messages: [
+          {
+            role: 'user',
+            content: systemPrompt
+          }
+        ]
+      });
+
+      const endTime = Date.now();
+      const processingTime = Math.round((endTime - startTime) / 1000);
+
+      // Parse Claude's response to extract the bracketed content
+      const responseText = response.content[0]?.text || '';
+      console.log('📊 [INFOGRAPHIC_STEP1] Claude response length:', responseText.length);
+
+      // Extract content between brackets
+      const extractBracketContent = (text: string, tag: string) => {
+        const regex = new RegExp(`\\[${tag}\\]([\\s\\S]*?)(?=\\[|$)`, 'i');
+        const match = text.match(regex);
+        return match ? match[1].trim() : '';
+      };
+
+      const optimizedContent = {
+        nome: extractBracketContent(responseText, 'NOME') || nomeProduto,
+        beneficios: extractBracketContent(responseText, 'BENEFICIOS'),
+        especificacoes: extractBracketContent(responseText, 'ESPECIFICACOES'),
+        cta: extractBracketContent(responseText, 'CTA'),
+        icons: extractBracketContent(responseText, 'ICONS')
+      };
+
+      // Calculate cost (Claude Sonnet pricing: $3.00/$15.00 per 1M tokens)
+      const inputTokens = response.usage.input_tokens || 0;
+      const outputTokens = response.usage.output_tokens || 0;
+      const cost = (inputTokens * 0.000003) + (outputTokens * 0.000015);
+
+      console.log('💰 [INFOGRAPHIC_STEP1] Cost calculation:', {
+        inputTokens,
+        outputTokens,
+        cost: cost.toFixed(6)
+      });
+
+      // Save to ai_generation_logs
+      await db.insert(aiGenerationLogs).values({
+        userId: user.id,
+        provider: 'anthropic',
+        model: 'claude-sonnet-4-20250514',
+        prompt: systemPrompt,
+        response: responseText,
+        promptCharacters: systemPrompt.length,
+        responseCharacters: responseText.length,
+        inputTokens: inputTokens,
+        outputTokens: outputTokens,
+        totalTokens: inputTokens + outputTokens,
+        cost: cost.toString(),
+        duration: processingTime * 1000,
+        feature: 'infographic-generator-step1',
+        createdAt: new Date()
+      });
+
+      console.log('✅ [INFOGRAPHIC_STEP1] Text optimization completed:', {
+        processingTime: `${processingTime}s`,
+        cost: `$${cost.toFixed(6)}`,
+        usage: response.usage
+      });
+
+      res.json({
+        success: true,
+        optimizedContent,
+        processingTime,
+        cost,
+        usage: response.usage
+      });
+
+    } catch (error: any) {
+      console.error('❌ [INFOGRAPHIC_STEP1] Error:', error);
+      
+      // Save error log
+      try {
+        const errorDuration = Date.now() - startTime;
+        const user = (req as any).user;
+        await db.insert(aiGenerationLogs).values({
+          userId: user.id,
+          provider: 'anthropic',
+          model: 'claude-sonnet-4-20250514',
+          prompt: 'Erro na otimização de texto do infográfico',
+          response: `Erro: ${error.message}`,
+          promptCharacters: 0,
+          responseCharacters: error.message?.length || 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          cost: '0.00',
+          duration: errorDuration,
+          feature: 'infographic-generator-step1',
+          createdAt: new Date()
+        });
+      } catch (logError) {
+        console.error('❌ [INFOGRAPHIC_STEP1] Error saving error log:', logError);
+      }
+      
+      res.status(500).json({ 
+        error: 'Erro na otimização de texto',
+        details: error.message
+      });
+    }
+  });
+
+  // Etapa 2: Geração de imagem com GPT-Image-1
+  app.post('/api/agents/infographic-generator/step2', requireAuth, async (req: Request, res: Response) => {
+    const startTime = Date.now();
+    
+    try {
+      const user = (req as any).user;
+      const { 
+        nomeProduto, 
+        optimizedContent, 
+        corPrimaria = '#3B82F6', 
+        corSecundaria = '#10B981',
+        quantidadeImagens = 1,
+        qualidade = 'high'
+      } = req.body;
+
+      console.log('🎨 [INFOGRAPHIC_STEP2] Starting image generation...');
+      console.log('🎨 [INFOGRAPHIC_STEP2] Product:', nomeProduto?.substring(0, 50) + '...');
+      console.log('🎨 [INFOGRAPHIC_STEP2] Quantity:', quantidadeImagens, 'Quality:', qualidade);
+
+      // Validation
+      if (!nomeProduto?.trim() || !optimizedContent) {
+        return res.status(400).json({ 
+          error: 'Nome do produto e conteúdo otimizado são obrigatórios' 
+        });
+      }
+
+      // Get user prompt from database
+      const userPromptResult = await db.query.agentPrompts.findFirst({
+        where: and(
+          eq(agentPrompts.agentId, 'agent-infographic-generator'),
+          eq(agentPrompts.promptType, 'user'),
+          eq(agentPrompts.isActive, true)
+        )
+      });
+
+      if (!userPromptResult) {
+        throw new Error('User prompt not found for infographic generator');
+      }
+
+      // Replace variables in prompt
+      const userPrompt = userPromptResult.content
+        .replace(/\{\{NOME_PRODUTO\}\}/g, nomeProduto)
+        .replace(/\{\{NOME_OTIMIZADO\}\}/g, optimizedContent.nome || nomeProduto)
+        .replace(/\{\{BENEFICIOS_OTIMIZADOS\}\}/g, optimizedContent.beneficios || '')
+        .replace(/\{\{ESPECIFICACOES_OTIMIZADAS\}\}/g, optimizedContent.especificacoes || '')
+        .replace(/\{\{CTA_OTIMIZADO\}\}/g, optimizedContent.cta || '')
+        .replace(/\{\{ICONS_OTIMIZADOS\}\}/g, optimizedContent.icons || '')
+        .replace(/\{\{COR_PRIMARIA\}\}/g, corPrimaria)
+        .replace(/\{\{COR_SECUNDARIA\}\}/g, corSecundaria);
+
+      console.log('🎨 [INFOGRAPHIC_STEP2] User prompt length:', userPrompt.length);
+
+      // Call OpenAI GPT-Image-1
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const response = await openai.images.generate({
+        model: 'gpt-image-1',
+        prompt: userPrompt,
+        n: quantidadeImagens,
+        size: '1024x1024',
+        quality: qualidade,
+        response_format: 'b64_json'
+      });
+
+      const endTime = Date.now();
+      const processingTime = Math.round((endTime - startTime) / 1000);
+
+      // Get real cost from OpenAI response usage
+      let realCost = 0.167 * quantidadeImagens; // Default fallback
+      
+      if (response.usage) {
+        const textInputTokens = response.usage.input_tokens_details?.text_tokens || 0;
+        const imageOutputTokens = response.usage.output_tokens || 0;
+        
+        realCost = (textInputTokens * 0.000005) + (imageOutputTokens * 0.00004);
+      }
+
+      console.log('💰 [INFOGRAPHIC_STEP2] Cost calculation details:', {
+        textTokens: response.usage?.input_tokens_details?.text_tokens || 0,
+        outputTokens: response.usage?.output_tokens || 0,
+        textCost: ((response.usage?.input_tokens_details?.text_tokens || 0) * 0.000005).toFixed(6),
+        outputCost: ((response.usage?.output_tokens || 0) * 0.00004).toFixed(6),
+        totalCost: realCost.toFixed(6)
+      });
+
+      // Extract generated images
+      const images = response.data.map((imageData, index) => {
+        if (!imageData.b64_json) {
+          throw new Error(`No image data received for image ${index + 1}`);
+        }
+        return `data:image/jpeg;base64,${imageData.b64_json}`;
+      });
+
+      console.log('✅ [INFOGRAPHIC_STEP2] Image generation completed:', {
+        processingTime: `${processingTime}s`,
+        cost: `$${realCost.toFixed(6)}`,
+        imagesGenerated: images.length,
+        usage: response.usage
+      });
+
+      // Save to ai_generation_logs
+      await db.insert(aiGenerationLogs).values({
+        userId: user.id,
+        provider: 'openai',
+        model: 'gpt-image-1',
+        prompt: userPrompt,
+        response: `${images.length} infográficos gerados com sucesso via GPT-Image-1`,
+        promptCharacters: userPrompt.length,
+        responseCharacters: 50, // Fixed value for image generation
+        inputTokens: response.usage?.input_tokens || 0,
+        outputTokens: response.usage?.output_tokens || 0,
+        totalTokens: response.usage?.total_tokens || 0,
+        cost: realCost.toString(),
+        duration: processingTime * 1000,
+        feature: 'infographic-generator-step2',
+        createdAt: new Date()
+      });
+
+      res.json({
+        success: true,
+        images,
+        processingTime,
+        cost: realCost,
+        usage: response.usage
+      });
+
+    } catch (error: any) {
+      console.error('❌ [INFOGRAPHIC_STEP2] Error:', error);
+      
+      // Save error log
+      try {
+        const errorDuration = Date.now() - startTime;
+        const user = (req as any).user;
+        await db.insert(aiGenerationLogs).values({
+          userId: user.id,
+          provider: 'openai',
+          model: 'gpt-image-1',
+          prompt: 'Erro na geração de imagem do infográfico',
+          response: `Erro: ${error.message}`,
+          promptCharacters: 0,
+          responseCharacters: error.message?.length || 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          cost: '0.00',
+          duration: errorDuration,
+          feature: 'infographic-generator-step2',
+          createdAt: new Date()
+        });
+      } catch (logError) {
+        console.error('❌ [INFOGRAPHIC_STEP2] Error saving error log:', logError);
+      }
+      
+      res.status(500).json({ 
+        error: 'Erro na geração de imagem',
+        details: error.message
+      });
+    }
+  });
+
   return httpServer;
 }
 

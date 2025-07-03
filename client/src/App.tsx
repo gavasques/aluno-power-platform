@@ -40,6 +40,7 @@ const HtmlDescriptionAgent = lazy(() => import("./pages/agents/HtmlDescriptionAg
 const BulletPointsAgent = lazy(() => import("./pages/agents/BulletPointsAgent"));
 const AmazonProductPhotography = lazy(() => import("./pages/agents/amazon-product-photography"));
 const LifestyleWithModel = lazy(() => import("./pages/agents/lifestyle-with-model"));
+const InfographicGenerator = lazy(() => import("./pages/agents/infographic-generator"));
 const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtractor"));
 const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
 const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
@@ -165,6 +166,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <LifestyleWithModel />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agents/agent-infographic-generator">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <InfographicGenerator />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
