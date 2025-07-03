@@ -2545,6 +2545,27 @@ export class DatabaseStorage implements IStorage {
         eq(supplierConversations.userId, userId)
       ));
   }
+
+  // Agent Management
+  async getAgentById(agentId: string) {
+    const [agent] = await db.select().from(agents).where(eq(agents.id, agentId)).limit(1);
+    return agent || null;
+  }
+
+  async getAgentPrompt(agentId: string, promptType: string) {
+    const [prompt] = await db.select()
+      .from(agentPrompts)
+      .where(
+        and(
+          eq(agentPrompts.agentId, agentId),
+          eq(agentPrompts.promptType, promptType),
+          eq(agentPrompts.isActive, true)
+        )
+      )
+      .orderBy(desc(agentPrompts.version))
+      .limit(1);
+    return prompt || null;
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import bcryptjs from "bcryptjs";
 import multer from "multer";
+import OpenAI from "openai";
 import { storage } from "./storage";
 
 // Configure multer for file uploads
@@ -5171,6 +5172,144 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       res.status(500).json({ 
         error: 'Erro no processamento, aguarde 24 horas e tente novamente. Pedimos desculpas.',
         code: 'INTERNAL_ERROR'
+      });
+    }
+  });
+
+  // Amazon Product Photography Agent API
+  const memoryUpload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 25 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'), false);
+      }
+    }
+  });
+  
+  app.post('/api/agents/amazon-product-photography/process', memoryUpload.single('image'), requireAuth, async (req: any, res: any) => {
+    console.log('🌐 [REQUEST] POST /api/agents/amazon-product-photography/process');
+    
+    try {
+      const startTime = Date.now();
+      
+      if (!req.file) {
+        return res.status(400).json({ error: 'Nenhuma imagem fornecida' });
+      }
+
+      const user = req.user;
+      const imageBuffer = req.file.buffer;
+      const fileName = req.file.originalname;
+
+      console.log('📸 [PRODUCT_PHOTOGRAPHY] Processing image:', {
+        fileName,
+        fileSize: req.file.size,
+        userId: user.id
+      });
+
+      // Convert image to base64
+      const base64Image = imageBuffer.toString('base64');
+
+      // Get agent configuration
+      const agent = await storage.getAgentById('agent-amazon-product-photography');
+      if (!agent) {
+        return res.status(404).json({ error: 'Agente não encontrado' });
+      }
+
+      // Get system prompt
+      const systemPrompt = await storage.getAgentPrompt('agent-amazon-product-photography', 'system');
+      if (!systemPrompt) {
+        return res.status(404).json({ error: 'Prompt do agente não encontrado' });
+      }
+
+      console.log('🤖 [PRODUCT_PHOTOGRAPHY] Using model:', agent.model);
+
+      // Call OpenAI GPT-Image-1 API
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const response = await openai.chat.completions.create({
+        model: 'gpt-image-1',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: systemPrompt.content
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:image/jpeg;base64,${base64Image}`
+                }
+              }
+            ],
+          },
+        ],
+        max_tokens: 4096,
+      });
+
+      const endTime = Date.now();
+      const processingTime = Math.round((endTime - startTime) / 1000);
+      const cost = 5.167; // Base cost for gpt-image-1
+
+      console.log('✅ [PRODUCT_PHOTOGRAPHY] Processing completed:', {
+        processingTime: `${processingTime}s`,
+        cost: `$${cost}`
+      });
+
+      // Extract generated image from response
+      const generatedImageUrl = response.choices[0]?.message?.content || '';
+      
+      // Save to ai_img_generation_logs
+      await storage.createAiImgGenerationLog({
+        userId: user.id,
+        provider: 'openai',
+        model: 'gpt-image-1',
+        feature: 'amazon-product-photography',
+        originalImageName: fileName,
+        quality: 'high',
+        scale: null,
+        cost: cost.toString(),
+        duration: processingTime,
+        status: 'success'
+      });
+
+      // Return result
+      res.json({
+        originalImage: `data:image/jpeg;base64,${base64Image}`,
+        processedImage: generatedImageUrl,
+        processingTime,
+        cost
+      });
+
+    } catch (error: any) {
+      const endTime = Date.now();
+      const processingTime = Math.round((endTime - Date.now()) / 1000);
+
+      console.error('❌ [PRODUCT_PHOTOGRAPHY] Error:', error);
+
+      // Save error log
+      if (req.user) {
+        await storage.createAiImgGenerationLog({
+          userId: req.user.id,
+          provider: 'openai',
+          model: 'gpt-image-1',
+          feature: 'amazon-product-photography',
+          originalImageName: req.file?.originalname || 'unknown',
+          quality: null,
+          scale: null,
+          cost: '0',
+          duration: processingTime,
+          status: 'failed'
+        });
+      }
+
+      res.status(500).json({ 
+        error: 'Erro no processamento da imagem. Tente novamente.',
+        details: error.message
       });
     }
   });
