@@ -5,7 +5,7 @@ import MyProducts from "./myarea/MyProducts";
 import MyMaterials from "./myarea/MyMaterials";
 import ProductForm from "./myarea/ProductForm";
 import ProductDetail from "./myarea/ProductDetail";
-import SupplierDetailPage from "./myarea/SupplierDetailPageNew";
+import SupplierDetailRefactored from "./myarea/SupplierDetailRefactored";
 import MaterialDetail from "./myarea/MaterialDetail";
 import MaterialForm from "./myarea/MaterialForm";
 
@@ -17,7 +17,7 @@ const MyArea = () => {
     case "fornecedores":
     case "suppliers":
       if (id) {
-        return <SupplierDetailPage />;
+        return <SupplierDetailRefactored />;
       }
       return <MySuppliers />;
     case "produtos":
