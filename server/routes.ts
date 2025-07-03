@@ -2294,169 +2294,129 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       // Convert base64 to proper format for OpenAI
       const imageBuffer = Buffer.from(image, 'base64');
       
+      // Call OpenAI GPT-Image-1 API for image editing using the same method as amazon-product-photography
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
       try {
-        // Use GPT-Image-1 for real image processing
-        const response = await client.images.edit({
-          image: imageBuffer as any,
+        // Import toFile from OpenAI library
+        const { toFile } = await import('openai');
+        
+        // Create file object using OpenAI's toFile utility
+        const imageFile = await toFile(imageBuffer, 'lifestyle-image.jpg', { type: 'image/jpeg' });
+        
+        const response = await openai.images.edit({
+          model: 'gpt-image-1',
+          image: imageFile,
           prompt: userPrompt,
-          model: "gpt-image-1",
           n: 1,
-          size: "1024x1024",
-          response_format: "b64_json"
+          size: '1024x1024',
+          quality: 'high'
         });
+
+        const endTime = Date.now();
+        const processingTime = Math.round((endTime - startTime) / 1000);
         
-        console.log('✅ [LIFESTYLE_MODEL] Successfully used gpt-image-1');
+        // Get real cost from OpenAI response usage (gpt-image-1 pricing)
+        // Text input: $5.00/1M, Image input: $10.00/1M, Image output: $40.00/1M
+        let realCost = 0.167; // Default fallback
         
-        const processedImageData = response.data?.[0]?.b64_json;
-        if (!processedImageData) {
+        if (response.usage) {
+          const textInputTokens = response.usage.input_tokens_details?.text_tokens || 0;
+          const imageInputTokens = response.usage.input_tokens_details?.image_tokens || 0;
+          const imageOutputTokens = response.usage.output_tokens || 0;
+          
+          realCost = (textInputTokens * 0.000005) + (imageInputTokens * 0.00001) + (imageOutputTokens * 0.00004);
+        }
+
+        console.log('💰 [LIFESTYLE_MODEL] Cost calculation details:', {
+          textTokens: response.usage?.input_tokens_details?.text_tokens || 0,
+          imageTokens: response.usage?.input_tokens_details?.image_tokens || 0,
+          outputTokens: response.usage?.output_tokens || 0,
+          textCost: ((response.usage?.input_tokens_details?.text_tokens || 0) * 0.000005).toFixed(6),
+          imageCost: ((response.usage?.input_tokens_details?.image_tokens || 0) * 0.00001).toFixed(6),
+          outputCost: ((response.usage?.output_tokens || 0) * 0.00004).toFixed(6),
+          totalCost: realCost.toFixed(6)
+        });
+
+        console.log('✅ [LIFESTYLE_MODEL] Processing completed:', {
+          processingTime: `${processingTime}s`,
+          cost: `$${realCost.toFixed(6)}`,
+          usage: response.usage
+        });
+
+        // Extract generated image from response - images.edit can return base64 or URL
+        const imageBase64 = response.data?.[0]?.b64_json;
+        const imageUrl = response.data?.[0]?.url;
+        
+        if (!imageBase64 && !imageUrl) {
           throw new Error('No image data received from OpenAI');
         }
         
-        const processingTime = Math.round((Date.now() - startTime) / 1000);
-        const cost = 0.167;
+        // Convert to data URL if we got base64, otherwise use URL directly
+        const generatedImageUrl = imageBase64 
+          ? (imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`)
+          : imageUrl;
         
-        // Convert to JPG format and return
-        const processedImageUrl = `data:image/jpeg;base64,${processedImageData}`;
-        
-        // Log successful generation
-        try {
-          await db.insert(aiImgGenerationLogs).values({
-            userId: user.id,
-            provider: 'openai',
-            model: 'gpt-image-1',
-            feature: 'lifestyle-with-model',
-            originalImageName: 'uploaded-image.jpg',
-            quality: 'high',
-            scale: null,
-            cost: cost.toString(),
-            duration: processingTime * 1000,
-            status: 'success',
-            ipAddress: req.ip || 'unknown',
-            userAgent: req.get('User-Agent') || 'unknown',
-            createdAt: new Date()
-          });
-        } catch (logError) {
-          console.log('⚠️ [LIFESTYLE_MODEL] Error logging success:', logError);
-        }
-          
+        // Save to ai_generation_logs with correct structure
+        await db.insert(aiGenerationLogs).values({
+          userId: user.id,
+          provider: 'openai',
+          model: 'gpt-image-1',
+          prompt: userPrompt,
+          response: 'Imagem lifestyle gerada com sucesso via GPT-Image-1',
+          promptCharacters: userPrompt.length,
+          responseCharacters: 50, // Fixed value for image generation
+          inputTokens: response.usage?.input_tokens || 0,
+          outputTokens: response.usage?.output_tokens || 0,
+          totalTokens: response.usage?.total_tokens || 0,
+          cost: realCost.toString(),
+          duration: processingTime * 1000, // Convert to milliseconds
+          feature: 'lifestyle-with-model',
+          createdAt: new Date()
+        });
+
+        // Return result
         return res.json({
           originalImage: `data:image/jpeg;base64,${image}`,
-          processedImage: processedImageUrl,
+          processedImage: generatedImageUrl,
           processingTime,
-          cost
+          cost: realCost
         });
         
       } catch (gptImageError: any) {
-        console.log('⚠️ [LIFESTYLE_MODEL] gpt-image-1 failed, trying fallback...', gptImageError.message);
-        
-        // Fallback: Generate a demonstration response
-        const processingTime = Math.round((Date.now() - startTime) / 1000);
-        const cost = 0.167;
-        
-        // Create a professional demo image that shows the system is working
-        const svgContent = `<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-          <defs>
-            <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#f8fafc"/>
-              <stop offset="100%" style="stop-color:#e2e8f0"/>
-            </linearGradient>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#bg)"/>
-          <rect x="50" y="50" width="924" height="924" fill="white" stroke="#e2e8f0" stroke-width="2" rx="20"/>
-          
-          <!-- Header -->
-          <rect x="80" y="80" width="864" height="120" fill="#3b82f6" rx="10"/>
-          <text x="512" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white">
-            Editor de Imagem Lifestyle
-          </text>
-          <text x="512" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#bfdbfe">
-            Sistema Funcionando - Demonstração
-          </text>
-          
-          <!-- Product Info -->
-          <text x="512" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#1f2937">
-            Produto: ${req.body.variables.PRODUTO_NOME}
-          </text>
-          <text x="512" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#6b7280">
-            Ambiente: ${req.body.variables.AMBIENTE}
-          </text>
-          <text x="512" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#6b7280">
-            Modelo: ${req.body.variables.SEXO}, ${req.body.variables.FAIXA_ETARIA}
-          </text>
-          <text x="512" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#9ca3af">
-            Ação: ${req.body.variables.ACAO.substring(0, 50)}...
-          </text>
-          
-          <!-- Status -->
-          <rect x="312" y="500" width="400" height="80" fill="#10b981" rx="40"/>
-          <text x="512" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">
-            ✓ Processamento Concluído
-          </text>
-          
-          <!-- Info Box -->
-          <rect x="150" y="650" width="724" height="250" fill="#f8fafc" stroke="#d1d5db" stroke-width="1" rx="15"/>
-          <text x="512" y="690" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#374151">
-            Interface Funcionando Perfeitamente
-          </text>
-          <text x="512" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">
-            • Upload de imagem realizado com sucesso
-          </text>
-          <text x="512" y="750" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">
-            • Formulário de configuração preenchido
-          </text>
-          <text x="512" y="780" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">
-            • API de processamento ativa e operacional
-          </text>
-          <text x="512" y="810" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">
-            • Sistema de autenticação validado
-          </text>
-          <text x="512" y="850" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#9ca3af" font-style="italic">
-            OpenAI GPT-Image-1 em configuração final
-          </text>
-        </svg>`;
-        
-        const demoImageUrl = `data:image/svg+xml;base64,${Buffer.from(svgContent).toString('base64')}`;
-        
-        console.log(`✅ [LIFESTYLE_MODEL] Demo mode completed in ${processingTime}s`);
-        
-        res.json({
-          originalImage: `data:image/jpeg;base64,${image}`,
-          processedImage: demoImageUrl,
-          processingTime,
-          cost
-        });
+        console.error('❌ [LIFESTYLE_MODEL] GPT-Image-1 error:', gptImageError);
+        throw gptImageError; // Re-throw to be handled by main catch block
       }
 
     } catch (error: any) {
-      const processingTime = Math.round((Date.now() - startTime) / 1000);
       console.error('❌ [LIFESTYLE_MODEL] Error:', error);
-
-      // Log the failed generation
-      const user = req.user;
-      if (user) {
-        try {
-          await db.insert(aiImgGenerationLogs).values({
-            userId: user.id,
-            provider: 'openai',
-            model: 'gpt-image-1',
-            feature: 'lifestyle-with-model',
-            originalImageName: 'uploaded-image.png',
-            quality: 'high',
-            scale: null,
-            cost: '0',
-            duration: processingTime * 1000, // Convert to milliseconds
-            status: 'failed',
-            ipAddress: req.ip || 'unknown',
-            userAgent: req.get('User-Agent') || 'unknown',
-            createdAt: new Date()
-          });
-        } catch (logError) {
-          console.log('⚠️ [LIFESTYLE_MODEL] Error logging failed:', logError);
-        }
+      
+      // Save error log to ai_generation_logs
+      try {
+        const errorDuration = Date.now() - startTime;
+        await db.insert(aiGenerationLogs).values({
+          userId: user.id,
+          provider: 'openai',
+          model: 'gpt-image-1',
+          prompt: 'Erro no processamento da imagem lifestyle',
+          response: `Erro: ${error.message}`,
+          promptCharacters: 0,
+          responseCharacters: error.message?.length || 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          cost: '0.00',
+          duration: errorDuration,
+          feature: 'lifestyle-with-model',
+          createdAt: new Date()
+        });
+      } catch (logError) {
+        console.error('❌ [LIFESTYLE_MODEL] Error saving error log:', logError);
       }
-
+      
       res.status(500).json({ 
-        error: 'Erro no processamento da imagem lifestyle. Tente novamente.' 
+        error: 'Erro no processamento da imagem lifestyle',
+        details: error.message
       });
     }
   });

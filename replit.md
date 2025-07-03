@@ -111,7 +111,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ SISTEMA DE AGENTES LIFESTYLE PADRONIZADO E TOTALMENTE FUNCIONAL
+- **July 03, 2025**: ✅ SISTEMA DE AGENTES LIFESTYLE CORRIGIDO - GPT-IMAGE-1 REAL SEM FALLBACK
+  - **Correção Crítica Implementada**:
+    - Removido completamente sistema de fallback SVG conforme regra estabelecida
+    - Implementado mesmo método do Editor de Imagem Principal usando OpenAI toFile
+    - Sistema agora usa GPT-Image-1 real ou retorna erro - nunca fallback
+    - Endpoint `/api/agents/lifestyle-with-model/process` usando método correto
+  - **Implementação Técnica Corrigida**:
+    - Uso de `toFile` da biblioteca OpenAI para criar arquivo correto
+    - Parâmetros corretos: model='gpt-image-1', quality='high', size='1024x1024'
+    - Remoção do parâmetro `response_format` que causava erro
+    - Tratamento de resposta base64 ou URL conforme API OpenAI
+    - Cálculo de custos real baseado em tokens de entrada/saída
+  - **Logs e Tracking Atualizados**:
+    - Sistema de logs usando tabela `ai_generation_logs` (não ai_img_generation_logs)
+    - Logs de sucesso e erro seguindo mesmo padrão do Editor Principal
+    - Custos calculados dinamicamente: text ($5/1M), image input ($10/1M), output ($40/1M)
+    - Retorno em JPG conforme solicitação: `data:image/jpeg;base64,{data}`
+  - **Regra Estabelecida**: Sistema nunca mostra fallback - ou funciona ou dá erro
+
+- **July 03, 2025 (anterior)**: ✅ SISTEMA DE AGENTES LIFESTYLE PADRONIZADO E TOTALMENTE FUNCIONAL
   - **Editor de Imagem - Lifestyle com Modelo**:
     - Interface completa em `/agents/lifestyle-with-model` funcionando
     - Formulários especializados: produto, ambiente, gênero, faixa etária, ação do modelo
