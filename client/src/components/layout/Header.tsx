@@ -48,9 +48,15 @@ const menuItems = [
     ],
   },
   {
+    title: "Agentes",
+    items: [
+      { title: "Editor de Imagem Principal", href: "/agents/agent-amazon-product-photography", icon: Bot },
+      { title: "Todos os Agentes", href: "/agents", icon: BrainCircuit },
+    ],
+  },
+  {
     title: "Hub de Recursos",
     items: [
-      { title: "Agentes IA", href: "/agents", icon: Bot },
       { title: "Vídeos", href: "/videos", icon: Youtube },
       { title: "Amazon Reviews", href: "/hub/amazon-reviews", icon: Star },
       { title: "Relatório de Keywords", href: "/hub/relatorio-keywords", icon: FileDigit },
@@ -62,7 +68,6 @@ const menuItems = [
       { title: "Ferramentas", href: "/hub/ferramentas", icon: Wrench },
       { title: "Templates", href: "/hub/templates", icon: FileText },
       { title: "Materiais", href: "/hub/materiais", icon: BookCopy },
-      { title: "Prompts IA", href: "/hub/prompts-ia", icon: BrainCircuit },
     ],
   },
   {

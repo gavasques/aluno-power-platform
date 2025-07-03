@@ -111,7 +111,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ EDITOR DE IMAGEM PRINCIPAL FINALIZADO - INTERFACE SIMPLIFICADA E OTIMIZADA
+- **July 03, 2025**: ✅ NAVEGAÇÃO REORGANIZADA E EDITOR DE IMAGEM PRINCIPAL FINALIZADO
+  - **Reestruturação Completa da Navegação**:
+    - Criado novo menu "Agentes" separado no header do Hub de Recursos
+    - "Editor de Imagem Principal" agora acessível diretamente via menu Agentes
+    - Removido "Agentes de IA" e "Prompts IA" do Hub de Recursos conforme solicitação
+    - Menu "Agentes" contém: Editor de Imagem Principal + Todos os Agentes
+    - Navegação mais limpa e organizada para usuários finais
   - **Correção Crítica de Custos**: Implementadas taxas oficiais OpenAI corrigindo erro de $78 para $0.17 USD
     - Text Input: $5.00/1M tokens (era $6.25)
     - Image Input: $10.00/1M tokens (correto)
@@ -125,6 +131,7 @@ Preferred communication style: Simple, everyday language.
     - Apenas 2 botões finais: "Baixar Imagem" e "Gerar Nova Imagem"
     - Nome alterado para "Editor de Imagem Principal" (interface e banco de dados)
     - Parâmetros GPT-Image-1 ajustados: quality='high', size='1024x1024'
+    - Aviso importante sobre limitação 1024x1024px e necessidade de upscale 2x para Amazon
   - **Funcionalidades Validadas**:
     - API OpenAI GPT-Image-1 estável com 40-57 segundos processamento
     - Sistema completo de upload, processamento e download funcionando
