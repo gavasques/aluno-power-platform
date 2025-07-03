@@ -3,7 +3,8 @@ import { useParams } from "wouter";
 import MySuppliers from "./myarea/MySuppliers";
 import MyProducts from "./myarea/MyProducts";
 import MyMaterials from "./myarea/MyMaterials";
-import ProductForm from "./myarea/ProductForm";
+import ProductFormNew from "./myarea/ProductFormNew";
+import ProductEditForm from "./myarea/ProductEditForm";
 import ProductDetail from "./myarea/ProductDetail";
 import SupplierDetailRefactored from "./myarea/SupplierDetailRefactored";
 import MaterialDetail from "./myarea/MaterialDetail";
@@ -12,6 +13,7 @@ import MaterialForm from "./myarea/MaterialForm";
 const MyArea = () => {
   const { section, id } = useParams();
   const fullPath = window.location.pathname;
+  const subId = fullPath.split('/')[4]; // Get the subId from the URL path
 
   switch (section) {
     case "fornecedores":
@@ -23,7 +25,10 @@ const MyArea = () => {
     case "produtos":
     case "products":
       if (id === "novo" || id === "new") {
-        return <ProductForm />;
+        return <ProductFormNew />;
+      }
+      if (id && subId === "editar") {
+        return <ProductEditForm />;
       }
       if (id) {
         return <ProductDetail />;

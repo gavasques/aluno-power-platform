@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { toast } from '@/hooks/use-toast';
 import type { Product as DbProduct, InsertProduct } from '@shared/schema';
 
 interface ProductContextType {
@@ -12,6 +13,7 @@ interface ProductContextType {
   deleteProduct: (id: number) => Promise<void>;
   getProductById: (id: number) => DbProduct | undefined;
   searchProducts: (query: string) => DbProduct[];
+  toggleProductStatus: (id: number) => Promise<void>;
   refetch: () => void;
 }
 
@@ -72,6 +74,26 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
   const deleteProduct = async (id: number): Promise<void> => {
     await deleteProductMutation.mutateAsync(id);
+    toast({
+      title: "Produto removido",
+      description: "O produto foi removido com sucesso.",
+    });
+  };
+
+  const toggleProductStatus = async (id: number): Promise<void> => {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    
+    const newStatus = !product.active;
+    await updateProductMutation.mutateAsync({ 
+      id, 
+      product: { active: newStatus } 
+    });
+    
+    toast({
+      title: newStatus ? "Produto ativado" : "Produto desativado",
+      description: newStatus ? "O produto foi ativado com sucesso." : "O produto foi desativado com sucesso.",
+    });
   };
 
   const getProductById = (id: number): DbProduct | undefined => {
@@ -82,7 +104,12 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     if (!query) return products;
     return products.filter(product =>
       product.name?.toLowerCase().includes(query.toLowerCase()) ||
-      (typeof product.descriptions === 'string' && product.descriptions.toLowerCase().includes(query.toLowerCase()))
+      product.brand?.toLowerCase().includes(query.toLowerCase()) ||
+      product.category?.toLowerCase().includes(query.toLowerCase()) ||
+      (typeof product.descriptions === 'object' && 
+       product.descriptions && 
+       'description' in product.descriptions &&
+       String(product.descriptions.description).toLowerCase().includes(query.toLowerCase()))
     );
   };
 
@@ -95,6 +122,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     deleteProduct,
     getProductById,
     searchProducts,
+    toggleProductStatus,
     refetch,
   };
 
