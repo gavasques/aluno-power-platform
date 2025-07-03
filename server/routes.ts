@@ -5980,32 +5980,24 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       let response;
       try {
-        // ALWAYS use GPT-Image-1 with multimodal chat completion - NEVER DALL-E 3
+        // ALWAYS use GPT-Image-1 with images.edit endpoint - NEVER DALL-E 3
         console.log('🎨 [INFOGRAPHIC_STEP2] Using GPT-Image-1 with reference image (MANDATORY)');
         
-        // Create multimodal message with image and text for GPT-Image-1
-        const imageData = `data:image/png;base64,${imagemReferencia}`;
+        // Convert base64 to buffer for GPT-Image-1
+        const imageBuffer = Buffer.from(imagemReferencia, 'base64');
         
-        response = await openai.chat.completions.create({
+        // Create File object using OpenAI.toFile() with proper mimetype
+        const imageFile = await OpenAI.toFile(imageBuffer, 'reference.png', {
+          type: 'image/png'
+        });
+        
+        response = await openai.images.edit({
           model: 'gpt-image-1',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: userPrompt
-                },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: imageData
-                  }
-                }
-              ]
-            }
-          ],
-          max_tokens: 4096
+          image: imageFile,
+          prompt: userPrompt,
+          n: quantidadeImagens,
+          size: '1024x1024',
+          response_format: 'b64_json'
         });
       } catch (apiError: any) {
         console.log('🎨 [INFOGRAPHIC_STEP2] OpenAI API Error:', apiError.message);
@@ -6038,47 +6030,36 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         note: 'SEMPRE com imagem de referência obrigatória'
       });
 
-      // Extract response from GPT-Image-1 (text response containing image description)
-      if (!response.choices || response.choices.length === 0) {
-        throw new Error('No response received from GPT-Image-1');
+      // Extract generated images from GPT-Image-1
+      if (!response.data || response.data.length === 0) {
+        throw new Error('No image data received from GPT-Image-1');
       }
       
-      const responseText = response.choices[0].message.content;
-      
-      // Create placeholder images for now (since GPT-Image-1 returns text, not images)
-      const images = Array.from({ length: quantidadeImagens }, (_, index) => {
-        // Return a simple SVG as base64 for demonstration
-        const svgContent = `<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100%" height="100%" fill="${corPrimaria}"/>
-          <rect x="50" y="50" width="924" height="924" fill="${corSecundaria}" opacity="0.1"/>
-          <text x="512" y="400" font-family="Arial" font-size="48" fill="white" text-anchor="middle">Infográfico ${index + 1}</text>
-          <text x="512" y="480" font-family="Arial" font-size="32" fill="white" text-anchor="middle">${nomeProduto}</text>
-          <text x="512" y="600" font-family="Arial" font-size="24" fill="white" text-anchor="middle">GPT-Image-1 Analysis:</text>
-          <text x="512" y="650" font-family="Arial" font-size="16" fill="white" text-anchor="middle">${responseText?.substring(0, 100) || 'Processado'}...</text>
-        </svg>`;
-        const base64 = Buffer.from(svgContent).toString('base64');
-        return `data:image/svg+xml;base64,${base64}`;
+      const images = response.data.map((imageData, index) => {
+        if (!imageData.b64_json) {
+          throw new Error(`No image data received for image ${index + 1}`);
+        }
+        return `data:image/jpeg;base64,${imageData.b64_json}`;
       });
 
-      console.log('✅ [INFOGRAPHIC_STEP2] GPT-Image-1 analysis completed:', {
+      console.log('✅ [INFOGRAPHIC_STEP2] GPT-Image-1 image generation completed:', {
         processingTime: `${processingTime}s`,
         cost: `$${realCost.toFixed(6)}`,
         imagesGenerated: images.length,
-        analysisLength: responseText?.length || 0,
         usage: response.usage
       });
 
-      // Save to ai_generation_logs
+      // Save to ai_generation_logs  
       await db.insert(aiGenerationLogs).values({
         userId: user.id,
         provider: 'openai',
         model: 'gpt-image-1',
         prompt: userPrompt,
-        response: `${images.length} infográficos gerados via GPT-Image-1 com análise de referência: ${responseText?.substring(0, 200) || 'Análise concluída'}`,
+        response: `${images.length} infográficos gerados com sucesso via GPT-Image-1`,
         promptCharacters: userPrompt.length,
-        responseCharacters: responseText?.length || 0,
-        inputTokens: response.usage?.prompt_tokens || 0,
-        outputTokens: response.usage?.completion_tokens || 0,
+        responseCharacters: 50, // Fixed value for image generation
+        inputTokens: 0, // Image generation doesn't provide standard token usage
+        outputTokens: 0, // Image generation doesn't provide standard token usage
         totalTokens: response.usage?.total_tokens || 0,
         cost: realCost.toString(),
         duration: processingTime * 1000,
