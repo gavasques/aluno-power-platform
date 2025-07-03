@@ -10,14 +10,14 @@ import { useProducts } from "@/contexts/ProductContext";
 import { usePagination } from "@/hooks/usePagination";
 import { ProductFilters } from "@/components/product/ProductFilters";
 import { ProductCard } from "@/components/product/ProductCard";
-import { ProductList } from "@/components/product/ProductList";
+
 import { ProductEmptyState } from "@/components/product/ProductEmptyState";
 
 const MyProducts = () => {
   const { products, deleteProduct, toggleProductStatus } = useProducts();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+
   const [showInactive, setShowInactive] = useState(false);
   const [, setLocation] = useLocation();
 
@@ -131,8 +131,6 @@ const MyProducts = () => {
               setSelectedCategory={setSelectedCategory}
               showInactive={showInactive}
               setShowInactive={setShowInactive}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
             />
           </div>
 
@@ -140,19 +138,11 @@ const MyProducts = () => {
           <div className="mb-4 px-2">
             {filteredProducts.length > 0 ? (
               <>
-                {viewMode === "grid" ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                    {paginatedProducts.map(product => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </div>
-                ) : (
-                  <ProductList
-                    products={paginatedProducts}
-                    onToggleProductStatus={handleToggleProductStatus}
-                    onDeleteProduct={handleDeleteProduct}
-                  />
-                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                  {paginatedProducts.map(product => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
                 <div className="mt-8">
                   {renderPagination()}
                 </div>
