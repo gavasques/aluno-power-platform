@@ -111,7 +111,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ SISTEMA DE ANEXOS EM CONVERSAS IMPLEMENTADO E FUNCIONAL
+- **July 03, 2025**: ✅ CORREÇÕES CRÍTICAS FINALIZADAS - BOTÕES DE ARQUIVO E EDIÇÃO DE CONVERSAS FUNCIONAIS
+  - **Problema de Sumiço de Conversas Resolvido**:
+    - Corrigido inconsistência de userId entre conversas (algumas com ID 1, outras com ID 2)
+    - Padronizadas todas conversas do fornecedor 3 com userId: 2 no banco de dados
+    - Modificada função updateSupplierConversation para não alterar userId original durante edição
+    - Atualizadas rotas da API para usar userId: 2 como padrão consistente
+  - **Botões de Arquivo Implementados**:
+    - Adicionados onClick handlers nos botões "Ver" e "Download" da aba Arquivos
+    - Botão "Ver": abre arquivo em nova aba usando window.open(file.fileUrl, '_blank')
+    - Botão "Download": força download usando createElement('a') com atributo download
+    - Sistema completamente funcional para visualização e download de arquivos
+  - **Sistema de Edição de Conversas Corrigido**:
+    - Função updateConversation implementada no hook useSupplierDetail
+    - Modal de edição funciona sem causar tela branca
+    - Conversas editadas permanecem visíveis na lista após salvamento
+    - Validação de parâmetros corrigida para evitar conflitos de ID
+
+- **July 03, 2025 (anterior)**: ✅ SISTEMA DE ANEXOS EM CONVERSAS IMPLEMENTADO E FUNCIONAL
   - **Funcionalidade de Anexos Completa**:
     - ConversationDialog atualizado com campo de upload de arquivo
     - Suporte a múltiplos formatos: .pdf, .doc, .docx, .jpg, .jpeg, .png, .txt, .xls, .xlsx
