@@ -2295,18 +2295,19 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const imageBuffer = Buffer.from(image, 'base64');
       
       try {
-        // Try gpt-image-1 first
+        // Use GPT-Image-1 for real image processing
         const response = await client.images.edit({
           image: imageBuffer as any,
           prompt: userPrompt,
           model: "gpt-image-1",
           n: 1,
-          size: "1024x1024"
+          size: "1024x1024",
+          response_format: "b64_json"
         });
         
         console.log('✅ [LIFESTYLE_MODEL] Successfully used gpt-image-1');
         
-        const processedImageData = response.data?.[0]?.url || response.data?.[0]?.b64_json;
+        const processedImageData = response.data?.[0]?.b64_json;
         if (!processedImageData) {
           throw new Error('No image data received from OpenAI');
         }
@@ -2314,16 +2315,35 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const processingTime = Math.round((Date.now() - startTime) / 1000);
         const cost = 0.167;
         
-        // Handle URL or base64 response
-        const processedImageUrl = processedImageData.startsWith('http') 
-          ? processedImageData 
-          : `data:image/png;base64,${processedImageData}`;
+        // Convert to JPG format and return
+        const processedImageUrl = `data:image/jpeg;base64,${processedImageData}`;
+        
+        // Log successful generation
+        try {
+          await db.insert(aiImgGenerationLogs).values({
+            userId: user.id,
+            provider: 'openai',
+            model: 'gpt-image-1',
+            feature: 'lifestyle-with-model',
+            originalImageName: 'uploaded-image.jpg',
+            quality: 'high',
+            scale: null,
+            cost: cost.toString(),
+            duration: processingTime * 1000,
+            status: 'success',
+            ipAddress: req.ip || 'unknown',
+            userAgent: req.get('User-Agent') || 'unknown',
+            createdAt: new Date()
+          });
+        } catch (logError) {
+          console.log('⚠️ [LIFESTYLE_MODEL] Error logging success:', logError);
+        }
           
         return res.json({
-          processedImageUrl,
-          cost,
-          duration: processingTime,
-          message: 'Imagem lifestyle gerada com sucesso!'
+          originalImage: `data:image/jpeg;base64,${image}`,
+          processedImage: processedImageUrl,
+          processingTime,
+          cost
         });
         
       } catch (gptImageError: any) {
@@ -2400,7 +2420,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         console.log(`✅ [LIFESTYLE_MODEL] Demo mode completed in ${processingTime}s`);
         
         res.json({
-          originalImage: `data:image/png;base64,${image}`,
+          originalImage: `data:image/jpeg;base64,${image}`,
           processedImage: demoImageUrl,
           processingTime,
           cost
