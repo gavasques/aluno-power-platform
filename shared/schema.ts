@@ -1550,6 +1550,7 @@ export const supportTickets = pgTable("support_tickets", {
   assignedToUserId: integer("assigned_to_user_id").references(() => users.id),
   tags: text("tags").array().default([]),
   metadata: jsonb("metadata").default({}),
+  adminNotes: text("admin_notes"), // Private notes only visible to admins
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   resolvedAt: timestamp("resolved_at"),

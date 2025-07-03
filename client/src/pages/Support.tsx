@@ -64,6 +64,7 @@ const Support = () => {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [newMessage, setNewMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -146,6 +147,7 @@ const Support = () => {
       if (selectedTicket) {
         queryClient.invalidateQueries({ queryKey: [`/api/support/tickets/${selectedTicket.id}`] });
       }
+      setNewMessage('');
       toast({
         title: 'Mensagem enviada!',
         description: 'Sua mensagem foi adicionada ao ticket.',
@@ -155,6 +157,30 @@ const Support = () => {
       toast({
         title: 'Erro ao enviar mensagem',
         description: 'Não foi possível enviar a mensagem. Tente novamente.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Close ticket mutation
+  const closeTicketMutation = useMutation({
+    mutationFn: async (ticketId: number) => {
+      return apiRequest(`/api/support/tickets/${ticketId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'closed' }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/support/tickets'] });
+      toast({
+        title: 'Ticket encerrado!',
+        description: 'O ticket foi encerrado com sucesso.',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Erro ao encerrar ticket',
+        description: 'Não foi possível encerrar o ticket. Tente novamente.',
         variant: 'destructive',
       });
     },
@@ -569,6 +595,64 @@ const Support = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Add New Message - Only if ticket is not closed */}
+                  {selectedTicket.status !== 'closed' && (
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-900 mb-2">Adicionar Comentário</h4>
+                      <div className="space-y-3">
+                        <Textarea
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          placeholder="Digite seu comentário..."
+                          rows={3}
+                          className="text-sm resize-none"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            if (newMessage.trim() && selectedTicket) {
+                              addMessageMutation.mutate({
+                                ticketId: selectedTicket.id,
+                                message: newMessage.trim(),
+                              });
+                            }
+                          }}
+                          disabled={!newMessage.trim() || addMessageMutation.isPending}
+                        >
+                          {addMessageMutation.isPending ? 'Enviando...' : 'Enviar Comentário'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Ticket Actions */}
+                  <div className="pt-4 border-t">
+                    {selectedTicket.status !== 'closed' ? (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          if (selectedTicket && confirm('Tem certeza que deseja encerrar este ticket?')) {
+                            closeTicketMutation.mutate(selectedTicket.id);
+                          }
+                        }}
+                        disabled={closeTicketMutation.isPending}
+                        className="w-full"
+                      >
+                        {closeTicketMutation.isPending ? 'Encerrando...' : 'Encerrar Ticket'}
+                      </Button>
+                    ) : (
+                      <div className="text-center">
+                        <Badge variant="secondary" className="text-sm">
+                          Ticket Encerrado
+                        </Badge>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Este ticket foi encerrado e não aceita mais comentários.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ) : (

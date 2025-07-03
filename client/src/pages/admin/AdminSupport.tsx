@@ -27,6 +27,7 @@ interface SupportTicket {
   priority: 'low' | 'medium' | 'high' | 'urgent';
   category: string;
   tags: string[] | null;
+  adminNotes?: string | null;
   createdAt: string;
   updatedAt: string;
   user: {
@@ -52,6 +53,88 @@ interface SupportTicket {
   }>;
 }
 
+// Utility functions
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'open':
+      return <AlertCircle className="h-4 w-4 text-green-500" />;
+    case 'in_progress':
+      return <Clock className="h-4 w-4 text-blue-500" />;
+    case 'waiting_response':
+      return <Clock className="h-4 w-4 text-yellow-500" />;
+    case 'resolved':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'closed':
+      return <XCircle className="h-4 w-4 text-gray-500" />;
+    default:
+      return <AlertCircle className="h-4 w-4 text-gray-500" />;
+  }
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'open':
+      return 'bg-green-100 text-green-800';
+    case 'in_progress':
+      return 'bg-blue-100 text-blue-800';
+    case 'waiting_response':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'resolved':
+      return 'bg-green-100 text-green-800';
+    case 'closed':
+      return 'bg-gray-100 text-gray-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'open':
+      return 'Aberto';
+    case 'in_progress':
+      return 'Em Andamento';
+    case 'waiting_response':
+      return 'Aguardando';
+    case 'resolved':
+      return 'Resolvido';
+    case 'closed':
+      return 'Fechado';
+    default:
+      return status;
+  }
+};
+
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'low':
+      return 'bg-gray-100 text-gray-800';
+    case 'medium':
+      return 'bg-blue-100 text-blue-800';
+    case 'high':
+      return 'bg-orange-100 text-orange-800';
+    case 'urgent':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getPriorityText = (priority: string) => {
+  switch (priority) {
+    case 'low':
+      return 'Baixa';
+    case 'medium':
+      return 'Média';
+    case 'high':
+      return 'Alta';
+    case 'urgent':
+      return 'Urgente';
+    default:
+      return priority;
+  }
+};
+
 const AdminSupport = () => {
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -59,6 +142,7 @@ const AdminSupport = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [newStatus, setNewStatus] = useState('');
+  const [adminNotes, setAdminNotes] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -97,6 +181,39 @@ const AdminSupport = () => {
       });
     },
   });
+
+  // Add staff message mutation
+  const addStaffMessageMutation = useMutation({
+    mutationFn: async ({ ticketId, message }: { ticketId: number; message: string }) => {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return apiRequest(`/api/support/tickets/${ticketId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ message, isStaffReply: true }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/support/tickets'] });
+      setNewMessage('');
+      toast({
+        title: 'Resposta enviada!',
+        description: 'Sua resposta foi adicionada ao ticket.',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Erro ao enviar resposta',
+        description: 'Não foi possível enviar a resposta. Tente novamente.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Set admin notes when ticket is selected
+  React.useEffect(() => {
+    if (selectedTicket) {
+      setAdminNotes(selectedTicket.adminNotes || '');
+    }
+  }, [selectedTicket]);
 
   // Add message mutation
   const addMessageMutation = useMutation({
@@ -403,9 +520,10 @@ const AdminSupport = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Tabs defaultValue="details" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="details">Detalhes</TabsTrigger>
                       <TabsTrigger value="messages">Mensagens</TabsTrigger>
+                      <TabsTrigger value="admin">Admin</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="details" className="space-y-4">
@@ -528,19 +646,104 @@ const AdminSupport = () => {
                             size="sm" 
                             onClick={() => {
                               if (newMessage.trim()) {
-                                addMessageMutation.mutate({
+                                addStaffMessageMutation.mutate({
                                   ticketId: selectedTicket.id,
                                   message: newMessage.trim()
                                 });
                               }
                             }}
-                            disabled={!newMessage.trim() || addMessageMutation.isPending}
+                            disabled={!newMessage.trim() || addStaffMessageMutation.isPending}
                             className="w-full"
                           >
-                            {addMessageMutation.isPending ? 'Enviando...' : 'Enviar Resposta'}
+                            {addStaffMessageMutation.isPending ? 'Enviando...' : 'Enviar Resposta'}
                           </Button>
                         </div>
                       )}
+                    </TabsContent>
+
+                    <TabsContent value="admin" className="space-y-4">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="adminNotes">Notas Privadas (Apenas para Admins)</Label>
+                          <Textarea
+                            id="adminNotes"
+                            value={adminNotes}
+                            onChange={(e) => setAdminNotes(e.target.value)}
+                            placeholder="Adicione suas notas privadas sobre este ticket..."
+                            rows={4}
+                            className="bg-yellow-50 border-yellow-200"
+                          />
+                          <Button 
+                            size="sm" 
+                            onClick={() => {
+                              updateTicketMutation.mutate({
+                                ticketId: selectedTicket.id,
+                                data: { adminNotes: adminNotes.trim() || null }
+                              });
+                            }}
+                            disabled={updateTicketMutation.isPending}
+                            variant="outline"
+                          >
+                            {updateTicketMutation.isPending ? 'Salvando...' : 'Salvar Notas'}
+                          </Button>
+                        </div>
+
+                        {selectedTicket.status !== 'closed' && (
+                          <div className="space-y-2">
+                            <Label htmlFor="staffMessage">Responder como Suporte</Label>
+                            <Textarea
+                              id="staffMessage"
+                              value={newMessage}
+                              onChange={(e) => setNewMessage(e.target.value)}
+                              placeholder="Digite sua resposta para o usuário..."
+                              rows={3}
+                            />
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                if (newMessage.trim()) {
+                                  addStaffMessageMutation.mutate({
+                                    ticketId: selectedTicket.id,
+                                    message: newMessage.trim()
+                                  });
+                                }
+                              }}
+                              disabled={!newMessage.trim() || addStaffMessageMutation.isPending}
+                              className="w-full"
+                            >
+                              {addStaffMessageMutation.isPending ? 'Enviando...' : 'Enviar Resposta'}
+                            </Button>
+                          </div>
+                        )}
+
+                        <div className="pt-4 border-t">
+                          <h4 className="font-medium text-sm text-gray-900 mb-3">Ações Administrativas</h4>
+                          
+                          {selectedTicket.status !== 'closed' && (
+                            <Button 
+                              size="sm" 
+                              variant="destructive"
+                              onClick={() => {
+                                updateTicketMutation.mutate({
+                                  ticketId: selectedTicket.id,
+                                  data: { status: 'closed' }
+                                });
+                              }}
+                              disabled={updateTicketMutation.isPending}
+                              className="w-full"
+                            >
+                              {updateTicketMutation.isPending ? 'Fechando...' : 'Fechar Ticket'}
+                            </Button>
+                          )}
+
+                          {selectedTicket.status === 'closed' && (
+                            <div className="bg-red-50 border border-red-200 rounded p-3 text-center">
+                              <XCircle className="h-5 w-5 text-red-500 mx-auto mb-1" />
+                              <p className="text-sm text-red-700">Ticket fechado - Usuário não pode mais comentar</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </TabsContent>
                   </Tabs>
                 </CardContent>
