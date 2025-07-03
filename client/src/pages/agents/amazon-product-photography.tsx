@@ -327,7 +327,7 @@ export default function AmazonProductPhotography() {
                     <li>• Sombra natural realista</li>
                   </ul>
                   <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                    <p className="text-xs text-amber-800 dark:text-amber-300">
+                    <p className="text-amber-800 dark:text-amber-300 text-[14px]">
                       <strong>Importante:</strong> A imagem gerada é limitada a dimensão de 1024x1024px, e para a Amazon é necessário realizar o upscale 2x dessa imagem.
                     </p>
                   </div>
@@ -337,7 +337,7 @@ export default function AmazonProductPhotography() {
           </div>
         ) : (
           /* Results Section */
-          <div className="space-y-6">
+          (<div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -381,7 +381,7 @@ export default function AmazonProductPhotography() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div>)
         )}
       </div>
     </div>
