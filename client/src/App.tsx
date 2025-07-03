@@ -39,6 +39,7 @@ const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
 const HtmlDescriptionAgent = lazy(() => import("./pages/agents/HtmlDescriptionAgent"));
 const BulletPointsAgent = lazy(() => import("./pages/agents/BulletPointsAgent"));
 const AmazonProductPhotography = lazy(() => import("./pages/agents/amazon-product-photography"));
+const LifestyleWithModel = lazy(() => import("./pages/agents/lifestyle-with-model"));
 const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtractor"));
 const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
 const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
@@ -154,6 +155,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <AmazonProductPhotography />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agents/agent-lifestyle-with-model">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <LifestyleWithModel />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

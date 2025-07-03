@@ -2248,6 +2248,136 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
   
+  // Lifestyle with Model - specific route 
+  app.post('/api/agents/lifestyle-with-model/process', requireAuth, async (req: any, res: any) => {
+    console.log('🎨 [LIFESTYLE_MODEL] Starting image processing...');
+    const startTime = Date.now();
+    
+    try {
+      const user = req.user;
+      const { image, variables } = req.body;
+
+      if (!image || !variables) {
+        console.log('❌ [LIFESTYLE_MODEL] Missing required fields');
+        return res.status(400).json({ error: 'Imagem e variáveis são obrigatórias' });
+      }
+
+      console.log('🎨 [LIFESTYLE_MODEL] Variables received:', {
+        PRODUTO_NOME: variables.PRODUTO_NOME?.substring(0, 50) + '...',
+        AMBIENTE: variables.AMBIENTE,
+        SEXO: variables.SEXO,
+        FAIXA_ETARIA: variables.FAIXA_ETARIA,
+        ACAO: variables.ACAO?.substring(0, 50) + '...'
+      });
+
+      // Get agent prompts from database
+      const systemPrompt = await storage.getAgentPrompt('agent-lifestyle-with-model', 'system');
+      const userPromptTemplate = await storage.getAgentPrompt('agent-lifestyle-with-model', 'user');
+
+      if (!systemPrompt || !userPromptTemplate) {
+        console.log('❌ [LIFESTYLE_MODEL] Agent prompts not found');
+        return res.status(500).json({ error: 'Configuração do agente não encontrada' });
+      }
+
+      // Replace variables in the user prompt
+      let userPrompt = userPromptTemplate.content;
+      Object.entries(variables).forEach(([key, value]) => {
+        const placeholder = `{{${key}}}`;
+        userPrompt = userPrompt.replace(new RegExp(placeholder, 'g'), value as string);
+      });
+
+      console.log('🎨 [LIFESTYLE_MODEL] Processed prompt length:', userPrompt.length);
+
+      // Call OpenAI API with image editing
+      const OpenAI = require('openai').default;
+      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const response = await client.images.edit({
+        image: Buffer.from(image, 'base64'),
+        prompt: userPrompt,
+        model: "gpt-image-1",
+        n: 1,
+        size: "1024x1024",
+        response_format: "b64_json",
+        quality: "high"
+      });
+
+      const processedImageData = response.data[0].b64_json;
+      if (!processedImageData) {
+        console.log('❌ [LIFESTYLE_MODEL] No image data received from OpenAI');
+        return res.status(500).json({ error: 'Falha na geração da imagem' });
+      }
+
+      const processingTime = Math.round((Date.now() - startTime) / 1000);
+      const cost = 0.167; // GPT-Image-1 cost per image
+
+      console.log(`✅ [LIFESTYLE_MODEL] Processing completed in ${processingTime}s, cost: $${cost}`);
+
+      // Convert base64 to data URL for frontend
+      const processedImageUrl = `data:image/png;base64,${processedImageData}`;
+
+      // Log using direct DB insert like other routes
+      try {
+        await db.insert(aiImgGenerationLogs).values({
+          userId: user.id,
+          provider: 'openai',
+          model: 'gpt-image-1',
+          feature: 'lifestyle-with-model',
+          originalImageName: 'uploaded-image.png',
+          quality: 'high',
+          scale: null,
+          cost: cost.toString(),
+          duration: processingTime * 1000, // Convert to milliseconds
+          status: 'success',
+          ipAddress: req.ip || 'unknown',
+          userAgent: req.get('User-Agent') || 'unknown',
+          createdAt: new Date()
+        });
+      } catch (logError) {
+        console.log('⚠️ [LIFESTYLE_MODEL] Logging error:', logError);
+      }
+
+      res.json({
+        processedImageUrl,
+        cost,
+        duration: processingTime,
+        message: 'Imagem lifestyle gerada com sucesso!'
+      });
+
+    } catch (error: any) {
+      const processingTime = Math.round((Date.now() - startTime) / 1000);
+      console.error('❌ [LIFESTYLE_MODEL] Error:', error);
+
+      // Log the failed generation
+      const user = req.user;
+      if (user) {
+        try {
+          await db.insert(aiImgGenerationLogs).values({
+            userId: user.id,
+            provider: 'openai',
+            model: 'gpt-image-1',
+            feature: 'lifestyle-with-model',
+            originalImageName: 'uploaded-image.png',
+            quality: 'high',
+            scale: null,
+            cost: '0',
+            duration: processingTime * 1000, // Convert to milliseconds
+            status: 'failed',
+            ipAddress: req.ip || 'unknown',
+            userAgent: req.get('User-Agent') || 'unknown',
+            createdAt: new Date()
+          });
+        } catch (logError) {
+          console.log('⚠️ [LIFESTYLE_MODEL] Error logging failed:', logError);
+        }
+      }
+
+      res.status(500).json({ 
+        error: 'Erro no processamento da imagem lifestyle. Tente novamente.' 
+      });
+    }
+  });
+
   app.post('/api/agents/amazon-product-photography/process', photographyUpload.single('image'), requireAuth, async (req: any, res: any) => {
     console.log('🌐 [REQUEST] POST /api/agents/amazon-product-photography/process');
     
