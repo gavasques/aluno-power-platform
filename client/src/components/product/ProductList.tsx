@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,7 @@ export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }
   const { columnPreferences, updateColumnVisibility, updateChannelVisibility } = useColumnPreferences();
 
   const allChannels = [
-    { key: "sitePropio", label: "Site Próprio", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+    { key: "siteProprio", label: "Site Próprio", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
     { key: "amazonFBM", label: "Amazon FBM", color: "bg-orange-50 text-orange-700 border-orange-200" },
     { key: "amazonFBAOnSite", label: "Amazon FBA On Site", color: "bg-orange-50 text-orange-700 border-orange-200" },
     { key: "amazonDBA", label: "Amazon DBA", color: "bg-orange-50 text-orange-700 border-orange-200" },
@@ -55,7 +54,7 @@ export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }
           onChannelVisibilityChange={updateChannelVisibility}
         />
       </div>
-      
+
       <Card className="border-0 shadow-md">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -88,19 +87,19 @@ export const ProductList = ({ products, onToggleProductStatus, onDeleteProduct }
                     {columnPreferences.photo && (
                       <TableCell className="text-center">
                         <img
-                          src={product.photo || "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop"}
-                          alt={product.name}
+                          src={product.photo || "/placeholder.svg"}
+                          alt={product.name || "Produto"}
                           className="w-12 h-12 object-cover rounded-lg shadow border border-gray-100 mx-auto"
                         />
                       </TableCell>
                     )}
                     {columnPreferences.name && (
                       <TableCell>
-                        <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
+                        <div className="font-semibold text-gray-900 text-sm">{product.name || "Produto sem nome"}</div>
                       </TableCell>
                     )}
                     {columnPreferences.brand && (
-                      <TableCell className="text-sm text-gray-700">{product.brand}</TableCell>
+                      <TableCell className="text-sm text-gray-700">{product.brand || "Marca não definida"}</TableCell>
                     )}
                     {columnPreferences.category && (
                       <TableCell>

@@ -1,7 +1,6 @@
 import React, { createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { toast } from '@/hooks/use-toast';
 import type { Product as DbProduct, InsertProduct } from '@shared/schema';
 
 interface ProductContextType {
@@ -9,11 +8,11 @@ interface ProductContextType {
   loading: boolean;
   error: string | null;
   addProduct: (product: InsertProduct) => Promise<void>;
-  updateProduct: (id: number, product: Partial<InsertProduct>) => Promise<void>;
-  deleteProduct: (id: number) => Promise<void>;
-  getProductById: (id: number) => DbProduct | undefined;
+  updateProduct: (id: string, product: Partial<InsertProduct>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  toggleProductStatus: (id: string) => Promise<void>;
+  getProductById: (id: string) => DbProduct | undefined;
   searchProducts: (query: string) => DbProduct[];
-  toggleProductStatus: (id: number) => Promise<void>;
   refetch: () => void;
 }
 
@@ -44,7 +43,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
   });
 
   const updateProductMutation = useMutation({
-    mutationFn: ({ id, product }: { id: number; product: Partial<InsertProduct> }) =>
+    mutationFn: ({ id, product }: { id: string; product: Partial<InsertProduct> }) =>
       apiRequest<DbProduct>(`/api/products/${id}`, {
         method: 'PUT',
         body: JSON.stringify(product),
@@ -55,9 +54,19 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
   });
 
   const deleteProductMutation = useMutation({
-    mutationFn: (id: number) =>
+    mutationFn: (id: string) =>
       apiRequest(`/api/products/${id}`, {
         method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+    },
+  });
+
+  const toggleProductStatusMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiRequest<DbProduct>(`/api/products/${id}/toggle-status`, {
+        method: 'PATCH',
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -68,48 +77,27 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     await addProductMutation.mutateAsync(product);
   };
 
-  const updateProduct = async (id: number, product: Partial<InsertProduct>): Promise<void> => {
+  const updateProduct = async (id: string, product: Partial<InsertProduct>): Promise<void> => {
     await updateProductMutation.mutateAsync({ id, product });
   };
 
-  const deleteProduct = async (id: number): Promise<void> => {
+  const deleteProduct = async (id: string): Promise<void> => {
     await deleteProductMutation.mutateAsync(id);
-    toast({
-      title: "Produto removido",
-      description: "O produto foi removido com sucesso.",
-    });
   };
 
-  const toggleProductStatus = async (id: number): Promise<void> => {
-    const product = products.find(p => p.id === id);
-    if (!product) return;
-    
-    const newStatus = !product.active;
-    await updateProductMutation.mutateAsync({ 
-      id, 
-      product: { active: newStatus } 
-    });
-    
-    toast({
-      title: newStatus ? "Produto ativado" : "Produto desativado",
-      description: newStatus ? "O produto foi ativado com sucesso." : "O produto foi desativado com sucesso.",
-    });
+  const toggleProductStatus = async (id: string): Promise<void> => {
+    await toggleProductStatusMutation.mutateAsync(id);
   };
 
-  const getProductById = (id: number): DbProduct | undefined => {
-    return products.find(product => product.id === id);
+  const getProductById = (id: string): DbProduct | undefined => {
+    return products.find(product => product.id === parseInt(id));
   };
 
   const searchProducts = (query: string): DbProduct[] => {
     if (!query) return products;
     return products.filter(product =>
       product.name?.toLowerCase().includes(query.toLowerCase()) ||
-      product.brand?.toLowerCase().includes(query.toLowerCase()) ||
-      product.category?.toLowerCase().includes(query.toLowerCase()) ||
-      (typeof product.descriptions === 'object' && 
-       product.descriptions && 
-       'description' in product.descriptions &&
-       String(product.descriptions.description).toLowerCase().includes(query.toLowerCase()))
+      (typeof product.descriptions === 'string' && product.descriptions.toLowerCase().includes(query.toLowerCase()))
     );
   };
 
@@ -120,9 +108,9 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     addProduct,
     updateProduct,
     deleteProduct,
+    toggleProductStatus,
     getProductById,
     searchProducts,
-    toggleProductStatus,
     refetch,
   };
 

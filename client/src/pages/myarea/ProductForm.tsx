@@ -6,10 +6,11 @@ import { BasicProductForm } from "@/components/product/BasicProductForm";
 import { ProductSuppliersManager } from "@/components/product/ProductSuppliersManager";
 import { ChannelForm } from "@/components/product/ChannelForm";
 import { useProductForm } from "@/hooks/useProductForm";
-import { mockSuppliers, mockCategories } from "@/data/mockData";
 import { channelNames } from "@/config/channels";
+import { useLocation } from "wouter";
 
 const ProductForm = () => {
+  const [, setLocation] = useLocation();
   const {
     productData,
     channels,
@@ -19,8 +20,7 @@ const ProductForm = () => {
     handleChannelInputChange,
     handleSuppliersChange,
     handlePhotoUpload,
-    handleSubmit,
-    navigate
+    handleSubmit
   } = useProductForm();
 
   return (
@@ -30,13 +30,13 @@ const ProductForm = () => {
         <div className="mb-8">
           <Button
             variant="ghost"
-            onClick={() => navigate("/minha-area/produtos")}
+            onClick={() => setLocation("/minha-area/produtos")}
             className="mb-6 hover:bg-white/80 dark:hover:bg-slate-800/80"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar para Produtos
           </Button>
-          
+
           <div className="bg-white dark:bg-slate-900 rounded-xl p-8 shadow-sm border">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -72,8 +72,6 @@ const ProductForm = () => {
                   productData={productData}
                   onInputChange={handleInputChange}
                   onPhotoUpload={handlePhotoUpload}
-                  mockSuppliers={mockSuppliers}
-                  mockCategories={mockCategories}
                 />
               </div>
             </div>
@@ -82,7 +80,6 @@ const ProductForm = () => {
               <div className="p-8">
                 <ProductSuppliersManager
                   suppliers={productSuppliers}
-                  availableSuppliers={mockSuppliers}
                   onSuppliersChange={handleSuppliersChange}
                 />
               </div>
@@ -100,7 +97,7 @@ const ProductForm = () => {
                     Ative e configure os marketplaces onde você deseja vender este produto
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {Object.keys(channelNames).map((channelKey) => {
                     const key = channelKey as keyof typeof channelNames;
@@ -130,7 +127,7 @@ const ProductForm = () => {
           <div className="flex gap-4 justify-end">
             <Button 
               variant="outline" 
-              onClick={() => navigate("/minha-area/produtos")} 
+              onClick={() => setLocation("/minha-area/produtos")} 
               size="lg"
               className="min-w-32"
             >

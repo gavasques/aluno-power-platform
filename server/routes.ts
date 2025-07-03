@@ -5374,4 +5374,3 @@ function generateTags(inputData: any): Record<string, string> {
 
   return tags;
 }
-
