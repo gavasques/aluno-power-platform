@@ -391,7 +391,7 @@ const SupplierDetailPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto px-6 py-6 max-w-full space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -446,9 +446,9 @@ const SupplierDetailPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="w-full">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6">
           {/* Supplier Details */}
           <Card>
             <CardHeader>
@@ -1002,11 +1002,6 @@ const SupplierDetailPage = () => {
               )}
             </TabsContent>
           </Tabs>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Sidebar content can be added here in the future if needed */}
         </div>
       </div>
 
