@@ -41,6 +41,26 @@ import {
   InsertSupplierConversation
 } from '@shared/schema';
 
+// Utility functions for formatting
+const formatCNPJ = (value: string) => {
+  const cleanValue = value.replace(/\D/g, '');
+  if (cleanValue.length <= 2) return cleanValue;
+  if (cleanValue.length <= 5) return `${cleanValue.slice(0, 2)}.${cleanValue.slice(2)}`;
+  if (cleanValue.length <= 8) return `${cleanValue.slice(0, 2)}.${cleanValue.slice(2, 5)}.${cleanValue.slice(5)}`;
+  if (cleanValue.length <= 12) return `${cleanValue.slice(0, 2)}.${cleanValue.slice(2, 5)}.${cleanValue.slice(5, 8)}/${cleanValue.slice(8)}`;
+  return `${cleanValue.slice(0, 2)}.${cleanValue.slice(2, 5)}.${cleanValue.slice(5, 8)}/${cleanValue.slice(8, 12)}-${cleanValue.slice(12, 14)}`;
+};
+
+const formatCEP = (value: string) => {
+  const cleanValue = value.replace(/\D/g, '');
+  if (cleanValue.length <= 5) return cleanValue;
+  return `${cleanValue.slice(0, 5)}-${cleanValue.slice(5, 8)}`;
+};
+
+// Options
+const countryOptions = ['Brasil', 'China', 'Taiwan', 'Hong Kong', 'India', 'Turquia', 'Argentina', 'Paraguay', 'Outro'];
+const supplierTypeOptions = ['Distribuidora', 'Importadora', 'Fabricante', 'Indústria', 'Representante'];
+
 const SupplierDetailPage = () => {
   const { id } = useParams();
   const { toast } = useToast();
@@ -476,6 +496,108 @@ const SupplierDetailPage = () => {
                       onChange={(e) => setEditForm({...editForm, corporateName: e.target.value})}
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="cnpj">CNPJ</Label>
+                    <Input
+                      id="cnpj"
+                      value={editForm.cnpj || ''}
+                      onChange={(e) => setEditForm({...editForm, cnpj: formatCNPJ(e.target.value)})}
+                      placeholder="00.000.000/0000-00"
+                      maxLength={18}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="country">País</Label>
+                    <Select 
+                      value={editForm.country || 'Brasil'} 
+                      onValueChange={(value) => setEditForm({...editForm, country: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o país" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countryOptions.map((country) => (
+                          <SelectItem key={country} value={country}>
+                            {country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="state">Estado</Label>
+                    <Input
+                      id="state"
+                      value={editForm.state || ''}
+                      onChange={(e) => setEditForm({...editForm, state: e.target.value})}
+                      placeholder="Estado/Província"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="city">Cidade</Label>
+                    <Input
+                      id="city"
+                      value={editForm.city || ''}
+                      onChange={(e) => setEditForm({...editForm, city: e.target.value})}
+                      placeholder="Cidade"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="zipCode">CEP (Zip Code)</Label>
+                    <Input
+                      id="zipCode"
+                      value={editForm.zipCode || ''}
+                      onChange={(e) => setEditForm({...editForm, zipCode: formatCEP(e.target.value)})}
+                      placeholder="00000-000"
+                      maxLength={9}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="supplierType">Tipo de Fornecedor</Label>
+                    <Select 
+                      value={editForm.supplierType || ''} 
+                      onValueChange={(value) => setEditForm({...editForm, supplierType: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {supplierTypeOptions.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="address">Endereço</Label>
+                    <Textarea
+                      id="address"
+                      value={editForm.address || ''}
+                      onChange={(e) => setEditForm({...editForm, address: e.target.value})}
+                      placeholder="Endereço completo"
+                      rows={2}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="stateRegistration">Inscrição Estadual</Label>
+                    <Input
+                      id="stateRegistration"
+                      value={editForm.stateRegistration || ''}
+                      onChange={(e) => setEditForm({...editForm, stateRegistration: e.target.value})}
+                      placeholder="Inscrição Estadual"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="municipalRegistration">Inscrição Municipal</Label>
+                    <Input
+                      id="municipalRegistration"
+                      value={editForm.municipalRegistration || ''}
+                      onChange={(e) => setEditForm({...editForm, municipalRegistration: e.target.value})}
+                      placeholder="Inscrição Municipal"
+                    />
+                  </div>
                   <div className="md:col-span-2">
                     <Label htmlFor="description">Descrição</Label>
                     <Textarea
@@ -488,10 +610,62 @@ const SupplierDetailPage = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{supplier.tradeName}</h3>
-                    <p className="text-sm text-gray-600">{supplier.corporateName}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="font-medium text-gray-900">{supplier.tradeName}</h3>
+                      <p className="text-sm text-gray-600">{supplier.corporateName}</p>
+                    </div>
+                    {supplier.cnpj && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">CNPJ</h4>
+                        <p className="text-gray-600">{supplier.cnpj}</p>
+                      </div>
+                    )}
+                    {supplier.country && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">País</h4>
+                        <p className="text-gray-600">{supplier.country}</p>
+                      </div>
+                    )}
+                    {supplier.supplierType && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Tipo</h4>
+                        <p className="text-gray-600">{supplier.supplierType}</p>
+                      </div>
+                    )}
+                    {(supplier.state || supplier.city) && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Localização</h4>
+                        <p className="text-gray-600">
+                          {[supplier.city, supplier.state].filter(Boolean).join(', ')}
+                        </p>
+                      </div>
+                    )}
+                    {supplier.zipCode && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">CEP</h4>
+                        <p className="text-gray-600">{supplier.zipCode}</p>
+                      </div>
+                    )}
+                    {supplier.stateRegistration && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Inscrição Estadual</h4>
+                        <p className="text-gray-600">{supplier.stateRegistration}</p>
+                      </div>
+                    )}
+                    {supplier.municipalRegistration && (
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Inscrição Municipal</h4>
+                        <p className="text-gray-600">{supplier.municipalRegistration}</p>
+                      </div>
+                    )}
                   </div>
+                  {supplier.address && (
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-1">Endereço</h4>
+                      <p className="text-gray-600">{supplier.address}</p>
+                    </div>
+                  )}
                   {supplier.description && (
                     <div>
                       <h4 className="font-medium text-gray-900 mb-1">Descrição</h4>
