@@ -5,6 +5,10 @@ import bcryptjs from "bcryptjs";
 import multer from "multer";
 import OpenAI from "openai";
 import { storage } from "./storage";
+import fs from "fs/promises";
+import fsSync from "fs";
+import path from "path";
+import os from "os";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -1724,12 +1728,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/agents/:id', async (req, res) => {
     try {
-      const agent = await storage.getAgentWithPrompts(req.params.id);
+      let agentId = req.params.id;
+      console.log('🔍 [API] GET /api/agents/:id - Original ID:', agentId);
+      
+      // Handle URL compatibility for amazon-product-photography
+      if (agentId === 'amazon-product-photography') {
+        agentId = 'agent-amazon-product-photography';
+        console.log('🔄 [API] URL mapped to:', agentId);
+      }
+      
+      const agent = await storage.getAgentWithPrompts(agentId);
+      console.log('📊 [API] Agent found:', !!agent);
       if (!agent) {
         return res.status(404).json({ error: 'Agent not found' });
       }
       res.json(agent);
     } catch (error) {
+      console.error('❌ [API] Error fetching agent:', error);
       res.status(500).json({ error: 'Failed to fetch agent' });
     }
   });
@@ -2248,7 +2263,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
 
       const user = req.user;
-      const imageBuffer = req.file.buffer;
+      const originalImageBuffer = req.file.buffer;
       const fileName = req.file.originalname;
 
       console.log('📸 [PRODUCT_PHOTOGRAPHY] Processing image:', {
@@ -2258,7 +2273,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       });
 
       // Convert image to base64
-      const base64Image = imageBuffer.toString('base64');
+      const base64Image = originalImageBuffer.toString('base64');
 
       // Get agent configuration
       console.log('🔍 [PRODUCT_PHOTOGRAPHY] Looking for agent:', 'agent-amazon-product-photography');
@@ -2278,65 +2293,67 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log('🤖 [PRODUCT_PHOTOGRAPHY] Using model:', agent.model);
 
-      // Call OpenAI GPT-Image-1 API
+      // Call OpenAI GPT-Image-1 API for image editing
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       
-      const response = await openai.chat.completions.create({
-        model: 'gpt-image-1',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: systemPrompt.content
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${base64Image}`
-                }
-              }
-            ],
-          },
-        ],
-        max_tokens: 4096,
-      });
-
-      const endTime = Date.now();
-      const processingTime = Math.round((endTime - startTime) / 1000);
-      const cost = 5.167; // Base cost for gpt-image-1
-
-      console.log('✅ [PRODUCT_PHOTOGRAPHY] Processing completed:', {
-        processingTime: `${processingTime}s`,
-        cost: `$${cost}`
-      });
-
-      // Extract generated image from response
-      const generatedImageUrl = response.choices[0]?.message?.content || '';
+      // Save buffer to temporary file for OpenAI images.edit
+      const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}-${fileName}`);
+      await fs.writeFile(tempFilePath, originalImageBuffer);
       
-      // Save to ai_img_generation_logs
-      await storage.createAiImgGenerationLog({
-        userId: user.id,
-        provider: 'openai',
-        model: 'gpt-image-1',
-        feature: 'amazon-product-photography',
-        originalImageName: fileName,
-        quality: 'high',
-        scale: null,
-        cost: cost.toString(),
-        duration: processingTime,
-        status: 'success'
-      });
+      try {
+        const response = await openai.images.edit({
+          model: 'gpt-image-1',
+          image: fsSync.createReadStream(tempFilePath),
+          prompt: systemPrompt.content,
+          n: 1
+        });
 
-      // Return result
-      res.json({
-        originalImage: `data:image/jpeg;base64,${base64Image}`,
-        processedImage: generatedImageUrl,
-        processingTime,
-        cost
-      });
+        const endTime = Date.now();
+        const processingTime = Math.round((endTime - startTime) / 1000);
+        const cost = 5.167; // Base cost for gpt-image-1
 
+        console.log('✅ [PRODUCT_PHOTOGRAPHY] Processing completed:', {
+          processingTime: `${processingTime}s`,
+          cost: `$${cost}`
+        });
+
+        // Extract generated image from response - images.edit returns URL by default
+        if (!response.data || !response.data[0] || !response.data[0].url) {
+          throw new Error('No image data received from OpenAI');
+        }
+        
+        const generatedImageUrl = response.data[0].url;
+        
+        // Save to ai_img_generation_logs
+        await storage.createAiImgGenerationLog({
+          userId: user.id,
+          provider: 'openai',
+          model: 'gpt-image-1',
+          feature: 'amazon-product-photography',
+          originalImageName: fileName,
+          quality: 'high',
+          scale: null,
+          cost: cost.toString(),
+          duration: processingTime,
+          status: 'success'
+        });
+
+        // Return result
+        res.json({
+          originalImage: `data:image/jpeg;base64,${base64Image}`,
+          processedImage: generatedImageUrl,
+          processingTime,
+          cost
+        });
+
+      } finally {
+        // Clean up temporary file
+        try {
+          await fs.unlink(tempFilePath);
+        } catch (cleanupError) {
+          console.warn('⚠️ [PRODUCT_PHOTOGRAPHY] Failed to cleanup temp file:', tempFilePath);
+        }
+      }
     } catch (error: any) {
       console.error('❌ [PRODUCT_PHOTOGRAPHY] Error:', error);
       res.status(500).json({ 
@@ -2346,7 +2363,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // OpenAI Processing route (generic)
+  // OpenAI Processing route (generic) - MOVED BELOW SPECIFIC ROUTES
   app.post('/api/agents/:agentId/process', async (req, res) => {
     try {
       const { productName, productInfo, reviewsData, format } = req.body;

@@ -96,26 +96,22 @@ export class OpenAIProvider extends BaseProvider {
   }
 
   private async handleImageCreation(request: AIRequest, modelConfig: ModelConfig, prompt: string): Promise<AIResponse> {
-    console.log(`🎨 [OPENAI] Generation mode: Creating image with gpt-image-1 via Responses API`);
+    console.log(`🎨 [OPENAI] Generation mode: Creating image with gpt-image-1 via Images API`);
     
     try {
-      const response = await this.client.responses.create({
-        model: 'gpt-4.1-mini',
-        input: prompt,
-        tools: [{ type: 'image_generation' }]
+      const response = await this.client.images.generate({
+        model: 'gpt-image-1',
+        prompt: prompt,
+        n: 1,
+        size: '1024x1024',
+        quality: 'high'
       });
 
-      // Extract image data from response
-      const imageData = response.output
-        .filter((output: any) => output.type === 'image_generation_call')
-        .map((output: any) => output.result);
-
-      if (!imageData.length) {
-        throw new Error('No image generated from Responses API');
+      if (!response.data || !response.data[0] || !response.data[0].url) {
+        throw new Error('No image generated from Images API');
       }
 
-      const imageBase64 = imageData[0];
-      const imageUrl = `data:image/png;base64,${imageBase64}`;
+      const imageUrl = response.data[0].url;
       const content = `Image created with GPT-Image-1!\n\nPrompt: ${prompt}\n\nURL: ${imageUrl}`;
       
       const inputTokens = this.countTokens(prompt);

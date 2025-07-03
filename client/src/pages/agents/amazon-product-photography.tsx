@@ -94,7 +94,7 @@ export default function AmazonProductPhotography() {
       const response = await fetch('/api/agents/amazon-product-photography/process', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: formData,
       });
