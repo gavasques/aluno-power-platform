@@ -1729,16 +1729,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/agents/:id', async (req, res) => {
     try {
       let agentId = req.params.id;
-      console.log('🔍 [API] GET /api/agents/:id - Original ID:', agentId);
-      
       // Handle URL compatibility for amazon-product-photography
       if (agentId === 'amazon-product-photography') {
         agentId = 'agent-amazon-product-photography';
-        console.log('🔄 [API] URL mapped to:', agentId);
       }
       
       const agent = await storage.getAgentWithPrompts(agentId);
-      console.log('📊 [API] Agent found:', !!agent);
       if (!agent) {
         return res.status(404).json({ error: 'Agent not found' });
       }
@@ -2296,14 +2292,22 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       // Call OpenAI GPT-Image-1 API for image editing
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       
-      // Save buffer to temporary file for OpenAI images.edit
-      const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}-${fileName}`);
-      await fs.writeFile(tempFilePath, originalImageBuffer);
+      const mimeType = req.file.mimetype;
+      
+      console.log('📁 [PRODUCT_PHOTOGRAPHY] Image processing:', {
+        fileName,
+        mimeType,
+        fileSize: originalImageBuffer.length
+      });
       
       try {
+        // Use buffer directly without temporary file to preserve mimetype
+        // Convert buffer to Blob with correct mimetype
+        const imageBlob = new Blob([originalImageBuffer], { type: mimeType });
+        
         const response = await openai.images.edit({
           model: 'gpt-image-1',
-          image: fsSync.createReadStream(tempFilePath),
+          image: imageBlob as any, // Cast needed for OpenAI SDK compatibility
           prompt: systemPrompt.content,
           n: 1
         });
