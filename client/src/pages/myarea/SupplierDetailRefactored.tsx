@@ -3,7 +3,7 @@ import { useParams, Link } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Edit, Building2 } from 'lucide-react';
+import { ArrowLeft, Edit, Building2, Save, X } from 'lucide-react';
 import { useSupplierDetail } from '@/hooks/useSupplierDetail';
 import { SupplierInfoDisplay } from '@/components/supplier/SupplierInfoDisplay';
 import { SupplierInfoForm } from '@/components/supplier/SupplierInfoForm';
@@ -14,6 +14,7 @@ import {
   FileList 
 } from '@/components/supplier/SupplierTabsManager';
 import { BrandDialog, ContactDialog, ConversationDialog } from '@/components/supplier/SupplierDialogs';
+import { SupplierEditDialog } from '@/components/supplier/SupplierEditDialog';
 import { FileUploadDialog } from '@/components/supplier/FileUploadDialog';
 import type { Supplier } from '@shared/schema';
 
@@ -47,6 +48,7 @@ const SupplierDetailRefactored = () => {
   // Local state for editing
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Supplier>>({});
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   // Dialog states
   const [brandDialogOpen, setBrandDialogOpen] = useState(false);
@@ -63,8 +65,18 @@ const SupplierDetailRefactored = () => {
   });
 
   const handleEditStart = () => {
-    setEditForm(supplier || {});
-    setIsEditing(true);
+    console.log('🔥 EDIT BUTTON CLICKED - Opening Dialog', { 
+      supplier: supplier?.tradeName, 
+      showEditDialog 
+    });
+    
+    if (!supplier) {
+      console.error('❌ No supplier data available');
+      return;
+    }
+    
+    setShowEditDialog(true);
+    console.log('✅ Edit dialog opened');
   };
 
   const handleEditCancel = () => {
@@ -158,17 +170,22 @@ const SupplierDetailRefactored = () => {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{supplier.tradeName}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {supplier.tradeName}
+              {isEditing && <span className="ml-2 text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded">Editando</span>}
+            </h1>
             <p className="text-gray-600">{supplier.corporateName}</p>
           </div>
         </div>
         
-        {!isEditing && (
-          <Button onClick={handleEditStart} disabled={isUpdating}>
-            <Edit className="h-4 w-4 mr-2" />
-            Editar Informações
-          </Button>
-        )}
+        <Button 
+          onClick={handleEditStart} 
+          disabled={isUpdating}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <Edit className="h-4 w-4 mr-2" />
+          Editar Informações
+        </Button>
       </div>
 
       {/* Main Content */}
@@ -284,6 +301,14 @@ const SupplierDetailRefactored = () => {
         onUpload={(file, name, type) => uploadFile({ file, name, type })}
         supplierId={supplierId}
         isLoading={isUploadingFile}
+      />
+
+      <SupplierEditDialog
+        open={showEditDialog}
+        onClose={() => setShowEditDialog(false)}
+        onSave={updateSupplier}
+        supplier={supplier}
+        isLoading={isUpdating}
       />
     </div>
   );
