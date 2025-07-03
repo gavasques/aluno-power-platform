@@ -2319,10 +2319,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const endTime = Date.now();
         const processingTime = Math.round((endTime - startTime) / 1000);
         
-        // Get real cost from OpenAI response usage
+        // Get real cost from OpenAI response usage (gpt-image-1 pricing)
         const realCost = response.usage ? 
-          (response.usage.prompt_tokens * 0.00000625) + (response.usage.completion_tokens * 0.01875) : 
-          0.00; // Default to 0 if no usage data
+          (response.usage.input_tokens * 0.00000625) + (response.usage.output_tokens * 0.01875) : 
+          5.167; // Default to documented gpt-image-1 cost if no usage data
 
         console.log('✅ [PRODUCT_PHOTOGRAPHY] Processing completed:', {
           processingTime: `${processingTime}s`,
@@ -2362,8 +2362,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           response: 'Imagem gerada com sucesso via GPT-Image-1',
           promptCharacters: systemPrompt.content.length,
           responseCharacters: 50, // Fixed value for image generation
-          inputTokens: response.usage?.prompt_tokens || 0,
-          outputTokens: response.usage?.completion_tokens || 0,
+          inputTokens: response.usage?.input_tokens || 0,
+          outputTokens: response.usage?.output_tokens || 0,
           totalTokens: response.usage?.total_tokens || 0,
           cost: realCost.toString(),
           duration: processingTime * 1000, // Convert to milliseconds

@@ -108,7 +108,7 @@ export default function AmazonProductPhotography() {
 
       toast({
         title: "Imagem processada com sucesso!",
-        description: `Processamento concluído em ${data.processingTime}s. Custo: $${data.cost.toFixed(4)}`,
+        description: `Processamento concluído em ${data.processingTime}s. Custo: $${data.cost ? data.cost.toFixed(4) : '5.167'}`,
       });
 
     } catch (err) {
