@@ -135,6 +135,8 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     // Validate the session token
     const user = await AuthService.validateSession(token);
     
+    console.log('🔍 [AUTH] User validation result:', user ? { userFound: true, userId: user.id, userRole: user.role } : 'null');
+    
     if (!user) {
       return res.status(401).json({ 
         error: 'Invalid or expired token',
@@ -145,8 +147,13 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     // Set user information on request object
     (req as any).user = {
       id: user.id,
-      email: user.email
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      username: user.username
     };
+    
+    console.log('🔍 [AUTH] User object set on request:', JSON.stringify((req as any).user, null, 2));
     
     next();
   } catch (error) {

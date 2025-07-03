@@ -5476,12 +5476,23 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
   // Update support ticket (admin/support only)
   app.patch('/api/support/tickets/:id', requireAuth, async (req: Request, res: Response) => {
+    console.log('🎯 ENTERED PATCH HANDLER - Starting patch ticket processing');
     try {
       const user = (req as any).user;
       const ticketId = parseInt(req.params.id);
       
+      console.log('🎯 PATCH HANDLER - Raw user object:', user);
+      console.log('🎯 PATCH HANDLER - User exists?', !!user);
+      console.log('🎯 PATCH HANDLER - User.role:', user?.role);
+      console.log('🎯 PATCH HANDLER - Typeof user.role:', typeof user?.role);
+      
+      console.log('🔍 PATCH TICKET - User object:', JSON.stringify(user, null, 2));
+      console.log('🔍 PATCH TICKET - User role:', user?.role);
+      console.log('🔍 PATCH TICKET - Authorization check:', user?.role === 'admin' || user?.role === 'support');
+      
       // Only admin/support can update tickets
       if (user.role !== 'admin' && user.role !== 'support') {
+        console.log('❌ PATCH TICKET - Authorization failed. User role:', user?.role);
         return res.status(403).json({ error: 'Não autorizado' });
       }
       
