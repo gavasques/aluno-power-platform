@@ -25,7 +25,8 @@ import {
   Eye,
   Save,
   X,
-  Paperclip
+  Paperclip,
+  Check
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -449,67 +450,14 @@ const SupplierDetailPage = () => {
       <div className="w-full">
         {/* Main Content */}
         <div className="space-y-6">
-          {/* Supplier Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Building2 className="h-5 w-5 mr-2" />
-                Informações do Fornecedor
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="tradeName">Nome Fantasia</Label>
-                    <Input
-                      id="tradeName"
-                      value={editForm.tradeName || ''}
-                      onChange={(e) => setEditForm({...editForm, tradeName: e.target.value})}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="corporateName">Razão Social</Label>
-                    <Input
-                      id="corporateName"
-                      value={editForm.corporateName || ''}
-                      onChange={(e) => setEditForm({...editForm, corporateName: e.target.value})}
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="description">Descrição</Label>
-                    <Textarea
-                      id="description"
-                      value={editForm.description || ''}
-                      onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                      rows={3}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{supplier.tradeName}</h3>
-                    <p className="text-sm text-gray-600">{supplier.corporateName}</p>
-                  </div>
-                  {supplier.description && (
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-1">Descrição</h4>
-                      <p className="text-gray-600">{supplier.description}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Tabs for additional content */}
+          {/* Tabs for all content */}
           <Tabs defaultValue="conversations" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="conversations">Conversas</TabsTrigger>
               <TabsTrigger value="brands">Marcas</TabsTrigger>
               <TabsTrigger value="contacts">Contatos</TabsTrigger>
               <TabsTrigger value="files">Arquivos</TabsTrigger>
+              <TabsTrigger value="info">Informações</TabsTrigger>
             </TabsList>
 
             {/* Brands Tab */}
@@ -1000,6 +948,261 @@ const SupplierDetailPage = () => {
                   <p>Nenhum arquivo enviado</p>
                 </div>
               )}
+            </TabsContent>
+            
+            {/* Supplier Information Tab */}
+            <TabsContent value="info" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Informações do Fornecedor</h3>
+                <Button 
+                  variant={isEditing ? "outline" : "default"}
+                  onClick={() => setIsEditing(!isEditing)}
+                  size="sm"
+                >
+                  {isEditing ? (
+                    <>
+                      <X className="w-4 h-4 mr-2" />
+                      Cancelar
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Editar
+                    </>
+                  )}
+                </Button>
+              </div>
+              
+              <Card>
+                <CardContent className="p-6">
+                  {isEditing ? (
+                    <div className="space-y-6">
+                      {/* Basic Information */}
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-4">Informações Básicas</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="tradeName">Nome Fantasia</Label>
+                            <Input
+                              id="tradeName"
+                              value={editForm.tradeName || ''}
+                              onChange={(e) => setEditForm({...editForm, tradeName: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="corporateName">Razão Social</Label>
+                            <Input
+                              id="corporateName"
+                              value={editForm.corporateName || ''}
+                              onChange={(e) => setEditForm({...editForm, corporateName: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="cnpj">CNPJ</Label>
+                            <Input
+                              id="cnpj"
+                              value={editForm.cnpj || ''}
+                              onChange={(e) => {
+                                // Apply CNPJ mask
+                                let value = e.target.value.replace(/\D/g, '');
+                                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+                                setEditForm({...editForm, cnpj: value});
+                              }}
+                              placeholder="00.000.000/0000-00"
+                              maxLength={18}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="supplierType">Tipo de Fornecedor</Label>
+                            <Select 
+                              value={editForm.supplierType || ''} 
+                              onValueChange={(value) => setEditForm({...editForm, supplierType: value})}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o tipo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="distribuidora">Distribuidora</SelectItem>
+                                <SelectItem value="importadora">Importadora</SelectItem>
+                                <SelectItem value="fabricante">Fabricante</SelectItem>
+                                <SelectItem value="industria">Indústria</SelectItem>
+                                <SelectItem value="representante">Representante</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Location Information */}
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-4">Localização</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor="country">País</Label>
+                            <Select 
+                              value={editForm.country || 'Brasil'} 
+                              onValueChange={(value) => setEditForm({...editForm, country: value})}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o país" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Brasil">Brasil</SelectItem>
+                                <SelectItem value="China">China</SelectItem>
+                                <SelectItem value="Taiwan">Taiwan</SelectItem>
+                                <SelectItem value="Hong Kong">Hong Kong</SelectItem>
+                                <SelectItem value="India">Índia</SelectItem>
+                                <SelectItem value="Turquia">Turquia</SelectItem>
+                                <SelectItem value="Argentina">Argentina</SelectItem>
+                                <SelectItem value="Paraguay">Paraguai</SelectItem>
+                                <SelectItem value="Outro">Outro</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="state">Estado</Label>
+                            <Input
+                              id="state"
+                              value={editForm.state || ''}
+                              onChange={(e) => setEditForm({...editForm, state: e.target.value})}
+                              placeholder="Estado"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="city">Cidade</Label>
+                            <Input
+                              id="city"
+                              value={editForm.city || ''}
+                              onChange={(e) => setEditForm({...editForm, city: e.target.value})}
+                              placeholder="Cidade"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="cep">CEP (Zip Code)</Label>
+                            <Input
+                              id="cep"
+                              value={editForm.cep || ''}
+                              onChange={(e) => {
+                                // Apply CEP mask for Brasil
+                                let value = e.target.value.replace(/\D/g, '');
+                                if (editForm.country === 'Brasil') {
+                                  value = value.replace(/^(\d{5})(\d)/, '$1-$2');
+                                }
+                                setEditForm({...editForm, cep: value});
+                              }}
+                              placeholder={editForm.country === 'Brasil' ? '00000-000' : 'Código Postal'}
+                              maxLength={editForm.country === 'Brasil' ? 9 : 20}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label htmlFor="address">Endereço</Label>
+                            <Textarea
+                              id="address"
+                              value={editForm.address || ''}
+                              onChange={(e) => setEditForm({...editForm, address: e.target.value})}
+                              placeholder="Endereço completo"
+                              rows={2}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Registration Information */}
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-4">Inscrições</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="stateRegistration">Inscrição Estadual</Label>
+                            <Input
+                              id="stateRegistration"
+                              value={editForm.stateRegistration || ''}
+                              onChange={(e) => setEditForm({...editForm, stateRegistration: e.target.value})}
+                              placeholder="Inscrição Estadual"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="municipalRegistration">Inscrição Municipal</Label>
+                            <Input
+                              id="municipalRegistration"
+                              value={editForm.municipalRegistration || ''}
+                              onChange={(e) => setEditForm({...editForm, municipalRegistration: e.target.value})}
+                              placeholder="Inscrição Municipal"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-4">Descrição</h4>
+                        <Textarea
+                          id="description"
+                          value={editForm.description || ''}
+                          onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                          placeholder="Descrição do fornecedor"
+                          rows={3}
+                        />
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-4 pt-4">
+                        <Button onClick={handleSaveSupplier}>
+                          <Check className="w-4 h-4 mr-2" />
+                          Salvar Alterações
+                        </Button>
+                        <Button variant="outline" onClick={() => setIsEditing(false)}>
+                          <X className="w-4 h-4 mr-2" />
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Display Mode */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Informações Básicas</h4>
+                          <div className="space-y-2 text-sm">
+                            <div><span className="font-medium">Nome Fantasia:</span> {supplier.tradeName}</div>
+                            <div><span className="font-medium">Razão Social:</span> {supplier.corporateName}</div>
+                            {supplier.cnpj && <div><span className="font-medium">CNPJ:</span> {supplier.cnpj}</div>}
+                            {supplier.supplierType && <div><span className="font-medium">Tipo:</span> {supplier.supplierType}</div>}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Localização</h4>
+                          <div className="space-y-2 text-sm">
+                            {supplier.country && <div><span className="font-medium">País:</span> {supplier.country}</div>}
+                            {supplier.state && <div><span className="font-medium">Estado:</span> {supplier.state}</div>}
+                            {supplier.city && <div><span className="font-medium">Cidade:</span> {supplier.city}</div>}
+                            {supplier.cep && <div><span className="font-medium">CEP:</span> {supplier.cep}</div>}
+                            {supplier.address && <div><span className="font-medium">Endereço:</span> {supplier.address}</div>}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Inscrições</h4>
+                          <div className="space-y-2 text-sm">
+                            {supplier.stateRegistration && <div><span className="font-medium">IE:</span> {supplier.stateRegistration}</div>}
+                            {supplier.municipalRegistration && <div><span className="font-medium">IM:</span> {supplier.municipalRegistration}</div>}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {supplier.description && (
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Descrição</h4>
+                          <p className="text-gray-600 text-sm">{supplier.description}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
