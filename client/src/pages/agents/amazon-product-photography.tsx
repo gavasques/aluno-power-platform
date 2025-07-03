@@ -164,7 +164,7 @@ export default function AmazonProductPhotography() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                  Amazon Product Photography
+                  Editor de Imagem Principal
                 </h1>
                 <p className="text-slate-600 dark:text-slate-400 text-lg">
                   Transforme suas imagens em fotografias profissionais para Amazon

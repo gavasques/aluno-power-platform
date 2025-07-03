@@ -111,7 +111,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ AMAZON PRODUCT PHOTOGRAPHY AGENT FINALIZADO - SISTEMA COMPLETO E OTIMIZADO
+- **July 03, 2025**: ✅ EDITOR DE IMAGEM PRINCIPAL FINALIZADO - SISTEMA COMPLETO E OTIMIZADO
   - **Correção Crítica de Custos**: Implementadas taxas oficiais OpenAI corrigindo erro de $78 para $0.17 USD
     - Text Input: $5.00/1M tokens (era $6.25)
     - Image Input: $10.00/1M tokens (correto)
@@ -122,6 +122,7 @@ Preferred communication style: Simple, everyday language.
     - Removida exibição de custos da interface (mantida apenas no backend)
     - Layout 3 colunas para estatísticas: Tempo, Proporção, Resolução
     - Botão "Visualizar" corrigido com detecção de popup bloqueado
+    - Nome alterado para "Editor de Imagem Principal" (interface e banco de dados)
   - **Funcionalidades Validadas**:
     - API OpenAI GPT-Image-1 estável com 40-57 segundos processamento
     - Sistema completo de upload, processamento e download funcionando
