@@ -14,9 +14,14 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { ProductEmptyState } from "@/components/product/ProductEmptyState";
 
 const MyProducts = () => {
-  const { products, deleteProduct, toggleProductStatus } = useProducts();
+  const { products, deleteProduct, toggleProductStatus, loading, error } = useProducts();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
+  
+  // Debug logs
+  console.log("MyProducts: loading =", loading);
+  console.log("MyProducts: error =", error);
+  console.log("MyProducts: products =", products);
 
   const [showInactive, setShowInactive] = useState(false);
   const [, setLocation] = useLocation();
@@ -98,6 +103,31 @@ const MyProducts = () => {
       </Pagination>
     );
   };
+
+  // Estados de loading e error
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="w-full py-4">
+          <div className="flex items-center justify-center h-64">
+            <p className="text-lg">Carregando produtos...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="w-full py-4">
+          <div className="flex items-center justify-center h-64">
+            <p className="text-lg text-red-600">Erro: {error.message || 'Erro desconhecido'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">

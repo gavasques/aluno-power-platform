@@ -14,7 +14,18 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   const [, setLocation] = useLocation();
 
   const getEnabledChannels = (product: Product) => {
-    const channels = [];
+    const channels: Array<{
+      name: string;
+      price: number;
+      margin: number;
+      color: string;
+    }> = [];
+    
+    // Verificar se channels existe antes de acessar
+    if (!product.channels) {
+      return channels;
+    }
+    
     if (product.channels.sitePropio?.enabled) {
       const result = calculateChannelResults(product, 'sitePropio', product.channels.sitePropio);
       channels.push({

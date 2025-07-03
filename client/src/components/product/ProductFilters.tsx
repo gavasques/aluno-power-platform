@@ -3,8 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { Search, Grid, List } from "lucide-react";
+import { Search } from "lucide-react";
 
 interface ProductFiltersProps {
   searchTerm: string;
@@ -13,8 +12,6 @@ interface ProductFiltersProps {
   setSelectedCategory: (category: string) => void;
   showInactive: boolean;
   setShowInactive: (show: boolean) => void;
-  viewMode: "grid" | "list";
-  setViewMode: (mode: "grid" | "list") => void;
 }
 
 export const ProductFilters = ({
@@ -23,9 +20,7 @@ export const ProductFilters = ({
   selectedCategory,
   setSelectedCategory,
   showInactive,
-  setShowInactive,
-  viewMode,
-  setViewMode
+  setShowInactive
 }: ProductFiltersProps) => {
   const categories = ["Todas", "Eletrônicos", "Roupas e Acessórios", "Casa e Jardim", "Esportes", "Automotivo"];
 
@@ -66,24 +61,7 @@ export const ProductFilters = ({
               </SelectContent>
             </Select>
 
-            <div className="flex items-center border border-gray-200 rounded-lg p-1">
-              <Button
-                variant={viewMode === "grid" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-                className="h-8 w-8 p-0"
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className="h-8 w-8 p-0"
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
+
           </div>
         </div>
       </CardContent>
