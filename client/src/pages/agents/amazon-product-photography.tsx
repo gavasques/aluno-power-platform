@@ -10,8 +10,7 @@ import {
   Sparkles,
   Loader2,
   X,
-  Download,
-  Eye
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -364,57 +363,15 @@ export default function AmazonProductPhotography() {
                   </div>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="text-lg font-semibold">{result.processingTime}s</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">Tempo</div>
-                  </div>
-                  <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="text-lg font-semibold">1:1</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">Proporção</div>
-                  </div>
-                  <div className="text-center p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="text-lg font-semibold">2000px</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">Resolução</div>
-                  </div>
-                </div>
-
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button onClick={downloadImage} className="flex-1">
                     <Download className="h-4 w-4 mr-2" />
                     Baixar Imagem
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      console.log('🔍 Visualizar clicked, URL:', result.processedImage);
-                      if (result.processedImage) {
-                        const newWindow = window.open(result.processedImage, '_blank');
-                        if (!newWindow) {
-                          toast({
-                            title: "Popup bloqueado",
-                            description: "Seu navegador bloqueou o popup. Permita popups para visualizar a imagem.",
-                            variant: "destructive"
-                          });
-                        }
-                      } else {
-                        toast({
-                          title: "Erro",
-                          description: "Imagem não encontrada para visualização.",
-                          variant: "destructive"
-                        });
-                      }
-                    }}
-                    className="flex-1"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Visualizar
-                  </Button>
-                  <Button variant="outline" onClick={resetForm}>
+                  <Button variant="outline" onClick={resetForm} className="flex-1">
                     <Camera className="h-4 w-4 mr-2" />
-                    Nova Imagem
+                    Gerar Nova Imagem
                   </Button>
                 </div>
               </CardContent>

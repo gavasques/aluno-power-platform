@@ -111,17 +111,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ EDITOR DE IMAGEM PRINCIPAL FINALIZADO - SISTEMA COMPLETO E OTIMIZADO
+- **July 03, 2025**: ✅ EDITOR DE IMAGEM PRINCIPAL FINALIZADO - INTERFACE SIMPLIFICADA E OTIMIZADA
   - **Correção Crítica de Custos**: Implementadas taxas oficiais OpenAI corrigindo erro de $78 para $0.17 USD
     - Text Input: $5.00/1M tokens (era $6.25)
     - Image Input: $10.00/1M tokens (correto)
     - Image Output: $40.00/1M tokens (era $18.75)
     - Sistema de logs detalhados para transparência dos cálculos
-  - **Interface Limpa e Profissional**:
+  - **Interface Ultra-Simplificada**:
     - Removido badge "GPT-Image-1" conforme solicitação do usuário
     - Removida exibição de custos da interface (mantida apenas no backend)
-    - Layout 3 colunas para estatísticas: Tempo, Proporção, Resolução
-    - Botão "Visualizar" corrigido com detecção de popup bloqueado
+    - Removidas estatísticas visuais: Tempo, Proporção, Resolução (conforme solicitação)
+    - Removido botão "Visualizar" mantendo apenas funcionalidades essenciais
+    - Apenas 2 botões finais: "Baixar Imagem" e "Gerar Nova Imagem"
     - Nome alterado para "Editor de Imagem Principal" (interface e banco de dados)
     - Parâmetros GPT-Image-1 ajustados: quality='high', size='1024x1024'
   - **Funcionalidades Validadas**:
