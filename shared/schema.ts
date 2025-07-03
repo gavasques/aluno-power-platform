@@ -174,6 +174,7 @@ export const supplierConversations = pgTable("supplier_conversations", {
   content: text("content").notNull(), // O que foi falado
   channel: text("channel").notNull(), // whatsapp, telefone, email, pessoalmente, call, outro
   contactPerson: text("contact_person"), // Pessoa de contato
+  attachedFileId: integer("attached_file_id").references(() => supplierFiles.id), // Arquivo anexo opcional
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

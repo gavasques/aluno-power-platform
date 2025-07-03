@@ -36,6 +36,7 @@ const SupplierDetailRefactored = () => {
     uploadFile,
     deleteBrand,
     deleteContact,
+    deleteConversation,
     isUpdating,
     isCreatingBrand,
     isCreatingContact,
@@ -108,6 +109,13 @@ const SupplierDetailRefactored = () => {
 
   const handleAddConversation = () => setConversationDialogOpen(true);
   const handleEditConversation = (conversation: any) => console.log('Edit conversation:', conversation);
+  const handleDeleteConversation = async (conversationId: number) => {
+    try {
+      await deleteConversation(conversationId);
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+    }
+  };
   
   const handleUploadFile = () => setFileUploadDialogOpen(true);
 
@@ -205,6 +213,7 @@ const SupplierDetailRefactored = () => {
                 conversations={conversations}
                 onAdd={handleAddConversation}
                 onEdit={handleEditConversation}
+                onDelete={handleDeleteConversation}
                 isLoading={isLoading}
               />
             </TabsContent>
@@ -264,6 +273,7 @@ const SupplierDetailRefactored = () => {
         open={conversationDialogOpen}
         onClose={() => setConversationDialogOpen(false)}
         onSave={createConversation}
+        onUploadFile={(file, name, type) => uploadFile({ file, name, type })}
         supplierId={supplierId}
         isLoading={isCreatingConversation}
       />
@@ -271,7 +281,7 @@ const SupplierDetailRefactored = () => {
       <FileUploadDialog
         open={fileUploadDialogOpen}
         onClose={() => setFileUploadDialogOpen(false)}
-        onUpload={uploadFile}
+        onUpload={(file, name, type) => uploadFile({ file, name, type })}
         supplierId={supplierId}
         isLoading={isUploadingFile}
       />

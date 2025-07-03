@@ -111,7 +111,40 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 03, 2025**: ✅ REFATORAÇÃO COMPLETA SEGUINDO SOLID/DRY/KISS - SISTEMA MODULAR IMPLEMENTADO
+- **July 03, 2025**: ✅ SISTEMA DE ANEXOS EM CONVERSAS IMPLEMENTADO E FUNCIONAL
+  - **Funcionalidade de Anexos Completa**:
+    - ConversationDialog atualizado com campo de upload de arquivo
+    - Suporte a múltiplos formatos: .pdf, .doc, .docx, .jpg, .jpeg, .png, .txt, .xls, .xlsx
+    - Upload máximo configurado e validação de tipos no frontend
+    - Integração completa com sistema de arquivos existente do fornecedor
+  - **Fluxo de Funcionamento**:
+    - Upload do arquivo é realizado primeiro via onUploadFile
+    - Arquivo é salvo na área de arquivos do fornecedor (tipo 'conversation')
+    - ID do arquivo é vinculado à conversa através do campo attachedFileId
+    - Sistema de fallback: se upload falhar, conversa é salva sem anexo
+  - **Interface e UX Aprimoradas**:
+    - Campo "Anexo (Opcional)" no formulário de criação de conversa
+    - Indicador visual "📎 Anexo" nas conversas que possuem arquivo anexado
+    - Feedback de upload com nome e tamanho do arquivo selecionado
+    - Botão "Remover" para cancelar seleção de arquivo
+    - Toast notifications para sucesso/erro no upload e criação
+  - **Arquitetura Técnica Robusta**:
+    - Tipos TypeScript atualizados: InsertSupplierConversation com attachedFileId
+    - Interfaces de diálogos corrigidas para máxima compatibilidade
+    - Sistema de upload reutilizando infraestrutura existente
+    - Validação de arquivo no backend e frontend
+  - **Testes Realizados com Sucesso**:
+    - Conversa sem anexo: funcional (attachedFileId: null)
+    - Conversa com anexo: funcional (attachedFileId: 2, arquivo disponível)
+    - Upload de arquivo: teste-anexo.txt (68 bytes) salvo corretamente
+    - Interface exibindo indicador de anexo apenas quando necessário
+  - **Benefícios para o Usuário**:
+    - Centralização: anexos ficam organizados na aba "Arquivos" do fornecedor
+    - Facilidade: processo de anexo integrado ao fluxo de criação de conversa
+    - Flexibilidade: anexos são opcionais, não obrigatórios
+    - Organização: tipo 'conversation' permite filtragem específica de anexos
+
+- **July 03, 2025 (anterior)**: ✅ REFATORAÇÃO COMPLETA SEGUINDO SOLID/DRY/KISS - SISTEMA MODULAR IMPLEMENTADO
   - **Arquitetura Modular Criada**:
     - Custom Hook `useSupplierDetail.ts`: Centraliza toda lógica de dados e operações
     - Componentes separados: SupplierInfoDisplay, SupplierInfoForm, SupplierTabsManager

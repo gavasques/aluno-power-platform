@@ -140,6 +140,18 @@ export const useSupplierDetail = (supplierId: string) => {
     },
   });
 
+  const deleteConversationMutation = useMutation({
+    mutationFn: (conversationId: number) =>
+      apiRequest(`/api/supplier-conversations/${conversationId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/suppliers/${supplierId}/conversations`] });
+      toast({
+        title: "Sucesso",
+        description: "Conversa removida com sucesso",
+      });
+    },
+  });
+
   const uploadFileMutation = useMutation({
     mutationFn: async ({ file, name, type }: { file: File; name: string; type: string }) => {
       const formData = new FormData();
@@ -186,6 +198,7 @@ export const useSupplierDetail = (supplierId: string) => {
     createConversation: createConversationMutation.mutateAsync,
     deleteBrand: deleteBrandMutation.mutateAsync,
     deleteContact: deleteContactMutation.mutateAsync,
+    deleteConversation: deleteConversationMutation.mutateAsync,
     uploadFile: uploadFileMutation.mutateAsync,
     
     // Mutation states

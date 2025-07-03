@@ -6,13 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import type { SupplierBrand, SupplierContact, SupplierConversation } from '@shared/schema';
+import type { SupplierBrand, SupplierContact, SupplierConversation, InsertSupplierBrand, InsertSupplierContact, InsertSupplierConversation } from '@shared/schema';
 
 // Brand Dialog
 interface BrandDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (brand: Partial<SupplierBrand>) => Promise<void>;
+  onSave: (brand: InsertSupplierBrand) => Promise<unknown>;
   brand?: SupplierBrand | null;
   supplierId: string;
   isLoading?: boolean;
@@ -59,11 +59,14 @@ export const BrandDialog: React.FC<BrandDialogProps> = ({
     }
 
     try {
-      await onSave({
-        ...formData,
+      const brandData: InsertSupplierBrand = {
+        name: formData.name,
+        description: formData.description || null,
         supplierId: parseInt(supplierId),
         userId: 2 // TODO: Get from auth context
-      });
+      };
+      
+      await onSave(brandData);
       onClose();
       toast({
         title: "Sucesso",
@@ -130,7 +133,7 @@ export const BrandDialog: React.FC<BrandDialogProps> = ({
 interface ContactDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (contact: Partial<SupplierContact>) => Promise<void>;
+  onSave: (contact: InsertSupplierContact) => Promise<unknown>;
   contact?: SupplierContact | null;
   supplierId: string;
   isLoading?: boolean;
@@ -189,11 +192,18 @@ export const ContactDialog: React.FC<ContactDialogProps> = ({
     }
 
     try {
-      await onSave({
-        ...formData,
+      const contactData: InsertSupplierContact = {
+        name: formData.name,
+        email: formData.email || null,
+        phone: formData.phone || null,
+        whatsapp: null, // TODO: Add whatsapp field to form
+        position: formData.position || null,
+        notes: formData.notes || null,
         supplierId: parseInt(supplierId),
         userId: 2 // TODO: Get from auth context
-      });
+      };
+      
+      await onSave(contactData);
       onClose();
       toast({
         title: "Sucesso",
@@ -301,7 +311,8 @@ export const ContactDialog: React.FC<ContactDialogProps> = ({
 interface ConversationDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (conversation: Partial<SupplierConversation>) => Promise<void>;
+  onSave: (conversation: InsertSupplierConversation) => Promise<unknown>;
+  onUploadFile?: (file: File, name: string, type: string) => Promise<any>;
   conversation?: SupplierConversation | null;
   supplierId: string;
   isLoading?: boolean;
@@ -311,6 +322,7 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
   open,
   onClose,
   onSave,
+  onUploadFile,
   conversation,
   supplierId,
   isLoading = false
@@ -322,6 +334,8 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
     channel: 'email',
     contactPerson: ''
   });
+  
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (conversation) {
@@ -354,14 +368,47 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
     }
 
     try {
-      const conversationData = {
-        ...formData,
+      let attachedFileId = null;
+      
+      // Se há um arquivo anexo, faça o upload primeiro
+      if (attachedFile && onUploadFile) {
+        try {
+          const uploadResult = await onUploadFile(
+            attachedFile, 
+            attachedFile.name, 
+            'conversation'
+          );
+          attachedFileId = uploadResult.id;
+          
+          toast({
+            title: "Arquivo anexado",
+            description: `${attachedFile.name} foi enviado com sucesso`,
+          });
+        } catch (uploadError) {
+          toast({
+            title: "Erro no upload",
+            description: "Não foi possível anexar o arquivo, mas a conversa será salva",
+            variant: "destructive"
+          });
+        }
+      }
+
+      const conversationData: InsertSupplierConversation = {
+        subject: formData.subject,
+        content: formData.content,
+        channel: formData.channel,
+        contactPerson: formData.contactPerson || null,
         supplierId: parseInt(supplierId),
-        userId: 2 // TODO: Get from auth context
+        userId: 2, // TODO: Get from auth context
+        attachedFileId: attachedFileId || null
       };
       
       await onSave(conversationData);
       onClose();
+      
+      // Reset file state
+      setAttachedFile(null);
+      
       toast({
         title: "Sucesso",
         description: conversation ? "Conversa atualizada" : "Conversa adicionada"
@@ -436,6 +483,34 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
                   placeholder="Nome da pessoa"
                 />
               </div>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="attachment">Anexo (Opcional)</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="attachment"
+                  type="file"
+                  onChange={(e) => setAttachedFile(e.target.files?.[0] || null)}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xls,.xlsx"
+                  className="file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
+                />
+                {attachedFile && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAttachedFile(null)}
+                  >
+                    Remover
+                  </Button>
+                )}
+              </div>
+              {attachedFile && (
+                <p className="text-sm text-gray-600">
+                  Arquivo selecionado: {attachedFile.name} ({(attachedFile.size / 1024).toFixed(1)} KB)
+                </p>
+              )}
             </div>
           </div>
           

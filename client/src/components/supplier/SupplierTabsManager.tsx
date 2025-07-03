@@ -155,6 +155,7 @@ interface ConversationListProps {
   conversations: SupplierConversation[];
   onAdd: () => void;
   onEdit: (conversation: SupplierConversation) => void;
+  onDelete?: (conversationId: number) => void;
   isLoading?: boolean;
 }
 
@@ -162,28 +163,11 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   conversations, 
   onAdd, 
   onEdit, 
+  onDelete,
   isLoading = false 
 }) => {
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString('pt-BR');
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'bg-blue-100 text-blue-800';
-      case 'closed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-orange-100 text-orange-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
   };
 
   return (
@@ -205,33 +189,46 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       ) : (
         <div className="grid gap-4">
           {conversations.map((conversation) => (
-            <Card key={conversation.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow">
-              <div onClick={() => onEdit(conversation)}>
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-medium text-gray-900">{conversation.subject}</h4>
-                  <div className="flex gap-2">
-                    <Badge className={getStatusColor(conversation.status)}>
-                      {conversation.status}
-                    </Badge>
-                    <Badge className={getPriorityColor(conversation.priority)}>
-                      {conversation.priority}
-                    </Badge>
-                  </div>
+            <Card key={conversation.id} className="p-4 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-medium text-gray-900">{conversation.subject}</h4>
+                <div className="flex gap-2 items-center">
+                  <Badge variant="outline">{conversation.channel}</Badge>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onEdit(conversation)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onDelete && onDelete(conversation.id)}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                
-                <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                  {conversation.content}
-                </p>
-                
-                <div className="flex justify-between items-center text-xs text-gray-500">
-                  <div className="flex gap-4">
-                    <span>📞 {conversation.channel}</span>
-                    {conversation.contactPerson && (
-                      <span>👤 {conversation.contactPerson}</span>
-                    )}
-                  </div>
-                  <span>{formatDate(conversation.createdAt)}</span>
+              </div>
+              
+              <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                {conversation.content}
+              </p>
+              
+              <div className="flex justify-between items-center text-xs text-gray-500">
+                <div className="flex gap-4">
+                  {conversation.contactPerson && (
+                    <span>👤 {conversation.contactPerson}</span>
+                  )}
+                  {conversation.attachedFileId && (
+                    <span className="flex items-center gap-1 text-blue-600">
+                      📎 Anexo
+                    </span>
+                  )}
                 </div>
+                <span>{formatDate(conversation.createdAt)}</span>
               </div>
             </Card>
           ))}
