@@ -2312,7 +2312,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           image: imageFile,
           prompt: systemPrompt.content,
           n: 1,
-          size: 'auto',
+          size: '1024x1024',
           quality: 'high'
         });
 

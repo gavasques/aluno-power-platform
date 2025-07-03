@@ -123,6 +123,7 @@ Preferred communication style: Simple, everyday language.
     - Layout 3 colunas para estatísticas: Tempo, Proporção, Resolução
     - Botão "Visualizar" corrigido com detecção de popup bloqueado
     - Nome alterado para "Editor de Imagem Principal" (interface e banco de dados)
+    - Parâmetros GPT-Image-1 ajustados: quality='high', size='1024x1024'
   - **Funcionalidades Validadas**:
     - API OpenAI GPT-Image-1 estável com 40-57 segundos processamento
     - Sistema completo de upload, processamento e download funcionando
