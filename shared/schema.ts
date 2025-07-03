@@ -1537,3 +1537,149 @@ export type UserSession = typeof userSessions.$inferSelect;
 export type UserWithGroups = User & {
   groups: (UserGroupMember & { group: UserGroup })[];
 };
+
+// Support Tickets table
+export const supportTickets = pgTable("support_tickets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull().default("general"), // general, technical, billing, feature_request
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  status: text("status").notNull().default("open"), // open, in_progress, waiting_customer, resolved, closed
+  assignedToUserId: integer("assigned_to_user_id").references(() => users.id),
+  tags: text("tags").array().default([]),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+  closedAt: timestamp("closed_at"),
+});
+
+// Support Ticket Messages table
+export const supportTicketMessages = pgTable("support_ticket_messages", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").references(() => supportTickets.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  message: text("message").notNull(),
+  isStaffReply: boolean("is_staff_reply").notNull().default(false),
+  attachments: jsonb("attachments").default([]), // array of file objects
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Support Ticket Files table
+export const supportTicketFiles = pgTable("support_ticket_files", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").references(() => supportTickets.id).notNull(),
+  messageId: integer("message_id").references(() => supportTicketMessages.id),
+  fileName: text("file_name").notNull(),
+  originalName: text("original_name").notNull(),
+  filePath: text("file_path").notNull(),
+  fileSize: integer("file_size").notNull(),
+  fileType: text("file_type").notNull(),
+  uploadedByUserId: integer("uploaded_by_user_id").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Support Categories table
+export const supportCategories = pgTable("support_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  color: text("color").notNull().default("#6b7280"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Relations for support tables
+export const supportTicketsRelations = relations(supportTickets, ({ one, many }) => ({
+  user: one(users, {
+    fields: [supportTickets.userId],
+    references: [users.id],
+  }),
+  assignedTo: one(users, {
+    fields: [supportTickets.assignedToUserId],
+    references: [users.id],
+  }),
+  messages: many(supportTicketMessages),
+  files: many(supportTicketFiles),
+}));
+
+export const supportTicketMessagesRelations = relations(supportTicketMessages, ({ one }) => ({
+  ticket: one(supportTickets, {
+    fields: [supportTicketMessages.ticketId],
+    references: [supportTickets.id],
+  }),
+  user: one(users, {
+    fields: [supportTicketMessages.userId],
+    references: [users.id],
+  }),
+}));
+
+export const supportTicketFilesRelations = relations(supportTicketFiles, ({ one }) => ({
+  ticket: one(supportTickets, {
+    fields: [supportTicketFiles.ticketId],
+    references: [supportTickets.id],
+  }),
+  message: one(supportTicketMessages, {
+    fields: [supportTicketFiles.messageId],
+    references: [supportTicketMessages.id],
+  }),
+  uploadedBy: one(users, {
+    fields: [supportTicketFiles.uploadedByUserId],
+    references: [users.id],
+  }),
+}));
+
+export const supportCategoriesRelations = relations(supportCategories, ({ many }) => ({
+  tickets: many(supportTickets),
+}));
+
+// Support schemas
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  resolvedAt: true,
+  closedAt: true,
+});
+
+export const insertSupportTicketMessageSchema = createInsertSchema(supportTicketMessages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSupportTicketFileSchema = createInsertSchema(supportTicketFiles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSupportCategorySchema = createInsertSchema(supportCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Support types
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+
+export type InsertSupportTicketMessage = z.infer<typeof insertSupportTicketMessageSchema>;
+export type SupportTicketMessage = typeof supportTicketMessages.$inferSelect;
+
+export type InsertSupportTicketFile = z.infer<typeof insertSupportTicketFileSchema>;
+export type SupportTicketFile = typeof supportTicketFiles.$inferSelect;
+
+export type InsertSupportCategory = z.infer<typeof insertSupportCategorySchema>;
+export type SupportCategory = typeof supportCategories.$inferSelect;
+
+// Support ticket with relations type
+export type SupportTicketWithRelations = SupportTicket & {
+  user: User;
+  assignedTo?: User;
+  messages: (SupportTicketMessage & { user: User })[];
+  files: (SupportTicketFile & { uploadedBy: User })[];
+};

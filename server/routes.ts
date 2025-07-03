@@ -5384,6 +5384,188 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Support Tickets API Routes
+  
+  // Get support tickets (with filters for admin)
+  app.get('/api/support/tickets', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { status, category, priority, search, assigned_to, limit = 50, offset = 0 } = req.query;
+      
+      // Users can only see their own tickets, admins/support can see all
+      const filters: any = {};
+      
+      if (user.role !== 'admin' && user.role !== 'support') {
+        filters.userId = user.id;
+      }
+      
+      if (status) filters.status = status as string;
+      if (category) filters.category = category as string;
+      if (priority) filters.priority = priority as string;
+      if (assigned_to) filters.assignedToUserId = parseInt(assigned_to as string);
+      if (search) filters.search = search as string;
+      
+      filters.limit = parseInt(limit as string);
+      filters.offset = parseInt(offset as string);
+      
+      const tickets = await storage.getSupportTickets(filters);
+      res.json(tickets);
+    } catch (error) {
+      console.error('Error fetching support tickets:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Get single support ticket
+  app.get('/api/support/tickets/:id', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const ticketId = parseInt(req.params.id);
+      
+      const ticket = await storage.getSupportTicketById(ticketId);
+      
+      if (!ticket) {
+        return res.status(404).json({ error: 'Ticket não encontrado' });
+      }
+      
+      // Check permissions
+      if (user.role !== 'admin' && user.role !== 'support' && ticket.userId !== user.id) {
+        return res.status(403).json({ error: 'Não autorizado' });
+      }
+      
+      res.json(ticket);
+    } catch (error) {
+      console.error('Error fetching support ticket:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Create support ticket
+  app.post('/api/support/tickets', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { title, description, category, priority } = req.body;
+      
+      if (!title || !description) {
+        return res.status(400).json({ error: 'Título e descrição são obrigatórios' });
+      }
+      
+      const ticketData = {
+        userId: user.id,
+        title: title.trim(),
+        description: description.trim(),
+        category: category || 'geral',
+        priority: priority || 'medium',
+        status: 'open' as const,
+        assignedToUserId: null,
+        tags: [],
+        metadata: {}
+      };
+      
+      const ticket = await storage.createSupportTicket(ticketData);
+      
+      // Get the full ticket with relations
+      const fullTicket = await storage.getSupportTicketById(ticket.id);
+      
+      res.status(201).json(fullTicket);
+    } catch (error) {
+      console.error('Error creating support ticket:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Update support ticket (admin/support only)
+  app.patch('/api/support/tickets/:id', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const ticketId = parseInt(req.params.id);
+      
+      // Only admin/support can update tickets
+      if (user.role !== 'admin' && user.role !== 'support') {
+        return res.status(403).json({ error: 'Não autorizado' });
+      }
+      
+      const updateData = req.body;
+      
+      const ticket = await storage.updateSupportTicket(ticketId, updateData);
+      
+      if (!ticket) {
+        return res.status(404).json({ error: 'Ticket não encontrado' });
+      }
+      
+      res.json(ticket);
+    } catch (error) {
+      console.error('Error updating support ticket:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Add message to support ticket
+  app.post('/api/support/tickets/:id/messages', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const ticketId = parseInt(req.params.id);
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: 'Mensagem é obrigatória' });
+      }
+      
+      // Check if user can access this ticket
+      const ticket = await storage.getSupportTicketById(ticketId);
+      if (!ticket) {
+        return res.status(404).json({ error: 'Ticket não encontrado' });
+      }
+      
+      if (user.role !== 'admin' && user.role !== 'support' && ticket.userId !== user.id) {
+        return res.status(403).json({ error: 'Não autorizado' });
+      }
+      
+      const messageData = {
+        ticketId,
+        userId: user.id,
+        message: message.trim(),
+        isStaffReply: user.role === 'admin' || user.role === 'support',
+        attachments: [],
+        metadata: {}
+      };
+      
+      const newMessage = await storage.createSupportTicketMessage(messageData);
+      res.status(201).json(newMessage);
+    } catch (error) {
+      console.error('Error adding message to support ticket:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Get support categories
+  app.get('/api/support/categories', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const categories = await storage.getSupportCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error('Error fetching support categories:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Get support stats (admin/support only)
+  app.get('/api/support/stats', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      
+      if (user.role !== 'admin' && user.role !== 'support') {
+        return res.status(403).json({ error: 'Não autorizado' });
+      }
+      
+      const stats = await storage.getSupportStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching support stats:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
   return httpServer;
 }
 

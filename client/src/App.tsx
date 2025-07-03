@@ -24,7 +24,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const UserEdit = lazy(() => import("./pages/admin/UserEdit"));
 const GroupEdit = lazy(() => import("./pages/admin/GroupEdit"));
-const SupportManagement = lazy(() => import("./pages/admin/SupportManagement"));
+const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
 const GeneralSettings = lazy(() => import("./pages/admin/GeneralSettings"));
 const ContentManagement = lazy(() => import("./pages/admin/ContentManagement"));
 const Suppliers = lazy(() => import("./pages/hub/Suppliers"));
@@ -474,7 +474,7 @@ function App() {
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <SupportManagement />
+                                  <AdminSupport />
                                 </Suspense>
                               </AdminLayout>
                             </ProtectedRoute>
