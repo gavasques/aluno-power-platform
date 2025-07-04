@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Upload, CheckCircle, ArrowRight, Image, Download } from 'lucide-react';
@@ -47,6 +48,7 @@ export default function AdvancedInfographicGenerator() {
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showProcessingModal, setShowProcessingModal] = useState(false);
   
   // Form state
   const [productName, setProductName] = useState('');
@@ -157,12 +159,9 @@ export default function AdvancedInfographicGenerator() {
       return;
     }
 
+    // Mostrar modal de processamento
+    setShowProcessingModal(true);
     setLoading(true);
-    
-    toast({
-      title: "Otimizando prompt...",
-      description: "Aguarde, estamos analisando a imagem e criando o prompt perfeito"
-    });
     
     try {
       const token = getAuthToken();
@@ -170,12 +169,13 @@ export default function AdvancedInfographicGenerator() {
         throw new Error('Token de autenticação não encontrado. Faça login novamente.');
       }
 
+      // Primeira etapa: gerar prompt otimizado
       const formData = new FormData();
       formData.append('analysisId', session.analysisId!);
       formData.append('conceptId', conceptId);
       formData.append('image', uploadedImage);
 
-      const response = await fetch('/api/infographics/generate-prompt', {
+      const promptResponse = await fetch('/api/infographics/generate-prompt', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -183,75 +183,45 @@ export default function AdvancedInfographicGenerator() {
         body: formData
       });
 
-      if (!response.ok) {
-        const error = await response.json();
+      if (!promptResponse.ok) {
+        const error = await promptResponse.json();
         throw new Error(error.details || 'Falha na geração do prompt');
       }
 
-      const result = await response.json();
-      
+      const promptResult = await promptResponse.json();
+
+      // Fechar modal e ir direto para a etapa de geração
+      setShowProcessingModal(false);
       setSession(prev => ({
         ...prev,
-        step: 'prompt',
+        step: 'generating',
         selectedConceptId: conceptId,
-        generationId: result.generationId
+        generationId: promptResult.generationId
       }));
 
-      toast({
-        title: "Prompt otimizado gerado!",
-        description: "Agora você pode gerar o infográfico final"
-      });
-
-    } catch (error: any) {
-      console.error('Error generating prompt:', error);
-      toast({
-        title: "Erro na geração do prompt",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Step 3: Generate final infographic
-  const generateInfographic = async () => {
-    setLoading(true);
-    setSession(prev => ({ ...prev, step: 'generating' }));
-    
-    toast({
-      title: "Gerando infográfico...",
-      description: "Aguarde, estamos criando seu infográfico profissional com GPT-Image-1"
-    });
-    
-    try {
-      const token = getAuthToken();
-      if (!token) {
-        throw new Error('Token de autenticação não encontrado. Faça login novamente.');
-      }
-
-      const response = await fetch('/api/infographics/generate', {
+      // Segunda etapa: gerar infográfico automaticamente
+      const generateResponse = await fetch('/api/infographics/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          generationId: session.generationId
+          generationId: promptResult.generationId
         })
       });
 
-      if (!response.ok) {
-        const error = await response.json();
+      if (!generateResponse.ok) {
+        const error = await generateResponse.json();
         throw new Error(error.details || 'Falha na geração do infográfico');
       }
 
-      const result = await response.json();
+      const generateResult = await generateResponse.json();
       
       setSession(prev => ({
         ...prev,
         step: 'completed',
-        finalImageUrl: result.finalImageUrl
+        finalImageUrl: generateResult.finalImageUrl
       }));
 
       toast({
@@ -260,13 +230,14 @@ export default function AdvancedInfographicGenerator() {
       });
 
     } catch (error: any) {
-      console.error('Error generating infographic:', error);
+      console.error('Error in full process:', error);
+      setShowProcessingModal(false);
       toast({
-        title: "Erro na geração",
+        title: "Erro no processamento",
         description: error.message,
         variant: "destructive"
       });
-      setSession(prev => ({ ...prev, step: 'prompt' }));
+      setSession(prev => ({ ...prev, step: 'concepts' }));
     } finally {
       setLoading(false);
     }
@@ -505,7 +476,7 @@ export default function AdvancedInfographicGenerator() {
               <span className="bg-green-100 text-green-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">2</span>
               Escolha o Conceito
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-muted-foreground text-[24px]">
               Selecione o conceito que melhor representa seu produto
             </CardDescription>
           </CardHeader>
@@ -572,57 +543,12 @@ export default function AdvancedInfographicGenerator() {
         </Card>
       )}
 
-      {/* Step 3: Prompt Generated */}
-      {session.step === 'prompt' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span className="bg-yellow-100 text-yellow-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">3</span>
-              Prompt Otimizado
-            </CardTitle>
-            <CardDescription>
-              Seu prompt foi gerado com base no conceito selecionado e imagem de referência
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="font-medium text-green-800">Prompt Otimizado Gerado</span>
-              </div>
-              <p className="text-sm text-green-700">
-                O ChatGPT 4o analisou sua imagem e conceito selecionado para criar um prompt otimizado para o GPT-Image-1.
-              </p>
-            </div>
-
-            <Button
-              onClick={generateInfographic}
-              disabled={loading}
-              className="w-full"
-              size="lg"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Gerando infográfico...
-                </>
-              ) : (
-                <>
-                  <Image className="mr-2 h-4 w-4" />
-                  Gerar Infográfico Final
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Step 4: Generating */}
+      {/* Step 3: Generating */}
       {session.step === 'generating' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">4</span>
+              <span className="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">3</span>
               Gerando Infográfico
             </CardTitle>
             <CardDescription>
@@ -642,7 +568,7 @@ export default function AdvancedInfographicGenerator() {
         </Card>
       )}
 
-      {/* Step 5: Completed */}
+      {/* Step 4: Completed */}
       {session.step === 'completed' && (
         <Card>
           <CardHeader>
@@ -680,6 +606,30 @@ export default function AdvancedInfographicGenerator() {
           </CardContent>
         </Card>
       )}
+
+      {/* Modal de Processamento */}
+      <Dialog open={showProcessingModal} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Processando Conceito
+            </DialogTitle>
+            <DialogDescription>
+              Aguarde enquanto analisamos sua imagem e otimizamos o prompt para criação do infográfico
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-6">
+            <div className="relative w-16 h-16 mb-4">
+              <Loader2 className="w-16 h-16 animate-spin text-blue-600" />
+            </div>
+            <div className="text-center space-y-2">
+              <p className="font-medium">Analisando conceito selecionado...</p>
+              <p className="text-sm text-gray-600">Este processo pode levar alguns segundos</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
