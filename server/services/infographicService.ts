@@ -352,22 +352,25 @@ class InfographicService {
       console.log(`🎨 [GPT_IMAGE_1] Response received:`, {
         hasData: !!response.data,
         dataLength: response.data?.length,
-        firstItem: response.data?.[0] ? Object.keys(response.data[0]) : 'none',
-        fullResponse: JSON.stringify(response, null, 2)
+        firstItem: response.data?.[0] ? Object.keys(response.data[0]) : 'none'
       });
 
       const generatedImage = response.data?.[0] as any;
+      console.log(`🎨 [GPT_IMAGE_1] Generated image object keys:`, Object.keys(generatedImage || {}));
+      console.log(`🎨 [GPT_IMAGE_1] Has 'data' field:`, !!generatedImage?.data);
+      console.log(`🎨 [GPT_IMAGE_1] Has 'url' field:`, !!generatedImage?.url);
+      
       let finalImageUrl: string;
       
       // Verifica se a resposta tem data em base64 (nova estrutura do GPT-Image-1)
-      if (generatedImage?.data) {
+      if (generatedImage && 'data' in generatedImage && generatedImage.data) {
         console.log(`🎨 [GPT_IMAGE_1] Found base64 data in response`);
         finalImageUrl = `data:image/png;base64,${generatedImage.data}`;
-      } else if (generatedImage?.url) {
+      } else if (generatedImage && 'url' in generatedImage && generatedImage.url) {
         console.log(`🎨 [GPT_IMAGE_1] Found URL in response`);
         finalImageUrl = generatedImage.url;
       } else {
-        console.error(`🎨 [GPT_IMAGE_1] Invalid response structure:`, JSON.stringify(response, null, 2));
+        console.error(`🎨 [GPT_IMAGE_1] Invalid response structure. Available fields:`, Object.keys(generatedImage || {}));
         throw new Error('Falha na geração da imagem pelo GPT-Image-1');
       }
       
