@@ -60,8 +60,6 @@ const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
 const Support = lazy(() => import("./pages/Support"));
-const PricingCalculator = lazy(() => import("./pages/pricing/PricingCalculator"));
-const PricingTest = lazy(() => import("./pages/pricing/PricingTest"));
 
 // Keep Login as eager import for immediate authentication
 import Login from "./pages/Login";
@@ -607,26 +605,6 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <Support />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          <Route path="/calculadora">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <PricingCalculator />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          <Route path="/teste">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <PricingTest />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
