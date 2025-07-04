@@ -971,6 +971,8 @@ export const amazonListingSessionsRelations = relations(amazonListingSessions, (
   // Future relations if needed
 }));
 
+
+
 // Generated Images Storage
 export const generatedImages = pgTable("generated_images", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -1158,6 +1160,105 @@ export const insertInfographicConceptSchema = createInsertSchema(infographicConc
 });
 export type InsertInfographicConcept = z.infer<typeof insertInfographicConceptSchema>;
 export type InfographicConcept = typeof infographicConcepts.$inferSelect;
+
+// Template Copy System - Template Analyses table
+export const templateAnalyses = pgTable("template_analyses", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  originalImageUrl: text("original_image_url").notNull(),
+  templateName: text("template_name").notNull(),
+  
+  // Análise estruturada
+  layout: jsonb("layout").notNull(),
+  colorPalette: jsonb("color_palette").notNull(),
+  typography: jsonb("typography").notNull(),
+  visualElements: jsonb("visual_elements").notNull(),
+  contentStructure: jsonb("content_structure").notNull(),
+  
+  // DNA do template
+  templateDNA: text("template_dna").notNull(),
+  
+  // Status da análise
+  status: text("status").notNull().default("analyzing"), // analyzing, completed, failed
+  errorMessage: text("error_message"),
+  
+  // Metadados
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("template_analyses_user_idx").on(table.userId),
+  statusIdx: index("template_analyses_status_idx").on(table.status),
+  createdIdx: index("template_analyses_created_idx").on(table.createdAt),
+}));
+
+// Template Copy System - Product Copies table  
+export const productCopies = pgTable("product_copies", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  templateId: text("template_id").references(() => templateAnalyses.id).notNull(),
+  
+  // Produto do usuário
+  productImageUrl: text("product_image_url").notNull(),
+  productName: text("product_name").notNull(),
+  productCategory: text("product_category").notNull(),
+  productBenefits: jsonb("product_benefits").notNull(),
+  productSpecs: jsonb("product_specs").notNull(),
+  
+  // Resultado
+  generatedImageUrl: text("generated_image_url"),
+  finalPrompt: text("final_prompt"),
+  status: text("status").notNull().default("created"), // created, analyzing, generating, completed, failed
+  errorMessage: text("error_message"),
+  
+  // Custos e performance
+  totalCost: decimal("total_cost", { precision: 10, scale: 6 }).default("0"),
+  processingTime: integer("processing_time"), // em segundos
+  
+  // Metadados
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => ({
+  userIdx: index("product_copies_user_idx").on(table.userId),
+  templateIdx: index("product_copies_template_idx").on(table.templateId),
+  statusIdx: index("product_copies_status_idx").on(table.status),
+  createdIdx: index("product_copies_created_idx").on(table.createdAt),
+}));
+
+// Insert schemas for template copy system
+export const insertTemplateAnalysisSchema = createInsertSchema(templateAnalyses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTemplateAnalysis = z.infer<typeof insertTemplateAnalysisSchema>;
+export type TemplateAnalysis = typeof templateAnalyses.$inferSelect;
+
+export const insertProductCopySchema = createInsertSchema(productCopies).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertProductCopy = z.infer<typeof insertProductCopySchema>;
+export type ProductCopy = typeof productCopies.$inferSelect;
+
+// Relations for template copy system
+export const templateAnalysesRelations = relations(templateAnalyses, ({ one, many }) => ({
+  user: one(users, {
+    fields: [templateAnalyses.userId],
+    references: [users.id],
+  }),
+  copies: many(productCopies),
+}));
+
+export const productCopiesRelations = relations(productCopies, ({ one }) => ({
+  user: one(users, {
+    fields: [productCopies.userId],
+    references: [users.id],
+  }),
+  template: one(templateAnalyses, {
+    fields: [productCopies.templateId],
+    references: [templateAnalyses.id],
+  }),
+}));
 
 // Insert schemas for supplier conversations
 export const insertSupplierConversationSchema = createInsertSchema(supplierConversations).omit({

@@ -6278,6 +6278,169 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // ==========================================
+  // TEMPLATE COPY SYSTEM ROUTES
+  // ==========================================
+  
+  // Import template copy service
+  const { templateCopyService } = await import('./services/templateCopyService');
+  
+  // ETAPA 1: Upload e análise do template
+  app.post('/api/template-copy/analyze', 
+    requireAuth, 
+    upload.single('templateImage'),
+    async (req: Request, res: Response) => {
+      try {
+        console.log('🎨 [TEMPLATE_COPY_API] Starting template analysis...');
+        
+        const { templateName } = req.body;
+        const userId = req.user?.id;
+        const templateFile = req.file;
+
+        if (!templateFile) {
+          return res.status(400).json({ error: 'Imagem do template é obrigatória' });
+        }
+
+        if (!templateName || !userId) {
+          return res.status(400).json({ error: 'Nome do template e usuário são obrigatórios' });
+        }
+
+        // Upload da imagem do template para storage temporário
+        const templateImageUrl = await storage.uploadTempFile(templateFile, 'templates');
+
+        const result = await templateCopyService.analyzeTemplate(
+          templateImageUrl,
+          templateName,
+          userId
+        );
+
+        console.log('✅ [TEMPLATE_COPY_API] Template analysis completed');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ [TEMPLATE_COPY_API] Error in template analysis:', error);
+        res.status(500).json({ 
+          error: error instanceof Error ? error.message : 'Erro interno do servidor' 
+        });
+      }
+    }
+  );
+
+  // ETAPA 2: Aplicar template ao produto
+  app.post('/api/template-copy/:templateId/apply',
+    requireAuth,
+    upload.single('productImage'),
+    async (req: Request, res: Response) => {
+      try {
+        console.log('🎨 [TEMPLATE_COPY_API] Starting template copy to product...');
+        
+        const { templateId } = req.params;
+        const { productName, productCategory, productBenefits, productSpecs } = req.body;
+        const userId = req.user?.id;
+        const productFile = req.file;
+
+        if (!productFile) {
+          return res.status(400).json({ error: 'Imagem do produto é obrigatória' });
+        }
+
+        if (!productName || !productCategory || !userId) {
+          return res.status(400).json({ error: 'Dados do produto são obrigatórios' });
+        }
+
+        // Upload da imagem do produto
+        const productImageUrl = await storage.uploadTempFile(productFile, 'products');
+
+        // Parse JSON arrays
+        let benefits: string[] = [];
+        let specs: string[] = [];
+        
+        try {
+          benefits = JSON.parse(productBenefits || '[]');
+          specs = JSON.parse(productSpecs || '[]');
+        } catch (parseError) {
+          return res.status(400).json({ error: 'Formato inválido para benefícios ou especificações' });
+        }
+
+        const result = await templateCopyService.copyTemplateToProduct(
+          templateId,
+          productImageUrl,
+          {
+            name: productName,
+            category: productCategory,
+            benefits,
+            specs
+          },
+          userId
+        );
+
+        console.log('✅ [TEMPLATE_COPY_API] Template copy started');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ [TEMPLATE_COPY_API] Error in template copy:', error);
+        res.status(500).json({ 
+          error: error instanceof Error ? error.message : 'Erro interno do servidor' 
+        });
+      }
+    }
+  );
+
+  // Status da cópia
+  app.get('/api/template-copy/:copyId/status', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { copyId } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const result = await templateCopyService.getCopyStatus(copyId, userId);
+      res.json(result);
+    } catch (error) {
+      console.error('❌ [TEMPLATE_COPY_API] Error fetching copy status:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Erro interno do servidor' 
+      });
+    }
+  });
+
+  // Listar templates do usuário
+  app.get('/api/template-copy/templates', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const templates = await templateCopyService.getUserTemplates(userId);
+      res.json(templates);
+    } catch (error) {
+      console.error('❌ [TEMPLATE_COPY_API] Error fetching templates:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Erro interno do servidor' 
+      });
+    }
+  });
+
+  // Histórico de cópias
+  app.get('/api/template-copy/copies', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const copies = await templateCopyService.getUserCopies(userId);
+      res.json(copies);
+    } catch (error) {
+      console.error('❌ [TEMPLATE_COPY_API] Error fetching copies:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Erro interno do servidor' 
+      });
+    }
+  });
+
   return httpServer;
 }
 
