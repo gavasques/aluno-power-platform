@@ -1,6 +1,9 @@
 import { db } from "../db";
 import { templateAnalyses, productCopies, type InsertTemplateAnalysis, type InsertProductCopy } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
+import fetch from 'node-fetch';
 
 export interface TemplateAnalysisResult {
   layout: {
@@ -132,7 +135,7 @@ class TemplateCopyService {
         status: 'completed'
       };
 
-      const [analysis] = await db.insert(templateAnalyses).values(analysisData).returning();
+      const [analysis] = await db.insert(templateAnalyses).values([analysisData]).returning();
       
       console.log('✅ [TEMPLATE_COPY] Template analysis completed successfully');
       
@@ -188,21 +191,10 @@ class TemplateCopyService {
 
       const [copy] = await db.insert(productCopies).values(copyData).returning();
       
-      // Simular processamento assíncrono
-      setTimeout(async () => {
-        try {
-          await db.update(productCopies)
-            .set({
-              status: 'completed',
-              generatedImageUrl: 'https://example.com/generated-image.jpg',
-              finalPrompt: `Infográfico estilo ${template.templateName} para produto ${productData.name}`,
-              completedAt: new Date()
-            })
-            .where(eq(productCopies.id, copy.id));
-        } catch (error) {
-          console.error('❌ [TEMPLATE_COPY] Error updating copy status:', error);
-        }
-      }, 5000);
+      // Processar com IA em background
+      this.processTemplateWithAI(copy.id, template, productImageUrl, productData).catch(error => {
+        console.error('❌ [TEMPLATE_COPY] Error in AI processing:', error);
+      });
       
       console.log('✅ [TEMPLATE_COPY] Template copy started successfully');
       
@@ -283,6 +275,157 @@ class TemplateCopyService {
       case 'failed': return 0;
       default: return 0;
     }
+  }
+
+  // PROCESSO REAL COM IA: Claude + GPT-Image-1
+  private async processTemplateWithAI(
+    copyId: string, 
+    template: any, 
+    productImageUrl: string, 
+    productData: ProductData
+  ): Promise<void> {
+    const startTime = Date.now();
+    
+    try {
+      console.log('🤖 [TEMPLATE_COPY_AI] Starting AI processing for copy:', copyId);
+      
+      // ETAPA 1: Análise do produto com Claude Sonnet
+      await this.updateCopyStatus(copyId, 'analyzing');
+      
+      const analysisPrompt = `
+Você é um especialista em infográficos de produtos Amazon. Analise os dados fornecidos:
+
+TEMPLATE ANALISADO:
+- Nome: ${template.templateName}
+- DNA do estilo: ${template.styleDna}
+- Layout: ${JSON.stringify(template.layoutAnalysis)}
+- Paleta de cores: ${JSON.stringify(template.colorPalette)}
+- Tipografia: ${JSON.stringify(template.typographyAnalysis)}
+
+PRODUTO DO USUÁRIO:
+- Nome: ${productData.name}
+- Categoria: ${productData.category}
+- Benefícios: ${productData.benefits.join(', ')}
+- Especificações: ${productData.specs.join(', ')}
+
+Crie uma análise otimizada do produto seguindo o estilo do template. Retorne JSON com:
+{
+  "optimizedTitle": "Título otimizado (max 60 chars)",
+  "keyBenefits": ["benefício 1", "benefício 2", "benefício 3"],
+  "mainSpecs": ["spec técnica 1", "spec técnica 2"],
+  "visualCues": ["ícone sugerido 1", "ícone sugerido 2"],
+  "callToAction": "CTA otimizado"
+}`;
+
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      const analysisResponse = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        temperature: 0.3,
+        messages: [{ role: 'user', content: analysisPrompt }],
+      });
+
+      const productAnalysis = JSON.parse((analysisResponse.content[0] as any).text);
+      console.log('✅ [TEMPLATE_COPY_AI] Product analysis completed');
+
+      // ETAPA 2: Otimização do prompt para GPT-Image-1
+      await this.updateCopyStatus(copyId, 'generating');
+      
+      const promptOptimizationPrompt = `
+Baseado na análise do produto, crie um prompt detalhado para gerar um infográfico profissional:
+
+ANÁLISE DO PRODUTO:
+${JSON.stringify(productAnalysis)}
+
+ESTILO DO TEMPLATE:
+- Paleta: ${JSON.stringify(template.colorPalette)}
+- Layout: ${JSON.stringify(template.layoutAnalysis)}
+- Tipografia: ${JSON.stringify(template.typographyAnalysis)}
+
+Crie um prompt técnico e específico para GPT-Image-1 que replique o estilo visual do template original aplicado ao novo produto. 
+
+Seja muito específico sobre:
+- Posições exatas dos elementos
+- Cores hexadecimais
+- Tipografia e tamanhos
+- Layout e composição
+- Ícones e elementos visuais
+
+Retorne apenas o prompt otimizado, sem explicações.`;
+
+      const promptResponse = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        temperature: 0.1,
+        messages: [{ role: 'user', content: promptOptimizationPrompt }],
+      });
+
+      const optimizedPrompt = (promptResponse.content[0] as any).text.trim();
+      console.log('✅ [TEMPLATE_COPY_AI] Prompt optimization completed');
+
+      // ETAPA 3: Geração da imagem com GPT-Image-1
+      console.log('🎨 [TEMPLATE_COPY_AI] Starting image generation with GPT-Image-1...');
+      
+      // Baixar imagem do produto
+      const imageResponse = await fetch(productImageUrl);
+      if (!imageResponse.ok) {
+        throw new Error('Falha ao baixar imagem do produto');
+      }
+      const imageBuffer = await imageResponse.buffer();
+
+      // Gerar com GPT-Image-1
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const gptImageResponse = await openai.images.edit({
+        model: 'gpt-image-1',
+        image: OpenAI.toFile(imageBuffer, 'product.png'),
+        prompt: optimizedPrompt,
+        n: 1,
+        size: '1024x1024',
+        response_format: 'b64_json'
+      });
+
+      const imageBase64 = gptImageResponse.data?.[0]?.b64_json;
+      const imageUrl = `data:image/png;base64,${imageBase64}`;
+      const estimatedCost = 0.167; // Custo estimado do GPT-Image-1
+
+      const processingTime = Math.round((Date.now() - startTime) / 1000);
+
+      // Atualizar com resultado final
+      await db.update(productCopies)
+        .set({
+          status: 'completed',
+          generatedImageUrl: imageUrl,
+          finalPrompt: optimizedPrompt,
+          totalCost: estimatedCost.toString(),
+          processingTime: processingTime,
+          completedAt: new Date()
+        })
+        .where(eq(productCopies.id, copyId));
+
+      console.log('✅ [TEMPLATE_COPY_AI] AI processing completed successfully');
+      
+    } catch (error: any) {
+      console.error('❌ [TEMPLATE_COPY_AI] Error in AI processing:', error);
+      
+      await db.update(productCopies)
+        .set({
+          status: 'failed',
+          errorMessage: error.message || 'Erro no processamento com IA'
+        })
+        .where(eq(productCopies.id, copyId));
+    }
+  }
+
+  private async updateCopyStatus(copyId: string, status: string): Promise<void> {
+    await db.update(productCopies)
+      .set({ status })
+      .where(eq(productCopies.id, copyId));
   }
 }
 
