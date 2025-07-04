@@ -552,7 +552,7 @@ export default function AdvancedInfographicGenerator() {
               Gerando Infográfico
             </CardTitle>
             <CardDescription>
-              Aguarde enquanto o GPT-Image-1 cria seu infográfico profissional
+              Aguarde enquanto criamos seu infográfico profissional
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center py-12">
