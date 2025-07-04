@@ -6460,12 +6460,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Get all states
   app.get('/api/pricing/states', requireAuth, async (req: Request, res: Response) => {
     try {
-      const statesResult = await db
-        .select()
-        .from(states)
-        .orderBy(states.name);
+      // Query SQL direta para contornar problemas do ORM
+      const statesResult = await db.execute(sql`
+        SELECT id, code, name, region, created_at 
+        FROM states 
+        ORDER BY name
+      `);
 
-      res.json(statesResult);
+      res.json(statesResult.rows);
     } catch (error: any) {
       console.error('Error fetching states:', error);
       res.status(500).json({ error: 'Erro interno do servidor' });
