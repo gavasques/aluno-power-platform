@@ -6278,6 +6278,271 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // ===== SISTEMA DE GESTÃO DE PRODUTOS =====
+  
+  // Importar serviços
+  const { productService } = await import('./services/productService');
+  const { pricingCalculationService } = await import('./services/pricingCalculationService');
+
+  // Listar produtos do usuário
+  app.get('/api/products', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { search, categoryId, supplierId } = req.query;
+
+      let products;
+      
+      if (search) {
+        products = await productService.searchProducts(user.id, search as string);
+      } else {
+        products = await productService.getProductsByUserId(user.id);
+      }
+
+      // Filtrar por categoria se fornecido
+      if (categoryId) {
+        const catId = parseInt(categoryId as string);
+        products = products.filter(p => p.categoryId === catId);
+      }
+
+      // Filtrar por fornecedor se fornecido
+      if (supplierId) {
+        const supId = parseInt(supplierId as string);
+        products = products.filter(p => p.supplierId === supId);
+      }
+
+      res.json(products);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      res.status(500).json({ error: 'Erro ao buscar produtos' });
+    }
+  });
+
+  // Obter produto específico
+  app.get('/api/products/:id', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const productId = parseInt(req.params.id);
+
+      const product = await productService.getProductById(productId, user.id);
+
+      if (!product) {
+        return res.status(404).json({ error: 'Produto não encontrado' });
+      }
+
+      res.json(product);
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      res.status(500).json({ error: 'Erro ao buscar produto' });
+    }
+  });
+
+  // Criar novo produto
+  app.post('/api/products', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const productData = {
+        ...req.body,
+        userId: user.id
+      };
+
+      const newProduct = await productService.createProduct(productData);
+      res.status(201).json(newProduct);
+    } catch (error) {
+      console.error('Error creating product:', error);
+      res.status(500).json({ error: 'Erro ao criar produto' });
+    }
+  });
+
+  // Atualizar produto
+  app.put('/api/products/:id', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const productId = parseInt(req.params.id);
+
+      const updatedProduct = await productService.updateProduct(productId, user.id, req.body);
+
+      if (!updatedProduct) {
+        return res.status(404).json({ error: 'Produto não encontrado' });
+      }
+
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error('Error updating product:', error);
+      res.status(500).json({ error: 'Erro ao atualizar produto' });
+    }
+  });
+
+  // Deletar produto
+  app.delete('/api/products/:id', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const productId = parseInt(req.params.id);
+
+      const deleted = await productService.deleteProduct(productId, user.id);
+
+      if (!deleted) {
+        return res.status(404).json({ error: 'Produto não encontrado' });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      res.status(500).json({ error: 'Erro ao deletar produto' });
+    }
+  });
+
+  // Alternar status do produto
+  app.patch('/api/products/:id/toggle-status', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const productId = parseInt(req.params.id);
+
+      const updatedProduct = await productService.toggleProductStatus(productId, user.id);
+
+      if (!updatedProduct) {
+        return res.status(404).json({ error: 'Produto não encontrado' });
+      }
+
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error('Error toggling product status:', error);
+      res.status(500).json({ error: 'Erro ao alterar status do produto' });
+    }
+  });
+
+  // Calcular preços para canal específico
+  app.post('/api/products/:id/calculate', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const productId = parseInt(req.params.id);
+      const { channelType, salePrice } = req.body;
+
+      if (!channelType || !salePrice) {
+        return res.status(400).json({ error: 'Canal e preço de venda são obrigatórios' });
+      }
+
+      const product = await productService.getProductById(productId, user.id);
+      if (!product) {
+        return res.status(404).json({ error: 'Produto não encontrado' });
+      }
+
+      const calculation = await pricingCalculationService.calculateChannelPricing(
+        product,
+        channelType,
+        parseFloat(salePrice),
+        user.id
+      );
+
+      res.json(calculation);
+    } catch (error) {
+      console.error('Error calculating pricing:', error);
+      res.status(500).json({ error: 'Erro ao calcular preços' });
+    }
+  });
+
+  // Calcular preços para todos os canais
+  app.post('/api/products/:id/calculate-all', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const productId = parseInt(req.params.id);
+      const { salePrices } = req.body;
+
+      if (!salePrices || typeof salePrices !== 'object') {
+        return res.status(400).json({ error: 'Preços por canal são obrigatórios' });
+      }
+
+      const product = await productService.getProductById(productId, user.id);
+      if (!product) {
+        return res.status(404).json({ error: 'Produto não encontrado' });
+      }
+
+      const calculations = await pricingCalculationService.calculateAllChannelsPricing(
+        product,
+        salePrices,
+        user.id
+      );
+
+      res.json(calculations);
+    } catch (error) {
+      console.error('Error calculating all channels pricing:', error);
+      res.status(500).json({ error: 'Erro ao calcular preços dos canais' });
+    }
+  });
+
+  // Obter configurações de preços do usuário
+  app.get('/api/user/pricing-settings', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      
+      // Buscar configurações existentes (será implementado no pricingCalculationService)
+      const settings = await db.query.userPricingSettings.findFirst({
+        where: eq(userPricingSettings.userId, user.id)
+      });
+
+      // Configurações padrão se não existir
+      if (!settings) {
+        const defaultSettings = {
+          state: 'SP',
+          taxPercentage: 0,
+          adSpendPercentage: 10,
+          activeChannels: ['amazon_fba', 'amazon_fbm', 'mercadolivre_me1']
+        };
+        return res.json(defaultSettings);
+      }
+
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching pricing settings:', error);
+      res.status(500).json({ error: 'Erro ao buscar configurações de preços' });
+    }
+  });
+
+  // Salvar configurações de preços do usuário
+  app.put('/api/user/pricing-settings', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { state, taxPercentage, adSpendPercentage, activeChannels } = req.body;
+
+      const success = await pricingCalculationService.saveUserPricingSettings(user.id, {
+        state,
+        taxPercentage: parseFloat(taxPercentage) || 0,
+        adSpendPercentage: parseFloat(adSpendPercentage) || 10,
+        activeChannels: activeChannels || []
+      });
+
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(500).json({ error: 'Erro ao salvar configurações' });
+      }
+    } catch (error) {
+      console.error('Error saving pricing settings:', error);
+      res.status(500).json({ error: 'Erro ao salvar configurações de preços' });
+    }
+  });
+
+  // Obter categorias disponíveis
+  app.get('/api/products/categories', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const categories = await productService.getCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      res.status(500).json({ error: 'Erro ao buscar categorias' });
+    }
+  });
+
+  // Obter fornecedores disponíveis
+  app.get('/api/products/suppliers', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const suppliers = await productService.getSuppliers();
+      res.json(suppliers);
+    } catch (error) {
+      console.error('Error fetching suppliers:', error);
+      res.status(500).json({ error: 'Erro ao buscar fornecedores' });
+    }
+  });
+
   return httpServer;
 }
 

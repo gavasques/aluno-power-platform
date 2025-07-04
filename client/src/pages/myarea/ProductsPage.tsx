@@ -42,7 +42,7 @@ interface Product {
   }>;
 }
 
-export default function MyProducts() {
+export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
@@ -166,7 +166,7 @@ export default function MyProducts() {
             </Card>
           ))}
         </div>
-      ) : (products as Product[]).length === 0 ? (
+      ) : products.length === 0 ? (
         <Card>
           <CardContent className="p-12">
             <div className="text-center">
@@ -199,7 +199,7 @@ export default function MyProducts() {
           {/* Resultados */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {(products as Product[]).length} produto{(products as Product[]).length !== 1 ? 's' : ''} encontrado{(products as Product[]).length !== 1 ? 's' : ''}
+              {products.length} produto{products.length !== 1 ? 's' : ''} encontrado{products.length !== 1 ? 's' : ''}
             </p>
             {(searchTerm || selectedCategory || selectedSupplier) && (
               <Button variant="ghost" size="sm" onClick={clearFilters}>
@@ -210,7 +210,7 @@ export default function MyProducts() {
 
           {/* Grid de Produtos */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(products as Product[]).map((product: Product) => (
+            {products.map((product: Product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
