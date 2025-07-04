@@ -5,7 +5,6 @@ import bcryptjs from "bcryptjs";
 import multer from "multer";
 import OpenAI from "openai";
 import { storage } from "./storage";
-import { templateCopyService } from "./services/templateCopyService";
 import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
@@ -6282,6 +6281,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // ==========================================
   // TEMPLATE COPY SYSTEM ROUTES
   // ==========================================
+  
+  // Import template copy service
+  const { templateCopyService } = await import('./services/templateCopyService');
   
   // ETAPA 1: Upload e análise do template
   app.post('/api/template-copy/analyze', 
