@@ -98,7 +98,7 @@ export default function TemplateCopyAgent() {
       formData.append('templateImage', templateFile);
       formData.append('templateName', templateName);
 
-      const result = await apiRequest('/api/templates/analyze', {
+      const result = await apiRequest('/api/template-copy/analyze', {
         method: 'POST',
         body: formData
       });

@@ -2174,6 +2174,40 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount > 0;
   }
 
+  // Upload temporary file for template copy system
+  async uploadTempFile(file: Express.Multer.File, category: string): Promise<string> {
+    try {
+      // Convert buffer to base64 data URL
+      const mimeType = file.mimetype;
+      const base64 = file.buffer.toString('base64');
+      const imageData = `data:${mimeType};base64,${base64}`;
+      
+      // Store as generated image temporarily
+      const imageRecord = await this.createGeneratedImage({
+        agentId: `template-copy-${category}`,
+        sessionId: `temp-${Date.now()}`,
+        model: 'upload-temp',
+        prompt: `Uploaded file: ${file.originalname}`,
+        imageUrl: imageData,
+        size: 'original',
+        quality: 'original',
+        format: file.mimetype.split('/')[1] || 'png',
+        cost: '0',
+        metadata: {
+          originalName: file.originalname,
+          fileSize: file.size,
+          category: category,
+          uploadedAt: new Date().toISOString()
+        }
+      });
+      
+      return imageRecord.imageUrl;
+    } catch (error) {
+      console.error('Error uploading temp file:', error);
+      throw new Error('Failed to upload temporary file');
+    }
+  }
+
   // Upscaled Images
   async createUpscaledImage(image: InsertUpscaledImage): Promise<UpscaledImage> {
     const [created] = await db
