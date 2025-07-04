@@ -111,29 +111,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 04, 2025**: ✅ SISTEMA COMPLETO DE PRECIFICAÇÃO MULTI-CANAL IMPLEMENTADO
-  - **Sistema de Precificação Abrangente**:
-    - Calculadora avançada para 9 canais de venda: Site próprio, Amazon (FBM/FBA/DBA/FBA Onsite), Mercado Livre (ME1/Flex/Envios/Full)
-    - Fórmulas específicas por canal com cálculos automáticos de comissões, fretes, taxas e custos
-    - Interface responsiva com 3 abas: Calculadora, Meus Produtos, Análise em Lote
-    - Métricas detalhadas: Lucro, Margem %, ROI, Custos totais e detalhamento por categoria
-  - **Backend Robusto Implementado**:
-    - Serviço de precificação (`pricingService.ts`) com cálculos precisos para cada canal
-    - APIs REST completas: `/api/products/pricing`, `/pricing/calculate`, `/pricing/save`
-    - Tabela `product_channels` para configurações específicas por produto e canal
-    - Integração com sistema existente de produtos do usuário
-  - **Navegação Integrada**:
-    - Menu "Precificação" adicionado na seção "Minha Área" do header principal
-    - Roteamento `/minha-area/precificacao` configurado em MyArea.tsx
-    - Interface moderna com seletores visuais por canal usando cores distintivas
-  - **Funcionalidades Implementadas**:
-    - Calculadora em tempo real com validação de campos obrigatórios
-    - Configuração padrão de comissões por canal (Amazon 15%, ML 18%, Site 0%)
-    - Sistema de salvamento de configurações de preços por produto/canal
-    - Visualização comparativa de margens e performance entre canais
-    - Suporte a campos específicos: ML Flex (receita adicional), custos de prep center, fretes
-
-- **July 04, 2025 (anterior)**: ✅ INTERFACE FINAL OTIMIZADA COM FLUXO AUTOMÁTICO E BRANDING LIMPO
+- **July 04, 2025**: ✅ INTERFACE FINAL OTIMIZADA COM FLUXO AUTOMÁTICO E BRANDING LIMPO
   - **Remoção Completa de Marca GPT-Image-1**:
     - Eliminada última referência "Aguarde enquanto o GPT-Image-1 cria..." na etapa 3
     - Interface 100% limpa sem menções específicas de IA para usuários finais

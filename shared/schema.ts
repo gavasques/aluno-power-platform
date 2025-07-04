@@ -429,56 +429,27 @@ export const prompts = pgTable("prompts", {
 // Products
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
   name: text("name").notNull(),
   photo: text("photo"),
   sku: text("sku"),
+  internalCode: text("internal_code"),
   ean: text("ean"),
   dimensions: jsonb("dimensions"), // {length, width, height}
   weight: decimal("weight", { precision: 10, scale: 3 }),
   brand: text("brand"),
-  categoryId: integer("category_id").references(() => departments.id),
+  category: text("category"),
   supplierId: integer("supplier_id").references(() => suppliers.id),
   ncm: text("ncm"),
-  // Global product costs
-  costItem: decimal("cost_item", { precision: 10, scale: 2 }).notNull(),
-  packCost: decimal("pack_cost", { precision: 10, scale: 2 }).default("0"),
-  taxPercent: decimal("tax_percent", { precision: 5, scale: 2 }).default("0"),
+  costItem: decimal("cost_item", { precision: 10, scale: 2 }),
+  packCost: decimal("pack_cost", { precision: 10, scale: 2 }),
+  taxPercent: decimal("tax_percent", { precision: 5, scale: 2 }),
   observations: text("observations"),
+  descriptions: jsonb("descriptions"), // {description, htmlDescription, bulletPoints, technicalSpecs}
+  channels: jsonb("channels"), // Channel configuration object
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
-
-// Product Channels - stores pricing configuration for each sales channel
-export const productChannels = pgTable("product_channels", {
-  id: serial("id").primaryKey(),
-  productId: integer("product_id").references(() => products.id).notNull(),
-  channelType: text("channel_type").notNull(), // 'site', 'amazon_fbm', 'amazon_fba_onsite', 'amazon_dba', 'amazon_fba', 'ml_me1', 'ml_flex', 'ml_envios', 'ml_full'
-  channelSubtype: text("channel_subtype"), // 'fbm', 'fba_onsite', 'dba', 'fba' for amazon; 'me1', 'flex', 'envios', 'full' for ml
-  enabled: boolean("enabled").notNull().default(false),
-  
-  // Pricing fields (all optional, depends on channel type)
-  costItemChannel: decimal("cost_item_channel", { precision: 10, scale: 2 }), // For FBA/ML FULL specific costs
-  inboundFreight: decimal("inbound_freight", { precision: 10, scale: 2 }).default("0"), // Cin
-  outboundFreight: decimal("outbound_freight", { precision: 10, scale: 2 }).default("0"), // Cf
-  prepCenter: decimal("prep_center", { precision: 10, scale: 2 }).default("0"), // Cprep
-  fixedFee: decimal("fixed_fee", { precision: 10, scale: 2 }).default("0"), // Cfix
-  commissionPct: decimal("commission_pct", { precision: 5, scale: 2 }).default("0"), // Com%
-  adsPct: decimal("ads_pct", { precision: 5, scale: 2 }).default("0"), // Ads%
-  otherPct: decimal("other_pct", { precision: 5, scale: 2 }).default("0"), // Oth%
-  otherValue: decimal("other_value", { precision: 10, scale: 2 }).default("0"), // Oth$
-  mlFlexRevenue: decimal("ml_flex_revenue", { precision: 10, scale: 2 }).default("0"), // Special for ML Flex
-  
-  // Calculated/target values
-  salePrice: decimal("sale_price", { precision: 10, scale: 2 }).default("0"),
-  targetMarginPct: decimal("target_margin_pct", { precision: 5, scale: 2 }),
-  
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  productChannelIdx: index("product_channel_idx").on(table.productId, table.channelType),
-}));
 
 // YouTube Videos Cache
 export const youtubeVideos = pgTable("youtube_videos", {
@@ -950,26 +921,10 @@ export const promptsRelations = relations(prompts, ({ one }) => ({
   }),
 }));
 
-export const productsRelations = relations(products, ({ one, many }) => ({
-  user: one(users, {
-    fields: [products.userId],
-    references: [users.id],
-  }),
+export const productsRelations = relations(products, ({ one }) => ({
   supplier: one(suppliers, {
     fields: [products.supplierId],
     references: [suppliers.id],
-  }),
-  category: one(departments, {
-    fields: [products.categoryId],
-    references: [departments.id],
-  }),
-  channels: many(productChannels),
-}));
-
-export const productChannelsRelations = relations(productChannels, ({ one }) => ({
-  product: one(products, {
-    fields: [productChannels.productId],
-    references: [products.id],
   }),
 }));
 
@@ -1308,63 +1263,6 @@ export const insertProductSchema = createInsertSchema(products).omit({
   updatedAt: true,
 });
 
-export const insertProductChannelSchema = createInsertSchema(productChannels).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-// Product and Channel Types
-export type Product = typeof products.$inferSelect;
-export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type ProductChannel = typeof productChannels.$inferSelect;
-export type InsertProductChannel = z.infer<typeof insertProductChannelSchema>;
-
-// Channel Types
-export type ChannelType = 'site' | 'amazon_fbm' | 'amazon_fba_onsite' | 'amazon_dba' | 'amazon_fba' | 'ml_me1' | 'ml_flex' | 'ml_envios' | 'ml_full';
-
-// Pricing calculation input interface
-export interface ChannelInput {
-  price: number; // P
-  costItem: number; // Cg
-  packCost?: number; // Cb
-  inboundFreight?: number; // Cin
-  outboundFreight?: number; // Cf
-  prepCenter?: number; // Cprep
-  fixedFee?: number; // Cfix
-  commissionPct?: number; // Com%
-  adsPct?: number; // Ads%
-  otherPct?: number; // Oth%
-  otherValue?: number; // Oth$
-  mlFlexRevenue?: number; // Special for ML Flex (positive value)
-  taxPct?: number; // Tax% (can be overridden per calculation)
-}
-
-// Pricing calculation result interface
-export interface ChannelResult {
-  price: number;
-  totalCosts: number;
-  unitCosts: number;
-  percentageCosts: number;
-  profit: number;
-  marginPct: number;
-  roiPct: number;
-  breakdown: {
-    costItem: number;
-    packCost: number;
-    inboundFreight: number;
-    outboundFreight: number;
-    prepCenter: number;
-    fixedFee: number;
-    otherValue: number;
-    commission: number;
-    ads: number;
-    otherPct: number;
-    tax: number;
-    mlFlexRevenue: number;
-  };
-}
-
 export const insertToolReviewSchema = createInsertSchema(toolReviews).omit({
   id: true,
   createdAt: true,
@@ -1528,7 +1426,8 @@ export type Template = typeof templates.$inferSelect;
 export type InsertPrompt = z.infer<typeof insertPromptSchema>;
 export type Prompt = typeof prompts.$inferSelect;
 
-// Product types moved earlier in file to avoid duplication
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Product = typeof products.$inferSelect;
 
 export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 export type YoutubeVideo = typeof youtubeVideos.$inferSelect;
