@@ -308,7 +308,10 @@ PRODUTO DO USUÁRIO:
 - Benefícios: ${productData.benefits.join(', ')}
 - Especificações: ${productData.specs.join(', ')}
 
-Crie uma análise otimizada do produto seguindo o estilo do template. Retorne JSON com:
+Crie uma análise otimizada do produto seguindo o estilo do template.
+
+IMPORTANTE: Retorne APENAS um objeto JSON válido, sem texto adicional, sem formatação markdown:
+
 {
   "optimizedTitle": "Título otimizado (max 60 chars)",
   "keyBenefits": ["benefício 1", "benefício 2", "benefício 3"],
@@ -328,7 +331,15 @@ Crie uma análise otimizada do produto seguindo o estilo do template. Retorne JS
         messages: [{ role: 'user', content: analysisPrompt }],
       });
 
-      const productAnalysis = JSON.parse((analysisResponse.content[0] as any).text);
+      let analysisText = (analysisResponse.content[0] as any).text;
+      // Extrair JSON do markdown se necessário
+      if (analysisText.includes('```json')) {
+        const jsonMatch = analysisText.match(/```json\s*([\s\S]*?)\s*```/);
+        if (jsonMatch) {
+          analysisText = jsonMatch[1];
+        }
+      }
+      const productAnalysis = JSON.parse(analysisText);
       console.log('✅ [TEMPLATE_COPY_AI] Product analysis completed');
 
       // ETAPA 2: Otimização do prompt para GPT-Image-1
