@@ -6,6 +6,7 @@ import MyMaterials from "./myarea/MyMaterials";
 import ProductFormNew from "../components/product/ProductFormNew";
 import ProductEditForm from "../components/product/ProductEditForm";
 import ProductDetail from "./myarea/ProductDetail";
+import ProductPricing from "./myarea/ProductPricing";
 import SupplierDetailRefactored from "./myarea/SupplierDetailRefactored";
 import MaterialDetail from "./myarea/MaterialDetail";
 import MaterialForm from "./myarea/MaterialForm";
@@ -46,6 +47,9 @@ const MyArea = () => {
         return <MaterialDetail />;
       }
       return <MyMaterials />;
+    case "precificacao":
+    case "pricing":
+      return <ProductPricing />;
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Minha Área";
       return (

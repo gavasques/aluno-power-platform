@@ -74,6 +74,8 @@ const menuItems = [
     title: "Minha Área",
     items: [
       { title: "Meus Fornecedores", href: "/minha-area/fornecedores", icon: Folder },
+      { title: "Meus Produtos", href: "/minha-area/produtos", icon: Package },
+      { title: "Precificação", href: "/minha-area/precificacao", icon: Calculator },
     ],
   },
   {
