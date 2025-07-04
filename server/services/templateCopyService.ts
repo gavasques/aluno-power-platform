@@ -380,21 +380,45 @@ Retorne apenas o prompt otimizado, sem explicações.`;
       // ETAPA 3: Geração da imagem com GPT-Image-1
       console.log('🎨 [TEMPLATE_COPY_AI] Starting image generation with GPT-Image-1...');
       
-      // Baixar imagem do produto
-      const imageResponse = await fetch(productImageUrl);
-      if (!imageResponse.ok) {
-        throw new Error('Falha ao baixar imagem do produto');
+      // Processar imagem do produto
+      let imageBuffer: Buffer;
+      
+      if (productImageUrl.startsWith('data:')) {
+        // Se for data URL, extrair o base64
+        const base64Data = productImageUrl.split(',')[1];
+        imageBuffer = Buffer.from(base64Data, 'base64');
+      } else if (productImageUrl.startsWith('http')) {
+        // Se for URL HTTP, fazer fetch
+        const imageResponse = await fetch(productImageUrl);
+        if (!imageResponse.ok) {
+          throw new Error('Falha ao baixar imagem do produto');
+        }
+        imageBuffer = await imageResponse.buffer();
+      } else {
+        // Se for caminho local, ler do sistema de arquivos
+        const fs = await import('fs');
+        const path = await import('path');
+        const fullPath = path.join(process.cwd(), productImageUrl);
+        imageBuffer = fs.readFileSync(fullPath);
       }
-      const imageBuffer = await imageResponse.buffer();
 
       // Gerar com GPT-Image-1
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
       });
 
+      // Criar arquivo para GPT-Image-1 usando FormData approach
+      const { Blob } = await import('buffer');
+      const imageBlob = new Blob([imageBuffer], { type: 'image/png' });
+      const imageFile = Object.assign(imageBlob, { 
+        name: 'product.png',
+        lastModified: Date.now(),
+        webkitRelativePath: ''
+      });
+
       const gptImageResponse = await openai.images.edit({
         model: 'gpt-image-1',
-        image: OpenAI.toFile(imageBuffer, 'product.png'),
+        image: imageFile as any,
         prompt: optimizedPrompt,
         n: 1,
         size: '1024x1024',
