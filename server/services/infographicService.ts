@@ -362,8 +362,11 @@ class InfographicService {
       
       let finalImageUrl: string;
       
-      // Verifica se a resposta tem data em base64 (nova estrutura do GPT-Image-1)
-      if (generatedImage && 'data' in generatedImage && generatedImage.data) {
+      // Verifica se a resposta tem data em base64 (GPT-Image-1 retorna b64_json)
+      if (generatedImage && 'b64_json' in generatedImage && generatedImage.b64_json) {
+        console.log(`🎨 [GPT_IMAGE_1] Found b64_json data in response`);
+        finalImageUrl = `data:image/png;base64,${generatedImage.b64_json}`;
+      } else if (generatedImage && 'data' in generatedImage && generatedImage.data) {
         console.log(`🎨 [GPT_IMAGE_1] Found base64 data in response`);
         finalImageUrl = `data:image/png;base64,${generatedImage.data}`;
       } else if (generatedImage && 'url' in generatedImage && generatedImage.url) {
