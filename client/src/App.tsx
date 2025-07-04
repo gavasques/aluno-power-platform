@@ -1,5 +1,5 @@
 
-import { Router, Route } from "wouter";
+import { Router, Route, Switch } from "wouter";
 import { ThemeProvider } from "@/components/theme-provider"
 import { AdminLayout } from "./components/layout/AdminLayout";
 import Layout from "./components/layout/Layout";
@@ -97,6 +97,7 @@ function App() {
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <AuthProvider>
             <CombinedProvider>
+                            <Switch>
                           <Route path="/login" component={Login} />
                           <Route path="/auth" component={Login} />
 
@@ -209,16 +210,6 @@ function App() {
                           </Route>
                           
                           <Route path="/agents/template-copy">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <TemplateCopyAgent />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/agent-template-copy">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -641,7 +632,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-
+                            </Switch>
                             <Toaster />
             </CombinedProvider>
           </AuthProvider>

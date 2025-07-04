@@ -6285,24 +6285,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Import template copy service
   const { templateCopyService } = await import('./services/templateCopyService');
   
-  // Configure multer for template copy (memory storage for buffer access)
-  const templateUpload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 25 * 1024 * 1024 }, // 25MB limit
-    fileFilter: (req, file, cb) => {
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-      if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Tipo de arquivo não suportado. Use PNG, JPG, JPEG ou WebP.'));
-      }
-    }
-  });
-  
   // ETAPA 1: Upload e análise do template
   app.post('/api/template-copy/analyze', 
     requireAuth, 
-    templateUpload.single('templateImage'),
+    upload.single('templateImage'),
     async (req: Request, res: Response) => {
       try {
         console.log('🎨 [TEMPLATE_COPY_API] Starting template analysis...');
@@ -6342,7 +6328,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // ETAPA 2: Aplicar template ao produto
   app.post('/api/template-copy/:templateId/apply',
     requireAuth,
-    templateUpload.single('productImage'),
+    upload.single('productImage'),
     async (req: Request, res: Response) => {
       try {
         console.log('🎨 [TEMPLATE_COPY_API] Starting template copy to product...');

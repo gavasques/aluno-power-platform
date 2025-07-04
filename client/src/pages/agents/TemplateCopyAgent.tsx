@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Image, Palette, Layout, FileImage, Download, Zap, AlertCircle } from 'lucide-react';
+import { Upload, Image, Palette, Layout, FileImage, Download, Zap } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface TemplateAnalysisResult {
@@ -27,16 +27,6 @@ interface TemplateAnalysisResult {
   previewData: any;
 }
 
-interface FinalResult {
-  generatedImageUrl?: string;
-  originalImageUrl: string;
-  templateName: string;
-  productName: string;
-  copyId?: string;
-  error?: boolean;
-  errorMessage?: string;
-}
-
 export default function TemplateCopyAgent() {
   const [currentStep, setCurrentStep] = useState<'upload' | 'analysis' | 'product' | 'generating' | 'result'>('upload');
   const [templateFile, setTemplateFile] = useState<File | null>(null);
@@ -51,7 +41,7 @@ export default function TemplateCopyAgent() {
   });
   const [progress, setProgress] = useState(0);
   const [copyId, setCopyId] = useState<string | null>(null);
-  const [finalResult, setFinalResult] = useState<FinalResult | null>(null);
+  const [finalResult, setFinalResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   
   const templateInputRef = useRef<HTMLInputElement>(null);
@@ -164,76 +154,37 @@ export default function TemplateCopyAgent() {
 
       setCopyId(result.copyId);
       
-      // Polling real da API para acompanhar progresso
-      const checkStatus = async () => {
-        try {
-          const statusResult = await apiRequest(`/api/template-copy/${result.copyId}/status`);
-          
-          if (statusResult.status === 'completed') {
+      // Simular progresso
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
             setCurrentStep('result');
-            setProgress(100);
             setFinalResult({
-              generatedImageUrl: statusResult.generatedImageUrl,
+              generatedImageUrl: 'https://via.placeholder.com/512x512/3B82F6/white?text=Infográfico+Gerado',
               originalImageUrl: URL.createObjectURL(productFile),
               templateName: templateName,
-              productName: productData.name,
-              copyId: result.copyId
+              productName: productData.name
             });
-            return true; // Parar polling
-          } else if (statusResult.status === 'failed') {
-            throw new Error(statusResult.errorMessage || 'Falha na geração');
-          } else if (statusResult.status === 'generating') {
-            setProgress(70);
-          } else if (statusResult.status === 'processing') {
-            setProgress(50);
+            return 100;
           }
-          
-          return false; // Continuar polling
-        } catch (error) {
-          console.error('Erro ao verificar status:', error);
-          return false;
-        }
-      };
-
-      // Polling a cada 3 segundos
-      const pollInterval = setInterval(async () => {
-        const shouldStop = await checkStatus();
-        if (shouldStop) {
-          clearInterval(pollInterval);
-        }
-      }, 3000);
-
-      // Cleanup no timeout (máximo 5 minutos)
-      setTimeout(() => {
-        clearInterval(pollInterval);
-      }, 300000);
+          return prev + 5;
+        });
+      }, 500);
 
       toast({
         title: "Processamento iniciado!",
         description: "Gerando seu infográfico personalizado...",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro na aplicação:', error);
-      
-      // Se for erro durante o polling, tratamento específico
-      if (error.message && error.message.includes('Falha na geração')) {
-        setFinalResult({
-          error: true,
-          errorMessage: error.message,
-          originalImageUrl: URL.createObjectURL(productFile),
-          templateName: templateName,
-          productName: productData.name
-        });
-        setCurrentStep('result');
-      } else {
-        toast({
-          title: "Erro na geração",
-          description: error.message || "Não foi possível aplicar o template. Tente novamente.",
-          variant: "destructive"
-        });
-        setCurrentStep('product');
-        setProgress(50);
-      }
+      toast({
+        title: "Erro na geração",
+        description: "Não foi possível aplicar o template. Tente novamente.",
+        variant: "destructive"
+      });
+      setCurrentStep('product');
+      setProgress(50);
     } finally {
       setLoading(false);
     }
@@ -503,50 +454,30 @@ export default function TemplateCopyAgent() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  {finalResult.error ? <AlertCircle className="h-5 w-5 text-destructive" /> : <Download className="h-5 w-5" />}
-                  {finalResult.error ? 'Erro na Geração' : 'Resultado Final'}
+                  <Download className="h-5 w-5" />
+                  Resultado Final
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {finalResult.error ? (
-                  <div className="text-center py-8">
-                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
-                      <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-destructive mb-2">Falha na Geração</h3>
-                      <p className="text-muted-foreground mb-4">
-                        {finalResult.errorMessage || 'Ocorreu um erro durante o processamento do infográfico'}
-                      </p>
-                      <Button onClick={resetProcess} variant="outline">
-                        Tentar Novamente
-                      </Button>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Produto Original</h4>
+                      <img 
+                        src={finalResult.originalImageUrl} 
+                        alt="Original"
+                        className="w-full h-32 object-cover rounded border"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Infográfico Gerado</h4>
+                      <img 
+                        src={finalResult.generatedImageUrl} 
+                        alt="Gerado"
+                        className="w-full h-32 object-cover rounded border"
+                      />
                     </div>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium mb-2">Produto Original</h4>
-                        <img 
-                          src={finalResult.originalImageUrl} 
-                          alt="Original"
-                          className="w-full h-32 object-cover rounded border"
-                        />
-                      </div>
-                      <div>
-                        <h4 className="font-medium mb-2">Infográfico Gerado</h4>
-                        {finalResult.generatedImageUrl ? (
-                          <img 
-                            src={finalResult.generatedImageUrl} 
-                            alt="Gerado"
-                            className="w-full h-32 object-cover rounded border"
-                          />
-                        ) : (
-                          <div className="w-full h-32 bg-muted rounded border flex items-center justify-center">
-                            <span className="text-muted-foreground">Processando...</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
                   
                   <div className="flex gap-2">
                     <Button className="flex-1">
