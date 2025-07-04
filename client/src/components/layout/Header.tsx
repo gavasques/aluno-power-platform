@@ -80,6 +80,11 @@ const menuItems = [
     title: "Simuladores",
     items: [
       {
+        title: "Precificação - Teste",
+        href: "/teste",
+        icon: Calculator,
+      },
+      {
         title: "Simples Nacional",
         href: "/simuladores/simples-nacional",
         icon: FileDigit,
