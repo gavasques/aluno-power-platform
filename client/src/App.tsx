@@ -219,6 +219,16 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
+                          <Route path="/agents/agent-template-copy">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <TemplateCopyAgent />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
                           <Route path="/agents/:id">
                             {(params) => (
                               <ProtectedRoute>
