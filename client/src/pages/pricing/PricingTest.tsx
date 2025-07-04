@@ -18,7 +18,7 @@ export default function PricingTest() {
     addLog("Testando conexão com banco de dados...");
     
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await fetch('/api/products', {
         headers: {
           'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export default function PricingTest() {
       '/api/categories'
     ];
     
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -85,7 +85,7 @@ export default function PricingTest() {
         salePrice: 100.00
       };
       
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await fetch('/api/pricing/calculate', {
         method: 'POST',
         headers: {
