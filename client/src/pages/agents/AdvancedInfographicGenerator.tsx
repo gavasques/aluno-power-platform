@@ -370,8 +370,8 @@ export default function AdvancedInfographicGenerator() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="normal">Normal (Claude 3.5 Sonnet)</SelectItem>
-                      <SelectItem value="high">Alto (Claude 3 Opus)</SelectItem>
+                      <SelectItem value="normal">Normal (Claude Sonnet 4)</SelectItem>
+                      <SelectItem value="high">Alto (Claude Opus 4)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

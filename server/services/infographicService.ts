@@ -1,6 +1,7 @@
 import { db } from '../db';
 import { infographics, infographicConcepts, users, type InsertInfographic, type InsertInfographicConcept } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
+import crypto from 'crypto';
 
 export interface ProductData {
   name: string;
@@ -114,14 +115,34 @@ class InfographicService {
     try {
       // Determinar modelo baseado no esforço
       const model = productData.effortLevel === 'high' 
-        ? 'claude-3-opus-20240229' 
-        : 'claude-3-5-sonnet-20241022';
+        ? 'claude-opus-4-20250514' 
+        : 'claude-sonnet-4-20250514';
 
       // Construir prompt da Etapa 1
       const analysisPrompt = this.buildAnalysisPrompt(productData);
 
-      // Simular resposta da IA (substituir pela integração real posteriormente)
-      const mockResponse = this.generateMockConcepts(productData);
+      console.log(`🤖 [INFOGRAPHIC_AI] Using model: ${model} (effortLevel: ${productData.effortLevel})`);
+
+      // Integração real com Anthropic Claude
+      const Anthropic = (await import('@anthropic-ai/sdk')).default;
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      const response = await anthropic.messages.create({
+        model: model,
+        max_tokens: 4096,
+        temperature: 1.0,
+        messages: [
+          {
+            role: 'user',
+            content: analysisPrompt
+          }
+        ]
+      });
+
+      const responseText = (response.content[0] as any)?.text || '';
+      const conceptsData = this.parseClaudeResponse(responseText, productData);
 
       // Salvar no banco usando Drizzle
       const insertData: InsertInfographic = {
@@ -137,7 +158,7 @@ class InfographicService {
       const [analysis] = await db.insert(infographics).values(insertData).returning();
 
       // Salvar conceitos
-      const conceptsToInsert: InsertInfographicConcept[] = mockResponse.concepts.map(concept => ({
+      const conceptsToInsert: InsertInfographicConcept[] = conceptsData.concepts.map((concept: ConceptData) => ({
         infographicId: analysis.id,
         conceptData: concept,
         recommended: concept.recommended
@@ -147,8 +168,8 @@ class InfographicService {
 
       return {
         analysisId: analysis.id,
-        concepts: mockResponse.concepts,
-        recommendedConcept: mockResponse.concepts.find(c => c.recommended)?.id || mockResponse.concepts[0].id
+        concepts: conceptsData.concepts,
+        recommendedConcept: conceptsData.concepts.find((c: any) => c.recommended)?.id || conceptsData.concepts[0]?.id || ''
       };
 
     } catch (error) {
@@ -179,26 +200,76 @@ class InfographicService {
         throw new Error('Análise não encontrada ou sem permissão');
       }
 
-      const concept = analysis.concepts.find((c: any) => 
-        (JSON.parse(JSON.stringify(c.conceptData)) as ConceptData).id === conceptId
-      );
+      const concept = analysis.concepts.find((c: any) => {
+        const conceptData = typeof c.conceptData === 'string' 
+          ? JSON.parse(c.conceptData) as ConceptData
+          : c.conceptData as ConceptData;
+        return conceptData.id === conceptId;
+      });
 
       if (!concept) {
         throw new Error('Conceito não encontrado');
       }
 
-      // Simular upload da imagem (substituir pela integração real)
-      const imageUrl = `https://temp-storage.com/uploads/${Date.now()}_${imageFile.originalname}`;
+      // Convert image to base64 for analysis
+      const base64Image = imageFile.buffer.toString('base64');
+      const imageUrl = `data:${imageFile.mimetype};base64,${base64Image}`;
 
-      // Gerar prompt usando mock (substituir pela integração real com ChatGPT 4o)
-      const mockPromptResponse = this.generateMockPrompt(concept.conceptData, imageUrl);
+      // Determine model based on effort level from original analysis
+      const model = analysis.effortLevel === 'high' 
+        ? 'claude-opus-4-20250514' 
+        : 'claude-sonnet-4-20250514';
+
+      console.log(`🤖 [INFOGRAPHIC_PROMPT] Using model: ${model} for prompt generation`);
+
+      // Parse concept data safely
+      const conceptData = typeof concept.conceptData === 'string' 
+        ? JSON.parse(concept.conceptData) as ConceptData
+        : concept.conceptData as ConceptData;
+
+      // Build prompt for step 2 - image analysis and prompt optimization
+      const imageAnalysisPrompt = this.buildImageAnalysisPrompt(conceptData, base64Image);
+
+      // Call Anthropic Claude for prompt optimization
+      const Anthropic = (await import('@anthropic-ai/sdk')).default;
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      const response = await anthropic.messages.create({
+        model: model,
+        max_tokens: 4096,
+        temperature: 0.7,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: imageAnalysisPrompt
+              },
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: imageFile.mimetype as any,
+                  data: base64Image
+                }
+              }
+            ]
+          }
+        ]
+      });
+
+      const responseText = (response.content[0] as any)?.text || '';
+      const promptData = this.parsePromptResponse(responseText);
 
       // Atualizar análise com dados da geração
       await db.update(infographics)
         .set({
           selectedConceptId: conceptId,
           productImageUrl: imageUrl,
-          optimizedPrompt: mockPromptResponse.optimizedPrompt,
+          optimizedPrompt: promptData.optimizedPrompt,
           status: 'prompt_generated',
           updatedAt: new Date()
         })
@@ -206,8 +277,8 @@ class InfographicService {
 
       return {
         generationId: analysisId,
-        optimizedPrompt: mockPromptResponse.optimizedPrompt,
-        imageAnalysis: mockPromptResponse.imageAnalysis
+        optimizedPrompt: promptData.optimizedPrompt,
+        imageAnalysis: promptData.imageAnalysis
       };
 
     } catch (error) {
@@ -243,11 +314,41 @@ class InfographicService {
         .set({ status: 'generating', updatedAt: new Date() })
         .where(eq(infographics.id, generationId));
 
-      // Simular geração da imagem (substituir pela integração real com DALL-E 3)
-      const mockImageUrl = `https://generated-images.com/infographics/${generationId}_final.png`;
+      // Integração real com GPT-Image-1 (NUNCA DALL-E 3)
+      console.log('🎨 [GPT_IMAGE_1] Starting infographic generation...');
+      
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
 
-      // Simular upscale da imagem
-      const finalImageUrl = await this.mockUpscaleImage(mockImageUrl, generationId);
+      // Convert base64 image back to File object for GPT-Image-1
+      const imageBase64 = analysis.productImageUrl?.replace(/^data:image\/[^;]+;base64,/, '') || '';
+      if (!imageBase64) {
+        throw new Error('Imagem de referência não encontrada');
+      }
+
+      const imageBuffer = Buffer.from(imageBase64, 'base64');
+
+      // Create infographic using GPT-Image-1 with reference image
+      const response = await openai.images.edit({
+        model: 'gpt-image-1',
+        image: await OpenAI.toFile(imageBuffer, 'product_reference.png'),
+        prompt: analysis.optimizedPrompt || 'Create a professional Amazon product infographic',
+        size: '1024x1024',
+        quality: 'high',
+        response_format: 'b64_json'
+      });
+
+      const generatedImage = response.data?.[0];
+      if (!generatedImage?.b64_json) {
+        throw new Error('Falha na geração da imagem pelo GPT-Image-1');
+      }
+
+      // Convert to data URL for storage
+      const finalImageUrl = `data:image/jpeg;base64,${generatedImage.b64_json}`;
+      
+      console.log('✅ [GPT_IMAGE_1] Infographic generated successfully');
 
       // Atualizar com resultado final
       await db.update(infographics)
@@ -395,6 +496,170 @@ class InfographicService {
       'failed': 0
     };
     return progressMap[status] || 0;
+  }
+
+  private buildImageAnalysisPrompt(conceptData: ConceptData, base64Image: string): string {
+    return `
+VOCÊ É UM ESPECIALISTA EM CRIAÇÃO DE INFOGRÁFICOS PARA AMAZON.
+
+Sua tarefa é analisar a imagem do produto fornecida e o conceito selecionado para gerar um prompt otimizado que criará um infográfico profissional usando GPT-Image-1.
+
+CONCEITO SELECIONADO:
+- Título: ${conceptData.title}
+- Subtítulo: ${conceptData.subtitle}
+- Foco: ${conceptData.focusType}
+- Pontos-chave: ${conceptData.keyPoints.join(', ')}
+- Cores: ${JSON.stringify(conceptData.colorPalette)}
+- Layout: ${JSON.stringify(conceptData.layoutSpecs)}
+
+ANÁLISE OBRIGATÓRIA DA IMAGEM:
+1. Descreva o produto visualmente em detalhes
+2. Identifique cores dominantes da imagem
+3. Analise o estilo/forma do produto
+4. Avalie a qualidade da imagem
+5. Sugira melhorias visuais para o infográfico
+
+PROMPT GPT-IMAGE-1 OBRIGATÓRIO:
+- Específico e detalhado (200-300 palavras)
+- Mencione dimensões exatas (1024x1024)
+- Inclua estilo visual específico baseado no conceito
+- Defina paleta de cores do conceito
+- Especifique layout e composição baseados no conceito
+- Inclua elementos de credibilidade Amazon
+- Mencione tipografia adequada para marketplace
+- Defina qualidade profissional para vendas
+
+FORMATO DE RESPOSTA OBRIGATÓRIO:
+---
+ANÁLISE DA IMAGEM:
+[Análise detalhada da imagem fornecida - 100-150 palavras]
+
+PROMPT OTIMIZADO GPT-IMAGE-1:
+[Prompt específico de 200-300 palavras para gerar o infográfico profissional]
+
+ELEMENTOS VISUAIS INCLUÍDOS:
+- Layout: [estrutura visual específica]
+- Cores: [paleta exata do conceito]
+- Tipografia: [estilo de texto adequado]
+- Ícones: [tipos específicos de ícones]
+- Credibilidade: [elementos de confiança Amazon]
+---
+`;
+  }
+
+  private parsePromptResponse(responseText: string): { optimizedPrompt: string; imageAnalysis: string } {
+    try {
+      // Extract image analysis
+      const analysisMatch = responseText.match(/ANÁLISE DA IMAGEM:\s*([^]*?)(?=PROMPT OTIMIZADO|$)/i);
+      const imageAnalysis = analysisMatch?.[1]?.trim() || 'Análise da imagem realizada com sucesso.';
+
+      // Extract optimized prompt
+      const promptMatch = responseText.match(/PROMPT OTIMIZADO GPT-IMAGE-1:\s*([^]*?)(?=ELEMENTOS VISUAIS|$)/i);
+      const optimizedPrompt = promptMatch?.[1]?.trim() || 'Prompt otimizado para criação de infográfico profissional.';
+
+      return {
+        optimizedPrompt,
+        imageAnalysis
+      };
+    } catch (error) {
+      console.error('Error parsing prompt response:', error);
+      return {
+        optimizedPrompt: 'Erro na geração do prompt otimizado',
+        imageAnalysis: 'Erro na análise da imagem'
+      };
+    }
+  }
+
+  private parseClaudeResponse(responseText: string, productData: ProductData): { concepts: ConceptData[] } {
+    try {
+      // Parse Claude's structured response 
+      const concepts: ConceptData[] = [];
+      
+      // Extract concepts using regex patterns
+      const conceptMatches = responseText.match(/CONCEITO \d+:([^]*?)(?=CONCEITO \d+:|$)/g);
+      
+      if (conceptMatches && conceptMatches.length > 0) {
+        conceptMatches.forEach((conceptText, index) => {
+          const concept = this.extractConceptData(conceptText, index);
+          if (concept) {
+            concepts.push(concept);
+          }
+        });
+      }
+      
+      // Fallback to mock if parsing fails
+      if (concepts.length === 0) {
+        console.warn('⚠️ [CLAUDE_PARSER] Failed to parse Claude response, using fallback');
+        return this.generateMockConcepts(productData);
+      }
+      
+      return { concepts };
+    } catch (error) {
+      console.error('❌ [CLAUDE_PARSER] Error parsing response:', error);
+      return this.generateMockConcepts(productData);
+    }
+  }
+
+  private extractConceptData(conceptText: string, index: number): ConceptData | null {
+    try {
+      const id = crypto.randomUUID();
+      
+      // Extract title
+      const titleMatch = conceptText.match(/- Título:\s*([^\n]+)/);
+      const title = titleMatch?.[1]?.trim() || `Conceito ${index + 1}`;
+      
+      // Extract subtitle
+      const subtitleMatch = conceptText.match(/- Subtítulo:\s*([^\n]+)/);
+      const subtitle = subtitleMatch?.[1]?.trim() || 'Descrição profissional';
+      
+      // Extract focus type
+      const focusMatch = conceptText.match(/- Foco:\s*([^\n]+)/);
+      const focusType = focusMatch?.[1]?.trim() || 'benefícios';
+      
+      // Extract key points
+      const keyPointsMatch = conceptText.match(/- Pontos-chave:\s*\[([^\]]+)\]/);
+      const keyPoints = keyPointsMatch?.[1]?.split(',').map(p => p.trim()) || ['Qualidade superior', 'Melhor preço', 'Garantia estendida'];
+      
+      // Extract color palette
+      const colorMatch = conceptText.match(/- Paleta de cores:\s*({[^}]+})/);
+      let colorPalette = { primaria: '#2563eb', secundaria: '#60a5fa', destaque: '#f59e0b' };
+      if (colorMatch) {
+        try {
+          colorPalette = JSON.parse(colorMatch[1]);
+        } catch (e) {
+          console.warn('Failed to parse color palette, using default');
+        }
+      }
+      
+      // Extract layout specs
+      const layoutMatch = conceptText.match(/- Layout:\s*({[^}]+})/);
+      let layoutSpecs = { estilo: 'moderno', disposição: 'vertical', elementos: ['ícones', 'gráficos'] };
+      if (layoutMatch) {
+        try {
+          layoutSpecs = JSON.parse(layoutMatch[1]);
+        } catch (e) {
+          console.warn('Failed to parse layout specs, using default');
+        }
+      }
+      
+      // Check if recommended
+      const recommendedMatch = conceptText.match(/- Recomendado:\s*(true|false)/);
+      const recommended = recommendedMatch?.[1] === 'true' || index === 0; // First concept default recommended
+      
+      return {
+        id,
+        title,
+        subtitle,
+        focusType,
+        keyPoints,
+        colorPalette,
+        layoutSpecs,
+        recommended
+      };
+    } catch (error) {
+      console.error('Error extracting concept data:', error);
+      return null;
+    }
   }
 }
 
