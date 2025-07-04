@@ -10,11 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import { Download, Users, Sparkles, Zap, AlertTriangle, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
 
 interface InfographicData {
   originalData: {
     nomeProduto: string;
     descricaoLonga: string;
+    categoria?: string;
+    publicoAlvo?: string;
     corPrimaria?: string;
     corSecundaria?: string;
     quantidadeImagens: number;
@@ -35,9 +38,16 @@ interface InfographicData {
 
 export default function InfographicGenerator() {
   const { toast } = useToast();
+  
+  // Buscar departamentos para o dropdown
+  const { data: departments = [] } = useQuery({
+    queryKey: ['/api/departments'],
+  });
   const [formData, setFormData] = useState({
     nomeProduto: '',
     descricaoLonga: '',
+    categoria: '',
+    publicoAlvo: '',
     corPrimaria: '#3B82F6',
     corSecundaria: '#10B981',
     quantidadeImagens: 1,
@@ -130,7 +140,9 @@ export default function InfographicGenerator() {
         method: 'POST',
         body: JSON.stringify({
           nomeProduto: formData.nomeProduto,
-          descricaoLonga: formData.descricaoLonga
+          descricaoLonga: formData.descricaoLonga,
+          categoria: formData.categoria,
+          publicoAlvo: formData.publicoAlvo
         })
       }) as any;
 
@@ -147,6 +159,8 @@ export default function InfographicGenerator() {
         body: JSON.stringify({
           nomeProduto: formData.nomeProduto,
           optimizedContent: etapa1Response.optimizedContent,
+          categoria: formData.categoria,
+          publicoAlvo: formData.publicoAlvo,
           corPrimaria: formData.corPrimaria,
           corSecundaria: formData.corSecundaria,
           quantidadeImagens: formData.quantidadeImagens,
@@ -211,6 +225,8 @@ export default function InfographicGenerator() {
     setFormData({
       nomeProduto: '',
       descricaoLonga: '',
+      categoria: '',
+      publicoAlvo: '',
       corPrimaria: '#3B82F6',
       corSecundaria: '#10B981',
       quantidadeImagens: 1,
@@ -273,6 +289,38 @@ export default function InfographicGenerator() {
                 />
               </div>
 
+              {/* Categoria */}
+              <div>
+                <Label htmlFor="categoria">Categoria</Label>
+                <Select value={formData.categoria} onValueChange={(value) => handleInputChange('categoria', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.isArray(departments) && departments.map((dept: any) => (
+                      <SelectItem key={dept.id} value={dept.name}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Público-Alvo */}
+              <div>
+                <Label htmlFor="publicoAlvo">Público-Alvo</Label>
+                <Input
+                  id="publicoAlvo"
+                  value={formData.publicoAlvo}
+                  onChange={(e) => handleInputChange('publicoAlvo', e.target.value)}
+                  placeholder="Ex: Mulheres de 25-45 anos que praticam exercícios em casa"
+                  maxLength={150}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Opcional: Descreva o público-alvo ideal para este produto
+                </p>
+              </div>
+
               {/* Descrição Longa */}
               <div>
                 <Label htmlFor="descricaoLonga">
@@ -296,10 +344,10 @@ export default function InfographicGenerator() {
 
               <Separator />
 
-              {/* Imagem de Referência */}
+              {/* Imagem do Produto */}
               <div>
                 <Label htmlFor="imagemReferencia">
-                  Imagem de Referência *
+                  Imagem do Seu Produto *
                   <span className="text-red-500 text-xs ml-1">(OBRIGATÓRIO)</span>
                 </Label>
                 <div className="space-y-3">
@@ -346,9 +394,7 @@ export default function InfographicGenerator() {
                     </div>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  <span className="font-medium text-red-600">OBRIGATÓRIO:</span> A imagem será enviada ao GPT-Image-1 como referência para o estilo do infográfico
-                </p>
+
               </div>
 
               <Separator />

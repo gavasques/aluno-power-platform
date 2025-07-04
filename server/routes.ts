@@ -5760,7 +5760,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     
     try {
       const user = (req as any).user;
-      const { nomeProduto, descricaoLonga } = req.body;
+      const { nomeProduto, descricaoLonga, categoria, publicoAlvo } = req.body;
 
       console.log('📊 [INFOGRAPHIC_STEP1] Starting text optimization...');
       console.log('📊 [INFOGRAPHIC_STEP1] Product:', nomeProduto?.substring(0, 50) + '...');
@@ -5795,7 +5795,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       // Replace variables in prompt
       const systemPrompt = systemPromptResult.content
         .replace(/\{\{NOME_PRODUTO\}\}/g, nomeProduto)
-        .replace(/\{\{DESCRICAO_LONGA\}\}/g, descricaoLonga);
+        .replace(/\{\{DESCRICAO_LONGA\}\}/g, descricaoLonga)
+        .replace(/\{\{CATEGORIA\}\}/g, categoria || 'Não especificada')
+        .replace(/\{\{PUBLICO_ALVO\}\}/g, publicoAlvo || 'Não especificado');
 
       console.log('📊 [INFOGRAPHIC_STEP1] System prompt length:', systemPrompt.length);
 
@@ -5925,6 +5927,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { 
         nomeProduto, 
         optimizedContent, 
+        categoria,
+        publicoAlvo,
         corPrimaria = '#3B82F6', 
         corSecundaria = '#10B981',
         quantidadeImagens = 1,
@@ -5978,6 +5982,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         .replace(/\{\{CTA_OTIMIZADO\}\}/g, parsedContent.cta || parsedContent.call_to_action || '')
         .replace(/\{\{ICONS_OTIMIZADOS\}\}/g, parsedContent.icons || parsedContent.icones || '')
         .replace(/\{\{TEXTO_OTIMIZADO_COMPLETO\}\}/g, parsedContent.texto_completo || JSON.stringify(parsedContent))
+        .replace(/\{\{CATEGORIA\}\}/g, categoria || 'Não especificada')
+        .replace(/\{\{PUBLICO_ALVO\}\}/g, publicoAlvo || 'Não especificado')
         .replace(/\{\{COR_PRIMARIA\}\}/g, corPrimaria)
         .replace(/\{\{COR_SECUNDARIA\}\}/g, corSecundaria);
 
