@@ -79,7 +79,7 @@ import { amazonListingService as amazonService } from "./services/amazonListingS
 import { requireAuth } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs } from '@shared/schema';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs, states, amazonFreightRates, channelCommissions, availableChannels, userSettings, userActiveChannels, productChannelConfigs, calculationLogs } from '@shared/schema';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -6275,6 +6275,264 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         error: 'Falha ao buscar histórico de infográficos',
         details: error.message
       });
+    }
+  });
+
+  // ===============================
+  // PRICING SYSTEM ROUTES
+  // ===============================
+
+  // Get user settings
+  app.get('/api/pricing/user-settings', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { pricingService } = await import('./services/pricingService');
+      
+      const settings = await pricingService.getUserSettings(user.id);
+      res.json(settings);
+    } catch (error: any) {
+      console.error('Error fetching user settings:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Update user settings
+  app.put('/api/pricing/user-settings', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { stateId, taxPercentage, globalSettings } = req.body;
+      
+      const data = {
+        userId: user.id,
+        stateId,
+        taxPercentage: taxPercentage?.toString(),
+        globalSettings,
+        updatedAt: new Date()
+      };
+
+      // Check if settings exist
+      const existing = await db
+        .select()
+        .from(userSettings)
+        .where(eq(userSettings.userId, user.id))
+        .limit(1);
+
+      let result;
+      if (existing.length > 0) {
+        result = await db
+          .update(userSettings)
+          .set(data)
+          .where(eq(userSettings.userId, user.id))
+          .returning();
+      } else {
+        result = await db.insert(userSettings).values(data).returning();
+      }
+
+      res.json(result[0]);
+    } catch (error: any) {
+      console.error('Error updating user settings:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Get available channels
+  app.get('/api/pricing/channels', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const channels = await db
+        .select()
+        .from(availableChannels)
+        .where(eq(availableChannels.isActive, true))
+        .orderBy(availableChannels.sortOrder);
+
+      res.json(channels);
+    } catch (error: any) {
+      console.error('Error fetching channels:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Get user active channels
+  app.get('/api/pricing/user-channels', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { pricingService } = await import('./services/pricingService');
+      
+      const channels = await pricingService.getUserActiveChannels(user.id);
+      res.json(channels);
+    } catch (error: any) {
+      console.error('Error fetching user channels:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Update user active channels
+  app.post('/api/pricing/user-channels', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { channelIds } = req.body;
+
+      // Remove existing active channels
+      await db
+        .delete(userActiveChannels)
+        .where(eq(userActiveChannels.userId, user.id));
+
+      // Add new active channels
+      if (channelIds && channelIds.length > 0) {
+        const channelData = channelIds.map((channelId: number) => ({
+          userId: user.id,
+          channelId,
+          isActive: true,
+          customSettings: {},
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }));
+
+        await db.insert(userActiveChannels).values(channelData);
+      }
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error updating user channels:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Calculate pricing for a product
+  app.post('/api/pricing/calculate', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { pricingService } = await import('./services/pricingService');
+      
+      const calculationInput = req.body;
+
+      const result = await pricingService.calculateDetailedPricing(user.id, calculationInput);
+
+      // Save calculation log
+      await pricingService.saveCalculationLog(
+        user.id,
+        calculationInput.productId,
+        calculationInput.channelId,
+        calculationInput,
+        result
+      );
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error calculating pricing:', error);
+      res.status(500).json({ 
+        error: 'Erro no cálculo de precificação',
+        details: error.message
+      });
+    }
+  });
+
+  // Get product channel configurations
+  app.get('/api/pricing/products/:productId/channels', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      const { pricingService } = await import('./services/pricingService');
+      
+      const configs = await pricingService.getProductChannelConfigs(productId);
+      res.json(configs);
+    } catch (error: any) {
+      console.error('Error fetching product channel configs:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Save product channel configuration
+  app.post('/api/pricing/products/:productId/channels/:channelId', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      const channelId = parseInt(req.params.channelId);
+      const { pricing, calculation } = req.body;
+      const { pricingService } = await import('./services/pricingService');
+
+      await pricingService.saveProductChannelConfig(productId, channelId, pricing, calculation);
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error saving product channel config:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Get all states
+  app.get('/api/pricing/states', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const statesResult = await db
+        .select()
+        .from(states)
+        .orderBy(states.name);
+
+      res.json(statesResult);
+    } catch (error: any) {
+      console.error('Error fetching states:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Get freight rates for a specific query
+  app.post('/api/pricing/freight-rates', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { stateId, serviceType, weight } = req.body;
+      const { pricingService } = await import('./services/pricingService');
+
+      const rate = await pricingService.getFreightRate({ stateId, serviceType, weight });
+      res.json({ rate });
+    } catch (error: any) {
+      console.error('Error fetching freight rate:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Get commission rates for a specific query
+  app.post('/api/pricing/commission-rates', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { categoryId, channelType, serviceType, salePrice } = req.body;
+      const { pricingService } = await import('./services/pricingService');
+
+      const rate = await pricingService.getCommissionRate({ categoryId, channelType, serviceType, salePrice });
+      res.json({ rate: rate * 100 }); // Return as percentage
+    } catch (error: any) {
+      console.error('Error fetching commission rate:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Get calculation logs (admin only)
+  app.get('/api/pricing/calculation-logs', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      
+      if (user.role !== 'admin') {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+
+      const logs = await db
+        .select({
+          id: calculationLogs.id,
+          userId: calculationLogs.userId,
+          productId: calculationLogs.productId,
+          channelId: calculationLogs.channelId,
+          inputData: calculationLogs.inputData,
+          result: calculationLogs.result,
+          calculatedAt: calculationLogs.calculatedAt,
+          userName: users.name,
+          productName: products.name,
+          channelName: availableChannels.displayName
+        })
+        .from(calculationLogs)
+        .leftJoin(users, eq(calculationLogs.userId, users.id))
+        .leftJoin(products, eq(calculationLogs.productId, products.id))
+        .leftJoin(availableChannels, eq(calculationLogs.channelId, availableChannels.id))
+        .orderBy(desc(calculationLogs.calculatedAt))
+        .limit(100);
+
+      res.json(logs);
+    } catch (error: any) {
+      console.error('Error fetching calculation logs:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
     }
   });
 

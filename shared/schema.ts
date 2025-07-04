@@ -1752,3 +1752,283 @@ export const infographicConceptsRelations = relations(infographicConcepts, ({ on
     references: [infographics.id],
   }),
 }));
+
+// === PRICING SYSTEM TABLES ===
+
+// Estados/Regiões para tabelas de frete
+export const states = pgTable("states", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull(), // SP, RJ, etc.
+  name: text("name").notNull(),
+  region: text("region").notNull(), // Sudeste, Sul, etc.
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Tabelas de frete Amazon por região
+export const amazonFreightRates = pgTable("amazon_freight_rates", {
+  id: serial("id").primaryKey(),
+  stateId: integer("state_id").references(() => states.id),
+  serviceType: text("service_type"), // 'FBA', 'DBA', 'FBA_ONSITE'
+  weightFrom: decimal("weight_from", { precision: 8, scale: 3 }),
+  weightTo: decimal("weight_to", { precision: 8, scale: 3 }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  effectiveDate: timestamp("effective_date"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Comissões por categoria e canal
+export const channelCommissions = pgTable("channel_commissions", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").references(() => departments.id),
+  channelType: text("channel_type"), // 'amazon', 'mercadolivre'
+  serviceType: text("service_type"), // 'FBA', 'FBM', etc.
+  priceFrom: decimal("price_from", { precision: 10, scale: 2 }).notNull().default("0"),
+  priceTo: decimal("price_to", { precision: 10, scale: 2 }),
+  commissionPercentage: decimal("commission_percentage", { precision: 5, scale: 2 }),
+  noInterestSurcharge: decimal("no_interest_surcharge", { precision: 5, scale: 2 }).notNull().default("1"), // +1% se sem juros
+  effectiveDate: timestamp("effective_date"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Canais disponíveis no sistema
+export const availableChannels = pgTable("available_channels", {
+  id: serial("id").primaryKey(),
+  channelType: text("channel_type"), // 'amazon', 'mercadolivre', 'site_proprio'
+  serviceType: text("service_type"), // 'FBA', 'FBM', 'DBA', etc.
+  displayName: text("display_name"),
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Configurações globais do usuário
+export const userSettings = pgTable("user_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  stateId: integer("state_id").references(() => states.id), // Estado do usuário
+  taxPercentage: decimal("tax_percentage", { precision: 5, scale: 2 }).notNull().default("0"),
+  globalSettings: jsonb("global_settings"), // Outras configurações globais
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Canais ativos por usuário (quais canais o usuário usa)
+export const userActiveChannels = pgTable("user_active_channels", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  channelId: integer("channel_id").references(() => availableChannels.id),
+  isActive: boolean("is_active").notNull().default(true),
+  customSettings: jsonb("custom_settings"), // Configurações específicas do usuário para este canal
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Configurações de canais específicas por produto
+export const productChannelConfigs = pgTable("product_channel_configs", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").references(() => products.id),
+  channelId: integer("channel_id").references(() => availableChannels.id),
+  isActive: boolean("is_active").notNull().default(true),
+  pricing: jsonb("pricing"), // Configurações específicas do canal para este produto
+  lastCalculation: jsonb("last_calculation"), // Cache do último cálculo
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Log de cálculos para auditoria (área admin)
+export const calculationLogs = pgTable("calculation_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  productId: integer("product_id").references(() => products.id),
+  channelId: integer("channel_id").references(() => availableChannels.id),
+  inputData: jsonb("input_data"), // Dados de entrada do cálculo
+  calculationSteps: jsonb("calculation_steps"), // Passos detalhados do cálculo
+  result: jsonb("result"), // Resultado final
+  calculatedAt: timestamp("calculated_at").notNull().defaultNow(),
+});
+
+// Pricing system relations
+export const statesRelations = relations(states, ({ many }) => ({
+  amazonFreightRates: many(amazonFreightRates),
+  userSettings: many(userSettings),
+}));
+
+export const amazonFreightRatesRelations = relations(amazonFreightRates, ({ one }) => ({
+  state: one(states, {
+    fields: [amazonFreightRates.stateId],
+    references: [states.id],
+  }),
+}));
+
+export const channelCommissionsRelations = relations(channelCommissions, ({ one }) => ({
+  category: one(departments, {
+    fields: [channelCommissions.categoryId],
+    references: [departments.id],
+  }),
+}));
+
+export const availableChannelsRelations = relations(availableChannels, ({ many }) => ({
+  userActiveChannels: many(userActiveChannels),
+  productChannelConfigs: many(productChannelConfigs),
+  calculationLogs: many(calculationLogs),
+}));
+
+export const userSettingsRelations = relations(userSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [userSettings.userId],
+    references: [users.id],
+  }),
+  state: one(states, {
+    fields: [userSettings.stateId],
+    references: [states.id],
+  }),
+}));
+
+export const userActiveChannelsRelations = relations(userActiveChannels, ({ one }) => ({
+  user: one(users, {
+    fields: [userActiveChannels.userId],
+    references: [users.id],
+  }),
+  channel: one(availableChannels, {
+    fields: [userActiveChannels.channelId],
+    references: [availableChannels.id],
+  }),
+}));
+
+export const productChannelConfigsRelations = relations(productChannelConfigs, ({ one }) => ({
+  product: one(products, {
+    fields: [productChannelConfigs.productId],
+    references: [products.id],
+  }),
+  channel: one(availableChannels, {
+    fields: [productChannelConfigs.channelId],
+    references: [availableChannels.id],
+  }),
+}));
+
+export const calculationLogsRelations = relations(calculationLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [calculationLogs.userId],
+    references: [users.id],
+  }),
+  product: one(products, {
+    fields: [calculationLogs.productId],
+    references: [products.id],
+  }),
+  channel: one(availableChannels, {
+    fields: [calculationLogs.channelId],
+    references: [availableChannels.id],
+  }),
+}));
+
+// Pricing system insert schemas
+export const insertStateSchema = createInsertSchema(states).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAmazonFreightRateSchema = createInsertSchema(amazonFreightRates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertChannelCommissionSchema = createInsertSchema(channelCommissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAvailableChannelSchema = createInsertSchema(availableChannels).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserSettingSchema = createInsertSchema(userSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserActiveChannelSchema = createInsertSchema(userActiveChannels).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProductChannelConfigSchema = createInsertSchema(productChannelConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCalculationLogSchema = createInsertSchema(calculationLogs).omit({
+  id: true,
+  calculatedAt: true,
+});
+
+// Pricing system types
+export type State = typeof states.$inferSelect;
+export type InsertState = z.infer<typeof insertStateSchema>;
+
+export type AmazonFreightRate = typeof amazonFreightRates.$inferSelect;
+export type InsertAmazonFreightRate = z.infer<typeof insertAmazonFreightRateSchema>;
+
+export type ChannelCommission = typeof channelCommissions.$inferSelect;
+export type InsertChannelCommission = z.infer<typeof insertChannelCommissionSchema>;
+
+export type AvailableChannel = typeof availableChannels.$inferSelect;
+export type InsertAvailableChannel = z.infer<typeof insertAvailableChannelSchema>;
+
+export type UserSetting = typeof userSettings.$inferSelect;
+export type InsertUserSetting = z.infer<typeof insertUserSettingSchema>;
+
+export type UserActiveChannel = typeof userActiveChannels.$inferSelect;
+export type InsertUserActiveChannel = z.infer<typeof insertUserActiveChannelSchema>;
+
+export type ProductChannelConfig = typeof productChannelConfigs.$inferSelect;
+export type InsertProductChannelConfig = z.infer<typeof insertProductChannelConfigSchema>;
+
+export type CalculationLog = typeof calculationLogs.$inferSelect;
+export type InsertCalculationLog = z.infer<typeof insertCalculationLogSchema>;
+
+// Pricing system business types
+export interface ChannelPricingConfig {
+  salePrice: number;
+  customCosts: {
+    inboundFreight?: number;
+    outboundFreight?: number;
+    prepCenter?: number;
+    fixedCost?: number;
+    adsPercentage?: number;
+    otherCostPercentage?: number;
+    otherCostValue?: number;
+    customCommission?: number; // Override da comissão padrão
+  };
+  settings: {
+    useNoInterestSurcharge?: boolean;
+    customFreightCalculation?: boolean;
+  };
+}
+
+export interface CalculationResult {
+  profit: number;
+  margin: number;
+  roi: number;
+  totalCost: number;
+  breakdown: {
+    baseCost: number;
+    packagingCost: number;
+    freightCost: number;
+    commissionCost: number;
+    taxCost: number;
+    adsCost: number;
+    otherCosts: number;
+  };
+  appliedRates: {
+    commissionRate: number;
+    freightRate: number;
+    taxRate: number;
+  };
+}
