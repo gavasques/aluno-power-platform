@@ -42,7 +42,6 @@ const AmazonProductPhotography = lazy(() => import("./pages/agents/amazon-produc
 const LifestyleWithModel = lazy(() => import("./pages/agents/lifestyle-with-model"));
 const InfographicGenerator = lazy(() => import("./pages/agents/infographic-generator"));
 const AdvancedInfographicGenerator = lazy(() => import("./pages/agents/AdvancedInfographicGenerator"));
-const TemplateCopyAgent = lazy(() => import("./pages/agents/TemplateCopyAgent"));
 const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtractor"));
 const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
 const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
@@ -206,16 +205,6 @@ function App() {
                               <Suspense fallback={<PageLoader />}>
                                 <BulletPointsAgent />
                               </Suspense>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/template-copy">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <TemplateCopyAgent />
-                                </Suspense>
-                              </Layout>
                             </ProtectedRoute>
                           </Route>
                           

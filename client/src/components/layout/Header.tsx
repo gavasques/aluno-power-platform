@@ -51,7 +51,6 @@ const menuItems = [
     title: "Agentes",
     items: [
       { title: "Editor de Imagem Principal", href: "/agents/agent-amazon-product-photography", icon: Bot },
-      { title: "Copiador de Templates", href: "/agents/template-copy", icon: ImageIcon },
       { title: "Todos os Agentes", href: "/agents", icon: BrainCircuit },
     ],
   },
