@@ -407,27 +407,40 @@ Retorne apenas o prompt otimizado, sem explicações.`;
         apiKey: process.env.OPENAI_API_KEY,
       });
 
-      // Criar arquivo para GPT-Image-1 usando FormData approach
-      const { Blob } = await import('buffer');
-      const imageBlob = new Blob([imageBuffer], { type: 'image/png' });
-      const imageFile = Object.assign(imageBlob, { 
-        name: 'product.png',
-        lastModified: Date.now(),
-        webkitRelativePath: ''
+      // Criar arquivo usando OpenAI.toFile (método correto)
+      const imageFile = await OpenAI.toFile(imageBuffer, 'product.png', {
+        type: 'image/png'
       });
 
       const gptImageResponse = await openai.images.edit({
         model: 'gpt-image-1',
-        image: imageFile as any,
+        image: imageFile,
         prompt: optimizedPrompt,
         n: 1,
-        size: '1024x1024',
-        response_format: 'b64_json'
+        size: '1024x1024'
       });
 
-      const imageBase64 = gptImageResponse.data?.[0]?.b64_json;
-      const imageUrl = `data:image/png;base64,${imageBase64}`;
-      const estimatedCost = 0.167; // Custo estimado do GPT-Image-1
+      // Processar resposta do GPT-Image-1
+      if (!gptImageResponse.data || gptImageResponse.data.length === 0) {
+        throw new Error('Nenhuma imagem gerada pelo GPT-Image-1');
+      }
+
+      const imageData = gptImageResponse.data[0];
+      let imageUrl: string;
+
+      if (imageData.b64_json) {
+        imageUrl = `data:image/jpeg;base64,${imageData.b64_json}`;
+      } else if (imageData.url) {
+        // Converter URL para base64
+        const imageResponse = await fetch(imageData.url);
+        const arrayBuffer = await imageResponse.arrayBuffer();
+        const base64 = Buffer.from(arrayBuffer).toString('base64');
+        imageUrl = `data:image/jpeg;base64,${base64}`;
+      } else {
+        throw new Error('Formato de resposta inválido do GPT-Image-1');
+      }
+
+      const estimatedCost = 0.20; // Custo do GPT-Image-1 ($0.20 por edição)
 
       const processingTime = Math.round((Date.now() - startTime) / 1000);
 
