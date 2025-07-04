@@ -118,8 +118,8 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   // Calcular métricas dos canais
-  const activeChannels = product.channels.filter(c => c.isActive);
-  const totalChannels = product.channels.length;
+  const activeChannels = (product.channels || []).filter(c => c.isActive);
+  const totalChannels = (product.channels || []).length;
   const bestMargin = product.calculations?.reduce((best, calc) => 
     calc.margin > (best?.margin || 0) ? calc : best
   );

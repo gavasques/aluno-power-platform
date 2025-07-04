@@ -656,6 +656,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Specific routes must come before generic :id route
+  app.get('/api/products/categories', async (req, res) => {
+    try {
+      const categories = await storage.getCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch categories' });
+    }
+  });
+
+  app.get('/api/products/suppliers', async (req, res) => {
+    try {
+      const suppliers = await storage.getSuppliers();
+      res.json(suppliers);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch suppliers' });
+    }
+  });
+
   app.get('/api/products/:id', async (req, res) => {
     try {
       const product = await storage.getProduct(parseInt(req.params.id));
@@ -6522,24 +6541,28 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   });
 
   // Obter categorias disponíveis
-  app.get('/api/products/categories', requireAuth, async (req: Request, res: Response) => {
+  app.get('/api/products/categories', async (req: Request, res: Response) => {
     try {
+      console.log('🔍 Categories endpoint called');
       const categories = await productService.getCategories();
+      console.log('📋 Categories retrieved:', categories?.length || 0);
       res.json(categories);
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      res.status(500).json({ error: 'Erro ao buscar categorias' });
+      console.error('❌ Error fetching categories:', error);
+      res.status(500).json({ error: 'Erro ao buscar categorias', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
   // Obter fornecedores disponíveis
-  app.get('/api/products/suppliers', requireAuth, async (req: Request, res: Response) => {
+  app.get('/api/products/suppliers', async (req: Request, res: Response) => {
     try {
+      console.log('🔍 Suppliers endpoint called');
       const suppliers = await productService.getSuppliers();
+      console.log('🏭 Suppliers retrieved:', suppliers?.length || 0);
       res.json(suppliers);
     } catch (error) {
-      console.error('Error fetching suppliers:', error);
-      res.status(500).json({ error: 'Erro ao buscar fornecedores' });
+      console.error('❌ Error fetching suppliers:', error);
+      res.status(500).json({ error: 'Erro ao buscar fornecedores', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 

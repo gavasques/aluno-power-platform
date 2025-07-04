@@ -175,20 +175,26 @@ export class ProductService {
   // Obter categorias disponíveis
   async getCategories() {
     try {
-      return await db.select().from(departments).orderBy(departments.name);
+      console.log("🔍 ProductService: Getting categories from departments table");
+      const result = await db.select().from(departments).orderBy(departments.name);
+      console.log("📋 ProductService: Categories result:", result?.length || 0);
+      return result;
     } catch (error) {
-      console.error("Error fetching categories:", error);
-      throw new Error("Failed to fetch categories");
+      console.error("❌ ProductService: Error fetching categories:", error);
+      throw new Error(`Failed to fetch categories: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   // Obter fornecedores disponíveis
   async getSuppliers() {
     try {
-      return await db.select().from(suppliers).orderBy(suppliers.name);
+      console.log("🔍 ProductService: Getting suppliers from suppliers table");
+      const result = await db.select().from(suppliers).orderBy(suppliers.name);
+      console.log("🏭 ProductService: Suppliers result:", result?.length || 0);
+      return result;
     } catch (error) {
-      console.error("Error fetching suppliers:", error);
-      throw new Error("Failed to fetch suppliers");
+      console.error("❌ ProductService: Error fetching suppliers:", error);
+      throw new Error(`Failed to fetch suppliers: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }
