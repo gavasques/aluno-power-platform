@@ -412,12 +412,25 @@ Retorne apenas o prompt otimizado, sem explicações.`;
         type: 'image/png'
       });
 
+      console.log('🎨 [TEMPLATE_COPY_AI] Calling OpenAI images.edit with:', {
+        model: 'gpt-image-1',
+        promptLength: optimizedPrompt.length,
+        imageFileSize: imageBuffer.length,
+        hasApiKey: !!process.env.OPENAI_API_KEY
+      });
+
       const gptImageResponse = await openai.images.edit({
         model: 'gpt-image-1',
         image: imageFile,
         prompt: optimizedPrompt,
         n: 1,
         size: '1024x1024'
+      });
+
+      console.log('🎨 [TEMPLATE_COPY_AI] OpenAI response received:', {
+        hasData: !!gptImageResponse.data,
+        dataLength: gptImageResponse.data?.length || 0,
+        firstItemKeys: gptImageResponse.data?.[0] ? Object.keys(gptImageResponse.data[0]) : []
       });
 
       // Processar resposta do GPT-Image-1
