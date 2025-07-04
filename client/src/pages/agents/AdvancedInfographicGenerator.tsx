@@ -331,7 +331,7 @@ export default function AdvancedInfographicGenerator() {
               <span className="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</span>
               Dados do Produto
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-muted-foreground text-[24px]">
               Forneça as informações do seu produto para análise e geração de conceitos
             </CardDescription>
           </CardHeader>
