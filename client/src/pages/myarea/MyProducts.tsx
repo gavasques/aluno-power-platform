@@ -17,6 +17,10 @@ export default function MyProducts() {
     window.location.href = `/minha-area/produtos/${id}/editar`;
   };
 
+  const handlePricing = (id: number) => {
+    window.location.href = `/minha-area/produtos/${id}/pricing`;
+  };
+
   const handleCreate = () => {
     window.location.href = `/minha-area/produtos/novo`;
   };
@@ -123,6 +127,7 @@ export default function MyProducts() {
                 product={product}
                 onView={handleView}
                 onEdit={handleEdit}
+                onPricing={handlePricing}
                 onToggleStatus={toggleStatus}
                 onDelete={deleteProduct}
               />

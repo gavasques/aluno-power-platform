@@ -1,13 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Package, Eye, Edit, Power, Trash2 } from "lucide-react";
+import { Package, Eye, Edit, Power, Trash2, DollarSign } from "lucide-react";
 import { Product } from "@/types/product";
 
 interface ProductCardProps {
   product: Product;
   onView: (id: number) => void;
   onEdit: (id: number) => void;
+  onPricing: (id: number) => void;
   onToggleStatus: (id: number) => void;
   onDelete: (id: number) => void;
 }
@@ -16,6 +17,7 @@ export const ProductCard = ({
   product, 
   onView, 
   onEdit, 
+  onPricing,
   onToggleStatus, 
   onDelete 
 }: ProductCardProps) => {
@@ -58,6 +60,7 @@ export const ProductCard = ({
               variant="outline"
               onClick={() => onView(Number(product.id))}
               className="flex-1"
+              title="Visualizar"
             >
               <Eye className="h-3 w-3" />
             </Button>
@@ -66,14 +69,25 @@ export const ProductCard = ({
               variant="outline"
               onClick={() => onEdit(Number(product.id))}
               className="flex-1"
+              title="Editar"
             >
               <Edit className="h-3 w-3" />
             </Button>
             <Button
               size="sm"
               variant="outline"
+              onClick={() => onPricing(Number(product.id))}
+              className="flex-1"
+              title="Precificação"
+            >
+              <DollarSign className="h-3 w-3" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => onToggleStatus(Number(product.id))}
               className="flex-1"
+              title={product.active ? "Desativar" : "Ativar"}
             >
               <Power className="h-3 w-3" />
             </Button>
@@ -82,6 +96,7 @@ export const ProductCard = ({
               variant="outline"
               onClick={() => onDelete(Number(product.id))}
               className="flex-1 text-red-500 hover:text-red-700"
+              title="Excluir"
             >
               <Trash2 className="h-3 w-3" />
             </Button>

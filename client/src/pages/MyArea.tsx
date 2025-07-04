@@ -6,6 +6,7 @@ import MyMaterials from "./myarea/MyMaterials";
 import ProductFormNew from "../components/product/ProductFormNew";
 import ProductEditForm from "../components/product/ProductEditForm";
 import ProductDetail from "./myarea/ProductDetail";
+import ProductPricing from "./myarea/ProductPricing";
 import SupplierDetailRefactored from "./myarea/SupplierDetailRefactored";
 import MaterialDetail from "./myarea/MaterialDetail";
 import MaterialForm from "./myarea/MaterialForm";
@@ -29,6 +30,9 @@ const MyArea = () => {
       }
       if (id && subId === "editar") {
         return <ProductEditForm />;
+      }
+      if (id && subId === "pricing") {
+        return <ProductPricing />;
       }
       if (id) {
         return <ProductDetail />;
