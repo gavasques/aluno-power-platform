@@ -336,6 +336,9 @@ class InfographicService {
       const imageBuffer = Buffer.from(imageBase64, 'base64');
 
       // Create infographic using GPT-Image-1 with reference image
+      console.log(`🎨 [GPT_IMAGE_1] Using mimetype: ${mimetype}, extension: ${fileExtension}`);
+      console.log(`🎨 [GPT_IMAGE_1] Prompt length: ${analysis.optimizedPrompt?.length || 0} characters`);
+      
       const response = await openai.images.edit({
         model: 'gpt-image-1',
         image: await OpenAI.toFile(imageBuffer, `product_reference.${fileExtension}`, { type: `image/${mimetype}` }),
@@ -343,8 +346,15 @@ class InfographicService {
         size: '1024x1024'
       });
 
+      console.log(`🎨 [GPT_IMAGE_1] Response received:`, {
+        hasData: !!response.data,
+        dataLength: response.data?.length,
+        firstItem: response.data?.[0] ? Object.keys(response.data[0]) : 'none'
+      });
+
       const generatedImage = response.data?.[0];
       if (!generatedImage?.url) {
+        console.error(`🎨 [GPT_IMAGE_1] Invalid response structure:`, response);
         throw new Error('Falha na geração da imagem pelo GPT-Image-1');
       }
 
@@ -383,7 +393,17 @@ class InfographicService {
         .where(eq(infographics.id, generationId));
 
       console.error('Erro na geração do infográfico:', error);
-      throw new Error('Falha na geração do infográfico');
+      
+      // Log detalhado do erro para debugging
+      if (error.status) {
+        console.error(`🚨 [GPT_IMAGE_1] API Error - Status: ${error.status}`);
+        console.error(`🚨 [GPT_IMAGE_1] API Error - Message: ${error.message}`);
+        console.error(`🚨 [GPT_IMAGE_1] API Error - Code: ${error.code}`);
+        console.error(`🚨 [GPT_IMAGE_1] API Error - Type: ${error.type}`);
+        console.error(`🚨 [GPT_IMAGE_1] API Error - Param: ${error.param}`);
+      }
+      
+      throw new Error(`Falha na geração do infográfico: ${error.message || 'Erro desconhecido'}`);
     }
   }
 
