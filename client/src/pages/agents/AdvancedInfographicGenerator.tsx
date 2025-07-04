@@ -95,6 +95,11 @@ export default function AdvancedInfographicGenerator() {
   // Step 1: Analyze product and generate concepts
   const analyzeProduct = async (productData: ProductData) => {
     setLoading(true);
+    toast({
+      title: "Analisando produto...",
+      description: "Aguarde, estamos analisando os dados e a foto do produto com IA"
+    });
+    
     try {
       const token = getAuthToken();
       if (!token) {
@@ -153,6 +158,12 @@ export default function AdvancedInfographicGenerator() {
     }
 
     setLoading(true);
+    
+    toast({
+      title: "Otimizando prompt...",
+      description: "Aguarde, estamos analisando a imagem e criando o prompt perfeito"
+    });
+    
     try {
       const token = getAuthToken();
       if (!token) {
@@ -207,6 +218,11 @@ export default function AdvancedInfographicGenerator() {
   const generateInfographic = async () => {
     setLoading(true);
     setSession(prev => ({ ...prev, step: 'generating' }));
+    
+    toast({
+      title: "Gerando infográfico...",
+      description: "Aguarde, estamos criando seu infográfico profissional com GPT-Image-1"
+    });
     
     try {
       const token = getAuthToken();

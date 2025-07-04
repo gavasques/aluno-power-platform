@@ -328,12 +328,17 @@ class InfographicService {
         throw new Error('Imagem de referência não encontrada');
       }
 
+      // Extract mimetype from the original data URL
+      const mimetypeMatch = analysis.productImageUrl?.match(/^data:image\/([^;]+);base64,/);
+      const mimetype = mimetypeMatch?.[1] || 'png';
+      const fileExtension = mimetype === 'jpeg' ? 'jpg' : mimetype;
+
       const imageBuffer = Buffer.from(imageBase64, 'base64');
 
       // Create infographic using GPT-Image-1 with reference image
       const response = await openai.images.edit({
         model: 'gpt-image-1',
-        image: await OpenAI.toFile(imageBuffer, 'product_reference.png'),
+        image: await OpenAI.toFile(imageBuffer, `product_reference.${fileExtension}`, { type: `image/${mimetype}` }),
         prompt: analysis.optimizedPrompt || 'Create a professional Amazon product infographic',
         size: '1024x1024'
       });
