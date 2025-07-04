@@ -47,6 +47,13 @@ export default function AdvancedInfographicGenerator() {
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  // Form state
+  const [productName, setProductName] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [targetAudience, setTargetAudience] = useState('');
+  const [effortLevel, setEffortLevel] = useState('normal');
 
   // Fetch categories for dropdown
   const { data: departments = [] } = useQuery<any[]>({
@@ -301,13 +308,15 @@ export default function AdvancedInfographicGenerator() {
                   <Input
                     id="productName"
                     placeholder="Ex: Fone de Ouvido Bluetooth Premium"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
                     maxLength={120}
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="category">Categoria *</Label>
-                  <Select>
+                  <Select value={category} onValueChange={setCategory} data-category-select>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione a categoria" />
                     </SelectTrigger>
@@ -328,13 +337,15 @@ export default function AdvancedInfographicGenerator() {
                   <Input
                     id="targetAudience"
                     placeholder="Ex: Profissionais de escritório, jovens urbanos"
+                    value={targetAudience}
+                    onChange={(e) => setTargetAudience(e.target.value)}
                     maxLength={150}
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="effortLevel">Nível de Esforço</Label>
-                  <Select defaultValue="normal">
+                  <Select value={effortLevel} onValueChange={setEffortLevel} data-effort-select>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -401,6 +412,8 @@ export default function AdvancedInfographicGenerator() {
                     id="description"
                     placeholder="Descreva detalhadamente seu produto, incluindo características, benefícios, diferenciais, materiais, etc."
                     className="min-h-[120px]"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     maxLength={2000}
                   />
                   <p className="text-xs text-gray-500 mt-1">Máximo 2000 caracteres</p>
@@ -410,17 +423,15 @@ export default function AdvancedInfographicGenerator() {
 
             <Button
               onClick={() => {
-                const form = document.querySelector('form') as HTMLFormElement;
-                const formData = new FormData(form || document.createElement('form'));
                 const productData: ProductData = {
-                  name: (document.getElementById('productName') as HTMLInputElement).value,
-                  description: (document.getElementById('description') as HTMLTextAreaElement).value,
-                  category: '', // Get from select
-                  targetAudience: (document.getElementById('targetAudience') as HTMLInputElement).value,
-                  effortLevel: 'normal' // Get from select
+                  name: productName,
+                  description: description,
+                  category: category || 'E-commerce General',
+                  targetAudience: targetAudience,
+                  effortLevel: effortLevel as 'normal' | 'high'
                 };
                 
-                if (!productData.name || !productData.description || !uploadedImage) {
+                if (!productData.name.trim() || !productData.description.trim() || !uploadedImage) {
                   toast({
                     title: "Campos obrigatórios",
                     description: "Preencha nome, descrição e faça upload da imagem",
