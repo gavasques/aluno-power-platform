@@ -87,15 +87,25 @@ export default function AdvancedInfographicGenerator() {
     setImagePreview(null);
   };
 
+  // Helper function to get auth token
+  const getAuthToken = () => {
+    return localStorage.getItem('auth_token') || localStorage.getItem('token') || localStorage.getItem('authToken') || '';
+  };
+
   // Step 1: Analyze product and generate concepts
   const analyzeProduct = async (productData: ProductData) => {
     setLoading(true);
     try {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('Token de autenticação não encontrado. Faça login novamente.');
+      }
+
       const response = await fetch('/api/infographics/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(productData)
       });
@@ -144,6 +154,11 @@ export default function AdvancedInfographicGenerator() {
 
     setLoading(true);
     try {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('Token de autenticação não encontrado. Faça login novamente.');
+      }
+
       const formData = new FormData();
       formData.append('analysisId', session.analysisId!);
       formData.append('conceptId', conceptId);
@@ -152,7 +167,7 @@ export default function AdvancedInfographicGenerator() {
       const response = await fetch('/api/infographics/generate-prompt', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: formData
       });
@@ -194,11 +209,16 @@ export default function AdvancedInfographicGenerator() {
     setSession(prev => ({ ...prev, step: 'generating' }));
     
     try {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('Token de autenticação não encontrado. Faça login novamente.');
+      }
+
       const response = await fetch('/api/infographics/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           generationId: session.generationId
