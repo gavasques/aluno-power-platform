@@ -1099,6 +1099,41 @@ export const insertAiImgGenerationLogSchema = createInsertSchema(aiImgGeneration
 export type InsertAiImgGenerationLog = z.infer<typeof insertAiImgGenerationLogSchema>;
 export type AiImgGenerationLog = typeof aiImgGenerationLogs.$inferSelect;
 
+// Infographics tables for the new agent system
+export const infographics = pgTable("infographics", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  productName: text("product_name").notNull(),
+  productDescription: text("product_description").notNull(),
+  category: text("category").notNull(),
+  targetAudience: text("target_audience").notNull(),
+  effortLevel: text("effort_level").notNull(), // 'normal' or 'high'
+  selectedConceptId: text("selected_concept_id"),
+  productImageUrl: text("product_image_url"),
+  optimizedPrompt: text("optimized_prompt"),
+  finalImageUrl: text("final_image_url"),
+  status: text("status").notNull().default("created"), // created, concepts_generated, prompt_generated, generating, completed, failed
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => ({
+  userIdx: index("infographics_user_idx").on(table.userId),
+  statusIdx: index("infographics_status_idx").on(table.status),
+  createdIdx: index("infographics_created_idx").on(table.createdAt),
+}));
+
+export const infographicConcepts = pgTable("infographic_concepts", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  infographicId: text("infographic_id").references(() => infographics.id).notNull(),
+  conceptData: jsonb("concept_data").notNull(),
+  recommended: boolean("recommended").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  infographicIdx: index("infographic_concepts_infographic_idx").on(table.infographicId),
+  recommendedIdx: index("infographic_concepts_recommended_idx").on(table.recommended),
+}));
+
 // Insert schemas for upscaled images
 export const insertUpscaledImageSchema = createInsertSchema(upscaledImages).omit({
   id: true,
@@ -1106,6 +1141,23 @@ export const insertUpscaledImageSchema = createInsertSchema(upscaledImages).omit
 });
 export type InsertUpscaledImage = z.infer<typeof insertUpscaledImageSchema>;
 export type UpscaledImage = typeof upscaledImages.$inferSelect;
+
+// Insert schemas for infographics
+export const insertInfographicSchema = createInsertSchema(infographics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertInfographic = z.infer<typeof insertInfographicSchema>;
+export type Infographic = typeof infographics.$inferSelect;
+
+// Insert schemas for infographic concepts
+export const insertInfographicConceptSchema = createInsertSchema(infographicConcepts).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertInfographicConcept = z.infer<typeof insertInfographicConceptSchema>;
+export type InfographicConcept = typeof infographicConcepts.$inferSelect;
 
 // Insert schemas for supplier conversations
 export const insertSupplierConversationSchema = createInsertSchema(supplierConversations).omit({
@@ -1684,3 +1736,19 @@ export type SupportTicketWithRelations = SupportTicket & {
   messages: (SupportTicketMessage & { user: User })[];
   files: (SupportTicketFile & { uploadedBy: User })[];
 };
+
+// Infographics relations
+export const infographicsRelations = relations(infographics, ({ one, many }) => ({
+  user: one(users, {
+    fields: [infographics.userId],
+    references: [users.id],
+  }),
+  concepts: many(infographicConcepts),
+}));
+
+export const infographicConceptsRelations = relations(infographicConcepts, ({ one }) => ({
+  infographic: one(infographics, {
+    fields: [infographicConcepts.infographicId],
+    references: [infographics.id],
+  }),
+}));

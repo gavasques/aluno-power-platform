@@ -6142,6 +6142,142 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // ===============================
+  // ADVANCED INFOGRAPHIC SYSTEM ROUTES
+  // ===============================
+
+  // Import the new infographic service
+  const { infographicService } = await import('./services/infographicService');
+
+  // STEP 1: Analyze product and generate concepts
+  app.post('/api/infographics/analyze', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const productData = req.body;
+
+      console.log('📊 [INFOGRAPHIC_ANALYZE] Starting product analysis...');
+      
+      const result = await infographicService.analyzeProduct(productData, user.id);
+      
+      console.log('✅ [INFOGRAPHIC_ANALYZE] Analysis completed:', {
+        analysisId: result.analysisId,
+        conceptsGenerated: result.concepts.length,
+        recommendedConcept: result.recommendedConcept
+      });
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('❌ [INFOGRAPHIC_ANALYZE] Error:', error);
+      res.status(500).json({ 
+        error: 'Falha na análise do produto',
+        details: error.message
+      });
+    }
+  });
+
+  // STEP 2: Generate optimized prompt from concept and image
+  const infographicUpload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 25 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'), false);
+      }
+    }
+  });
+
+  app.post('/api/infographics/generate-prompt', requireAuth, infographicUpload.single('image'), async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { analysisId, conceptId } = req.body;
+      const imageFile = req.file;
+
+      console.log('🎨 [INFOGRAPHIC_PROMPT] Generating optimized prompt...');
+
+      if (!imageFile) {
+        return res.status(400).json({ 
+          error: 'Imagem de referência é obrigatória' 
+        });
+      }
+
+      const result = await infographicService.generatePrompt(
+        analysisId, 
+        conceptId, 
+        imageFile, 
+        user.id
+      );
+
+      console.log('✅ [INFOGRAPHIC_PROMPT] Prompt generated successfully');
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('❌ [INFOGRAPHIC_PROMPT] Error:', error);
+      res.status(500).json({ 
+        error: 'Falha na geração do prompt',
+        details: error.message
+      });
+    }
+  });
+
+  // STEP 3: Generate final infographic
+  app.post('/api/infographics/generate', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { generationId } = req.body;
+
+      console.log('🖼️ [INFOGRAPHIC_GENERATE] Generating final infographic...');
+
+      const result = await infographicService.generateInfographic(generationId, user.id);
+
+      console.log('✅ [INFOGRAPHIC_GENERATE] Infographic generated successfully');
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('❌ [INFOGRAPHIC_GENERATE] Error:', error);
+      res.status(500).json({ 
+        error: 'Falha na geração do infográfico',
+        details: error.message
+      });
+    }
+  });
+
+  // Get generation status
+  app.get('/api/infographics/:id/status', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { id } = req.params;
+
+      const status = await infographicService.getGenerationStatus(id, user.id);
+
+      res.json(status);
+    } catch (error: any) {
+      console.error('❌ [INFOGRAPHIC_STATUS] Error:', error);
+      res.status(500).json({ 
+        error: 'Falha ao buscar status da geração',
+        details: error.message
+      });
+    }
+  });
+
+  // Get user infographics history
+  app.get('/api/infographics/history', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+
+      const history = await infographicService.getUserInfographics(user.id);
+
+      res.json(history);
+    } catch (error: any) {
+      console.error('❌ [INFOGRAPHIC_HISTORY] Error:', error);
+      res.status(500).json({ 
+        error: 'Falha ao buscar histórico de infográficos',
+        details: error.message
+      });
+    }
+  });
+
   return httpServer;
 }
 
