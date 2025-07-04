@@ -121,14 +121,14 @@ class TemplateCopyService {
       // Salvar análise no banco
       const analysisData: InsertTemplateAnalysis = {
         userId,
-        originalImageUrl: templateImageUrl,
+        templateImageUrl: templateImageUrl,
         templateName,
-        layout: mockAnalysis.layout,
+        layoutAnalysis: mockAnalysis.layout,
         colorPalette: mockAnalysis.colorPalette,
-        typography: mockAnalysis.typography,
+        typographyAnalysis: mockAnalysis.typography,
         visualElements: mockAnalysis.visualElements,
         contentStructure: mockAnalysis.contentStructure,
-        templateDNA,
+        styleDna: templateDNA,
         status: 'completed'
       };
 

@@ -1165,26 +1165,30 @@ export type InfographicConcept = typeof infographicConcepts.$inferSelect;
 export const templateAnalyses = pgTable("template_analyses", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: integer("user_id").references(() => users.id).notNull(),
-  originalImageUrl: text("original_image_url").notNull(),
+  templateImageUrl: text("template_image_url").notNull(),
   templateName: text("template_name").notNull(),
   
   // Análise estruturada
-  layout: jsonb("layout").notNull(),
+  layoutAnalysis: jsonb("layout_analysis").notNull(),
   colorPalette: jsonb("color_palette").notNull(),
-  typography: jsonb("typography").notNull(),
+  typographyAnalysis: jsonb("typography_analysis").notNull(),
   visualElements: jsonb("visual_elements").notNull(),
   contentStructure: jsonb("content_structure").notNull(),
   
   // DNA do template
-  templateDNA: text("template_dna").notNull(),
+  styleDna: text("style_dna"),
   
   // Status da análise
   status: text("status").notNull().default("analyzing"), // analyzing, completed, failed
   errorMessage: text("error_message"),
   
+  // Custos e performance
+  totalCost: decimal("total_cost", { precision: 10, scale: 6 }).default("0"),
+  processingTime: integer("processing_time"),
+  
   // Metadados
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
 }, (table) => ({
   userIdx: index("template_analyses_user_idx").on(table.userId),
   statusIdx: index("template_analyses_status_idx").on(table.status),
