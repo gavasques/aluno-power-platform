@@ -43,6 +43,11 @@ export default function InfographicGenerator() {
   const { data: departments = [] } = useQuery({
     queryKey: ['/api/departments'],
   });
+
+  // Ordenar departamentos alfabeticamente por nome
+  const sortedDepartments = Array.isArray(departments) 
+    ? [...departments].sort((a: any, b: any) => a.name.localeCompare(b.name))
+    : [];
   const [formData, setFormData] = useState({
     nomeProduto: '',
     descricaoLonga: '',
@@ -297,7 +302,7 @@ export default function InfographicGenerator() {
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.isArray(departments) && departments.map((dept: any) => (
+                    {sortedDepartments.map((dept: any) => (
                       <SelectItem key={dept.id} value={dept.name}>
                         {dept.name}
                       </SelectItem>

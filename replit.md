@@ -111,6 +111,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 04, 2025**: ✅ INTERFACE MELHORIAS E ORDENAÇÃO ALFABÉTICA IMPLEMENTADAS
+  - **Texto do Campo de Imagem Atualizado**:
+    - Alterado de "Imagem de Referência" para "Imagem do Seu Produto" para melhor compreensão
+    - Removido texto explicativo técnico sobre GPT-Image-1 conforme solicitação
+    - Mantida validação obrigatória de upload de imagem
+  - **Campos Categoria e Público-Alvo Integrados**:
+    - Campo Categoria com dropdown carregado da tabela Departments
+    - Campo Público-Alvo opcional para segmentação
+    - Ordenação alfabética A-Z implementada no dropdown de categorias
+    - Backend atualizado para processar novos campos em ambas as etapas
+  - **Processamento Completo Atualizado**:
+    - Etapa 1 (Claude): incluindo {{CATEGORIA}} e {{PUBLICO_ALVO}} no prompt
+    - Etapa 2 (GPT-Image-1): variáveis adicionais para geração mais precisa
+    - Frontend enviando todos os campos nas requisições das duas etapas
+
 - **July 03, 2025**: ✅ INFOGRAPHIC GENERATOR - IMAGEM OBRIGATÓRIA + GPT-IMAGE-1 EXCLUSIVO
   - **Campo de Upload OBRIGATÓRIO Implementado**:
     - Interface marcada como "OBRIGATÓRIO" com validação rigorosa
