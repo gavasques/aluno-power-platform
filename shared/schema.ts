@@ -451,6 +451,56 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// === CONFIGURAÇÕES DE CANAIS POR PRODUTO ===
+export const productChannels = pgTable("product_channels", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").references(() => products.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  channelType: text("channel_type").notNull(), // 'amazon_fba', 'amazon_fbm', 'mercadolivre_me1', etc.
+  isActive: boolean("is_active").notNull().default(true),
+  salePrice: decimal("sale_price", { precision: 10, scale: 2 }),
+  customCosts: jsonb("custom_costs"), // Custos específicos do canal
+  lastCalculation: jsonb("last_calculation"), // Cache do último cálculo
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// === CONFIGURAÇÕES DO USUÁRIO ===
+export const userSettings = pgTable("user_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  state: text("state"), // SP, RJ, etc.
+  taxPercentage: decimal("tax_percentage", { precision: 5, scale: 2 }).notNull().default("0"),
+  activeChannels: jsonb("active_channels"), // Lista de canais que o usuário usa
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// === TABELAS ADMINISTRATIVAS ===
+// Tabelas de frete Amazon por estado
+export const amazonFreightRates = pgTable("amazon_freight_rates", {
+  id: serial("id").primaryKey(),
+  state: text("state").notNull(),
+  serviceType: text("service_type").notNull(), // 'FBA', 'DBA', 'FBA_ONSITE'
+  weightFrom: decimal("weight_from", { precision: 8, scale: 3 }).notNull(),
+  weightTo: decimal("weight_to", { precision: 8, scale: 3 }).notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Comissões por categoria
+export const categoryCommissions = pgTable("category_commissions", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").references(() => departments.id).notNull(),
+  channelType: text("channel_type").notNull(),
+  priceFrom: decimal("price_from", { precision: 10, scale: 2 }).notNull().default("0"),
+  priceTo: decimal("price_to", { precision: 10, scale: 2 }),
+  commissionPercentage: decimal("commission_percentage", { precision: 5, scale: 2 }).notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // YouTube Videos Cache
 export const youtubeVideos = pgTable("youtube_videos", {
   id: serial("id").primaryKey(),
@@ -1752,3 +1802,114 @@ export const infographicConceptsRelations = relations(infographicConcepts, ({ on
     references: [infographics.id],
   }),
 }));
+
+// === PRODUCT MANAGEMENT RELATIONS ===
+export const productChannelsRelations = relations(productChannels, ({ one }) => ({
+  product: one(products, {
+    fields: [productChannels.productId],
+    references: [products.id],
+  }),
+  user: one(users, {
+    fields: [productChannels.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userSettingsRelations = relations(userSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [userSettings.userId],
+    references: [users.id],
+  }),
+}));
+
+export const categoryCommissionsRelations = relations(categoryCommissions, ({ one }) => ({
+  category: one(departments, {
+    fields: [categoryCommissions.categoryId],
+    references: [departments.id],
+  }),
+}));
+
+// === PRODUCT MANAGEMENT TYPES ===
+// Insert schemas for product channels
+export const insertProductChannelSchema = createInsertSchema(productChannels).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertProductChannel = z.infer<typeof insertProductChannelSchema>;
+export type ProductChannel = typeof productChannels.$inferSelect;
+
+// Insert schemas for user settings
+export const insertUserSettingsSchema = createInsertSchema(userSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>;
+export type UserSettings = typeof userSettings.$inferSelect;
+
+// Insert schemas for Amazon freight rates
+export const insertAmazonFreightRateSchema = createInsertSchema(amazonFreightRates).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAmazonFreightRate = z.infer<typeof insertAmazonFreightRateSchema>;
+export type AmazonFreightRate = typeof amazonFreightRates.$inferSelect;
+
+// Insert schemas for category commissions
+export const insertCategoryCommissionSchema = createInsertSchema(categoryCommissions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCategoryCommission = z.infer<typeof insertCategoryCommissionSchema>;
+export type CategoryCommission = typeof categoryCommissions.$inferSelect;
+
+// === EXTENDED PRODUCT TYPES ===
+// Product with channels type
+export type ProductWithChannels = Product & {
+  channels: ProductChannel[];
+};
+
+// Channel costs interface
+export interface ChannelCosts {
+  freightCost?: number;
+  prepCenterCost?: number;
+  commissionOverride?: number;
+  adsPercentage?: number;
+  otherCostPercentage?: number;
+  otherCostValue?: number;
+}
+
+// Calculation result interface
+export interface CalculationResult {
+  profit: number;
+  margin: number;
+  roi: number;
+  totalCost: number;
+  breakdown: CostBreakdown;
+}
+
+// Cost breakdown interface
+export interface CostBreakdown {
+  baseCost: number;
+  packagingCost: number;
+  freightCost: number;
+  commissionCost: number;
+  adsCost: number;
+  prepCenterCost: number;
+  otherCosts: number;
+  taxCost: number;
+  totalCost: number;
+}
+
+// Channel type definitions
+export const CHANNEL_TYPES = {
+  amazon_fba: 'Amazon FBA',
+  amazon_fbm: 'Amazon FBM',
+  amazon_dba: 'Amazon DBA',
+  mercadolivre_me1: 'Mercado Livre ME1',
+  mercadolivre_flex: 'Mercado Livre Flex',
+  site_proprio: 'Site Próprio',
+} as const;
+
+export type ChannelType = keyof typeof CHANNEL_TYPES;
