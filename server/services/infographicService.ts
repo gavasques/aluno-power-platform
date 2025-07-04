@@ -335,18 +335,16 @@ class InfographicService {
         model: 'gpt-image-1',
         image: await OpenAI.toFile(imageBuffer, 'product_reference.png'),
         prompt: analysis.optimizedPrompt || 'Create a professional Amazon product infographic',
-        size: '1024x1024',
-        quality: 'high',
-        response_format: 'b64_json'
+        size: '1024x1024'
       });
 
       const generatedImage = response.data?.[0];
-      if (!generatedImage?.b64_json) {
+      if (!generatedImage?.url) {
         throw new Error('Falha na geração da imagem pelo GPT-Image-1');
       }
 
-      // Convert to data URL for storage
-      const finalImageUrl = `data:image/jpeg;base64,${generatedImage.b64_json}`;
+      // Use the URL directly from GPT-Image-1
+      const finalImageUrl = generatedImage.url;
       
       console.log('✅ [GPT_IMAGE_1] Infographic generated successfully');
 
