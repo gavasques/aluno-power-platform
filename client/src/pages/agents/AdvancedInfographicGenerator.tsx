@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, Upload, CheckCircle, ArrowRight, Image, Download, Eye } from 'lucide-react';
+import { Loader2, Upload, CheckCircle, ArrowRight, Image, Download } from 'lucide-react';
 
 interface ProductData {
   name: string;
@@ -669,11 +669,6 @@ export default function AdvancedInfographicGenerator() {
               <Button onClick={downloadImage} size="lg">
                 <Download className="mr-2 h-4 w-4" />
                 Baixar PNG
-              </Button>
-              
-              <Button variant="outline" size="lg" onClick={() => window.open(session.finalImageUrl, '_blank')}>
-                <Eye className="mr-2 h-4 w-4" />
-                Visualizar
               </Button>
             </div>
 
