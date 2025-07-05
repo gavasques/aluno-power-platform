@@ -45,7 +45,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
   const saveCosts = async () => {
     setIsSaving(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("auth_token");
       const costsData = {
         costs: form.getValues("costs")
       };

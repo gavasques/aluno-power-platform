@@ -75,7 +75,7 @@ export default function ProductPricingForm() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const auth = useAuth();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("auth_token");
   const [activeTab, setActiveTab] = useState("basic");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [calculatedCubicWeight, setCalculatedCubicWeight] = useState(0);

@@ -153,7 +153,7 @@ export default function ProductBasicDataTab({
       // Auto-save photo if editing existing product
       if (isEditing && productId) {
         try {
-          const token = localStorage.getItem("token");
+          const token = localStorage.getItem("auth_token");
           const formData = new FormData();
           formData.append("photo", file);
           
