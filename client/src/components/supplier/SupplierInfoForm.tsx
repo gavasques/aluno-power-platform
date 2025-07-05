@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Save, X } from 'lucide-react';
-import type { Supplier } from '@shared/schema';
+import { useQuery } from '@tanstack/react-query';
+import type { Supplier, Department } from '@shared/schema';
 
 interface SupplierInfoFormProps {
   supplier: Supplier;
@@ -33,6 +34,15 @@ export const SupplierInfoForm: React.FC<SupplierInfoFormProps> = ({
   onCancel,
   isLoading = false
 }) => {
+  // Carregar departamentos para o dropdown
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery<Department[]>({
+    queryKey: ['/api/departments'],
+    queryFn: async () => {
+      const response = await fetch('/api/departments');
+      if (!response.ok) throw new Error('Failed to fetch departments');
+      return response.json();
+    },
+  });
   const formatCNPJ = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
@@ -90,6 +100,27 @@ export const SupplierInfoForm: React.FC<SupplierInfoFormProps> = ({
               placeholder="00.000.000/0000-00"
               maxLength={18}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="categoryId">Categoria Principal do Fornecedor</Label>
+            <Select
+              value={editForm.categoryId?.toString() || supplier.categoryId?.toString() || ''}
+              onValueChange={(value) => onFormChange({ categoryId: value ? parseInt(value) : null })}
+              disabled={departmentsLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={departmentsLoading ? "Carregando..." : "Selecione uma categoria"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Sem categoria</SelectItem>
+                {departments.map((department) => (
+                  <SelectItem key={department.id} value={department.id.toString()}>
+                    {department.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

@@ -83,7 +83,7 @@ export const suppliers = pgTable("suppliers", {
   userId: integer("user_id").notNull(),
   tradeName: text("trade_name").notNull(),
   corporateName: text("corporate_name").notNull(),
-  categoryId: integer("category_id").references(() => categories.id),
+  categoryId: integer("category_id").references(() => departments.id),
   logo: text("logo"),
   description: text("description"),
   notes: text("notes"),

@@ -350,6 +350,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Departments endpoint
+  app.get('/api/departments', async (req, res) => {
+    try {
+      const allDepartments = await db.select().from(departments).orderBy(departments.name);
+      res.json(allDepartments);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      res.status(500).json({ error: 'Failed to fetch departments' });
+    }
+  });
+
   // Supplier Contacts endpoints
   app.get('/api/suppliers/:id/contacts', requireAuth, async (req: any, res: any) => {
     try {

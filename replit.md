@@ -111,6 +111,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 10:54 PM**: ✅ IMPLEMENTAÇÃO COMPLETA DO CAMPO "CATEGORIA PRINCIPAL DO FORNECEDOR" FINALIZADA
+  - **Campo de Categoria Vinculado a Departamentos**:
+    - Atualizado schema suppliers para referenciar tabela departments ao invés de categories (categoryId → departments.id)
+    - Criado endpoint `/api/departments` para carregar lista de 24 departamentos ordenados alfabeticamente
+    - Implementado campo "Categoria Principal do Fornecedor" no SupplierInfoForm.tsx com dropdown dinâmico
+  - **Interface de Usuário Completa**:
+    - Dropdown carregado via useQuery com dados reais da API /api/departments
+    - Campo posicionado estrategicamente após CNPJ nas informações básicas do fornecedor
+    - Opção "Sem categoria" disponível para fornecedores sem categorização
+    - Estado de loading implementado durante carregamento dos departamentos
+  - **Integração Backend-Frontend**:
+    - Schema TypeScript atualizado: categoryId referencia departments.id
+    - API endpoint funcional retornando 24 departamentos (Alimentos e Bebidas, Eletrônicos, etc.)
+    - Componente SupplierInfoForm integrado com useQuery para carregamento automático
+    - Validação de dados: categoryId convertido para integer no salvamento
+  - **Benefícios para Gestão de Fornecedores**:
+    - Categorização padronizada usando departamentos já existentes no sistema
+    - Facilita filtragem e organização de fornecedores por área de atuação
+    - Consistência com estrutura de departamentos usada em outras partes do sistema
+    - Interface intuitiva permitindo alteração de categoria facilmente
+
 - **January 05, 2025 - 10:50 PM**: ✅ REMOÇÃO TOTAL E COMPLETA DO SISTEMA DE SUPORTE - LIMPEZA FINAL CONCLUÍDA
   - **Vulnerabilidade de Criptografia Crítica Corrigida**:
     - Corrigido comprimento de chave de criptografia AES-256: agora usa chave completa de 64 caracteres hex (32 bytes)
