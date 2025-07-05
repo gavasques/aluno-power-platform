@@ -111,7 +111,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 05, 2025**: ✅ CORREÇÃO CRÍTICA DA LÓGICA DE IMPOSTOS NO SISTEMA DE CUSTOS
+- **January 05, 2025**: ✅ CORREÇÕES CRÍTICAS DE NAVEGAÇÃO E LOOP DE CANAIS
+  - **Loop Infinito de Canais Corrigido**: 
+    - Problema: Ativar/desativar canais causava refresh infinito da página
+    - Causa: Dois useEffect criando atualização cíclica entre form e state local
+    - Solução: Removido useEffect redundante e form atualizado diretamente em handleChannelUpdate
+  - **Navegação de Produtos Corrigida**:
+    - Problema: Acessar "Meus Produtos" abria direto o formulário de novo produto
+    - Correção: MyArea.tsx agora retorna MyProducts (lista) ao invés de ProductPricingForm
+    - Fluxo correto: Lista de produtos → Botão "Novo Produto" → Formulário
+
+- **January 05, 2025 (anterior)**: ✅ CORREÇÃO CRÍTICA DA LÓGICA DE IMPOSTOS NO SISTEMA DE CUSTOS
   - **Problema Resolvido**: Sistema estava calculando impostos sobre o custo do produto, o que é incorreto
     - Erro conceitual: Aplicava taxPercent sobre o custo base para calcular "custo total"
     - Correção: O campo "Custo" já deve incluir TUDO (produto, impostos, frete, embalagem)

@@ -38,8 +38,8 @@ const MyArea = () => {
       if (id) {
         return <ProductDetail />;
       }
-      // Se não tem ID, mostra o formulário direto
-      return <ProductPricingForm />;
+      // Se não tem ID, mostra a lista de produtos
+      return <MyProducts />;
     case "materiais":
     case "materials":
       if (id === "novo" || id === "new") {
