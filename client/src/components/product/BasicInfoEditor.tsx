@@ -107,6 +107,8 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
   // Update form when product loads
   React.useEffect(() => {
     if (product && isOpen) {
+      console.log("🔍 [BASIC_INFO] Product data loaded:", product);
+      console.log("🔍 [BASIC_INFO] Category value:", (product as any).category);
       form.reset({
         name: (product as any).name || "",
         sku: (product as any).sku || "",
@@ -114,7 +116,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
         supplierCode: (product as any).supplierCode || "",
         ean: (product as any).ean || "",
         brand: (product as any).brand || "",
-        categoryId: (product as any).category || "",
+        categoryId: (product as any).category ? (product as any).category.toString() : "",
         supplierId: (product as any).supplierId?.toString() || "",
         ncm: (product as any).ncm || "",
       });

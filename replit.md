@@ -111,6 +111,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 02:56 PM**: ✅ SISTEMA DE EDIÇÃO DE PRODUTOS APRIMORADO COM NOVOS EDITORES INDEPENDENTES
+  - **Correção do Campo Categoria**:
+    - Resolvido problema de persistência convertendo valores inteiros do banco para strings
+    - Select component agora recebe valor string corretamente (category.toString())
+    - Logs de debug adicionados para rastreamento de valores de categoria
+  - **Novo Editor de Canais (ChannelsEditor)**:
+    - Componente independente para edição de canais de venda criado
+    - Interface modal com switches individuais para ativação de canais
+    - Suporte completo aos 11 tipos de canais com nomes brasileiros
+    - Campos para preço, frete e percentuais de comissão/marketing/outros
+    - Salvamento automático com autenticação via Bearer token
+    - Ícone Store adicionado na lista de produtos para acesso rápido
+  - **Melhorias na Lista de Produtos**:
+    - Três botões de ação especializados: Info Básicas (ShoppingBag), Canais (Store), Editar Completo (Edit)
+    - Tooltips adicionados para melhor UX
+    - State management implementado para controle do modal de canais
+  - **Logs de Debug Implementados**:
+    - Console logs em BasicInfoEditor para rastreamento de categoria
+    - Console logs em ChannelsEditor para dados de formulário
+    - Facilita troubleshooting de problemas de persistência
+
 - **January 05, 2025 - 02:09 AM**: ✅ FUNCIONALIDADE "SALVAR E CONTINUAR" APRIMORADA E PESO CUBADO CORRIGIDO
   - **Botão "Salvar e Continuar" Funcional**:
     - Produto novo: salva e redireciona para modo de edição após 1 segundo

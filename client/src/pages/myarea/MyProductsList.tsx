@@ -31,7 +31,8 @@ import {
   ChevronUp,
   TrendingUp,
   TrendingDown,
-  ShoppingBag
+  ShoppingBag,
+  Store
 } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import { formatBRL, calculateChannelPricing } from "@/utils/pricingCalculations";
@@ -39,6 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { SalesChannel, PricingCalculation } from "@/types/pricing";
 import BasicInfoEditor from "@/components/product/BasicInfoEditor";
+import { ChannelsEditor } from "@/components/product/ChannelsEditor";
 
 const ITEMS_PER_PAGE = 50;
 
@@ -61,6 +63,8 @@ export default function MyProductsList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const [channelsEditorOpen, setChannelsEditorOpen] = useState(false);
+  const [channelsEditorProductId, setChannelsEditorProductId] = useState<number | null>(null);
   const { products, isLoading, error, deleteProduct } = useProducts();
   const { toast } = useToast();
 
@@ -332,6 +336,7 @@ export default function MyProductsList() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={(e) => e.stopPropagation()}
+                                  title="Editar Informações Básicas"
                                 >
                                   <ShoppingBag className="h-4 w-4" />
                                 </Button>
@@ -342,8 +347,21 @@ export default function MyProductsList() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
+                                setChannelsEditorProductId(product.id);
+                                setChannelsEditorOpen(true);
+                              }}
+                              title="Editar Canais de Venda"
+                            >
+                              <Store className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 handleEdit(product.id);
                               }}
+                              title="Editar Produto Completo"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -501,6 +519,18 @@ export default function MyProductsList() {
           </div>
         )}
       </div>
+
+      {/* Channels Editor Modal */}
+      {channelsEditorProductId && (
+        <ChannelsEditor
+          productId={channelsEditorProductId}
+          isOpen={channelsEditorOpen}
+          onClose={() => {
+            setChannelsEditorOpen(false);
+            setChannelsEditorProductId(null);
+          }}
+        />
+      )}
     </div>
   );
 }
