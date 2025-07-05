@@ -402,7 +402,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
                             <SelectContent>
                               {(suppliers as any[]).map((supplier: any) => (
                                 <SelectItem key={supplier.id} value={supplier.id.toString()}>
-                                  {supplier.name}
+                                  {supplier.tradeName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
