@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import bcryptjs from "bcryptjs";
@@ -126,6 +127,8 @@ function broadcastNotification(type: string, data: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve static files from uploads directory
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
   // Suppliers
   app.get('/api/suppliers', requireAuth, async (req: any, res: any) => {
     try {
