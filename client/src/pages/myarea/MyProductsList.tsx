@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import { formatBRL, calculateChannelPricing } from "@/utils/pricingCalculations";
+import { calculateChannelProfitability, type ChannelCalculationResult } from "@/utils/channelCalculations";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { SalesChannel, PricingCalculation } from "@/types/pricing";
@@ -108,7 +109,7 @@ export default function MyProductsList() {
     });
   };
 
-  const getActiveChannels = (product: any): { channel: SalesChannel; calculation: PricingCalculation }[] => {
+  const getActiveChannels = (product: any): { channel: any; calculation: ChannelCalculationResult }[] => {
     if (!product.channels) return [];
     
     try {
@@ -119,11 +120,18 @@ export default function MyProductsList() {
       if (!Array.isArray(channels)) return [];
       
       return channels
-        .filter((channel: SalesChannel) => channel.enabled)
-        .map((channel: SalesChannel) => ({
-          channel,
-          calculation: calculateChannelPricing(product, channel)
-        }));
+        .filter((channel: any) => channel.isActive)
+        .map((channel: any) => {
+          const productBase = {
+            costItem: parseFloat(product.costItem) || 0,
+            taxPercent: parseFloat(product.taxPercent) || 0,
+          };
+          
+          return {
+            channel,
+            calculation: calculateChannelProfitability(channel.type, channel.data || {}, productBase)
+          };
+        });
     } catch (error) {
       return [];
     }
@@ -321,17 +329,17 @@ export default function MyProductsList() {
                                 <div key={`${product.id}-${channel.id || channel.type}-${index}`} className="text-xs">
                                   <div className="font-medium">{CHANNEL_NAMES[channel.type] || channel.name}</div>
                                   <div className="flex items-center justify-center gap-2">
-                                    <span className="text-gray-600">{formatBRL(channel.sellingPrice)}</span>
+                                    <span className="text-gray-600">{formatBRL(channel.data?.price || 0)}</span>
                                     <span 
                                       className={cn(
                                         "font-semibold",
-                                        calculation.profitMarginPercent >= 30 ? "text-green-600" :
-                                        calculation.profitMarginPercent >= 20 ? "text-blue-600" :
-                                        calculation.profitMarginPercent >= 10 ? "text-yellow-600" :
+                                        calculation.marginPercent >= 30 ? "text-green-600" :
+                                        calculation.marginPercent >= 20 ? "text-blue-600" :
+                                        calculation.marginPercent >= 10 ? "text-yellow-600" :
                                         "text-red-600"
                                       )}
                                     >
-                                      {calculation.profitMarginPercent.toFixed(1)}%
+                                      {calculation.marginPercent.toFixed(1)}%
                                     </span>
                                   </div>
                                 </div>
@@ -407,48 +415,36 @@ export default function MyProductsList() {
                             <div className="space-y-4">
                               <h4 className="font-semibold text-sm mb-2">Detalhes dos Cálculos por Canal</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {activeChannels.map(({ channel, calculation }) => (
-                                  <div key={channel.id} className="bg-white rounded-lg border p-3 space-y-2">
+                                {activeChannels.map(({ channel, calculation }, index) => (
+                                  <div key={`${product.id}-${channel.type}-${index}`} className="bg-white rounded-lg border p-3 space-y-2">
                                     <div className="flex items-center justify-between mb-2">
-                                      <h5 className="font-semibold">{channel.name}</h5>
+                                      <h5 className="font-semibold">{CHANNEL_NAMES[channel.type] || channel.type}</h5>
                                       <Badge 
-                                        variant={calculation.profitMarginPercent >= 20 ? "default" : "destructive"}
+                                        variant={calculation.marginPercent >= 20 ? "default" : "destructive"}
                                         className={cn(
-                                          calculation.profitMarginPercent >= 30 ? "bg-green-500" :
-                                          calculation.profitMarginPercent >= 20 ? "bg-blue-500" :
-                                          calculation.profitMarginPercent >= 10 ? "bg-yellow-500" :
+                                          calculation.marginPercent >= 30 ? "bg-green-500" :
+                                          calculation.marginPercent >= 20 ? "bg-blue-500" :
+                                          calculation.marginPercent >= 10 ? "bg-yellow-500" :
                                           "bg-red-500"
                                         )}
                                       >
-                                        {calculation.profitMarginPercent.toFixed(1)}% margem
+                                        {calculation.marginPercent.toFixed(1)}% margem
                                       </Badge>
                                     </div>
                                     
                                     <div className="space-y-1 text-xs">
                                       <div className="flex justify-between">
                                         <span className="text-gray-600">Preço de Venda:</span>
-                                        <span className="font-medium">{formatBRL(channel.sellingPrice)}</span>
+                                        <span className="font-medium">{formatBRL(channel.data?.price || 0)}</span>
                                       </div>
                                       <div className="flex justify-between">
                                         <span className="text-gray-600">Custo Total:</span>
-                                        <span>{formatBRL(calculation.totalCost)}</span>
+                                        <span>{formatBRL(calculation.totalCosts)}</span>
                                       </div>
                                       <div className="flex justify-between">
-                                        <span className="text-gray-600">Comissão ({channel.fees.commissionPercent}%):</span>
-                                        <span>{formatBRL(calculation.commissionValue)}</span>
+                                        <span className="text-gray-600">Preço:</span>
+                                        <span>{formatBRL(channel.data?.price || 0)}</span>
                                       </div>
-                                      {channel.fees.shippingCost && channel.fees.shippingCost > 0 && (
-                                        <div className="flex justify-between">
-                                          <span className="text-gray-600">Frete:</span>
-                                          <span>{formatBRL(channel.fees.shippingCost)}</span>
-                                        </div>
-                                      )}
-                                      {channel.fees.advertisingPercent && channel.fees.advertisingPercent > 0 && (
-                                        <div className="flex justify-between">
-                                          <span className="text-gray-600">Publicidade ({channel.fees.advertisingPercent}%):</span>
-                                          <span>{formatBRL(calculation.advertisingCost)}</span>
-                                        </div>
-                                      )}
                                       <div className="flex justify-between pt-1 border-t">
                                         <span className="text-gray-600">Lucro Líquido:</span>
                                         <span className={cn(

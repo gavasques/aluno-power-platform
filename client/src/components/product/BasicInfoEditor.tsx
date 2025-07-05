@@ -78,7 +78,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
   });
 
   // Load categories
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useQuery<Array<{ id: number; name: string }>>({
     queryKey: ["/api/departments"],
     enabled: isOpen,
   });
@@ -390,9 +390,9 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {(categories as any[])
-                                  .sort((a: any, b: any) => a.name.localeCompare(b.name))
-                                  .map((category: any) => (
+                                {categories
+                                  .sort((a, b) => a.name.localeCompare(b.name))
+                                  .map((category) => (
                                   <SelectItem key={category.id} value={category.id.toString()}>
                                     {category.name}
                                   </SelectItem>

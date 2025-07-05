@@ -111,6 +111,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 05:09 PM**: ✅ CORREÇÃO COMPLETA DE MAPEAMENTO DE PROPRIEDADES TypeScript
+  - **Erro Crítico Resolvido**: Lista de produtos mostrando erros de propriedades inexistentes
+    - Corrigido: `profitMarginPercent` → `marginPercent` em todos os locais
+    - Corrigido: `totalCost` → `totalCosts` 
+    - Removido: Referências a `commissionValue` e `advertisingCost` (propriedades inexistentes)
+  - **Visualização de Canais Corrigida**:
+    - `channel.name` → `CHANNEL_NAMES[channel.type]` (usando mapeamento correto)
+    - `channel.sellingPrice` → `channel.data?.price || 0`
+    - Key única usando template literals com type e index
+  - **BasicInfoEditor Tipagem Corrigida**:
+    - Adicionada tipagem para `categories` no useQuery: `Array<{ id: number; name: string }>`
+    - Removido cast desnecessário para `any[]`
+  - **Interface Funcionando**: Todos os componentes sem erros de TypeScript
+
 - **January 05, 2025 - 03:50 PM**: ✅ SISTEMA DE CANAIS COMPLETAMENTE REFATORADO COM CAMPOS ESPECÍFICOS POR CANAL
   - **ChannelsEditor Refatorado com Estrutura Dinâmica**:
     - Implementada estrutura CHANNEL_FIELDS com campos específicos para cada canal
