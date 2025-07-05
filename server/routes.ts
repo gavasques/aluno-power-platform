@@ -3951,13 +3951,23 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       const { email, password } = loginSchema.parse(req.body);
       
-      console.log('🔐 LOGIN DATA PARSED:', JSON.stringify({
+      console.log('🔐 LOGIN DATA PARSED:', {
         email,
-        passwordLength: password.length,
-        passwordHash: password.substring(0, 3) + '***'
-      }));
+        hasPassword: !!password
+      });
 
-      const user = await AuthService.authenticateUserByEmail(email, password);
+      let user;
+      
+      try {
+        user = await AuthService.authenticateUserByEmail(email, password);
+      } catch (authError) {
+        // Handle account lockout error
+        if (authError instanceof Error && authError.message.includes('Account locked')) {
+          console.log('🔐 LOGIN FAILED - Account locked due to too many failed attempts');
+          return res.status(403).json({ error: authError.message });
+        }
+        throw authError;
+      }
       
       console.log('🔐 AUTHENTICATION RESULT:', JSON.stringify({
         email,
@@ -4006,6 +4016,15 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   app.post('/api/auth/register', async (req, res) => {
     try {
       const userData = registerSchema.parse(req.body);
+      
+      // Validate password strength
+      const passwordValidation = AuthService.validatePasswordStrength(userData.password);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ 
+          error: 'Password does not meet security requirements',
+          details: passwordValidation.errors
+        });
+      }
       
       // Check if user already exists
       const existingUser = await AuthService.getUserByEmail(userData.email);

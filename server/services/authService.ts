@@ -4,8 +4,87 @@ import { db } from '../db';
 import { users, userSessions, userGroups, userGroupMembers } from '@shared/schema';
 import { eq, and, gt, sql } from 'drizzle-orm';
 import type { User, InsertUser, UserWithGroups } from '@shared/schema';
+import { EncryptionService } from '../utils/encryption';
+
+// In-memory store for failed login attempts (in production, use Redis or database)
+const failedAttempts = new Map<string, { count: number; lastAttempt: Date; lockoutUntil?: Date }>();
 
 export class AuthService {
+  // Account lockout configuration
+  static readonly MAX_LOGIN_ATTEMPTS = 5;
+  static readonly LOCKOUT_DURATION_MINUTES = 30;
+  static readonly ATTEMPT_WINDOW_MINUTES = 15;
+
+  // Check if account is locked
+  static isAccountLocked(email: string): { locked: boolean; minutesRemaining?: number } {
+    const attempts = failedAttempts.get(email);
+    if (!attempts || !attempts.lockoutUntil) {
+      return { locked: false };
+    }
+
+    const now = new Date();
+    if (now < attempts.lockoutUntil) {
+      const minutesRemaining = Math.ceil((attempts.lockoutUntil.getTime() - now.getTime()) / 60000);
+      return { locked: true, minutesRemaining };
+    }
+
+    // Lockout expired, reset attempts
+    failedAttempts.delete(email);
+    return { locked: false };
+  }
+
+  // Record failed login attempt
+  static recordFailedAttempt(email: string): void {
+    const now = new Date();
+    const attempts = failedAttempts.get(email) || { count: 0, lastAttempt: now };
+    
+    // Reset if outside window
+    const windowStart = new Date(now.getTime() - this.ATTEMPT_WINDOW_MINUTES * 60000);
+    if (attempts.lastAttempt < windowStart) {
+      attempts.count = 0;
+    }
+
+    attempts.count++;
+    attempts.lastAttempt = now;
+
+    // Lock account if exceeded max attempts
+    if (attempts.count >= this.MAX_LOGIN_ATTEMPTS) {
+      attempts.lockoutUntil = new Date(now.getTime() + this.LOCKOUT_DURATION_MINUTES * 60000);
+    }
+
+    failedAttempts.set(email, attempts);
+  }
+
+  // Clear failed attempts on successful login
+  static clearFailedAttempts(email: string): void {
+    failedAttempts.delete(email);
+  }
+  // Password strength requirements
+  static validatePasswordStrength(password: string): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    
+    if (password.length < 12) {
+      errors.push('Password must be at least 12 characters long');
+    }
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Password must contain at least one uppercase letter');
+    }
+    if (!/[a-z]/.test(password)) {
+      errors.push('Password must contain at least one lowercase letter');
+    }
+    if (!/[0-9]/.test(password)) {
+      errors.push('Password must contain at least one number');
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+      errors.push('Password must contain at least one special character');
+    }
+    
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
+
   // Hash password with bcrypt
   static async hashPassword(password: string): Promise<string> {
     const saltRounds = 12;
@@ -29,6 +108,12 @@ export class AuthService {
 
   // Create user
   static async createUser(userData: InsertUser): Promise<User> {
+    // Validate password strength
+    const passwordValidation = this.validatePasswordStrength(userData.password);
+    if (!passwordValidation.valid) {
+      throw new Error(`Password validation failed: ${passwordValidation.errors.join(', ')}`);
+    }
+    
     const hashedPassword = await this.hashPassword(userData.password);
     
     const [user] = await db
@@ -71,6 +156,13 @@ export class AuthService {
   static async authenticateUserByEmail(email: string, password: string): Promise<User | null> {
     console.log('🔍 AUTH SERVICE - Searching for user by email:', email);
     
+    // Check if account is locked
+    const lockStatus = this.isAccountLocked(email);
+    if (lockStatus.locked) {
+      console.log('🔍 AUTH SERVICE - Account locked', { email, minutesRemaining: lockStatus.minutesRemaining });
+      throw new Error(`Account locked due to too many failed login attempts. Try again in ${lockStatus.minutesRemaining} minutes.`);
+    }
+    
     const [user] = await db
       .select()
       .from(users)
@@ -86,6 +178,7 @@ export class AuthService {
 
     if (!user) {
       console.log('🔍 AUTH SERVICE - User not found in database');
+      this.recordFailedAttempt(email);
       return null;
     }
 
@@ -97,17 +190,19 @@ export class AuthService {
     console.log('🔍 AUTH SERVICE - Comparing passwords for user:', user.email);
     const isValidPassword = await this.comparePassword(password, user.password);
     
-    console.log('🔍 AUTH SERVICE - Password comparison result:', JSON.stringify({
+    console.log('🔍 AUTH SERVICE - Password comparison result:', {
       email: user.email,
-      isValidPassword,
-      providedPasswordLength: password.length,
-      storedHashLength: user.password.length
-    }));
+      isValidPassword
+    });
 
     if (!isValidPassword) {
       console.log('🔍 AUTH SERVICE - Password validation failed');
+      this.recordFailedAttempt(email);
       return null;
     }
+
+    // Clear failed attempts on successful login
+    this.clearFailedAttempts(email);
 
     // Update last login
     await db
@@ -123,14 +218,18 @@ export class AuthService {
     const sessionToken = this.generateSessionToken();
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
+    // Encrypt the session token before storing
+    const encryptedToken = EncryptionService.encrypt(sessionToken);
+
     await db
       .insert(userSessions)
       .values({
         userId,
-        sessionToken,
+        sessionToken: encryptedToken,
         expiresAt,
       });
 
+    // Return the unencrypted token to the user
     return sessionToken;
   }
 
@@ -138,31 +237,46 @@ export class AuthService {
   static async validateSession(sessionToken: string): Promise<User | null> {
     console.log('🔍 VALIDATE SESSION - Starting validation for token:', sessionToken.substring(0, 10) + '...');
     
-    const [session] = await db
-      .select({
-        user: users,
-        session: userSessions,
-      })
-      .from(userSessions)
-      .innerJoin(users, eq(userSessions.userId, users.id))
-      .where(
-        and(
-          eq(userSessions.sessionToken, sessionToken),
-          gt(userSessions.expiresAt, new Date()),
-          eq(users.isActive, true)
-        )
-      );
+    try {
+      // Get all active sessions
+      const sessions = await db
+        .select({
+          user: users,
+          session: userSessions,
+        })
+        .from(userSessions)
+        .innerJoin(users, eq(userSessions.userId, users.id))
+        .where(
+          and(
+            gt(userSessions.expiresAt, new Date()),
+            eq(users.isActive, true)
+          )
+        );
 
-    console.log('🔍 VALIDATE SESSION - Query result:', JSON.stringify({
-      sessionFound: !!session,
-      userFound: !!session?.user,
-      userId: session?.user?.id,
-      userEmail: session?.user?.email,
-      sessionExpiry: session?.session?.expiresAt,
-      isExpired: session?.session ? new Date() > session.session.expiresAt : 'no session'
-    }));
+      // Try to find a matching session by decrypting stored tokens
+      for (const session of sessions) {
+        try {
+          const decryptedToken = EncryptionService.decrypt(session.session.sessionToken);
+          if (decryptedToken === sessionToken) {
+            console.log('🔍 VALIDATE SESSION - Found matching session:', {
+              userId: session.user.id,
+              userEmail: session.user.email,
+              sessionExpiry: session.session.expiresAt
+            });
+            return session.user;
+          }
+        } catch (decryptError) {
+          // Skip sessions that can't be decrypted (may be from before encryption was implemented)
+          continue;
+        }
+      }
 
-    return session?.user || null;
+      console.log('🔍 VALIDATE SESSION - No matching session found');
+      return null;
+    } catch (error) {
+      console.error('🔍 VALIDATE SESSION - Error:', error);
+      return null;
+    }
   }
 
   // Get user with groups

@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Download, ExternalLink, Eye } from 'lucide-react';
 import type { MaterialViewerProps } from './MaterialTypes';
+import DOMPurify from 'isomorphic-dompurify';
 
 export const MaterialViewer: React.FC<MaterialViewerProps & { isOpen: boolean; onClose: () => void }> = ({
   material,
@@ -66,7 +67,7 @@ export const MaterialViewer: React.FC<MaterialViewerProps & { isOpen: boolean; o
           return (
             <div 
               className="w-full"
-              dangerouslySetInnerHTML={{ __html: material.embedCode }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(material.embedCode) }}
             />
           );
         } else if (material.embedUrl) {

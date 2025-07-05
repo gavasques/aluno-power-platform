@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { z } from 'zod';
+import crypto from 'crypto';
+import validator from 'validator';
 
 // Security headers middleware
 export const securityHeaders = (req: Request, res: Response, next: NextFunction) => {
@@ -109,6 +111,211 @@ export const sanitizeError = (error: any): { error: string; details?: string } =
     error: message,
     details: error.details || undefined
   };
+};
+
+// Input sanitization functions
+export const sanitizeInput = (input: string): string => {
+  if (!input || typeof input !== 'string') {
+    return '';
+  }
+  
+  // Trim whitespace
+  let sanitized = input.trim();
+  
+  // Remove null bytes
+  sanitized = sanitized.replace(/\0/g, '');
+  
+  // Escape HTML entities
+  sanitized = validator.escape(sanitized);
+  
+  // Remove control characters except newline and tab
+  sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  
+  return sanitized;
+};
+
+// Sanitize search query specifically
+export const sanitizeSearchQuery = (query: string): string => {
+  if (!query || typeof query !== 'string') {
+    return '';
+  }
+  
+  // Basic sanitization
+  let sanitized = sanitizeInput(query);
+  
+  // Limit length for search queries
+  sanitized = sanitized.substring(0, 100);
+  
+  // Remove SQL injection attempts
+  sanitized = sanitized.replace(/(['";\\])/g, '\\$1');
+  
+  // Remove common SQL keywords used in injection
+  const sqlKeywords = /\b(UNION|SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|SCRIPT|--)\b/gi;
+  sanitized = sanitized.replace(sqlKeywords, '');
+  
+  return sanitized;
+};
+
+// Sanitize filename
+export const sanitizeFilename = (filename: string): string => {
+  if (!filename || typeof filename !== 'string') {
+    return '';
+  }
+  
+  // Get base name to remove any path traversal attempts
+  const basename = filename.replace(/^.*[\\\/]/, '');
+  
+  // Remove special characters, keep only alphanumeric, dots, dashes, and underscores
+  let sanitized = basename.replace(/[^a-zA-Z0-9._-]/g, '_');
+  
+  // Limit length
+  if (sanitized.length > 255) {
+    const ext = sanitized.substring(sanitized.lastIndexOf('.'));
+    const name = sanitized.substring(0, sanitized.lastIndexOf('.'));
+    sanitized = name.substring(0, 255 - ext.length) + ext;
+  }
+  
+  return sanitized;
+};
+
+// Sanitize URL
+export const sanitizeUrl = (url: string): string => {
+  if (!url || typeof url !== 'string') {
+    return '';
+  }
+  
+  try {
+    // Validate URL
+    if (!validator.isURL(url, { 
+      protocols: ['http', 'https'],
+      require_protocol: true,
+      require_valid_protocol: true
+    })) {
+      return '';
+    }
+    
+    // Parse and reconstruct to ensure it's clean
+    const parsed = new URL(url);
+    
+    // Only allow http and https
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return '';
+    }
+    
+    return parsed.toString();
+  } catch (error) {
+    return '';
+  }
+};
+
+// Middleware to sanitize all query parameters
+export const sanitizeQueryParams = (req: Request, res: Response, next: NextFunction) => {
+  if (req.query) {
+    Object.keys(req.query).forEach(key => {
+      const value = req.query[key];
+      if (typeof value === 'string') {
+        req.query[key] = sanitizeInput(value);
+      } else if (Array.isArray(value)) {
+        req.query[key] = value.map(v => typeof v === 'string' ? sanitizeInput(v) : v);
+      }
+    });
+  }
+  next();
+};
+
+// Middleware to sanitize all body parameters
+export const sanitizeBody = (req: Request, res: Response, next: NextFunction) => {
+  if (req.body && typeof req.body === 'object') {
+    const sanitizeObject = (obj: any): any => {
+      const sanitized: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (typeof value === 'string') {
+          sanitized[key] = sanitizeInput(value);
+        } else if (Array.isArray(value)) {
+          sanitized[key] = value.map(v => 
+            typeof v === 'string' ? sanitizeInput(v) : 
+            typeof v === 'object' && v !== null ? sanitizeObject(v) : v
+          );
+        } else if (typeof value === 'object' && value !== null) {
+          sanitized[key] = sanitizeObject(value);
+        } else {
+          sanitized[key] = value;
+        }
+      }
+      return sanitized;
+    };
+    
+    req.body = sanitizeObject(req.body);
+  }
+  next();
+};
+
+// Middleware to sanitize search parameters
+export const sanitizeSearchParam = (req: Request, res: Response, next: NextFunction) => {
+  if (req.params.query) {
+    req.params.query = sanitizeSearchQuery(req.params.query);
+  }
+  
+  if (req.params.search) {
+    req.params.search = sanitizeSearchQuery(req.params.search);
+  }
+  
+  next();
+};
+
+// CSRF token generation and validation
+const csrfTokens = new Map<string, { token: string; createdAt: Date }>();
+
+export const generateCSRFToken = (sessionId: string): string => {
+  const token = crypto.randomBytes(32).toString('hex');
+  csrfTokens.set(sessionId, {
+    token,
+    createdAt: new Date()
+  });
+  
+  // Clean old tokens every hour
+  setTimeout(() => {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    for (const [sid, data] of csrfTokens.entries()) {
+      if (data.createdAt < oneHourAgo) {
+        csrfTokens.delete(sid);
+      }
+    }
+  }, 60 * 60 * 1000);
+  
+  return token;
+};
+
+export const validateCSRFToken = (sessionId: string, token: string): boolean => {
+  const storedData = csrfTokens.get(sessionId);
+  if (!storedData) return false;
+  
+  // Check if token is valid and not expired (1 hour)
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  return storedData.token === token && storedData.createdAt > oneHourAgo;
+};
+
+// CSRF protection middleware
+export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+  // Skip CSRF for GET, HEAD, OPTIONS requests
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return next();
+  }
+  
+  // Skip CSRF for public endpoints
+  const publicPaths = ['/api/auth/login', '/api/auth/register', '/api/health'];
+  if (publicPaths.includes(req.path)) {
+    return next();
+  }
+  
+  const sessionId = (req as any).sessionId;
+  const csrfToken = req.headers['x-csrf-token'] as string || req.body?._csrf;
+  
+  if (!sessionId || !csrfToken || !validateCSRFToken(sessionId, csrfToken)) {
+    return res.status(403).json({ error: 'Invalid or missing CSRF token' });
+  }
+  
+  next();
 };
 
 // Authentication middleware

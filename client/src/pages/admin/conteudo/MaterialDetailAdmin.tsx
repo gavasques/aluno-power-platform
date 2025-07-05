@@ -5,6 +5,7 @@ import { useMaterials } from '@/contexts/MaterialsContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import DOMPurify from 'isomorphic-dompurify';
 import {
   ArrowLeft,
   Download,
@@ -87,7 +88,7 @@ const MaterialViewer = ({ material }: { material: Material }) => {
         return (
           <div 
             className="w-full min-h-64 border border-border rounded-lg p-4"
-            dangerouslySetInnerHTML={{ __html: material.embedCode || '' }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(material.embedCode || '') }}
           />
         );
 
