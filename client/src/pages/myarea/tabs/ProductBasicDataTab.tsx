@@ -325,7 +325,11 @@ export default function ProductBasicDataTab({
             <FormField
               control={form.control}
               name="brandId"
-              render={({ field }) => (
+              render={({ field }) => {
+                console.log("🔍 [BRAND_SELECT] Field value:", field.value);
+                console.log("🔍 [BRAND_SELECT] Available brands:", brands);
+                console.log("🔍 [BRAND_SELECT] Loading brands:", loadingBrands);
+                return (
                 <FormItem>
                   <FormLabel>Marca</FormLabel>
                   <Select 
@@ -378,7 +382,8 @@ export default function ProductBasicDataTab({
                   </div>
                   <FormMessage />
                 </FormItem>
-              )}
+                );
+              }}
             />
 
             <FormField

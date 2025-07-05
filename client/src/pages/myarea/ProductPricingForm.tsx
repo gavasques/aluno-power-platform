@@ -138,6 +138,10 @@ export default function ProductPricingForm() {
   // Update form when product is loaded
   useEffect(() => {
     if (existingProduct && isEditing) {
+      console.log("🔍 [PRODUCT_PRICING_FORM] Existing product data:", existingProduct);
+      console.log("🔍 [PRODUCT_PRICING_FORM] BrandId from product:", existingProduct?.brandId);
+      console.log("🔍 [PRODUCT_PRICING_FORM] Category from product:", existingProduct?.category);
+      
       // Map existing product data to form structure
       const productDimensions = existingProduct?.dimensions || {
         length: 0,
@@ -148,7 +152,7 @@ export default function ProductPricingForm() {
       form.reset({
         id: existingProduct?.id,
         name: existingProduct?.name || "",
-        sku: existingProduct?.sku || "",
+        sku: existingProduct?.sku || existingProduct?.internalCode || "", // Use internalCode as fallback if SKU is empty
         freeCode: existingProduct?.freeCode || "",
         supplierCode: existingProduct?.supplierCode || "",
         photo: existingProduct?.photo || "",
@@ -165,6 +169,12 @@ export default function ProductPricingForm() {
           observations: existingProduct?.observations || "",
         },
         channels: existingProduct?.channels || [],
+      });
+      
+      console.log("🔍 [PRODUCT_PRICING_FORM] Form reset values:", {
+        brandId: existingProduct?.brandId?.toString() || "",
+        categoryId: existingProduct?.category?.toString() || existingProduct?.categoryId?.toString() || "",
+        sku: existingProduct?.sku || existingProduct?.internalCode || ""
       });
       
       // Calculate cubic weight for loaded product

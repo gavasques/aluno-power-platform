@@ -111,6 +111,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 09:05 PM**: ✅ CORREÇÃO DE CAMPOS DO FORMULÁRIO DE PRODUTOS IMPLEMENTADA
+  - **SKU Field Fix**: Implementado fallback para usar internalCode quando SKU está vazio
+    - BasicInfoEditor (modal): ✅ Já corrigido anteriormente 
+    - ProductPricingForm (formulário principal): ✅ Corrigido agora com mesma lógica
+    - Código: `sku: existingProduct?.sku || existingProduct?.internalCode || ""`
+  - **Debug Logging Adicionado**: 
+    - ProductPricingForm agora loga dados carregados do produto existente
+    - ProductBasicDataTab loga valores de brandId e categoryId em tempo real
+    - Logs de debug para brand select adicionados com valores e marcas disponíveis
+  - **Próximos Passos**: Monitorar logs do console para verificar timing de carregamento de dados
+
 - **January 05, 2025 - 08:30 PM**: ✅ IMPLEMENTAÇÃO FRONTEND-BACKEND COMPLETA DO CAMPO "TAXA FIXA MARKETPLACE R$" FINALIZADA
   - **Problema Crítico Resolvido**: Campo implementado no backend mas ausente na interface do usuário
     - Frontend-Backend Disconnect: Campo existia nos cálculos mas não estava visível para os usuários
