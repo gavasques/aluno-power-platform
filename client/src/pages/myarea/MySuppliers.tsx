@@ -1,22 +1,54 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Link } from 'wouter';
-import { SearchIcon, Building2, Globe, Star, Plus, Eye } from 'lucide-react';
+import { SearchIcon, Building2, Globe, Star, Plus, Eye, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 import { Supplier } from '@shared/schema';
 
 const MySuppliers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Buscar fornecedores
   const { data: suppliers = [], isLoading } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
   });
+
+  // Mutation para deletar fornecedor
+  const deleteMutation = useMutation({
+    mutationFn: async (supplierId: number) => {
+      return apiRequest(`/api/suppliers/${supplierId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/suppliers'] });
+      toast({
+        title: 'Fornecedor excluído',
+        description: 'O fornecedor foi removido com sucesso.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao excluir',
+        description: error.message || 'Não foi possível excluir o fornecedor.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleDeleteSupplier = (supplierId: number) => {
+    deleteMutation.mutate(supplierId);
+  };
 
 
 
@@ -122,12 +154,46 @@ const MySuppliers = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Link href={`/minha-area/fornecedores/${supplier.id}`}>
-                      <Button size="sm" variant="outline">
-                        <Eye className="h-3 w-3 mr-1" />
-                        Ver Detalhes
-                      </Button>
-                    </Link>
+                    <div className="flex gap-2">
+                      <Link href={`/minha-area/fornecedores/${supplier.id}`}>
+                        <Button size="sm" variant="outline">
+                          <Eye className="h-3 w-3 mr-1" />
+                          Ver Detalhes
+                        </Button>
+                      </Link>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Excluir
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir o fornecedor "{supplier.tradeName}"? 
+                              Esta ação não pode ser desfeita e todos os dados relacionados serão perdidos.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteSupplier(supplier.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Sim, excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
