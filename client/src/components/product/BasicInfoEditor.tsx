@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -72,7 +73,6 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [newBrandName, setNewBrandName] = useState("");
-  const [showCreateBrand, setShowCreateBrand] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -113,7 +113,6 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
       queryClient.invalidateQueries({ queryKey: ["/api/brands"] });
       form.setValue("brandId", newBrand.id.toString());
       setNewBrandName("");
-      setShowCreateBrand(false);
       toast({
         title: "Marca criada",
         description: `A marca "${newBrand.name}" foi criada com sucesso.`,
@@ -408,72 +407,56 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
                               <span className="text-sm text-muted-foreground">Carregando marcas...</span>
                             </div>
                           ) : (
-                            <div className="space-y-2">
-                              <div className="flex gap-2">
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger className="flex-1">
-                                      <SelectValue placeholder="Selecione uma marca" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {brands
-                                      .sort((a, b) => a.name.localeCompare(b.name))
-                                      .map((brand) => (
-                                      <SelectItem key={brand.id} value={brand.id.toString()}>
-                                        {brand.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setShowCreateBrand(true)}
-                                  className="px-3 shrink-0"
-                                >
-                                  <Plus className="h-4 w-4" />
-                                </Button>
-                              </div>
+                            <div className="space-y-3">
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione uma marca" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {brands
+                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                    .map((brand) => (
+                                    <SelectItem key={brand.id} value={brand.id.toString()}>
+                                      {brand.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                               
-                              {showCreateBrand && (
-                                <div className="flex gap-2 p-3 border rounded-lg bg-muted/50">
-                                  <Input
-                                    placeholder="Nome da nova marca"
-                                    value={newBrandName}
-                                    onChange={(e) => setNewBrandName(e.target.value)}
-                                    className="flex-1"
-                                  />
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={() => {
+                              <div>
+                                <Label htmlFor="newBrandInput" className="text-sm text-muted-foreground">
+                                  Inserir Marca
+                                </Label>
+                                <Input
+                                  id="newBrandInput"
+                                  placeholder="Digite o nome da nova marca e pressione Enter"
+                                  value={newBrandName}
+                                  onChange={(e) => setNewBrandName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
                                       if (newBrandName.trim()) {
                                         createBrandMutation.mutate(newBrandName.trim());
                                       }
-                                    }}
-                                    disabled={!newBrandName.trim() || createBrandMutation.isPending}
-                                  >
-                                    {createBrandMutation.isPending ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      "Criar"
-                                    )}
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setShowCreateBrand(false);
-                                      setNewBrandName("");
-                                    }}
-                                  >
-                                    Cancelar
-                                  </Button>
-                                </div>
-                              )}
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    if (newBrandName.trim()) {
+                                      createBrandMutation.mutate(newBrandName.trim());
+                                    }
+                                  }}
+                                  disabled={createBrandMutation.isPending}
+                                  className="mt-1"
+                                />
+                                {createBrandMutation.isPending && (
+                                  <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                                    <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                                    Criando marca...
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           )}
                           <FormMessage />
