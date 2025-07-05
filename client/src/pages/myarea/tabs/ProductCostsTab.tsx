@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { PercentInput } from "@/components/ui/percent-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 import { 
   DollarSign, 
   Calculator,
@@ -17,7 +19,9 @@ import {
   TrendingUp,
   Info,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Save,
+  Loader2
 } from "lucide-react";
 import { formatBRL, formatPercent } from "@/utils/pricingCalculations";
 import { format } from "date-fns";
@@ -25,22 +29,63 @@ import { ptBR } from "date-fns/locale";
 
 interface ProductCostsTabProps {
   form: UseFormReturn<any>;
+  isEditing?: boolean;
+  productId?: string;
 }
 
-export default function ProductCostsTab({ form }: ProductCostsTabProps) {
+export default function ProductCostsTab({ form, isEditing, productId }: ProductCostsTabProps) {
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
   const productCost = form.watch("costs.currentCost") || 0;
   const taxPercent = form.watch("costs.taxPercent") || 0;
-  const productId = form.watch("id");
+  const formProductId = form.watch("id");
   const [costHistory, setCostHistory] = React.useState<any[]>([]);
 
+  // Save costs function
+  const saveCosts = async () => {
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      const costsData = {
+        costs: form.getValues("costs")
+      };
+
+      const response = await fetch(`/api/products/${productId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(costsData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Custos salvos",
+          description: "Os dados de custos foram salvos com sucesso.",
+        });
+      } else {
+        throw new Error("Erro ao salvar custos");
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar os custos. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   React.useEffect(() => {
-    if (productId) {
-      fetch(`/api/products/${productId}/cost-history`)
+    if (formProductId) {
+      fetch(`/api/products/${formProductId}/cost-history`)
         .then(res => res.json())
         .then(data => setCostHistory(data))
         .catch(err => console.error('Error fetching cost history:', err));
     }
-  }, [productId]);
+  }, [formProductId]);
 
   return (
     <div className="space-y-6">
@@ -122,6 +167,30 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
               </FormItem>
             )}
           />
+
+          {/* Save Button */}
+          {isEditing && (
+            <div className="pt-4 border-t">
+              <Button 
+                onClick={saveCosts}
+                disabled={isSaving}
+                className="w-full"
+                variant="default"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Salvar Custos
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

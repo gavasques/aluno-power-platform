@@ -114,20 +114,7 @@ export default function PricingChannelCard({
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor={`${channel.id}-competitor`}>Preço Concorrência</Label>
-              <div className="relative">
-                <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id={`${channel.id}-competitor`}
-                  type="number"
-                  step="0.01"
-                  value={channel.competitorPrice || ''}
-                  onChange={(e) => handleFieldUpdate('competitorPrice', parseFloat(e.target.value) || 0)}
-                  className="pl-8"
-                />
-              </div>
-            </div>
+{/* Preços de Concorrência removidos conforme solicitação do usuário */}
           </div>
 
           {/* Competitor Comparison */}

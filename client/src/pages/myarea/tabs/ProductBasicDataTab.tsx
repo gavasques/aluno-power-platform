@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Image, 
   Upload, 
@@ -15,23 +16,33 @@ import {
   Weight,
   Barcode,
   Building,
-  Factory
+  Factory,
+  Save,
+  Loader2
 } from "lucide-react";
 import { formatBRL } from "@/utils/pricingCalculations";
+import { useState } from "react";
 
 interface ProductBasicDataTabProps {
   form: UseFormReturn<any>;
   imageFile: File | null;
   setImageFile: (file: File | null) => void;
   calculatedCubicWeight: number;
+  isEditing?: boolean;
+  productId?: string;
 }
 
 export default function ProductBasicDataTab({ 
   form, 
   imageFile, 
   setImageFile,
-  calculatedCubicWeight 
+  calculatedCubicWeight,
+  isEditing,
+  productId
 }: ProductBasicDataTabProps) {
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+  
   // Load categories
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/departments"],
@@ -42,8 +53,74 @@ export default function ProductBasicDataTab({
     queryKey: ["/api/suppliers"],
   });
 
-  // Handle image upload
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Save basic information
+  const saveBasicInfo = async () => {
+    try {
+      setIsSaving(true);
+      const values = form.getValues();
+      const token = localStorage.getItem("token");
+      
+      const formData = new FormData();
+      
+      // Add basic fields
+      formData.append("name", values.name || "");
+      formData.append("sku", values.sku || "");
+      if (values.freeCode) formData.append("freeCode", values.freeCode);
+      if (values.supplierCode) formData.append("supplierCode", values.supplierCode);
+      if (values.ean) formData.append("ean", values.ean);
+      if (values.brand) formData.append("brand", values.brand);
+      if (values.categoryId) formData.append("categoryId", values.categoryId);
+      if (values.supplierId) formData.append("supplierId", values.supplierId);
+      if (values.ncm) formData.append("ncm", values.ncm);
+      
+      // Add dimensions and weight
+      if (values.dimensions) {
+        formData.append("dimensions", JSON.stringify(values.dimensions));
+      }
+      if (values.weight !== undefined) {
+        formData.append("weight", values.weight.toString());
+        formData.append("calculatedWeight", Math.max(values.weight, calculatedCubicWeight).toString());
+      }
+      
+      // Add image if selected
+      if (imageFile) {
+        formData.append("photo", imageFile);
+      }
+      
+      const url = isEditing ? `/api/products/${productId}` : "/api/products";
+      const method = isEditing ? "PUT" : "POST";
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erro ao salvar");
+      }
+      
+      toast({
+        title: "Informações básicas salvas",
+        description: "As informações básicas foram salvas com sucesso.",
+      });
+      
+    } catch (error) {
+      toast({
+        title: "Erro ao salvar",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle image upload with automatic save
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validate file size (3MB max)
@@ -72,6 +149,33 @@ export default function ProductBasicDataTab({
         form.setValue("photo", reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Auto-save photo if editing existing product
+      if (isEditing && productId) {
+        try {
+          const token = localStorage.getItem("token");
+          const formData = new FormData();
+          formData.append("photo", file);
+          
+          const response = await fetch(`/api/products/${productId}`, {
+            method: "PUT",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+            },
+            body: formData,
+          });
+          
+          if (response.ok) {
+            toast({
+              title: "Foto salva automaticamente",
+              description: "A imagem foi salva com sucesso.",
+            });
+          }
+        } catch (error) {
+          // Silent fail for auto-save - don't disrupt user experience
+          console.error("Auto-save failed:", error);
+        }
+      }
     }
   };
 
@@ -453,6 +557,27 @@ export default function ProductBasicDataTab({
           )}
         </CardContent>
       </Card>
+
+      {/* Save Button for Basic Information */}
+      <div className="flex justify-end pt-4">
+        <Button 
+          onClick={saveBasicInfo}
+          disabled={isSaving}
+          className="min-w-[150px]"
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Salvando...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Salvar Informações
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

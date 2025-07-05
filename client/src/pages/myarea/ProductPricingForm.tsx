@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
 import { 
   PricingProduct, 
@@ -73,6 +74,8 @@ export default function ProductPricingForm() {
   const { id } = useParams();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const auth = useAuth();
+  const token = localStorage.getItem("token");
   const [activeTab, setActiveTab] = useState("basic");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [calculatedCubicWeight, setCalculatedCubicWeight] = useState(0);
@@ -298,10 +301,9 @@ export default function ProductPricingForm() {
         
         const url = isEditing ? `/api/products/${id}` : "/api/products";
         const method = isEditing ? "PUT" : "POST";
-        const token = localStorage.getItem("token");
         
         console.log("📤 Enviando para:", url, "Método:", method);
-        console.log("🔑 Token presente:", !!token, token ? token.substring(0, 20) + "..." : "Sem token");
+        console.log("🔑 Token do useAuth:", !!token, token ? token.substring(0, 20) + "..." : "Sem token");
         
         const response = await fetch(url, {
           method,
@@ -421,11 +423,17 @@ export default function ProductPricingForm() {
                 imageFile={imageFile}
                 setImageFile={setImageFile}
                 calculatedCubicWeight={calculatedCubicWeight}
+                isEditing={isEditing}
+                productId={id}
               />
             </TabsContent>
 
             <TabsContent value="costs">
-              <ProductCostsTab form={form} />
+              <ProductCostsTab 
+                form={form} 
+                isEditing={isEditing}
+                productId={id}
+              />
             </TabsContent>
 
             <TabsContent value="channels">
@@ -448,30 +456,6 @@ export default function ProductPricingForm() {
               onClick={() => navigate("/minha-area/produtos")}
             >
               Cancelar
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                console.log("🖱️ [Botão Salvar e Continuar] Clicado!");
-                form.handleSubmit(handleSaveAndContinue)();
-              }}
-              disabled={saveMutation.isPending}
-            >
-              {saveMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Salvar e Continuar
-            </Button>
-            <Button type="submit" disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Salvar
             </Button>
           </div>
         </form>
