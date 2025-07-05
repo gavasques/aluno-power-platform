@@ -161,7 +161,8 @@ export default function MyProductsList() {
 
   // Filter products based on search
   const filteredProducts = useMemo(() => {
-    return products.filter((product: any) =>
+    if (!Array.isArray(products)) return [];
+    return (products as Product[]).filter((product: Product) =>
       product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||

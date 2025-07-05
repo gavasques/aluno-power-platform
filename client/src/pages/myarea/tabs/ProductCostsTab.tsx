@@ -8,16 +8,13 @@ import { Button } from "@/components/ui/button";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { PercentInput } from "@/components/ui/percent-input";
 import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import { useToast } from "@/hooks/use-toast";
 import { 
   DollarSign, 
-  Calculator,
   History,
   Percent,
   FileText,
-  TrendingUp,
-  Info,
   Clock,
   ArrowRight,
   Save,
@@ -227,31 +224,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
         </CardContent>
       </Card>
 
-      {/* Cost Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
-            Resumo do Custo
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg text-center">
-              <p className="text-sm text-blue-700 font-semibold mb-1">Custo Final do Produto</p>
-              <p className="text-3xl font-bold text-blue-900">{formatBRL(productCost)}</p>
-            </div>
 
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Este é o custo final já incluindo TODOS os custos (produto, impostos, frete, embalagem, etc). 
-                O percentual de impostos será aplicado apenas sobre o preço de venda nos canais.
-              </AlertDescription>
-            </Alert>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Cost History */}
       <Card>
@@ -337,45 +310,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
         </CardContent>
       </Card>
 
-      {/* Cost Tips */}
-      <Card className="bg-amber-50 border-amber-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-amber-900">
-            <TrendingUp className="h-5 w-5" />
-            Dicas para Gestão de Custos
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-amber-800">
-          <div className="flex items-start gap-2">
-            <Badge variant="outline" className="mt-0.5">1</Badge>
-            <p>
-              <strong>Custo final completo:</strong> Inclua TUDO no custo: produto, impostos (PIS, COFINS, ICMS, IPI), 
-              frete, embalagem, etiquetas, diferencial de alíquota - esse é o custo real final.
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <Badge variant="outline" className="mt-0.5">2</Badge>
-            <p>
-              <strong>Impostos sobre venda:</strong> O percentual de impostos será aplicado APENAS sobre o 
-              preço de venda nos canais, nunca sobre o custo.
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <Badge variant="outline" className="mt-0.5">3</Badge>
-            <p>
-              <strong>Atualização regular:</strong> Revise os custos mensalmente ou sempre que 
-              houver mudança significativa em impostos, frete ou fornecedores.
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <Badge variant="outline" className="mt-0.5">4</Badge>
-            <p>
-              <strong>Negociação:</strong> Busque melhores condições com fornecedores para 
-              reduzir o custo unitário.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }
