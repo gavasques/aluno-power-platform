@@ -45,7 +45,7 @@ const productFormSchema = z.object({
   supplierCode: z.string().optional(),
   photo: z.string().optional(),
   ean: z.string().optional(),
-  brand: z.string().optional(),
+  brandId: z.string().optional(),
   categoryId: z.string().min(1, "Categoria é obrigatória"),
   supplierId: z.string().min(1, "Fornecedor é obrigatório"),
   ncm: z.string().optional(),
@@ -97,7 +97,7 @@ export default function ProductPricingForm() {
       supplierCode: "",
       photo: "",
       ean: "",
-      brand: "",
+      brandId: "",
       categoryId: "",
       supplierId: "",
       ncm: "",
@@ -153,8 +153,8 @@ export default function ProductPricingForm() {
         supplierCode: existingProduct?.supplierCode || "",
         photo: existingProduct?.photo || "",
         ean: existingProduct?.ean || "",
-        brand: existingProduct?.brandId?.toString() || "",
-        categoryId: existingProduct?.categoryId?.toString() || "",
+        brandId: existingProduct?.brandId?.toString() || "",
+        categoryId: existingProduct?.category?.toString() || existingProduct?.categoryId?.toString() || "",
         supplierId: existingProduct?.supplierId?.toString() || "",
         ncm: existingProduct?.ncm || "",
         dimensions: productDimensions,
@@ -186,7 +186,7 @@ export default function ProductPricingForm() {
       if (data.freeCode) formData.append("freeCode", data.freeCode);
       if (data.supplierCode) formData.append("supplierCode", data.supplierCode);
       if (data.ean) formData.append("ean", data.ean);
-      if (data.brand) formData.append("brandId", data.brand);
+      if (data.brandId) formData.append("brandId", data.brandId);
       formData.append("categoryId", data.categoryId);
       formData.append("supplierId", data.supplierId);
       if (data.ncm) formData.append("ncm", data.ncm);
@@ -278,7 +278,7 @@ export default function ProductPricingForm() {
         if (data.freeCode) formData.append("freeCode", data.freeCode);
         if (data.supplierCode) formData.append("supplierCode", data.supplierCode);
         if (data.ean) formData.append("ean", data.ean);
-        if (data.brand) formData.append("brandId", data.brand);
+        if (data.brandId) formData.append("brandId", data.brandId);
         formData.append("categoryId", data.categoryId);
         formData.append("supplierId", data.supplierId);
         if (data.ncm) formData.append("ncm", data.ncm);

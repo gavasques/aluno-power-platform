@@ -115,7 +115,7 @@ export default function ProductBasicDataTab({
       console.log("🔍 [BASIC_INFO_FRONTEND] Form values:", values);
       console.log("🔍 [BASIC_INFO_FRONTEND] SKU:", values.sku);
       console.log("🔍 [BASIC_INFO_FRONTEND] Category:", values.categoryId);
-      console.log("🔍 [BASIC_INFO_FRONTEND] Brand:", values.brand);
+      console.log("🔍 [BASIC_INFO_FRONTEND] Brand:", values.brandId);
       
       const formData = new FormData();
       
@@ -125,7 +125,7 @@ export default function ProductBasicDataTab({
       if (values.freeCode) formData.append("freeCode", values.freeCode);
       if (values.supplierCode) formData.append("supplierCode", values.supplierCode);
       if (values.ean) formData.append("ean", values.ean);
-      if (values.brand) formData.append("brandId", values.brand);
+      if (values.brandId) formData.append("brandId", values.brandId);
       if (values.categoryId) formData.append("categoryId", values.categoryId);
       if (values.supplierId) formData.append("supplierId", values.supplierId);
       if (values.ncm) formData.append("ncm", values.ncm);
@@ -317,7 +317,7 @@ export default function ProductBasicDataTab({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="brand"
+              name="brandId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Marca</FormLabel>
