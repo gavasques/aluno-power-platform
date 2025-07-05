@@ -29,10 +29,10 @@ import {
 } from "lucide-react";
 
 // Import tab components
-import ProductBasicDataTab from "./tabs/ProductBasicDataTab";
-import ProductCostsTab from "./tabs/ProductCostsTab";
-import ProductChannelsTab from "./tabs/ProductChannelsTab";
-import ProductResultsTab from "./tabs/ProductResultsTab";
+import ProductBasicDataTab from "@/pages/myarea/tabs/ProductBasicDataTab";
+import ProductCostsTab from "@/pages/myarea/tabs/ProductCostsTab";
+import ProductChannelsTab from "@/pages/myarea/tabs/ProductChannelsTab";
+import ProductResultsTab from "@/pages/myarea/tabs/ProductResultsTab";
 
 // Form schema
 const productFormSchema = z.object({

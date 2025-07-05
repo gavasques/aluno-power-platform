@@ -7,7 +7,7 @@ import ProductFormNew from "../components/product/ProductFormNew";
 import ProductEditForm from "../components/product/ProductEditForm";
 import ProductDetail from "./myarea/ProductDetail";
 import ProductPricing from "./myarea/ProductPricing";
-import ProductPricingForm from "./myarea/ProductPricingForm";
+import ProductPricingForm from "./myarea/ProductPricingFormSimple";
 import SupplierDetailRefactored from "./myarea/SupplierDetailRefactored";
 import MaterialDetail from "./myarea/MaterialDetail";
 import MaterialForm from "./myarea/MaterialForm";
