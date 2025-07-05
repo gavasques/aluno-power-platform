@@ -75,7 +75,6 @@ export default function ProductPricingForm() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const auth = useAuth();
-  const token = localStorage.getItem("auth_token");
   const [activeTab, setActiveTab] = useState("basic");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [calculatedCubicWeight, setCalculatedCubicWeight] = useState(0);
@@ -276,14 +275,14 @@ export default function ProductPricingForm() {
         formData.append("supplierId", data.supplierId);
         if (data.ncm) formData.append("ncm", data.ncm);
         
-        // Add dimensions and weight
+        // Add dimensions and weight (as strings for backend compatibility)
         formData.append("dimensions", JSON.stringify(data.dimensions));
-        formData.append("weight", data.weight.toString());
-        formData.append("calculatedWeight", Math.max(data.weight, calculatedCubicWeight).toString());
+        formData.append("weight", String(data.weight));
+        formData.append("calculatedWeight", String(Math.max(data.weight, calculatedCubicWeight)));
         
-        // Add costs
-        formData.append("costItem", data.costs.currentCost.toString());
-        formData.append("taxPercent", data.costs.taxPercent.toString());
+        // Add costs (as strings for backend compatibility)
+        formData.append("costItem", String(data.costs.currentCost));
+        formData.append("taxPercent", String(data.costs.taxPercent));
         formData.append("packCost", "0");
         if (data.costs.observations) {
           formData.append("observations", data.costs.observations);
@@ -303,12 +302,13 @@ export default function ProductPricingForm() {
         const method = isEditing ? "PUT" : "POST";
         
         console.log("📤 Enviando para:", url, "Método:", method);
-        console.log("🔑 Token do useAuth:", !!token, token ? token.substring(0, 20) + "..." : "Sem token");
+        const currentToken = localStorage.getItem("auth_token");
+        console.log("🔑 Token atual:", !!currentToken, currentToken ? currentToken.substring(0, 20) + "..." : "Sem token");
         
         const response = await fetch(url, {
           method,
           headers: {
-            "Authorization": `Bearer ${token}`,
+            "Authorization": `Bearer ${currentToken}`,
           },
           body: formData,
         });

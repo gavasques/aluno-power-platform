@@ -26,17 +26,22 @@ export function PercentInput({ value, onChange, ...props }: PercentInputProps) {
     if (value === undefined || value === null || value === 0) return '';
     return formatPercent(value);
   });
+  const [isUserInput, setIsUserInput] = React.useState(false);
 
   React.useEffect(() => {
-    if (value === undefined || value === null || value === 0) {
-      setDisplayValue('');
-    } else {
-      setDisplayValue(formatPercent(value));
+    // Só atualiza se não for input do usuário
+    if (!isUserInput) {
+      if (value === undefined || value === null || value === 0) {
+        setDisplayValue('');
+      } else {
+        setDisplayValue(formatPercent(value));
+      }
     }
-  }, [value]);
+  }, [value, isUserInput]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
+    setIsUserInput(true);
     
     // Se estiver vazio, limpa o valor
     if (!inputValue) {
@@ -57,6 +62,7 @@ export function PercentInput({ value, onChange, ...props }: PercentInputProps) {
   };
 
   const handleBlur = () => {
+    setIsUserInput(false);
     if (displayValue) {
       const numericValue = parsePercent(displayValue);
       if (!isNaN(numericValue) && numericValue >= 0) {
