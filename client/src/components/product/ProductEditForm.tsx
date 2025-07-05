@@ -29,7 +29,7 @@ export default function ProductEditForm() {
   const queryClient = useQueryClient();
   const params = useParams();
   const productId = params.id;
-  
+
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     sku: "",
@@ -91,11 +91,11 @@ export default function ProductEditForm() {
         },
         body: JSON.stringify(productData)
       });
-      
+
       if (!response.ok) {
         throw new Error('Falha ao atualizar produto');
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -118,7 +118,7 @@ export default function ProductEditForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast({
         title: "Erro",
@@ -127,7 +127,7 @@ export default function ProductEditForm() {
       });
       return;
     }
-    
+
     updateMutation.mutate(formData);
   };
 

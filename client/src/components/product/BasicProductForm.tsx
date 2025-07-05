@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormattedInput } from "@/components/ui/formatted-input";
 import { Upload, Package, Ruler, DollarSign, Hash, Building2, Tag, Code, FileText } from "lucide-react";
+import { ImageFallback } from "@/components/ui/image-fallback";
 
 interface BasicProductFormProps {
   productData: {
@@ -58,6 +59,13 @@ export const BasicProductForm = ({
                   src={productData.photo} 
                   alt="Preview" 
                   className="w-32 h-32 object-cover mx-auto rounded-lg border-2 border-muted"
+                  onError={(e) => {
+                    console.error('Erro ao carregar imagem:', productData.photo);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                  onLoad={() => {
+                    console.log('Imagem carregada com sucesso:', productData.photo);
+                  }}
                 />
                 <p className="text-sm text-muted-foreground">Clique para alterar a foto</p>
               </div>
