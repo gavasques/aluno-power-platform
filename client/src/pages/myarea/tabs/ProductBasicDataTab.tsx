@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
+import { Label } from "@/components/ui/label";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Image, 
   Upload, 
@@ -41,7 +43,10 @@ export default function ProductBasicDataTab({
   productId
 }: ProductBasicDataTabProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
+  const [newBrandName, setNewBrandName] = useState("");
+  const [isCreatingBrand, setIsCreatingBrand] = useState(false);
   
   // Load categories
   const { data: categories = [] } = useQuery({
@@ -52,6 +57,53 @@ export default function ProductBasicDataTab({
   const { data: suppliers = [] } = useQuery({
     queryKey: ["/api/suppliers"],
   });
+
+  // Load brands
+  const { data: brands = [], isLoading: loadingBrands } = useQuery({
+    queryKey: ["/api/brands"],
+  });
+
+  // Create brand mutation
+  const createBrandMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const response = await apiRequest("/api/brands", {
+        method: "POST",
+        body: JSON.stringify({ name }),
+      });
+      return response;
+    },
+    onSuccess: (newBrand: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/brands"] });
+      form.setValue("brand", newBrand.id.toString());
+      setNewBrandName("");
+      toast({
+        title: "Marca criada",
+        description: `A marca "${newBrand.name}" foi criada com sucesso!`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao criar marca",
+        description: error.message || "Não foi possível criar a marca",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateBrand = async () => {
+    if (!newBrandName.trim()) {
+      toast({
+        title: "Nome inválido",
+        description: "Por favor, insira um nome para a marca",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreatingBrand(true);
+    await createBrandMutation.mutateAsync(newBrandName.trim());
+    setIsCreatingBrand(false);
+  };
 
   // Save basic information
   const saveBasicInfo = async () => {
@@ -264,9 +316,54 @@ export default function ProductBasicDataTab({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Marca</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Ex: Apple, Samsung" />
-                  </FormControl>
+                  <Select 
+                    onValueChange={(value) => field.onChange(value)}
+                    value={field.value}
+                    disabled={loadingBrands}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={loadingBrands ? "Carregando marcas..." : "Selecione uma marca"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {(brands as any[])?.map((brand: any) => (
+                        <SelectItem key={brand.id} value={brand.id.toString()}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <div className="mt-2 space-y-2">
+                    <Label className="text-sm text-muted-foreground">Inserir Marca</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Nova marca"
+                        value={newBrandName}
+                        onChange={(e) => setNewBrandName(e.target.value)}
+                        disabled={isCreatingBrand}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleCreateBrand();
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleCreateBrand}
+                        disabled={isCreatingBrand || !newBrandName.trim()}
+                      >
+                        {isCreatingBrand ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Criar"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
