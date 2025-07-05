@@ -14,15 +14,18 @@ export interface ProductBaseData {
 }
 
 export interface ChannelData {
-  price?: string;
-  [key: string]: string | undefined;
+  price?: string | number;
+  [key: string]: string | number | undefined;
 }
 
-// Convert string values to numbers, handling Brazilian formatting
-const parseValue = (value: string | undefined): number => {
-  if (!value) return 0;
+// Convert string or number values to numbers, handling Brazilian formatting
+const parseValue = (value: string | number | undefined): number => {
+  if (!value && value !== 0) return 0;
   
-  // Remove R$, %, and spaces, replace comma with dot
+  // If it's already a number, return it
+  if (typeof value === 'number') return value;
+  
+  // If it's a string, clean it up and convert
   const cleanValue = value
     .replace(/[R$%\s]/g, '')
     .replace(',', '.');
