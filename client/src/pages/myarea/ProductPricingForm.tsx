@@ -83,6 +83,9 @@ export default function ProductPricingForm() {
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: "",
+      sku: "",
+      freeCode: "",
+      supplierCode: "",
       photo: "",
       ean: "",
       brand: "",

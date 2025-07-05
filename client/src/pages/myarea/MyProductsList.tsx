@@ -294,8 +294,8 @@ export default function MyProductsList() {
                         <TableCell className="text-center">
                           {activeChannels.length > 0 ? (
                             <div className="space-y-1">
-                              {activeChannels.slice(0, 3).map(({ channel, calculation }) => (
-                                <div key={channel.id} className="text-xs">
+                              {activeChannels.slice(0, 3).map(({ channel, calculation }, index) => (
+                                <div key={`${product.id}-${channel.id || channel.type}-${index}`} className="text-xs">
                                   <div className="font-medium">{CHANNEL_NAMES[channel.type] || channel.name}</div>
                                   <div className="flex items-center justify-center gap-2">
                                     <span className="text-gray-600">{formatBRL(channel.sellingPrice)}</span>
