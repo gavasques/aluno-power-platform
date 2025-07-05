@@ -29,7 +29,6 @@ interface PricingChannelCardProps {
   channel: SalesChannel;
   calculation?: PricingCalculation;
   onChannelUpdate: (channel: SalesChannel) => void;
-  onCalculate: () => void;
 }
 
 // Channel display names mapping
@@ -50,8 +49,7 @@ const channelDisplayNames: Record<ChannelType, string> = {
 export default function PricingChannelCard({
   channel,
   calculation,
-  onChannelUpdate,
-  onCalculate
+  onChannelUpdate
 }: PricingChannelCardProps) {
   const health = calculation ? getPricingHealth(calculation.profitMarginPercent) : null;
   
@@ -298,17 +296,7 @@ export default function PricingChannelCard({
             </>
           )}
 
-          <div className="pt-2">
-            <Button
-              onClick={onCalculate}
-              size="sm"
-              className="w-full"
-              variant="outline"
-            >
-              <Calculator className="h-4 w-4 mr-2" />
-              Calcular
-            </Button>
-          </div>
+
         </CardContent>
       )}
     </Card>

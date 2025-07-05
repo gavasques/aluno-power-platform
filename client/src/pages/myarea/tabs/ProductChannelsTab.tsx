@@ -187,6 +187,22 @@ export default function ProductChannelsTab({ form }: ProductChannelsTabProps) {
     form.setValue("channels", newChannels);
   };
 
+  // Auto-calculate channels when any relevant data changes
+  useEffect(() => {
+    const calculateAllChannelsAutomatically = () => {
+      channels.forEach(channel => {
+        if (channel.enabled && channel.sellingPrice > 0) {
+          calculateChannel(channel.id);
+        }
+      });
+    };
+
+    // Only calculate if we have the necessary data
+    if (productCost > 0) {
+      calculateAllChannelsAutomatically();
+    }
+  }, [productCost, taxPercent, dimensions, weight, channels]);
+
   const calculateChannel = (channelId: string) => {
     const channel = channels.find(ch => ch.id === channelId);
     if (!channel || !channel.enabled) return;
@@ -221,13 +237,7 @@ export default function ProductChannelsTab({ form }: ProductChannelsTabProps) {
     }));
   };
 
-  const calculateAllChannels = () => {
-    channels.forEach(channel => {
-      if (channel.enabled) {
-        calculateChannel(channel.id);
-      }
-    });
-  };
+
 
   const activeChannelsCount = channels.filter(ch => ch.enabled).length;
 
@@ -236,22 +246,10 @@ export default function ProductChannelsTab({ form }: ProductChannelsTabProps) {
       {/* Header */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              Canais de Venda
-            </CardTitle>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={calculateAllChannels}
-              disabled={activeChannelsCount === 0}
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Recalcular Todos
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5" />
+            Canais de Venda
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Alert>
@@ -276,7 +274,7 @@ export default function ProductChannelsTab({ form }: ProductChannelsTabProps) {
             channel={channel}
             calculation={calculations[channel.id]}
             onChannelUpdate={handleChannelUpdate}
-            onCalculate={() => calculateChannel(channel.id)}
+
           />
         ))}
       </div>
