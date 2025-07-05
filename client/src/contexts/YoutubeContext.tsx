@@ -76,8 +76,8 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
 
   const syncVideos = async (): Promise<void> => {
     await syncMutation.mutateAsync();
-    // Force page reload after sync to clear all caches
-    window.location.reload();
+    // Proper cache invalidation instead of window.location.reload()
+    queryClient.invalidateQueries({ queryKey: ['/api/youtube-channel-info'] });
   };
 
   const deleteVideo = async (id: number): Promise<void> => {

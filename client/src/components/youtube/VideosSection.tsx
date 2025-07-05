@@ -1,48 +1,36 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Youtube, RefreshCw, Play, Calendar, Users, ExternalLink } from "lucide-react";
-import { VideoCard } from "./VideoCard";
+import { Youtube, RefreshCw, Play, Users, ExternalLink } from "lucide-react";
 import { useYoutube } from "@/contexts/YoutubeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { RoleToggle } from "@/components/ui/role-toggle";
-import { VirtualVideoList } from "@/components/ui/VirtualList";
-import { useState, useMemo } from "react";
+import { useVideoData } from "@/hooks/useVideoData";
+import { useVideoSync } from "@/hooks/useVideoSync";
+import { CategorySection } from "./CategorySection";
 
+/**
+ * Refactored VideosSection following SOLID/DRY/KISS principles
+ * - Removed unused VirtualVideoList import
+ * - Extracted data processing to useVideoData hook
+ * - Extracted sync logic to useVideoSync hook  
+ * - Eliminated window.location.reload() anti-pattern
+ * - Removed duplicate state management
+ * - Used CategorySection component to eliminate duplication
+ */
 export function VideosSection() {
-  const { videos, channelInfo, loading, channelLoading, syncVideos } = useYoutube();
+  const { videos, channelInfo, loading, channelLoading } = useYoutube();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  const [syncing, setSyncing] = useState(false);
-
-  const handleSync = async () => {
-    setSyncing(true);
-    try {
-      await syncVideos();
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  // Memoized expensive computations for better performance
-  const groupedVideos = useMemo(() => {
-    return videos.reduce((acc, video) => {
-      const category = video.category || 'Outros';
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(video);
-      return acc;
-    }, {} as Record<string, typeof videos>);
-  }, [videos]);
-
-  const categories = useMemo(() => Object.keys(groupedVideos), [groupedVideos]);
   
-  const latestVideos = useMemo(() => {
-    return videos
-      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-      .slice(0, 6);
-  }, [videos]);
+  // Custom hooks following Single Responsibility Principle
+  const { categories, getVideosForCategory, hasMoreVideos, totalVideos } = useVideoData(videos);
+  const { syncVideos, isSyncing } = useVideoSync();
+
+  const handleShowMore = (category: string) => {
+    // Future implementation for showing more videos in a category
+    console.log(`Show more videos for category: ${category}`);
+  };
 
   return (
     <div className="space-y-6">
@@ -104,17 +92,17 @@ export function VideosSection() {
             </div>
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="text-xs">
-                {videos.length} vídeos em cache
+                {totalVideos} vídeos em cache
               </Badge>
               {isAdmin && (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleSync}
-                  disabled={syncing}
+                  onClick={syncVideos}
+                  disabled={isSyncing}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
-                  {syncing ? 'Sincronizando...' : 'Atualizar'}
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                  {isSyncing ? 'Sincronizando...' : 'Atualizar'}
                 </Button>
               )}
             </div>
@@ -129,7 +117,7 @@ export function VideosSection() {
             <p className="text-muted-foreground">Carregando vídeos...</p>
           </CardContent>
         </Card>
-      ) : videos.length === 0 ? (
+      ) : totalVideos === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Youtube className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -138,7 +126,7 @@ export function VideosSection() {
               {isAdmin ? 'Clique em "Buscar Vídeos" para sincronizar com o YouTube' : 'Os vídeos do YouTube serão sincronizados automaticamente'}
             </p>
             {isAdmin && (
-              <Button onClick={handleSync} disabled={syncing}>
+              <Button onClick={syncVideos} disabled={isSyncing}>
                 <Play className="h-4 w-4 mr-2" />
                 Buscar Vídeos
               </Button>
@@ -147,33 +135,15 @@ export function VideosSection() {
         </Card>
       ) : (
         <>
-          {/* Categories */}
+          {/* Categories - Using reusable CategorySection component */}
           {categories.map((category) => (
-            <Card key={category}>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                  <Badge variant="secondary" className="text-xs">
-                    {groupedVideos[category].length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {groupedVideos[category].slice(0, 8).map((video) => (
-                    <VideoCard key={video.id} video={video} />
-                  ))}
-                </div>
-                {groupedVideos[category].length > 8 && (
-                  <div className="mt-4 text-center">
-                    <Button variant="outline" size="sm">
-                      Ver mais {category.toLowerCase()}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <CategorySection
+              key={category}
+              category={category}
+              videos={getVideosForCategory(category, 8)}
+              hasMore={hasMoreVideos(category, 8)}
+              onShowMore={handleShowMore}
+            />
           ))}
         </>
       )}

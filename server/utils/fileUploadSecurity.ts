@@ -63,7 +63,7 @@ export const generateSecureFilename = (originalName: string): string => {
 // Validate file extension
 const validateFileExtension = (filename: string, mimeType: string): boolean => {
   const ext = path.extname(filename).toLowerCase();
-  const allowedType = ALLOWED_FILE_TYPES[mimeType];
+  const allowedType = ALLOWED_FILE_TYPES[mimeType as keyof typeof ALLOWED_FILE_TYPES];
   
   if (!allowedType) return false;
   return allowedType.extensions.includes(ext);
@@ -71,7 +71,7 @@ const validateFileExtension = (filename: string, mimeType: string): boolean => {
 
 // Validate file magic number (file signature)
 const validateFileMagicNumber = async (buffer: Buffer, mimeType: string): Promise<boolean> => {
-  const allowedType = ALLOWED_FILE_TYPES[mimeType];
+  const allowedType = ALLOWED_FILE_TYPES[mimeType as keyof typeof ALLOWED_FILE_TYPES];
   
   if (!allowedType || !allowedType.magicNumbers) {
     // For text files, we don't check magic numbers
@@ -82,7 +82,7 @@ const validateFileMagicNumber = async (buffer: Buffer, mimeType: string): Promis
   const fileSignature = buffer.slice(0, 8).toString('hex');
   
   // Check if file signature matches any of the allowed magic numbers
-  return allowedType.magicNumbers.some(magic => fileSignature.startsWith(magic));
+  return allowedType.magicNumbers.some((magic: string) => fileSignature.startsWith(magic));
 };
 
 // Scan file for malicious content (basic implementation)
