@@ -6,6 +6,21 @@ interface CurrencyInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEle
   onChange?: (value: number) => void;
 }
 
+const formatCurrency = (num: number): string => {
+  return num.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
+const parseCurrency = (str: string): number => {
+  // Remove tudo exceto números, vírgula e ponto
+  const cleaned = str.replace(/[^\d,.-]/g, '');
+  // Substitui vírgula por ponto
+  const normalized = cleaned.replace(',', '.');
+  return parseFloat(normalized) || 0;
+};
+
 export function CurrencyInput({ value, onChange, ...props }: CurrencyInputProps) {
   const [displayValue, setDisplayValue] = React.useState(() => {
     if (value === undefined || value === null || value === 0) return '';
@@ -19,21 +34,6 @@ export function CurrencyInput({ value, onChange, ...props }: CurrencyInputProps)
       setDisplayValue(formatCurrency(value));
     }
   }, [value]);
-
-  const formatCurrency = (num: number): string => {
-    return num.toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  };
-
-  const parseCurrency = (str: string): number => {
-    // Remove tudo exceto números, vírgula e ponto
-    const cleaned = str.replace(/[^\d,.-]/g, '');
-    // Substitui vírgula por ponto
-    const normalized = cleaned.replace(',', '.');
-    return parseFloat(normalized) || 0;
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;

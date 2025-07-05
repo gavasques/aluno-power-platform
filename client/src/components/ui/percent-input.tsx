@@ -6,6 +6,21 @@ interface PercentInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   onChange?: (value: number) => void;
 }
 
+const formatPercent = (num: number): string => {
+  return num.toLocaleString('pt-BR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 2
+  });
+};
+
+const parsePercent = (str: string): number => {
+  // Remove tudo exceto números, vírgula e ponto
+  const cleaned = str.replace(/[^\d,.-]/g, '');
+  // Substitui vírgula por ponto
+  const normalized = cleaned.replace(',', '.');
+  return parseFloat(normalized) || 0;
+};
+
 export function PercentInput({ value, onChange, ...props }: PercentInputProps) {
   const [displayValue, setDisplayValue] = React.useState(() => {
     if (value === undefined || value === null || value === 0) return '';
@@ -19,21 +34,6 @@ export function PercentInput({ value, onChange, ...props }: PercentInputProps) {
       setDisplayValue(formatPercent(value));
     }
   }, [value]);
-
-  const formatPercent = (num: number): string => {
-    return num.toLocaleString('pt-BR', {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 2
-    });
-  };
-
-  const parsePercent = (str: string): number => {
-    // Remove tudo exceto números, vírgula e ponto
-    const cleaned = str.replace(/[^\d,.-]/g, '');
-    // Substitui vírgula por ponto
-    const normalized = cleaned.replace(',', '.');
-    return parseFloat(normalized) || 0;
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;

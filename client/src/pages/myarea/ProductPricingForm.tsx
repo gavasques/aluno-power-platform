@@ -249,10 +249,17 @@ export default function ProductPricingForm() {
   };
 
   const handleSaveAndContinue = (data: ProductFormData) => {
-    console.log("🔄 Salvando produto...", data);
+    console.log("🔄 [handleSaveAndContinue] Iniciado com dados:", {
+      hasData: !!data,
+      productName: data?.name,
+      sku: data?.sku,
+      isEditing,
+      id
+    });
     
     const saveData = async () => {
       try {
+        console.log("💾 [saveData] Iniciando salvamento assíncrono...");
         const formData = new FormData();
         
         // Add basic fields
@@ -291,15 +298,23 @@ export default function ProductPricingForm() {
         
         const url = isEditing ? `/api/products/${id}` : "/api/products";
         const method = isEditing ? "PUT" : "POST";
+        const token = localStorage.getItem("token");
         
         console.log("📤 Enviando para:", url, "Método:", method);
+        console.log("🔑 Token presente:", !!token, token ? token.substring(0, 20) + "..." : "Sem token");
         
         const response = await fetch(url, {
           method,
           headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            "Authorization": `Bearer ${token}`,
           },
           body: formData,
+        });
+        
+        console.log("📨 Resposta recebida:", {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok
         });
         
         if (!response.ok) {
@@ -344,6 +359,7 @@ export default function ProductPricingForm() {
       }
     };
     
+    console.log("🚀 [handleSaveAndContinue] Chamando saveData()...");
     saveData();
   };
 
@@ -436,7 +452,10 @@ export default function ProductPricingForm() {
             <Button
               type="button"
               variant="secondary"
-              onClick={form.handleSubmit(handleSaveAndContinue)}
+              onClick={() => {
+                console.log("🖱️ [Botão Salvar e Continuar] Clicado!");
+                form.handleSubmit(handleSaveAndContinue)();
+              }}
               disabled={saveMutation.isPending}
             >
               {saveMutation.isPending ? (
