@@ -16,16 +16,24 @@ export const sessions = pgTable(
 
 // Users table for Replit Auth
 export const users = pgTable("users", {
-  id: text("id").primaryKey().notNull(), // Changed to text for Replit user IDs
+  id: serial("id").primaryKey(), // Using serial to match existing database
+  username: text("username"),
+  password: text("password"),
   email: text("email").unique(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
-  profileImageUrl: text("profile_image_url"),
+  name: text("name"), // Matches existing 'name' column
+  firstName: text("first_name"), // Optional new field
+  lastName: text("last_name"), // Optional new field
+  profileImageUrl: text("profile_image_url"), // Optional new field
   role: text("role").notNull().default("user"), // admin, support, user
   isActive: boolean("is_active").notNull().default(true),
   lastLogin: timestamp("last_login"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
+  emailVerified: boolean("email_verified").default(false),
+  magicLinkToken: text("magic_link_token"),
+  magicLinkExpiresAt: timestamp("magic_link_expires_at"),
 });
 
 // User Groups table
