@@ -26,17 +26,40 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  ChevronDown,
+  ChevronUp,
+  TrendingUp,
+  TrendingDown,
+  ShoppingBag
 } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
-import { formatBRL } from "@/utils/pricingCalculations";
+import { formatBRL, calculateChannelPricing } from "@/utils/pricingCalculations";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { SalesChannel, PricingCalculation } from "@/types/pricing";
 
 const ITEMS_PER_PAGE = 50;
+
+// Channel display configuration
+const CHANNEL_NAMES: Record<string, string> = {
+  'SITE_PROPRIO': 'Site',
+  'AMAZON_FBM': 'FBM',
+  'AMAZON_FBA_ON_SITE': 'FBA-Site',
+  'AMAZON_DBA': 'DBA',
+  'AMAZON_FBA': 'FBA',
+  'ML_ME1': 'ML-ME1',
+  'ML_FLEX': 'ML-Flex',
+  'ML_ENVIOS': 'ML-Envios',
+  'ML_FULL': 'ML-Full',
+  'SHOPEE': 'Shopee',
+  'MARKETPLACE_OTHER': 'Outro'
+};
 
 export default function MyProductsList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const { products, isLoading, error, deleteProduct } = useProducts();
   const { toast } = useToast();
 
@@ -63,6 +86,39 @@ export default function MyProductsList() {
           variant: "destructive",
         });
       }
+    }
+  };
+
+  const toggleRowExpansion = (productId: number) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+  };
+
+  const getActiveChannels = (product: any): { channel: SalesChannel; calculation: PricingCalculation }[] => {
+    if (!product.channels) return [];
+    
+    try {
+      const channels = typeof product.channels === 'string' 
+        ? JSON.parse(product.channels) 
+        : product.channels;
+      
+      if (!Array.isArray(channels)) return [];
+      
+      return channels
+        .filter((channel: SalesChannel) => channel.enabled)
+        .map((channel: SalesChannel) => ({
+          channel,
+          calculation: calculateChannelPricing(product, channel)
+        }));
+    } catch (error) {
+      return [];
     }
   };
 
@@ -156,17 +212,18 @@ export default function MyProductsList() {
         </div>
 
         {/* Products Table */}
-        <div className="bg-white rounded-lg border shadow-sm">
+        <div className="bg-white rounded-lg border shadow-sm overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[40px]"></TableHead>
                 <TableHead className="w-[50px]">Foto</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>SKU</TableHead>
-                <TableHead>EAN</TableHead>
                 <TableHead>Marca</TableHead>
                 <TableHead className="text-right">Custo</TableHead>
                 <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-center">Canais Ativos</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -186,54 +243,186 @@ export default function MyProductsList() {
                   </TableCell>
                 </TableRow>
               ) : (
-                currentProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      {product.photo ? (
-                        <img
-                          src={product.photo}
-                          alt={product.name}
-                          className="w-10 h-10 object-cover rounded"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">
-                          N/A
-                        </div>
+                currentProducts.map((product) => {
+                  const activeChannels = getActiveChannels(product);
+                  const isExpanded = expandedRows.has(product.id);
+                  
+                  return (
+                    <>
+                      <TableRow 
+                        key={product.id}
+                        className="cursor-pointer hover:bg-gray-50"
+                        onClick={() => toggleRowExpansion(product.id)}
+                      >
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-0 h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleRowExpansion(product.id);
+                            }}
+                          >
+                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          {product.photo ? (
+                            <img
+                              src={product.photo}
+                              alt={product.name}
+                              className="w-10 h-10 object-cover rounded"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">
+                              N/A
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell>{product.sku}</TableCell>
+                        <TableCell>{product.brand || '-'}</TableCell>
+                        <TableCell className="text-right">
+                          {product.costItem ? formatBRL(product.costItem) : '-'}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant={product.active ? "default" : "secondary"}>
+                            {product.active ? "Ativo" : "Inativo"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {activeChannels.length > 0 ? (
+                            <div className="space-y-1">
+                              {activeChannels.slice(0, 3).map(({ channel, calculation }) => (
+                                <div key={channel.id} className="text-xs">
+                                  <div className="font-medium">{CHANNEL_NAMES[channel.type] || channel.name}</div>
+                                  <div className="flex items-center justify-center gap-2">
+                                    <span className="text-gray-600">{formatBRL(channel.sellingPrice)}</span>
+                                    <span 
+                                      className={cn(
+                                        "font-semibold",
+                                        calculation.profitMarginPercent >= 30 ? "text-green-600" :
+                                        calculation.profitMarginPercent >= 20 ? "text-blue-600" :
+                                        calculation.profitMarginPercent >= 10 ? "text-yellow-600" :
+                                        "text-red-600"
+                                      )}
+                                    >
+                                      {calculation.profitMarginPercent.toFixed(1)}%
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                              {activeChannels.length > 3 && (
+                                <div className="text-xs text-gray-500">
+                                  +{activeChannels.length - 3} canais
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400">Nenhum canal ativo</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(product.id);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(product.id, product.name);
+                              }}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      
+                      {/* Expanded calculation details */}
+                      {isExpanded && activeChannels.length > 0 && (
+                        <TableRow>
+                          <TableCell colSpan={9} className="bg-gray-50 p-4">
+                            <div className="space-y-4">
+                              <h4 className="font-semibold text-sm mb-2">Detalhes dos Cálculos por Canal</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {activeChannels.map(({ channel, calculation }) => (
+                                  <div key={channel.id} className="bg-white rounded-lg border p-3 space-y-2">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h5 className="font-semibold">{channel.name}</h5>
+                                      <Badge 
+                                        variant={calculation.profitMarginPercent >= 20 ? "default" : "destructive"}
+                                        className={cn(
+                                          calculation.profitMarginPercent >= 30 ? "bg-green-500" :
+                                          calculation.profitMarginPercent >= 20 ? "bg-blue-500" :
+                                          calculation.profitMarginPercent >= 10 ? "bg-yellow-500" :
+                                          "bg-red-500"
+                                        )}
+                                      >
+                                        {calculation.profitMarginPercent.toFixed(1)}% margem
+                                      </Badge>
+                                    </div>
+                                    
+                                    <div className="space-y-1 text-xs">
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Preço de Venda:</span>
+                                        <span className="font-medium">{formatBRL(channel.sellingPrice)}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Custo Total:</span>
+                                        <span>{formatBRL(calculation.totalCost)}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Comissão ({channel.fees.commissionPercent}%):</span>
+                                        <span>{formatBRL(calculation.commissionValue)}</span>
+                                      </div>
+                                      {channel.fees.shippingCost && channel.fees.shippingCost > 0 && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">Frete:</span>
+                                          <span>{formatBRL(channel.fees.shippingCost)}</span>
+                                        </div>
+                                      )}
+                                      {channel.fees.advertisingPercent && channel.fees.advertisingPercent > 0 && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">Publicidade ({channel.fees.advertisingPercent}%):</span>
+                                          <span>{formatBRL(calculation.advertisingCost)}</span>
+                                        </div>
+                                      )}
+                                      <div className="flex justify-between pt-1 border-t">
+                                        <span className="text-gray-600">Lucro Líquido:</span>
+                                        <span className={cn(
+                                          "font-medium",
+                                          calculation.netProfit > 0 ? "text-green-600" : "text-red-600"
+                                        )}>
+                                          {formatBRL(calculation.netProfit)}
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">ROI:</span>
+                                        <span className="font-medium">{calculation.roi.toFixed(1)}%</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
                       )}
-                    </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.sku}</TableCell>
-                    <TableCell>{product.ean || '-'}</TableCell>
-                    <TableCell>{product.brand || '-'}</TableCell>
-                    <TableCell className="text-right">
-                      {product.costItem ? formatBRL(product.costItem) : '-'}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={product.active ? "default" : "secondary"}>
-                        {product.active ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(product.id)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(product.id, product.name)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                    </>
+                  );
+                })
               )}
             </TableBody>
           </Table>

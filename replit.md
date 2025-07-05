@@ -111,6 +111,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 01:45 AM**: ✅ CORREÇÃO DE MAPEAMENTO DE PROPRIEDADES NA LISTA DE PRODUTOS
+  - **Problema Resolvido**: Lista de produtos mostrando erro de propriedades inexistentes
+    - Corrigido: `marginPercent` → `profitMarginPercent`
+    - Corrigido: `commissionCost` → `commissionValue`
+    - Corrigido: `profit` → `netProfit`
+  - **Mapeamento de Canais Atualizado**:
+    - Ajustado CHANNEL_NAMES para usar os tipos enum corretos (SITE_PROPRIO, AMAZON_FBM, etc.)
+    - Removidos canais obsoletos e mantidos apenas os 11 canais suportados
+  - **Interface Funcionando**: Lista de produtos exibindo corretamente canais ativos e margens
+
 - **January 05, 2025 - 01:30 AM**: ✅ SISTEMA DE PRODUTOS COMPLETO COM LISTA E OTIMIZAÇÃO
   - **Lista de Produtos Implementada**:
     - Criado novo componente `MyProductsList.tsx` com visualização em tabela
