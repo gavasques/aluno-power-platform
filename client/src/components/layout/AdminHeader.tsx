@@ -16,7 +16,6 @@ import {
   LayoutDashboard,
   Users,
   FileText,
-  MessageSquare,
   Settings,
   Database,
   Bot,
@@ -130,18 +129,7 @@ export function AdminHeader() {
                   Usuários
                 </Link>
               </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link 
-                  to="/admin/suporte" 
-                  className={cn(
-                    navigationMenuTriggerStyle(),
-                    "bg-transparent text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                  )}
-                >
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Suporte
-                </Link>
-              </NavigationMenuItem>
+
             </NavigationMenuList>
           </NavigationMenu>
         </div>
