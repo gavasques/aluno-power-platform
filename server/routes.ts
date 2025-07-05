@@ -810,11 +810,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       
-      console.log("🔍 [BACKEND] Received categoryId:", req.body.categoryId);
-      console.log("🔍 [BACKEND] All form fields:", Object.keys(req.body));
-      console.log("🔍 [BACKEND] categoryId type:", typeof req.body.categoryId);
-      console.log("🔍 [BACKEND] Dimensions received:", req.body.dimensions);
-      console.log("🔍 [BACKEND] Weight received:", req.body.weight);
+      console.log("🔍 [PUT PRODUCT] ProductId:", id);
+      console.log("🔍 [PUT PRODUCT] All form fields:", Object.keys(req.body));
+      console.log("🔍 [PUT PRODUCT] Raw body content:", req.body);
+      console.log("🔍 [PUT PRODUCT] SKU:", req.body.sku);
+      console.log("🔍 [PUT PRODUCT] CategoryId:", req.body.categoryId);
+      console.log("🔍 [PUT PRODUCT] BrandId:", req.body.brandId);
       
       // Parse FormData fields - only include fields that were actually sent
       const productData: any = {
@@ -859,8 +860,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         productData.photo = req.body.photo || null;
       }
 
+      console.log("💾 [PUT PRODUCT] Final productData:", productData);
+      
       const validatedData = insertProductSchema.partial().parse(productData);
+      console.log("✅ [PUT PRODUCT] Validated data:", validatedData);
+      
       const product = await storage.updateProduct(id, validatedData);
+      console.log("🎯 [PUT PRODUCT] Updated product:", product);
+      
       res.json(product);
     } catch (error) {
       console.error('Error updating product:', error);

@@ -112,6 +112,11 @@ export default function ProductBasicDataTab({
       const values = form.getValues();
       const token = localStorage.getItem("auth_token");
       
+      console.log("🔍 [BASIC_INFO_FRONTEND] Form values:", values);
+      console.log("🔍 [BASIC_INFO_FRONTEND] SKU:", values.sku);
+      console.log("🔍 [BASIC_INFO_FRONTEND] Category:", values.categoryId);
+      console.log("🔍 [BASIC_INFO_FRONTEND] Brand:", values.brand);
+      
       const formData = new FormData();
       
       // Add basic fields
