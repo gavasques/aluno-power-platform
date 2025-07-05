@@ -37,7 +37,7 @@ import {
 import { useProducts } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
 import { formatBRL, calculateChannelPricing } from "@/utils/pricingCalculations";
-import { calculateChannelProfitability, type ChannelCalculationResult } from "@/utils/channelCalculations";
+import { calculateChannelProfitability, getDetailedCostBreakdown, type ChannelCalculationResult, type CostBreakdownItem } from "@/utils/channelCalculations";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { SalesChannel, PricingCalculation } from "@/types/pricing";
@@ -473,47 +473,39 @@ export default function MyProductsList() {
                                         <span>{formatBRL(calculation.totalCosts)}</span>
                                       </div>
                                       
-                                      {expandedCosts[`${product.id}-${channel.type}`] && (
-                                        <div className="ml-2 mt-1 space-y-1 text-xs border-l-2 border-gray-200 pl-2">
-                                          <div className="flex justify-between text-gray-500">
-                                            <span>Custo do Produto:</span>
-                                            <span>{formatBRL(product.costItem || 0)}</span>
-                                          </div>
-                                          {product.packCost && product.packCost > 0 && (
-                                            <div className="flex justify-between text-gray-500">
-                                              <span>Custo de Embalagem:</span>
-                                              <span>{formatBRL(product.packCost)}</span>
+                                      {expandedCosts[`${product.id}-${channel.type}`] && (() => {
+                                        const costBreakdown = getDetailedCostBreakdown(
+                                          channel.type,
+                                          channel.data || {},
+                                          {
+                                            costItem: product.costItem || 0,
+                                            taxPercent: product.taxPercent || 0
+                                          },
+                                          product.packCost || 0
+                                        );
+                                        
+                                        return (
+                                          <div className="ml-2 mt-1 space-y-1 text-xs border-l-2 border-gray-200 pl-2">
+                                            {costBreakdown.map((item: CostBreakdownItem, index: number) => (
+                                              <div key={index} className={cn(
+                                                "flex justify-between",
+                                                item.isRebate ? "text-green-600" : "text-gray-500"
+                                              )}>
+                                                <span>{item.label}:</span>
+                                                <span className={cn(
+                                                  item.isRebate && "font-medium"
+                                                )}>
+                                                  {item.isRebate ? '+' : ''}{formatBRL(item.value)}
+                                                </span>
+                                              </div>
+                                            ))}
+                                            <div className="flex justify-between text-gray-500 pt-1 border-t border-gray-200">
+                                              <span className="font-medium">Total:</span>
+                                              <span className="font-medium">{formatBRL(calculation.totalCosts)}</span>
                                             </div>
-                                          )}
-                                          {(() => {
-                                            const price = channel.data?.price || 0;
-                                            const taxCost = price * ((product.taxPercent || 0) / 100);
-                                            const baseCost = (product.costItem || 0) + (product.packCost || 0);
-                                            const otherCosts = calculation.totalCosts - baseCost - taxCost;
-                                            
-                                            return (
-                                              <>
-                                                {taxCost > 0 && (
-                                                  <div className="flex justify-between text-gray-500">
-                                                    <span>Impostos s/ Venda ({product.taxPercent || 0}%):</span>
-                                                    <span>{formatBRL(taxCost)}</span>
-                                                  </div>
-                                                )}
-                                                {otherCosts > 0 && (
-                                                  <div className="flex justify-between text-gray-500">
-                                                    <span>Custos do Canal:</span>
-                                                    <span>{formatBRL(otherCosts)}</span>
-                                                  </div>
-                                                )}
-                                                <div className="flex justify-between text-gray-500 pt-1 border-t border-gray-200">
-                                                  <span className="font-medium">Total:</span>
-                                                  <span className="font-medium">{formatBRL(calculation.totalCosts)}</span>
-                                                </div>
-                                              </>
-                                            );
-                                          })()}
-                                        </div>
-                                      )}
+                                          </div>
+                                        );
+                                      })()}
                                       <div className="flex justify-between">
                                         <span className="text-gray-600">Preço:</span>
                                         <span>{formatBRL(channel.data?.price || 0)}</span>

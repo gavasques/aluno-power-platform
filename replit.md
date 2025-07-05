@@ -132,6 +132,22 @@ Preferred communication style: Simple, everyday language.
     - Performance otimizada com React Query
     - Testabilidade aumentada com arquitetura modular
 
+- **January 05, 2025 - 07:48 PM**: ✅ BREAKDOWN DE CUSTOS INDIVIDUAL COMPLETO IMPLEMENTADO
+  - **Análise Detalhada por Canal**: 
+    - Função `getDetailedCostBreakdown` criada com breakdown específico para cada tipo de canal
+    - Mostra TODOS os componentes de custo preenchidos (comissão, frete, embalagem, etc.)
+    - Rebates exibidos como valores positivos em verde que reduzem custos totais
+    - Percentuais incluídos nos rótulos quando aplicável (ex: "Comissão (15%)")
+  - **Interface Otimizada**:
+    - Componentes de custo específicos por canal: Site Próprio, Amazon FBM/FBA/DBA, ML ME1/Flex/Envios/FULL, Shopee
+    - Apenas componentes com valores > 0 são exibidos para manter interface limpa
+    - Rebates destacados em verde com sinal "+" para indicar redução de custos
+    - Layout expandível mantido com melhor organização visual
+  - **Cobertura Completa de Canais**:
+    - 11 tipos de canal com campos específicos: embalagem, marketing, financeiro, prep center, etc.
+    - Cálculos precisos incluindo rebates, receitas ML Flex, e custos diferenciados por canal
+    - Transparência total na composição dos custos para análise de rentabilidade
+
 - **January 05, 2025 - 07:15 PM**: ✅ LIMPEZA COMPLETA DA ABA CUSTOS - SEÇÕES DESNECESSÁRIAS REMOVIDAS
   - **Seção "Resumo do Custo" Removida**: 
     - Eliminado card que mostrava custo final em destaque azul

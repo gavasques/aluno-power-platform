@@ -221,3 +221,297 @@ export const formatPercent = (value: number): string => {
     maximumFractionDigits: 1
   }).format(value / 100);
 };
+
+// Interface for individual cost breakdown items
+export interface CostBreakdownItem {
+  label: string;
+  value: number;
+  isRebate?: boolean; // Indicates if this is a rebate (positive value)
+}
+
+// Generate detailed cost breakdown for a specific channel
+export const getDetailedCostBreakdown = (
+  channelType: string,
+  channelData: ChannelData,
+  productBase: ProductBaseData,
+  packCost: number = 0
+): CostBreakdownItem[] => {
+  const price = parseValue(channelData.price);
+  const productCost = productBase.costItem;
+  const taxPercent = productBase.taxPercent;
+  const breakdown: CostBreakdownItem[] = [];
+  
+  if (!price || price <= 0) {
+    return breakdown;
+  }
+
+  // Base costs that appear for all channels
+  const taxCost = price * (taxPercent / 100);
+  
+  // Add channel-specific breakdown based on channel type
+  switch (channelType) {
+    case 'SITE_PROPRIO':
+      breakdown.push({ label: 'Custo do Produto', value: productCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
+      
+      const sitePackaging = parseValue(channelData.packagingCostValue);
+      const siteFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const siteOtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const siteOtherCostValue = parseValue(channelData.otherCostValue);
+      const siteMarketing = price * (parseValue(channelData.marketingCostPercent) / 100);
+      const siteFinancial = price * (parseValue(channelData.financialCostPercent) / 100);
+      
+      if (sitePackaging > 0) breakdown.push({ label: 'Embalagem', value: sitePackaging });
+      if (siteFixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: siteFixedCost });
+      if (siteOtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: siteOtherCostPct });
+      if (siteOtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: siteOtherCostValue });
+      if (siteMarketing > 0) breakdown.push({ label: `Marketing (${parseValue(channelData.marketingCostPercent)}%)`, value: siteMarketing });
+      if (siteFinancial > 0) breakdown.push({ label: `Financeiro (${parseValue(channelData.financialCostPercent)}%)`, value: siteFinancial });
+      break;
+      
+    case 'AMAZON_FBM':
+      breakdown.push({ label: 'Custo do Produto', value: productCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
+      
+      const fbmCommission = price * (parseValue(channelData.commissionPercent) / 100);
+      const fbmFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const fbmInstallment = price * (parseValue(channelData.installmentPercent) / 100);
+      const fbmPackaging = parseValue(channelData.packagingCostValue);
+      const fbmOtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const fbmOtherCostValue = parseValue(channelData.otherCostValue);
+      const fbmTacos = price * (parseValue(channelData.tacosCostPercent) / 100);
+      const fbmRebatePct = price * (parseValue(channelData.rebatePercent) / 100);
+      const fbmRebateValue = parseValue(channelData.rebateValue);
+      
+      if (fbmCommission > 0) breakdown.push({ label: `Comissão (${parseValue(channelData.commissionPercent)}%)`, value: fbmCommission });
+      if (fbmFixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: fbmFixedCost });
+      if (fbmInstallment > 0) breakdown.push({ label: `Parcelamento (${parseValue(channelData.installmentPercent)}%)`, value: fbmInstallment });
+      if (fbmPackaging > 0) breakdown.push({ label: 'Embalagem', value: fbmPackaging });
+      if (fbmOtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: fbmOtherCostPct });
+      if (fbmOtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: fbmOtherCostValue });
+      if (fbmTacos > 0) breakdown.push({ label: `TaCos (${parseValue(channelData.tacosCostPercent)}%)`, value: fbmTacos });
+      if (fbmRebatePct > 0) breakdown.push({ label: `Rebate (${parseValue(channelData.rebatePercent)}%)`, value: fbmRebatePct, isRebate: true });
+      if (fbmRebateValue > 0) breakdown.push({ label: 'Rebate R$', value: fbmRebateValue, isRebate: true });
+      break;
+      
+    case 'AMAZON_FBA_ONSITE':
+      breakdown.push({ label: 'Custo do Produto', value: productCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
+      
+      const onsiteShipping = parseValue(channelData.shippingCost);
+      const onsiteCommission = price * (parseValue(channelData.commissionPercent) / 100);
+      const onsiteInstallment = price * (parseValue(channelData.installmentPercent) / 100);
+      const onsiteFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const onsitePackaging = parseValue(channelData.packagingCostValue);
+      const onsiteOtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const onsiteOtherCostValue = parseValue(channelData.otherCostValue);
+      const onsiteRebatePct = price * (parseValue(channelData.rebatePercent) / 100);
+      const onsiteRebateValue = parseValue(channelData.rebateValue);
+      const onsiteTacos = price * (parseValue(channelData.tacosCostPercent) / 100);
+      
+      if (onsiteShipping > 0) breakdown.push({ label: 'Frete FBA ON Site', value: onsiteShipping });
+      if (onsiteCommission > 0) breakdown.push({ label: `Comissão (${parseValue(channelData.commissionPercent)}%)`, value: onsiteCommission });
+      if (onsiteInstallment > 0) breakdown.push({ label: `Parcelamento (${parseValue(channelData.installmentPercent)}%)`, value: onsiteInstallment });
+      if (onsiteFixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: onsiteFixedCost });
+      if (onsitePackaging > 0) breakdown.push({ label: 'Embalagem', value: onsitePackaging });
+      if (onsiteOtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: onsiteOtherCostPct });
+      if (onsiteOtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: onsiteOtherCostValue });
+      if (onsiteRebatePct > 0) breakdown.push({ label: `Rebate (${parseValue(channelData.rebatePercent)}%)`, value: onsiteRebatePct, isRebate: true });
+      if (onsiteRebateValue > 0) breakdown.push({ label: 'Rebate R$', value: onsiteRebateValue, isRebate: true });
+      if (onsiteTacos > 0) breakdown.push({ label: `TaCos (${parseValue(channelData.tacosCostPercent)}%)`, value: onsiteTacos });
+      break;
+      
+    case 'AMAZON_DBA':
+      breakdown.push({ label: 'Custo do Produto', value: productCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
+      
+      const dbaShipping = parseValue(channelData.shippingCost);
+      const dbaCommission = price * (parseValue(channelData.commissionPercent) / 100);
+      const dbaInstallment = price * (parseValue(channelData.installmentPercent) / 100);
+      const dbaFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const dbaPackaging = parseValue(channelData.packagingCostValue);
+      const dbaOtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const dbaOtherCostValue = parseValue(channelData.otherCostValue);
+      const dbaTacos = price * (parseValue(channelData.tacosCostPercent) / 100);
+      const dbaRebatePct = price * (parseValue(channelData.rebatePercent) / 100);
+      const dbaRebateValue = parseValue(channelData.rebateValue);
+      
+      if (dbaShipping > 0) breakdown.push({ label: 'Frete DBA', value: dbaShipping });
+      if (dbaCommission > 0) breakdown.push({ label: `Comissão (${parseValue(channelData.commissionPercent)}%)`, value: dbaCommission });
+      if (dbaInstallment > 0) breakdown.push({ label: `Parcelamento (${parseValue(channelData.installmentPercent)}%)`, value: dbaInstallment });
+      if (dbaFixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: dbaFixedCost });
+      if (dbaPackaging > 0) breakdown.push({ label: 'Embalagem', value: dbaPackaging });
+      if (dbaOtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: dbaOtherCostPct });
+      if (dbaOtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: dbaOtherCostValue });
+      if (dbaTacos > 0) breakdown.push({ label: `TaCos (${parseValue(channelData.tacosCostPercent)}%)`, value: dbaTacos });
+      if (dbaRebatePct > 0) breakdown.push({ label: `Rebate (${parseValue(channelData.rebatePercent)}%)`, value: dbaRebatePct, isRebate: true });
+      if (dbaRebateValue > 0) breakdown.push({ label: 'Rebate R$', value: dbaRebateValue, isRebate: true });
+      break;
+      
+    case 'AMAZON_FBA':
+      const fbaProductCost = parseValue(channelData.productCostFBA) || productCost;
+      breakdown.push({ label: 'Custo no FBA', value: fbaProductCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      
+      const fbaShipping = parseValue(channelData.shippingCost);
+      const fbaCommission = price * (parseValue(channelData.commissionPercent) / 100);
+      const fbaInstallment = price * (parseValue(channelData.installmentPercent) / 100);
+      const fbaFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const fbaPackaging = parseValue(channelData.packagingCostValue);
+      const fbaPrepCenter = parseValue(channelData.prepCenterCost);
+      const fbaOtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const fbaOtherCostValue = parseValue(channelData.otherCostValue);
+      const fbaTacos = price * (parseValue(channelData.tacosCostPercent) / 100);
+      const fbaRebatePct = price * (parseValue(channelData.rebatePercent) / 100);
+      const fbaRebateValue = parseValue(channelData.rebateValue);
+      
+      if (fbaShipping > 0) breakdown.push({ label: 'Frete FBA', value: fbaShipping });
+      if (fbaCommission > 0) breakdown.push({ label: `Comissão (${parseValue(channelData.commissionPercent)}%)`, value: fbaCommission });
+      if (fbaInstallment > 0) breakdown.push({ label: `Parcelamento (${parseValue(channelData.installmentPercent)}%)`, value: fbaInstallment });
+      if (fbaFixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: fbaFixedCost });
+      if (fbaPackaging > 0) breakdown.push({ label: 'Embalagem', value: fbaPackaging });
+      if (fbaPrepCenter > 0) breakdown.push({ label: 'Prep Center', value: fbaPrepCenter });
+      if (fbaOtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: fbaOtherCostPct });
+      if (fbaOtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: fbaOtherCostValue });
+      if (fbaTacos > 0) breakdown.push({ label: `TaCos (${parseValue(channelData.tacosCostPercent)}%)`, value: fbaTacos });
+      if (fbaRebatePct > 0) breakdown.push({ label: `Rebate (${parseValue(channelData.rebatePercent)}%)`, value: fbaRebatePct, isRebate: true });
+      if (fbaRebateValue > 0) breakdown.push({ label: 'Rebate R$', value: fbaRebateValue, isRebate: true });
+      break;
+      
+    case 'MERCADO_LIVRE_ME1':
+      breakdown.push({ label: 'Custo do Produto', value: productCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
+      
+      const me1Commission = price * (parseValue(channelData.commissionPercent) / 100);
+      const me1FixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const me1Packaging = parseValue(channelData.packagingCostValue);
+      const me1OtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const me1OtherCostValue = parseValue(channelData.otherCostValue);
+      const me1Tacos = price * (parseValue(channelData.tacosCostPercent) / 100);
+      const me1RebatePct = price * (parseValue(channelData.rebatePercent) / 100);
+      const me1RebateValue = parseValue(channelData.rebateValue);
+      
+      if (me1Commission > 0) breakdown.push({ label: `Comissão (${parseValue(channelData.commissionPercent)}%)`, value: me1Commission });
+      if (me1FixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: me1FixedCost });
+      if (me1Packaging > 0) breakdown.push({ label: 'Embalagem', value: me1Packaging });
+      if (me1OtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: me1OtherCostPct });
+      if (me1OtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: me1OtherCostValue });
+      if (me1Tacos > 0) breakdown.push({ label: `TaCos (${parseValue(channelData.tacosCostPercent)}%)`, value: me1Tacos });
+      if (me1RebatePct > 0) breakdown.push({ label: `Rebate (${parseValue(channelData.rebatePercent)}%)`, value: me1RebatePct, isRebate: true });
+      if (me1RebateValue > 0) breakdown.push({ label: 'Rebate R$', value: me1RebateValue, isRebate: true });
+      break;
+      
+    case 'MERCADO_LIVRE_FLEX':
+      breakdown.push({ label: 'Custo do Produto', value: productCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
+      
+      const flexShipping = parseValue(channelData.shippingCost);
+      const flexCommission = price * (parseValue(channelData.commissionPercent) / 100);
+      const flexFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const flexPackaging = parseValue(channelData.packagingCostValue);
+      const flexRevenue = parseValue(channelData.revenueMLFlex);
+      const flexOtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const flexOtherCostValue = parseValue(channelData.otherCostValue);
+      const flexTacos = price * (parseValue(channelData.tacosCostPercent) / 100);
+      const flexRebatePct = price * (parseValue(channelData.rebatePercent) / 100);
+      const flexRebateValue = parseValue(channelData.rebateValue);
+      
+      if (flexShipping > 0) breakdown.push({ label: 'Frete ML Flex', value: flexShipping });
+      if (flexCommission > 0) breakdown.push({ label: `Comissão (${parseValue(channelData.commissionPercent)}%)`, value: flexCommission });
+      if (flexFixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: flexFixedCost });
+      if (flexPackaging > 0) breakdown.push({ label: 'Embalagem', value: flexPackaging });
+      if (flexRevenue > 0) breakdown.push({ label: 'Receita ML Flex', value: flexRevenue, isRebate: true });
+      if (flexOtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: flexOtherCostPct });
+      if (flexOtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: flexOtherCostValue });
+      if (flexTacos > 0) breakdown.push({ label: `TaCos (${parseValue(channelData.tacosCostPercent)}%)`, value: flexTacos });
+      if (flexRebatePct > 0) breakdown.push({ label: `Rebate (${parseValue(channelData.rebatePercent)}%)`, value: flexRebatePct, isRebate: true });
+      if (flexRebateValue > 0) breakdown.push({ label: 'Rebate R$', value: flexRebateValue, isRebate: true });
+      break;
+      
+    case 'MERCADO_LIVRE_ENVIOS':
+      breakdown.push({ label: 'Custo do Produto', value: productCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
+      
+      const enviosShipping = parseValue(channelData.shippingCost);
+      const enviosCommission = price * (parseValue(channelData.commissionPercent) / 100);
+      const enviosPackaging = parseValue(channelData.packagingCostValue);
+      const enviosFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const enviosOtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const enviosOtherCostValue = parseValue(channelData.otherCostValue);
+      const enviosTacos = price * (parseValue(channelData.tacosCostPercent) / 100);
+      const enviosRebatePct = price * (parseValue(channelData.rebatePercent) / 100);
+      const enviosRebateValue = parseValue(channelData.rebateValue);
+      
+      if (enviosShipping > 0) breakdown.push({ label: 'Frete ML Envios', value: enviosShipping });
+      if (enviosCommission > 0) breakdown.push({ label: `Comissão (${parseValue(channelData.commissionPercent)}%)`, value: enviosCommission });
+      if (enviosPackaging > 0) breakdown.push({ label: 'Embalagem', value: enviosPackaging });
+      if (enviosFixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: enviosFixedCost });
+      if (enviosOtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: enviosOtherCostPct });
+      if (enviosOtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: enviosOtherCostValue });
+      if (enviosTacos > 0) breakdown.push({ label: `TaCos (${parseValue(channelData.tacosCostPercent)}%)`, value: enviosTacos });
+      if (enviosRebatePct > 0) breakdown.push({ label: `Rebate (${parseValue(channelData.rebatePercent)}%)`, value: enviosRebatePct, isRebate: true });
+      if (enviosRebateValue > 0) breakdown.push({ label: 'Rebate R$', value: enviosRebateValue, isRebate: true });
+      break;
+      
+    case 'MERCADO_LIVRE_FULL':
+      const fullProductCost = parseValue(channelData.productCostMLFull) || productCost;
+      breakdown.push({ label: 'Custo no ML FULL', value: fullProductCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      
+      const fullShipping = parseValue(channelData.shippingCost);
+      const fullCommission = price * (parseValue(channelData.commissionPercent) / 100);
+      const fullPackaging = parseValue(channelData.packagingCostValue);
+      const fullFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const fullPrepCenter = parseValue(channelData.prepCenterCost);
+      const fullOtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const fullOtherCostValue = parseValue(channelData.otherCostValue);
+      const fullTacos = price * (parseValue(channelData.tacosCostPercent) / 100);
+      const fullRebatePct = price * (parseValue(channelData.rebatePercent) / 100);
+      const fullRebateValue = parseValue(channelData.rebateValue);
+      
+      if (fullShipping > 0) breakdown.push({ label: 'Frete ML FULL', value: fullShipping });
+      if (fullCommission > 0) breakdown.push({ label: `Comissão (${parseValue(channelData.commissionPercent)}%)`, value: fullCommission });
+      if (fullPackaging > 0) breakdown.push({ label: 'Embalagem', value: fullPackaging });
+      if (fullFixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: fullFixedCost });
+      if (fullPrepCenter > 0) breakdown.push({ label: 'Prep Center', value: fullPrepCenter });
+      if (fullOtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: fullOtherCostPct });
+      if (fullOtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: fullOtherCostValue });
+      if (fullTacos > 0) breakdown.push({ label: `TaCos (${parseValue(channelData.tacosCostPercent)}%)`, value: fullTacos });
+      if (fullRebatePct > 0) breakdown.push({ label: `Rebate (${parseValue(channelData.rebatePercent)}%)`, value: fullRebatePct, isRebate: true });
+      if (fullRebateValue > 0) breakdown.push({ label: 'Rebate R$', value: fullRebateValue, isRebate: true });
+      break;
+      
+    case 'SHOPEE':
+      breakdown.push({ label: 'Custo do Produto', value: productCost });
+      if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
+      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
+      
+      const shopeeCommission = price * (parseValue(channelData.commissionPercent) / 100);
+      const shopeeFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
+      const shopeePackaging = parseValue(channelData.packagingCostValue);
+      const shopeeOtherCostPct = price * (parseValue(channelData.otherCostPercent) / 100);
+      const shopeeOtherCostValue = parseValue(channelData.otherCostValue);
+      const shopeeTacos = price * (parseValue(channelData.tacosCostPercent) / 100);
+      const shopeeRebatePct = price * (parseValue(channelData.rebatePercent) / 100);
+      const shopeeRebateValue = parseValue(channelData.rebateValue);
+      
+      if (shopeeCommission > 0) breakdown.push({ label: `Comissão (${parseValue(channelData.commissionPercent)}%)`, value: shopeeCommission });
+      if (shopeeFixedCost > 0) breakdown.push({ label: `Custo Fixo (${parseValue(channelData.fixedCostPercent)}%)`, value: shopeeFixedCost });
+      if (shopeePackaging > 0) breakdown.push({ label: 'Embalagem', value: shopeePackaging });
+      if (shopeeOtherCostPct > 0) breakdown.push({ label: `Outro Custo (${parseValue(channelData.otherCostPercent)}%)`, value: shopeeOtherCostPct });
+      if (shopeeOtherCostValue > 0) breakdown.push({ label: 'Outro Custo R$', value: shopeeOtherCostValue });
+      if (shopeeTacos > 0) breakdown.push({ label: `TaCos (${parseValue(channelData.tacosCostPercent)}%)`, value: shopeeTacos });
+      if (shopeeRebatePct > 0) breakdown.push({ label: `Rebate (${parseValue(channelData.rebatePercent)}%)`, value: shopeeRebatePct, isRebate: true });
+      if (shopeeRebateValue > 0) breakdown.push({ label: 'Rebate R$', value: shopeeRebateValue, isRebate: true });
+      break;
+  }
+  
+  return breakdown;
+};
