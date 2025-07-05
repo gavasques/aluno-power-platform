@@ -37,6 +37,9 @@ import ProductResultsTab from "@/pages/myarea/tabs/ProductResultsTab";
 
 // Form schema
 const productFormSchema = z.object({
+  // ID for editing
+  id: z.number().optional(),
+  
   // Basic data
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
   sku: z.string().min(1, "Código SKU é obrigatório"),
@@ -139,6 +142,7 @@ export default function ProductPricingForm() {
       };
       
       form.reset({
+        id: existingProduct?.id,
         name: existingProduct?.name || "",
         sku: existingProduct?.sku || "",
         freeCode: existingProduct?.freeCode || "",

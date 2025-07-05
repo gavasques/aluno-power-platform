@@ -17,6 +17,9 @@ interface ProductChannelsTabProps {
 export default function ProductChannelsTab({ form }: ProductChannelsTabProps) {
   const [showChannelsEditor, setShowChannelsEditor] = useState(false);
   const productId = form.getValues("id");
+  
+  console.log("🔍 [PRODUCT CHANNELS TAB] productId:", productId);
+  console.log("🔍 [PRODUCT CHANNELS TAB] form values:", form.getValues());
 
   return (
     <div className="space-y-6">
