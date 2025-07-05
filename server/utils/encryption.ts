@@ -64,8 +64,8 @@ export class EncryptionService {
       const authTag = combined.slice(ivLength, ivLength + tagLength);
       const encrypted = combined.slice(ivLength + tagLength);
       
-      // Create decipher
-      const decipher = crypto.createDecipheriv(algorithm, Buffer.from(this.key, 'hex'), iv);
+      // Create decipher with explicit auth tag length
+      const decipher = crypto.createDecipheriv(algorithm, Buffer.from(this.key, 'hex'), iv, { authTagLength: tagLength });
       decipher.setAuthTag(authTag);
       
       // Decrypt data
