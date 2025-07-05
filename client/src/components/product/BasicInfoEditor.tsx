@@ -49,7 +49,7 @@ import {
 // Validation schema for basic info
 const basicInfoSchema = z.object({
   name: z.string().min(1, "Nome do produto é obrigatório").max(120, "Nome deve ter no máximo 120 caracteres"),
-  sku: z.string().min(1, "SKU é obrigatório"),
+  sku: z.string().optional(), // SKU is now optional since it can be empty
   freeCode: z.string().optional(),
   supplierCode: z.string().optional(),
   ean: z.string().optional().refine((val) => !val || val.length <= 13, "EAN deve ter no máximo 13 dígitos"),
@@ -162,7 +162,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
       
       form.reset({
         name: (product as any).name || "",
-        sku: (product as any).sku || "",
+        sku: (product as any).sku || (product as any).internalCode || "", // Use internalCode as fallback if SKU is empty
         freeCode: (product as any).freeCode || "",
         supplierCode: (product as any).supplierCode || "",
         ean: (product as any).ean || "",
