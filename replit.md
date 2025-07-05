@@ -111,6 +111,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 06:53 PM**: ✅ ABA "RESULTADOS" REMOVIDA E HISTÓRICO DE CUSTOS LIMITADO
+  - **Aba "Resultados" Removida**: 
+    - Removido TabsContent value="results" do ProductPricingForm
+    - Removidas importações: ProductResultsTab e BarChart3 (lucide-react)
+    - Grid de abas ajustado de 4 para 3 colunas (Dados Básicos, Custos, Canais)
+  - **Histórico de Custos Limitado**:
+    - Exibe apenas as últimas 6 atualizações usando slice(0, 6)
+    - Indicador visual "Últimas 6 atualizações" quando há mais de 6 registros
+    - Interface mais limpa e focada no histórico recente
+  - **TypeScript**: Corrigido erro de tipos convertendo defaults de number para string
+
 - **January 05, 2025 - 06:49 PM**: 🔧 FORMATAÇÃO BRASILEIRA DE NÚMEROS EM ANDAMENTO
   - **Problema Identificado**: Formatação com vírgula (brasileiro) sendo convertida para ponto ao salvar
   - **Ajuste de Schema**: Campos de custo agora aceitam strings para permitir formatação brasileira

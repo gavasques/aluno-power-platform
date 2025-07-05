@@ -22,8 +22,7 @@ import { calculateCubicWeight } from "@/utils/pricingCalculations";
 import { 
   Package, 
   DollarSign, 
-  ShoppingCart, 
-  BarChart3,
+  ShoppingCart,
   Save,
   X,
   Loader2
@@ -33,7 +32,6 @@ import {
 import ProductBasicDataTab from "@/pages/myarea/tabs/ProductBasicDataTab";
 import ProductCostsTab from "@/pages/myarea/tabs/ProductCostsTab";
 import ProductChannelsTab from "@/pages/myarea/tabs/ProductChannelsTab";
-import ProductResultsTab from "@/pages/myarea/tabs/ProductResultsTab";
 
 // Form schema
 const productFormSchema = z.object({
@@ -408,7 +406,7 @@ export default function ProductPricingForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="basic" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 <span className="hidden sm:inline">Dados Básicos</span>
@@ -420,10 +418,6 @@ export default function ProductPricingForm() {
               <TabsTrigger value="channels" className="flex items-center gap-2">
                 <ShoppingCart className="h-4 w-4" />
                 <span className="hidden sm:inline">Canais</span>
-              </TabsTrigger>
-              <TabsTrigger value="results" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                <span className="hidden sm:inline">Resultados</span>
               </TabsTrigger>
             </TabsList>
 
@@ -448,13 +442,6 @@ export default function ProductPricingForm() {
 
             <TabsContent value="channels">
               <ProductChannelsTab form={form} />
-            </TabsContent>
-
-            <TabsContent value="results">
-              <ProductResultsTab
-                form={form}
-                calculatedCubicWeight={calculatedCubicWeight}
-              />
             </TabsContent>
           </Tabs>
 

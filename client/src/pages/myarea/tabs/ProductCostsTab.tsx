@@ -256,9 +256,16 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
       {/* Cost History */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" />
-            Histórico de Custos
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Histórico de Custos
+            </span>
+            {costHistory.length > 6 && (
+              <span className="text-sm font-normal text-muted-foreground">
+                Últimas 6 atualizações
+              </span>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -272,7 +279,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
             </div>
           ) : (
             <div className="space-y-3">
-              {costHistory.map((history, index) => {
+              {costHistory.slice(0, 6).map((history, index) => {
                 const prevCost = parseFloat(history.previousCost);
                 const newCost = parseFloat(history.newCost);
                 const percentChange = ((newCost - prevCost) / prevCost * 100).toFixed(2);
