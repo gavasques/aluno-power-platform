@@ -759,24 +759,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/products', async (req, res) => {
+  app.post('/api/products', upload.single('photo'), async (req, res) => {
     try {
-      const validatedData = insertProductSchema.parse(req.body);
+      // Parse FormData fields
+      const productData: any = {
+        name: req.body.name,
+        sku: req.body.sku || '',  // Required field
+        freeCode: req.body.freeCode || null,
+        supplierCode: req.body.supplierCode || null,
+        ean: req.body.ean || null,
+        brand: req.body.brand || null,
+        category: req.body.categoryId || null,  // categoryId from frontend maps to category in DB
+        supplierId: req.body.supplierId ? parseInt(req.body.supplierId) : null,
+        ncm: req.body.ncm || null,
+        dimensions: req.body.dimensions ? JSON.parse(req.body.dimensions) : null,
+        weight: req.body.weight ? parseFloat(req.body.weight) : 0,
+        costItem: req.body.costItem ? parseFloat(req.body.costItem) : 0,
+        taxPercent: req.body.taxPercent ? parseFloat(req.body.taxPercent) : 0,
+        packCost: req.body.packCost ? parseFloat(req.body.packCost) : 0,
+        observations: req.body.observations || null,
+        channels: req.body.channels ? JSON.parse(req.body.channels) : [],
+        photo: req.file ? `/uploads/${req.file.filename}` : (req.body.photo || null),
+        active: true,
+      };
+
+      const validatedData = insertProductSchema.parse(productData);
       const product = await storage.createProduct(validatedData);
       res.status(201).json(product);
     } catch (error) {
-      res.status(400).json({ error: 'Invalid product data' });
+      console.error('Error creating product:', error);
+      res.status(400).json({ error: 'Invalid product data', details: error });
     }
   });
 
-  app.put('/api/products/:id', async (req, res) => {
+  app.put('/api/products/:id', upload.single('photo'), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertProductSchema.partial().parse(req.body);
+      
+      // Parse FormData fields
+      const productData: any = {
+        name: req.body.name,
+        sku: req.body.sku || '',  // Required field
+        freeCode: req.body.freeCode || null,
+        supplierCode: req.body.supplierCode || null,
+        ean: req.body.ean || null,
+        brand: req.body.brand || null,
+        category: req.body.categoryId || null,  // categoryId from frontend maps to category in DB
+        supplierId: req.body.supplierId ? parseInt(req.body.supplierId) : null,
+        ncm: req.body.ncm || null,
+        dimensions: req.body.dimensions ? JSON.parse(req.body.dimensions) : null,
+        weight: req.body.weight ? parseFloat(req.body.weight) : 0,
+        costItem: req.body.costItem ? parseFloat(req.body.costItem) : 0,
+        taxPercent: req.body.taxPercent ? parseFloat(req.body.taxPercent) : 0,
+        packCost: req.body.packCost ? parseFloat(req.body.packCost) : 0,
+        observations: req.body.observations || null,
+        channels: req.body.channels ? JSON.parse(req.body.channels) : [],
+      };
+
+      // Handle photo update
+      if (req.file) {
+        productData.photo = `/uploads/${req.file.filename}`;
+      } else if (req.body.photo !== undefined) {
+        productData.photo = req.body.photo || null;
+      }
+
+      const validatedData = insertProductSchema.partial().parse(productData);
       const product = await storage.updateProduct(id, validatedData);
       res.json(product);
     } catch (error) {
-      res.status(400).json({ error: 'Failed to update product' });
+      console.error('Error updating product:', error);
+      res.status(400).json({ error: 'Failed to update product', details: error });
     }
   });
 
@@ -786,6 +838,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete product' });
+    }
+  });
+
+  app.get('/api/products/:id/cost-history', async (req, res) => {
+    try {
+      const history = await storage.getProductCostHistory(parseInt(req.params.id));
+      res.json(history);
+    } catch (error) {
+      console.error('Error fetching cost history:', error);
+      res.status(500).json({ error: 'Failed to fetch cost history' });
     }
   });
 

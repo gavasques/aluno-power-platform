@@ -1,9 +1,12 @@
+import React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { CurrencyInput } from "@/components/ui/currency-input";
+import { PercentInput } from "@/components/ui/percent-input";
+import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   DollarSign, 
@@ -12,9 +15,13 @@ import {
   Percent,
   FileText,
   TrendingUp,
-  Info
+  Info,
+  Clock,
+  ArrowRight
 } from "lucide-react";
 import { formatBRL, formatPercent } from "@/utils/pricingCalculations";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface ProductCostsTabProps {
   form: UseFormReturn<any>;
@@ -23,6 +30,17 @@ interface ProductCostsTabProps {
 export default function ProductCostsTab({ form }: ProductCostsTabProps) {
   const productCost = form.watch("costs.currentCost") || 0;
   const taxPercent = form.watch("costs.taxPercent") || 0;
+  const productId = form.watch("id");
+  const [costHistory, setCostHistory] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    if (productId) {
+      fetch(`/api/products/${productId}/cost-history`)
+        .then(res => res.json())
+        .then(data => setCostHistory(data))
+        .catch(err => console.error('Error fetching cost history:', err));
+    }
+  }, [productId]);
 
   return (
     <div className="space-y-6">
@@ -46,12 +64,9 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
                     Custo Final do Produto (R$) *
                   </FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
-                      type="number" 
-                      step="0.01"
-                      placeholder="0,00"
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    <CurrencyInput 
+                      value={field.value}
+                      onChange={(value) => field.onChange(value)}
                     />
                   </FormControl>
                   <div className="text-xs text-muted-foreground mt-1">
@@ -73,12 +88,9 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
                     Impostos sobre Venda (%) *
                   </FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
-                      type="number" 
-                      step="0.1"
-                      placeholder="0"
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    <PercentInput 
+                      value={field.value}
+                      onChange={(value) => field.onChange(value)}
                     />
                   </FormControl>
                   <div className="text-xs text-muted-foreground mt-1">
@@ -139,7 +151,7 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
         </CardContent>
       </Card>
 
-      {/* Cost History (placeholder for future implementation) */}
+      {/* Cost History */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -148,13 +160,71 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <History className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>Histórico será exibido após o primeiro salvamento</p>
-            <p className="text-sm mt-2">
-              Acompanhe a evolução dos custos ao longo do tempo
-            </p>
-          </div>
+          {costHistory.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <History className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p>Histórico será exibido após o primeiro salvamento</p>
+              <p className="text-sm mt-2">
+                Acompanhe a evolução dos custos ao longo do tempo
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {costHistory.map((history, index) => {
+                const prevCost = parseFloat(history.previousCost);
+                const newCost = parseFloat(history.newCost);
+                const percentChange = ((newCost - prevCost) / prevCost * 100).toFixed(2);
+                const isIncrease = newCost > prevCost;
+                
+                return (
+                  <div key={history.id || index} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-2">
+                          <span className="text-sm text-muted-foreground">
+                            {new Date(history.createdAt).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                          {history.observations && (
+                            <Badge variant="secondary" className="text-xs">
+                              Com observação
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {formatBRL(prevCost)}
+                          </span>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">
+                            {formatBRL(newCost)}
+                          </span>
+                          <Badge 
+                            variant={isIncrease ? "destructive" : "default"} 
+                            className="ml-2"
+                          >
+                            {isIncrease ? '+' : ''}{percentChange}%
+                          </Badge>
+                        </div>
+                        
+                        {history.observations && (
+                          <div className="mt-2 text-sm text-muted-foreground bg-muted/50 rounded-md p-2">
+                            {history.observations}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 

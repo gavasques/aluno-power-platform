@@ -38,6 +38,9 @@ import ProductResultsTab from "@/pages/myarea/tabs/ProductResultsTab";
 const productFormSchema = z.object({
   // Basic data
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+  sku: z.string().min(1, "Código SKU é obrigatório"),
+  freeCode: z.string().optional(),
+  supplierCode: z.string().optional(),
   photo: z.string().optional(),
   ean: z.string().optional(),
   brand: z.string().optional(),
@@ -132,10 +135,13 @@ export default function ProductPricingForm() {
       
       form.reset({
         name: existingProduct?.name || "",
+        sku: existingProduct?.sku || "",
+        freeCode: existingProduct?.freeCode || "",
+        supplierCode: existingProduct?.supplierCode || "",
         photo: existingProduct?.photo || "",
         ean: existingProduct?.ean || "",
         brand: existingProduct?.brand || "",
-        categoryId: existingProduct?.categoryId?.toString() || "",
+        categoryId: existingProduct?.category || "",
         supplierId: existingProduct?.supplierId?.toString() || "",
         ncm: existingProduct?.ncm || "",
         dimensions: productDimensions,
@@ -163,6 +169,9 @@ export default function ProductPricingForm() {
       
       // Add basic fields
       formData.append("name", data.name);
+      formData.append("sku", data.sku);
+      if (data.freeCode) formData.append("freeCode", data.freeCode);
+      if (data.supplierCode) formData.append("supplierCode", data.supplierCode);
       if (data.ean) formData.append("ean", data.ean);
       if (data.brand) formData.append("brand", data.brand);
       formData.append("categoryId", data.categoryId);
@@ -177,7 +186,7 @@ export default function ProductPricingForm() {
       // Add costs
       formData.append("costItem", data.costs.currentCost.toString());
       formData.append("taxPercent", data.costs.taxPercent.toString());
-      formData.append("totalCost", ((data.costs.currentCost * (1 + data.costs.taxPercent / 100))).toString());
+      formData.append("packCost", "0"); // Default to 0 for now
       if (data.costs.observations) {
         formData.append("observations", data.costs.observations);
       }

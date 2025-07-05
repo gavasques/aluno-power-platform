@@ -466,6 +466,19 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Product Cost History
+export const productCostHistory = pgTable("product_cost_history", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").references(() => products.id).notNull(),
+  previousCost: decimal("previous_cost", { precision: 10, scale: 2 }),
+  newCost: decimal("new_cost", { precision: 10, scale: 2 }).notNull(),
+  observations: text("observations"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  productIdx: index("cost_history_product_idx").on(table.productId),
+  createdIdx: index("cost_history_created_idx").on(table.createdAt),
+}));
+
 // YouTube Videos Cache
 export const youtubeVideos = pgTable("youtube_videos", {
   id: serial("id").primaryKey(),
@@ -1464,6 +1477,9 @@ export type Prompt = typeof prompts.$inferSelect;
 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
+
+export type InsertProductCostHistory = typeof productCostHistory.$inferInsert;
+export type ProductCostHistory = typeof productCostHistory.$inferSelect;
 
 export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 export type YoutubeVideo = typeof youtubeVideos.$inferSelect;

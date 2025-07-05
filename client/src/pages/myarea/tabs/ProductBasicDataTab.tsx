@@ -109,6 +109,50 @@ export default function ProductBasicDataTab({
             )}
           />
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="sku"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Código SKU *</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Ex: CAPA-IP15PM-001" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="freeCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Código Livre</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Ex: CLV-001" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="supplierCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Código no Fornecedor</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Ex: FORN-12345" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}

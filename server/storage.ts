@@ -7,6 +7,7 @@ import {
   templates, 
   prompts, 
   products,
+  productCostHistory,
   categories,
   materialTypes,
   materialCategories,
@@ -62,6 +63,8 @@ import {
   type InsertPrompt,
   type Product,
   type InsertProduct,
+  type ProductCostHistory,
+  type InsertProductCostHistory,
   type Category,
   type InsertCategory,
   type Department,
@@ -1198,6 +1201,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product> {
+    // Get current product to check if cost changed
+    const [currentProduct] = await db
+      .select()
+      .from(products)
+      .where(eq(products.id, id));
+    
+    // Update the product
     const [updated] = await db
       .update(products)
       .set({
@@ -1206,11 +1216,34 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(products.id, id))
       .returning();
+    
+    // If cost changed, save to history
+    if (currentProduct && product.costItem !== undefined && 
+        currentProduct.costItem !== product.costItem) {
+      const costHistoryData: InsertProductCostHistory = {
+        productId: id,
+        previousCost: currentProduct.costItem,
+        newCost: String(product.costItem),
+        observations: product.observations || null,
+      };
+      
+      await db.insert(productCostHistory).values(costHistoryData);
+    }
+    
     return updated;
   }
 
   async deleteProduct(id: number): Promise<void> {
     await db.delete(products).where(eq(products.id, id));
+  }
+
+  async getProductCostHistory(productId: number): Promise<ProductCostHistory[]> {
+    const history = await db
+      .select()
+      .from(productCostHistory)
+      .where(eq(productCostHistory.productId, productId))
+      .orderBy(desc(productCostHistory.createdAt));
+    return history;
   }
 
   async searchProducts(query: string): Promise<Product[]> {
