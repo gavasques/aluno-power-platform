@@ -6,76 +6,79 @@ interface CurrencyInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEle
   onChange?: (value: number) => void;
 }
 
-const formatCurrency = (num: number): string => {
-  return num.toLocaleString('pt-BR', {
+const formatBRL = (value: number): string => {
+  if (!value || value === 0) return '';
+  return value.toLocaleString('pt-BR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
 };
 
-const parseCurrency = (str: string): number => {
+const parseBRL = (value: string): number => {
+  if (!value) return 0;
   // Remove tudo exceto números, vírgula e ponto
-  const cleaned = str.replace(/[^\d,.-]/g, '');
-  // Substitui vírgula por ponto
+  const cleaned = value.replace(/[^\d,.-]/g, '');
+  // Substitui vírgula por ponto para parseFloat
   const normalized = cleaned.replace(',', '.');
-  return parseFloat(normalized) || 0;
+  const parsed = parseFloat(normalized);
+  return isNaN(parsed) ? 0 : parsed;
 };
 
-export function CurrencyInput({ value, onChange, ...props }: CurrencyInputProps) {
-  const [displayValue, setDisplayValue] = React.useState(() => {
-    if (value === undefined || value === null || value === 0) return '';
-    return formatCurrency(value);
-  });
+export function CurrencyInput({ value, onChange, className, ...props }: CurrencyInputProps) {
+  const [inputValue, setInputValue] = React.useState('');
+  const [isFocused, setIsFocused] = React.useState(false);
+  const [lastValueProp, setLastValueProp] = React.useState<number | undefined>();
 
+  // Atualiza o valor de exibição apenas quando o value prop mudar externamente
+  // e o input não estiver focado
   React.useEffect(() => {
-    if (value === undefined || value === null || value === 0) {
-      setDisplayValue('');
-    } else {
-      setDisplayValue(formatCurrency(value));
+    // Só atualiza se:
+    // 1. Input não está focado
+    // 2. Value prop mudou de fato (não é o mesmo valor anterior)
+    if (!isFocused && value !== lastValueProp) {
+      const formattedValue = value ? formatBRL(value) : '';
+      setInputValue(formattedValue);
+      setLastValueProp(value);
     }
-  }, [value]);
+  }, [value, isFocused, lastValueProp]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
+    const newValue = e.target.value;
+    setInputValue(newValue);
     
-    // Se estiver vazio, limpa o valor
-    if (!inputValue) {
-      setDisplayValue('');
-      onChange?.(0);
-      return;
-    }
+    // Chama onChange apenas com valores válidos
+    const numericValue = parseBRL(newValue);
+    onChange?.(numericValue);
+  };
 
-    // Remove caracteres não numéricos exceto vírgula e ponto
-    const cleaned = inputValue.replace(/[^\d,.-]/g, '');
-    setDisplayValue(cleaned);
-
-    // Parse do valor para número
-    const numericValue = parseCurrency(cleaned);
-    if (!isNaN(numericValue)) {
-      onChange?.(numericValue);
-    }
+  const handleFocus = () => {
+    setIsFocused(true);
   };
 
   const handleBlur = () => {
-    if (displayValue) {
-      const numericValue = parseCurrency(displayValue);
-      if (!isNaN(numericValue) && numericValue > 0) {
-        setDisplayValue(formatCurrency(numericValue));
-      }
+    setIsFocused(false);
+    // Formata o valor no blur se houver um valor válido
+    const numericValue = parseBRL(inputValue);
+    if (numericValue > 0) {
+      setInputValue(formatBRL(numericValue));
+    } else {
+      setInputValue('');
     }
   };
 
   return (
     <div className="relative">
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground z-10">
         R$
       </span>
       <Input
         {...props}
-        value={displayValue}
+        type="text"
+        value={inputValue}
         onChange={handleChange}
+        onFocus={handleFocus}
         onBlur={handleBlur}
-        className="pl-10"
+        className={`pl-12 ${className || ''}`}
         placeholder="0,00"
       />
     </div>

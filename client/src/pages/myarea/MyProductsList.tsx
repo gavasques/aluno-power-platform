@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -248,9 +248,8 @@ export default function MyProductsList() {
                   const isExpanded = expandedRows.has(product.id);
                   
                   return (
-                    <>
+                    <React.Fragment key={product.id}>
                       <TableRow 
-                        key={product.id}
                         className="cursor-pointer hover:bg-gray-50"
                         onClick={() => toggleRowExpansion(product.id)}
                       >
@@ -350,6 +349,7 @@ export default function MyProductsList() {
                         </TableCell>
                       </TableRow>
                       
+                      
                       {/* Expanded calculation details */}
                       {isExpanded && activeChannels.length > 0 && (
                         <TableRow key={`${product.id}-details`}>
@@ -420,7 +420,7 @@ export default function MyProductsList() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </>
+                    </React.Fragment>
                   );
                 })
               )}
