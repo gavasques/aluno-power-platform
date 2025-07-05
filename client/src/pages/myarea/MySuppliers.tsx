@@ -118,8 +118,6 @@ const MySuppliers = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome da Empresa</TableHead>
-                <TableHead>Razão Social</TableHead>
-                <TableHead>Descrição</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -130,16 +128,6 @@ const MySuppliers = () => {
                   <TableCell>
                     <div className="font-medium text-gray-900">
                       {supplier.tradeName}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm text-gray-600">
-                      {supplier.corporateName}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm text-gray-600 max-w-xs truncate">
-                      {supplier.description || '-'}
                     </div>
                   </TableCell>
                   <TableCell>
