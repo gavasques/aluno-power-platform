@@ -1223,47 +1223,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
-    const [result] = await db
-      .select({
-        id: products.id,
-        name: products.name,
-        photo: products.photo,
-        sku: products.sku,
-        freeCode: products.freeCode,
-        supplierCode: products.supplierCode,
-        internalCode: products.internalCode,
-        ean: products.ean,
-        dimensions: products.dimensions,
-        weight: products.weight,
-        brand: products.brand, // Legacy text field
-        brandId: products.brandId,
-        brandName: brands.name, // Join with brands table for brand name
-        category: products.category,
-        supplierId: products.supplierId,
-        ncm: products.ncm,
-        costItem: products.costItem,
-        packCost: products.packCost,
-        taxPercent: products.taxPercent,
-        observations: products.observations,
-        bulletPoints: products.bulletPoints,
-        description: products.description,
-        descriptions: products.descriptions,
-        channels: products.channels,
-        active: products.active,
-        createdAt: products.createdAt,
-        updatedAt: products.updatedAt,
-      })
+    // First try to get the product data
+    const [product] = await db
+      .select()
       .from(products)
-      .leftJoin(brands, eq(products.brandId, brands.id))
       .where(eq(products.id, id));
 
-    if (!result) return undefined;
+    if (!product) return undefined;
 
-    // Return with the brand name from the join if available
+    // Now try to get brand name if brand exists (either from brand_id or legacy brand field)
+    let brandName = null;
+    let brandId = null;
+
+    if (product.brandId) {
+      // Use brand_id (preferred method)
+      const [brand] = await db
+        .select({ name: brands.name })
+        .from(brands)
+        .where(eq(brands.id, product.brandId));
+      brandName = brand?.name || null;
+      brandId = product.brandId;
+    } else if (product.brand && !isNaN(parseInt(product.brand))) {
+      // Legacy: brand field contains numeric ID as string
+      const brandIdFromText = parseInt(product.brand);
+      const [brand] = await db
+        .select({ name: brands.name })
+        .from(brands)
+        .where(eq(brands.id, brandIdFromText));
+      brandName = brand?.name || null;
+      brandId = brandIdFromText;
+    }
+
+    // Return with proper brand mapping
     return {
-      ...result,
-      // Use brandName from join if available, otherwise fallback to legacy brand field
-      brand: result.brandName || result.brand || ''
+      ...product,
+      brandId: brandId,
+      brandName: brandName,
+      // For the brand field, use brandId if available, otherwise keep legacy value
+      brand: brandId ? brandId.toString() : product.brand || ''
     };
   }
 
