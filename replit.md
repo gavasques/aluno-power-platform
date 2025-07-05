@@ -111,6 +111,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 05:15 PM**: ✅ BREAKDOWN DE CUSTOS INTERATIVO E MARGEM ADICIONADA
+  - **Breakdown de Custos Implementado**: Clique em "Custo Total" para expandir detalhes
+    - Mostra: Custo do Produto, Embalagem (se houver), Impostos sobre Venda, Custos do Canal
+    - Total destacado com linha divisória
+    - Estado controlado por `expandedCosts` para cada canal individualmente
+  - **Margem Adicionada**: Exibida após ROI com cores indicativas
+    - Verde: Margem >= 20% (boa rentabilidade)
+    - Amarelo: Margem >= 10% (rentabilidade moderada)
+    - Vermelho: Margem < 10% (baixa rentabilidade)
+  - **Interface Interativa**: Texto "Custo Total" sublinhado com hover effect
+  - **Cálculo Simplificado**: Custos do Canal = Total - (Produto + Embalagem + Impostos)
+
 - **January 05, 2025 - 05:09 PM**: ✅ CORREÇÃO COMPLETA DE MAPEAMENTO DE PROPRIEDADES TypeScript
   - **Erro Crítico Resolvido**: Lista de produtos mostrando erros de propriedades inexistentes
     - Corrigido: `profitMarginPercent` → `marginPercent` em todos os locais

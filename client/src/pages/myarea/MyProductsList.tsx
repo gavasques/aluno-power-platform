@@ -67,6 +67,7 @@ export default function MyProductsList() {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [channelsEditorOpen, setChannelsEditorOpen] = useState(false);
   const [channelsEditorProductId, setChannelsEditorProductId] = useState<number | null>(null);
+  const [expandedCosts, setExpandedCosts] = useState<Record<string, boolean>>({});
   const { products, isLoading, error, deleteProduct } = useProducts();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -438,9 +439,59 @@ export default function MyProductsList() {
                                         <span className="font-medium">{formatBRL(channel.data?.price || 0)}</span>
                                       </div>
                                       <div className="flex justify-between">
-                                        <span className="text-gray-600">Custo Total:</span>
+                                        <span 
+                                          className="text-gray-600 cursor-pointer hover:text-gray-800 underline decoration-dotted"
+                                          onClick={() => setExpandedCosts(prev => ({
+                                            ...prev,
+                                            [`${product.id}-${channel.type}`]: !prev[`${product.id}-${channel.type}`]
+                                          }))}
+                                        >
+                                          Custo Total:
+                                        </span>
                                         <span>{formatBRL(calculation.totalCosts)}</span>
                                       </div>
+                                      
+                                      {expandedCosts[`${product.id}-${channel.type}`] && (
+                                        <div className="ml-2 mt-1 space-y-1 text-xs border-l-2 border-gray-200 pl-2">
+                                          <div className="flex justify-between text-gray-500">
+                                            <span>Custo do Produto:</span>
+                                            <span>{formatBRL(product.costItem || 0)}</span>
+                                          </div>
+                                          {product.packCost && product.packCost > 0 && (
+                                            <div className="flex justify-between text-gray-500">
+                                              <span>Custo de Embalagem:</span>
+                                              <span>{formatBRL(product.packCost)}</span>
+                                            </div>
+                                          )}
+                                          {(() => {
+                                            const price = channel.data?.price || 0;
+                                            const taxCost = price * ((product.taxPercent || 0) / 100);
+                                            const baseCost = (product.costItem || 0) + (product.packCost || 0);
+                                            const otherCosts = calculation.totalCosts - baseCost - taxCost;
+                                            
+                                            return (
+                                              <>
+                                                {taxCost > 0 && (
+                                                  <div className="flex justify-between text-gray-500">
+                                                    <span>Impostos s/ Venda ({product.taxPercent || 0}%):</span>
+                                                    <span>{formatBRL(taxCost)}</span>
+                                                  </div>
+                                                )}
+                                                {otherCosts > 0 && (
+                                                  <div className="flex justify-between text-gray-500">
+                                                    <span>Custos do Canal:</span>
+                                                    <span>{formatBRL(otherCosts)}</span>
+                                                  </div>
+                                                )}
+                                                <div className="flex justify-between text-gray-500 pt-1 border-t border-gray-200">
+                                                  <span className="font-medium">Total:</span>
+                                                  <span className="font-medium">{formatBRL(calculation.totalCosts)}</span>
+                                                </div>
+                                              </>
+                                            );
+                                          })()}
+                                        </div>
+                                      )}
                                       <div className="flex justify-between">
                                         <span className="text-gray-600">Preço:</span>
                                         <span>{formatBRL(channel.data?.price || 0)}</span>
@@ -457,6 +508,16 @@ export default function MyProductsList() {
                                       <div className="flex justify-between">
                                         <span className="text-gray-600">ROI:</span>
                                         <span className="font-medium">{calculation.roi.toFixed(1)}%</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Margem:</span>
+                                        <span className={cn(
+                                          "font-medium",
+                                          calculation.marginPercent >= 20 ? "text-green-600" : 
+                                          calculation.marginPercent >= 10 ? "text-yellow-600" : "text-red-600"
+                                        )}>
+                                          {calculation.marginPercent.toFixed(1)}%
+                                        </span>
                                       </div>
                                     </div>
                                   </div>
