@@ -40,6 +40,10 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
   const taxPercent = form.watch("costs.taxPercent") || 0;
   const formProductId = form.watch("id");
   const [costHistory, setCostHistory] = React.useState<any[]>([]);
+  
+  console.log('🔍 [PRODUCT COSTS TAB] productId:', productId);
+  console.log('🔍 [PRODUCT COSTS TAB] formProductId:', formProductId);
+  console.log('🔍 [PRODUCT COSTS TAB] isEditing:', isEditing);
 
   // Save costs function
   const saveCosts = async () => {
@@ -64,6 +68,17 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
           title: "Custos salvos",
           description: "Os dados de custos foram salvos com sucesso.",
         });
+        
+        // Reload cost history to show the new entry
+        if (productId) {
+          fetch(`/api/products/${productId}/cost-history`)
+            .then(res => res.json())
+            .then(data => {
+              console.log('📊 [COST HISTORY] Reloaded after save:', data);
+              setCostHistory(data);
+            })
+            .catch(err => console.error('Error reloading cost history:', err));
+        }
       } else {
         throw new Error("Erro ao salvar custos");
       }
@@ -79,13 +94,20 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
   };
 
   React.useEffect(() => {
-    if (formProductId) {
-      fetch(`/api/products/${formProductId}/cost-history`)
+    // Use productId from props if available, otherwise use formProductId
+    const idToUse = productId || formProductId;
+    console.log('📊 [COST HISTORY] Using ID:', idToUse);
+    
+    if (idToUse) {
+      fetch(`/api/products/${idToUse}/cost-history`)
         .then(res => res.json())
-        .then(data => setCostHistory(data))
+        .then(data => {
+          console.log('📊 [COST HISTORY] Loaded:', data);
+          setCostHistory(data);
+        })
         .catch(err => console.error('Error fetching cost history:', err));
     }
-  }, [formProductId]);
+  }, [productId, formProductId]);
 
   return (
     <div className="space-y-6">

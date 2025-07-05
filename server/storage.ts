@@ -1207,6 +1207,9 @@ export class DatabaseStorage implements IStorage {
       .from(products)
       .where(eq(products.id, id));
     
+    console.log('🔄 [UPDATE PRODUCT] Current costItem:', currentProduct?.costItem);
+    console.log('🔄 [UPDATE PRODUCT] New costItem:', product.costItem);
+    
     // Update the product
     const [updated] = await db
       .update(products)
@@ -1227,6 +1230,7 @@ export class DatabaseStorage implements IStorage {
         observations: product.observations || null,
       };
       
+      console.log('💾 [COST HISTORY] Saving:', costHistoryData);
       await db.insert(productCostHistory).values(costHistoryData);
     }
     

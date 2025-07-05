@@ -822,6 +822,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sku: req.body.sku || '',  // Required field
       };
 
+      // Handle costs object from frontend
+      if (req.body.costs) {
+        const costs = typeof req.body.costs === 'string' ? JSON.parse(req.body.costs) : req.body.costs;
+        if (costs.currentCost !== undefined) productData.costItem = String(costs.currentCost);
+        if (costs.taxPercent !== undefined) productData.taxPercent = String(costs.taxPercent);
+        if (costs.observations !== undefined) productData.observations = costs.observations;
+      }
+
       // Only add optional fields if they were explicitly sent in the request
       if ('freeCode' in req.body) productData.freeCode = req.body.freeCode || null;
       if ('supplierCode' in req.body) productData.supplierCode = req.body.supplierCode || null;
@@ -833,10 +841,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if ('ncm' in req.body) productData.ncm = req.body.ncm || null;
       if ('dimensions' in req.body) productData.dimensions = req.body.dimensions ? JSON.parse(req.body.dimensions) : null;
       if ('weight' in req.body) productData.weight = req.body.weight ? String(req.body.weight) : "0";
-      if ('costItem' in req.body) productData.costItem = req.body.costItem ? String(req.body.costItem) : "0";
-      if ('taxPercent' in req.body) productData.taxPercent = req.body.taxPercent ? String(req.body.taxPercent) : "0";
+      
+      // Direct fields (not from costs object)
+      if ('costItem' in req.body && !req.body.costs) productData.costItem = req.body.costItem ? String(req.body.costItem) : "0";
+      if ('taxPercent' in req.body && !req.body.costs) productData.taxPercent = req.body.taxPercent ? String(req.body.taxPercent) : "0";
       if ('packCost' in req.body) productData.packCost = req.body.packCost ? String(req.body.packCost) : "0";
-      if ('observations' in req.body) productData.observations = req.body.observations || null;
+      if ('observations' in req.body && !req.body.costs) productData.observations = req.body.observations || null;
       if ('channels' in req.body) productData.channels = typeof req.body.channels === 'string' ? JSON.parse(req.body.channels) : req.body.channels;
       
       console.log("🔍 [BACKEND] Parsed productData dimensions:", productData.dimensions);
@@ -869,7 +879,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/products/:id/cost-history', async (req, res) => {
     try {
-      const history = await storage.getProductCostHistory(parseInt(req.params.id));
+      const productId = parseInt(req.params.id);
+      console.log('📊 [COST HISTORY ENDPOINT] Fetching for product:', productId);
+      const history = await storage.getProductCostHistory(productId);
+      console.log('📊 [COST HISTORY ENDPOINT] Found entries:', history.length);
       res.json(history);
     } catch (error) {
       console.error('Error fetching cost history:', error);
