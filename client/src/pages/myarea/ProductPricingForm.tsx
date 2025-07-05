@@ -249,12 +249,77 @@ export default function ProductPricingForm() {
   };
 
   const handleSaveAndContinue = (data: ProductFormData) => {
-    saveMutation.mutate(data, {
-      onSuccess: (savedProduct) => {
+    console.log("🔄 Salvando produto...", data);
+    
+    const saveData = async () => {
+      try {
+        const formData = new FormData();
+        
+        // Add basic fields
+        formData.append("name", data.name);
+        formData.append("sku", data.sku || "");
+        if (data.freeCode) formData.append("freeCode", data.freeCode);
+        if (data.supplierCode) formData.append("supplierCode", data.supplierCode);
+        if (data.ean) formData.append("ean", data.ean);
+        if (data.brand) formData.append("brand", data.brand);
+        formData.append("categoryId", data.categoryId);
+        formData.append("supplierId", data.supplierId);
+        if (data.ncm) formData.append("ncm", data.ncm);
+        
+        // Add dimensions and weight
+        formData.append("dimensions", JSON.stringify(data.dimensions));
+        formData.append("weight", data.weight.toString());
+        formData.append("calculatedWeight", Math.max(data.weight, calculatedCubicWeight).toString());
+        
+        // Add costs
+        formData.append("costItem", data.costs.currentCost.toString());
+        formData.append("taxPercent", data.costs.taxPercent.toString());
+        formData.append("packCost", "0");
+        if (data.costs.observations) {
+          formData.append("observations", data.costs.observations);
+        }
+        
+        // Add channels configuration
+        if (data.channels) {
+          formData.append("channels", JSON.stringify(data.channels));
+        }
+        
+        // Add image if selected
+        if (imageFile) {
+          formData.append("photo", imageFile);
+        }
+        
+        const url = isEditing ? `/api/products/${id}` : "/api/products";
+        const method = isEditing ? "PUT" : "POST";
+        
+        console.log("📤 Enviando para:", url, "Método:", method);
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Erro ao salvar produto");
+        }
+        
+        const savedProduct = await response.json();
+        console.log("✅ Produto salvo:", savedProduct);
+        
         toast({
           title: "Produto salvo com sucesso",
           description: "Continue editando ou vá para a próxima aba.",
         });
+        
+        // Invalidate queries
+        queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+        if (isEditing) {
+          queryClient.invalidateQueries({ queryKey: [`/api/products/${id}`] });
+        }
         
         // Se for um produto novo, redireciona para edição
         if (!isEditing && savedProduct?.id) {
@@ -269,8 +334,17 @@ export default function ProductPricingForm() {
             setActiveTab(tabs[currentIndex + 1]);
           }
         }
-      },
-    });
+      } catch (error) {
+        console.error("❌ Erro ao salvar:", error);
+        toast({
+          title: "Erro ao salvar",
+          description: error instanceof Error ? error.message : "Erro desconhecido",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    saveData();
   };
 
   if (loadingProduct) {

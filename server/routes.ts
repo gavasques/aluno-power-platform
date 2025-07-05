@@ -759,8 +759,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/products', upload.single('photo'), async (req, res) => {
+  app.post('/api/products', requireAuth, upload.single('photo'), async (req, res) => {
     try {
+      console.log("📝 [POST /api/products] Recebendo dados:", {
+        body: req.body,
+        file: req.file ? req.file.filename : 'Nenhum arquivo'
+      });
+      
       // Parse FormData fields
       const productData: any = {
         name: req.body.name,
@@ -783,8 +788,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         active: true,
       };
 
+      console.log("📋 [POST /api/products] Dados processados:", productData);
+      
       const validatedData = insertProductSchema.parse(productData);
+      console.log("✅ [POST /api/products] Dados validados:", validatedData);
+      
       const product = await storage.createProduct(validatedData);
+      console.log("💾 [POST /api/products] Produto criado:", product);
+      
       res.status(201).json(product);
     } catch (error) {
       console.error('Error creating product:', error);
@@ -792,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/products/:id', upload.single('photo'), async (req, res) => {
+  app.put('/api/products/:id', requireAuth, upload.single('photo'), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       
