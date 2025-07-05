@@ -41,6 +41,7 @@ const CHANNEL_FIELDS = {
     icon: '📮',
     fields: [
       { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
       { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
       { key: 'installmentPercent', label: '% Parc. Sem Juros', type: 'percent' },
       { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
@@ -58,6 +59,7 @@ const CHANNEL_FIELDS = {
     fields: [
       { key: 'shippingCost', label: 'Custo do Frete FBA ON Site', type: 'currency' },
       { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
       { key: 'installmentPercent', label: '% Parc. Sem Juros', type: 'percent' },
       { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
       { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
@@ -75,6 +77,7 @@ const CHANNEL_FIELDS = {
     fields: [
       { key: 'shippingCost', label: 'Custo do Frete DBA', type: 'currency' },
       { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
       { key: 'installmentPercent', label: '% Parc. Sem Juros', type: 'percent' },
       { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
       { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
@@ -93,6 +96,7 @@ const CHANNEL_FIELDS = {
       { key: 'productCostFBA', label: 'Custo do Produto no FBA', type: 'currency' },
       { key: 'shippingCost', label: 'Custo do Frete FBA', type: 'currency' },
       { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
       { key: 'installmentPercent', label: '% Parc. Sem Juros', type: 'percent' },
       { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
       { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
@@ -110,6 +114,7 @@ const CHANNEL_FIELDS = {
     icon: '🛒',
     fields: [
       { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
       { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
       { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
       { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
@@ -126,6 +131,7 @@ const CHANNEL_FIELDS = {
     fields: [
       { key: 'shippingCost', label: 'Custo do Frete ML Flex', type: 'currency' },
       { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
       { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
       { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
       { key: 'revenueMLFlex', label: 'Receita ML Flex R$', type: 'currency' },
@@ -143,6 +149,7 @@ const CHANNEL_FIELDS = {
     fields: [
       { key: 'shippingCost', label: 'Custo do Frete ML Envios', type: 'currency' },
       { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
       { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
       { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
       { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
@@ -160,6 +167,7 @@ const CHANNEL_FIELDS = {
       { key: 'productCostMLFull', label: 'Custo do Produto no ML FULL', type: 'currency' },
       { key: 'shippingCost', label: 'Custo Frete ML FULL', type: 'currency' },
       { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
       { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
       { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
       { key: 'prepCenterCost', label: 'Custo Prep. Center', type: 'currency' },
@@ -176,6 +184,7 @@ const CHANNEL_FIELDS = {
     icon: '🛍️',
     fields: [
       { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
       { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
       { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
       { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
@@ -184,6 +193,57 @@ const CHANNEL_FIELDS = {
       { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
       { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
       { key: 'price', label: 'Preço de Venda Shopee', type: 'currency' },
+    ]
+  },
+  MAGALU_FULL: {
+    name: 'Magalu FULL',
+    icon: '🏪',
+    fields: [
+      { key: 'productCostMagaluFull', label: 'Custo do Produto MGL FULL', type: 'currency' },
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda MGL FULL', type: 'currency' },
+    ]
+  },
+  MAGALU_ENVIOS: {
+    name: 'Magalu Envios',
+    icon: '📦',
+    fields: [
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
+      { key: 'shippingCostValue', label: 'Custo Frete R$', type: 'currency' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda MGL Envios', type: 'currency' },
+    ]
+  },
+  TIKTOKSHOP_NORMAL: {
+    name: 'TikTok Shop',
+    icon: '🎵',
+    fields: [
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'marketplaceFeeValue', label: 'Taxa Fixa Marketplace R$', type: 'currency' },
+      { key: 'affiliateCommissionPercent', label: 'Comissão Afiliado %', type: 'percent' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'shippingCostValue', label: 'Custo Frete R$', type: 'currency' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'price', label: 'Preço de Venda TikTok', type: 'currency' },
     ]
   },
 } as const;

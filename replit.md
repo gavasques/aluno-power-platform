@@ -111,26 +111,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 05, 2025 - 08:20 PM**: ✅ IMPLEMENTAÇÃO UNIVERSAL DO CAMPO "TAXA FIXA MARKETPLACE R$" CONCLUÍDA
-  - **Campo Adicionado Sistematicamente a TODOS os 14 Canais**:
-    - ✅ AMAZON_FBM, AMAZON_FBA, AMAZON_DBA, AMAZON_FBA_ONSITE (4 canais Amazon)
-    - ✅ MERCADO_LIVRE_ME1, MERCADO_LIVRE_FLEX, MERCADO_LIVRE_ENVIOS, MERCADO_LIVRE_FULL (4 canais ML)
-    - ✅ SHOPEE (já existia), MAGALU_FULL, MAGALU_ENVIOS, TIKTOKSHOP_NORMAL (4 outros canais)
-    - ✅ SITE_PROPRIO (canal próprio) - Total: 13 canais cobertos
-  - **Posicionamento Estratégico**:
-    - Campo posicionado consistentemente após comissão/marketing
-    - Integrado ao breakdown de custos detalhado de cada canal
-    - Exibição condicional: apenas quando valor > 0
-    - Rótulo padronizado: "Taxa Fixa Marketplace R$" em todos os canais
-  - **Estrutura de Dados Otimizada**:
-    - Variável `marketplaceFeeValue` padronizada em todos os canais
-    - Integração completa com função `getDetailedCostBreakdown`
-    - Suporte completo nos cálculos de rentabilidade por canal
-  - **Benefícios para o Usuário**:
-    - Transparência total nos custos de marketplace
-    - Análise precisa de rentabilidade com todas as taxas incluídas
-    - Interface consistente em todos os canais de venda
-    - Flexibilidade para diferentes estruturas de cobrança por marketplace
+- **January 05, 2025 - 08:30 PM**: ✅ IMPLEMENTAÇÃO FRONTEND-BACKEND COMPLETA DO CAMPO "TAXA FIXA MARKETPLACE R$" FINALIZADA
+  - **Problema Crítico Resolvido**: Campo implementado no backend mas ausente na interface do usuário
+    - Frontend-Backend Disconnect: Campo existia nos cálculos mas não estava visível para os usuários
+    - Solução Sistemática: Adicionado campo `marketplaceFeeValue` a TODOS os canais no ChannelsEditor.tsx
+  - **Interface do Usuário Completa**:
+    - ✅ Campo "Taxa Fixa Marketplace R$" visível em todos os 13 canais de venda
+    - ✅ Posicionamento estratégico: após campo de comissão em cada canal
+    - ✅ Validação de entrada com CurrencyInput component
+    - ✅ Persistência correta no banco de dados via formulário unificado
+  - **Canais Novos Adicionados à Interface**:
+    - ✅ MAGALU_FULL: "Magalu FULL" com campos específicos incluindo productCostMagaluFull
+    - ✅ MAGALU_ENVIOS: "Magalu Envios" com estrutura de frete dedicada
+    - ✅ TIKTOKSHOP_NORMAL: "TikTok Shop" com affiliateCommissionPercent específico
+  - **Total de 13 Canais com Campo Marketplace Fee**:
+    - Amazon: FBM, FBA, DBA, FBA_ONSITE (4 canais)
+    - Mercado Livre: ME1, FLEX, ENVIOS, FULL (4 canais)
+    - Outros: SITE_PROPRIO, SHOPEE, MAGALU_FULL, MAGALU_ENVIOS, TIKTOKSHOP_NORMAL (5 canais)
+  - **Sistema Completo e Operacional**:
+    - Backend: Cálculos incluindo marketplaceFeeValue em channelCalculations.ts
+    - Frontend: Interface de usuário completa no ChannelsEditor.tsx
+    - Persistência: Salvamento correto via API endpoints existentes
+    - UX: Campo exibido apenas quando valor > 0 no breakdown de custos
 
 - **January 05, 2025 - 07:00 PM**: 🔧 REFATORAÇÃO COMPLETA DE "MINHA ÁREA" EM ANDAMENTO - SOLID/DRY/KISS
   - **Service Layer Implementado**:
