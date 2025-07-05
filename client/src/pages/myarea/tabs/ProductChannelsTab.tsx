@@ -160,32 +160,31 @@ export default function ProductChannelsTab({ form }: ProductChannelsTabProps) {
   const weight = form.watch("weight");
   const formChannels = form.watch("channels");
 
-  // Initialize channels
+  // Initialize channels only once
   useEffect(() => {
-    if (!formChannels || formChannels.length === 0) {
-      // Initialize with default channels
-      const initialChannels = defaultChannels.map((channel, index) => ({
-        ...channel,
-        id: `channel-${index}-${channel.type}`,
-      })) as SalesChannel[];
-      
-      setChannels(initialChannels);
-      form.setValue("channels", initialChannels);
-    } else {
-      setChannels(formChannels);
+    if (channels.length === 0) {
+      if (!formChannels || formChannels.length === 0) {
+        // Initialize with default channels
+        const initialChannels = defaultChannels.map((channel, index) => ({
+          ...channel,
+          id: `channel-${index}-${channel.type}`,
+        })) as SalesChannel[];
+        
+        setChannels(initialChannels);
+        form.setValue("channels", initialChannels);
+      } else {
+        setChannels(formChannels);
+      }
     }
-  }, [formChannels, form]);
-
-  // Update form when channels change
-  useEffect(() => {
-    form.setValue("channels", channels);
-  }, [channels, form]);
+  }, [formChannels]); // Only depends on formChannels
 
   const handleChannelUpdate = (updatedChannel: SalesChannel) => {
     const newChannels = channels.map(ch => 
       ch.id === updatedChannel.id ? updatedChannel : ch
     );
     setChannels(newChannels);
+    // Update form directly when channel is updated
+    form.setValue("channels", newChannels);
   };
 
   const calculateChannel = (channelId: string) => {
