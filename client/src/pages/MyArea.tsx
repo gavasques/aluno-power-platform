@@ -26,7 +26,19 @@ const MyArea = () => {
       return <MySuppliers />;
     case "produtos":
     case "products":
-      // Sempre mostra o formulário de precificação
+      if (id === "novo" || id === "new") {
+        return <ProductPricingForm />;
+      }
+      if (id && subId === "editar") {
+        return <ProductPricingForm />;
+      }
+      if (id && subId === "pricing") {
+        return <ProductPricing />;
+      }
+      if (id) {
+        return <ProductDetail />;
+      }
+      // Se não tem ID, mostra o formulário direto
       return <ProductPricingForm />;
     case "materiais":
     case "materials":
