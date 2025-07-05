@@ -3,21 +3,27 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-// Users table
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: text("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// Users table for Replit Auth
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  email: text("email").notNull().unique(),
-  name: text("name").notNull(),
+  id: text("id").primaryKey().notNull(), // Changed to text for Replit user IDs
+  email: text("email").unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  profileImageUrl: text("profile_image_url"),
   role: text("role").notNull().default("user"), // admin, support, user
   isActive: boolean("is_active").notNull().default(true),
   lastLogin: timestamp("last_login"),
-  resetToken: text("reset_token"),
-  resetTokenExpiry: timestamp("reset_token_expiry"),
-  magicLinkToken: text("magic_link_token"),
-  magicLinkExpiresAt: timestamp("magic_link_expires_at"),
-  emailVerified: boolean("email_verified").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -41,14 +47,7 @@ export const userGroupMembers = pgTable("user_group_members", {
   addedAt: timestamp("added_at").notNull().defaultNow(),
 });
 
-// User Sessions table
-export const userSessions = pgTable("user_sessions", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  sessionToken: text("session_token").notNull().unique(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+
 
 // Categories
 export const categories = pgTable("categories", {
@@ -1601,14 +1600,11 @@ export type AgentSessionWithFiles = AgentSession & {
   files: AgentSessionFile[];
 };
 
-// Auth schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
+// Replit Auth schemas
+export const upsertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
   lastLogin: true,
-  resetToken: true,
-  resetTokenExpiry: true,
 });
 
 export const insertUserGroupSchema = createInsertSchema(userGroups).omit({
@@ -1622,20 +1618,15 @@ export const insertUserGroupMemberSchema = createInsertSchema(userGroupMembers).
   addedAt: true,
 });
 
-export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
-  id: true,
-  createdAt: true,
-});
+// Replit Auth types
+export type UpsertUser = z.infer<typeof upsertUserSchema>;
+export type User = typeof users.$inferSelect;
 
-// Auth types
 export type InsertUserGroup = z.infer<typeof insertUserGroupSchema>;
 export type UserGroup = typeof userGroups.$inferSelect;
 
 export type InsertUserGroupMember = z.infer<typeof insertUserGroupMemberSchema>;
 export type UserGroupMember = typeof userGroupMembers.$inferSelect;
-
-export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
-export type UserSession = typeof userSessions.$inferSelect;
 
 // User with groups type
 export type UserWithGroups = User & {

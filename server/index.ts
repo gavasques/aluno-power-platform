@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "./routes_replit_auth";
 import { setupVite, serveStatic, log } from "./vite";
 import { scheduler } from "./services/scheduler";
 

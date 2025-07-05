@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { db } from '../db';
-import { users, userSessions, userGroups, userGroupMembers } from '@shared/schema';
+import { users, userGroups, userGroupMembers } from '@shared/schema';
 import { eq, and, gt, sql } from 'drizzle-orm';
 import type { User, InsertUser, UserWithGroups } from '@shared/schema';
 import { EncryptionService } from '../utils/encryption';

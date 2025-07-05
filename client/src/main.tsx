@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
+import AppMinimal from './AppMinimal.tsx'
 import './index.css'
 
 // Global error handling for unhandled promise rejections
@@ -14,4 +14,4 @@ window.addEventListener('error', (event) => {
   console.error('Uncaught error:', event.error);
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(<AppMinimal />);

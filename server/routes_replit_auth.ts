@@ -4,10 +4,10 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
+  // Setup Replit Auth middleware
   await setupAuth(app);
 
-  // Auth routes
+  // Auth routes for Replit Auth
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -20,9 +20,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Protected route example
-  app.get("/api/protected", isAuthenticated, async (req, res) => {
+  app.get("/api/protected", isAuthenticated, async (req: any, res) => {
     const userId = req.user?.claims?.sub;
     res.json({ message: "This is a protected route", userId });
+  });
+
+  // Simple health check
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'OK', timestamp: new Date().toISOString() });
   });
 
   const httpServer = createServer(app);

@@ -1,25 +1,22 @@
 
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-// Simulação de usuário logado - em produção seria de um contexto de autenticação
-const getCurrentUser = () => ({
-  id: "1",
-  name: "Guilherme Vasques",
-  email: "aluno@lvbrasil.com",
-  role: "admin" // admin | support | user
-});
+export function useAuth() {
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+  });
 
-export const useAuth = () => {
-  const [user] = useState(getCurrentUser());
-
-  const isAdmin = user.role === "admin";
-  const isSupport = user.role === "support";
+  const isAdmin = user?.role === "admin";
+  const isSupport = user?.role === "support";
   const hasAdminAccess = isAdmin || isSupport;
 
   return {
     user,
+    isLoading,
+    isAuthenticated: !!user,
     isAdmin,
     isSupport,
     hasAdminAccess
   };
-};
+}

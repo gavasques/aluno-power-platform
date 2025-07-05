@@ -48,7 +48,7 @@ import {
   supportTicketFiles,
   supportCategories,
   type User, 
-  type InsertUser,
+  type UpsertUser,
   type Supplier,
   type InsertSupplier,
   type Partner,
@@ -170,10 +170,9 @@ export type InsertSupplierReview = {
 import { eq, ilike, and, or, desc, asc, sql, count } from "drizzle-orm";
 
 export interface IStorage {
-  // Users
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  // Users for Replit Auth
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
 
   // Suppliers
   getSuppliers(userId?: number): Promise<Supplier[]>;
@@ -406,26 +405,22 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // Users
-  async getUser(id: number): Promise<User | undefined> {
+  // Users for Replit Auth
+  async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    return user;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values({
-        ...insertUser,
-        role: insertUser.role || "student",
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
       })
       .returning();
     return user;
