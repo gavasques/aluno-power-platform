@@ -61,6 +61,9 @@ const CHANNEL_NAMES: Record<string, string> = {
   'ML_ENVIOS': 'ML-Envios',
   'ML_FULL': 'ML-Full',
   'MERCADO_LIVRE_FULL': 'ML-Full',  // Alternative naming
+  'MAGALU_FULL': 'MGL-Full',
+  'MAGALU_ENVIOS': 'MGL-Envios',
+  'TIKTOKSHOP_NORMAL': 'TikTok',
   'SHOPEE': 'Shopee',
   'MARKETPLACE_OTHER': 'Outro',
   // Add any missing variants that might exist

@@ -111,6 +111,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 08:20 PM**: ✅ IMPLEMENTAÇÃO UNIVERSAL DO CAMPO "TAXA FIXA MARKETPLACE R$" CONCLUÍDA
+  - **Campo Adicionado Sistematicamente a TODOS os 14 Canais**:
+    - ✅ AMAZON_FBM, AMAZON_FBA, AMAZON_DBA, AMAZON_FBA_ONSITE (4 canais Amazon)
+    - ✅ MERCADO_LIVRE_ME1, MERCADO_LIVRE_FLEX, MERCADO_LIVRE_ENVIOS, MERCADO_LIVRE_FULL (4 canais ML)
+    - ✅ SHOPEE (já existia), MAGALU_FULL, MAGALU_ENVIOS, TIKTOKSHOP_NORMAL (4 outros canais)
+    - ✅ SITE_PROPRIO (canal próprio) - Total: 13 canais cobertos
+  - **Posicionamento Estratégico**:
+    - Campo posicionado consistentemente após comissão/marketing
+    - Integrado ao breakdown de custos detalhado de cada canal
+    - Exibição condicional: apenas quando valor > 0
+    - Rótulo padronizado: "Taxa Fixa Marketplace R$" em todos os canais
+  - **Estrutura de Dados Otimizada**:
+    - Variável `marketplaceFeeValue` padronizada em todos os canais
+    - Integração completa com função `getDetailedCostBreakdown`
+    - Suporte completo nos cálculos de rentabilidade por canal
+  - **Benefícios para o Usuário**:
+    - Transparência total nos custos de marketplace
+    - Análise precisa de rentabilidade com todas as taxas incluídas
+    - Interface consistente em todos os canais de venda
+    - Flexibilidade para diferentes estruturas de cobrança por marketplace
+
 - **January 05, 2025 - 07:00 PM**: 🔧 REFATORAÇÃO COMPLETA DE "MINHA ÁREA" EM ANDAMENTO - SOLID/DRY/KISS
   - **Service Layer Implementado**:
     - productService.ts: Centraliza todas operações de API para produtos

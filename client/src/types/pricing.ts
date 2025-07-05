@@ -56,6 +56,13 @@ export enum ChannelType {
   ML_ENVIOS = 'ML_ENVIOS',
   ML_FULL = 'ML_FULL',
   
+  // Magazine Luiza
+  MAGALU_FULL = 'MAGALU_FULL',
+  MAGALU_ENVIOS = 'MAGALU_ENVIOS',
+  
+  // TikTok Shop
+  TIKTOKSHOP_NORMAL = 'TIKTOKSHOP_NORMAL',
+  
   // Shopee
   SHOPEE = 'SHOPEE',
   
