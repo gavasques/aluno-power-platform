@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { Plus } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 import {
   Dialog,
   DialogContent,
@@ -69,6 +71,8 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
   const [isSaving, setIsSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [newBrandName, setNewBrandName] = useState("");
+  const [showCreateBrand, setShowCreateBrand] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -94,6 +98,34 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
   const { data: brands = [] } = useQuery<Array<{ id: number; name: string; isGlobal: boolean }>>({
     queryKey: ["/api/brands"],
     enabled: isOpen,
+  });
+
+  // Create brand mutation
+  const createBrandMutation = useMutation({
+    mutationFn: async (brandName: string) => {
+      return await apiRequest("/api/brands", {
+        method: "POST",
+        body: JSON.stringify({ name: brandName }),
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+    onSuccess: (newBrand: { id: number; name: string }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/brands"] });
+      form.setValue("brandId", newBrand.id.toString());
+      setNewBrandName("");
+      setShowCreateBrand(false);
+      toast({
+        title: "Marca criada",
+        description: `A marca "${newBrand.name}" foi criada com sucesso.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao criar marca",
+        description: "Não foi possível criar a marca. Tente novamente.",
+        variant: "destructive",
+      });
+    },
   });
 
   const form = useForm<BasicInfoFormData>({
@@ -376,22 +408,73 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
                               <span className="text-sm text-muted-foreground">Carregando marcas...</span>
                             </div>
                           ) : (
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione uma marca" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {brands
-                                  .sort((a, b) => a.name.localeCompare(b.name))
-                                  .map((brand) => (
-                                  <SelectItem key={brand.id} value={brand.id.toString()}>
-                                    {brand.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <div className="space-y-2">
+                              <div className="flex gap-2">
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="flex-1">
+                                      <SelectValue placeholder="Selecione uma marca" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {brands
+                                      .sort((a, b) => a.name.localeCompare(b.name))
+                                      .map((brand) => (
+                                      <SelectItem key={brand.id} value={brand.id.toString()}>
+                                        {brand.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setShowCreateBrand(true)}
+                                  className="px-3 shrink-0"
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              
+                              {showCreateBrand && (
+                                <div className="flex gap-2 p-3 border rounded-lg bg-muted/50">
+                                  <Input
+                                    placeholder="Nome da nova marca"
+                                    value={newBrandName}
+                                    onChange={(e) => setNewBrandName(e.target.value)}
+                                    className="flex-1"
+                                  />
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => {
+                                      if (newBrandName.trim()) {
+                                        createBrandMutation.mutate(newBrandName.trim());
+                                      }
+                                    }}
+                                    disabled={!newBrandName.trim() || createBrandMutation.isPending}
+                                  >
+                                    {createBrandMutation.isPending ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      "Criar"
+                                    )}
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setShowCreateBrand(false);
+                                      setNewBrandName("");
+                                    }}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
                           )}
                           <FormMessage />
                         </FormItem>

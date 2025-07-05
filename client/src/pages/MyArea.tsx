@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 const MySuppliers = lazy(() => import("./myarea/MySuppliers"));
 const MyProductsList = lazy(() => import("./myarea/MyProductsList"));
 const MyMaterials = lazy(() => import("./myarea/MyMaterials"));
+const MyBrands = lazy(() => import("./myarea/MyBrands"));
 const ProductFormNew = lazy(() => import("../components/product/ProductFormNew"));
 const ProductEditForm = lazy(() => import("../components/product/ProductEditForm"));
 const ProductDetail = lazy(() => import("./myarea/ProductDetail"));
@@ -112,6 +113,13 @@ const MyArea = () => {
       return (
         <Suspense fallback={<LoadingSpinner />}>
           <MyMaterials />
+        </Suspense>
+      );
+    case "marcas":
+    case "brands":
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
+          <MyBrands />
         </Suspense>
       );
     default:
