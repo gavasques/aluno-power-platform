@@ -8,13 +8,14 @@ import type {
   UpscaleOptions, 
   BackgroundRemovalOptions 
 } from '@/types/ai-image';
+import { CompressionProfile, getCompressionConfig, estimateCompressedSize } from '@/config/compression';
 
 interface UseImageProcessingReturn {
   // Estado
   uploadedImage: UploadedImage | null;
   processedImage: ProcessedImage | null;
   state: ProcessingState;
-  
+
   // Ações
   uploadImage: (file: File) => Promise<void>;
   processBackgroundRemoval: (options?: BackgroundRemovalOptions) => Promise<void>;
@@ -23,7 +24,7 @@ interface UseImageProcessingReturn {
   reset: () => void;
 }
 
-export const useImageProcessing = (): UseImageProcessingReturn => {
+export const useImageProcessing = (compressionProfile: CompressionProfile = 'general') => {
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [processedImage, setProcessedImage] = useState<ProcessedImage | null>(null);
   const [state, setState] = useState<ProcessingState>({
@@ -40,14 +41,14 @@ export const useImageProcessing = (): UseImageProcessingReturn => {
   const uploadImage = useCallback(async (file: File) => {
     try {
       updateState({ isUploading: true, error: null });
-      
+
       // Validar arquivo
       AIImageService.validateImageFile(file, AI_IMAGE_CONFIG);
-      
+
       // Upload
       const result = await AIImageService.uploadImage(file);
       setUploadedImage(result);
-      
+
       updateState({ isUploading: false });
     } catch (error) {
       updateState({ 
@@ -59,13 +60,13 @@ export const useImageProcessing = (): UseImageProcessingReturn => {
 
   const processBackgroundRemoval = useCallback(async (options: BackgroundRemovalOptions = {}) => {
     if (!uploadedImage) return;
-    
+
     try {
       updateState({ isProcessing: true, error: null, step: 'Removendo background...' });
-      
+
       const result = await AIImageService.removeBackground(uploadedImage.id, options);
       setProcessedImage(result);
-      
+
       updateState({ isProcessing: false, step: '' });
     } catch (error) {
       updateState({ 
@@ -78,14 +79,14 @@ export const useImageProcessing = (): UseImageProcessingReturn => {
 
   const processUpscale = useCallback(async (options: UpscaleOptions) => {
     if (!uploadedImage) return;
-    
+
     try {
       const stepMessage = `Processando upscale ${options.scale}x...`;
       updateState({ isProcessing: true, error: null, step: stepMessage });
-      
+
       const result = await AIImageService.upscaleImage(uploadedImage.id, options);
       setProcessedImage(result);
-      
+
       updateState({ isProcessing: false, step: '' });
     } catch (error) {
       updateState({ 
@@ -98,13 +99,13 @@ export const useImageProcessing = (): UseImageProcessingReturn => {
 
   const downloadImage = useCallback(async (fileName?: string) => {
     if (!processedImage || !uploadedImage) return;
-    
+
     try {
       updateState({ error: null, step: 'Preparando download...' });
-      
+
       const downloadFileName = fileName || `processed_${uploadedImage.metadata.fileName}`;
       await AIImageService.downloadProcessedImage(processedImage.url, downloadFileName);
-      
+
       updateState({ step: '' });
     } catch (error) {
       updateState({ 
