@@ -111,6 +111,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 03:50 PM**: ✅ SISTEMA DE CANAIS COMPLETAMENTE REFATORADO COM CAMPOS ESPECÍFICOS POR CANAL
+  - **ChannelsEditor Refatorado com Estrutura Dinâmica**:
+    - Implementada estrutura CHANNEL_FIELDS com campos específicos para cada canal
+    - Total de 11 canais com campos únicos conforme documento de regras de custos
+    - Site Próprio: embalagem, custo fixo, marketing, financeiro
+    - Amazon (FBM, FBA, DBA, On-Site): comissão, TaCos, rebate, parcelamento
+    - Mercado Livre (ME1, Flex, Envios, FULL): campos específicos por modalidade
+    - Shopee: comissão, TaCos, rebate com estrutura própria
+  - **Interface Dinâmica de Campos**:
+    - Renderização automática baseada no tipo de canal selecionado
+    - Grid responsivo de 2 colunas para campos compactos
+    - Campo de preço sempre em destaque (col-span-2)
+    - Exibição de custo do produto e impostos para referência
+  - **Estrutura de Dados Otimizada**:
+    - Cada canal salva dados em formato: {type, isActive, data: {campo: valor}}
+    - Backend compatível recebendo channels como JSON parseado
+    - Persistência correta no banco de dados PostgreSQL como JSONB
+  - **Tipos de Campos Implementados**:
+    - currency: CurrencyInput com formatação R$ brasileira
+    - percent: PercentInput com formatação % brasileira
+    - Validação e máscaras automáticas em todos os campos
+
 - **January 05, 2025 - 03:24 PM**: ✅ CATEGORIAS ORDENADAS E BOTÃO DE ATUALIZAÇÃO IMPLEMENTADOS
   - **Ordenação Alfabética de Categorias**:
     - Dropdown de categorias agora ordenado A-Z usando `.localeCompare()`

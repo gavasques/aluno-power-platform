@@ -15,30 +15,179 @@ import { Loader2, Package, Store, Check, X } from 'lucide-react';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { PercentInput } from '@/components/ui/percent-input';
 
-const CHANNEL_TYPES = [
-  { id: 'SITE_PROPRIO', name: 'Site Próprio', icon: '🌐' },
-  { id: 'MERCADO_LIVRE_ME1', name: 'Mercado Livre ME1', icon: '🛒' },
-  { id: 'MERCADO_LIVRE_FLEX', name: 'Mercado Livre Flex', icon: '📦' },
-  { id: 'MERCADO_LIVRE_ENVIOS', name: 'Mercado Livre Envios', icon: '🚚' },
-  { id: 'MERCADO_LIVRE_FULL', name: 'Mercado Livre FULL', icon: '🏪' },
-  { id: 'AMAZON_FBM', name: 'Amazon FBM', icon: '📮' },
-  { id: 'AMAZON_FBA', name: 'Amazon FBA', icon: '🏭' },
-  { id: 'AMAZON_DBA', name: 'Amazon DBA', icon: '🚛' },
-  { id: 'SHOPEE', name: 'Shopee', icon: '🛍️' },
-  { id: 'ALIEXPRESS', name: 'AliExpress', icon: '🌏' },
-  { id: 'MAGAZINE_LUIZA', name: 'Magazine Luiza', icon: '🏬' },
-];
+// Define channel types with their specific fields
+const CHANNEL_FIELDS = {
+  SITE_PROPRIO: {
+    name: 'Site Próprio',
+    icon: '🌐',
+    fields: [
+      { key: 'packagingCostValue', label: 'Custo de Embalagem R$', type: 'currency' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'marketingCostPercent', label: 'Custos Marketing %', type: 'percent' },
+      { key: 'financialCostPercent', label: 'Custos Financeiro %', type: 'percent' },
+      { key: 'price', label: 'Preço de Venda Site', type: 'currency' },
+    ]
+  },
+  AMAZON_FBM: {
+    name: 'Amazon FBM',
+    icon: '📮',
+    fields: [
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'installmentPercent', label: '% Parc. Sem Juros', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda FBM', type: 'currency' },
+    ]
+  },
+  AMAZON_FBA_ONSITE: {
+    name: 'Amazon FBA On Site',
+    icon: '🏭',
+    fields: [
+      { key: 'shippingCost', label: 'Custo do Frete FBA ON Site', type: 'currency' },
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'installmentPercent', label: '% Parc. Sem Juros', type: 'percent' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'price', label: 'Preço de Venda FBA On Site', type: 'currency' },
+    ]
+  },
+  AMAZON_DBA: {
+    name: 'Amazon DBA',
+    icon: '🚛',
+    fields: [
+      { key: 'shippingCost', label: 'Custo do Frete DBA', type: 'currency' },
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'installmentPercent', label: '% Parc. Sem Juros', type: 'percent' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda DBA', type: 'currency' },
+    ]
+  },
+  AMAZON_FBA: {
+    name: 'Amazon FBA',
+    icon: '🏭',
+    fields: [
+      { key: 'productCostFBA', label: 'Custo do Produto no FBA', type: 'currency' },
+      { key: 'shippingCost', label: 'Custo do Frete FBA', type: 'currency' },
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'installmentPercent', label: '% Parc. Sem Juros', type: 'percent' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'prepCenterCost', label: 'Custo Prep. Center', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda FBA', type: 'currency' },
+    ]
+  },
+  MERCADO_LIVRE_ME1: {
+    name: 'Mercado Livre ME1',
+    icon: '🛒',
+    fields: [
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda ML ME1', type: 'currency' },
+    ]
+  },
+  MERCADO_LIVRE_FLEX: {
+    name: 'Mercado Livre Flex',
+    icon: '📦',
+    fields: [
+      { key: 'shippingCost', label: 'Custo do Frete ML Flex', type: 'currency' },
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'revenueMLFlex', label: 'Receita ML Flex R$', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda ML', type: 'currency' },
+    ]
+  },
+  MERCADO_LIVRE_ENVIOS: {
+    name: 'Mercado Livre Envios',
+    icon: '🚚',
+    fields: [
+      { key: 'shippingCost', label: 'Custo do Frete ML Envios', type: 'currency' },
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda ML', type: 'currency' },
+    ]
+  },
+  MERCADO_LIVRE_FULL: {
+    name: 'Mercado Livre FULL',
+    icon: '🏪',
+    fields: [
+      { key: 'productCostMLFull', label: 'Custo do Produto no ML FULL', type: 'currency' },
+      { key: 'shippingCost', label: 'Custo Frete ML FULL', type: 'currency' },
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'prepCenterCost', label: 'Custo Prep. Center', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda ML FULL', type: 'currency' },
+    ]
+  },
+  SHOPEE: {
+    name: 'Shopee',
+    icon: '🛍️',
+    fields: [
+      { key: 'commissionPercent', label: 'Custo Comissão %', type: 'percent' },
+      { key: 'fixedCostPercent', label: 'Custo Fixo %', type: 'percent' },
+      { key: 'packagingCostValue', label: 'Custo Embalagem R$', type: 'currency' },
+      { key: 'otherCostPercent', label: 'Outro Custo %', type: 'percent' },
+      { key: 'otherCostValue', label: 'Outro Custo R$', type: 'currency' },
+      { key: 'tacosCostPercent', label: 'Custos TaCos %', type: 'percent' },
+      { key: 'rebatePercent', label: 'Rebate %', type: 'percent' },
+      { key: 'rebateValue', label: 'Rebate R$', type: 'currency' },
+      { key: 'price', label: 'Preço de Venda Shopee', type: 'currency' },
+    ]
+  },
+} as const;
 
-// Channel schema
+// Channel schema - dynamic based on channel fields
 const channelSchema = z.object({
   channels: z.array(z.object({
     type: z.string(),
     isActive: z.boolean(),
-    price: z.string().optional(),
-    shippingCost: z.string().optional(),
-    commissionPercent: z.string().optional(),
-    marketingCostPercent: z.string().optional(),
-    otherCostPercent: z.string().optional(),
+    data: z.record(z.string()).optional(),
   })),
 });
 
@@ -63,14 +212,10 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
   const form = useForm<ChannelFormData>({
     resolver: zodResolver(channelSchema),
     defaultValues: {
-      channels: CHANNEL_TYPES.map(channel => ({
-        type: channel.id,
+      channels: Object.keys(CHANNEL_FIELDS).map(channelType => ({
+        type: channelType,
         isActive: false,
-        price: '',
-        shippingCost: '',
-        commissionPercent: '',
-        marketingCostPercent: '',
-        otherCostPercent: '',
+        data: {},
       })),
     },
   });
@@ -84,16 +229,12 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       const channelMap = new Map(productChannels.map((ch: any) => [ch.type, ch]));
       
       // Update form with product data
-      const formChannels = CHANNEL_TYPES.map(channelType => {
-        const existingChannel = channelMap.get(channelType.id) as any;
+      const formChannels = Object.keys(CHANNEL_FIELDS).map(channelType => {
+        const existingChannel = channelMap.get(channelType) as any;
         return {
-          type: channelType.id,
+          type: channelType,
           isActive: existingChannel?.isActive || false,
-          price: existingChannel?.price || '',
-          shippingCost: existingChannel?.shippingCost || '',
-          commissionPercent: existingChannel?.commissionPercent || '',
-          marketingCostPercent: existingChannel?.marketingCostPercent || '',
-          otherCostPercent: existingChannel?.otherCostPercent || '',
+          data: existingChannel?.data || {},
         };
       });
       
@@ -162,7 +303,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <Store className="h-6 w-6" />
@@ -175,17 +316,17 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {CHANNEL_TYPES.map((channel, index) => {
+            <div className="grid grid-cols-1 gap-4">
+              {Object.entries(CHANNEL_FIELDS).map(([channelType, channelConfig], index) => {
                 const isActive = form.watch(`channels.${index}.isActive`);
                 
                 return (
-                  <Card key={channel.id} className={isActive ? 'border-primary' : ''}>
+                  <Card key={channelType} className={isActive ? 'border-primary' : ''}>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg flex items-center gap-2">
-                          <span className="text-2xl">{channel.icon}</span>
-                          {channel.name}
+                          <span className="text-2xl">{channelConfig.icon}</span>
+                          {channelConfig.name}
                         </CardTitle>
                         <FormField
                           control={form.control}
@@ -205,93 +346,42 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
                     </CardHeader>
                     {isActive && (
                       <CardContent className="space-y-3">
-                        <FormField
-                          control={form.control}
-                          name={`channels.${index}.price`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Preço de Venda</FormLabel>
-                              <FormControl>
-                                <CurrencyInput
-                                  value={field.value || ''}
-                                  onChange={field.onChange}
-                                  placeholder="R$ 0,00"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name={`channels.${index}.shippingCost`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Custo de Frete</FormLabel>
-                              <FormControl>
-                                <CurrencyInput
-                                  value={field.value || ''}
-                                  onChange={field.onChange}
-                                  placeholder="R$ 0,00"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="grid grid-cols-3 gap-2">
-                          <FormField
-                            control={form.control}
-                            name={`channels.${index}.commissionPercent`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-xs">Comissão</FormLabel>
-                                <FormControl>
-                                  <PercentInput
-                                    value={field.value || ''}
-                                    onChange={field.onChange}
-                                    placeholder="0,00%"
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name={`channels.${index}.marketingCostPercent`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-xs">Marketing</FormLabel>
-                                <FormControl>
-                                  <PercentInput
-                                    value={field.value || ''}
-                                    onChange={field.onChange}
-                                    placeholder="0,00%"
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name={`channels.${index}.otherCostPercent`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-xs">Outros</FormLabel>
-                                <FormControl>
-                                  <PercentInput
-                                    value={field.value || ''}
-                                    onChange={field.onChange}
-                                    placeholder="0,00%"
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
+                        <div className="text-sm text-muted-foreground mb-3">
+                          Custo do produto: R$ {(product as any)?.costItem || '0,00'} | 
+                          Impostos: {(product as any)?.taxPercent || '0,00'}%
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          {channelConfig.fields.map((fieldConfig) => (
+                            <FormField
+                              key={fieldConfig.key}
+                              control={form.control}
+                              name={`channels.${index}.data.${fieldConfig.key}`}
+                              render={({ field }) => (
+                                <FormItem className={fieldConfig.key === 'price' ? 'col-span-2' : ''}>
+                                  <FormLabel className={fieldConfig.key === 'price' ? 'font-semibold' : ''}>
+                                    {fieldConfig.label}
+                                  </FormLabel>
+                                  <FormControl>
+                                    {fieldConfig.type === 'currency' ? (
+                                      <CurrencyInput
+                                        value={field.value || ''}
+                                        onChange={field.onChange}
+                                        placeholder="R$ 0,00"
+                                      />
+                                    ) : (
+                                      <PercentInput
+                                        value={field.value || ''}
+                                        onChange={field.onChange}
+                                        placeholder="0,00%"
+                                      />
+                                    )}
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          ))}
                         </div>
                       </CardContent>
                     )}
@@ -311,7 +401,10 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
                     Salvando...
                   </>
                 ) : (
-                  'Salvar Canais'
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Salvar Canais
+                  </>
                 )}
               </Button>
             </div>
