@@ -35,11 +35,13 @@ import {
   Store
 } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
+import { useBrands } from "@/hooks/useBrands";
 import { formatBRL, calculateChannelPricing } from "@/utils/pricingCalculations";
 import { calculateChannelProfitability, type ChannelCalculationResult } from "@/utils/channelCalculations";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { SalesChannel, PricingCalculation } from "@/types/pricing";
+import { Product } from "@shared/schema";
 import BasicInfoEditor from "@/components/product/BasicInfoEditor";
 import { ChannelsEditor } from "@/components/product/ChannelsEditor";
 import { useQueryClient } from "@tanstack/react-query";
@@ -69,8 +71,27 @@ export default function MyProductsList() {
   const [channelsEditorProductId, setChannelsEditorProductId] = useState<number | null>(null);
   const [expandedCosts, setExpandedCosts] = useState<Record<string, boolean>>({});
   const { products, isLoading, error, deleteProduct } = useProducts();
+  const { brands } = useBrands();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Get brand name by ID
+  const getBrandName = (product: Product): string => {
+    // If brandId exists, use it to find the brand
+    if (product.brandId) {
+      const brand = brands?.find(b => b.id === product.brandId);
+      return brand?.name || '-';
+    }
+    
+    // If brand field contains a number (legacy ID), try to find it
+    if (product.brand && !isNaN(Number(product.brand))) {
+      const brand = brands?.find(b => b.id === Number(product.brand));
+      return brand?.name || product.brand;
+    }
+    
+    // Otherwise return the brand field as is (might be a string name)
+    return product.brand || '-';
+  };
 
   const handleEdit = (id: number) => {
     window.location.href = `/minha-area/produtos/${id}/editar`;
@@ -314,7 +335,7 @@ export default function MyProductsList() {
                         </TableCell>
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell>{product.sku}</TableCell>
-                        <TableCell>{product.brand || '-'}</TableCell>
+                        <TableCell>{getBrandName(product)}</TableCell>
                         <TableCell className="text-right">
                           {product.costItem ? formatBRL(product.costItem) : '-'}
                         </TableCell>
