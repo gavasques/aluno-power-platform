@@ -141,24 +141,7 @@ export function SystemAnalytics({ className }: SystemAnalyticsProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Tickets Suporte</p>
-                <p className="text-2xl font-bold">{analytics.metrics?.supportTickets || 0}</p>
-              </div>
-              <div className="p-2 bg-orange-100 rounded-full">
-                <MessageSquare className="h-4 w-4 text-orange-600" />
-              </div>
-            </div>
-            <div className="flex items-center mt-2">
-              <span className="text-xs text-muted-foreground">
-                Tempo médio: {analytics.metrics?.avgResponseTime || 0}h
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+
 
         <Card>
           <CardContent className="p-6">

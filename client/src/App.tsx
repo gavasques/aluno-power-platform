@@ -24,7 +24,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const UserEdit = lazy(() => import("./pages/admin/UserEdit"));
 const GroupEdit = lazy(() => import("./pages/admin/GroupEdit"));
-const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
+
 const GeneralSettings = lazy(() => import("./pages/admin/GeneralSettings"));
 const ContentManagement = lazy(() => import("./pages/admin/ContentManagement"));
 const Suppliers = lazy(() => import("./pages/hub/Suppliers"));
@@ -59,7 +59,7 @@ const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
-const Support = lazy(() => import("./pages/Support"));
+
 
 // Keep Login as eager import for immediate authentication
 import Login from "./pages/Login";
@@ -503,15 +503,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/admin/suporte">
-                            <ProtectedRoute requireAdmin>
-                              <AdminLayout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AdminSupport />
-                                </Suspense>
-                              </AdminLayout>
-                            </ProtectedRoute>
-                          </Route>
+
                           
                           <Route path="/admin/configuracoes/:section?">
                             {(params) => (
@@ -600,15 +592,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/suporte">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <Support />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
+
 
                           {/* Home route - Protected */}
                           <Route path="/">

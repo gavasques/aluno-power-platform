@@ -92,10 +92,7 @@ const GroupEdit = memo(({ params }: GroupEditProps = {}) => {
     // Sistema
     { id: 'system.settings', name: 'Configurações do Sistema', description: 'Alterar configurações gerais', category: 'Sistema', icon: Settings },
     { id: 'system.logs', name: 'Visualizar Logs', description: 'Ver logs do sistema', category: 'Sistema', icon: Settings },
-    
-    // Suporte
-    { id: 'support.view', name: 'Visualizar Suporte', description: 'Ver tickets de suporte', category: 'Suporte', icon: MessageSquare },
-    { id: 'support.respond', name: 'Responder Suporte', description: 'Responder tickets', category: 'Suporte', icon: MessageSquare }
+
   ];
 
   // Group permissions by category

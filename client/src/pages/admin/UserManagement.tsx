@@ -100,7 +100,6 @@ const UserManagement = memo(() => {
   const getRoleBadge = (role: string) => {
     const variants = {
       admin: <Badge className="bg-red-100 text-red-700 border-red-200">Admin</Badge>,
-      support: <Badge className="bg-blue-100 text-blue-700 border-blue-200">Suporte</Badge>,
       user: <Badge className="bg-gray-100 text-gray-700 border-gray-200">Usuário</Badge>
     };
     return variants[role as keyof typeof variants] || variants.user;

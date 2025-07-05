@@ -2,7 +2,7 @@ import { useParams } from "wouter";
 import AdminDashboard from "./admin/AdminDashboard";
 import UserManagement from "./admin/UserManagement";
 import ContentManagement from "./admin/ContentManagement";
-import SupportManagement from "./admin/SupportManagement";
+
 import GeneralSettings from "./admin/GeneralSettings";
 import AdminCadastros from "./admin/AdminCadastros";
 import { Shield, ShieldX } from "lucide-react";
@@ -16,7 +16,6 @@ const Admin = () => {
   // Controle de acesso
   const hasAccess = (requiredSection: string) => {
     if (isAdmin) return true;
-    if (isSupport && requiredSection === "suporte") return true;
     return false;
   };
 
@@ -54,10 +53,7 @@ const Admin = () => {
       if (!hasAccess("conteudo")) return renderAccessDenied();
       return <ContentManagement />;
     
-    case "suporte":
-      if (!hasAccess("suporte")) return renderAccessDenied();
-      return <SupportManagement />;
-    
+
     case "configuracoes":
       if (!hasAccess("configuracoes")) return renderAccessDenied();
       return <GeneralSettings subsection={subsection} />;

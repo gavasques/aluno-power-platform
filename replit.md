@@ -111,6 +111,30 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 10:48 PM**: ✅ REMOÇÃO TOTAL E COMPLETA DO SISTEMA DE SUPORTE - LIMPEZA FINAL CONCLUÍDA
+  - **Vulnerabilidade de Criptografia Crítica Corrigida**:
+    - Corrigido comprimento de chave de criptografia AES-256: agora usa chave completa de 64 caracteres hex (32 bytes)
+    - Eliminado erro "Invalid key length" que impedia registro de usuários
+    - Sistema de criptografia agora funciona corretamente com authTagLength explícito
+  - **Sistema de Suporte 100% Eliminado**:
+    - Componentes de interface removidos: Support.tsx, AdminSupport.tsx, SupportManagement.tsx
+    - Todas as rotas de suporte removidas do App.tsx (/suporte e /admin/suporte)
+    - APIs de suporte completamente removidas do server/routes.ts (linhas 5928-6119)
+    - Funções de storage relacionadas ao suporte removidas (getSupportTickets, createSupportTicket, etc.)
+    - Permissões de suporte removidas do sistema de grupos (support.view, support.respond)
+    - Tipos e importações de suporte removidos do server/storage.ts
+  - **Limpeza Final de Interface Concluída**:
+    - Removido "support" role badge do UserManagement.tsx
+    - Removido "Suporte" option do UserEdit.tsx select component
+    - Removido suporte access check e case "suporte" do Admin.tsx
+    - Removido import de SupportManagement do Admin.tsx
+    - **ZERO referencias restantes ao sistema de suporte em toda aplicação**
+  - **Aplicação Totalmente Limpa**:
+    - Sistema 100% livre de qualquer código relacionado ao sistema de tickets
+    - Aplicação mais leve e focada nas funcionalidades principais
+    - Redução significativa de complexidade desnecessária
+    - Eliminação completa de código morto e dependências não utilizadas
+
 - **January 05, 2025 - 09:56 PM**: 🔒 IMPLEMENTAÇÃO COMPLETA DE SEGURANÇA - AUDITORIA CRÍTICA RESOLVIDA
   - **CSRF Protection Implementado**:
     - Sistema baseado em sessão com geração de tokens únicos

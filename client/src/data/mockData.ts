@@ -53,8 +53,6 @@ export const mockData = {
       totalUsers: 0,
       activeUsers: 0,
       totalTokens: 0,
-      supportTickets: 0,
-      avgResponseTime: 0,
       systemUptime: 0
     }
   },

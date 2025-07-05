@@ -12,7 +12,7 @@ const keyLength = 32;
 const getEncryptionKey = (): string => {
   // In production, this should come from environment variables
   const key = process.env.ENCRYPTION_KEY || 'default-encryption-key-change-in-production';
-  return crypto.createHash('sha256').update(key).digest('hex').slice(0, 32);
+  return crypto.createHash('sha256').update(key).digest('hex'); // Full 64 hex chars for 32 bytes
 };
 
 export class EncryptionService {

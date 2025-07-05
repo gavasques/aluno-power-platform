@@ -244,7 +244,6 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="user">Usuário</SelectItem>
-                    <SelectItem value="support">Suporte</SelectItem>
                     <SelectItem value="admin">Administrador</SelectItem>
                   </SelectContent>
                 </Select>
