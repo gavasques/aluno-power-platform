@@ -816,25 +816,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔍 [BACKEND] Dimensions received:", req.body.dimensions);
       console.log("🔍 [BACKEND] Weight received:", req.body.weight);
       
-      // Parse FormData fields
+      // Parse FormData fields - only include fields that were actually sent
       const productData: any = {
         name: req.body.name,
         sku: req.body.sku || '',  // Required field
-        freeCode: req.body.freeCode || null,
-        supplierCode: req.body.supplierCode || null,
-        ean: req.body.ean || null,
-        brand: req.body.brand || null,
-        category: req.body.categoryId || null,  // Keep as string to match schema
-        supplierId: req.body.supplierId ? parseInt(req.body.supplierId) : null,
-        ncm: req.body.ncm || null,
-        dimensions: req.body.dimensions ? JSON.parse(req.body.dimensions) : null,
-        weight: req.body.weight ? String(req.body.weight) : "0",
-        costItem: req.body.costItem ? String(req.body.costItem) : "0",
-        taxPercent: req.body.taxPercent ? String(req.body.taxPercent) : "0",
-        packCost: req.body.packCost ? String(req.body.packCost) : "0",
-        observations: req.body.observations || null,
-        channels: req.body.channels ? (typeof req.body.channels === 'string' ? JSON.parse(req.body.channels) : req.body.channels) : [],
       };
+
+      // Only add optional fields if they were explicitly sent in the request
+      if ('freeCode' in req.body) productData.freeCode = req.body.freeCode || null;
+      if ('supplierCode' in req.body) productData.supplierCode = req.body.supplierCode || null;
+      if ('ean' in req.body) productData.ean = req.body.ean || null;
+      if ('brand' in req.body) productData.brand = req.body.brand || null;
+      if ('brandId' in req.body) productData.brandId = req.body.brandId ? parseInt(req.body.brandId) : null;
+      if ('categoryId' in req.body) productData.category = req.body.categoryId || null;  // Keep as string to match schema
+      if ('supplierId' in req.body) productData.supplierId = req.body.supplierId ? parseInt(req.body.supplierId) : null;
+      if ('ncm' in req.body) productData.ncm = req.body.ncm || null;
+      if ('dimensions' in req.body) productData.dimensions = req.body.dimensions ? JSON.parse(req.body.dimensions) : null;
+      if ('weight' in req.body) productData.weight = req.body.weight ? String(req.body.weight) : "0";
+      if ('costItem' in req.body) productData.costItem = req.body.costItem ? String(req.body.costItem) : "0";
+      if ('taxPercent' in req.body) productData.taxPercent = req.body.taxPercent ? String(req.body.taxPercent) : "0";
+      if ('packCost' in req.body) productData.packCost = req.body.packCost ? String(req.body.packCost) : "0";
+      if ('observations' in req.body) productData.observations = req.body.observations || null;
+      if ('channels' in req.body) productData.channels = typeof req.body.channels === 'string' ? JSON.parse(req.body.channels) : req.body.channels;
       
       console.log("🔍 [BACKEND] Parsed productData dimensions:", productData.dimensions);
       console.log("🔍 [BACKEND] Parsed productData weight:", productData.weight);

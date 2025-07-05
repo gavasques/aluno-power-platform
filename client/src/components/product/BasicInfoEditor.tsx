@@ -51,6 +51,7 @@ const basicInfoSchema = z.object({
   supplierCode: z.string().optional(),
   ean: z.string().optional().refine((val) => !val || val.length <= 13, "EAN deve ter no máximo 13 dígitos"),
   brand: z.string().optional(),
+  brandId: z.string().optional(),
   categoryId: z.string().optional(),
   supplierId: z.string().optional(),
   ncm: z.string().optional(),
@@ -89,6 +90,12 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
     enabled: isOpen,
   });
 
+  // Load brands
+  const { data: brands = [] } = useQuery<Array<{ id: number; name: string; isGlobal: boolean }>>({
+    queryKey: ["/api/brands"],
+    enabled: isOpen,
+  });
+
   const form = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
     defaultValues: {
@@ -98,6 +105,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
       supplierCode: "",
       ean: "",
       brand: "",
+      brandId: "",
       categoryId: "",
       supplierId: "",
       ncm: "",
@@ -121,6 +129,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
         supplierCode: (product as any).supplierCode || "",
         ean: (product as any).ean || "",
         brand: (product as any).brand || "",
+        brandId: (product as any).brandId?.toString() || "",
         categoryId: categoryValue,
         supplierId: (product as any).supplierId?.toString() || "",
         ncm: (product as any).ncm || "",
@@ -191,6 +200,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
       if (data.supplierCode) formData.append("supplierCode", data.supplierCode);
       if (data.ean) formData.append("ean", data.ean);
       if (data.brand) formData.append("brand", data.brand);
+      if (data.brandId) formData.append("brandId", data.brandId);
       if (data.categoryId) {
         console.log("🔍 [BASIC_INFO_FORM] Adding categoryId to FormData:", data.categoryId);
         formData.append("categoryId", data.categoryId);
@@ -356,13 +366,33 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
 
                     <FormField
                       control={form.control}
-                      name="brand"
+                      name="brandId"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Marca</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Ex: Apple" />
-                          </FormControl>
+                          {brands.length === 0 ? (
+                            <div className="flex items-center space-x-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <span className="text-sm text-muted-foreground">Carregando marcas...</span>
+                            </div>
+                          ) : (
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione uma marca" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {brands
+                                  .sort((a, b) => a.name.localeCompare(b.name))
+                                  .map((brand) => (
+                                  <SelectItem key={brand.id} value={brand.id.toString()}>
+                                    {brand.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}
