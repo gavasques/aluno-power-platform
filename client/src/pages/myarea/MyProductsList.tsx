@@ -53,14 +53,19 @@ const CHANNEL_NAMES: Record<string, string> = {
   'SITE_PROPRIO': 'Site',
   'AMAZON_FBM': 'FBM',
   'AMAZON_FBA_ON_SITE': 'FBA-Site',
+  'AMAZON_FBA_ONSITE': 'FBA-Site',  // Added mapping for variant
   'AMAZON_DBA': 'DBA',
   'AMAZON_FBA': 'FBA',
   'ML_ME1': 'ML-ME1',
   'ML_FLEX': 'ML-Flex',
   'ML_ENVIOS': 'ML-Envios',
   'ML_FULL': 'ML-Full',
+  'MERCADO_LIVRE_FULL': 'ML-Full',  // Alternative naming
   'SHOPEE': 'Shopee',
-  'MARKETPLACE_OTHER': 'Outro'
+  'MARKETPLACE_OTHER': 'Outro',
+  // Add any missing variants that might exist
+  'AMAZON_FBA_OSITE': 'FBA-Site',
+  'AMAZON_ONSITE': 'FBA-Site'
 };
 
 export default function MyProductsList() {

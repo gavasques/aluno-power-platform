@@ -150,6 +150,10 @@ Preferred communication style: Simple, everyday language.
     - Otimização de espaço: 4 botões compactos em formato quadrado
     - Mantidos tooltips para identificação das ações
     - Área de ações reduzida sem perder funcionalidade
+  - **Canal Sem Nome Corrigido**:
+    - Adicionados mapeamentos para variações de tipos de canal (AMAZON_FBA_ONSITE, etc.)
+    - Canal que mostrava "R$ 1.397,00 1.0%" agora exibe nome correto
+    - Mapeamento CHANNEL_NAMES expandido para cobrir todas as variações possíveis
 
 - **January 05, 2025 - 07:48 PM**: ✅ BREAKDOWN DE CUSTOS INDIVIDUAL COMPLETO IMPLEMENTADO
   - **Análise Detalhada por Canal**: 
