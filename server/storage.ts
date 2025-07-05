@@ -254,6 +254,7 @@ export interface IStorage {
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
   searchProducts(query: string): Promise<Product[]>;
+  getProductCostHistory(productId: number, limit?: number): Promise<ProductCostHistory[]>;
 
   // Categories
   getCategories(type?: string): Promise<Category[]>;
@@ -1317,12 +1318,18 @@ export class DatabaseStorage implements IStorage {
     await db.delete(products).where(eq(products.id, id));
   }
 
-  async getProductCostHistory(productId: number): Promise<ProductCostHistory[]> {
-    const history = await db
+  async getProductCostHistory(productId: number, limit?: number): Promise<ProductCostHistory[]> {
+    let query = db
       .select()
       .from(productCostHistory)
       .where(eq(productCostHistory.productId, productId))
       .orderBy(desc(productCostHistory.createdAt));
+    
+    if (limit) {
+      query = query.limit(limit);
+    }
+    
+    const history = await query;
     return history;
   }
 

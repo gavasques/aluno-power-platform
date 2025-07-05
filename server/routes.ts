@@ -1036,8 +1036,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/products/:id/cost-history', async (req, res) => {
     try {
       const productId = parseInt(req.params.id);
-      console.log('📊 [COST HISTORY ENDPOINT] Fetching for product:', productId);
-      const history = await storage.getProductCostHistory(productId);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      console.log('📊 [COST HISTORY ENDPOINT] Fetching for product:', productId, 'limit:', limit);
+      const history = await storage.getProductCostHistory(productId, limit);
       console.log('📊 [COST HISTORY ENDPOINT] Found entries:', history.length);
       res.json(history);
     } catch (error) {

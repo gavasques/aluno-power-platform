@@ -111,6 +111,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 09:38 PM**: 🚀 OTIMIZAÇÃO DE PERFORMANCE - FASE 1 E 2 IMPLEMENTADAS
+  - **YouTube API Error Caching**: 
+    - Adicionado `retry: false` para evitar tentativas repetidas quando API key está ausente
+    - Configurado `staleTime: 5 * 60 * 1000` (5 minutos) para cache de erro
+    - Configurado `gcTime: 10 * 60 * 1000` (10 minutos) para limpeza do cache
+    - Elimina múltiplas requisições falhas que causavam lentidão
+  - **Cost History Optimization**:
+    - Adicionado parâmetro `limit` opcional ao endpoint `/api/products/:id/cost-history`
+    - Storage method atualizado para aceitar limite de registros
+    - Frontend agora solicita apenas 6 registros (matching UI display) ao invés de todos os 18
+    - Redução significativa na transferência de dados
+  - **Search Debouncing Implemented**:
+    - Criado hook `useDebounce` para otimização de busca
+    - MyProductsList agora usa busca com debounce de 300ms
+    - Evita re-renderizações excessivas durante digitação
+    - Melhoria significativa de performance com listas grandes de produtos
+  - **Status**: Fases 1 e 2 concluídas, Fase 3 (Bundle optimization) e Fase 4 (Backend optimization) pendentes
+
 - **January 05, 2025 - 09:12 PM**: ✅ CORREÇÃO COMPLETA DOS CAMPOS DE FORMULÁRIO DE PRODUTOS
   - **SKU Field**: ✅ Corrigido - agora exibe código interno "241" quando SKU está vazio
   - **Brand/Category Fields Fix**: Corrigido código que tentava acessar `.category` inexistente

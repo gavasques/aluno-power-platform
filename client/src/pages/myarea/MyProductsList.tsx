@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/useDebounce";
 import { 
   Table, 
   TableBody, 
@@ -82,6 +83,9 @@ export default function MyProductsList() {
   const { brands } = useBrands();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Debounce search term to avoid excessive re-renders
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Get brand name by ID
   const getBrandName = (product: Product): string => {
@@ -167,16 +171,16 @@ export default function MyProductsList() {
     }
   };
 
-  // Filter products based on search
+  // Filter products based on debounced search
   const filteredProducts = useMemo(() => {
     if (!Array.isArray(products)) return [];
     return (products as Product[]).filter((product: Product) =>
-      product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.ean?.includes(searchTerm)
+      product.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      product.sku?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      product.brand?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      product.ean?.includes(debouncedSearchTerm)
     );
-  }, [products, searchTerm]);
+  }, [products, debouncedSearchTerm]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);

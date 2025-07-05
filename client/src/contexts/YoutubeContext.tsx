@@ -48,6 +48,10 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/youtube-channel-info'],
     queryFn: () => apiRequest<ChannelInfo>('/api/youtube-channel-info'),
+    retry: false, // Don't retry on 404 errors
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    throwOnError: false, // Don't throw errors to avoid component crashes
   });
 
   const syncMutation = useMutation({

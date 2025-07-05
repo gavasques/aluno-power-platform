@@ -79,7 +79,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
         
         // Reload cost history to show the new entry
         if (productId) {
-          fetch(`/api/products/${productId}/cost-history`)
+          fetch(`/api/products/${productId}/cost-history?limit=6`)
             .then(res => res.json())
             .then(data => {
               console.log('📊 [COST HISTORY] Reloaded after save:', data);
@@ -107,7 +107,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
     console.log('📊 [COST HISTORY] Using ID:', idToUse);
     
     if (idToUse) {
-      fetch(`/api/products/${idToUse}/cost-history`)
+      fetch(`/api/products/${idToUse}/cost-history?limit=6`)
         .then(res => res.json())
         .then(data => {
           console.log('📊 [COST HISTORY] Loaded:', data);
