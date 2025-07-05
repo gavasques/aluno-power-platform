@@ -158,7 +158,7 @@ export default function ProductPricingForm() {
         photo: existingProduct?.photo || "",
         ean: existingProduct?.ean || "",
         brandId: existingProduct?.brandId?.toString() || "",
-        categoryId: existingProduct?.category?.toString() || existingProduct?.categoryId?.toString() || "",
+        categoryId: existingProduct?.categoryId?.toString() || "",
         supplierId: existingProduct?.supplierId?.toString() || "",
         ncm: existingProduct?.ncm || "",
         dimensions: productDimensions,
@@ -173,7 +173,7 @@ export default function ProductPricingForm() {
       
       console.log("🔍 [PRODUCT_PRICING_FORM] Form reset values:", {
         brandId: existingProduct?.brandId?.toString() || "",
-        categoryId: existingProduct?.category?.toString() || existingProduct?.categoryId?.toString() || "",
+        categoryId: existingProduct?.categoryId?.toString() || "",
         sku: existingProduct?.sku || existingProduct?.internalCode || ""
       });
       
