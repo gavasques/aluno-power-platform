@@ -170,17 +170,20 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     return new Date(date).toLocaleDateString('pt-BR');
   };
 
+  // Ensure conversations is always an array
+  const conversationsList = Array.isArray(conversations) ? conversations : [];
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Conversas ({conversations.length})</h3>
+        <h3 className="text-lg font-semibold">Conversas ({conversationsList.length})</h3>
         <Button onClick={onAdd} size="sm" disabled={isLoading}>
           <Plus className="h-4 w-4 mr-2" />
           Nova Conversa
         </Button>
       </div>
 
-      {conversations.length === 0 ? (
+      {conversationsList.length === 0 ? (
         <EmptyState 
           icon={MessageSquare}
           title="Nenhuma conversa registrada"
@@ -188,7 +191,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         />
       ) : (
         <div className="grid gap-4">
-          {conversations.map((conversation) => (
+          {conversationsList.map((conversation) => (
             <Card key={conversation.id} className="p-4 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-2">
                 <h4 className="font-medium text-gray-900">{conversation.subject}</h4>

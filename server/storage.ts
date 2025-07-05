@@ -2578,6 +2578,21 @@ export class DatabaseStorage implements IStorage {
     return contact;
   }
 
+  async updateSupplierContact(contactId: number, userId: number, contactData: Partial<InsertSupplierContact>): Promise<SupplierContact> {
+    const [contact] = await db
+      .update(supplierContacts)
+      .set({
+        ...contactData,
+        updatedAt: new Date(),
+      })
+      .where(and(
+        eq(supplierContacts.id, contactId),
+        eq(supplierContacts.userId, userId)
+      ))
+      .returning();
+    return contact;
+  }
+
   async deleteSupplierContact(contactId: number, userId: number): Promise<void> {
     await db
       .delete(supplierContacts)

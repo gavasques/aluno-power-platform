@@ -125,7 +125,7 @@ export default function ProductBasicDataTab({
       if (values.freeCode) formData.append("freeCode", values.freeCode);
       if (values.supplierCode) formData.append("supplierCode", values.supplierCode);
       if (values.ean) formData.append("ean", values.ean);
-      if (values.brand) formData.append("brand", values.brand);
+      if (values.brand) formData.append("brandId", values.brand);
       if (values.categoryId) formData.append("categoryId", values.categoryId);
       if (values.supplierId) formData.append("supplierId", values.supplierId);
       if (values.ncm) formData.append("ncm", values.ncm);

@@ -153,8 +153,8 @@ export default function ProductPricingForm() {
         supplierCode: existingProduct?.supplierCode || "",
         photo: existingProduct?.photo || "",
         ean: existingProduct?.ean || "",
-        brand: existingProduct?.brand || "",
-        categoryId: existingProduct?.category?.toString() || "",
+        brand: existingProduct?.brandId?.toString() || "",
+        categoryId: existingProduct?.categoryId?.toString() || "",
         supplierId: existingProduct?.supplierId?.toString() || "",
         ncm: existingProduct?.ncm || "",
         dimensions: productDimensions,
@@ -186,7 +186,7 @@ export default function ProductPricingForm() {
       if (data.freeCode) formData.append("freeCode", data.freeCode);
       if (data.supplierCode) formData.append("supplierCode", data.supplierCode);
       if (data.ean) formData.append("ean", data.ean);
-      if (data.brand) formData.append("brand", data.brand);
+      if (data.brand) formData.append("brandId", data.brand);
       formData.append("categoryId", data.categoryId);
       formData.append("supplierId", data.supplierId);
       if (data.ncm) formData.append("ncm", data.ncm);
@@ -278,7 +278,7 @@ export default function ProductPricingForm() {
         if (data.freeCode) formData.append("freeCode", data.freeCode);
         if (data.supplierCode) formData.append("supplierCode", data.supplierCode);
         if (data.ean) formData.append("ean", data.ean);
-        if (data.brand) formData.append("brand", data.brand);
+        if (data.brand) formData.append("brandId", data.brand);
         formData.append("categoryId", data.categoryId);
         formData.append("supplierId", data.supplierId);
         if (data.ncm) formData.append("ncm", data.ncm);

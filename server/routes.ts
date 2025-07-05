@@ -278,6 +278,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/suppliers/:id/brands', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const brands = await storage.getSupplierBrands(supplierId);
+      res.json(brands);
+    } catch (error) {
+      console.error('Error fetching supplier brands:', error);
+      res.status(500).json({ error: 'Failed to fetch brands' });
+    }
+  });
+
   app.delete('/api/suppliers/brands/:brandId', async (req, res) => {
     try {
       const brandId = parseInt(req.params.brandId);
@@ -286,6 +297,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting supplier brand:', error);
       res.status(500).json({ error: 'Failed to delete brand' });
+    }
+  });
+
+  // Supplier Conversations endpoints
+  app.get('/api/suppliers/:id/conversations', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      const conversations = await storage.getSupplierConversations(supplierId, userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error('Error fetching supplier conversations:', error);
+      res.status(500).json({ error: 'Failed to fetch conversations' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/conversations', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      const conversationData = { ...req.body, supplierId, userId };
+      const conversation = await storage.createSupplierConversation(conversationData);
+      res.status(201).json(conversation);
+    } catch (error) {
+      console.error('Error creating supplier conversation:', error);
+      res.status(500).json({ error: 'Failed to create conversation' });
+    }
+  });
+
+  app.put('/api/supplier-conversations/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      const conversation = await storage.updateSupplierConversation(conversationId, userId, req.body);
+      res.json(conversation);
+    } catch (error) {
+      console.error('Error updating supplier conversation:', error);
+      res.status(500).json({ error: 'Failed to update conversation' });
+    }
+  });
+
+  app.delete('/api/supplier-conversations/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      await storage.deleteSupplierConversation(conversationId, userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting supplier conversation:', error);
+      res.status(500).json({ error: 'Failed to delete conversation' });
+    }
+  });
+
+  // Supplier Contacts endpoints
+  app.get('/api/suppliers/:id/contacts', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      const contacts = await storage.getSupplierContacts(supplierId, userId);
+      res.json(contacts);
+    } catch (error) {
+      console.error('Error fetching supplier contacts:', error);
+      res.status(500).json({ error: 'Failed to fetch contacts' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/contacts', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      const contactData = { ...req.body, supplierId, userId };
+      const contact = await storage.createSupplierContact(contactData);
+      res.status(201).json(contact);
+    } catch (error) {
+      console.error('Error creating supplier contact:', error);
+      res.status(500).json({ error: 'Failed to create contact' });
+    }
+  });
+
+  app.put('/api/supplier-contacts/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      const contact = await storage.updateSupplierContact(contactId, userId, req.body);
+      res.json(contact);
+    } catch (error) {
+      console.error('Error updating supplier contact:', error);
+      res.status(500).json({ error: 'Failed to update contact' });
+    }
+  });
+
+  app.delete('/api/supplier-contacts/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const contactId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      await storage.deleteSupplierContact(contactId, userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting supplier contact:', error);
+      res.status(500).json({ error: 'Failed to delete contact' });
+    }
+  });
+
+  // Supplier Files endpoints
+  app.get('/api/suppliers/:id/files', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      const files = await storage.getSupplierFiles(supplierId, userId);
+      res.json(files);
+    } catch (error) {
+      console.error('Error fetching supplier files:', error);
+      res.status(500).json({ error: 'Failed to fetch files' });
+    }
+  });
+
+  app.post('/api/suppliers/:id/files', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      const fileData = { ...req.body, supplierId, userId };
+      const file = await storage.createSupplierFile(fileData);
+      res.status(201).json(file);
+    } catch (error) {
+      console.error('Error creating supplier file:', error);
+      res.status(500).json({ error: 'Failed to create file' });
+    }
+  });
+
+  app.delete('/api/supplier-files/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const fileId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      await storage.deleteSupplierFile(fileId, userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting supplier file:', error);
+      res.status(500).json({ error: 'Failed to delete file' });
     }
   });
 
