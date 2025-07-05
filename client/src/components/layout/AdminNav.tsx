@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Settings, Headset, LogOut, Home } from "lucide-react";
+import { User, Settings, LogOut, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function AdminNav() {
@@ -54,12 +54,7 @@ export function AdminNav() {
               <span>Configurações</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild className="text-foreground hover:text-primary hover:bg-primary/10 focus:text-primary focus:bg-primary/10">
-            <Link to="/suporte">
-             <Headset className="mr-2 h-4 w-4" />
-              <span>Suporte</span>
-            </Link>
-          </DropdownMenuItem>
+
           <DropdownMenuSeparator className="bg-border" />
           <DropdownMenuItem asChild className="text-foreground hover:text-primary hover:bg-primary/10 focus:text-primary focus:bg-primary/10">
             <Link to="/">
