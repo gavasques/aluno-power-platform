@@ -14,10 +14,12 @@ const formatBRL = (value: number): string => {
   });
 };
 
-const parseBRL = (value: string): number => {
+const parseBRL = (value: string | number): number => {
   if (!value) return 0;
+  // Converte para string se for número
+  const stringValue = typeof value === 'number' ? value.toString() : value;
   // Remove tudo exceto números, vírgula e ponto
-  const cleaned = value.replace(/[^\d,.-]/g, '');
+  const cleaned = stringValue.replace(/[^\d,.-]/g, '');
   // Substitui vírgula por ponto para parseFloat
   const normalized = cleaned.replace(',', '.');
   const parsed = parseFloat(normalized);

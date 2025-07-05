@@ -238,10 +238,20 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       // Update form with product data
       const formChannels = Object.keys(CHANNEL_FIELDS).map(channelType => {
         const existingChannel = channelMap.get(channelType) as any;
+        
+        // Convert string values to numbers for all channel data
+        const convertedData = {};
+        if (existingChannel?.data) {
+          Object.keys(existingChannel.data).forEach(key => {
+            const value = existingChannel.data[key];
+            convertedData[key] = value ? parseFloat(value) || 0 : 0;
+          });
+        }
+        
         return {
           type: channelType,
           isActive: existingChannel?.isActive || false,
-          data: existingChannel?.data || {},
+          data: convertedData,
         };
       });
       
@@ -400,13 +410,13 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
                                   <FormControl>
                                     {fieldConfig.type === 'currency' ? (
                                       <CurrencyInput
-                                        value={field.value || ''}
+                                        value={field.value || 0}
                                         onChange={field.onChange}
                                         placeholder="R$ 0,00"
                                       />
                                     ) : (
                                       <PercentInput
-                                        value={field.value || ''}
+                                        value={field.value || 0}
                                         onChange={field.onChange}
                                         placeholder="0,00%"
                                       />

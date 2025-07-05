@@ -13,9 +13,12 @@ const formatPercent = (num: number): string => {
   });
 };
 
-const parsePercent = (str: string): number => {
+const parsePercent = (str: string | number): number => {
+  if (!str) return 0;
+  // Converte para string se for número
+  const stringValue = typeof str === 'number' ? str.toString() : str;
   // Remove tudo exceto números, vírgula e ponto
-  const cleaned = str.replace(/[^\d,.-]/g, '');
+  const cleaned = stringValue.replace(/[^\d,.-]/g, '');
   // Substitui vírgula por ponto
   const normalized = cleaned.replace(',', '.');
   return parseFloat(normalized) || 0;
