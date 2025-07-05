@@ -786,7 +786,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         taxPercent: req.body.taxPercent ? String(req.body.taxPercent) : "0",
         packCost: req.body.packCost ? String(req.body.packCost) : "0",
         observations: req.body.observations || null,
-        channels: req.body.channels ? JSON.parse(req.body.channels) : [],
+        channels: req.body.channels ? (typeof req.body.channels === 'string' ? JSON.parse(req.body.channels) : req.body.channels) : [],
         photo: req.file ? `/uploads/${req.file.filename}` : (req.body.photo || null),
         active: true,
       };
@@ -833,7 +833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         taxPercent: req.body.taxPercent ? String(req.body.taxPercent) : "0",
         packCost: req.body.packCost ? String(req.body.packCost) : "0",
         observations: req.body.observations || null,
-        channels: req.body.channels ? JSON.parse(req.body.channels) : [],
+        channels: req.body.channels ? (typeof req.body.channels === 'string' ? JSON.parse(req.body.channels) : req.body.channels) : [],
       };
       
       console.log("🔍 [BACKEND] Parsed productData dimensions:", productData.dimensions);
