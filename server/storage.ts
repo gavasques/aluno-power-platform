@@ -8,6 +8,7 @@ import {
   prompts, 
   products,
   productCostHistory,
+  brands,
   categories,
   materialTypes,
   materialCategories,
@@ -1180,12 +1181,90 @@ export class DatabaseStorage implements IStorage {
 
   // Products
   async getProducts(): Promise<Product[]> {
-    return await db.select().from(products);
+    const results = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        photo: products.photo,
+        sku: products.sku,
+        freeCode: products.freeCode,
+        supplierCode: products.supplierCode,
+        internalCode: products.internalCode,
+        ean: products.ean,
+        dimensions: products.dimensions,
+        weight: products.weight,
+        brand: products.brand, // Legacy text field
+        brandId: products.brandId,
+        brandName: brands.name, // Join with brands table for brand name
+        category: products.category,
+        supplierId: products.supplierId,
+        ncm: products.ncm,
+        costItem: products.costItem,
+        packCost: products.packCost,
+        taxPercent: products.taxPercent,
+        observations: products.observations,
+        bulletPoints: products.bulletPoints,
+        description: products.description,
+        descriptions: products.descriptions,
+        channels: products.channels,
+        active: products.active,
+        createdAt: products.createdAt,
+        updatedAt: products.updatedAt,
+      })
+      .from(products)
+      .leftJoin(brands, eq(products.brandId, brands.id));
+
+    // Map results to include the brand name from the join
+    return results.map(result => ({
+      ...result,
+      // Use brandName from join if available, otherwise fallback to legacy brand field
+      brand: result.brandName || result.brand || ''
+    }));
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.id, id));
-    return product || undefined;
+    const [result] = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        photo: products.photo,
+        sku: products.sku,
+        freeCode: products.freeCode,
+        supplierCode: products.supplierCode,
+        internalCode: products.internalCode,
+        ean: products.ean,
+        dimensions: products.dimensions,
+        weight: products.weight,
+        brand: products.brand, // Legacy text field
+        brandId: products.brandId,
+        brandName: brands.name, // Join with brands table for brand name
+        category: products.category,
+        supplierId: products.supplierId,
+        ncm: products.ncm,
+        costItem: products.costItem,
+        packCost: products.packCost,
+        taxPercent: products.taxPercent,
+        observations: products.observations,
+        bulletPoints: products.bulletPoints,
+        description: products.description,
+        descriptions: products.descriptions,
+        channels: products.channels,
+        active: products.active,
+        createdAt: products.createdAt,
+        updatedAt: products.updatedAt,
+      })
+      .from(products)
+      .leftJoin(brands, eq(products.brandId, brands.id))
+      .where(eq(products.id, id));
+
+    if (!result) return undefined;
+
+    // Return with the brand name from the join if available
+    return {
+      ...result,
+      // Use brandName from join if available, otherwise fallback to legacy brand field
+      brand: result.brandName || result.brand || ''
+    };
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
