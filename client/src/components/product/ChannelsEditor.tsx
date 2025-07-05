@@ -11,9 +11,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Package, Store, Check, X } from 'lucide-react';
+import { Loader2, Package, Store, Check, X, TrendingUp, TrendingDown } from 'lucide-react';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { PercentInput } from '@/components/ui/percent-input';
+import { 
+  calculateChannelProfitability, 
+  formatCurrency, 
+  formatPercent,
+  type ChannelCalculationResult 
+} from '@/utils/channelCalculations';
 
 // Define channel types with their specific fields
 const CHANNEL_FIELDS = {
@@ -202,6 +208,7 @@ interface ChannelsEditorProps {
 export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpen, onClose }) => {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = React.useState(false);
+  const [channelCalculations, setChannelCalculations] = React.useState<Record<string, ChannelCalculationResult>>({});
 
   // Load product data
   const { data: product, isLoading: loadingProduct } = useQuery({
@@ -241,6 +248,34 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       form.reset({ channels: formChannels });
     }
   }, [product, isOpen, form]);
+
+  // Calculate financial metrics in real-time
+  const watchedValues = form.watch();
+  
+  React.useEffect(() => {
+    if (!product) return;
+
+    const newCalculations: Record<string, ChannelCalculationResult> = {};
+
+    watchedValues.channels.forEach((channel, index) => {
+      if (channel.isActive && channel.data) {
+        const productBase = {
+          costItem: parseFloat((product as any).costItem) || 0,
+          taxPercent: parseFloat((product as any).taxPercent) || 0,
+        };
+
+        const calculation = calculateChannelProfitability(
+          channel.type,
+          channel.data,
+          productBase
+        );
+
+        newCalculations[channel.type] = calculation;
+      }
+    });
+
+    setChannelCalculations(newCalculations);
+  }, [watchedValues, product]);
 
   const onSubmit = async (data: ChannelFormData) => {
     try {
@@ -383,6 +418,53 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
                             />
                           ))}
                         </div>
+                        
+                        {/* Financial Summary */}
+                        {channelCalculations[channelType] && (
+                          <div className="border-t pt-3 mt-3">
+                            <div className="bg-muted/30 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-2">
+                                {channelCalculations[channelType].isProfit ? (
+                                  <TrendingUp className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4 text-red-600" />
+                                )}
+                                <span className="font-medium text-sm">Resumo Financeiro</span>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                  <span className="text-muted-foreground">Custos Totais:</span>
+                                  <br />
+                                  <span className="font-medium">
+                                    {formatCurrency(channelCalculations[channelType].totalCosts)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Lucro Líquido:</span>
+                                  <br />
+                                  <span className={`font-medium ${channelCalculations[channelType].isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatCurrency(channelCalculations[channelType].netProfit)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Margem:</span>
+                                  <br />
+                                  <span className={`font-medium ${channelCalculations[channelType].isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatPercent(channelCalculations[channelType].marginPercent)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">ROI:</span>
+                                  <br />
+                                  <span className={`font-medium ${channelCalculations[channelType].isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatPercent(channelCalculations[channelType].roi)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     )}
                   </Card>
