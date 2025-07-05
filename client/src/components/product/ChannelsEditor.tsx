@@ -188,12 +188,12 @@ const CHANNEL_FIELDS = {
   },
 } as const;
 
-// Channel schema - dynamic based on channel fields
+// Simplified channel schema - no automatic validation to avoid "Required" messages
 const channelSchema = z.object({
   channels: z.array(z.object({
     type: z.string(),
     isActive: z.boolean(),
-    data: z.record(z.union([z.string(), z.number()])).optional(),
+    data: z.record(z.any()).optional().default({}),
   })),
 });
 
@@ -239,11 +239,11 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       const formChannels = Object.keys(CHANNEL_FIELDS).map(channelType => {
         const existingChannel = channelMap.get(channelType) as any;
         
-        // Convert string values to numbers for all channel data
-        const convertedData = {};
+        // Convert string values to numbers for all channel data with safe type handling
+        const convertedData: Record<string, any> = {};
         if (existingChannel?.data) {
           Object.keys(existingChannel.data).forEach(key => {
-            const value = existingChannel.data[key];
+            const value = (existingChannel.data as any)[key];
             convertedData[key] = value ? parseFloat(value) || 0 : 0;
           });
         }
@@ -276,7 +276,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
 
         const calculation = calculateChannelProfitability(
           channel.type,
-          channel.data,
+          channel.data as any,
           productBase
         );
 
@@ -294,8 +294,39 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
 
       console.log("🔍 [CHANNELS_FORM] Form data being submitted:", data);
 
-      // Filter only active channels
-      const activeChannels = data.channels.filter(ch => ch.isActive);
+      // Validate that active channels have price filled
+      const validationErrors: string[] = [];
+      
+      data.channels.forEach((channel, index) => {
+        if (channel.isActive) {
+          const price = (channel.data as any)?.price;
+          if (!price || parseFloat(price.toString()) <= 0) {
+            const channelConfig = Object.values(CHANNEL_FIELDS)[index];
+            validationErrors.push(`${channelConfig.name}: Preço de venda é obrigatório`);
+          }
+        }
+      });
+
+      if (validationErrors.length > 0) {
+        toast({
+          title: "Preço obrigatório",
+          description: validationErrors.join(' • '),
+          variant: "destructive",
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      // Process all channels (active and inactive), converting empty fields to 0
+      const processedChannels = data.channels.map(channel => ({
+        type: channel.type,
+        isActive: channel.isActive,
+        data: Object.keys((channel.data as any) || {}).reduce((acc, key) => {
+          const value = (channel.data as any)?.[key];
+          acc[key] = value && value !== '' ? parseFloat(value.toString()) || 0 : 0;
+          return acc;
+        }, {} as Record<string, number>),
+      }));
 
       const response = await fetch(`/api/products/${productId}`, {
         method: 'PUT',
@@ -304,7 +335,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          channels: activeChannels,
+          channels: processedChannels,
         }),
       });
 
@@ -410,13 +441,13 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
                                   <FormControl>
                                     {fieldConfig.type === 'currency' ? (
                                       <CurrencyInput
-                                        value={field.value || 0}
+                                        value={parseFloat(field.value?.toString() || '0') || 0}
                                         onChange={field.onChange}
                                         placeholder="R$ 0,00"
                                       />
                                     ) : (
                                       <PercentInput
-                                        value={field.value || 0}
+                                        value={parseFloat(field.value?.toString() || '0') || 0}
                                         onChange={field.onChange}
                                         placeholder="0,00%"
                                       />
