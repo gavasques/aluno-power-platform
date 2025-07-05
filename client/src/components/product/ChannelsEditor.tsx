@@ -193,7 +193,7 @@ const channelSchema = z.object({
   channels: z.array(z.object({
     type: z.string(),
     isActive: z.boolean(),
-    data: z.record(z.string()).optional(),
+    data: z.record(z.union([z.string(), z.number()])).optional(),
   })),
 });
 
