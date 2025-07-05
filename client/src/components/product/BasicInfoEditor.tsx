@@ -94,9 +94,18 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
   });
 
   // Load brands
-  const { data: brands = [] } = useQuery<Array<{ id: number; name: string; isGlobal: boolean }>>({
+  const { data: brands = [], isLoading: loadingBrands, error: brandsError } = useQuery<Array<{ id: number; name: string; isGlobal: boolean }>>({
     queryKey: ["/api/brands"],
     enabled: isOpen,
+  });
+
+  // Debug brands loading
+  console.log("🔍 Brands Query Debug:", {
+    isOpen,
+    loadingBrands,
+    brandsCount: brands.length,
+    brandsError: brandsError?.message,
+    brands
   });
 
   // Create brand mutation
@@ -397,7 +406,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Marca</FormLabel>
-                          {brands.length === 0 ? (
+                          {loadingBrands ? (
                             <div className="flex items-center space-x-2">
                               <Loader2 className="h-4 w-4 animate-spin" />
                               <span className="text-sm text-muted-foreground">Carregando marcas...</span>
