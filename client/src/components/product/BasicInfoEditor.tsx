@@ -109,6 +109,11 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
     if (product && isOpen) {
       console.log("🔍 [BASIC_INFO] Product data loaded:", product);
       console.log("🔍 [BASIC_INFO] Category value:", (product as any).category);
+      console.log("🔍 [BASIC_INFO] Categories available:", categories);
+      
+      const categoryValue = (product as any).category ? (product as any).category.toString() : "";
+      console.log("🔍 [BASIC_INFO] Setting categoryId to:", categoryValue);
+      
       form.reset({
         name: (product as any).name || "",
         sku: (product as any).sku || "",
@@ -116,13 +121,20 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
         supplierCode: (product as any).supplierCode || "",
         ean: (product as any).ean || "",
         brand: (product as any).brand || "",
-        categoryId: (product as any).category ? (product as any).category.toString() : "",
+        categoryId: categoryValue,
         supplierId: (product as any).supplierId?.toString() || "",
         ncm: (product as any).ncm || "",
       });
       setImagePreview((product as any).photo || null);
+      
+      // Force field update after reset
+      setTimeout(() => {
+        form.setValue("categoryId", categoryValue);
+        console.log("🔍 [BASIC_INFO] Force set categoryId to:", categoryValue);
+        console.log("🔍 [BASIC_INFO] Current form values:", form.getValues());
+      }, 100);
     }
-  }, [product, isOpen, form]);
+  }, [product, isOpen, form, categories]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
