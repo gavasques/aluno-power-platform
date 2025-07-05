@@ -111,6 +111,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 03:24 PM**: ✅ CATEGORIAS ORDENADAS E BOTÃO DE ATUALIZAÇÃO IMPLEMENTADOS
+  - **Ordenação Alfabética de Categorias**:
+    - Dropdown de categorias agora ordenado A-Z usando `.localeCompare()`
+    - Aplicado no BasicInfoEditor para melhor usabilidade
+    - Mantém funcionalidade existente com ordenação automática
+  - **Botão de Atualização na Lista de Produtos**:
+    - Novo botão "Atualizar" ao lado da paginação na MyProductsList
+    - Usa `useQueryClient()` para invalidar cache via `invalidateQueries`
+    - Feedback imediato com toast: "Lista atualizada"
+    - Permite refresh manual dos dados sem recarregar página
+    - Ícone Loader2 para identificação visual
+
 - **January 05, 2025 - 02:56 PM**: ✅ SISTEMA DE EDIÇÃO DE PRODUTOS APRIMORADO COM NOVOS EDITORES INDEPENDENTES
   - **Correção do Campo Categoria**:
     - Resolvido problema de persistência convertendo valores inteiros do banco para strings

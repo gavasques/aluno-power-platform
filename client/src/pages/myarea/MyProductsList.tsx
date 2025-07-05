@@ -41,6 +41,7 @@ import { cn } from "@/lib/utils";
 import { SalesChannel, PricingCalculation } from "@/types/pricing";
 import BasicInfoEditor from "@/components/product/BasicInfoEditor";
 import { ChannelsEditor } from "@/components/product/ChannelsEditor";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 50;
 
@@ -67,6 +68,7 @@ export default function MyProductsList() {
   const [channelsEditorProductId, setChannelsEditorProductId] = useState<number | null>(null);
   const { products, isLoading, error, deleteProduct } = useProducts();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleEdit = (id: number) => {
     window.location.href = `/minha-area/produtos/${id}/editar`;
@@ -210,8 +212,25 @@ export default function MyProductsList() {
               {filteredProducts.length} produtos encontrados
               {searchTerm && ` para "${searchTerm}"`}
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              Página {currentPage} de {totalPages || 1}
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+                  toast({
+                    title: "Lista atualizada",
+                    description: "As informações dos produtos foram atualizadas.",
+                  });
+                }}
+                className="flex items-center gap-2"
+              >
+                <Loader2 className="h-4 w-4" />
+                Atualizar
+              </Button>
+              <div className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages || 1}
+              </div>
             </div>
           </div>
         </div>
