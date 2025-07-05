@@ -361,7 +361,7 @@ export default function ProductBasicDataTab({
                 console.log("🔍 [BRAND_SELECT] Loading brands:", loadingBrands);
                 
                 // Get the current brand name for display
-                const selectedBrand = brands?.find((brand: any) => brand.id.toString() === field.value);
+                const selectedBrand = (brands as Array<{id: number; name: string}>)?.find((brand) => brand.id.toString() === field.value);
                 console.log("🔍 [BRAND_SELECT] Selected brand:", selectedBrand);
                 
                 return (
@@ -457,7 +457,7 @@ export default function ProductBasicDataTab({
                 console.log("🔍 [CATEGORY_SELECT] Loading categories:", loadingCategories);
                 
                 // Get the current category name for display
-                const selectedCategory = categories?.find((category: any) => category.id.toString() === field.value);
+                const selectedCategory = (categories as Array<{id: number; name: string}>)?.find((category) => category.id.toString() === field.value);
                 console.log("🔍 [CATEGORY_SELECT] Selected category:", selectedCategory);
                 
                 return (

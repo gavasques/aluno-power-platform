@@ -43,6 +43,9 @@ const channelDisplayNames: Record<ChannelType, string> = {
   [ChannelType.ML_ENVIOS]: "Mercado Livre Envios",
   [ChannelType.ML_FULL]: "Mercado Livre FULL",
   [ChannelType.SHOPEE]: "Shopee",
+  [ChannelType.MAGALU_FULL]: "Magalu FULL",
+  [ChannelType.MAGALU_ENVIOS]: "Magalu Envios",
+  [ChannelType.TIKTOKSHOP_NORMAL]: "TikTok Shop",
   [ChannelType.MARKETPLACE_OTHER]: "Outro Marketplace"
 };
 

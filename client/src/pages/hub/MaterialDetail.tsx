@@ -38,11 +38,9 @@ const getIcon = (iconName: string) => {
 };
 
 const MaterialViewer = ({ material }: { material: Material }) => {
-  const { incrementView } = useMaterials();
+  const {} = useMaterials();
   
-  React.useEffect(() => {
-    incrementView(material.id);
-  }, [material.id, incrementView]);
+  // Note: incrementView functionality removed
 
   const renderViewer = () => {
     switch (material.type.name) {

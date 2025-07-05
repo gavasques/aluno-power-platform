@@ -216,7 +216,7 @@ export const sanitizeQueryParams = (req: Request, res: Response, next: NextFunct
       if (typeof value === 'string') {
         req.query[key] = sanitizeInput(value);
       } else if (Array.isArray(value)) {
-        req.query[key] = value.map(v => typeof v === 'string' ? sanitizeInput(v) : v);
+        req.query[key] = value.map(v => typeof v === 'string' ? sanitizeInput(v) : v) as any;
       }
     });
   }

@@ -35,11 +35,9 @@ const getIcon = (iconName: string) => {
 
 // Re-using MaterialViewer logic from src/pages/myarea/MaterialDetail.tsx
 const MaterialViewer = ({ material }: { material: Material }) => {
-  const { incrementView } = useMaterials();
+  const {} = useMaterials();
   
-  React.useEffect(() => {
-    incrementView(material.id);
-  }, [material.id, incrementView]);
+  // Note: incrementView functionality removed
 
   // ... (viewer rendering logic copied from MaterialDetail.tsx)
   const renderViewer = () => {

@@ -374,7 +374,8 @@ export interface IStorage {
 
   // Agent Prompts
   getAgentPrompts(agentId: string): Promise<AgentPrompt[]>;
-  getAgentPrompt(id: string): Promise<AgentPrompt | undefined>;
+  getAgentPrompt(agentId: string, promptType: string): Promise<AgentPrompt | null>;
+  getAgentPromptById(id: string): Promise<AgentPrompt | undefined>;
   createAgentPrompt(prompt: InsertAgentPrompt): Promise<AgentPrompt>;
   updateAgentPrompt(id: string, prompt: Partial<InsertAgentPrompt>): Promise<AgentPrompt>;
   deleteAgentPrompt(id: string): Promise<void>;
@@ -1251,7 +1252,6 @@ export class DatabaseStorage implements IStorage {
     return {
       ...product,
       brandId: brandId,
-      brandName: brandName,
       // For the brand field, use brandId if available, otherwise keep legacy value
       brand: brandId ? brandId.toString() : product.brand || ''
     };
@@ -1311,17 +1311,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProductCostHistory(productId: number, limit?: number): Promise<ProductCostHistory[]> {
-    let query = db
+    const baseQuery = db
       .select()
       .from(productCostHistory)
       .where(eq(productCostHistory.productId, productId))
       .orderBy(desc(productCostHistory.createdAt));
     
-    if (limit) {
-      query = query.limit(limit);
-    }
-    
-    const history = await query;
+    const history = limit ? await baseQuery.limit(limit) : await baseQuery;
     return history;
   }
 
@@ -1673,6 +1669,12 @@ export class DatabaseStorage implements IStorage {
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
+          lastLogin: null,
+          resetToken: null,
+          resetTokenExpiry: null,
+          magicLinkToken: null,
+          magicLinkExpiresAt: null,
+          emailVerified: false
         },
         replies: repliesByReview[row.review.id] || [],
       }));
@@ -2028,6 +2030,12 @@ export class DatabaseStorage implements IStorage {
               isActive: users.isActive,
               createdAt: users.createdAt,
               updatedAt: users.updatedAt,
+              lastLogin: users.lastLogin,
+              resetToken: users.resetToken,
+              resetTokenExpiry: users.resetTokenExpiry,
+              magicLinkToken: users.magicLinkToken,
+              magicLinkExpiresAt: users.magicLinkExpiresAt,
+              emailVerified: users.emailVerified,
             }
           })
           .from(toolReviewReplies)
@@ -2042,7 +2050,7 @@ export class DatabaseStorage implements IStorage {
       })
     );
 
-    return reviewsWithReplies;
+    return reviewsWithReplies as any;
   }
 
   async createToolReview(review: InsertToolReview): Promise<ToolReview> {
@@ -2181,7 +2189,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(agentPrompts.promptType);
   }
 
-  async getAgentPrompt(id: string): Promise<AgentPrompt | undefined> {
+  async getAgentPromptById(id: string): Promise<AgentPrompt | undefined> {
     const [prompt] = await db.select().from(agentPrompts).where(eq(agentPrompts.id, id));
     return prompt || undefined;
   }
@@ -2283,7 +2291,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(generatedImages)
       .where(eq(generatedImages.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Upscaled Images
@@ -2321,7 +2329,7 @@ export class DatabaseStorage implements IStorage {
         eq(upscaledImages.id, id),
         eq(upscaledImages.userId, userId)
       ));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // AI Image Generation Logs
@@ -2362,14 +2370,23 @@ export class DatabaseStorage implements IStorage {
         model: aiImgGenerationLogs.model,
         feature: aiImgGenerationLogs.feature,
         originalImageName: aiImgGenerationLogs.originalImageName,
+        originalImageSize: aiImgGenerationLogs.originalImageSize,
+        generatedImageUrl: aiImgGenerationLogs.generatedImageUrl,
+        generatedImageSize: aiImgGenerationLogs.generatedImageSize,
+        prompt: aiImgGenerationLogs.prompt,
         quality: aiImgGenerationLogs.quality,
         scale: aiImgGenerationLogs.scale,
+        apiResponse: aiImgGenerationLogs.apiResponse,
         cost: aiImgGenerationLogs.cost,
         duration: aiImgGenerationLogs.duration,
         status: aiImgGenerationLogs.status,
+        errorMessage: aiImgGenerationLogs.errorMessage,
+        requestId: aiImgGenerationLogs.requestId,
+        sessionId: aiImgGenerationLogs.sessionId,
         createdAt: aiImgGenerationLogs.createdAt,
         ipAddress: aiImgGenerationLogs.ipAddress,
-        userAgent: aiImgGenerationLogs.userAgent
+        userAgent: aiImgGenerationLogs.userAgent,
+        metadata: aiImgGenerationLogs.metadata
       })
       .from(aiImgGenerationLogs)
       .limit(limit)

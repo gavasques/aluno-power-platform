@@ -232,7 +232,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
       
       // Add basic fields
       formData.append("name", data.name);
-      formData.append("sku", data.sku);
+      formData.append("sku", data.sku || "");
       if (data.freeCode) formData.append("freeCode", data.freeCode);
       if (data.supplierCode) formData.append("supplierCode", data.supplierCode);
       if (data.ean) formData.append("ean", data.ean);

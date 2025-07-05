@@ -11,6 +11,20 @@ import fsSync from "fs";
 import path from "path";
 import os from "os";
 
+// Helper function for generating tags
+function generateTags(data: any): any {
+  const tags: any = {};
+  if (data.productName) tags.PRODUCT_NAME = data.productName.trim();
+  if (data.brand) tags.BRAND = data.brand.trim();
+  if (data.category) tags.CATEGORY = data.category.trim();
+  if (data.keywords) tags.KEYWORDS = data.keywords.trim();
+  if (data.longTailKeywords) tags.LONG_TAIL_KEYWORDS = data.longTailKeywords.trim();
+  if (data.mainFeatures) tags.MAIN_FEATURES = data.mainFeatures.trim();
+  if (data.targetAudience) tags.TARGET_AUDIENCE = data.targetAudience.trim();
+  if (data.reviewsData) tags.REVIEWS_DATA = data.reviewsData.trim();
+  return tags;
+}
+
 // Configure multer for file uploads
 const upload = multer({
   storage: multer.diskStorage({
@@ -79,7 +93,7 @@ import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
 import { requireAuth } from "./security";
 import { db } from './db';
-import { eq, desc, like, and, isNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
+import { eq, desc, like, and, isNull, isNotNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
 import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs } from '@shared/schema';
 
 // WebSocket connections storage
@@ -460,7 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           or(
             eq(brands.isGlobal, true),
-            eq(brands.userId, userId)
+            eq(brands.userId, userId as any)
           )
         )
         .orderBy(asc(brands.name));
@@ -487,7 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(brands.name, name.trim()),
-            eq(brands.userId, userId)
+            eq(brands.userId, userId as any)
           )
         )
         .limit(1);
@@ -520,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(brands.id, brandId),
-            eq(brands.userId, userId),
+            eq(brands.userId, userId as any),
             eq(brands.isGlobal, false)
           )
         )
