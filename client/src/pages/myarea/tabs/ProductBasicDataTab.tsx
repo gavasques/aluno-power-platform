@@ -307,7 +307,9 @@ export default function ProductBasicDataTab({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {(categories as any[])?.map((category: any) => (
+                      {(categories as any[])
+                        ?.sort((a: any, b: any) => a.name.localeCompare(b.name))
+                        ?.map((category: any) => (
                         <SelectItem key={category.id} value={category.id.toString()}>
                           {category.name}
                         </SelectItem>

@@ -377,22 +377,29 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
                             <Building className="inline h-4 w-4 mr-1" />
                             Categoria
                           </FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione uma categoria" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {(categories as any[])
-                                .sort((a: any, b: any) => a.name.localeCompare(b.name))
-                                .map((category: any) => (
-                                <SelectItem key={category.id} value={category.id.toString()}>
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          {categories.length === 0 ? (
+                            <div className="flex items-center space-x-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <span className="text-sm text-muted-foreground">Carregando categorias...</span>
+                            </div>
+                          ) : (
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione uma categoria" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {(categories as any[])
+                                  .sort((a: any, b: any) => a.name.localeCompare(b.name))
+                                  .map((category: any) => (
+                                  <SelectItem key={category.id} value={category.id.toString()}>
+                                    {category.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}

@@ -813,6 +813,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔍 [BACKEND] Received categoryId:", req.body.categoryId);
       console.log("🔍 [BACKEND] All form fields:", Object.keys(req.body));
       console.log("🔍 [BACKEND] categoryId type:", typeof req.body.categoryId);
+      console.log("🔍 [BACKEND] Dimensions received:", req.body.dimensions);
+      console.log("🔍 [BACKEND] Weight received:", req.body.weight);
       
       // Parse FormData fields
       const productData: any = {
@@ -833,6 +835,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         observations: req.body.observations || null,
         channels: req.body.channels ? JSON.parse(req.body.channels) : [],
       };
+      
+      console.log("🔍 [BACKEND] Parsed productData dimensions:", productData.dimensions);
+      console.log("🔍 [BACKEND] Parsed productData weight:", productData.weight);
 
       // Handle photo update
       if (req.file) {
