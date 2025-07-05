@@ -70,6 +70,35 @@ export default function ProductBasicDataTab({
   console.log("🔍 [PRODUCT_BASIC_TAB] CategoryId value:", currentFormValues.categoryId);
   console.log("🔍 [PRODUCT_BASIC_TAB] Available brands:", brands);
 
+  // Force field update when data is available but fields are empty
+  useEffect(() => {
+    if (isEditing && productId) {
+      const brandId = form.getValues("brandId");
+      const categoryId = form.getValues("categoryId");
+      
+      // If we have a product ID but fields are empty, try to get values from URL or force update
+      if (!brandId || !categoryId) {
+        // Small delay to ensure data is loaded
+        setTimeout(() => {
+          const currentFormData = form.getValues();
+          console.log("🔍 [PRODUCT_BASIC_TAB] Force update check - current form data:", currentFormData);
+          
+          // Get the raw form values that should have been set
+          if (currentFormData.id === parseInt(productId) || currentFormData.id === productId) {
+            if (!brandId && currentFormData.brandId) {
+              form.setValue("brandId", currentFormData.brandId);
+              console.log("🔍 [PRODUCT_BASIC_TAB] Force set brandId:", currentFormData.brandId);
+            }
+            if (!categoryId && currentFormData.categoryId) {
+              form.setValue("categoryId", currentFormData.categoryId);
+              console.log("🔍 [PRODUCT_BASIC_TAB] Force set categoryId:", currentFormData.categoryId);
+            }
+          }
+        }, 200);
+      }
+    }
+  }, [brands, categories, isEditing, productId, form]);
+
   // Create brand mutation
   const createBrandMutation = useMutation({
     mutationFn: async (name: string) => {
@@ -329,17 +358,30 @@ export default function ProductBasicDataTab({
                 console.log("🔍 [BRAND_SELECT] Field value:", field.value);
                 console.log("🔍 [BRAND_SELECT] Available brands:", brands);
                 console.log("🔍 [BRAND_SELECT] Loading brands:", loadingBrands);
+                
+                // Get the current brand name for display
+                const selectedBrand = brands?.find((brand: any) => brand.id.toString() === field.value);
+                console.log("🔍 [BRAND_SELECT] Selected brand:", selectedBrand);
+                
                 return (
                 <FormItem>
                   <FormLabel>Marca</FormLabel>
                   <Select 
-                    onValueChange={(value) => field.onChange(value)}
-                    value={field.value}
+                    onValueChange={(value) => {
+                      console.log("🔍 [BRAND_SELECT] onValueChange called with:", value);
+                      field.onChange(value);
+                    }}
+                    value={field.value || ""}
                     disabled={loadingBrands}
+                    key={`brand-select-${field.value}`} // Force re-render when value changes
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={loadingBrands ? "Carregando marcas..." : "Selecione uma marca"} />
+                        <SelectValue 
+                          placeholder={loadingBrands ? "Carregando marcas..." : "Selecione uma marca"}
+                        >
+                          {selectedBrand ? selectedBrand.name : field.value ? `ID: ${field.value}` : ""}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
