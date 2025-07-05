@@ -111,7 +111,25 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 05, 2025**: ✅ CORREÇÃO CRÍTICA DE SCHEMA E BANCO DE DADOS FINALIZADA
+- **January 05, 2025**: ✅ CORREÇÃO CRÍTICA DA LÓGICA DE IMPOSTOS NO SISTEMA DE CUSTOS
+  - **Problema Resolvido**: Sistema estava calculando impostos sobre o custo do produto, o que é incorreto
+    - Erro conceitual: Aplicava taxPercent sobre o custo base para calcular "custo total"
+    - Correção: O campo "Custo" já deve incluir TUDO (produto, impostos, frete, embalagem)
+    - Impostos (taxPercent) são aplicados APENAS sobre o preço de venda nos canais
+  - **Mudanças Implementadas**:
+    - `ProductCostsTab`: Campo renomeado para "Custo Final do Produto" com explicação clara
+    - Label de impostos alterado para "Impostos sobre Venda (%)" 
+    - Removido "Resumo de Custos" que mostrava cálculo incorreto
+    - Dicas atualizadas para refletir entendimento correto
+  - **Arquivos de Cálculo Corrigidos**:
+    - `pricingCalculations.ts`: Removido cálculo de taxCost sobre custo base
+    - `productCalculations.ts`: Corrigido para não adicionar impostos ao custo
+    - `PricingCalculation` interface: Removido campo taxCost
+  - **Regra de Negócio Clara**:
+    - Custo = valor final incluindo TODOS os gastos
+    - Impostos = aplicado apenas na venda, nunca no custo
+
+- **January 05, 2025 (anterior)**: ✅ CORREÇÃO CRÍTICA DE SCHEMA E BANCO DE DADOS FINALIZADA
   - **Problema Resolvido**: Incompatibilidade entre schema TypeScript e estrutura real do banco de dados
     - Erro: "column 'free_code' does not exist" bloqueava API de produtos
     - Causa: Schema esperava colunas que não existiam no banco

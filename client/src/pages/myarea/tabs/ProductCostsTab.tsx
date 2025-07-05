@@ -23,10 +23,6 @@ interface ProductCostsTabProps {
 export default function ProductCostsTab({ form }: ProductCostsTabProps) {
   const productCost = form.watch("costs.currentCost") || 0;
   const taxPercent = form.watch("costs.taxPercent") || 0;
-  
-  // Calculate total cost
-  const taxAmount = productCost * (taxPercent / 100);
-  const totalCost = productCost + taxAmount;
 
   return (
     <div className="space-y-6">
@@ -47,7 +43,7 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4" />
-                    Custo do Produto (R$) *
+                    Custo Final do Produto (R$) *
                   </FormLabel>
                   <FormControl>
                     <Input 
@@ -58,6 +54,10 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Custo total incluindo TUDO: produto, frete, impostos (PIS, COFINS, ICMS, IPI), 
+                    diferencial de alíquota, embalagem, etc.
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -70,7 +70,7 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
                     <Percent className="h-4 w-4" />
-                    Impostos (%) *
+                    Impostos sobre Venda (%) *
                   </FormLabel>
                   <FormControl>
                     <Input 
@@ -81,6 +81,9 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Percentual usado APENAS nos canais de venda, aplicado sobre o preço de venda
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -115,32 +118,21 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
-            Resumo de Custos
+            Resumo do Custo
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-gray-50 rounded-lg space-y-1">
-                <p className="text-sm text-muted-foreground">Custo do Produto</p>
-                <p className="text-2xl font-bold">{formatBRL(productCost)}</p>
-              </div>
-              
-              <div className="p-4 bg-gray-50 rounded-lg space-y-1">
-                <p className="text-sm text-muted-foreground">Impostos ({formatPercent(taxPercent, 1)})</p>
-                <p className="text-2xl font-bold">{formatBRL(taxAmount)}</p>
-              </div>
-              
-              <div className="p-4 bg-blue-50 rounded-lg space-y-1">
-                <p className="text-sm text-blue-700 font-semibold">Custo Total</p>
-                <p className="text-2xl font-bold text-blue-900">{formatBRL(totalCost)}</p>
-              </div>
+            <div className="p-4 bg-blue-50 rounded-lg text-center">
+              <p className="text-sm text-blue-700 font-semibold mb-1">Custo Final do Produto</p>
+              <p className="text-3xl font-bold text-blue-900">{formatBRL(productCost)}</p>
             </div>
 
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                O custo total será usado como base para cálculo de preços e margens em todos os canais de venda.
+                Este é o custo final já incluindo TODOS os custos (produto, impostos, frete, embalagem, etc). 
+                O percentual de impostos será aplicado apenas sobre o preço de venda nos canais.
               </AlertDescription>
             </Alert>
           </div>
@@ -178,22 +170,22 @@ export default function ProductCostsTab({ form }: ProductCostsTabProps) {
           <div className="flex items-start gap-2">
             <Badge variant="outline" className="mt-0.5">1</Badge>
             <p>
-              <strong>Custo completo:</strong> Inclua todos os custos diretos como produto, embalagem, 
-              etiquetas e preparação.
+              <strong>Custo final completo:</strong> Inclua TUDO no custo: produto, impostos (PIS, COFINS, ICMS, IPI), 
+              frete, embalagem, etiquetas, diferencial de alíquota - esse é o custo real final.
             </p>
           </div>
           <div className="flex items-start gap-2">
             <Badge variant="outline" className="mt-0.5">2</Badge>
             <p>
-              <strong>Impostos:</strong> Considere ICMS, PIS, COFINS e outros impostos aplicáveis 
-              ao seu regime tributário.
+              <strong>Impostos sobre venda:</strong> O percentual de impostos será aplicado APENAS sobre o 
+              preço de venda nos canais, nunca sobre o custo.
             </p>
           </div>
           <div className="flex items-start gap-2">
             <Badge variant="outline" className="mt-0.5">3</Badge>
             <p>
               <strong>Atualização regular:</strong> Revise os custos mensalmente ou sempre que 
-              houver mudança significativa.
+              houver mudança significativa em impostos, frete ou fornecedores.
             </p>
           </div>
           <div className="flex items-start gap-2">

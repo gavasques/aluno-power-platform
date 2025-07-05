@@ -40,9 +40,8 @@ export function calculateChannelResults(
   const packCost = product.packCost || 0;
   const taxPercent = product.taxPercent || 0;
   
-  const baseCost = costItem + packCost;
-  const taxCost = baseCost * (taxPercent / 100);
-  const totalProductCost = baseCost + taxCost;
+  // Cost already includes everything (product, taxes, shipping, etc.)
+  const totalProductCost = costItem + packCost;
   
   const revenue = channel.price;
   

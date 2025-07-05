@@ -100,7 +100,6 @@ export interface PricingCalculation {
   
   // Valores base
   productCost: number;
-  taxCost: number;
   totalCost: number;
   sellingPrice: number;
   

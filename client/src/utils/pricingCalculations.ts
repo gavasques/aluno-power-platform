@@ -98,10 +98,9 @@ export function calculateChannelPricing(
   product: PricingProduct,
   channel: SalesChannel
 ): PricingCalculation {
-  // Base costs
+  // Base costs - productCost already includes everything (taxes, shipping, etc)
   const productCost = product.costs.currentCost;
-  const taxCost = productCost * (product.costs.taxPercent / 100);
-  const totalCost = productCost + taxCost;
+  const totalCost = productCost; // No additional calculations, this is the final cost
   
   // Channel fees
   const commissionValue = calculateCommission(channel.sellingPrice, channel.fees.commissionPercent);
@@ -157,7 +156,6 @@ export function calculateChannelPricing(
     
     // Base values
     productCost,
-    taxCost,
     totalCost,
     sellingPrice: channel.sellingPrice,
     
