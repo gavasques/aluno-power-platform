@@ -165,6 +165,9 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
       setIsSaving(true);
       const token = localStorage.getItem("auth_token");
 
+      console.log("🔍 [BASIC_INFO_FORM] Form data being submitted:", data);
+      console.log("🔍 [BASIC_INFO_FORM] Category value:", data.categoryId);
+
       const formData = new FormData();
       
       // Add basic fields
@@ -174,7 +177,12 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
       if (data.supplierCode) formData.append("supplierCode", data.supplierCode);
       if (data.ean) formData.append("ean", data.ean);
       if (data.brand) formData.append("brand", data.brand);
-      if (data.categoryId) formData.append("categoryId", data.categoryId);
+      if (data.categoryId) {
+        console.log("🔍 [BASIC_INFO_FORM] Adding categoryId to FormData:", data.categoryId);
+        formData.append("categoryId", data.categoryId);
+      } else {
+        console.log("🔍 [BASIC_INFO_FORM] No categoryId to add");
+      }
       if (data.supplierId) formData.append("supplierId", data.supplierId);
       if (data.ncm) formData.append("ncm", data.ncm);
 

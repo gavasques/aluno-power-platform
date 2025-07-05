@@ -810,6 +810,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       
+      console.log("🔍 [BACKEND] Received categoryId:", req.body.categoryId);
+      console.log("🔍 [BACKEND] All form fields:", Object.keys(req.body));
+      console.log("🔍 [BACKEND] categoryId type:", typeof req.body.categoryId);
+      
       // Parse FormData fields
       const productData: any = {
         name: req.body.name,
@@ -818,7 +822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         supplierCode: req.body.supplierCode || null,
         ean: req.body.ean || null,
         brand: req.body.brand || null,
-        category: req.body.categoryId || null,  // categoryId from frontend maps to category in DB
+        category: req.body.categoryId ? parseInt(req.body.categoryId) : null,  // Ensure integer conversion
         supplierId: req.body.supplierId ? parseInt(req.body.supplierId) : null,
         ncm: req.body.ncm || null,
         dimensions: req.body.dimensions ? JSON.parse(req.body.dimensions) : null,
