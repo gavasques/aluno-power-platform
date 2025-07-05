@@ -822,7 +822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         supplierCode: req.body.supplierCode || null,
         ean: req.body.ean || null,
         brand: req.body.brand || null,
-        category: req.body.categoryId ? parseInt(req.body.categoryId) : null,  // Ensure integer conversion
+        category: req.body.categoryId || null,  // Keep as string to match schema
         supplierId: req.body.supplierId ? parseInt(req.body.supplierId) : null,
         ncm: req.body.ncm || null,
         dimensions: req.body.dimensions ? JSON.parse(req.body.dimensions) : null,
