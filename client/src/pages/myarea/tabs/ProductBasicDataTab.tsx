@@ -50,7 +50,7 @@ export default function ProductBasicDataTab({
   const [isCreatingBrand, setIsCreatingBrand] = useState(false);
   
   // Load categories
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isLoading: loadingCategories } = useQuery({
     queryKey: ["/api/departments"],
   });
 
@@ -451,16 +451,37 @@ export default function ProductBasicDataTab({
             <FormField
               control={form.control}
               name="categoryId"
-              render={({ field }) => (
+              render={({ field }) => {
+                console.log("🔍 [CATEGORY_SELECT] Field value:", field.value);
+                console.log("🔍 [CATEGORY_SELECT] Available categories:", categories);
+                console.log("🔍 [CATEGORY_SELECT] Loading categories:", loadingCategories);
+                
+                // Get the current category name for display
+                const selectedCategory = categories?.find((category: any) => category.id.toString() === field.value);
+                console.log("🔍 [CATEGORY_SELECT] Selected category:", selectedCategory);
+                
+                return (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
                     <Building className="h-4 w-4" />
                     Categoria *
                   </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select 
+                    onValueChange={(value) => {
+                      console.log("🔍 [CATEGORY_SELECT] onValueChange called with:", value);
+                      field.onChange(value);
+                    }}
+                    value={field.value || ""}
+                    disabled={loadingCategories}
+                    key={`category-select-${field.value}`} // Force re-render when value changes
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma categoria" />
+                        <SelectValue 
+                          placeholder={loadingCategories ? "Carregando categorias..." : "Selecione uma categoria"}
+                        >
+                          {selectedCategory ? selectedCategory.name : field.value ? `ID: ${field.value}` : ""}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -475,7 +496,8 @@ export default function ProductBasicDataTab({
                   </Select>
                   <FormMessage />
                 </FormItem>
-              )}
+                );
+              }}
             />
 
             <FormField

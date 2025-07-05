@@ -140,7 +140,7 @@ export default function ProductPricingForm() {
     if (existingProduct && isEditing) {
       console.log("🔍 [PRODUCT_PRICING_FORM] Existing product data:", existingProduct);
       console.log("🔍 [PRODUCT_PRICING_FORM] BrandId from product:", existingProduct?.brandId);
-      console.log("🔍 [PRODUCT_PRICING_FORM] CategoryId from product:", existingProduct?.categoryId);
+      console.log("🔍 [PRODUCT_PRICING_FORM] Category from product:", existingProduct?.category);
       
       // Map existing product data to form structure
       const productDimensions = existingProduct?.dimensions || {
@@ -158,7 +158,7 @@ export default function ProductPricingForm() {
         photo: existingProduct?.photo || "",
         ean: existingProduct?.ean || "",
         brandId: existingProduct?.brandId?.toString() || "",
-        categoryId: existingProduct?.categoryId?.toString() || "",
+        categoryId: existingProduct?.category?.toString() || "",
         supplierId: existingProduct?.supplierId?.toString() || "",
         ncm: existingProduct?.ncm || "",
         dimensions: productDimensions,
@@ -173,7 +173,7 @@ export default function ProductPricingForm() {
       
       console.log("🔍 [PRODUCT_PRICING_FORM] Form reset values:", {
         brandId: existingProduct?.brandId?.toString() || "",
-        categoryId: existingProduct?.categoryId?.toString() || "",
+        categoryId: existingProduct?.category?.toString() || "",
         sku: existingProduct?.sku || existingProduct?.internalCode || ""
       });
       
@@ -183,9 +183,9 @@ export default function ProductPricingForm() {
           form.setValue("brandId", existingProduct.brandId.toString());
           console.log("🔍 [PRODUCT_PRICING_FORM] Force set brandId:", existingProduct.brandId.toString());
         }
-        if (existingProduct?.categoryId) {
-          form.setValue("categoryId", existingProduct.categoryId.toString());
-          console.log("🔍 [PRODUCT_PRICING_FORM] Force set categoryId:", existingProduct.categoryId.toString());
+        if (existingProduct?.category) {
+          form.setValue("categoryId", existingProduct.category.toString());
+          console.log("🔍 [PRODUCT_PRICING_FORM] Force set categoryId:", existingProduct.category.toString());
         }
       }, 100);
       
