@@ -111,7 +111,32 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 04, 2025**: ✅ SISTEMA COMPLETO DE PRECIFICAÇÃO DE PRODUTOS IMPLEMENTADO
+- **July 04, 2025**: ✅ ESTRUTURA DE DADOS TYPESCRIPT PARA PRECIFICAÇÃO CRIADA
+  - **Tipos e Interfaces TypeScript Implementados**:
+    - `PricingProduct`: Produto completo com informações de precificação
+    - `ProductCosts`: Custos atuais e histórico de alterações
+    - `SalesChannel`: Configuração individual de canais de venda
+    - `PricingCalculation`: Resultados de cálculos por canal
+    - `ChannelType`: Enum com 11 tipos de canais (Site Próprio, Amazon FBM/FBA/DBA, ML ME1/Flex/Envios/FULL, Shopee)
+  - **Utilitários de Cálculo Criados** (`pricingCalculations.ts`):
+    - Cálculo de peso cubado e peso faturável
+    - Cálculo de custos totais com impostos
+    - Cálculo de comissões e taxas por canal
+    - Cálculo de margem, markup e ROI
+    - Sugestão de preço baseado em margem desejada
+    - Cálculo de preço de equilíbrio (break-even)
+    - Comparação com preços de concorrência
+  - **Componentes de Interface Criados**:
+    - `PricingChannelCard`: Card para configuração e visualização de cada canal
+    - `PricingSummaryCard`: Resumo estatístico de precificação
+    - Indicadores visuais de saúde financeira (excelente/bom/regular/ruim/prejuízo)
+  - **Estrutura Compatível com Sistema Existente**:
+    - Integração com tabela products existente (costItem, packCost, taxPercent)
+    - Uso de JSONB para armazenar configurações de canais
+    - TypeScript strict mode com validações apropriadas
+    - Comentários explicativos em todas as interfaces
+
+- **July 04, 2025 (anterior)**: ✅ SISTEMA COMPLETO DE PRECIFICAÇÃO DE PRODUTOS IMPLEMENTADO
   - **Nova Funcionalidade de Precificação Avançada**:
     - Componente ProductPricing criado em `/minha-area/produtos/{id}/pricing`
     - Interface com 4 abas especializadas: Custos, Precificação, Análise e Estratégias
