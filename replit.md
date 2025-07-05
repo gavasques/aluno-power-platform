@@ -111,6 +111,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 06:49 PM**: 🔧 FORMATAÇÃO BRASILEIRA DE NÚMEROS EM ANDAMENTO
+  - **Problema Identificado**: Formatação com vírgula (brasileiro) sendo convertida para ponto ao salvar
+  - **Ajuste de Schema**: Campos de custo agora aceitam strings para permitir formatação brasileira
+  - **Conversão Implementada**: 
+    - Entrada: Aceita formato brasileiro (494,12)
+    - Salvamento: Converte para formato US (494.12) antes de enviar ao servidor
+    - Exibição: Mantém formato brasileiro na interface
+  - **Logs de Debug**: Adicionados para rastrear valores antes e depois da conversão
+
 - **January 05, 2025 - 05:15 PM**: ✅ BREAKDOWN DE CUSTOS INTERATIVO E MARGEM ADICIONADA
   - **Breakdown de Custos Implementado**: Clique em "Custo Total" para expandir detalhes
     - Mostra: Custo do Produto, Embalagem (se houver), Impostos sobre Venda, Custos do Canal

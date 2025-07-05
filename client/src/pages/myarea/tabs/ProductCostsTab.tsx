@@ -50,9 +50,20 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
     setIsSaving(true);
     try {
       const token = localStorage.getItem("auth_token");
+      const costs = form.getValues("costs");
+      
+      console.log('🔍 [SAVE COSTS] Form values:', costs);
+      
+      // Convert Brazilian format (comma) to US format (dot) before sending
       const costsData = {
-        costs: form.getValues("costs")
+        costs: {
+          currentCost: costs.currentCost ? String(costs.currentCost).replace(',', '.') : "0",
+          taxPercent: costs.taxPercent ? String(costs.taxPercent).replace(',', '.') : "0",
+          observations: costs.observations || ""
+        }
       };
+      
+      console.log('🔍 [SAVE COSTS] Data to send:', costsData);
 
       const response = await fetch(`/api/products/${productId}`, {
         method: "PUT",

@@ -62,8 +62,14 @@ const productFormSchema = z.object({
   
   // Costs
   costs: z.object({
-    currentCost: z.number().min(0, "Custo não pode ser negativo"),
-    taxPercent: z.number().min(0).max(100, "Imposto deve estar entre 0 e 100"),
+    currentCost: z.union([z.number(), z.string()]).transform((val) => {
+      if (typeof val === 'string') return val;
+      return String(val);
+    }),
+    taxPercent: z.union([z.number(), z.string()]).transform((val) => {
+      if (typeof val === 'string') return val;
+      return String(val);
+    }),
     observations: z.string().optional(),
   }),
   
@@ -104,8 +110,8 @@ export default function ProductPricingForm() {
       },
       weight: 0,
       costs: {
-        currentCost: 0,
-        taxPercent: 0,
+        currentCost: "0",
+        taxPercent: "0",
         observations: "",
       },
       channels: [],
@@ -150,14 +156,14 @@ export default function ProductPricingForm() {
         photo: existingProduct?.photo || "",
         ean: existingProduct?.ean || "",
         brand: existingProduct?.brand || "",
-        categoryId: existingProduct?.category || "",
+        categoryId: existingProduct?.category?.toString() || "",
         supplierId: existingProduct?.supplierId?.toString() || "",
         ncm: existingProduct?.ncm || "",
         dimensions: productDimensions,
         weight: existingProduct?.weight || 0,
         costs: {
-          currentCost: existingProduct?.costItem || 0,
-          taxPercent: existingProduct?.taxPercent || 0,
+          currentCost: existingProduct?.costItem ? String(existingProduct.costItem).replace('.', ',') : "0",
+          taxPercent: existingProduct?.taxPercent ? String(existingProduct.taxPercent).replace('.', ',') : "0",
           observations: existingProduct?.observations || "",
         },
         channels: existingProduct?.channels || [],
