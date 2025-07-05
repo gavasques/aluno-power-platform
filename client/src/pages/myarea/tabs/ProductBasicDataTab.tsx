@@ -63,6 +63,13 @@ export default function ProductBasicDataTab({
     queryKey: ["/api/brands"],
   });
 
+  // Debug form values
+  const currentFormValues = form.watch();
+  console.log("🔍 [PRODUCT_BASIC_TAB] Current form values:", currentFormValues);
+  console.log("🔍 [PRODUCT_BASIC_TAB] BrandId value:", currentFormValues.brandId);
+  console.log("🔍 [PRODUCT_BASIC_TAB] CategoryId value:", currentFormValues.categoryId);
+  console.log("🔍 [PRODUCT_BASIC_TAB] Available brands:", brands);
+
   // Create brand mutation
   const createBrandMutation = useMutation({
     mutationFn: async (name: string) => {
