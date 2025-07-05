@@ -140,7 +140,7 @@ export default function MyProductsList() {
 
   // Filter products based on search
   const filteredProducts = useMemo(() => {
-    return products.filter(product =>
+    return products.filter((product: any) =>
       product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -276,7 +276,7 @@ export default function MyProductsList() {
                   </TableCell>
                 </TableRow>
               ) : (
-                currentProducts.map((product) => {
+                currentProducts.map((product: any) => {
                   const activeChannels = getActiveChannels(product);
                   const isExpanded = expandedRows.has(product.id);
                   
