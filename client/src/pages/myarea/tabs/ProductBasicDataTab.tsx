@@ -58,7 +58,7 @@ export default function ProductBasicDataTab({
     try {
       setIsSaving(true);
       const values = form.getValues();
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("auth_token");
       
       const formData = new FormData();
       

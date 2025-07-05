@@ -38,6 +38,7 @@ import { formatBRL, calculateChannelPricing } from "@/utils/pricingCalculations"
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { SalesChannel, PricingCalculation } from "@/types/pricing";
+import BasicInfoEditor from "@/components/product/BasicInfoEditor";
 
 const ITEMS_PER_PAGE = 50;
 
@@ -324,6 +325,18 @@ export default function MyProductsList() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-end gap-2">
+                            <BasicInfoEditor 
+                              productId={product.id.toString()}
+                              trigger={
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <ShoppingBag className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
                             <Button
                               variant="ghost"
                               size="sm"
