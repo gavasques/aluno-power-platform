@@ -116,32 +116,32 @@ export default function ProductPricingForm() {
   const { data: existingProduct, isLoading: loadingProduct } = useQuery({
     queryKey: [`/api/products/${id}`],
     enabled: isEditing,
-  });
+  }) as { data: any, isLoading: boolean };
 
   // Update form when product is loaded
   useEffect(() => {
     if (existingProduct && isEditing) {
       // Map existing product data to form structure
       form.reset({
-        name: existingProduct.name || "",
-        photo: existingProduct.photo || "",
-        ean: existingProduct.ean || "",
-        brand: existingProduct.brand || "",
-        categoryId: existingProduct.categoryId?.toString() || "",
-        supplierId: existingProduct.supplierId?.toString() || "",
-        ncm: existingProduct.ncm || "",
-        dimensions: existingProduct.dimensions || {
+        name: existingProduct?.name || "",
+        photo: existingProduct?.photo || "",
+        ean: existingProduct?.ean || "",
+        brand: existingProduct?.brand || "",
+        categoryId: existingProduct?.categoryId?.toString() || "",
+        supplierId: existingProduct?.supplierId?.toString() || "",
+        ncm: existingProduct?.ncm || "",
+        dimensions: existingProduct?.dimensions || {
           length: 0,
           width: 0,
           height: 0,
         },
-        weight: existingProduct.weight || 0,
+        weight: existingProduct?.weight || 0,
         costs: {
-          currentCost: existingProduct.costItem || 0,
-          taxPercent: existingProduct.taxPercent || 0,
-          observations: existingProduct.observations || "",
+          currentCost: existingProduct?.costItem || 0,
+          taxPercent: existingProduct?.taxPercent || 0,
+          observations: existingProduct?.observations || "",
         },
-        channels: existingProduct.channels || [],
+        channels: existingProduct?.channels || [],
       });
     }
   }, [existingProduct, isEditing, form]);

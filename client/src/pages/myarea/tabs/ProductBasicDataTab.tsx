@@ -159,7 +159,7 @@ export default function ProductBasicDataTab({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category: any) => (
+                      {categories?.map((category: any) => (
                         <SelectItem key={category.id} value={category.id.toString()}>
                           {category.name}
                         </SelectItem>
@@ -187,7 +187,7 @@ export default function ProductBasicDataTab({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {suppliers.map((supplier: any) => (
+                      {suppliers?.map((supplier: any) => (
                         <SelectItem key={supplier.id} value={supplier.id.toString()}>
                           {supplier.tradeName || supplier.corporateName}
                         </SelectItem>
