@@ -30,8 +30,29 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+    // Password strength validation (matching backend requirements)
+    if (formData.password.length < 12) {
+      setError('A senha deve ter pelo menos 12 caracteres');
+      return;
+    }
+
+    if (!/[A-Z]/.test(formData.password)) {
+      setError('A senha deve conter pelo menos uma letra maiúscula');
+      return;
+    }
+
+    if (!/[a-z]/.test(formData.password)) {
+      setError('A senha deve conter pelo menos uma letra minúscula');
+      return;
+    }
+
+    if (!/[0-9]/.test(formData.password)) {
+      setError('A senha deve conter pelo menos um número');
+      return;
+    }
+
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(formData.password)) {
+      setError('A senha deve conter pelo menos um caractere especial');
       return;
     }
 
@@ -113,6 +134,26 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             disabled={isLoading}
             required
           />
+        </div>
+        <div className="text-xs text-muted-foreground space-y-1">
+          <p>A senha deve conter:</p>
+          <ul className="list-disc list-inside space-y-0.5 ml-2">
+            <li className={formData.password.length >= 12 ? 'text-green-600' : 'text-gray-500'}>
+              Pelo menos 12 caracteres
+            </li>
+            <li className={/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}>
+              Uma letra maiúscula
+            </li>
+            <li className={/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}>
+              Uma letra minúscula
+            </li>
+            <li className={/[0-9]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}>
+              Um número
+            </li>
+            <li className={/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}>
+              Um caractere especial (!@#$%^&*...)
+            </li>
+          </ul>
         </div>
       </div>
 
