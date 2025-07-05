@@ -183,7 +183,7 @@ export default function ProductPricingForm() {
       }
       
       const url = isEditing ? `/api/products/${id}` : "/api/products";
-      const method = isEditing ? "PATCH" : "POST";
+      const method = isEditing ? "PUT" : "POST";
       
       const response = await fetch(url, {
         method,

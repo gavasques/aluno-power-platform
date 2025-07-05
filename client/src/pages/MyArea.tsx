@@ -1,16 +1,34 @@
 
 import { useParams } from "wouter";
-import MySuppliers from "./myarea/MySuppliers";
-import MyProducts from "./myarea/MyProducts";
-import MyMaterials from "./myarea/MyMaterials";
-import ProductFormNew from "../components/product/ProductFormNew";
-import ProductEditForm from "../components/product/ProductEditForm";
-import ProductDetail from "./myarea/ProductDetail";
-import ProductPricing from "./myarea/ProductPricing";
-import ProductPricingForm from "./myarea/ProductPricingForm";
-import SupplierDetailRefactored from "./myarea/SupplierDetailRefactored";
-import MaterialDetail from "./myarea/MaterialDetail";
-import MaterialForm from "./myarea/MaterialForm";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+// Lazy load components for better performance
+const MySuppliers = lazy(() => import("./myarea/MySuppliers"));
+const MyProductsList = lazy(() => import("./myarea/MyProductsList"));
+const MyMaterials = lazy(() => import("./myarea/MyMaterials"));
+const ProductFormNew = lazy(() => import("../components/product/ProductFormNew"));
+const ProductEditForm = lazy(() => import("../components/product/ProductEditForm"));
+const ProductDetail = lazy(() => import("./myarea/ProductDetail"));
+const ProductPricing = lazy(() => import("./myarea/ProductPricing"));
+const ProductPricingForm = lazy(() => import("./myarea/ProductPricingForm"));
+const SupplierDetailRefactored = lazy(() => import("./myarea/SupplierDetailRefactored"));
+const MaterialDetail = lazy(() => import("./myarea/MaterialDetail"));
+const MaterialForm = lazy(() => import("./myarea/MaterialForm"));
+
+// Loading component
+const LoadingSpinner = () => (
+  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-lg text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const MyArea = () => {
   const { section, id } = useParams();
@@ -21,37 +39,81 @@ const MyArea = () => {
     case "fornecedores":
     case "suppliers":
       if (id) {
-        return <SupplierDetailRefactored />;
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <SupplierDetailRefactored />
+          </Suspense>
+        );
       }
-      return <MySuppliers />;
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
+          <MySuppliers />
+        </Suspense>
+      );
     case "produtos":
     case "products":
       if (id === "novo" || id === "new") {
-        return <ProductPricingForm />;
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProductPricingForm />
+          </Suspense>
+        );
       }
       if (id && subId === "editar") {
-        return <ProductPricingForm />;
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProductPricingForm />
+          </Suspense>
+        );
       }
       if (id && subId === "pricing") {
-        return <ProductPricing />;
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProductPricing />
+          </Suspense>
+        );
       }
       if (id) {
-        return <ProductDetail />;
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProductDetail />
+          </Suspense>
+        );
       }
       // Se não tem ID, mostra a lista de produtos
-      return <MyProducts />;
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
+          <MyProductsList />
+        </Suspense>
+      );
     case "materiais":
     case "materials":
       if (id === "novo" || id === "new") {
-        return <MaterialForm />;
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <MaterialForm />
+          </Suspense>
+        );
       }
       if (fullPath.includes("/edit")) {
-        return <MaterialForm />;
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <MaterialForm />
+          </Suspense>
+        );
       }
       if (id) {
-        return <MaterialDetail />;
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <MaterialDetail />
+          </Suspense>
+        );
       }
-      return <MyMaterials />;
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
+          <MyMaterials />
+        </Suspense>
+      );
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Minha Área";
       return (
