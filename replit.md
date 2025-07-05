@@ -111,6 +111,43 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 05, 2025**: ✅ CORREÇÃO CRÍTICA DE SCHEMA E BANCO DE DADOS FINALIZADA
+  - **Problema Resolvido**: Incompatibilidade entre schema TypeScript e estrutura real do banco de dados
+    - Erro: "column 'free_code' does not exist" bloqueava API de produtos
+    - Causa: Schema esperava colunas que não existiam no banco
+  - **Colunas Adicionadas ao Banco**:
+    - `free_code` TEXT - Código Livre do produto
+    - `supplier_code` TEXT - Código no Fornecedor
+    - `bullet_points` TEXT - Pontos de destaque do produto  
+    - `description` TEXT - Descrição do produto
+    - `brand` TEXT - Campo legado de marca (texto livre)
+  - **Schema TypeScript Sincronizado**:
+    - Adicionado campo `brand` que faltava no TypeScript
+    - Mantida compatibilidade com brandId (referência a tabela brands)
+    - Todos os campos agora correspondem exatamente ao banco
+  - **API de Produtos Restaurada**:
+    - Endpoint `/api/products` funcionando corretamente
+    - Listagem e CRUD de produtos operacionais
+    - Integração com sistema de marcas preservada
+
+- **July 05, 2025 (anterior)**: ✅ SISTEMA DE MARCAS (BRANDS) IMPLEMENTADO PARA PRODUTOS
+  - **Tabela brands criada no banco de dados**:
+    - Estrutura: id, name, userId, isGlobal (marca genérica ou específica do usuário)
+    - Marca "Genérico" criada automaticamente para todos os usuários
+    - Relação com produtos através de brandId na tabela products
+  - **API endpoints criados**:
+    - GET /api/brands - lista marcas do usuário e globais
+    - POST /api/brands - criar nova marca do usuário
+    - DELETE /api/brands/:id - deletar marca (apenas não-globais)
+  - **Sistema de segurança implementado**:
+    - Endpoints protegidos com requireAuth middleware
+    - Usuários só podem ver/editar suas próprias marcas
+    - Marcas globais (como "Genérico") não podem ser deletadas
+  - **Integração com sistema de produtos**:
+    - Campo brandId adicionado aos produtos
+    - Seleção de marca obrigatória no cadastro de produtos
+    - Dropdown com marcas disponíveis no formulário
+
 - **July 04, 2025**: ✅ ESTRUTURA DE DADOS TYPESCRIPT PARA PRECIFICAÇÃO CRIADA
   - **Tipos e Interfaces TypeScript Implementados**:
     - `PricingProduct`: Produto completo com informações de precificação

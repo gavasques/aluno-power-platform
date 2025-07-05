@@ -426,17 +426,30 @@ export const prompts = pgTable("prompts", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Brands
+export const brands = pgTable("brands", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  userId: integer("user_id").references(() => users.id), // null for global brands
+  isGlobal: boolean("is_global").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Products
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   photo: text("photo"),
-  sku: text("sku"),
+  sku: text("sku").notNull(), // Made required
+  freeCode: text("free_code"), // Código Livre
+  supplierCode: text("supplier_code"), // Código no Fornecedor
   internalCode: text("internal_code"),
   ean: text("ean"),
   dimensions: jsonb("dimensions"), // {length, width, height}
   weight: decimal("weight", { precision: 10, scale: 3 }),
-  brand: text("brand"),
+  brand: text("brand"), // Legacy field for text brand name
+  brandId: integer("brand_id").references(() => brands.id), // Changed from text to reference
   category: text("category"),
   supplierId: integer("supplier_id").references(() => suppliers.id),
   ncm: text("ncm"),
@@ -444,6 +457,8 @@ export const products = pgTable("products", {
   packCost: decimal("pack_cost", { precision: 10, scale: 2 }),
   taxPercent: decimal("tax_percent", { precision: 5, scale: 2 }),
   observations: text("observations"),
+  bulletPoints: text("bullet_points"), // Added
+  description: text("description"), // Added
   descriptions: jsonb("descriptions"), // {description, htmlDescription, bulletPoints, technicalSpecs}
   channels: jsonb("channels"), // Channel configuration object
   active: boolean("active").notNull().default(true),
@@ -921,10 +936,22 @@ export const promptsRelations = relations(prompts, ({ one }) => ({
   }),
 }));
 
+export const brandsRelations = relations(brands, ({ one, many }) => ({
+  user: one(users, {
+    fields: [brands.userId],
+    references: [users.id],
+  }),
+  products: many(products),
+}));
+
 export const productsRelations = relations(products, ({ one }) => ({
   supplier: one(suppliers, {
     fields: [products.supplierId],
     references: [suppliers.id],
+  }),
+  brand: one(brands, {
+    fields: [products.brandId],
+    references: [brands.id],
   }),
 }));
 
@@ -1158,6 +1185,15 @@ export const insertInfographicConceptSchema = createInsertSchema(infographicConc
 });
 export type InsertInfographicConcept = z.infer<typeof insertInfographicConceptSchema>;
 export type InfographicConcept = typeof infographicConcepts.$inferSelect;
+
+// Insert schemas for brands
+export const insertBrandSchema = createInsertSchema(brands).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertBrand = z.infer<typeof insertBrandSchema>;
+export type Brand = typeof brands.$inferSelect;
 
 // Insert schemas for supplier conversations
 export const insertSupplierConversationSchema = createInsertSchema(supplierConversations).omit({

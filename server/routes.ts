@@ -79,7 +79,7 @@ import { amazonListingService as amazonService } from "./services/amazonListingS
 import { requireAuth } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs } from '@shared/schema';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs } from '@shared/schema';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -282,6 +282,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       console.error('Error deleting supplier brand:', error);
+      res.status(500).json({ error: 'Failed to delete brand' });
+    }
+  });
+
+  // Product Brands endpoints
+  app.get('/api/brands', requireAuth, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      
+      // Get all brands that are either global or belong to the user
+      const userBrands = await db.select()
+        .from(brands)
+        .where(
+          or(
+            eq(brands.isGlobal, true),
+            eq(brands.userId, userId)
+          )
+        )
+        .orderBy(asc(brands.name));
+
+      res.json(userBrands);
+    } catch (error) {
+      console.error('Error fetching brands:', error);
+      res.status(500).json({ error: 'Failed to fetch brands' });
+    }
+  });
+
+  app.post('/api/brands', requireAuth, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      const { name } = req.body;
+
+      if (!name || name.trim().length === 0) {
+        return res.status(400).json({ error: 'Nome da marca é obrigatório' });
+      }
+
+      // Check if brand already exists for this user
+      const existingBrand = await db.select()
+        .from(brands)
+        .where(
+          and(
+            eq(brands.name, name.trim()),
+            eq(brands.userId, userId)
+          )
+        )
+        .limit(1);
+
+      if (existingBrand.length > 0) {
+        return res.status(400).json({ error: 'Marca já existe' });
+      }
+
+      const [newBrand] = await db.insert(brands).values({
+        name: name.trim(),
+        userId: userId,
+        isGlobal: false,
+      }).returning();
+
+      res.json(newBrand);
+    } catch (error) {
+      console.error('Error creating brand:', error);
+      res.status(500).json({ error: 'Failed to create brand' });
+    }
+  });
+
+  app.delete('/api/brands/:id', requireAuth, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      const brandId = parseInt(req.params.id);
+
+      // Check if brand belongs to user and is not global
+      const brandResult = await db.select()
+        .from(brands)
+        .where(
+          and(
+            eq(brands.id, brandId),
+            eq(brands.userId, userId),
+            eq(brands.isGlobal, false)
+          )
+        )
+        .limit(1);
+
+      if (brandResult.length === 0) {
+        return res.status(404).json({ error: 'Marca não encontrada ou não pode ser excluída' });
+      }
+
+      await db.delete(brands).where(eq(brands.id, brandId));
+
+      res.json({ message: 'Marca excluída com sucesso' });
+    } catch (error) {
+      console.error('Error deleting brand:', error);
       res.status(500).json({ error: 'Failed to delete brand' });
     }
   });
@@ -652,6 +742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const products = await storage.getProducts();
       res.json(products);
     } catch (error) {
+      console.error('Error fetching products:', error);
       res.status(500).json({ error: 'Failed to fetch products' });
     }
   });
