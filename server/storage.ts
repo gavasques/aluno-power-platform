@@ -48,7 +48,7 @@ import {
   supportTicketFiles,
   supportCategories,
   type User, 
-  type UpsertUser,
+  type InsertUser,
   type Supplier,
   type InsertSupplier,
   type Partner,
@@ -170,10 +170,10 @@ export type InsertSupplierReview = {
 import { eq, ilike, and, or, desc, asc, sql, count } from "drizzle-orm";
 
 export interface IStorage {
-  // Users for Replit Auth
+  // Users
   getUser(id: number): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
 
   // Suppliers
   getSuppliers(userId?: number): Promise<Supplier[]>;
@@ -406,46 +406,29 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // Users for Replit Auth
+  // Users
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    return user || undefined;
   }
 
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    // Check if user exists by email (since we can't use Replit ID with integer primary key)
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.email, userData.email || '')
-    });
-
-    if (existingUser) {
-      // Update existing user
-      const [user] = await db
-        .update(users)
-        .set({
-          ...userData,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, existingUser.id))
-        .returning();
-      return user;
-    } else {
-      // Create new user
-      const [user] = await db
-        .insert(users)
-        .values({
-          ...userData,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
-      return user;
-    }
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        role: insertUser.role || "student",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return user;
   }
 
   // Suppliers

@@ -11,14 +11,11 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^1.2.12",
     "@anthropic-ai/sdk": "^0.37.0",
-    "@genkit-ai/googleai": "^1.14.0",
     "@google/genai": "^1.7.0",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
-    "@n8n_io/ai-assistant-sdk": "^1.15.0",
     "@neondatabase/serverless": "^0.10.4",
     "@radix-ui/react-accordion": "^1.2.4",
     "@radix-ui/react-alert-dialog": "^1.1.7",
