@@ -31,6 +31,10 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
+  // Use secure cookies only in production (HTTPS)
+  const isProduction = process.env.NODE_ENV === "production";
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -38,8 +42,9 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: isProduction, // Only secure in production
       maxAge: sessionTtl,
+      sameSite: isProduction ? "strict" : "lax", // More permissive in development
     },
   });
 }
@@ -132,7 +137,18 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  console.log("🔍 [DEBUG] isAuthenticated middleware:", {
+    isAuthenticated: req.isAuthenticated(),
+    hasUser: !!req.user,
+    userExpiresAt: user?.expires_at,
+    sessionID: req.sessionID
+  });
+
+  if (!req.isAuthenticated() || !user?.expires_at) {
+    console.log("❌ [AUTH] Authorization failed:", {
+      isAuthenticated: req.isAuthenticated(),
+      hasExpiresAt: !!user?.expires_at
+    });
     return res.status(401).json({ message: "Unauthorized" });
   }
 
