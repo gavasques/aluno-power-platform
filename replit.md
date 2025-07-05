@@ -132,6 +132,25 @@ Preferred communication style: Simple, everyday language.
     - Performance otimizada com React Query
     - Testabilidade aumentada com arquitetura modular
 
+- **January 05, 2025 - 07:56 PM**: ✅ INTERFACE OTIMIZADA CONFORME SOLICITAÇÕES DO USUÁRIO
+  - **Correção do SKU**: 
+    - Corrigido campo SKU para usar `product.internalCode` ao invés de `product.sku` vazio
+    - Fallback para `product.sku` se internalCode não existir
+    - SKU agora exibe corretamente valores como "241" conforme dados do produto
+  - **Status Reposicionado**:
+    - Status "Ativo/Inativo" movido para abaixo do nome do produto
+    - Removida coluna Status da tabela para economizar espaço
+    - Badge integrado ao layout do nome do produto
+  - **Canais Ativos Melhorados**:
+    - Formato "NOME VALOR %" lado a lado implementado
+    - Informações organizadas horizontalmente para melhor legibilidade
+    - Cores mantidas para indicar níveis de margem (verde/azul/amarelo/vermelho)
+  - **Ações em Grid 2x2**:
+    - Botões de ação organizados em layout de grade 2x2
+    - Otimização de espaço: 4 botões compactos em formato quadrado
+    - Mantidos tooltips para identificação das ações
+    - Área de ações reduzida sem perder funcionalidade
+
 - **January 05, 2025 - 07:48 PM**: ✅ BREAKDOWN DE CUSTOS INDIVIDUAL COMPLETO IMPLEMENTADO
   - **Análise Detalhada por Canal**: 
     - Função `getDetailedCostBreakdown` criada com breakdown específico para cada tipo de canal

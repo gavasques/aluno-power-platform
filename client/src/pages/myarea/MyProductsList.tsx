@@ -277,7 +277,6 @@ export default function MyProductsList() {
                 <TableHead>SKU</TableHead>
                 <TableHead>Marca</TableHead>
                 <TableHead className="text-right">Custo</TableHead>
-                <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-center">Canais Ativos</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -285,7 +284,7 @@ export default function MyProductsList() {
             <TableBody>
               {currentProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <p className="text-muted-foreground mb-4">
                       {searchTerm ? 'Nenhum produto encontrado' : 'Nenhum produto cadastrado'}
                     </p>
@@ -334,24 +333,28 @@ export default function MyProductsList() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.sku}</TableCell>
+                        <TableCell className="font-medium">
+                          <div>
+                            <div>{product.name}</div>
+                            <div className="mt-1">
+                              <Badge variant={product.active ? "default" : "secondary"} className="text-xs">
+                                {product.active ? "Ativo" : "Inativo"}
+                              </Badge>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{product.internalCode || product.sku || '-'}</TableCell>
                         <TableCell>{getBrandName(product)}</TableCell>
                         <TableCell className="text-right">
                           {product.costItem ? formatBRL(product.costItem) : '-'}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant={product.active ? "default" : "secondary"}>
-                            {product.active ? "Ativo" : "Inativo"}
-                          </Badge>
                         </TableCell>
                         <TableCell className="text-center">
                           {activeChannels.length > 0 ? (
                             <div className="space-y-1">
                               {activeChannels.slice(0, 3).map(({ channel, calculation }, index) => (
                                 <div key={`${product.id}-${channel.id || channel.type}-${index}`} className="text-xs">
-                                  <div className="font-medium">{CHANNEL_NAMES[channel.type] || channel.name}</div>
                                   <div className="flex items-center justify-center gap-2">
+                                    <span className="font-medium">{CHANNEL_NAMES[channel.type] || channel.name}</span>
                                     <span className="text-gray-600">{formatBRL(channel.data?.price || 0)}</span>
                                     <span 
                                       className={cn(
@@ -378,13 +381,14 @@ export default function MyProductsList() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="grid grid-cols-2 gap-1 w-20">
                             <BasicInfoEditor 
                               productId={product.id.toString()}
                               trigger={
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  className="p-2 h-8 w-8"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Editar Informações Básicas"
                                 >
@@ -395,6 +399,7 @@ export default function MyProductsList() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              className="p-2 h-8 w-8"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setChannelsEditorProductId(product.id);
@@ -407,6 +412,7 @@ export default function MyProductsList() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              className="p-2 h-8 w-8"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEdit(product.id);
@@ -418,11 +424,12 @@ export default function MyProductsList() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              className="p-2 h-8 w-8 text-red-600 hover:text-red-700"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(product.id, product.name);
                               }}
-                              className="text-red-600 hover:text-red-700"
+                              title="Excluir Produto"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -434,7 +441,7 @@ export default function MyProductsList() {
                       {/* Expanded calculation details */}
                       {isExpanded && activeChannels.length > 0 && (
                         <TableRow key={`${product.id}-details`}>
-                          <TableCell colSpan={9} className="bg-gray-50 p-4">
+                          <TableCell colSpan={8} className="bg-gray-50 p-4">
                             <div className="space-y-4">
                               <h4 className="font-semibold text-sm mb-2">Detalhes dos Cálculos por Canal</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
