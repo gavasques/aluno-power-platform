@@ -111,6 +111,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 05, 2025 - 02:09 AM**: ✅ FUNCIONALIDADE "SALVAR E CONTINUAR" APRIMORADA E PESO CUBADO CORRIGIDO
+  - **Botão "Salvar e Continuar" Funcional**:
+    - Produto novo: salva e redireciona para modo de edição após 1 segundo
+    - Produto existente: salva e avança automaticamente para próxima aba
+    - Sequência das abas: Dados Básicos → Custos → Canais → Descrições
+    - Toast melhorado com feedback claro da ação
+  - **Peso Cubado Calculado Automaticamente**:
+    - Fórmula: (Comprimento × Largura × Altura) ÷ 6000
+    - Cálculo em tempo real quando dimensões são alteradas
+    - Funciona tanto em produtos novos quanto ao editar existentes
+    - Exibição visual do peso faturável (maior entre real e cubado)
+  - **Correção de Lista de Produtos**: Erro de React "key" prop resolvido
+
 - **January 05, 2025 - 01:45 AM**: ✅ CORREÇÃO DE MAPEAMENTO DE PROPRIEDADES NA LISTA DE PRODUTOS
   - **Problema Resolvido**: Lista de produtos mostrando erro de propriedades inexistentes
     - Corrigido: `marginPercent` → `profitMarginPercent`

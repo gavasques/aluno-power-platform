@@ -238,11 +238,25 @@ export default function ProductPricingForm() {
 
   const handleSaveAndContinue = (data: ProductFormData) => {
     saveMutation.mutate(data, {
-      onSuccess: () => {
+      onSuccess: (savedProduct) => {
         toast({
-          title: "Produto salvo",
-          description: "Continue editando as informações.",
+          title: "Produto salvo com sucesso",
+          description: "Continue editando ou vá para a próxima aba.",
         });
+        
+        // Se for um produto novo, redireciona para edição
+        if (!isEditing && savedProduct?.id) {
+          setTimeout(() => {
+            navigate(`/minha-area/produtos/${savedProduct.id}/editar`);
+          }, 1000);
+        } else {
+          // Se for edição, avança para próxima aba se não estiver na última
+          const tabs = ["basic", "costs", "channels", "descriptions"];
+          const currentIndex = tabs.indexOf(activeTab);
+          if (currentIndex < tabs.length - 1) {
+            setActiveTab(tabs[currentIndex + 1]);
+          }
+        }
       },
     });
   };

@@ -352,7 +352,7 @@ export default function MyProductsList() {
                       
                       {/* Expanded calculation details */}
                       {isExpanded && activeChannels.length > 0 && (
-                        <TableRow>
+                        <TableRow key={`${product.id}-details`}>
                           <TableCell colSpan={9} className="bg-gray-50 p-4">
                             <div className="space-y-4">
                               <h4 className="font-semibold text-sm mb-2">Detalhes dos Cálculos por Canal</h4>
