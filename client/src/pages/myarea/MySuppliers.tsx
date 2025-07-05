@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Link } from 'wouter';
 import { SearchIcon, Building2, Globe, Star, Plus, Eye } from 'lucide-react';
 import { Supplier } from '@shared/schema';
@@ -80,40 +81,59 @@ const MySuppliers = () => {
         </div>
 
         {/* Lista de Fornecedores */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredSuppliers.map((supplier) => (
-            <Card key={supplier.id} className="hover:shadow-md transition-shadow duration-200">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">{supplier.tradeName}</h3>
-                    <p className="text-sm text-gray-600">{supplier.corporateName}</p>
-                  </div>
-                  {supplier.isVerified && (
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                      Verificado
-                    </Badge>
-                  )}
-                </div>
-
-                {supplier.description && (
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {supplier.description}
-                  </p>
-                )}
-
-                <div className="flex gap-2">
-                  <Link href={`/minha-area/fornecedores/${supplier.id}`}>
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Eye className="h-3 w-3 mr-1" />
-                      Ver Detalhes
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card className="bg-white border border-gray-200">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome da Empresa</TableHead>
+                <TableHead>Razão Social</TableHead>
+                <TableHead>Descrição</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredSuppliers.map((supplier) => (
+                <TableRow key={supplier.id} className="hover:bg-gray-50">
+                  <TableCell>
+                    <div className="font-medium text-gray-900">
+                      {supplier.tradeName}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm text-gray-600">
+                      {supplier.corporateName}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm text-gray-600 max-w-xs truncate">
+                      {supplier.description || '-'}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {supplier.isVerified ? (
+                      <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                        Verificado
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">
+                        Não verificado
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Link href={`/minha-area/fornecedores/${supplier.id}`}>
+                      <Button size="sm" variant="outline">
+                        <Eye className="h-3 w-3 mr-1" />
+                        Ver Detalhes
+                      </Button>
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
 
         {/* Mensagem quando não há resultados */}
         {filteredSuppliers.length === 0 && (
