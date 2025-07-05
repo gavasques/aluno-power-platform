@@ -106,11 +106,13 @@ export default function ProductPricingForm() {
   const weight = form.watch("weight");
 
   useEffect(() => {
-    if (dimensions.length && dimensions.width && dimensions.height) {
+    if (dimensions && dimensions.length > 0 && dimensions.width > 0 && dimensions.height > 0) {
       const cubicWeight = calculateCubicWeight(dimensions);
       setCalculatedCubicWeight(cubicWeight);
+    } else {
+      setCalculatedCubicWeight(0);
     }
-  }, [dimensions]);
+  }, [dimensions?.length, dimensions?.width, dimensions?.height]);
 
   // Load existing product if editing
   const { data: existingProduct, isLoading: loadingProduct } = useQuery({
@@ -122,6 +124,12 @@ export default function ProductPricingForm() {
   useEffect(() => {
     if (existingProduct && isEditing) {
       // Map existing product data to form structure
+      const productDimensions = existingProduct?.dimensions || {
+        length: 0,
+        width: 0,
+        height: 0,
+      };
+      
       form.reset({
         name: existingProduct?.name || "",
         photo: existingProduct?.photo || "",
@@ -130,11 +138,7 @@ export default function ProductPricingForm() {
         categoryId: existingProduct?.categoryId?.toString() || "",
         supplierId: existingProduct?.supplierId?.toString() || "",
         ncm: existingProduct?.ncm || "",
-        dimensions: existingProduct?.dimensions || {
-          length: 0,
-          width: 0,
-          height: 0,
-        },
+        dimensions: productDimensions,
         weight: existingProduct?.weight || 0,
         costs: {
           currentCost: existingProduct?.costItem || 0,
@@ -143,6 +147,12 @@ export default function ProductPricingForm() {
         },
         channels: existingProduct?.channels || [],
       });
+      
+      // Calculate cubic weight for loaded product
+      if (productDimensions.length > 0 && productDimensions.width > 0 && productDimensions.height > 0) {
+        const cubicWeight = calculateCubicWeight(productDimensions);
+        setCalculatedCubicWeight(cubicWeight);
+      }
     }
   }, [existingProduct, isEditing, form]);
 
