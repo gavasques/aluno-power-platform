@@ -101,7 +101,7 @@ export default function BasicInfoEditor({ productId, trigger }: BasicInfoEditorP
   });
 
   // Create brand mutation
-  const createBrandMutation = useMutation({
+  const createBrandMutation = useMutation<{ id: number; name: string }, Error, string>({
     mutationFn: async (brandName: string) => {
       return await apiRequest("/api/brands", {
         method: "POST",
