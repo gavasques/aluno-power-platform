@@ -169,6 +169,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard routes for user dashboard system
   app.use('/api/user/dashboard', dashboardRoutes);
   
+  // Import Stripe routes
+  const { default: stripeRoutes } = await import('./routes/stripe/index.js');
+  app.use('/api/stripe', stripeRoutes);
+  
   // PHASE 2: ✅ SUPPLIER ROUTES MIGRATED TO MODULAR ARCHITECTURE
   // All supplier routes now handled by modular system in server/routes/supplierRoutes.ts
   // Following SOLID/DRY/KISS principles - eliminated code duplication

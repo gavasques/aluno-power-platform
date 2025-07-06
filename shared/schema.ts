@@ -18,6 +18,7 @@ export const users = pgTable("users", {
   magicLinkToken: text("magic_link_token"),
   magicLinkExpiresAt: timestamp("magic_link_expires_at"),
   emailVerified: boolean("email_verified").notNull().default(false),
+  stripeCustomerId: text("stripe_customer_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -1385,6 +1386,108 @@ export const insertUserActivityLogSchema = createInsertSchema(userActivityLogs).
 });
 export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
 export type UserActivityLog = typeof userActivityLogs.$inferSelect;
+
+// Stripe Products and Prices
+export const stripeProducts = pgTable("stripe_products", {
+  id: text("id").primaryKey(), // Stripe product ID
+  name: text("name").notNull(),
+  description: text("description"),
+  type: text("type").notNull(), // 'subscription' or 'credits'
+  metadata: jsonb("metadata").default({}),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const stripePrices = pgTable("stripe_prices", {
+  id: text("id").primaryKey(), // Stripe price ID
+  productId: text("product_id").references(() => stripeProducts.id).notNull(),
+  unitAmount: integer("unit_amount").notNull(), // Amount in cents
+  currency: text("currency").notNull().default("brl"),
+  interval: text("interval"), // 'month', 'year', null for one-time
+  intervalCount: integer("interval_count").default(1),
+  credits: integer("credits"), // Number of credits for this price
+  metadata: jsonb("metadata").default({}),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Stripe Payment Intents
+export const stripePaymentIntents = pgTable("stripe_payment_intents", {
+  id: text("id").primaryKey(), // Stripe payment intent ID
+  userId: integer("user_id").references(() => users.id).notNull(),
+  amount: integer("amount").notNull(), // Amount in cents
+  currency: text("currency").notNull().default("brl"),
+  status: text("status").notNull(),
+  clientSecret: text("client_secret"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Stripe Checkout Sessions
+export const stripeCheckoutSessions = pgTable("stripe_checkout_sessions", {
+  id: text("id").primaryKey(), // Stripe session ID
+  userId: integer("user_id").references(() => users.id).notNull(),
+  customerId: text("customer_id").notNull(),
+  mode: text("mode").notNull(), // 'payment', 'subscription'
+  status: text("status").notNull(),
+  amountTotal: integer("amount_total"),
+  currency: text("currency").notNull().default("brl"),
+  successUrl: text("success_url"),
+  cancelUrl: text("cancel_url"),
+  metadata: jsonb("metadata").default({}),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Stripe Webhook Events
+export const stripeWebhookEvents = pgTable("stripe_webhook_events", {
+  id: text("id").primaryKey(), // Stripe event ID
+  type: text("type").notNull(),
+  apiVersion: text("api_version"),
+  data: jsonb("data").notNull(),
+  processed: boolean("processed").notNull().default(false),
+  processingError: text("processing_error"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  processedAt: timestamp("processed_at"),
+}, (table) => ({
+  typeIdx: index("stripe_webhook_events_type_idx").on(table.type),
+  processedIdx: index("stripe_webhook_events_processed_idx").on(table.processed),
+}));
+
+// Insert schemas for Stripe tables
+export const insertStripeProductSchema = createInsertSchema(stripeProducts).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertStripeProduct = z.infer<typeof insertStripeProductSchema>;
+export type StripeProduct = typeof stripeProducts.$inferSelect;
+
+export const insertStripePriceSchema = createInsertSchema(stripePrices).omit({
+  createdAt: true,
+});
+export type InsertStripePrice = z.infer<typeof insertStripePriceSchema>;
+export type StripePrice = typeof stripePrices.$inferSelect;
+
+export const insertStripePaymentIntentSchema = createInsertSchema(stripePaymentIntents).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertStripePaymentIntent = z.infer<typeof insertStripePaymentIntentSchema>;
+export type StripePaymentIntent = typeof stripePaymentIntents.$inferSelect;
+
+export const insertStripeCheckoutSessionSchema = createInsertSchema(stripeCheckoutSessions).omit({
+  createdAt: true,
+});
+export type InsertStripeCheckoutSession = z.infer<typeof insertStripeCheckoutSessionSchema>;
+export type StripeCheckoutSession = typeof stripeCheckoutSessions.$inferSelect;
+
+export const insertStripeWebhookEventSchema = createInsertSchema(stripeWebhookEvents).omit({
+  createdAt: true,
+});
+export type InsertStripeWebhookEvent = z.infer<typeof insertStripeWebhookEventSchema>;
+export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect;
 
 // Insert schemas (moved to end of file to avoid conflicts)
 
