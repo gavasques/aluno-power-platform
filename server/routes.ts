@@ -3787,7 +3787,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       
       // Notificar clientes sobre erro
       broadcastNotification('amazon_processing', {
-        sessionId,
+        sessionId: req.params.sessionId,
         step: 3,
         status: 'error',
         message: 'Erro ao gerar bullet points'
@@ -3834,7 +3834,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       
       // Notificar clientes sobre erro
       broadcastNotification('amazon_processing', {
-        sessionId,
+        sessionId: req.params.sessionId,
         step: 4,
         status: 'error',
         message: 'Erro ao gerar descrição'
