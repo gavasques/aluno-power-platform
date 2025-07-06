@@ -6769,5 +6769,59 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Temporary dashboard test route without auth
+  app.get('/api/test/dashboard', async (req: Request, res: Response) => {
+    const testData = {
+      user: {
+        name: 'Guilherme Vasques',
+        plan: {
+          name: 'Sem Plano',
+          level: 'basic',
+          credits: 0,
+          nextBilling: 'N/A',
+          status: 'cancelled'
+        },
+        creditBalance: 250,
+        totalSpent: 0,
+        savings: 0
+      },
+      usage: {
+        thisMonth: 0,
+        lastMonth: 0,
+        topFeatures: [],
+        projection: 0,
+        dailyUsage: []
+      },
+      activity: [],
+      recommendations: [
+        {
+          id: 'start-subscription',
+          title: 'Comece com um plano',
+          description: 'Escolha um plano para ter acesso a mais créditos e funcionalidades.',
+          type: 'upgrade',
+          priority: 'high',
+          actionText: 'Ver Planos',
+          actionUrl: '/minha-area/assinaturas?tab=plans'
+        },
+        {
+          id: 'try-agents',
+          title: 'Experimente nossos agentes IA',
+          description: 'Use nossos agentes especializados para otimizar suas vendas na Amazon.',
+          type: 'feature',
+          priority: 'medium',
+          actionText: 'Ver Agentes',
+          actionUrl: '/agents'
+        }
+      ],
+      stats: {
+        totalGenerations: 0,
+        averageSessionTime: 0,
+        featuresUsed: 0,
+        successRate: 100
+      }
+    };
+    res.json(testData);
+  });
+
   return httpServer;
 }

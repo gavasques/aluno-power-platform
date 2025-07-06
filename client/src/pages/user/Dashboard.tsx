@@ -74,7 +74,7 @@ const UserDashboard = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
 
   const { data: dashboardData, isLoading, error } = useQuery<DashboardData>({
-    queryKey: ['/api/user/dashboard/summary'],
+    queryKey: ['/api/test/dashboard'],
     enabled: true
   });
 
