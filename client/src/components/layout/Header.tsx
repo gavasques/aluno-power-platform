@@ -51,7 +51,7 @@ const menuItems = [
     title: "Agentes",
     items: [
       { title: "Editor de Imagem Principal", href: "/agents/agent-amazon-product-photography", icon: Bot },
-      { title: "Todos os Agentes", href: "/agents", icon: BrainCircuit },
+      { title: "Todos os Agentes", href: "/agentes", icon: BrainCircuit },
     ],
   },
   {

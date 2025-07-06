@@ -37,7 +37,7 @@ const ResponsiveHeader = memo<{ variant: string }>(({ variant }) => {
     const baseItems = [
       { title: 'Dashboard', href: '/', icon: '📊' },
       { title: 'Hub de Recursos', href: '/hub', icon: '📚' },
-      { title: 'Agentes IA', href: '/agents', icon: '🤖' },
+      { title: 'Agentes IA', href: '/agentes', icon: '🤖' },
       { title: 'Vídeos', href: '/videos', icon: '🎥' },
     ];
 

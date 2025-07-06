@@ -256,14 +256,14 @@ export default function AgentsPage() {
                 
                 <div className="flex space-x-2 pt-4">
                   <Button asChild size="sm" className="flex-1">
-                    <Link href={agent.id === 'html-description-generator' ? '/agents/html-description-generator' : `/agents/${agent.id}`}>
+                    <Link href={agent.id === 'html-description-generator' ? '/agents/html-description-generator' : `/agentes/${agent.id}`}>
                       <Zap className="w-4 h-4 mr-1" />
                       Usar Agente
                     </Link>
                   </Button>
                   
                   <Button asChild variant="outline" size="sm">
-                    <Link href={`/agents/${agent.id}/settings`}>
+                    <Link href={`/agentes/${agent.id}/settings`}>
                       <Settings className="w-4 h-4" />
                     </Link>
                   </Button>

@@ -103,7 +103,7 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <Link href="/agents">
+          <Link href="/agentes">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar aos Agentes
@@ -123,7 +123,7 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/agents">
+        <Link href="/agentes">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar aos Agentes

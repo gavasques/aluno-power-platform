@@ -149,7 +149,7 @@ export default function AmazonProductPhotography() {
       <div className="container mx-auto p-6 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/agents">
+          <Link href="/agentes">
             <Button variant="ghost" className="mb-6 hover:bg-white/80 dark:hover:bg-slate-800/80">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar para Agentes

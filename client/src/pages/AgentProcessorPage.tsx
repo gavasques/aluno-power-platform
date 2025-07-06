@@ -17,7 +17,6 @@ import { apiRequest } from "@/lib/queryClient";
 
 export default function AgentProcessorPage() {
   const { id } = useParams();
-  console.log("❌ WRONG! AgentProcessorPage loading for ID:", id, "URL:", window.location.pathname);
   const { toast } = useToast();
   const [productName, setProductName] = useState("");
   const [productInfo, setProductInfo] = useState("");
@@ -111,7 +110,7 @@ export default function AgentProcessorPage() {
             O agente solicitado não existe ou foi removido
           </p>
           <Button asChild>
-            <Link href="/agents">
+            <Link href="/agentes">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar aos Agentes
             </Link>
@@ -125,7 +124,7 @@ export default function AgentProcessorPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Button asChild variant="ghost" className="mb-4">
-          <Link href="/agents">
+          <Link href="/agentes">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar aos Agentes
           </Link>
