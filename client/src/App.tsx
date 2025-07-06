@@ -273,20 +273,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          {/* GENERIC ROUTE - TEMPORARILY COMMENTED FOR DEBUGGING */}
-                          {/*
-                          <Route path="/agents/:id">
-                            {(params) => (
-                              <ProtectedRoute>
-                                <Layout>
-                                  <Suspense fallback={<PageLoader />}>
-                                    <AgentProcessorPage />
-                                  </Suspense>
-                                </Layout>
-                              </ProtectedRoute>
-                            )}
-                          </Route>
-                          */}
+
 
                           {/* Detail routes with Layout - Protected */}
                           <Route path="/hub/materiais/:id">
@@ -661,6 +648,19 @@ function App() {
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
+                          </Route>
+
+                          {/* GENERIC AGENT ROUTE - ABSOLUTE LAST TO AVOID CONFLICTS */}
+                          <Route path="/agents/:id">
+                            {(params) => (
+                              <ProtectedRoute>
+                                <Layout>
+                                  <Suspense fallback={<PageLoader />}>
+                                    <AgentProcessorPage />
+                                  </Suspense>
+                                </Layout>
+                              </ProtectedRoute>
+                            )}
                           </Route>
 
                             </Switch>
