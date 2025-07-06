@@ -2078,7 +2078,190 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // AI AGENT: AMAZON NEGATIVE REVIEWS RESPONSE
+  // ========================================
 
+  // Global storage for negative reviews sessions
+  if (!global.negativeReviewsSessions) {
+    global.negativeReviewsSessions = new Map();
+  }
+
+  // Process negative reviews response
+  app.post('/api/agents/amazon-negative-reviews/process', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const { sessionId, negativeReview, userInfo, sellerName, sellerPosition, customerName, orderId } = req.body;
+
+      if (!sessionId || !negativeReview || !sellerName || !sellerPosition || !customerName || !orderId) {
+        return res.status(400).json({ error: 'Dados obrigatórios não fornecidos' });
+      }
+
+      // Get agent configuration
+      const agent = await storage.getAgentById('amazon-negative-reviews');
+      if (!agent) {
+        return res.status(404).json({ error: 'Agente não encontrado' });
+      }
+
+      // Get prompts
+      const systemPrompt = await storage.getAgentPrompt('amazon-negative-reviews', 'system');
+      const mainPrompt = await storage.getAgentPrompt('amazon-negative-reviews', 'main');
+
+      if (!systemPrompt || !mainPrompt) {
+        return res.status(404).json({ error: 'Prompts do agente não encontrados' });
+      }
+
+      // Create session
+      const sessionData = {
+        id: sessionId,
+        status: 'processing',
+        input_data: {
+          negativeReview,
+          userInfo: userInfo || '',
+          sellerName,
+          sellerPosition,
+          customerName,
+          orderId
+        },
+        created_at: new Date().toISOString()
+      };
+
+      global.negativeReviewsSessions.set(sessionId, sessionData);
+
+      // Process prompt with user data
+      const processedPrompt = mainPrompt.content
+        .replace('[NEGATIVE_REVIEW]', negativeReview)
+        .replace('[USER_INFO]', userInfo || 'Nenhuma informação adicional fornecida')
+        .replace('[SELLER_NAME]', sellerName)
+        .replace('[SELLER_POSITION]', sellerPosition)
+        .replace('[CUSTOMER_NAME]', customerName)
+        .replace('[ORDER_ID]', orderId);
+
+      console.log('🤖 [NEGATIVE_REVIEWS] Processing with Anthropic Claude:', agent.model);
+
+      // Call Anthropic API
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      const startTime = Date.now();
+
+      const response = await anthropic.messages.create({
+        model: agent.model || 'claude-sonnet-4-20250514',
+        max_tokens: parseInt(agent.maxTokens) || 4000,
+        temperature: parseFloat(agent.temperature) || 0.7,
+        messages: [
+          {
+            role: 'user',
+            content: `${systemPrompt.content}\n\n${processedPrompt}`,
+          },
+        ],
+      });
+
+      const processingTime = Date.now() - startTime;
+      const responseText = response.content[0]?.text || '';
+
+      // Calculate usage and cost
+      const inputTokens = response.usage?.input_tokens || 0;
+      const outputTokens = response.usage?.output_tokens || 0;
+      const totalTokens = inputTokens + outputTokens;
+      const costPer1k = agent.costPer1kTokens || 0.015;
+      const totalCost = (totalTokens / 1000) * costPer1k;
+
+      // Update session with results
+      sessionData.status = 'completed';
+      sessionData.completed_at = new Date().toISOString();
+      sessionData.result_data = {
+        response: responseText,
+        analysis: {
+          sentiment: 'Negativo',
+          urgency: 'Alta',
+          keyIssues: ['Defeito no produto', 'Atraso na entrega', 'Embalagem danificada']
+        }
+      };
+      sessionData.processing_time = processingTime;
+      sessionData.tokens_used = { input: inputTokens, output: outputTokens, total: totalTokens };
+      sessionData.cost = totalCost;
+
+      global.negativeReviewsSessions.set(sessionId, sessionData);
+
+      // Save to AI Generation Logs table
+      try {
+        const fullPrompt = `${systemPrompt.content}\n\n${processedPrompt}`;
+        
+        await db.insert(aiGenerationLogs).values({
+          userId: user.id,
+          provider: 'anthropic',
+          model: agent.model || 'claude-sonnet-4-20250514',
+          prompt: fullPrompt,
+          response: responseText,
+          promptCharacters: fullPrompt.length,
+          responseCharacters: responseText.length,
+          inputTokens,
+          outputTokens,
+          totalTokens,
+          cost: totalCost.toString(),
+          duration: processingTime,
+          feature: 'amazon-negative-reviews'
+        });
+        
+        console.log(`💾 [AI_LOG] Saved generation log - User: ${user.id}, Model: ${agent.model}, Cost: $${totalCost.toFixed(6)}, Tokens: ${totalTokens}`);
+      } catch (logError) {
+        console.error('❌ [AI_LOG] Error saving generation log:', logError);
+      }
+
+      // Log usage for tracking (existing)
+      try {
+        await storage.createAgentUsage({
+          agentId: 'amazon-negative-reviews',
+          userId: user.id,
+          inputTokens,
+          outputTokens,
+          totalTokens,
+          cost: totalCost,
+          processingTime,
+          createdAt: new Date()
+        });
+      } catch (logError) {
+        console.error('❌ [NEGATIVE_REVIEWS] Error logging usage:', logError);
+      }
+
+      res.json({ sessionId, status: 'completed' });
+    } catch (error: any) {
+      console.error('❌ [NEGATIVE_REVIEWS] Error processing:', error);
+      
+      // Update session with error
+      if (global.negativeReviewsSessions && global.negativeReviewsSessions.has(req.body.sessionId)) {
+        const sessionData = global.negativeReviewsSessions.get(req.body.sessionId);
+        sessionData.status = 'error';
+        sessionData.error_message = error.message;
+        global.negativeReviewsSessions.set(req.body.sessionId, sessionData);
+      }
+      
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get negative reviews session status
+  app.get('/api/agents/amazon-negative-reviews/sessions/:sessionId', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { sessionId } = req.params;
+      
+      if (!global.negativeReviewsSessions || !global.negativeReviewsSessions.has(sessionId)) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+      
+      const sessionData = global.negativeReviewsSessions.get(sessionId);
+      res.json(sessionData);
+    } catch (error: any) {
+      console.error('❌ [NEGATIVE_REVIEWS] Error getting session:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 
   // Admin prompts management endpoints
   app.get('/api/agent-prompts/:agentId', async (req, res) => {

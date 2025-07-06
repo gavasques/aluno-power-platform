@@ -56,6 +56,8 @@ const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-l
 const AmazonListingsOptimizerNew = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
 const AmazonCustomerService = lazy(() => import("./pages/agents/amazon-customer-service"));
 const AmazonCustomerServiceResult = lazy(() => import("./pages/agents/amazon-customer-service-result"));
+const AmazonNegativeReviews = lazy(() => import("./pages/agents/amazon-negative-reviews"));
+const AmazonNegativeReviewsResult = lazy(() => import("./pages/agents/amazon-negative-reviews-result"));
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
 const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
@@ -124,6 +126,26 @@ function App() {
                           </Route>
 
                           {/* Agents routes */}
+                          <Route path="/agentes/amazon-negative-reviews/resultado/:sessionId">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviewsResult />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/amazon-negative-reviews">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviews />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
                           <Route path="/agentes/amazon-customer-service/resultado/:sessionId">
                             <ProtectedRoute>
                               <Layout>
