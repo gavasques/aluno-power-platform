@@ -163,6 +163,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PHASE 3 & 4: All modular routes are now registered in registerModularRoutes()
   // No more duplicate registrations needed here
 
+  // Stripe webhook endpoint (must be before JSON parser)
+  app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+    try {
+      const { handleStripeWebhook } = await import('./webhooks/stripe');
+      await handleStripeWebhook(req, res);
+    } catch (error) {
+      console.error('Error loading Stripe webhook handler:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Serve static files from uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
   
