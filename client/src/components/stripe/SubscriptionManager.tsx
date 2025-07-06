@@ -1,256 +1,289 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Crown, 
+  Calendar, 
+  CreditCard, 
+  XCircle, 
+  AlertTriangle,
+  CheckCircle,
+  Loader2,
+  ExternalLink
+} from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { CheckoutButton } from './CheckoutButton';
 import { useToast } from '@/hooks/use-toast';
-import { Subscription, Plan, CustomerPortalResponse } from '@/types/stripe';
 
-export const SubscriptionManager: React.FC = () => {
-  const [showCancelModal, setShowCancelModal] = useState(false);
+export default function SubscriptionManager() {
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: subscriptionData, isLoading: subscriptionLoading } = useQuery({
-    queryKey: ['/api/stripe/subscription'],
-    queryFn: () => apiRequest('/api/stripe/subscription'),
+  const { data: subscriptionStatus, isLoading } = useQuery({
+    queryKey: ['/api/stripe/subscription-status'],
+    enabled: true
   });
-
-  const { data: productsData, isLoading: plansLoading } = useQuery({
-    queryKey: ['/api/stripe/products'],
-    queryFn: () => apiRequest('/api/stripe/products'),
-  });
-
-  const subscription = subscriptionData as Subscription | null;
-  const plans = productsData?.subscriptions as Plan[] | null;
 
   const handleCancelSubscription = async () => {
+    setIsCanceling(true);
+    
     try {
-      await apiRequest('/api/stripe/cancel-subscription', {
+      const response = await fetch('/api/stripe/cancel-subscription', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
       });
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/stripe/subscription'] });
-      setShowCancelModal(false);
+
+      if (!response.ok) {
+        throw new Error('Erro ao cancelar assinatura');
+      }
+
+      const result = await response.json();
       
       toast({
         title: "Assinatura cancelada",
-        description: "Sua assinatura será cancelada ao final do período atual.",
+        description: "Sua assinatura foi cancelada com sucesso. Você ainda terá acesso até o final do período atual.",
+        variant: "default"
       });
-    } catch (error: any) {
+
+      // Refresh subscription status
+      queryClient.invalidateQueries({ queryKey: ['/api/stripe/subscription-status'] });
+      setShowCancelConfirm(false);
+      
+    } catch (error) {
+      console.error('Erro ao cancelar assinatura:', error);
       toast({
-        title: "Erro ao cancelar",
-        description: error.message || "Erro ao cancelar assinatura",
-        variant: "destructive",
+        title: "Erro no cancelamento",
+        description: "Não foi possível cancelar a assinatura. Tente novamente ou entre em contato com o suporte.",
+        variant: "destructive"
       });
+    } finally {
+      setIsCanceling(false);
     }
   };
 
-  const openCustomerPortal = async () => {
+  const handleManageBilling = async () => {
     try {
-      const response = await apiRequest('/api/stripe/create-customer-portal', {
+      const response = await fetch('/api/stripe/customer-portal', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          returnUrl: `${window.location.origin}/minha-area/assinaturas`
+        })
       });
-      window.location.href = (response as CustomerPortalResponse).url;
-    } catch (error: any) {
+
+      if (!response.ok) {
+        throw new Error('Erro ao acessar portal de cobrança');
+      }
+
+      const { url } = await response.json();
+      window.open(url, '_blank');
+      
+    } catch (error) {
+      console.error('Erro ao acessar portal:', error);
       toast({
-        title: "Erro",
-        description: error.message || "Erro ao abrir portal do cliente",
-        variant: "destructive",
+        title: "Erro no portal",
+        description: "Não foi possível acessar o portal de cobrança. Tente novamente.",
+        variant: "destructive"
       });
     }
   };
 
-  if (subscriptionLoading || plansLoading) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-100 text-green-800">Ativo</Badge>;
+      case 'canceled':
+        return <Badge variant="destructive">Cancelado</Badge>;
+      case 'past_due':
+        return <Badge className="bg-yellow-100 text-yellow-800">Pendente</Badge>;
+      case 'incomplete':
+        return <Badge className="bg-orange-100 text-orange-800">Incompleto</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  if (isLoading) {
     return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-        <div className="h-32 bg-gray-200 rounded"></div>
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-center h-48">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </CardContent>
+      </Card>
     );
   }
 
+  if (!subscriptionStatus?.hasSubscription) {
+    return (
+      <Card>
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <Crown className="h-12 w-12 text-gray-400" />
+          </div>
+          <CardTitle>Nenhuma Assinatura Ativa</CardTitle>
+          <CardDescription>
+            Você não possui uma assinatura ativa no momento. Escolha um plano para começar a usar todos os recursos.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const subscription = subscriptionStatus.subscription;
+  const currentPlan = subscriptionStatus.currentPlan;
+
   return (
     <div className="space-y-6">
-      {/* Assinatura Atual */}
-      {subscription ? (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Assinatura Atual</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <p className="text-sm text-gray-600">Plano</p>
-              <p className="font-semibold">{subscription?.planName || 'N/A'}</p>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Crown className="h-6 w-6 text-blue-600" />
+              <div>
+                <CardTitle className="text-xl">{currentPlan?.name || 'Assinatura Ativa'}</CardTitle>
+                <CardDescription>Gerencie sua assinatura e faturamento</CardDescription>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Status</p>
-              <span className={`
-                inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                ${subscription?.status === 'active' 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-red-100 text-red-800'
-                }
-              `}>
-                {subscription?.status === 'active' ? 'Ativo' : 'Inativo'}
-              </span>
+            {getStatusBadge(subscription?.status || 'unknown')}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <CreditCard className="h-5 w-5 text-gray-600" />
+              <div>
+                <p className="font-medium">Valor Mensal</p>
+                <p className="text-xl font-bold text-blue-600">
+                  R$ {currentPlan?.price?.toFixed(2).replace('.', ',') || '0,00'}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Próxima Cobrança</p>
-              <p className="font-semibold">
-                {subscription?.currentPeriodEnd 
-                  ? new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')
-                  : 'N/A'
-                }
-              </p>
+
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <Calendar className="h-5 w-5 text-gray-600" />
+              <div>
+                <p className="font-medium">Próxima Cobrança</p>
+                <p className="text-sm font-semibold">
+                  {subscription?.nextBillingDate ? 
+                    formatDate(subscription.nextBillingDate) : 
+                    'Não disponível'
+                  }
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Valor Mensal</p>
-              <p className="font-semibold">
-                R$ {subscription?.amount ? (subscription.amount / 100).toFixed(2) : '0,00'}
-              </p>
+
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <CheckCircle className="h-5 w-5 text-gray-600" />
+              <div>
+                <p className="font-medium">Créditos Mensais</p>
+                <p className="text-xl font-bold text-green-600">
+                  {subscriptionStatus.credits?.monthly?.toLocaleString() || '0'}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="flex space-x-4">
-            <button
-              onClick={openCustomerPortal}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+          {subscription?.cancelledAt && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Sua assinatura foi cancelada e será encerrada em {formatDate(subscription.endDate)}.
+                Você ainda pode usar todos os recursos até esta data.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex gap-4">
+            <Button 
+              onClick={handleManageBilling}
+              variant="outline"
+              className="flex items-center gap-2"
             >
-              Gerenciar Pagamento
-            </button>
-            
-            {!subscription?.cancelAtPeriodEnd && (
-              <button
-                onClick={() => setShowCancelModal(true)}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
-              >
-                Cancelar Assinatura
-              </button>
+              <ExternalLink className="h-4 w-4" />
+              Portal de Cobrança
+            </Button>
+
+            {subscription?.status === 'active' && !subscription?.cancelledAt && (
+              <>
+                {!showCancelConfirm ? (
+                  <Button 
+                    onClick={() => setShowCancelConfirm(true)}
+                    variant="destructive"
+                    className="flex items-center gap-2"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Cancelar Assinatura
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleCancelSubscription}
+                      disabled={isCanceling}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      {isCanceling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Confirmar Cancelamento
+                    </Button>
+                    <Button 
+                      onClick={() => setShowCancelConfirm(false)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Manter Assinatura
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
-          {subscription?.cancelAtPeriodEnd && (
-            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
-              <p className="text-yellow-800">
-                Sua assinatura será cancelada em{' '}
-                {subscription?.currentPeriodEnd 
-                  ? new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')
-                  : 'N/A'
-                }
-              </p>
-            </div>
+          {showCancelConfirm && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Tem certeza que deseja cancelar?</strong><br />
+                Você perderá acesso aos créditos mensais e recursos premium, mas manterá acesso até o final do período atual.
+              </AlertDescription>
+            </Alert>
           )}
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Nenhuma Assinatura Ativa</h3>
-          <p className="text-gray-600 mb-4">
-            Escolha um plano para começar a usar todos os recursos da plataforma.
-          </p>
-        </div>
-      )}
+        </CardContent>
+      </Card>
 
-      {/* Planos Disponíveis */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-6">Planos Disponíveis</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {plans && plans.map((plan: Plan) => (
-            <div
-              key={plan.id}
-              className={`
-                border rounded-lg p-6 relative
-                ${subscription?.planName === plan.name
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200'
-                }
-              `}
-            >
-              {subscription?.planName === plan.name && (
-                <div className="absolute top-0 right-0 bg-blue-500 text-white px-2 py-1 text-xs rounded-bl">
-                  Atual
-                </div>
-              )}
-
-              <h4 className="text-xl font-semibold mb-2">{plan.name}</h4>
-              <p className="text-3xl font-bold mb-4">
-                R$ {plan.price.toFixed(2)}
-                <span className="text-sm font-normal text-gray-600">/mês</span>
-              </p>
-              
-              <ul className="space-y-2 mb-6">
-                <li className="flex items-center">
-                  <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {plan.credits.toLocaleString()} créditos/mês
+      {currentPlan && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recursos do seu Plano</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {currentPlan.features?.map((feature: string, index: number) => (
+                <li key={index} className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
                 </li>
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              {subscription?.planName !== plan.name && (
-                <CheckoutButton
-                  type="subscription"
-                  priceId={plan.priceId}
-                  planName={plan.name}
-                  className="w-full"
-                  onSuccess={() => {
-                    queryClient.invalidateQueries({ queryKey: ['/api/stripe/subscription'] });
-                    toast({
-                      title: "Sucesso!",
-                      description: `Assinatura do plano ${plan.name} ativada com sucesso.`,
-                    });
-                  }}
-                  onError={(error) => {
-                    toast({
-                      title: "Erro",
-                      description: error,
-                      variant: "destructive",
-                    });
-                  }}
-                >
-                  {subscription ? 'Alterar Plano' : 'Assinar'}
-                </CheckoutButton>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Modal de Cancelamento */}
-      {showCancelModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Cancelar Assinatura</h3>
-            <p className="text-gray-600 mb-6">
-              Tem certeza que deseja cancelar sua assinatura? Você continuará tendo acesso 
-              aos recursos até o final do período atual.
-            </p>
-            
-            <div className="flex space-x-4">
-              <button
-                onClick={() => setShowCancelModal(false)}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-medium flex-1 transition-colors"
-              >
-                Manter Assinatura
-              </button>
-              <button
-                onClick={handleCancelSubscription}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium flex-1 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
-};
+}

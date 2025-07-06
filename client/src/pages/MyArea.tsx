@@ -16,7 +16,7 @@ const ProductPricingForm = lazy(() => import("./myarea/ProductPricingForm"));
 const SupplierDetailRefactored = lazy(() => import("./myarea/SupplierDetailRefactored"));
 const MaterialDetail = lazy(() => import("./myarea/MaterialDetail"));
 const MaterialForm = lazy(() => import("./myarea/MaterialForm"));
-const MySubscriptions = lazy(() => import("./myarea/MySubscriptions"));
+const MySubscriptions = lazy(() => import("../pages/myarea/MySubscriptions"));
 
 // Loading component
 const LoadingSpinner = () => (

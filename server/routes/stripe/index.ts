@@ -8,6 +8,7 @@ const router = Router();
 // Validation schemas
 const createCheckoutSchema = z.object({
   priceId: z.string().min(1, 'Price ID is required'),
+  planId: z.string().optional(),
   quantity: z.number().optional().default(1),
   successUrl: z.string().url().optional(),
   cancelUrl: z.string().url().optional(),
@@ -17,28 +18,56 @@ const createPortalSchema = z.object({
   returnUrl: z.string().url().optional(),
 });
 
-// Create subscription checkout session
-router.post('/create-subscription-checkout', requireAuth, async (req: any, res: any) => {
+// Create real checkout session
+router.post('/create-checkout-session', requireAuth, async (req: any, res: any) => {
   try {
-    const { priceId, successUrl, cancelUrl } = createCheckoutSchema.parse(req.body);
+    const { priceId, planId, successUrl, cancelUrl } = createCheckoutSchema.parse(req.body);
     const userId = req.user.id;
 
-    const defaultSuccessUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/subscription/success?session_id={CHECKOUT_SESSION_ID}`;
-    const defaultCancelUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/subscription/cancel`;
+    // Price ID mapping for plans
+    const PRICE_IDS = {
+      'basic': process.env.STRIPE_PRICE_BASIC_MONTHLY || 'price_basic_monthly',
+      'premium': process.env.STRIPE_PRICE_PREMIUM_MONTHLY || 'price_premium_monthly', 
+      'master': process.env.STRIPE_PRICE_MASTER_MONTHLY || 'price_master_monthly'
+    };
+
+    const finalPriceId = planId && PRICE_IDS[planId as keyof typeof PRICE_IDS] ? 
+      PRICE_IDS[planId as keyof typeof PRICE_IDS] : priceId;
 
     const session = await stripeService.createSubscriptionCheckout(
       userId,
-      priceId,
-      successUrl || defaultSuccessUrl,
-      cancelUrl || defaultCancelUrl
+      finalPriceId,
+      successUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/minha-area/assinaturas?success=true`,
+      cancelUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/minha-area/assinaturas?canceled=true`
     );
 
-    res.json({ sessionId: session.id, url: session.url });
+    res.json({ checkoutUrl: session.url, sessionId: session.id });
   } catch (error) {
-    console.error('Erro ao criar checkout de assinatura:', error);
+    console.error('Erro ao criar checkout:', error);
     res.status(500).json({ 
-      error: 'Erro interno do servidor',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Erro ao processar pagamento',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
+  }
+});
+
+// Cancel subscription
+router.post('/cancel-subscription', requireAuth, async (req: any, res: any) => {
+  try {
+    const userId = req.user.id;
+    
+    const result = await stripeService.cancelSubscription(userId);
+    
+    res.json({ 
+      success: true, 
+      message: 'Assinatura cancelada com sucesso',
+      cancellation: result
+    });
+  } catch (error) {
+    console.error('Erro ao cancelar assinatura:', error);
+    res.status(500).json({ 
+      error: 'Erro ao cancelar assinatura',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
     });
   }
 });
