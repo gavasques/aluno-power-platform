@@ -23,11 +23,10 @@ const BackgroundRemovalControls = ({
 }) => (
   <div className="space-y-4">
     <div className="text-sm text-muted-foreground space-y-2">
-      <p>• Custo: {BACKGROUND_REMOVAL_CONFIG.cost}</p>
       <p>• Tempo estimado: {BACKGROUND_REMOVAL_CONFIG.estimatedTime}</p>
       <p>• Formato de saída: PNG transparente</p>
     </div>
-    
+
     <Button 
       onClick={onProcess}
       disabled={!hasUploadedImage || isProcessing || isUploading}
