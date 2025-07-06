@@ -1920,10 +1920,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/agents/amazon-customer-service/process', requireAuth, async (req: any, res: any) => {
     try {
       const user = req.user;
-      const { sessionId, emailContent } = req.body;
+      const { sessionId, emailContent, userObservations } = req.body;
 
-      if (!sessionId || !emailContent) {
-        return res.status(400).json({ error: 'SessionId e emailContent são obrigatórios' });
+      if (!sessionId || !emailContent || !userObservations) {
+        return res.status(400).json({ error: 'SessionId, emailContent e userObservations são obrigatórios' });
       }
 
       // Get session data
@@ -1942,8 +1942,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const systemPrompt = agent.prompts.find(p => p.promptType === 'system')?.content || '';
       const mainPrompt = agent.prompts.find(p => p.promptType === 'main')?.content || '';
 
-      // Replace [EMAIL_CONTENT] with actual email content
-      const processedPrompt = mainPrompt.replace('[EMAIL_CONTENT]', emailContent);
+      // Replace placeholders with actual content
+      const processedPrompt = mainPrompt
+        .replace('[EMAIL_CONTENT]', emailContent)
+        .replace('[USER_OBSERVATIONS]', userObservations);
 
       console.log('🤖 [CUSTOMER_SERVICE] Processing with Anthropic Claude:', agent.model);
 

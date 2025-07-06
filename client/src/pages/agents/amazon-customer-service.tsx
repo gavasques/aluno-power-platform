@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 const AmazonCustomerService = () => {
   const [emailContent, setEmailContent] = useState("");
+  const [userObservations, setUserObservations] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -25,6 +26,15 @@ const AmazonCustomerService = () => {
       return;
     }
 
+    if (!userObservations.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, insira suas observações sobre o ocorrido",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -33,7 +43,8 @@ const AmazonCustomerService = () => {
         method: 'POST',
         body: JSON.stringify({
           input_data: {
-            emailContent: emailContent.trim()
+            emailContent: emailContent.trim(),
+            userObservations: userObservations.trim()
           }
         }),
       });
@@ -44,7 +55,8 @@ const AmazonCustomerService = () => {
           method: 'POST',
           body: JSON.stringify({
             sessionId: sessionResponse.sessionId,
-            emailContent: emailContent.trim()
+            emailContent: emailContent.trim(),
+            userObservations: userObservations.trim()
           }),
         });
 
@@ -96,7 +108,7 @@ João Silva`;
           <div>
             <h1 className="text-2xl font-bold">Amazon Customer Service Email Response</h1>
             <p className="text-muted-foreground">
-              Agente especializado em responder emails de clientes insatisfeitos
+              Agente especializado em responder emails de clientes insatisfeitos com tom caloroso e soluções proativas
             </p>
           </div>
         </div>
@@ -110,28 +122,39 @@ João Silva`;
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
-                Email do Cliente
+                Dados para Atendimento
               </CardTitle>
               <CardDescription>
-                Cole o email que o cliente enviou expressando sua insatisfação
+                Forneça o email do cliente e suas observações sobre o caso
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="emailContent">Conteúdo do Email *</Label>
+                <Label htmlFor="emailContent">Email do Cliente *</Label>
                 <Textarea
                   id="emailContent"
                   placeholder="Cole aqui o email completo do cliente..."
                   value={emailContent}
                   onChange={(e) => setEmailContent(e.target.value)}
-                  className="min-h-[300px] resize-none"
+                  className="min-h-[200px] resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="userObservations">Informações do Usuário *</Label>
+                <Textarea
+                  id="userObservations"
+                  placeholder="Explique o que ocorreu, contexto adicional, observações sobre o caso..."
+                  value={userObservations}
+                  onChange={(e) => setUserObservations(e.target.value)}
+                  className="min-h-[150px] resize-none"
                 />
               </div>
 
               <div className="flex gap-3">
                 <Button
                   onClick={handleSubmit}
-                  disabled={isProcessing || !emailContent.trim()}
+                  disabled={isProcessing || !emailContent.trim() || !userObservations.trim()}
                   className="flex-1"
                 >
                   {isProcessing ? (
@@ -149,7 +172,10 @@ João Silva`;
                 
                 <Button
                   variant="outline"
-                  onClick={() => setEmailContent(exampleEmail)}
+                  onClick={() => {
+                    setEmailContent(exampleEmail);
+                    setUserObservations("Produto com defeito de fabricação confirmado. Cliente relatou que já tentou soluções básicas. Oferecemos troca imediata e acompanhamento personalizado para reverter possível avaliação negativa.");
+                  }}
                   disabled={isProcessing}
                 >
                   Usar Exemplo
@@ -222,8 +248,8 @@ João Silva`;
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Requisito:</strong> Cole o email completo do cliente incluindo assunto, 
-              conteúdo e qualquer informação relevante para uma resposta personalizada.
+              <strong>Requisitos:</strong> Forneça o email completo do cliente e suas observações 
+              sobre o caso para uma resposta personalizada e eficaz.
             </AlertDescription>
           </Alert>
         </div>

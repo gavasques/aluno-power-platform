@@ -24,6 +24,7 @@ interface SessionData {
   status: 'processing' | 'completed' | 'failed';
   input_data: {
     emailContent: string;
+    userObservations: string;
   };
   result_data?: {
     response: string;
@@ -283,6 +284,23 @@ const AmazonCustomerServiceResult = () => {
                 <div className="bg-muted/50 p-4 rounded-lg border-l-4 border-red-500">
                   <pre className="whitespace-pre-wrap font-sans text-sm text-muted-foreground">
                     {sessionData.input_data.emailContent}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* User Observations */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Informações do Usuário</CardTitle>
+                <CardDescription>
+                  Observações e contexto adicional fornecido para o atendimento
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                  <pre className="whitespace-pre-wrap font-sans text-sm text-muted-foreground">
+                    {sessionData.input_data.userObservations}
                   </pre>
                 </div>
               </CardContent>
