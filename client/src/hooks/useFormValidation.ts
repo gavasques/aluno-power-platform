@@ -93,10 +93,10 @@ export function useFormValidation(initialData: any = {}, rules: ValidationRules 
 
   // Auto-validate when initialData changes
   useEffect(() => {
-    if (initialData) {
+    if (initialData && Object.keys(rules).length > 0) {
       validate(initialData);
     }
-  }, [initialData]);
+  }, [initialData, rules]);
 
   return {
     errors,

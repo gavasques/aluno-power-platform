@@ -60,12 +60,8 @@ export default function AmazonListingsOptimizer() {
     loadDepartments();
   }, []);
 
-  // Update session when form data changes
-  useEffect(() => {
-    if (session && Object.values(formData).some(value => value.trim())) {
-      updateSessionData(formData);
-    }
-  }, [formData, session, updateSessionData]);
+  // Remove automatic session updating to prevent infinite loops
+  // Session will only be updated on explicit form submission
 
   // Generate available tags from form data
   useEffect(() => {

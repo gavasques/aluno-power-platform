@@ -75,7 +75,7 @@ const MaterialViewer = ({ material }: { material: MaterialWithType }) => {
             <video
               controls
               className="w-full h-full rounded-lg"
-              src={material.fileUrl || material.externalUrl}
+              src={material.fileUrl || material.externalUrl || undefined}
             >
               Seu navegador não suporta o elemento de vídeo.
             </video>
@@ -105,7 +105,7 @@ const MaterialViewer = ({ material }: { material: MaterialWithType }) => {
         return (
           <div className="w-full">
             <img
-              src={material.fileUrl || material.externalUrl}
+              src={material.fileUrl || material.externalUrl || undefined}
               alt={material.title}
               className="w-full h-auto rounded-lg border border-border"
             />
@@ -121,7 +121,7 @@ const MaterialViewer = ({ material }: { material: MaterialWithType }) => {
                 Visualização não disponível para este tipo de arquivo
               </p>
               <Button asChild className="mt-4">
-                <a href={material.fileUrl || material.externalUrl} download>
+                <a href={material.fileUrl || material.externalUrl || undefined} download>
                   <Download className="h-4 w-4 mr-2" />
                   Baixar arquivo
                 </a>

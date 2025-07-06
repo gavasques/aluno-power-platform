@@ -146,7 +146,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <AmazonListingsOptimizer />
+                                  <AmazonListingsOptimizerNew />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
