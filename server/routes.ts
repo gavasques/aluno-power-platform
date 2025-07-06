@@ -3753,6 +3753,100 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Processar Etapa 3: Gerar Bullet Points
+  app.post('/api/amazon-sessions/:sessionId/process-step3', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      // Notificar clientes sobre início do processamento
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 3,
+        status: 'processing',
+        message: 'Gerando bullet points otimizados...'
+      });
+
+      const result = await amazonService.processStep3_BulletPoints(sessionId);
+      
+      // Notificar clientes sobre conclusão
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 3,
+        status: 'completed',
+        message: 'Bullet points gerados com sucesso'
+      });
+
+      res.json({ 
+        success: true, 
+        step: 3, 
+        status: 'completed', 
+        result: result 
+      });
+    } catch (error: any) {
+      console.error('Erro ao processar Etapa 3:', error);
+      
+      // Notificar clientes sobre erro
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 3,
+        status: 'error',
+        message: 'Erro ao gerar bullet points'
+      });
+      
+      res.status(500).json({ 
+        success: false, 
+        error: error.message || 'Erro interno do servidor' 
+      });
+    }
+  });
+
+  // Processar Etapa 4: Gerar Descrição
+  app.post('/api/amazon-sessions/:sessionId/process-step4', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      // Notificar clientes sobre início do processamento
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 4,
+        status: 'processing',
+        message: 'Gerando descrição completa...'
+      });
+
+      const result = await amazonService.processStep4_Description(sessionId);
+      
+      // Notificar clientes sobre conclusão
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 4,
+        status: 'completed',
+        message: 'Descrição gerada com sucesso'
+      });
+
+      res.json({ 
+        success: true, 
+        step: 4, 
+        status: 'completed', 
+        result: result 
+      });
+    } catch (error: any) {
+      console.error('Erro ao processar Etapa 4:', error);
+      
+      // Notificar clientes sobre erro
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 4,
+        status: 'error',
+        message: 'Erro ao gerar descrição'
+      });
+      
+      res.status(500).json({ 
+        success: false, 
+        error: error.message || 'Erro interno do servidor' 
+      });
+    }
+  });
+
   // Abortar processamento
   app.post('/api/amazon-sessions/:sessionId/abort', async (req, res) => {
     try {

@@ -74,6 +74,12 @@ ${results.reviewsInsight || 'Não disponível'}
 TÍTULOS OTIMIZADOS:
 ${results.titulos || 'Não disponível'}
 
+BULLET POINTS OTIMIZADOS:
+${results.bulletPoints || 'Não disponível'}
+
+DESCRIÇÃO COMPLETA:
+${results.descricao || 'Não disponível'}
+
 Data de geração: ${new Date().toLocaleString('pt-BR')}
     `.trim();
 
@@ -215,6 +221,58 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
                   value={results.titulos}
                   readOnly
                   className="min-h-[200px] font-mono text-sm"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 3 Results - Bullet Points */}
+          {results.bulletPoints && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Bullet Points Otimizados</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(results.bulletPoints)}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  value={results.bulletPoints}
+                  readOnly
+                  className="min-h-[200px] font-mono text-sm"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 4 Results - Description */}
+          {results.descricao && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Descrição Completa</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(results.descricao)}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  value={results.descricao}
+                  readOnly
+                  className="min-h-[300px] font-mono text-sm"
                 />
               </CardContent>
             </Card>

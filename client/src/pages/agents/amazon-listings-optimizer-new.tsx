@@ -132,8 +132,28 @@ export default function AmazonListingsOptimizerNew() {
       if (!step2Response.ok) {
         throw new Error('Erro na geração de títulos');
       }
+
+      // 5. Processar Etapa 3 (Bullet Points)
+      const step3Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step3`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
       
-      // 5. Navegar para resultados
+      if (!step3Response.ok) {
+        throw new Error('Erro na geração de bullet points');
+      }
+
+      // 6. Processar Etapa 4 (Descrição)
+      const step4Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step4`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!step4Response.ok) {
+        throw new Error('Erro na geração de descrição');
+      }
+      
+      // 7. Navegar para resultados
       navigate(`/agents/amazon-listings-optimizer/result?session=${sessionId}`);
       
     } catch (error) {
