@@ -22,24 +22,34 @@ export class AmazonListingService {
 
   // Atualizar dados da sessão
   async updateSessionData(sessionId: string, data: Partial<InsertAmazonListingSession>): Promise<AmazonListingSession> {
-    console.log('📝 updateSessionData called:', { sessionId, dataKeys: Object.keys(data) });
-    
-    const [session] = await db
-      .update(amazonListingSessions)
-      .set({ 
-        ...data, 
-        dataHoraUpdated: new Date() 
-      })
-      .where(eq(amazonListingSessions.id, sessionId))
-      .returning();
-    
-    console.log('💾 updateSessionData result:', { 
+    console.log('📝 updateSessionData called:', { 
       sessionId, 
-      bulletPointsUpdated: !!session?.bulletPoints,
-      bulletPointsLength: session?.bulletPoints?.length || 0 
+      dataKeys: Object.keys(data),
+      bulletPointsData: data.bulletPoints ? data.bulletPoints.substring(0, 50) + '...' : 'não enviado'
     });
     
-    return session;
+    try {
+      const [session] = await db
+        .update(amazonListingSessions)
+        .set({ 
+          ...data, 
+          dataHoraUpdated: new Date() 
+        })
+        .where(eq(amazonListingSessions.id, sessionId))
+        .returning();
+      
+      console.log('💾 updateSessionData result:', { 
+        sessionId, 
+        bulletPointsUpdated: !!session?.bulletPoints,
+        bulletPointsLength: session?.bulletPoints?.length || 0,
+        sessionReturned: !!session
+      });
+      
+      return session;
+    } catch (error) {
+      console.error('❌ Erro no updateSessionData:', error);
+      throw error;
+    }
   }
 
   // Buscar sessão por ID
@@ -494,6 +504,12 @@ export class AmazonListingService {
 
       // Salvar bullet points na sessão
       console.log('🔄 ANTES de salvar bullet points na sessão');
+      console.log('💾 Salvando bullet points na sessão:', { 
+        sessionId, 
+        bulletPointsLength: bulletPointsResult?.length || 0,
+        bulletPointsPreview: bulletPointsResult?.substring(0, 50) + '...' 
+      });
+      
       await this.updateSessionData(sessionId, { 
         bulletPoints: bulletPointsResult,
         status: 'step3_completed'

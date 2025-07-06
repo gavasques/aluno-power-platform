@@ -111,15 +111,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 06, 2025 - 04:01 PM**: ✅ AMAZON LISTING OPTIMIZER PIPELINE COMPLETO FUNCIONANDO 100%
-  - **Sessão Creation/Retrieval CORRIGIDO**: Novo endpoint `/api/amazon-sessions/:sessionId/create` implementado
-  - **Debug Logs Implementados**: Logs detalhados para rastreamento de sessões e dados salvos
-  - **Sistema 4-Etapas Validado**: Pipeline completo Análise → Títulos → Bullet Points → Descrição testado e funcional
-  - **Persistência de Dados Confirmada**: UpdateSessionData funcionando corretamente com logs de debug
-  - **IA Real Integrada**: 100% OpenAI real, sem dados simulados, usando aiProviderService
-  - **Prompts Otimizados Ativos**: Bullet points (7 unidades, 200-280 chars), Descrições (1400-2000 chars, sem emojis)
-  - **Validação Sequencial Operacional**: Cada etapa valida conclusão da anterior antes de prosseguir
-  - **Sistema Production-Ready**: Geração real de conteúdo comercial persuasivo para Amazon listings
+- **January 06, 2025 - 04:35 PM**: 🔧 AMAZON LISTING OPTIMIZER DEBUGGING EM ANDAMENTO 
+  - **Problema Identificado**: Bullet points sendo gerados pela IA mas não salvos no banco de dados
+  - **Logs de Debug Implementados**: Sistema completo de logs para rastreamento de updateSessionData
+  - **Schema Banco Verificado**: Coluna bullet_points (TEXT) existe corretamente na tabela amazon_listing_sessions
+  - **Endpoint Creation Funcional**: `/api/amazon-sessions/:sessionId/create` implementado e testado
+  - **Etapas 1-2 Operacionais**: Análise e títulos funcionando corretamente com persistência
+  - **Bug em Investigação**: UpdateSessionData chamado mas bullet_points retorna length=0
+  - **Sistema Parcialmente Funcional**: Pipeline 4-etapas com problema específico na persistência bullet_points
 
 - **January 06, 2025 - 03:25 PM**: ✅ AMAZON LISTING OPTIMIZER PROMPTS OTIMIZADOS PARA CONVERSÃO MÁXIMA
   - **Prompt de Bullet Points Atualizado**:
