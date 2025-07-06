@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 const AmazonCustomerService = () => {
+  console.log("🔥 AmazonCustomerService component loaded - SPECIFIC VERSION");
+  
   const [emailContent, setEmailContent] = useState("");
   const [userObservations, setUserObservations] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -110,6 +112,9 @@ João Silva`;
             <p className="text-muted-foreground">
               Agente especializado em responder emails de clientes insatisfeitos com tom caloroso e soluções proativas
             </p>
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+              ✅ INTERFACE ESPECÍFICA CARREGADA CORRETAMENTE
+            </div>
           </div>
         </div>
       </div>
