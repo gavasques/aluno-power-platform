@@ -14,6 +14,7 @@ import materialRoutes from './materialRoutes';
 import materialCategoryRoutes from './materialCategoryRoutes';
 import materialTypeRoutes from './materialTypeRoutes';
 import productRoutes from './productRoutes';
+import dashboardRoutes from './dashboard';
 
 /**
  * Register all modular routes
@@ -33,6 +34,9 @@ export function registerModularRoutes(app: Express): void {
   
   // PHASE 4: Products Domain Modularization - SOLID/DRY/KISS
   app.use('/api/products', productRoutes);
+  
+  // User Dashboard Routes - Complete Dashboard System
+  app.use('/api/user/dashboard', dashboardRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

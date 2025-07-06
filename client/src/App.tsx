@@ -63,6 +63,7 @@ const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
+const UserDashboard = lazy(() => import("./pages/user/UserDashboard"));
 
 
 // Keep Login as eager import for immediate authentication
@@ -452,6 +453,15 @@ function App() {
                                 </Layout>
                               </ProtectedRoute>
                             )}
+                          </Route>
+
+                          {/* User Dashboard - Protected */}
+                          <Route path="/user/dashboard">
+                            <ProtectedRoute>
+                              <Suspense fallback={<PageLoader />}>
+                                <UserDashboard />
+                              </Suspense>
+                            </ProtectedRoute>
                           </Route>
 
                           {/* Minha Área routes - Protected */}

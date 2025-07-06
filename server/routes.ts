@@ -13,6 +13,7 @@ import path from "path";
 import os from "os";
 import { db } from "./db";
 import { aiGenerationLogs } from "../shared/schema";
+import dashboardRoutes from "./routes/dashboard-fixed";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -107,6 +108,7 @@ import { materials, partners, tools, toolTypes, suppliers, news, updates, youtub
 
 // PHASE 2: SOLID/DRY/KISS Modular Architecture Integration
 import { registerModularRoutes } from './routes/index';
+import dashboardRoutes from './routes/dashboard';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -163,6 +165,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Serve static files from uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  
+  // Dashboard routes for user dashboard system
+  app.use('/api/user/dashboard', dashboardRoutes);
   
   // PHASE 2: ✅ SUPPLIER ROUTES MIGRATED TO MODULAR ARCHITECTURE
   // All supplier routes now handled by modular system in server/routes/supplierRoutes.ts

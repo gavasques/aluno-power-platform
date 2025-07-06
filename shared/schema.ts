@@ -1129,6 +1129,115 @@ export const aiImgGenerationLogs = pgTable("ai_img_generation_logs", {
   costIdx: index("ai_img_logs_cost_idx").on(table.cost),
 }));
 
+// User Plans/Subscriptions
+export const userPlans = pgTable("user_plans", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  displayName: text("display_name").notNull(),
+  description: text("description"),
+  monthlyPrice: decimal("monthly_price", { precision: 10, scale: 2 }).notNull().default("0"),
+  yearlyPrice: decimal("yearly_price", { precision: 10, scale: 2 }).notNull().default("0"),
+  credits: integer("credits").notNull().default(0), // Credits included per month
+  features: jsonb("features").notNull().default([]), // Array of features
+  maxUsers: integer("max_users").notNull().default(1),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// User Subscriptions
+export const userSubscriptions = pgTable("user_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  planId: integer("plan_id").references(() => userPlans.id).notNull(),
+  status: text("status").notNull().default("active"), // active, cancelled, expired, suspended
+  billingCycle: text("billing_cycle").notNull().default("monthly"), // monthly, yearly
+  startDate: timestamp("start_date").notNull().defaultNow(),
+  endDate: timestamp("end_date"),
+  nextBillingDate: timestamp("next_billing_date"),
+  cancelledAt: timestamp("cancelled_at"),
+  metadata: jsonb("metadata"), // Payment gateway data, etc.
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("user_subscriptions_user_idx").on(table.userId),
+  statusIdx: index("user_subscriptions_status_idx").on(table.status),
+  nextBillingIdx: index("user_subscriptions_next_billing_idx").on(table.nextBillingDate),
+}));
+
+// User Credit Balance
+export const userCreditBalance = pgTable("user_credit_balance", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  currentBalance: integer("current_balance").notNull().default(0),
+  totalEarned: integer("total_earned").notNull().default(0),
+  totalSpent: integer("total_spent").notNull().default(0),
+  lastResetDate: timestamp("last_reset_date"), // Monthly reset for subscription credits
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("user_credit_balance_user_idx").on(table.userId),
+  balanceIdx: index("user_credit_balance_balance_idx").on(table.currentBalance),
+}));
+
+// Credit Transactions
+export const creditTransactions = pgTable("credit_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  type: text("type").notNull(), // purchase, usage, subscription_credit, bonus, refund
+  amount: integer("amount").notNull(), // positive for credits added, negative for credits used
+  balanceBefore: integer("balance_before").notNull(),
+  balanceAfter: integer("balance_after").notNull(),
+  description: text("description").notNull(),
+  relatedId: text("related_id"), // Reference to related transaction/usage/purchase
+  relatedType: text("related_type"), // ai_generation, image_processing, etc.
+  metadata: jsonb("metadata"), // Additional transaction data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("credit_transactions_user_idx").on(table.userId),
+  typeIdx: index("credit_transactions_type_idx").on(table.type),
+  createdIdx: index("credit_transactions_created_idx").on(table.createdAt),
+  relatedIdx: index("credit_transactions_related_idx").on(table.relatedId, table.relatedType),
+}));
+
+// Billing History
+export const billingHistory = pgTable("billing_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  subscriptionId: integer("subscription_id").references(() => userSubscriptions.id),
+  transactionId: text("transaction_id").notNull(), // Payment gateway transaction ID
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("BRL"),
+  status: text("status").notNull(), // pending, completed, failed, refunded
+  paymentMethod: text("payment_method"), // card, pix, boleto, etc.
+  description: text("description").notNull(),
+  metadata: jsonb("metadata"), // Payment gateway response, etc.
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("billing_history_user_idx").on(table.userId),
+  statusIdx: index("billing_history_status_idx").on(table.status),
+  createdIdx: index("billing_history_created_idx").on(table.createdAt),
+  transactionIdx: index("billing_history_transaction_idx").on(table.transactionId),
+}));
+
+// User Activity Logs for dashboard
+export const userActivityLogs = pgTable("user_activity_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  activity: text("activity").notNull(), // login, feature_used, purchase, etc.
+  feature: text("feature"), // Specific feature used
+  description: text("description").notNull(),
+  duration: integer("duration"), // Time spent in milliseconds
+  metadata: jsonb("metadata"), // Additional activity data
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("user_activity_user_idx").on(table.userId),
+  activityIdx: index("user_activity_activity_idx").on(table.activity),
+  featureIdx: index("user_activity_feature_idx").on(table.feature),
+  createdIdx: index("user_activity_created_idx").on(table.createdAt),
+}));
+
 // Insert schemas for generated images
 export const insertGeneratedImageSchema = createInsertSchema(generatedImages);
 export type InsertGeneratedImage = z.infer<typeof insertGeneratedImageSchema>;
@@ -1232,6 +1341,50 @@ export const insertToolUsageLogSchema = createInsertSchema(toolUsageLogs).omit({
 });
 export type InsertToolUsageLog = z.infer<typeof insertToolUsageLogSchema>;
 export type ToolUsageLog = typeof toolUsageLogs.$inferSelect;
+
+// Insert schemas for user dashboard tables
+export const insertUserPlanSchema = createInsertSchema(userPlans).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertUserPlan = z.infer<typeof insertUserPlanSchema>;
+export type UserPlan = typeof userPlans.$inferSelect;
+
+export const insertUserSubscriptionSchema = createInsertSchema(userSubscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
+export type UserSubscription = typeof userSubscriptions.$inferSelect;
+
+export const insertUserCreditBalanceSchema = createInsertSchema(userCreditBalance).omit({
+  id: true,
+  updatedAt: true,
+});
+export type InsertUserCreditBalance = z.infer<typeof insertUserCreditBalanceSchema>;
+export type UserCreditBalance = typeof userCreditBalance.$inferSelect;
+
+export const insertCreditTransactionSchema = createInsertSchema(creditTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCreditTransaction = z.infer<typeof insertCreditTransactionSchema>;
+export type CreditTransaction = typeof creditTransactions.$inferSelect;
+
+export const insertBillingHistorySchema = createInsertSchema(billingHistory).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertBillingHistory = z.infer<typeof insertBillingHistorySchema>;
+export type BillingHistory = typeof billingHistory.$inferSelect;
+
+export const insertUserActivityLogSchema = createInsertSchema(userActivityLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
+export type UserActivityLog = typeof userActivityLogs.$inferSelect;
 
 // Insert schemas (moved to end of file to avoid conflicts)
 
