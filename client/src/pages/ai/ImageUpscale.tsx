@@ -157,12 +157,19 @@ export default function ImageUpscale() {
         <div className="space-y-6">
           {processedImage && uploadedImage ? (
             <UpscaleResult
-              originalImage={uploadedImage.url}
-              processedImage={processedImage.url}
-              processingDuration={processedImage.metadata?.processingTime}
-              originalFileName={uploadedImage.metadata.fileName}
+              result={{
+                id: processedImage.id,
+                originalImageUrl: uploadedImage.url,
+                upscaledImageUrl: processedImage.url,
+                scale: processedImage.metadata?.scale || scale,
+                processingTime: processedImage.metadata?.processingTime,
+              }}
+              originalImage={{
+                id: uploadedImage.id,
+                url: uploadedImage.url,
+                name: uploadedImage.metadata.fileName,
+              }}
               scale={processedImage.metadata?.scale || scale}
-              onDownload={handleDownload}
             />
           ) : (
             <Card className="h-full min-h-[400px] flex items-center justify-center">
