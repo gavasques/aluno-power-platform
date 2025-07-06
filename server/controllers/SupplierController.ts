@@ -24,7 +24,7 @@ export class SupplierController extends BaseController {
       }
 
       this.logOperation('GET_ALL_SUPPLIERS', { userId });
-      const suppliers = await storage.getUserSuppliers(userId);
+      const suppliers = await storage.getSuppliers(userId);
       ResponseHandler.success(res, suppliers);
     } catch (error) {
       this.handleError(error, res, 'GET_ALL_SUPPLIERS');
