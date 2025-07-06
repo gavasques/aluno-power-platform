@@ -2198,6 +2198,91 @@ export const insertConversionEventSchema = createInsertSchema(conversionEvents);
 export type InsertConversionEvent = z.infer<typeof insertConversionEventSchema>;
 export type ConversionEvent = typeof conversionEvents.$inferSelect;
 
+// Security Tables
+export const fraudAlerts = pgTable("fraud_alerts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  riskScore: integer("risk_score").notNull(),
+  flags: jsonb("flags").notNull().default([]), // Array of fraud flags
+  ipAddress: text("ip_address").notNull(),
+  userAgent: text("user_agent").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("pending"), // pending, approved, rejected
+  reviewerId: integer("reviewer_id").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("fraud_alerts_user_idx").on(table.userId),
+  statusIdx: index("fraud_alerts_status_idx").on(table.status),
+  riskScoreIdx: index("fraud_alerts_risk_score_idx").on(table.riskScore),
+  createdIdx: index("fraud_alerts_created_idx").on(table.createdAt),
+}));
+
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  action: text("action").notNull(),
+  resource: text("resource").notNull(),
+  resourceId: text("resource_id"),
+  oldValues: jsonb("old_values"),
+  newValues: jsonb("new_values"),
+  ipAddress: text("ip_address").notNull(),
+  userAgent: text("user_agent").notNull(),
+  metadata: jsonb("metadata"),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("audit_logs_user_idx").on(table.userId),
+  actionIdx: index("audit_logs_action_idx").on(table.action),
+  resourceIdx: index("audit_logs_resource_idx").on(table.resource),
+  timestampIdx: index("audit_logs_timestamp_idx").on(table.timestamp),
+}));
+
+export const paymentHistory = pgTable("payment_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  amountCents: integer("amount_cents").notNull(),
+  currency: text("currency").notNull().default("brl"),
+  status: text("status").notNull(), // succeeded, failed, canceled, processing
+  paymentMethod: text("payment_method"),
+  description: text("description"),
+  metadata: jsonb("metadata"),
+  failureReason: text("failure_reason"),
+  riskScore: integer("risk_score"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("payment_history_user_idx").on(table.userId),
+  statusIdx: index("payment_history_status_idx").on(table.status),
+  stripeIdx: index("payment_history_stripe_idx").on(table.stripePaymentIntentId),
+  createdIdx: index("payment_history_created_idx").on(table.createdAt),
+}));
+
+// Security schemas and types
+export const insertFraudAlertSchema = createInsertSchema(fraudAlerts).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertFraudAlert = z.infer<typeof insertFraudAlertSchema>;
+export type FraudAlert = typeof fraudAlerts.$inferSelect;
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  timestamp: true,
+});
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type AuditLog = typeof auditLogs.$inferSelect;
+
+export const insertPaymentHistorySchema = createInsertSchema(paymentHistory).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPaymentHistory = z.infer<typeof insertPaymentHistorySchema>;
+export type PaymentHistory = typeof paymentHistory.$inferSelect;
+
 // Relations for new tables
 export const couponsRelations = relations(coupons, ({ one }) => ({
   createdBy: one(users, {
@@ -2231,6 +2316,32 @@ export const abandonedCartsRelations = relations(abandonedCarts, ({ one }) => ({
 export const conversionEventsRelations = relations(conversionEvents, ({ one }) => ({
   user: one(users, {
     fields: [conversionEvents.userId],
+    references: [users.id],
+  }),
+}));
+
+// Security relations
+export const fraudAlertsRelations = relations(fraudAlerts, ({ one }) => ({
+  user: one(users, {
+    fields: [fraudAlerts.userId],
+    references: [users.id],
+  }),
+  reviewer: one(users, {
+    fields: [fraudAlerts.reviewerId],
+    references: [users.id],
+  }),
+}));
+
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [auditLogs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const paymentHistoryRelations = relations(paymentHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [paymentHistory.userId],
     references: [users.id],
   }),
 }));
