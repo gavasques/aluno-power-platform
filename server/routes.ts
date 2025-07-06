@@ -111,6 +111,7 @@ import { registerModularRoutes } from './routes/index';
 import dashboardRoutes from './routes/dashboard';
 import { registerAdvancedRoutes } from './routes/advanced';
 import userDashboardRoutes from './routes/user/dashboard';
+import userUsageRoutes from './routes/user/usage';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -184,6 +185,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // User dashboard routes
   app.use('/api/user/dashboard', userDashboardRoutes);
+  
+  // User usage routes
+  app.use('/api/user/usage', requireAuth, userUsageRoutes);
   
   // Advanced functionality routes (coupons, trial, abandoned cart, analytics)
   registerAdvancedRoutes(app);
