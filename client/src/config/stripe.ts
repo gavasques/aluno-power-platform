@@ -7,7 +7,7 @@ export const STRIPE_CONFIG = {
       name: 'Plano Basic',
       description: 'Ideal para iniciantes no e-commerce',
       price: 39.90,
-      priceId: 'price_1RhzYxJX2OwQ92jAdumOfPp7',
+      priceId: 'price_1RhzvQJX2OwQ92jArTiSMjIn',
       credits: 500,
       features: [
         '500 créditos mensais de IA',
@@ -21,7 +21,7 @@ export const STRIPE_CONFIG = {
       name: 'Plano Premium',
       description: 'Perfeito para vendedores ativos',
       price: 79.90,
-      priceId: 'price_1RhzYxJX2OwQ92jAWBsNojQp',
+      priceId: 'price_1Rhzw4JX2OwQ92jAwXdSc4mk',
       credits: 1200,
       features: [
         '1.200 créditos mensais de IA',
@@ -37,7 +37,7 @@ export const STRIPE_CONFIG = {
       name: 'Plano Master',
       description: 'Para vendedores profissionais',
       price: 199.00,
-      priceId: 'price_1RhzYxJX2OwQ92jAtEHN5Kiw',
+      priceId: 'price_1RhzwJJX2OwQ92jAhoyOwZQY',
       credits: 3000,
       features: [
         '3.000 créditos mensais de IA',

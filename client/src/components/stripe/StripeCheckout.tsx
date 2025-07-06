@@ -26,7 +26,7 @@ const PLANS: Plan[] = [
     name: 'Plano Basic',
     price: 39.90,
     credits: 500,
-    stripePriceId: 'price_1RhzYxJX2OwQ92jAdumOfPp7',
+    stripePriceId: 'price_1RhzvQJX2OwQ92jArTiSMjIn',
     features: [
       '500 créditos mensais de IA',
       'Acesso a todos os agentes',
@@ -39,7 +39,7 @@ const PLANS: Plan[] = [
     name: 'Plano Premium',
     price: 79.90,
     credits: 1200,
-    stripePriceId: 'price_1RhzYxJX2OwQ92jAWBsNojQp',
+    stripePriceId: 'price_1Rhzw4JX2OwQ92jAwXdSc4mk',
     popular: true,
     features: [
       '1.200 créditos mensais de IA',
@@ -54,7 +54,7 @@ const PLANS: Plan[] = [
     name: 'Plano Master',
     price: 199.00,
     credits: 3000,
-    stripePriceId: 'price_1RhzYxJX2OwQ92jAtEHN5Kiw',
+    stripePriceId: 'price_1RhzwJJX2OwQ92jAhoyOwZQY',
     features: [
       '3.000 créditos mensais de IA',
       'Acesso a todos os agentes',
