@@ -64,6 +64,7 @@ const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
 const UserDashboard = lazy(() => import("./pages/user/UserDashboard"));
+const UserDashboardNew = lazy(() => import("./pages/user/Dashboard"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
 
 
@@ -664,7 +665,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <Dashboard />
+                                  <UserDashboardNew />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

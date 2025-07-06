@@ -110,6 +110,7 @@ import { materials, partners, tools, toolTypes, suppliers, news, updates, youtub
 import { registerModularRoutes } from './routes/index';
 import dashboardRoutes from './routes/dashboard';
 import { registerAdvancedRoutes } from './routes/advanced';
+import userDashboardRoutes from './routes/user/dashboard';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -180,6 +181,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Dashboard routes for user dashboard system
   app.use('/api/user/dashboard', dashboardRoutes);
+  
+  // User dashboard routes
+  app.use('/api/user/dashboard', userDashboardRoutes);
   
   // Advanced functionality routes (coupons, trial, abandoned cart, analytics)
   registerAdvancedRoutes(app);
