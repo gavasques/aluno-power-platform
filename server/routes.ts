@@ -1959,8 +1959,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const response = await anthropic.messages.create({
         model: agent.model || 'claude-sonnet-4-20250514',
-        max_tokens: agent.maxTokens || 4000,
-        temperature: agent.temperature || 0.7,
+        max_tokens: parseInt(agent.maxTokens) || 4000,
+        temperature: parseFloat(agent.temperature) || 0.7,
         messages: [
           {
             role: 'user',
