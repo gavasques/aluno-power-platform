@@ -85,11 +85,11 @@ export class AuthController extends BaseController {
       }
 
       // Create session
-      const session = await AuthService.createSession(user.id);
+      const token = await AuthService.createSession(user.id);
       
       ResponseHandler.success(res, {
         user: { id: user.id, email: user.email, name: user.name, role: user.role },
-        token: session.token
+        token: token
       });
     } catch (error: any) {
       ResponseHandler.handleError(res, error, 'Login failed');
