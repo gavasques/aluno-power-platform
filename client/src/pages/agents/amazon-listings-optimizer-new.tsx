@@ -373,7 +373,31 @@ export default function AmazonListingsOptimizerNew() {
                 <div>
                   <h4 className="font-medium">Geração de Títulos</h4>
                   <p className="text-sm text-muted-foreground">
-                    Criamos 5 títulos otimizados baseados na análise e suas palavras-chave
+                    Criamos títulos otimizados baseados na análise e suas palavras-chave
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+              
+              <div className="flex items-start gap-3">
+                <Badge variant="outline">3</Badge>
+                <div>
+                  <h4 className="font-medium">Geração de Bullet Points</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Desenvolvemos bullet points persuasivos usando dados da análise e títulos gerados
+                  </p>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-start gap-3">
+                <Badge variant="outline">4</Badge>
+                <div>
+                  <h4 className="font-medium">Descrição Completa</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Criamos uma descrição otimizada integrando todas as etapas anteriores
                   </p>
                 </div>
               </div>
