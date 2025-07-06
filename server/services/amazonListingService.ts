@@ -60,6 +60,16 @@ export class AmazonListingService {
       .where(eq(amazonListingSessions.id, sessionId))
       .limit(1);
     
+    console.log('🔍 DEBUG - getSession result:', {
+      sessionId,
+      found: !!session,
+      reviewsInsight: !!session?.reviewsInsight,
+      titulos: !!session?.titulos,
+      bulletPoints: !!session?.bulletPoints,
+      currentStep: session?.currentStep,
+      status: session?.status
+    });
+    
     return session || null;
   }
 
@@ -306,7 +316,29 @@ export class AmazonListingService {
         maxTokens: 3000
       });
       
-      const titlesResult = titlesResponse.content;
+      console.log('🔍 DEBUG - titlesResponse:', {
+        hasResponse: !!titlesResponse,
+        responseType: typeof titlesResponse,
+        hasContent: !!titlesResponse?.content,
+        contentLength: titlesResponse?.content?.length || 0,
+        contentPreview: titlesResponse?.content?.substring(0, 100) || 'VAZIO'
+      });
+      
+      // Extrair conteúdo baseado na estrutura AIResponse
+      let titlesResult;
+      if (typeof titlesResponse === 'string') {
+        titlesResult = titlesResponse;
+      } else if (titlesResponse && typeof titlesResponse === 'object') {
+        titlesResult = titlesResponse.content || titlesResponse.message || JSON.stringify(titlesResponse);
+      } else {
+        titlesResult = String(titlesResponse || '');
+      }
+      
+      console.log('🔍 DEBUG - Extracted titlesResult:', {
+        resultType: typeof titlesResult,
+        resultLength: titlesResult?.length || 0,
+        resultPreview: titlesResult?.substring(0, 100) || 'VAZIO'
+      });
 
       const duration = Date.now() - startTime;
 
@@ -425,8 +457,21 @@ export class AmazonListingService {
     if (!session) throw new Error('Sessão não encontrada');
 
     // Verificar se etapas anteriores foram concluídas
-    if (!session.reviewsInsight || !session.titulos) {
-      throw new Error('Análise de avaliações e títulos devem ser concluídos primeiro');
+    console.log('🔍 DEBUG - Validação Etapa 3:', {
+      sessionId,
+      hasReviewsInsight: !!session.reviewsInsight,
+      hasTitulos: !!session.titulos,
+      reviewsInsightLength: session.reviewsInsight?.length || 0,
+      titulosLength: session.titulos?.length || 0,
+      currentStep: session.currentStep,
+      status: session.status
+    });
+    
+    if (!session.reviewsInsight) {
+      throw new Error('Análise de avaliações deve ser concluída primeiro');
+    }
+    if (!session.titulos) {
+      throw new Error('Títulos devem ser gerados primeiro');
     }
 
     // Atualizar status
