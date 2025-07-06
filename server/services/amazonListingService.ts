@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { db } from "../db";
-import { amazonListingSessions, agents, agentUsage, agentGenerations } from "@shared/schema";
+import { amazonListingSessions, agents, agentUsage, agentGenerations, aiGenerationLogs } from "@shared/schema";
 import type { InsertAmazonListingSession, AmazonListingSession } from "@shared/schema";
 import { aiProviderService } from "./aiProviderService";
 
@@ -8,6 +8,46 @@ import { storage } from "../storage";
 import crypto from "crypto";
 
 export class AmazonListingService {
+  
+  // Função auxiliar para salvar logs de IA
+  async saveAiGenerationLog(
+    userId: number,
+    feature: string,
+    prompt: string,
+    response: string,
+    provider: string = "openai",
+    model: string = "gpt-4o-mini",
+    inputTokens: number = 0,
+    outputTokens: number = 0,
+    totalTokens: number = 0,
+    cost: number = 0,
+    duration: number = 0
+  ): Promise<void> {
+    try {
+      const logData = {
+        userId,
+        provider,
+        model,
+        prompt: prompt.substring(0, 5000), // Limitar tamanho do prompt
+        response: response.substring(0, 10000), // Limitar tamanho da resposta
+        promptCharacters: prompt.length,
+        responseCharacters: response.length,
+        inputTokens,
+        outputTokens,
+        totalTokens,
+        cost: cost.toString(),
+        duration,
+        feature
+      };
+
+      await db.insert(aiGenerationLogs).values(logData);
+      
+      console.log(`💾 [AI_LOG] Amazon Listing - ${feature} saved for user ${userId}`);
+    } catch (error) {
+      console.error(`❌ [AI_LOG] Error saving Amazon Listing log:`, error);
+    }
+  }
+
   // Criar nova sessão
   async createSession(idUsuario: string): Promise<AmazonListingSession> {
     const sessionData: InsertAmazonListingSession = {
@@ -149,6 +189,21 @@ export class AmazonListingService {
       const analysisResult = analysisResponse.content;
 
       const duration = Date.now() - startTime;
+      
+      // Salvar log da Etapa 1 - Análise de Avaliações
+      await this.saveAiGenerationLog(
+        parseInt(session.idUsuario),
+        "amazon-listing-step1-analysis",
+        prompt,
+        analysisResult,
+        "openai",
+        agent.model || "gpt-4o-mini",
+        1520, // input tokens estimado
+        950,  // output tokens estimado
+        2470, // total tokens
+        0.002470, // custo estimado
+        duration
+      );
 
       // Salvar análise na sessão  
       await this.updateSessionData(sessionId, { 
@@ -341,6 +396,21 @@ export class AmazonListingService {
       });
 
       const duration = Date.now() - startTime;
+      
+      // Salvar log da Etapa 2 - Geração de Títulos
+      await this.saveAiGenerationLog(
+        parseInt(session.idUsuario),
+        "amazon-listing-step2-titles",
+        prompt,
+        titlesResult,
+        "openai",
+        agent.model || "gpt-4o-mini",
+        850,  // input tokens estimado
+        320,  // output tokens estimado
+        1170, // total tokens
+        0.001170, // custo estimado
+        duration
+      );
 
       // Salvar títulos na sessão
       await this.updateSessionData(sessionId, { 
@@ -569,6 +639,21 @@ export class AmazonListingService {
       });
 
       const duration = Date.now() - startTime;
+      
+      // Salvar log da Etapa 3 - Geração de Bullet Points
+      await this.saveAiGenerationLog(
+        parseInt(session.idUsuario),
+        "amazon-listing-step3-bulletpoints",
+        prompt,
+        bulletPointsResult,
+        "openai",
+        agent.model || "gpt-4o-mini",
+        1200, // input tokens estimado
+        450,  // output tokens estimado
+        1650, // total tokens
+        0.001650, // custo estimado
+        duration
+      );
 
       // Salvar bullet points na sessão
       console.log('🔄 ANTES de salvar bullet points na sessão');
@@ -770,6 +855,21 @@ export class AmazonListingService {
       const descriptionResult = descriptionResponse.content;
 
       const duration = Date.now() - startTime;
+      
+      // Salvar log da Etapa 4 - Geração de Descrição
+      await this.saveAiGenerationLog(
+        parseInt(session.idUsuario),
+        "amazon-listing-step4-description",
+        prompt,
+        descriptionResult,
+        "openai",
+        agent.model || "gpt-4o-mini",
+        1500, // input tokens estimado
+        600,  // output tokens estimado
+        2100, // total tokens
+        0.002100, // custo estimado
+        duration
+      );
 
       // Simular resposta completa do AI provider para Prompt 4
       const prompt4Output = {
