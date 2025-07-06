@@ -9,11 +9,14 @@ import { Loader2, CreditCard, Calendar, AlertTriangle, ExternalLink, Crown, Zap 
 import { stripeService, formatStripeAmount, formatStripeDate, getSubscriptionStatusBadge } from '@/services/stripeService';
 import { SUBSCRIPTION_PLANS, CREDIT_PACKAGES, formatPrice, formatCredits } from '../../../shared/stripe-config';
 import { useToast } from '@/hooks/use-toast';
+import { StripeCheckoutModal } from '@/components/stripe/StripeCheckoutModal';
 
 export default function SubscriptionManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState('');
 
   // Get current subscription
   const { data: subscriptionData, isLoading: loadingSubscription } = useQuery({
@@ -37,19 +40,12 @@ export default function SubscriptionManagement() {
       }
     },
     onSuccess: (data) => {
-      console.log('🔍 [SUBSCRIPTION MANAGEMENT] Checkout mutation success:', data);
-      console.log('🔍 [SUBSCRIPTION MANAGEMENT] About to open checkout in new tab:', data.url);
+      console.log('🔍 [SUBSCRIPTION MANAGEMENT] Checkout URL received:', data.url);
       
-      // Open Stripe Checkout in a new tab to completely avoid iframe issues
-      const newWindow = window.open(data.url, '_blank', 'noopener,noreferrer');
-      
-      if (!newWindow) {
-        // Fallback if popup was blocked
-        console.log('🔍 [SUBSCRIPTION MANAGEMENT] Popup blocked, using direct redirect');
-        window.location.href = data.url;
-      } else {
-        console.log('🔍 [SUBSCRIPTION MANAGEMENT] Checkout opened in new tab successfully');
-      }
+      // Set URL and open modal (which will redirect automatically)
+      setCheckoutUrl(data.url);
+      setCheckoutModalOpen(true);
+      setLoadingCheckout(null);
     },
     onError: (error) => {
       console.error('Checkout error:', error);
@@ -343,6 +339,13 @@ export default function SubscriptionManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Stripe Checkout Modal */}
+      <StripeCheckoutModal
+        open={checkoutModalOpen}
+        onClose={() => setCheckoutModalOpen(false)}
+        checkoutUrl={checkoutUrl}
+      />
     </div>
   );
 }
