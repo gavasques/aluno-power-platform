@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,7 +15,7 @@ const AmazonCustomerService = () => {
   const [emailContent, setEmailContent] = useState("");
   const [userObservations, setUserObservations] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const handleSubmit = async () => {
@@ -64,7 +64,7 @@ const AmazonCustomerService = () => {
 
         if (processResponse?.sessionId) {
           // Navigate to results page
-          navigate(`/agentes/amazon-customer-service/resultado/${processResponse.sessionId}`);
+          setLocation(`/agentes/amazon-customer-service/resultado/${processResponse.sessionId}`);
         } else {
           throw new Error('Session ID not received');
         }
@@ -112,9 +112,7 @@ João Silva`;
             <p className="text-muted-foreground">
               Agente especializado em responder emails de clientes insatisfeitos com tom caloroso e soluções proativas
             </p>
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-              ✅ INTERFACE ESPECÍFICA CARREGADA CORRETAMENTE
-            </div>
+
           </div>
         </div>
       </div>
