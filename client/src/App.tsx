@@ -465,14 +465,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* Subscription Management - Protected */}
-                          <Route path="/assinatura">
-                            <ProtectedRoute>
-                              <Suspense fallback={<PageLoader />}>
-                                <SubscriptionPage />
-                              </Suspense>
-                            </ProtectedRoute>
-                          </Route>
+
 
                           {/* Minha Área routes - Protected */}
                           <Route path="/minha-area/:section/:id?/:action?">
