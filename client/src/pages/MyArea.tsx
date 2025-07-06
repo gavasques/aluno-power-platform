@@ -16,6 +16,7 @@ const ProductPricingForm = lazy(() => import("./myarea/ProductPricingForm"));
 const SupplierDetailRefactored = lazy(() => import("./myarea/SupplierDetailRefactored"));
 const MaterialDetail = lazy(() => import("./myarea/MaterialDetail"));
 const MaterialForm = lazy(() => import("./myarea/MaterialForm"));
+const MySubscriptions = lazy(() => import("./myarea/MySubscriptions"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -120,6 +121,13 @@ const MyArea = () => {
       return (
         <Suspense fallback={<LoadingSpinner />}>
           <MyBrands />
+        </Suspense>
+      );
+    case "assinaturas":
+    case "subscriptions":
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
+          <MySubscriptions />
         </Suspense>
       );
     default:
