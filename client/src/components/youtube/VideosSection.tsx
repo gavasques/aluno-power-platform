@@ -14,7 +14,7 @@ import type { YoutubeVideo } from "@shared/schema";
 // Custom hook for video data processing
 function useVideoData() {
   const { data: videos, isLoading, error } = useQuery<YoutubeVideo[]>({
-    queryKey: ['/api/videos'],
+    queryKey: ['/api/youtube-videos'],
     staleTime: 5 * 60 * 1000, // 5 minutes cache
     gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
   });
@@ -51,12 +51,12 @@ function useVideoSync() {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/youtube/sync', { method: 'POST' });
+      const response = await fetch('/api/youtube-videos/sync', { method: 'POST' });
       if (!response.ok) throw new Error('Erro na sincronização');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/videos'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
       toast({
         title: "Sincronização concluída",
         description: "Vídeos atualizados com sucesso",
@@ -78,7 +78,7 @@ export function VideosSection() {
   const syncMutation = useVideoSync();
 
   const { data: videos, isLoading, error } = useQuery<YoutubeVideo[]>({
-    queryKey: ['/api/videos'],
+    queryKey: ['/api/youtube-videos'],
     retry: false, // Don't retry on YouTube API key errors
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
