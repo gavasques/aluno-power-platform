@@ -56,10 +56,7 @@ const AmazonNegativeReviews = () => {
 
       const response = await apiRequest("/api/agents/amazon-negative-reviews/process", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        body: {
           sessionId,
           negativeReview: negativeReview.trim(),
           userInfo: userInfo.trim() || "",
@@ -67,11 +64,11 @@ const AmazonNegativeReviews = () => {
           sellerPosition: sellerPosition.trim(),
           customerName: customerName.trim(),
           orderId: orderId.trim()
-        }),
+        },
       });
 
       if (response.sessionId) {
-        setLocation(`/agentes/amazon-negative-reviews/resultado/${response.sessionId}`);
+        setLocation(`/agentes/amazon-negative-reviews/result?sessionId=${response.sessionId}`);
       }
     } catch (error: any) {
       console.error("Error processing review response:", error);

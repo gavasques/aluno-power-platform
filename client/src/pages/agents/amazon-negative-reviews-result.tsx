@@ -39,8 +39,9 @@ interface SessionData {
 }
 
 const AmazonNegativeReviewsResult = () => {
-  const [, params] = useRoute("/agentes/amazon-negative-reviews/resultado/:sessionId");
-  const sessionId = params?.sessionId;
+  // Get sessionId from URL query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionId = urlParams.get('sessionId');
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
