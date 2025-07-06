@@ -498,16 +498,41 @@ export class AmazonListingService {
         maxTokens: 3000
       });
       
-      const bulletPointsResult = bulletPointsResponse.content;
+      console.log('🔍 DEBUG - bulletPointsResponse:', {
+        hasResponse: !!bulletPointsResponse,
+        responseType: typeof bulletPointsResponse,
+        hasContent: !!bulletPointsResponse?.content,
+        contentType: typeof bulletPointsResponse?.content,
+        contentLength: bulletPointsResponse?.content?.length || 0,
+        contentPreview: bulletPointsResponse?.content?.substring(0, 100) || 'VAZIO'
+      });
+      
+      // Extrair conteúdo baseado na estrutura AIResponse
+      let bulletPointsResult;
+      if (typeof bulletPointsResponse === 'string') {
+        bulletPointsResult = bulletPointsResponse;
+      } else if (bulletPointsResponse && typeof bulletPointsResponse === 'object') {
+        bulletPointsResult = bulletPointsResponse.content || bulletPointsResponse.message || JSON.stringify(bulletPointsResponse);
+      } else {
+        bulletPointsResult = String(bulletPointsResponse || '');
+      }
+      
+      console.log('🔍 DEBUG - Extracted bulletPointsResult:', {
+        resultType: typeof bulletPointsResult,
+        resultLength: bulletPointsResult?.length || 0,
+        resultPreview: bulletPointsResult?.substring(0, 100) || 'VAZIO'
+      });
 
       const duration = Date.now() - startTime;
 
       // Salvar bullet points na sessão
       console.log('🔄 ANTES de salvar bullet points na sessão');
-      console.log('💾 Salvando bullet points na sessão:', { 
-        sessionId, 
-        bulletPointsLength: bulletPointsResult?.length || 0,
-        bulletPointsPreview: bulletPointsResult?.substring(0, 50) + '...' 
+      console.log('🔍 DEBUG - bulletPointsResult final:', {
+        sessionId,
+        resultType: typeof bulletPointsResult,
+        resultLength: bulletPointsResult?.length || 0,
+        resultPreview: bulletPointsResult?.substring(0, 100) || 'VAZIO',
+        resultExists: !!bulletPointsResult
       });
       
       await this.updateSessionData(sessionId, { 
