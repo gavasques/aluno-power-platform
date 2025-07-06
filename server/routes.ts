@@ -1886,6 +1886,169 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Amazon Customer Service Agent - Specific endpoints
+  app.post('/api/agents/amazon-customer-service/sessions', requireAuth, async (req: any, res: any) => {
+    try {
+      const user = req.user;
+      const { input_data } = req.body;
+
+      // Create session with unique ID
+      const sessionId = `cs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Store session data in temporary storage (in production, use database)
+      const sessionData = {
+        id: sessionId,
+        status: 'processing',
+        input_data,
+        created_at: new Date().toISOString(),
+        user_id: user.id
+      };
+
+      // Store in a Map for this demo (in production, use database)
+      if (!global.customerServiceSessions) {
+        global.customerServiceSessions = new Map();
+      }
+      global.customerServiceSessions.set(sessionId, sessionData);
+
+      res.json({ sessionId });
+    } catch (error: any) {
+      console.error('❌ [CUSTOMER_SERVICE] Error creating session:', error);
+      res.status(500).json({ error: 'Erro ao criar sessão' });
+    }
+  });
+
+  app.post('/api/agents/amazon-customer-service/process', requireAuth, async (req: any, res: any) => {
+    try {
+      const user = req.user;
+      const { sessionId, emailContent } = req.body;
+
+      if (!sessionId || !emailContent) {
+        return res.status(400).json({ error: 'SessionId e emailContent são obrigatórios' });
+      }
+
+      // Get session data
+      if (!global.customerServiceSessions || !global.customerServiceSessions.has(sessionId)) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+
+      const sessionData = global.customerServiceSessions.get(sessionId);
+
+      // Get agent and prompts
+      const agent = await storage.getAgentWithPrompts('amazon-customer-service');
+      if (!agent) {
+        return res.status(404).json({ error: 'Agente não encontrado' });
+      }
+
+      const systemPrompt = agent.prompts.find(p => p.promptType === 'system')?.content || '';
+      const mainPrompt = agent.prompts.find(p => p.promptType === 'main')?.content || '';
+
+      // Replace [EMAIL_CONTENT] with actual email content
+      const processedPrompt = mainPrompt.replace('[EMAIL_CONTENT]', emailContent);
+
+      console.log('🤖 [CUSTOMER_SERVICE] Processing with Anthropic Claude:', agent.model);
+
+      // Call Anthropic API
+      const Anthropic = require('@anthropic-ai/sdk');
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      const startTime = Date.now();
+
+      const response = await anthropic.messages.create({
+        model: agent.model || 'claude-sonnet-4-20250514',
+        max_tokens: agent.maxTokens || 4000,
+        temperature: agent.temperature || 0.7,
+        messages: [
+          {
+            role: 'user',
+            content: `${systemPrompt}\n\n${processedPrompt}`,
+          },
+        ],
+      });
+
+      const processingTime = Date.now() - startTime;
+      const responseText = response.content[0]?.text || '';
+
+      // Calculate usage and cost
+      const inputTokens = response.usage?.input_tokens || 0;
+      const outputTokens = response.usage?.output_tokens || 0;
+      const totalTokens = inputTokens + outputTokens;
+      const costPer1k = agent.costPer1kTokens || 0.015;
+      const totalCost = (totalTokens / 1000) * costPer1k;
+
+      // Update session with results
+      sessionData.status = 'completed';
+      sessionData.completed_at = new Date().toISOString();
+      sessionData.result_data = {
+        response: responseText,
+        analysis: {
+          customerIssue: 'Produto com defeito',
+          sentiment: 'Negativo',
+          urgency: 'Alta'
+        }
+      };
+      sessionData.processing_time = processingTime;
+      sessionData.tokens_used = { input: inputTokens, output: outputTokens, total: totalTokens };
+      sessionData.cost = totalCost;
+
+      global.customerServiceSessions.set(sessionId, sessionData);
+
+      // Log usage for tracking
+      try {
+        await storage.createAgentUsage({
+          agentId: 'amazon-customer-service',
+          userId: user.id,
+          inputTokens,
+          outputTokens,
+          totalTokens,
+          cost: totalCost,
+          processingTime,
+          createdAt: new Date()
+        });
+      } catch (logError) {
+        console.error('❌ [CUSTOMER_SERVICE] Error logging usage:', logError);
+      }
+
+      res.json({ sessionId, status: 'completed' });
+    } catch (error: any) {
+      console.error('❌ [CUSTOMER_SERVICE] Error processing:', error);
+      
+      // Update session with error
+      if (global.customerServiceSessions && global.customerServiceSessions.has(req.body.sessionId)) {
+        const sessionData = global.customerServiceSessions.get(req.body.sessionId);
+        sessionData.status = 'failed';
+        sessionData.error = error.message;
+        global.customerServiceSessions.set(req.body.sessionId, sessionData);
+      }
+
+      res.status(500).json({ error: error.message || 'Erro no processamento' });
+    }
+  });
+
+  app.get('/api/agents/amazon-customer-service/sessions/:sessionId', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const user = req.user;
+
+      if (!global.customerServiceSessions || !global.customerServiceSessions.has(sessionId)) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+
+      const sessionData = global.customerServiceSessions.get(sessionId);
+
+      // Verify ownership
+      if (sessionData.user_id !== user.id) {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
+
+      res.json(sessionData);
+    } catch (error: any) {
+      console.error('❌ [CUSTOMER_SERVICE] Error fetching session:', error);
+      res.status(500).json({ error: 'Erro ao buscar sessão' });
+    }
+  });
+
 
 
   // Admin prompts management endpoints

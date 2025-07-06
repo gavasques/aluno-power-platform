@@ -54,6 +54,8 @@ const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
 const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer"));
 const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
 const AmazonListingsOptimizerNew = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
+const AmazonCustomerService = lazy(() => import("./pages/agents/amazon-customer-service"));
+const AmazonCustomerServiceResult = lazy(() => import("./pages/agents/amazon-customer-service-result"));
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
 const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
@@ -122,6 +124,26 @@ function App() {
                           </Route>
 
                           {/* Agents routes */}
+                          <Route path="/agentes/amazon-customer-service/resultado/:sessionId">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerServiceResult />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/amazon-customer-service">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerService />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
                           <Route path="/agents/amazon-listings-optimizer-new">
                             <ProtectedRoute>
                               <Layout>
