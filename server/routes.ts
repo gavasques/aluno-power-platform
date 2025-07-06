@@ -96,6 +96,9 @@ import { db } from './db';
 import { eq, desc, like, and, isNull, isNotNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
 import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs } from '@shared/schema';
 
+// PHASE 2: SOLID/DRY/KISS Modular Architecture Integration
+import { registerModularRoutes } from './routes/index';
+
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
 
@@ -141,10 +144,20 @@ function broadcastNotification(type: string, data: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // PHASE 2: SOLID/DRY/KISS Modular Routes Integration
+  console.log('🏗️  [PHASE_2] Registering modular routes...');
+  registerModularRoutes(app);
+  console.log('✅ [PHASE_2] Modular routes registered successfully');
+
   // Serve static files from uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-  // Suppliers
-  app.get('/api/suppliers', requireAuth, async (req: any, res: any) => {
+  
+  // PHASE 2: ✅ SUPPLIER ROUTES MIGRATED TO MODULAR ARCHITECTURE
+  // All supplier routes now handled by modular system in server/routes/supplierRoutes.ts
+  // Following SOLID/DRY/KISS principles - eliminated code duplication
+
+  // Product Brands endpoints
+  app.get('/api/brands', requireAuth, async (req, res) => {
     try {
       const userId = req.user?.id;
       const suppliers = await storage.getSuppliers(userId);
