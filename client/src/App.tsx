@@ -264,6 +264,13 @@ function App() {
                           </Route>
                           
                           <Route path="/agents">
+                            {() => {
+                              window.location.href = '/agentes';
+                              return null;
+                            }}
+                          </Route>
+                          
+                          <Route path="/agentes">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -650,8 +657,49 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* GENERIC AGENT ROUTE - ABSOLUTE LAST TO AVOID CONFLICTS */}
-                          <Route path="/agents/:id">
+                          {/* SPECIFIC AGENT ROUTES FOR /agentes */}
+                          <Route path="/agentes/amazon-negative-reviews">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviews />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/amazon-negative-reviews/result">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviewsResult />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/amazon-customer-service">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerService />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/amazon-customer-service/result">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerServiceResult />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* GENERIC AGENT ROUTE FOR /agentes - CATCH ALL */}
+                          <Route path="/agentes/:id">
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
@@ -661,6 +709,14 @@ function App() {
                                 </Layout>
                               </ProtectedRoute>
                             )}
+                          </Route>
+                          
+                          {/* FALLBACK REDIRECT FOR OLD /agents/:id ROUTES */}
+                          <Route path="/agents/:id">
+                            {(params) => {
+                              window.location.href = `/agentes/${params.id}`;
+                              return null;
+                            }}
                           </Route>
 
                             </Switch>
