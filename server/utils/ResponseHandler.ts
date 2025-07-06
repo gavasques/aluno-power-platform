@@ -77,6 +77,13 @@ export class ResponseHandler {
   }
 
   /**
+   * Send unauthorized response
+   */
+  static unauthorized(res: Response, message: string = 'Unauthorized'): void {
+    res.status(401).json({ error: message });
+  }
+
+  /**
    * Send service unavailable response
    */
   static serviceUnavailable(res: Response, message: string = 'Service unavailable', details?: string): void {

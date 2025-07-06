@@ -32,7 +32,7 @@ export class AuthController extends BaseController {
       const validatedData = registerSchema.parse(req.body);
       
       // Check if user already exists
-      const existingUser = await storage.getUserByEmail(validatedData.email);
+      const existingUser = await AuthService.getUserByEmail(validatedData.email);
       if (existingUser) {
         ResponseHandler.conflict(res, 'Email already registered');
         return;
@@ -71,21 +71,21 @@ export class AuthController extends BaseController {
       const { email, password } = loginSchema.parse(req.body);
       
       // Find user
-      const user = await storage.getUserByEmail(email);
+      const user = await AuthService.getUserByEmail(email);
       if (!user) {
         ResponseHandler.unauthorized(res, 'Invalid credentials');
         return;
       }
 
       // Verify password
-      const isValid = await bcryptjs.compare(password, user.passwordHash);
+      const isValid = await bcryptjs.compare(password, user.password);
       if (!isValid) {
         ResponseHandler.unauthorized(res, 'Invalid credentials');
         return;
       }
 
       // Create session
-      const session = await this.authService.createSession(user.id);
+      const session = await AuthService.createSession(user.id);
       
       ResponseHandler.success(res, {
         user: { id: user.id, email: user.email, name: user.name, role: user.role },

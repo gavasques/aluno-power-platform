@@ -269,7 +269,7 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
         </div>
 
         {/* Groups */}
-        {groups && Array.isArray(groups) && groups.length > 0 && (
+        {groups && Array.isArray(groups) && groups.length > 0 ? (
           <AdminCard title="Grupos de Usuário">
             <div className="space-y-3">
               <p className="text-sm text-gray-600 mb-4">
@@ -296,7 +296,7 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
               </div>
             </div>
           </AdminCard>
-        )}
+        ) : null}
 
         {/* Error Display */}
         {errors.general && (

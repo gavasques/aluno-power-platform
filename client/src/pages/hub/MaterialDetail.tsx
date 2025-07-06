@@ -287,28 +287,28 @@ const HubMaterialDetail = () => {
                 </div>
               )}
 
-              {material.technicalInfo && typeof material.technicalInfo === 'object' && (
+              {material.technicalInfo && typeof material.technicalInfo === 'object' ? (
                 <div className="space-y-2 text-sm">
                   {(material.technicalInfo as any).duration && (
                     <div>
                       <span className="text-muted-foreground">Duração:</span>
-                      <span className="text-foreground ml-2">{(material.technicalInfo as any).duration}</span>
+                      <span className="text-foreground ml-2">{String((material.technicalInfo as any).duration)}</span>
                     </div>
                   )}
                   {(material.technicalInfo as any).format && (
                     <div>
                       <span className="text-muted-foreground">Formato:</span>
-                      <span className="text-foreground ml-2">{(material.technicalInfo as any).format}</span>
+                      <span className="text-foreground ml-2">{String((material.technicalInfo as any).format)}</span>
                     </div>
                   )}
                   {(material.technicalInfo as any).quality && (
                     <div>
                       <span className="text-muted-foreground">Qualidade:</span>
-                      <span className="text-foreground ml-2">{(material.technicalInfo as any).quality}</span>
+                      <span className="text-foreground ml-2">{String((material.technicalInfo as any).quality)}</span>
                     </div>
                   )}
                 </div>
-              )}
+              ) : null}
             </CardContent>
           </Card>
 
