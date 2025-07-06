@@ -109,6 +109,7 @@ import { materials, partners, tools, toolTypes, suppliers, news, updates, youtub
 // PHASE 2: SOLID/DRY/KISS Modular Architecture Integration
 import { registerModularRoutes } from './routes/index';
 import dashboardRoutes from './routes/dashboard';
+import { registerAdvancedRoutes } from './routes/advanced';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
@@ -179,6 +180,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Dashboard routes for user dashboard system
   app.use('/api/user/dashboard', dashboardRoutes);
+  
+  // Advanced functionality routes (coupons, trial, abandoned cart, analytics)
+  registerAdvancedRoutes(app);
   
   // Import Stripe routes
   const { default: stripeRoutes } = await import('./routes/stripe/index.js');

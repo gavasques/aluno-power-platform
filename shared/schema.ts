@@ -2060,3 +2060,177 @@ export const infographicConceptsRelations = relations(infographicConcepts, ({ on
     references: [infographics.id],
   }),
 }));
+
+// ========================================
+// ADVANCED FUNCTIONALITIES TABLES
+// ========================================
+
+// Coupons Table - Sistema de Cupons e Descontos
+export const coupons = pgTable("coupons", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  code: text("code").notNull().unique(),
+  type: text("type").notNull(), // 'percentage', 'fixed_amount', 'trial_extension'
+  value: decimal("value", { precision: 10, scale: 2 }).notNull(), // Percentage or amount
+  minPurchaseAmount: decimal("min_purchase_amount", { precision: 10, scale: 2 }),
+  maxUses: integer("max_uses"),
+  currentUses: integer("current_uses").notNull().default(0),
+  usedByUserId: integer("used_by_user_id").array(), // Track which users used it
+  validFrom: timestamp("valid_from").notNull().defaultNow(),
+  validTo: timestamp("valid_to").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  metadata: jsonb("metadata"), // Additional coupon data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  codeIdx: index("coupons_code_idx").on(table.code),
+  typeIdx: index("coupons_type_idx").on(table.type),
+  validIdx: index("coupons_valid_idx").on(table.validFrom, table.validTo),
+  activeIdx: index("coupons_active_idx").on(table.isActive),
+}));
+
+// User Trials Table - Sistema de Trial Gratuito
+export const userTrials = pgTable("user_trials", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  planId: integer("plan_id").references(() => userPlans.id).notNull(),
+  startDate: timestamp("start_date").notNull().defaultNow(),
+  endDate: timestamp("end_date").notNull(),
+  originalEndDate: timestamp("original_end_date").notNull(), // Track original vs extended end
+  status: text("status").notNull().default("active"), // 'active', 'expired', 'converted', 'cancelled'
+  creditsUsed: integer("credits_used").notNull().default(0),
+  creditsLimit: integer("credits_limit").notNull().default(100),
+  remindersSent: integer("reminders_sent").notNull().default(0),
+  convertedAt: timestamp("converted_at"),
+  conversionDetails: jsonb("conversion_details"),
+  couponCode: text("coupon_code"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("user_trials_user_idx").on(table.userId),
+  statusIdx: index("user_trials_status_idx").on(table.status),
+  endDateIdx: index("user_trials_end_date_idx").on(table.endDate),
+  convertedIdx: index("user_trials_converted_idx").on(table.convertedAt),
+}));
+
+// Abandoned Carts Table - Sistema de Recuperação de Carrinho Abandonado
+export const abandonedCarts = pgTable("abandoned_carts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  sessionId: text("session_id").notNull(),
+  email: text("email"),
+  planId: integer("plan_id").references(() => userPlans.id),
+  billingCycle: text("billing_cycle"), // 'monthly', 'yearly'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("BRL"),
+  paymentMethod: text("payment_method"),
+  cartData: jsonb("cart_data").notNull(),
+  checkoutUrl: text("checkout_url"),
+  lastActivityAt: timestamp("last_activity_at").notNull().defaultNow(),
+  emailsSent: integer("emails_sent").notNull().default(0),
+  emailSent: boolean("email_sent").notNull().default(false),
+  emailType: text("email_type"), // 'immediate', 'reminder_24h', 'reminder_7d'
+  lastEmailSent: timestamp("last_email_sent"),
+  converted: boolean("converted").notNull().default(false),
+  convertedAt: timestamp("converted_at"),
+  conversionAmount: decimal("conversion_amount", { precision: 10, scale: 2 }),
+  discountOffered: decimal("discount_offered", { precision: 10, scale: 2 }),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("abandoned_carts_user_idx").on(table.userId),
+  sessionIdx: index("abandoned_carts_session_idx").on(table.sessionId),
+  emailIdx: index("abandoned_carts_email_idx").on(table.email),
+  activityIdx: index("abandoned_carts_activity_idx").on(table.lastActivityAt),
+  convertedIdx: index("abandoned_carts_converted_idx").on(table.converted),
+  emailSentIdx: index("abandoned_carts_email_sent_idx").on(table.emailSent),
+}));
+
+// Conversion Events Table - Analytics de Conversão
+export const conversionEvents = pgTable("conversion_events", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  sessionId: text("session_id"),
+  eventType: text("event_type").notNull(), // 'page_view', 'signup', 'trial_start', 'checkout_start', 'payment_success', etc.
+  eventData: jsonb("event_data"),
+  url: text("url"),
+  referer: text("referer"),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  metadata: jsonb("metadata"),
+}, (table) => ({
+  userIdx: index("conversion_events_user_idx").on(table.userId),
+  sessionIdx: index("conversion_events_session_idx").on(table.sessionId),
+  eventTypeIdx: index("conversion_events_event_type_idx").on(table.eventType),
+  timestampIdx: index("conversion_events_timestamp_idx").on(table.timestamp),
+  urlIdx: index("conversion_events_url_idx").on(table.url),
+}));
+
+// Insert schemas for new tables
+export const insertCouponSchema = createInsertSchema(coupons).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCoupon = z.infer<typeof insertCouponSchema>;
+export type Coupon = typeof coupons.$inferSelect;
+
+export const insertUserTrialSchema = createInsertSchema(userTrials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertUserTrial = z.infer<typeof insertUserTrialSchema>;
+export type UserTrial = typeof userTrials.$inferSelect;
+
+export const insertAbandonedCartSchema = createInsertSchema(abandonedCarts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAbandonedCart = z.infer<typeof insertAbandonedCartSchema>;
+export type AbandonedCart = typeof abandonedCarts.$inferSelect;
+
+export const insertConversionEventSchema = createInsertSchema(conversionEvents);
+export type InsertConversionEvent = z.infer<typeof insertConversionEventSchema>;
+export type ConversionEvent = typeof conversionEvents.$inferSelect;
+
+// Relations for new tables
+export const couponsRelations = relations(coupons, ({ one }) => ({
+  createdBy: one(users, {
+    fields: [coupons.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const userTrialsRelations = relations(userTrials, ({ one }) => ({
+  user: one(users, {
+    fields: [userTrials.userId],
+    references: [users.id],
+  }),
+  plan: one(userPlans, {
+    fields: [userTrials.planId],
+    references: [userPlans.id],
+  }),
+}));
+
+export const abandonedCartsRelations = relations(abandonedCarts, ({ one }) => ({
+  user: one(users, {
+    fields: [abandonedCarts.userId],
+    references: [users.id],
+  }),
+  plan: one(userPlans, {
+    fields: [abandonedCarts.planId],
+    references: [userPlans.id],
+  }),
+}));
+
+export const conversionEventsRelations = relations(conversionEvents, ({ one }) => ({
+  user: one(users, {
+    fields: [conversionEvents.userId],
+    references: [users.id],
+  }),
+}));

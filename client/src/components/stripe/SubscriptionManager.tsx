@@ -15,13 +15,13 @@ export const SubscriptionManager: React.FC = () => {
     queryFn: () => apiRequest('/api/stripe/subscription/current'),
   });
 
-  const { data: plansData, isLoading: plansLoading } = useQuery({
-    queryKey: ['/api/stripe/plans'],
-    queryFn: () => apiRequest('/api/stripe/plans'),
+  const { data: productsData, isLoading: plansLoading } = useQuery({
+    queryKey: ['/api/stripe/products'],
+    queryFn: () => apiRequest('/api/stripe/products'),
   });
 
   const subscription = subscriptionData as Subscription | null;
-  const plans = plansData as Plan[] | null;
+  const plans = productsData?.subscriptions as Plan[] | null;
 
   const handleCancelSubscription = async () => {
     try {
