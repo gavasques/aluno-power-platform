@@ -37,6 +37,8 @@ export default function SubscriptionManagement() {
       }
     },
     onSuccess: (data) => {
+      console.log('🔍 [SUBSCRIPTION MANAGEMENT] Checkout mutation success:', data);
+      console.log('🔍 [SUBSCRIPTION MANAGEMENT] About to redirect to:', data.url);
       // Redirect to Stripe Checkout
       window.location.href = data.url;
     },

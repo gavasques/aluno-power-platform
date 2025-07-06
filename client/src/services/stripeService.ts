@@ -85,6 +85,8 @@ export interface ProductsResponse {
 export const stripeService = {
   // Create subscription checkout session
   createSubscriptionCheckout: async (request: CreateCheckoutRequest): Promise<CheckoutResponse> => {
+    console.log('🔍 [STRIPE SERVICE] Creating subscription checkout:', request);
+    
     const response = await fetch('/api/stripe/create-checkout-session', {
       method: 'POST',
       headers: {
@@ -98,13 +100,21 @@ export const stripeService = {
       })
     });
 
+    console.log('🔍 [STRIPE SERVICE] Response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json();
+      console.error('🔍 [STRIPE SERVICE] Error response:', error);
       throw new Error(error.details || 'Failed to create subscription checkout');
     }
 
     const data = await response.json();
-    return { sessionId: data.sessionId, url: data.checkoutUrl };
+    console.log('🔍 [STRIPE SERVICE] Success response:', data);
+    
+    const result = { sessionId: data.sessionId || '', url: data.checkoutUrl };
+    console.log('🔍 [STRIPE SERVICE] Returning data:', result);
+    
+    return result;
   },
 
   // Create credits checkout session
