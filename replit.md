@@ -111,13 +111,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 06, 2025 - 04:49 PM**: 🔧 AMAZON LISTING OPTIMIZER TESTE FINAL DEFINITIVO
-  - **Sistema de Debug Completo**: Logs detalhados implementados para titlesResponse e bulletPointsResponse
-  - **Extração Robusta de Conteúdo**: Sistema fallback para diferentes estruturas de resposta da IA
-  - **Root Cause Identificado**: Títulos e bullet points gerados mas não persistidos (length = 0 no banco)
-  - **Teste Final em Execução**: Pipeline completo executando com logs intensivos de debug
-  - **Objetivo**: Resolver definitivamente problema de persistência para pipeline 4-etapas 100% funcional
-  - **Status**: Executando teste final com sessão debug-final-resolver para capturar logs definitivos
+- **January 06, 2025 - 04:53 PM**: ✅ AMAZON LISTING OPTIMIZER PROMPT BULLET POINTS ATUALIZADO E OTIMIZADO
+  - **Prompt de Bullet Points Completamente Renovado**:
+    - ✅ **Estrutura profissional**: "Você é um especialista em criar bullet points persuasivos para Amazon"
+    - ✅ **Variáveis dinâmicas**: [NOME_PRODUTO], [MARCA], [CATEGORIA], [KEYWORDS], etc.
+    - ✅ **Regras rigorosas**: NUNCA emojis, NUNCA negrito, NUNCA inventar funcionalidades
+    - ✅ **Especificações técnicas**: 200-280 caracteres, mínimo 190, máximo 280
+    - ✅ **Formato padronizado**: ✅ TÍTULO: Descrição do benefício (sem negrito)
+    - ✅ **Foco comercial intensificado**: Chamadas à ação dinâmicas e persuasivas
+  - **Teste em Execução**: Nova sessão criada para validar prompt otimizado
+  - **Melhoria Garantida**: Bullet points mais comerciais, persuasivos e focados em conversão
 
 - **January 06, 2025 - 03:25 PM**: ✅ AMAZON LISTING OPTIMIZER PROMPTS OTIMIZADOS PARA CONVERSÃO MÁXIMA
   - **Prompt de Bullet Points Atualizado**:
