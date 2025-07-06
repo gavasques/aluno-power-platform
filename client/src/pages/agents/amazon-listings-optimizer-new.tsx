@@ -146,7 +146,7 @@ export default function AmazonListingsOptimizerNew() {
                   </SelectTrigger>
                   <SelectContent>
                     {isDepartmentsLoading ? (
-                      <SelectItem value="" disabled>Carregando categorias...</SelectItem>
+                      <SelectItem value="loading" disabled>Carregando categorias...</SelectItem>
                     ) : departments?.length > 0 ? (
                       departments.map((dept: any) => (
                         <SelectItem key={dept.id} value={dept.name}>
@@ -154,7 +154,7 @@ export default function AmazonListingsOptimizerNew() {
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="" disabled>Nenhuma categoria encontrada</SelectItem>
+                      <SelectItem value="empty" disabled>Nenhuma categoria encontrada</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
