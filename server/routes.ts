@@ -11,6 +11,8 @@ import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
 import os from "os";
+import { db } from "./db";
+import { aiGenerationLogs } from "../shared/schema";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -1996,7 +1998,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       global.customerServiceSessions.set(sessionId, sessionData);
 
-      // Log usage for tracking
+      // Save to AI Generation Logs table
+      try {
+        const fullPrompt = `${systemPrompt}\n\n${processedPrompt}`;
+        
+        await db.insert(aiGenerationLogs).values({
+          userId: user.id,
+          provider: 'anthropic',
+          model: agent.model || 'claude-sonnet-4-20250514',
+          prompt: fullPrompt,
+          response: responseText,
+          promptCharacters: fullPrompt.length,
+          responseCharacters: responseText.length,
+          inputTokens,
+          outputTokens,
+          totalTokens,
+          cost: totalCost.toString(),
+          duration: processingTime,
+          feature: 'amazon-customer-service'
+        });
+        
+        console.log(`💾 [AI_LOG] Saved generation log - User: ${user.id}, Model: ${agent.model}, Cost: $${totalCost.toFixed(6)}, Tokens: ${totalTokens}`);
+      } catch (logError) {
+        console.error('❌ [AI_LOG] Error saving generation log:', logError);
+      }
+
+      // Log usage for tracking (existing)
       try {
         await storage.createAgentUsage({
           agentId: 'amazon-customer-service',
