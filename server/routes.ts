@@ -2206,10 +2206,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalTokens,
           cost: totalCost.toString(),
           duration: processingTime,
-          feature: 'amazon-negative-reviews'
+          feature: 'amazon-negative-reviews',
+          metadata: {
+            agentType: 'amazon-negative-reviews',
+            agentName: 'Amazon Negative Reviews Response',
+            sessionId: sessionId,
+            requestData: {
+              sellerName: sellerName,
+              sellerPosition: sellerPosition,
+              customerName: customerName,
+              orderId: orderId,
+              userInfo: userInfo || 'Nenhuma informação adicional',
+              negativeReviewLength: negativeReview.length,
+              negativeReviewPreview: negativeReview.substring(0, 100) + (negativeReview.length > 100 ? '...' : '')
+            },
+            responseAnalysis: {
+              responseLength: responseText.length,
+              responseWordCount: responseText.split(' ').length,
+              sentiment: 'Resposta estratégica para avaliação negativa',
+              urgency: 'Alta - Resposta para feedback negativo',
+              keyElements: ['Empatia', 'Responsabilização', 'Solução proativa', 'Convite para nova experiência'],
+              responseStructure: ['Abertura empática', 'Responsabilização genuína', 'Solução proativa', 'Educação sutil', 'Convite futuro', 'Fechamento caloroso']
+            },
+            performance: {
+              inputTokens,
+              outputTokens,
+              totalTokens,
+              costUsd: totalCost,
+              processingTimeMs: processingTime,
+              tokensPerSecond: Math.round(totalTokens / (processingTime / 1000)),
+              efficiency: totalTokens > 3000 ? 'High' : totalTokens > 1500 ? 'Medium' : 'Low'
+            }
+          }
         });
         
-        console.log(`💾 [AI_LOG] Saved generation log - User: ${user.id}, Model: ${agent.model}, Cost: $${totalCost.toFixed(6)}, Tokens: ${totalTokens}`);
+        console.log(`📊 [AI_GENERATION_LOG] Amazon Negative Reviews processado`);
+        console.log(`📊 [DETAILS] Cliente: ${customerName} | Pedido: ${orderId} | Vendedor: ${sellerName}`);
+        console.log(`📊 [PERFORMANCE] Tokens: ${totalTokens} | Custo: $${totalCost.toFixed(6)} | Tempo: ${processingTime}ms`);
       } catch (logError) {
         console.error('❌ [AI_LOG] Error saving generation log:', logError);
       }
@@ -2256,7 +2289,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const sessionData = global.negativeReviewsSessions.get(sessionId);
-      res.json(sessionData);
+      
+      // Remove sensitive data from response (keep for internal logs only)
+      const { tokens_used, cost, ...publicSessionData } = sessionData;
+      
+      res.json(publicSessionData);
     } catch (error: any) {
       console.error('❌ [NEGATIVE_REVIEWS] Error getting session:', error);
       res.status(500).json({ error: error.message });

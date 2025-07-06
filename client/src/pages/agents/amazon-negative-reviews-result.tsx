@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, ArrowLeft, CheckCircle, Clock, Copy, DollarSign, MessageSquare, RefreshCw, TrendingUp, Zap } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle, Clock, Copy, MessageSquare, RefreshCw, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -28,12 +28,7 @@ interface SessionData {
     };
   };
   processing_time?: number;
-  tokens_used?: {
-    input: number;
-    output: number;
-    total: number;
-  };
-  cost?: number;
+
   completed_at?: string;
   error_message?: string;
 }
@@ -304,49 +299,7 @@ const AmazonNegativeReviewsResult = () => {
             </CardContent>
           </Card>
 
-          {sessionData.tokens_used && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  Uso de Tokens
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Entrada:</span>
-                  <span className="text-sm font-mono">{sessionData.tokens_used.input.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Saída:</span>
-                  <span className="text-sm font-mono">{sessionData.tokens_used.output.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center justify-between font-medium">
-                  <span className="text-sm text-gray-900">Total:</span>
-                  <span className="text-sm font-mono">{sessionData.tokens_used.total.toLocaleString()}</span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
-          {sessionData.cost !== undefined && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Custo
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center">
-                  <span className="text-2xl font-bold text-green-600">
-                    ${sessionData.cost.toFixed(6)}
-                  </span>
-                  <p className="text-xs text-gray-500 mt-1">Custo total da geração</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           <Card className="bg-blue-50 border-blue-200">
             <CardHeader>
