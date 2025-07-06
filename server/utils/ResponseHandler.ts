@@ -85,4 +85,27 @@ export class ResponseHandler {
       details
     });
   }
+
+  /**
+   * Handle error response with automatic status code detection
+   */
+  static handleError(res: Response, error: any, defaultMessage: string = 'Internal server error'): void {
+    console.error('Error details:', error);
+    
+    let statusCode = 500;
+    let message = defaultMessage;
+    
+    // Extract status code and message from error if available
+    if (error?.statusCode) {
+      statusCode = error.statusCode;
+    }
+    
+    if (error?.message) {
+      message = error.message;
+    } else if (typeof error === 'string') {
+      message = error;
+    }
+    
+    res.status(statusCode).json({ error: message });
+  }
 }
