@@ -93,6 +93,49 @@ router.post('/create-customer-portal', requireAuth, async (req: any, res: any) =
   }
 });
 
+// Get subscription status (simplified endpoint)
+router.get('/subscription-status', requireAuth, async (req: any, res: any) => {
+  try {
+    const userId = req.user.id;
+    
+    // Get user subscription from database
+    const { userSubscriptions, userCreditBalance } = await import('../../../shared/schema');
+    const { db } = await import('../../db');
+    const { eq } = await import('drizzle-orm');
+    
+    const subscription = await db.select()
+      .from(userSubscriptions)
+      .where(eq(userSubscriptions.userId, userId))
+      .limit(1);
+    
+    const credits = await db.select()
+      .from(userCreditBalance)
+      .where(eq(userCreditBalance.userId, userId))
+      .limit(1);
+
+    const hasSubscription = subscription.length > 0 && subscription[0].status === 'active';
+    
+    res.json({
+      hasSubscription,
+      currentPlan: hasSubscription ? {
+        name: subscription[0].planId === 1 ? 'Plano Basic' : 
+              subscription[0].planId === 2 ? 'Plano Premium' : 'Plano Master',
+        status: subscription[0].status,
+        currentPeriodEnd: subscription[0].endDate?.toLocaleDateString('pt-BR') || 'N/A'
+      } : null,
+      credits: {
+        current: credits[0]?.currentBalance || 0,
+        monthly: hasSubscription ? 
+          (subscription[0].planId === 1 ? 500 : 
+           subscription[0].planId === 2 ? 1200 : 3000) : 0
+      }
+    });
+  } catch (error) {
+    console.error('Error getting subscription status:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 // Get user's subscription info
 router.get('/subscription', requireAuth, async (req: any, res: any) => {
   try {
