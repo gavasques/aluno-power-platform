@@ -161,42 +161,7 @@ export const SubscriptionPlans: React.FC = () => {
         ))}
       </div>
 
-      {/* Pacotes de créditos */}
-      <div className="pt-8">
-        <h3 className="text-xl font-semibold mb-4">Comprar Créditos Avulsos</h3>
-        <div className="grid md:grid-cols-4 gap-4">
-          {STRIPE_CONFIG.creditPackages.map((pkg) => (
-            <Card key={pkg.id} className="text-center">
-              <CardHeader>
-                <CardTitle className="text-lg">{pkg.name}</CardTitle>
-                <div className="text-2xl font-bold text-blue-600">
-                  {formatCurrency(pkg.price)}
-                </div>
-                {pkg.bonus && (
-                  <Badge variant="secondary" className="mx-auto">
-                    +{pkg.bonus} bônus
-                  </Badge>
-                )}
-              </CardHeader>
-              <CardContent>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSubscribe(pkg.priceId)}
-                  disabled={isCreatingCheckout === pkg.priceId}
-                  className="w-full"
-                >
-                  {isCreatingCheckout === pkg.priceId ? (
-                    'Processando...'
-                  ) : (
-                    'Comprar'
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Crown, Coins, Settings, CreditCard } from 'lucide-react';
 import StripeCheckout from '@/components/stripe/StripeCheckout';
 import SubscriptionManager from '@/components/stripe/SubscriptionManager';
-import CreditManager from '@/components/stripe/CreditManager';
+
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
@@ -61,7 +61,7 @@ export default function MySubscriptions() {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="subscription" className="flex items-center gap-2">
             <Crown className="h-4 w-4" />
             Assinatura
@@ -69,10 +69,6 @@ export default function MySubscriptions() {
           <TabsTrigger value="plans" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Planos
-          </TabsTrigger>
-          <TabsTrigger value="credits" className="flex items-center gap-2">
-            <Coins className="h-4 w-4" />
-            Créditos
           </TabsTrigger>
           <TabsTrigger value="billing" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
@@ -101,11 +97,6 @@ export default function MySubscriptions() {
               <StripeCheckout currentPlan={subscriptionStatus?.currentPlan?.id} />
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Credits Tab */}
-        <TabsContent value="credits">
-          <CreditManager />
         </TabsContent>
 
         {/* Billing Tab */}

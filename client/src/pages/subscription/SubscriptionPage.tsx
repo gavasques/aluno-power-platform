@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SubscriptionManager } from '@/components/stripe/SubscriptionManager';
+import SubscriptionManager from '@/components/stripe/SubscriptionManager';
 import { PricingTable } from '@/components/stripe/PricingTable';
 import { PaymentMethodManager } from '@/components/stripe/PaymentMethodManager';
 import { InvoiceViewer } from '@/components/stripe/InvoiceViewer';

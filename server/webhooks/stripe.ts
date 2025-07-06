@@ -12,7 +12,7 @@ import {
   stripePrices
 } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
-import { creditService } from '../services/creditService';
+
 import { emailService } from '../services/emailService';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -187,16 +187,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     },
   });
 
-  // Add credits for active subscription
-  if (subscription.status === 'active') {
-    await creditService.creditCredits(
-      user.id,
-      planInfo.creditsIncluded,
-      `Créditos do plano ${planInfo.name}`,
-      'subscription',
-      subscription.id
-    );
-  }
+  // Note: Credit system removed - subscription-only platform
 
   // Send welcome email
   await emailService.sendSubscriptionWelcome(user.email, planInfo.name);

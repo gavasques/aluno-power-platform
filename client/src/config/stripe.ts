@@ -48,45 +48,6 @@ export const STRIPE_CONFIG = {
         'Consultoria mensal'
       ]
     }
-  ],
-
-  // Pacotes de Créditos Avulsos
-  creditPackages: [
-    {
-      id: 'credits-100',
-      name: '100 Créditos',
-      description: 'Pacote básico de créditos',
-      price: 19.90,
-      priceId: 'price_1RhzYxJX2OwQ92jAEmsBYGxp',
-      credits: 100
-    },
-    {
-      id: 'credits-300',
-      name: '300 Créditos',
-      description: 'Pacote popular de créditos',
-      price: 49.90,
-      priceId: 'price_1RhzYyJX2OwQ92jAUtCdkBRM',
-      credits: 300,
-      bonus: 30 // 10% de bônus
-    },
-    {
-      id: 'credits-700',
-      name: '700 Créditos',
-      description: 'Pacote avançado de créditos',
-      price: 99.90,
-      priceId: 'price_1RhzYyJX2OwQ92jAmMux0Kic',
-      credits: 700,
-      bonus: 100 // ~14% de bônus
-    },
-    {
-      id: 'credits-1500',
-      name: '1500 Créditos',
-      description: 'Pacote premium de créditos',
-      price: 199.00,
-      priceId: 'price_1RhzYyJX2OwQ92jAhn5aUMPj',
-      credits: 1500,
-      bonus: 300 // 20% de bônus
-    }
   ]
 };
 

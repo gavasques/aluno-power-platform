@@ -15,8 +15,7 @@ import {
 } from 'lucide-react';
 
 // Dashboard Components
-import { CreditCard } from '@/components/dashboard/CreditCard';
-import { SubscriptionCard } from '@/components/dashboard/SubscriptionCard';
+import { SubscriptionStatus } from '@/components/dashboard/SubscriptionStatus';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { RecommendationCard } from '@/components/dashboard/RecommendationCard';
@@ -124,8 +123,8 @@ const UserDashboard: React.FC = () => {
     }
   };
 
-  const handleBuyCredits = () => {
-    handleQuickAction('buy_credits');
+  const handleSubscribe = () => {
+    handleQuickAction('upgrade_plan');
   };
 
   const handleManageSubscription = () => {
@@ -207,12 +206,12 @@ const UserDashboard: React.FC = () => {
             <div className="flex items-center gap-4">
               <Badge variant="outline" className="px-3 py-1">
                 <Zap className="h-3 w-3 mr-1" />
-                {dashboardData?.user?.plan || 'Gratuito'}
+                {dashboardData?.subscription?.planName || 'Sem Assinatura'}
               </Badge>
               <div className="text-right">
-                <p className="text-sm text-muted-foreground">Saldo de Créditos</p>
+                <p className="text-sm text-muted-foreground">Status da Assinatura</p>
                 <p className="text-lg font-semibold">
-                  {dashboardData?.user?.creditBalance?.toLocaleString() || 0}
+                  {dashboardData?.subscription?.status === 'active' ? 'Ativa' : 'Inativa'}
                 </p>
               </div>
             </div>
@@ -224,18 +223,7 @@ const UserDashboard: React.FC = () => {
       <main className="container mx-auto px-4 py-6">
         {/* Status Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <CreditCard 
-            balance={dashboardData?.user?.creditBalance}
-            usage={{
-              thisMonth: dashboardData?.credits?.usageThisMonth || 0,
-              lastMonth: 0, // TODO: Get from API
-              topFeatures: [], // TODO: Get from API
-              projection: 0, // TODO: Calculate
-            }}
-            onBuyCredits={handleBuyCredits}
-          />
-          
-          <SubscriptionCard 
+          <SubscriptionStatus 
             subscription={dashboardData?.subscription}
             onManage={handleManageSubscription}
           />
