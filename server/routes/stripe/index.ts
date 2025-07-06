@@ -26,13 +26,21 @@ router.post('/create-checkout-session', requireAuth, async (req: any, res: any) 
 
     // Price ID mapping for plans
     const PRICE_IDS = {
-      'basic': process.env.STRIPE_PRICE_BASIC_MONTHLY || 'price_basic_monthly',
-      'premium': process.env.STRIPE_PRICE_PREMIUM_MONTHLY || 'price_premium_monthly', 
-      'master': process.env.STRIPE_PRICE_MASTER_MONTHLY || 'price_master_monthly'
+      'basic': 'price_1RhzvQJX2OwQ92jArTiSMjIn',
+      'premium': 'price_1Rhzw4JX2OwQ92jAwXdSc4mk', 
+      'master': 'price_1RhzwJJX2OwQ92jAhoyOwZQY'
     };
 
     const finalPriceId = planId && PRICE_IDS[planId as keyof typeof PRICE_IDS] ? 
       PRICE_IDS[planId as keyof typeof PRICE_IDS] : priceId;
+
+    console.log('🔍 [Stripe Debug] Creating checkout session:', {
+      planId,
+      priceId,
+      finalPriceId,
+      userId,
+      PRICE_IDS
+    });
 
     const session = await stripeService.createSubscriptionCheckout(
       userId,
