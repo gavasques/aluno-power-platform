@@ -22,6 +22,8 @@ export class AmazonListingService {
 
   // Atualizar dados da sessão
   async updateSessionData(sessionId: string, data: Partial<InsertAmazonListingSession>): Promise<AmazonListingSession> {
+    console.log('📝 updateSessionData called:', { sessionId, dataKeys: Object.keys(data) });
+    
     const [session] = await db
       .update(amazonListingSessions)
       .set({ 
@@ -30,6 +32,12 @@ export class AmazonListingService {
       })
       .where(eq(amazonListingSessions.id, sessionId))
       .returning();
+    
+    console.log('💾 updateSessionData result:', { 
+      sessionId, 
+      bulletPointsUpdated: !!session?.bulletPoints,
+      bulletPointsLength: session?.bulletPoints?.length || 0 
+    });
     
     return session;
   }
@@ -48,8 +56,17 @@ export class AmazonListingService {
   // Processar Etapa 1: Análise de Avaliações
   async processStep1_AnalysisReviews(sessionId: string): Promise<string> {
     const startTime = Date.now();
+    
+    console.log('🔍 Buscando sessão:', sessionId);
     const session = await this.getSession(sessionId);
-    if (!session) throw new Error('Sessão não encontrada');
+    console.log('🔍 Sessão encontrada:', !!session, session?.id);
+    
+    if (!session) {
+      // Tentar busca direta no banco para debug
+      const [directSearch] = await db.select().from(amazonListingSessions).where(eq(amazonListingSessions.id, sessionId));
+      console.log('🔍 Busca direta no banco:', !!directSearch, directSearch?.id);
+      throw new Error('Sessão não encontrada');
+    }
 
     // Atualizar status
     await this.updateSessionData(sessionId, { 
@@ -476,10 +493,12 @@ export class AmazonListingService {
       const duration = Date.now() - startTime;
 
       // Salvar bullet points na sessão
+      console.log('🔄 ANTES de salvar bullet points na sessão');
       await this.updateSessionData(sessionId, { 
         bulletPoints: bulletPointsResult,
         status: 'step3_completed'
       });
+      console.log('✅ DEPOIS de salvar bullet points na sessão');
 
       // Simular resposta completa do AI provider para Prompt 3
       const prompt3Output = {

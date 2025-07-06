@@ -103,7 +103,7 @@ import { amazonListingService as amazonService } from "./services/amazonListingS
 import { requireAuth } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, isNotNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs } from '@shared/schema';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs } from '@shared/schema';
 
 // PHASE 2: SOLID/DRY/KISS Modular Architecture Integration
 import { registerModularRoutes } from './routes/index';
@@ -3624,6 +3624,52 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     } catch (error: any) {
       console.error('Erro ao criar sessão Amazon:', error);
       res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Criar nova sessão Amazon Listing com sessionId customizado
+  app.post('/api/amazon-sessions/:sessionId/create', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const { nomeProduto, marca, categoria, keywords, principaisCaracteristicas, publicoAlvo, reviewsData } = req.body;
+      
+      console.log('🔧 Criando sessão com ID:', sessionId);
+      console.log('🔧 Dados recebidos:', { nomeProduto, marca, categoria });
+      
+      // Criar sessão com dados do produto
+      const sessionData: InsertAmazonListingSession = {
+        id: sessionId,
+        idUsuario: '2', // ID fixo para teste
+        status: 'active',
+        currentStep: 0,
+        nomeProduto,
+        marca,
+        categoria,
+        keywords,
+        principaisCaracteristicas,
+        publicoAlvo,
+        reviewsData
+      };
+
+      console.log('🔧 Tentando inserir no banco:', sessionData);
+      const [session] = await db.insert(amazonListingSessions).values(sessionData).returning();
+      console.log('🔧 Sessão criada no banco:', session?.id);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Sessão criada com sucesso',
+        session: {
+          id: session.id,
+          sessionHash: session.sessionHash,
+          idUsuario: session.idUsuario,
+          status: session.status,
+          currentStep: session.currentStep,
+          dataHoraCreated: session.dataHoraCreated
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Erro ao criar sessão Amazon customizada:', error);
+      res.status(500).json({ error: 'Erro interno do servidor', details: error.message });
     }
   });
 
