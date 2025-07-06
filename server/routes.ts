@@ -5,6 +5,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import bcryptjs from "bcryptjs";
 import multer from "multer";
 import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { storage } from "./storage";
 import fs from "fs/promises";
 import fsSync from "fs";
@@ -1950,7 +1951,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🤖 [CUSTOMER_SERVICE] Processing with Anthropic Claude:', agent.model);
 
       // Call Anthropic API
-      const Anthropic = require('@anthropic-ai/sdk');
       const anthropic = new Anthropic({
         apiKey: process.env.ANTHROPIC_API_KEY,
       });

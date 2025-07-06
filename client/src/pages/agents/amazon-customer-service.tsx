@@ -10,8 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 const AmazonCustomerService = () => {
-  console.log("🔥 AmazonCustomerService component loaded - SPECIFIC VERSION");
-  
   const [emailContent, setEmailContent] = useState("");
   const [userObservations, setUserObservations] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
