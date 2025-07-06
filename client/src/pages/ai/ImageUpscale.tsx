@@ -1,7 +1,7 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { Sparkles } from "lucide-react";
 import { ImageUploader } from "@/components/ai/ImageUploader";
 import { UpscaleResult } from "@/components/ai/UpscaleResult";
@@ -45,9 +45,7 @@ const UpscaleControls = ({
             <div className="text-center space-y-1">
               <div className="font-medium">{option.label}</div>
               <div className="text-sm text-muted-foreground">{option.time}</div>
-              <Badge variant="outline" className="text-xs">
-                ${UPSCALE_CONFIG.costs[option.value]}
-              </Badge>
+              
             </div>
           </button>
         ))}
@@ -67,7 +65,7 @@ const UpscaleControls = ({
   </div>
 );
 
-export default function ImageUpscale() {
+function ImageUpscale() {
   const {
     uploadedImage,
     processedImage,
