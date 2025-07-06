@@ -11,8 +11,8 @@ export const SubscriptionManager: React.FC = () => {
   const queryClient = useQueryClient();
 
   const { data: subscriptionData, isLoading: subscriptionLoading } = useQuery({
-    queryKey: ['/api/stripe/subscription/current'],
-    queryFn: () => apiRequest('/api/stripe/subscription/current'),
+    queryKey: ['/api/stripe/subscription'],
+    queryFn: () => apiRequest('/api/stripe/subscription'),
   });
 
   const { data: productsData, isLoading: plansLoading } = useQuery({
@@ -25,11 +25,11 @@ export const SubscriptionManager: React.FC = () => {
 
   const handleCancelSubscription = async () => {
     try {
-      await apiRequest('/api/stripe/subscription/cancel', {
+      await apiRequest('/api/stripe/cancel-subscription', {
         method: 'POST',
       });
       
-      queryClient.invalidateQueries({ queryKey: ['/api/stripe/subscription/current'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stripe/subscription'] });
       setShowCancelModal(false);
       
       toast({
@@ -202,7 +202,7 @@ export const SubscriptionManager: React.FC = () => {
                   planName={plan.name}
                   className="w-full"
                   onSuccess={() => {
-                    queryClient.invalidateQueries({ queryKey: ['/api/stripe/subscription/current'] });
+                    queryClient.invalidateQueries({ queryKey: ['/api/stripe/subscription'] });
                     toast({
                       title: "Sucesso!",
                       description: `Assinatura do plano ${plan.name} ativada com sucesso.`,

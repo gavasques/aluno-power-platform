@@ -15,6 +15,7 @@ import materialCategoryRoutes from './materialCategoryRoutes';
 import materialTypeRoutes from './materialTypeRoutes';
 import productRoutes from './productRoutes';
 import dashboardRoutes from './dashboard';
+import stripeRoutes from './stripe';
 
 /**
  * Register all modular routes
@@ -37,6 +38,9 @@ export function registerModularRoutes(app: Express): void {
   
   // User Dashboard Routes - Complete Dashboard System
   app.use('/api/user/dashboard', dashboardRoutes);
+  
+  // Stripe Payment Routes - Complete Stripe Integration
+  app.use('/api/stripe', stripeRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);
