@@ -1239,6 +1239,133 @@ export const userActivityLogs = pgTable("user_activity_logs", {
   createdIdx: index("user_activity_created_idx").on(table.createdAt),
 }));
 
+// =============================================================================
+// EXTENDED TABLES FOR CREDITS AND SUBSCRIPTIONS SYSTEM
+// =============================================================================
+
+// Feature Costs - Definir custo em créditos de cada funcionalidade
+export const featureCosts = pgTable("feature_costs", {
+  id: serial("id").primaryKey(),
+  featureName: text("feature_name").notNull().unique(),
+  costPerUse: integer("cost_per_use").notNull(),
+  description: text("description"),
+  category: text("category"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  featureNameIdx: index("feature_costs_name_idx").on(table.featureName),
+  categoryIdx: index("feature_costs_category_idx").on(table.category),
+  activeIdx: index("feature_costs_active_idx").on(table.isActive),
+}));
+
+// Subscription Plans - Definir os planos de assinatura disponíveis
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  priceCents: integer("price_cents").notNull(),
+  currency: text("currency").notNull().default("BRL"),
+  creditsIncluded: integer("credits_included").notNull(),
+  stripePriceId: text("stripe_price_id").unique(),
+  features: jsonb("features"),
+  maxUsers: integer("max_users"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  nameIdx: index("subscription_plans_name_idx").on(table.name),
+  activeIdx: index("subscription_plans_active_idx").on(table.isActive),
+  sortIdx: index("subscription_plans_sort_idx").on(table.sortOrder),
+  stripePriceIdx: index("subscription_plans_stripe_price_idx").on(table.stripePriceId),
+}));
+
+// Subscriptions - Gerenciar assinaturas dos usuários (Stripe integration)
+export const subscriptions = pgTable("subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  stripeSubscriptionId: text("stripe_subscription_id").unique(),
+  stripeCustomerId: text("stripe_customer_id"),
+  planId: integer("plan_id").references(() => subscriptionPlans.id).notNull(),
+  status: text("status").notNull(), // 'active', 'canceled', 'past_due', 'unpaid', 'trialing'
+  currentPeriodStart: timestamp("current_period_start").notNull(),
+  currentPeriodEnd: timestamp("current_period_end").notNull(),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+  trialEnd: timestamp("trial_end"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("subscriptions_user_idx").on(table.userId),
+  statusIdx: index("subscriptions_status_idx").on(table.status),
+  stripeSubIdx: index("subscriptions_stripe_sub_idx").on(table.stripeSubscriptionId),
+  stripeCustomerIdx: index("subscriptions_stripe_customer_idx").on(table.stripeCustomerId),
+  planIdx: index("subscriptions_plan_idx").on(table.planId),
+}));
+
+// Credit Packages - Pacotes de créditos avulsos
+export const creditPackages = pgTable("credit_packages", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  creditsAmount: integer("credits_amount").notNull(),
+  priceCents: integer("price_cents").notNull(),
+  currency: text("currency").notNull().default("BRL"),
+  stripePriceId: text("stripe_price_id").unique(),
+  bonusCredits: integer("bonus_credits").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  nameIdx: index("credit_packages_name_idx").on(table.name),
+  activeIdx: index("credit_packages_active_idx").on(table.isActive),
+  sortIdx: index("credit_packages_sort_idx").on(table.sortOrder),
+  stripePriceIdx: index("credit_packages_stripe_price_idx").on(table.stripePriceId),
+}));
+
+// Extended Payment History - Histórico de pagamentos com funcionalidades avançadas
+export const extendedPaymentHistory = pgTable("extended_payment_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  stripeInvoiceId: text("stripe_invoice_id"),
+  amountCents: integer("amount_cents").notNull(),
+  currency: text("currency").notNull().default("BRL"),
+  status: text("status").notNull(), // 'succeeded', 'failed', 'pending', 'canceled', 'refunded'
+  paymentMethod: text("payment_method"),
+  description: text("description"),
+  failureReason: text("failure_reason"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("extended_payment_history_user_idx").on(table.userId),
+  statusIdx: index("extended_payment_history_status_idx").on(table.status),
+  stripePaymentIdx: index("extended_payment_history_stripe_payment_idx").on(table.stripePaymentIntentId),
+  stripeInvoiceIdx: index("extended_payment_history_stripe_invoice_idx").on(table.stripeInvoiceId),
+  createdIdx: index("extended_payment_history_created_idx").on(table.createdAt),
+}));
+
+// Admin Actions - Auditoria de ações administrativas
+export const adminActions = pgTable("admin_actions", {
+  id: serial("id").primaryKey(),
+  adminUserId: integer("admin_user_id").references(() => users.id).notNull(),
+  targetUserId: integer("target_user_id").references(() => users.id),
+  actionType: text("action_type").notNull(), // 'credit_adjustment', 'user_update', 'permission_change', 'subscription_modify'
+  description: text("description").notNull(),
+  oldValues: jsonb("old_values"),
+  newValues: jsonb("new_values"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  adminUserIdx: index("admin_actions_admin_user_idx").on(table.adminUserId),
+  targetUserIdx: index("admin_actions_target_user_idx").on(table.targetUserId),
+  actionTypeIdx: index("admin_actions_action_type_idx").on(table.actionType),
+  createdIdx: index("admin_actions_created_idx").on(table.createdAt),
+}));
+
 // Insert schemas for generated images
 export const insertGeneratedImageSchema = createInsertSchema(generatedImages);
 export type InsertGeneratedImage = z.infer<typeof insertGeneratedImageSchema>;
@@ -2342,6 +2469,88 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
 export const paymentHistoryRelations = relations(paymentHistory, ({ one }) => ({
   user: one(users, {
     fields: [paymentHistory.userId],
+    references: [users.id],
+  }),
+}));
+
+// Extended tables schemas and types
+export const insertFeatureCostSchema = createInsertSchema(featureCosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertFeatureCost = z.infer<typeof insertFeatureCostSchema>;
+export type FeatureCost = typeof featureCosts.$inferSelect;
+
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+
+export const insertCreditPackageSchema = createInsertSchema(creditPackages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCreditPackage = z.infer<typeof insertCreditPackageSchema>;
+export type CreditPackage = typeof creditPackages.$inferSelect;
+
+export const insertExtendedPaymentHistorySchema = createInsertSchema(extendedPaymentHistory).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertExtendedPaymentHistory = z.infer<typeof insertExtendedPaymentHistorySchema>;
+export type ExtendedPaymentHistory = typeof extendedPaymentHistory.$inferSelect;
+
+export const insertAdminActionSchema = createInsertSchema(adminActions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAdminAction = z.infer<typeof insertAdminActionSchema>;
+export type AdminAction = typeof adminActions.$inferSelect;
+
+// Extended tables relations
+export const featureCostsRelations = relations(featureCosts, ({ many }) => ({
+  // Feature costs don't need direct relations, used by reference
+}));
+
+export const subscriptionPlansRelations = relations(subscriptionPlans, ({ many }) => ({
+  subscriptions: many(subscriptions),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
+  plan: one(subscriptionPlans, {
+    fields: [subscriptions.planId],
+    references: [subscriptionPlans.id],
+  }),
+}));
+
+export const creditPackagesRelations = relations(creditPackages, ({ many }) => ({
+  // Credit packages don't need direct relations, used by reference
+}));
+
+export const adminActionsRelations = relations(adminActions, ({ one }) => ({
+  adminUser: one(users, {
+    fields: [adminActions.adminUserId],
+    references: [users.id],
+  }),
+  targetUser: one(users, {
+    fields: [adminActions.targetUserId],
     references: [users.id],
   }),
 }));
