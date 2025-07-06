@@ -38,9 +38,18 @@ export default function SubscriptionManagement() {
     },
     onSuccess: (data) => {
       console.log('🔍 [SUBSCRIPTION MANAGEMENT] Checkout mutation success:', data);
-      console.log('🔍 [SUBSCRIPTION MANAGEMENT] About to redirect to:', data.url);
-      // Redirect to Stripe Checkout
-      window.location.href = data.url;
+      console.log('🔍 [SUBSCRIPTION MANAGEMENT] About to open checkout in new tab:', data.url);
+      
+      // Open Stripe Checkout in a new tab to completely avoid iframe issues
+      const newWindow = window.open(data.url, '_blank', 'noopener,noreferrer');
+      
+      if (!newWindow) {
+        // Fallback if popup was blocked
+        console.log('🔍 [SUBSCRIPTION MANAGEMENT] Popup blocked, using direct redirect');
+        window.location.href = data.url;
+      } else {
+        console.log('🔍 [SUBSCRIPTION MANAGEMENT] Checkout opened in new tab successfully');
+      }
     },
     onError: (error) => {
       console.error('Checkout error:', error);
