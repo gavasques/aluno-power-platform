@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CreditCard, Calendar, AlertTriangle, ExternalLink, Crown, Zap } from 'lucide-react';
 import { stripeService, formatStripeAmount, formatStripeDate, getSubscriptionStatusBadge } from '@/services/stripeService';
-import { SUBSCRIPTION_PLANS, CREDIT_PACKAGES, formatPrice, formatCredits } from '../../../shared/stripe-config';
+import { SUBSCRIPTION_PLANS, formatPrice } from '../../../shared/stripe-config';
 import { useToast } from '@/hooks/use-toast';
 import { StripeCheckoutModal } from '@/components/stripe/StripeCheckoutModal';
 
@@ -32,12 +32,8 @@ export default function SubscriptionManagement() {
 
   // Create checkout session mutation
   const createCheckoutMutation = useMutation({
-    mutationFn: ({ type, priceId }: { type: 'subscription' | 'credits'; priceId: string }) => {
-      if (type === 'subscription') {
-        return stripeService.createSubscriptionCheckout({ priceId });
-      } else {
-        return stripeService.createCreditsCheckout({ priceId });
-      }
+    mutationFn: ({ priceId }: { priceId: string }) => {
+      return stripeService.createSubscriptionCheckout({ priceId });
     },
     onSuccess: (data) => {
       console.log('🔍 [SUBSCRIPTION MANAGEMENT] Checkout URL received:', data.url);
@@ -76,12 +72,7 @@ export default function SubscriptionManagement() {
 
   const handleSubscribe = async (priceId: string) => {
     setLoadingCheckout(priceId);
-    createCheckoutMutation.mutate({ type: 'subscription', priceId });
-  };
-
-  const handleBuyCredits = async (priceId: string) => {
-    setLoadingCheckout(priceId);
-    createCheckoutMutation.mutate({ type: 'credits', priceId });
+    createCheckoutMutation.mutate({ priceId });
   };
 
   const handleManageBilling = () => {
@@ -97,7 +88,7 @@ export default function SubscriptionManagement() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Gerenciar Assinatura</h1>
         <p className="text-muted-foreground">
-          Gerencie sua assinatura, compre créditos e visualize seu histórico de cobrança
+          Gerencie sua assinatura e visualize seu histórico de cobrança
         </p>
       </div>
 
@@ -136,9 +127,9 @@ export default function SubscriptionManagement() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Créditos mensais</p>
+                  <p className="text-sm text-muted-foreground">Valor mensal</p>
                   <p className="text-sm font-medium">
-                    {formatCredits(currentPlan?.credits || 0)} créditos
+                    {formatStripeAmount(currentPlan?.unitAmount || 0, currentPlan?.currency)}
                   </p>
                 </div>
               </div>
@@ -231,56 +222,6 @@ export default function SubscriptionManagement() {
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
                   {currentPlan?.id === plan.priceId ? 'Plano Atual' : 'Assinar'}
-                </Button>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Credit Packages */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Pacotes de Créditos Avulsos</CardTitle>
-          <CardDescription>
-            Compre créditos adicionais conforme sua necessidade
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {CREDIT_PACKAGES.map((pkg) => (
-              <div
-                key={pkg.id}
-                className={`border rounded-lg p-4 ${
-                  pkg.popular ? 'border-primary ring-2 ring-primary/20' : 'border-border'
-                }`}
-              >
-                {pkg.popular && (
-                  <Badge className="mb-2" size="sm">Melhor Valor</Badge>
-                )}
-                
-                <div className="text-center mb-4">
-                  <h4 className="text-lg font-semibold">{pkg.name}</h4>
-                  <p className="text-2xl font-bold text-primary">
-                    {formatPrice(pkg.price)}
-                  </p>
-                  {pkg.bonus && (
-                    <p className="text-sm text-green-600">
-                      +{formatCredits(pkg.bonus)} créditos bônus
-                    </p>
-                  )}
-                </div>
-
-                <Button
-                  onClick={() => handleBuyCredits(pkg.priceId)}
-                  disabled={loadingCheckout === pkg.priceId}
-                  className="w-full"
-                  variant="outline"
-                >
-                  {loadingCheckout === pkg.priceId ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : null}
-                  Comprar
                 </Button>
               </div>
             ))}
