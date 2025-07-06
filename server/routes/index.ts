@@ -14,6 +14,8 @@ import materialRoutes from './materialRoutes';
 import materialCategoryRoutes from './materialCategoryRoutes';
 import materialTypeRoutes from './materialTypeRoutes';
 import productRoutes from './productRoutes';
+import { adminRoutes } from './adminRoutes';
+import { contentRoutes } from './contentRoutes';
 
 /**
  * Register all modular routes
@@ -34,9 +36,12 @@ export function registerModularRoutes(app: Express): void {
   // PHASE 4: Products Domain Modularization - SOLID/DRY/KISS
   app.use('/api/products', productRoutes);
   
+  // PHASE 6: Admin & Content Domain Modularization - SOLID/DRY/KISS
+  app.use('/api', adminRoutes);
+  app.use('/api', contentRoutes);
+  
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);
-  // app.use('/api/users', userRoutes);
 }
 
 /**
@@ -47,5 +52,7 @@ export {
   materialRoutes,
   materialCategoryRoutes,
   materialTypeRoutes,
-  productRoutes
+  productRoutes,
+  adminRoutes,
+  contentRoutes
 };

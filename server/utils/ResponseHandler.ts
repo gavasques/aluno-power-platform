@@ -51,4 +51,38 @@ export class ResponseHandler {
   static noContent(res: Response): void {
     res.status(204).send();
   }
+
+  /**
+   * Send bad request response with details
+   */
+  static badRequest(res: Response, message: string = 'Bad request', details?: any): void {
+    res.status(400).json({ 
+      error: message,
+      details
+    });
+  }
+
+  /**
+   * Send conflict response
+   */
+  static conflict(res: Response, message: string = 'Resource conflict'): void {
+    res.status(409).json({ error: message });
+  }
+
+  /**
+   * Send forbidden response
+   */
+  static forbidden(res: Response, message: string = 'Access forbidden'): void {
+    res.status(403).json({ error: message });
+  }
+
+  /**
+   * Send service unavailable response
+   */
+  static serviceUnavailable(res: Response, message: string = 'Service unavailable', details?: string): void {
+    res.status(503).json({ 
+      error: message,
+      details
+    });
+  }
 }
