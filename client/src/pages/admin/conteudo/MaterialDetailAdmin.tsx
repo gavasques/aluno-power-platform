@@ -24,7 +24,7 @@ import {
   ExternalLink,
   Edit
 } from 'lucide-react';
-import { Material } from '@/types/material';
+import type { MaterialWithType } from '@shared/schema';
 
 const getIcon = (iconName: string) => {
   const icons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -34,7 +34,7 @@ const getIcon = (iconName: string) => {
 };
 
 // Re-using MaterialViewer logic from src/pages/myarea/MaterialDetail.tsx
-const MaterialViewer = ({ material }: { material: Material }) => {
+const MaterialViewer = ({ material }: { material: MaterialWithType }) => {
   const {} = useMaterials();
   
   // Note: incrementView functionality removed
@@ -143,7 +143,7 @@ const MaterialViewer = ({ material }: { material: Material }) => {
 const MaterialDetailAdmin = () => {
   const { id } = useParams<{ id: string }>();
   const { materials } = useMaterials();
-  const material = materials.find(m => m.id === id);
+  const material = materials.find(m => m.id === parseInt(id || '0'));
 
   if (!material) {
     return <div>Material não encontrado.</div>;

@@ -22,7 +22,7 @@ import {
   Image,
   ExternalLink
 } from 'lucide-react';
-import { Material } from '@/types/material';
+import type { MaterialWithType } from '@shared/schema';
 
 const getIcon = (iconName: string) => {
   const icons: Record<string, React.ComponentType> = {
@@ -37,7 +37,7 @@ const getIcon = (iconName: string) => {
   return icons[iconName] || FileText;
 };
 
-const MaterialViewer = ({ material }: { material: Material }) => {
+const MaterialViewer = ({ material }: { material: MaterialWithType }) => {
   const {} = useMaterials();
   
   // Note: incrementView functionality removed
@@ -77,7 +77,7 @@ const MaterialViewer = ({ material }: { material: Material }) => {
             <video
               controls
               className="w-full h-full rounded-lg"
-              src={material.fileUrl || material.externalUrl}
+              src={material.fileUrl || material.externalUrl || undefined}
             >
               Seu navegador não suporta o elemento de vídeo.
             </video>
@@ -96,7 +96,7 @@ const MaterialViewer = ({ material }: { material: Material }) => {
         return (
           <div className="w-full h-96 border border-border rounded-lg">
             <iframe
-              src={material.externalUrl}
+              src={material.externalUrl || undefined}
               className="w-full h-full rounded-lg"
               title={material.title}
             />
@@ -107,7 +107,7 @@ const MaterialViewer = ({ material }: { material: Material }) => {
         return (
           <div className="w-full">
             <img
-              src={material.fileUrl || material.externalUrl}
+              src={material.fileUrl || material.externalUrl || undefined}
               alt={material.title}
               className="w-full h-auto rounded-lg border border-border"
             />
@@ -123,7 +123,7 @@ const MaterialViewer = ({ material }: { material: Material }) => {
                 Visualização não disponível para este tipo de arquivo
               </p>
               <Button asChild className="mt-4">
-                <a href={material.fileUrl || material.externalUrl} download>
+                <a href={material.fileUrl || material.externalUrl || undefined} download>
                   <Download className="h-4 w-4 mr-2" />
                   Baixar arquivo
                 </a>
@@ -166,7 +166,7 @@ const HubMaterialDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { materials, incrementDownload } = useMaterials();
   
-  const material = materials.find(m => m.id === id);
+  const material = materials.find(m => m.id === parseInt(id || '0'));
   
   if (!material) {
     return (
@@ -237,7 +237,7 @@ const HubMaterialDetail = () => {
               <div>
                 <label className="text-sm font-medium text-foreground">Tags</label>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {material.tags.map(tag => (
+                  {material.tags?.map(tag => (
                     <Badge key={tag} variant="outline">
                       {tag}
                     </Badge>
@@ -275,7 +275,7 @@ const HubMaterialDetail = () => {
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Enviado por:</span>
-                <span className="text-foreground">{material.uploadedBy.name}</span>
+                <span className="text-foreground">Usuário #{material.uploadedBy}</span>
               </div>
 
               {material.fileSize && (
@@ -287,28 +287,31 @@ const HubMaterialDetail = () => {
                 </div>
               )}
 
-              {material.technicalInfo && (
-                <div className="space-y-2 text-sm">
-                  {material.technicalInfo.duration && (
-                    <div>
-                      <span className="text-muted-foreground">Duração:</span>
-                      <span className="text-foreground ml-2">{material.technicalInfo.duration}</span>
-                    </div>
-                  )}
-                  {material.technicalInfo.format && (
-                    <div>
-                      <span className="text-muted-foreground">Formato:</span>
-                      <span className="text-foreground ml-2">{material.technicalInfo.format}</span>
-                    </div>
-                  )}
-                  {material.technicalInfo.quality && (
-                    <div>
-                      <span className="text-muted-foreground">Qualidade:</span>
-                      <span className="text-foreground ml-2">{material.technicalInfo.quality}</span>
-                    </div>
-                  )}
-                </div>
-              )}
+              {material.technicalInfo && typeof material.technicalInfo === 'object' && (() => {
+                const techInfo = material.technicalInfo as any;
+                return (
+                  <div className="space-y-2 text-sm">
+                    {techInfo.duration && (
+                      <div>
+                        <span className="text-muted-foreground">Duração:</span>
+                        <span className="text-foreground ml-2">{techInfo.duration}</span>
+                      </div>
+                    )}
+                    {techInfo.format && (
+                      <div>
+                        <span className="text-muted-foreground">Formato:</span>
+                        <span className="text-foreground ml-2">{techInfo.format}</span>
+                      </div>
+                    )}
+                    {techInfo.quality && (
+                      <div>
+                        <span className="text-muted-foreground">Qualidade:</span>
+                        <span className="text-foreground ml-2">{techInfo.quality}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
 
