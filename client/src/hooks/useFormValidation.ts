@@ -17,7 +17,7 @@ export interface ValidationErrors {
   [key: string]: string;
 }
 
-export function useFormValidation(initialData: any, rules: ValidationRules) {
+export function useFormValidation(initialData: any = {}, rules: ValidationRules = {}) {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isValid, setIsValid] = useState(false);
 
@@ -102,9 +102,11 @@ export function useFormValidation(initialData: any, rules: ValidationRules) {
     errors,
     isValid,
     validate,
+    validateField,
     validateSingleField,
+    validateForm,
     clearErrors,
     clearFieldError,
-    validateForm
+    clearError: clearFieldError
   };
 }
