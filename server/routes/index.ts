@@ -10,6 +10,9 @@
 import { Express } from 'express';
 import { supplierRoutes } from './supplierRoutes';
 import { supplierConversationRoutes } from './supplierConversationRoutes';
+import materialRoutes from './materialRoutes';
+import materialCategoryRoutes from './materialCategoryRoutes';
+import materialTypeRoutes from './materialTypeRoutes';
 
 /**
  * Register all modular routes
@@ -22,8 +25,12 @@ export function registerModularRoutes(app: Express): void {
   // Additional supplier conversation management routes
   app.use('/api/supplier-conversations', supplierConversationRoutes);
   
+  // PHASE 3: Materials Domain Modularization - SOLID/DRY/KISS
+  app.use('/api/materials', materialRoutes);
+  app.use('/api/material-categories', materialCategoryRoutes);
+  app.use('/api/material-types', materialTypeRoutes);
+  
   // Future modular routes will be added here:
-  // app.use('/api/materials', materialRoutes);
   // app.use('/api/products', productRoutes);
   // app.use('/api/agents', agentRoutes);
   // app.use('/api/users', userRoutes);
@@ -32,4 +39,9 @@ export function registerModularRoutes(app: Express): void {
 /**
  * Export individual route modules for flexibility
  */
-export { supplierRoutes };
+export { 
+  supplierRoutes,
+  materialRoutes,
+  materialCategoryRoutes,
+  materialTypeRoutes
+};

@@ -88,6 +88,12 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { youtubeService } from "./services/youtubeService";
 import { openaiService } from "./services/openaiService";
+
+// 🏗️  [PHASE_3] MATERIAL DOMAIN MODULAR INTEGRATION
+import { MaterialController } from "./controllers/MaterialController";
+import materialRoutes from "./routes/materialRoutes";
+import materialCategoryRoutes from "./routes/materialCategoryRoutes";
+import materialTypeRoutes from "./routes/materialTypeRoutes";
 import { aiProviderService } from "./services/aiProviderService";
 import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
@@ -148,6 +154,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('🏗️  [PHASE_2] Registering modular routes...');
   registerModularRoutes(app);
   console.log('✅ [PHASE_2] Modular routes registered successfully');
+  
+  // 🏗️  [PHASE_3] MATERIAL DOMAIN MODULAR INTEGRATION
+  console.log('🏗️  [PHASE_3] Registering material modular routes...');
+  app.use('/api/materials', materialRoutes);
+  app.use('/api/material-categories', materialCategoryRoutes);
+  app.use('/api/material-types', materialTypeRoutes);
+  console.log('✅ [PHASE_3] Material modular routes registered successfully');
 
   // Serve static files from uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -627,121 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Materials
-  app.get('/api/materials', async (req, res) => {
-    try {
-      const materials = await storage.getMaterials();
-      res.json(materials);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch materials' });
-    }
-  });
 
-  app.get('/api/materials/:id', async (req, res) => {
-    try {
-      const material = await storage.getMaterial(parseInt(req.params.id));
-      if (!material) {
-        return res.status(404).json({ error: 'Material not found' });
-      }
-      res.json(material);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch material' });
-    }
-  });
-
-  app.post('/api/materials', async (req, res) => {
-    try {
-      const validatedData = insertMaterialSchema.parse(req.body);
-      const material = await storage.createMaterial(validatedData);
-      res.status(201).json(material);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid material data' });
-    }
-  });
-
-  app.put('/api/materials/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const validatedData = insertMaterialSchema.partial().parse(req.body);
-      const material = await storage.updateMaterial(id, validatedData);
-      res.json(material);
-    } catch (error) {
-      res.status(400).json({ error: 'Failed to update material' });
-    }
-  });
-
-  app.delete('/api/materials/:id', async (req, res) => {
-    try {
-      await storage.deleteMaterial(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete material' });
-    }
-  });
-
-  app.get('/api/materials/search/:query', async (req, res) => {
-    try {
-      const materials = await storage.searchMaterials(req.params.query);
-      res.json(materials);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to search materials' });
-    }
-  });
-
-  app.post('/api/materials/:id/view', async (req, res) => {
-    try {
-      await storage.incrementMaterialViewCount(parseInt(req.params.id));
-      res.status(200).json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to increment view count' });
-    }
-  });
-
-  app.post('/api/materials/:id/download', async (req, res) => {
-    try {
-      await storage.incrementMaterialDownloadCount(parseInt(req.params.id));
-      res.status(200).json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to increment download count' });
-    }
-  });
-
-  // Material Categories
-  app.get('/api/material-categories', async (req, res) => {
-    try {
-      const categories = await storage.getMaterialCategories();
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch material categories' });
-    }
-  });
-
-  app.post('/api/material-categories', async (req, res) => {
-    try {
-      const category = await storage.createMaterialCategory(req.body);
-      res.status(201).json(category);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to create material category' });
-    }
-  });
-
-  app.put('/api/material-categories/:id', async (req, res) => {
-    try {
-      const category = await storage.updateMaterialCategory(parseInt(req.params.id), req.body);
-      res.json(category);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to update material category' });
-    }
-  });
-
-  app.delete('/api/material-categories/:id', async (req, res) => {
-    try {
-      await storage.deleteMaterialCategory(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete material category' });
-    }
-  });
 
   // Tools
   app.get('/api/tools', async (req, res) => {
@@ -1355,57 +1254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Material Types
-  app.get('/api/material-types', async (req, res) => {
-    try {
-      const materialTypes = await storage.getMaterialTypes();
-      res.json(materialTypes);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch material types' });
-    }
-  });
 
-  app.get('/api/material-types/:id', async (req, res) => {
-    try {
-      const materialType = await storage.getMaterialType(parseInt(req.params.id));
-      if (!materialType) {
-        return res.status(404).json({ error: 'Material type not found' });
-      }
-      res.json(materialType);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch material type' });
-    }
-  });
-
-  app.post('/api/material-types', async (req, res) => {
-    try {
-      const validatedData = insertMaterialTypeSchema.parse(req.body);
-      const materialType = await storage.createMaterialType(validatedData);
-      res.status(201).json(materialType);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid material type data' });
-    }
-  });
-
-  app.put('/api/material-types/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const validatedData = insertMaterialTypeSchema.partial().parse(req.body);
-      const materialType = await storage.updateMaterialType(id, validatedData);
-      res.json(materialType);
-    } catch (error) {
-      res.status(400).json({ error: 'Failed to update material type' });
-    }
-  });
-
-  app.delete('/api/material-types/:id', async (req, res) => {
-    try {
-      await storage.deleteMaterialType(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete material type' });
-    }
-  });
 
   // YouTube Videos
   app.get('/api/youtube-videos', async (req, res) => {
