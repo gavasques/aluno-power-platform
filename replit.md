@@ -111,6 +111,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 06, 2025 - 03:25 PM**: ✅ AMAZON LISTING OPTIMIZER PROMPTS OTIMIZADOS PARA CONVERSÃO MÁXIMA
+  - **Prompt de Bullet Points Atualizado**:
+    - ✅ **Quantidade aumentada de 5 para 7 bullet points** para cobertura completa de benefícios
+    - ✅ **Tamanho expandido para 200-280 caracteres por bullet** (mínimo 190, máximo 280)
+    - ✅ **Foco comercial intensificado**: marcadores soam mais persuasivos e comerciais
+    - ✅ **Chamadas à ação dinâmicas**: cada bullet point impulsiona compradores a agir agora
+    - ✅ **Valor irresistível**: ressalta benefícios principais de forma mais impactante
+  - **Prompt de Descrição Otimizado**:
+    - ✅ **Restrições de formatação**: NUNCA USE EMOJIS, NUNCA USA NEGRITO
+    - ✅ **Controle rigoroso de tamanho**: mínimo 1400 caracteres, máximo 2000 caracteres
+    - ✅ **Mantém diretrizes originais**: história envolvente, benefícios principais, objeções, persuasão, call-to-action
+    - ✅ **Tom profissional preservado**: acessível mas sem elementos visuais desnecessários
+  - **Implementação Técnica Completa**:
+    - Banco de dados: Prompts atualizados na tabela agent_prompts
+    - Código: Métodos buildBulletPointsPrompt e buildDescriptionPrompt atualizados
+    - Sistema: Pronto para gerar conteúdo otimizado com novas especificações
+  - **Benefícios para Conversão**:
+    - Bullet points mais longos permitem argumentação mais persuasiva
+    - Quantidade aumentada (7 vs 5) cobre mais objeções e benefícios
+    - Descrições com tamanho controlado garantem leitura completa
+    - Ausência de emojis/negrito mantém profissionalismo Amazon
+
 - **January 06, 2025 - 12:08 AM**: 🏗️ PHASE 3 MATERIALS DOMAIN MODULARIZATION - COMPLETE SOLID/DRY/KISS SUCCESS
   - **100% MATERIALS DOMAIN MIGRATION COMPLETED**:
     - ✅ **Modular Architecture Fully Operational**: BaseController pattern with MaterialController implementing all 5 SOLID principles (SRP, OCP, LSP, ISP, DIP)

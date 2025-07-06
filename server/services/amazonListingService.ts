@@ -864,15 +864,19 @@ ${session.reviewsInsight || ''}
 TÍTULOS GERADOS (ETAPA 2):
 ${session.titulos || ''}
 
-Crie 5 bullet points otimizados que tenham:
-- Entre 150-200 caracteres cada
+Crie 7 bullet points otimizados que tenham:
+- Entre 200-280 caracteres cada
+- NUNCA MENOS DE 190 CARACTERES CADA BULLET
+- NUNCA EXCEDA 280 caracteres cada BULLET POINT
 - Destaque benefícios específicos
 - Resolva pontos de dor identificados
 - Use linguagem emocional e persuasiva
 - Inclua especificações técnicas relevantes
 
+Faça os marcadores soarem mais comerciais e persuasivos, com um foco em despertar o desejo de compra dos clientes. Transforme cada marcador em uma verdadeira chamada à ação que impulsione os compradores a agir agora. Os marcadores devem ser mais dinâmicos, focados nos benefícios principais, e ressaltar o valor do produto de forma irresistível.
+
 Formato: ✅ **TÍTULO**: Descrição do benefício
-Retorne APENAS os 5 bullet points, sem numeração ou explicações.`;
+Retorne APENAS os 7 bullet points, sem numeração ou explicações.`;
   }
 
   // Construir prompt da Etapa 4 conforme especificação
@@ -904,6 +908,10 @@ Escreva uma descrição detalhada (500-1000 palavras) que:
 - Use linguagem persuasiva
 - Inclua call-to-action forte
 - Mantenha tom profissional mas acessível
+
+NUNCA USE EMOJIS, NUNCA USA NEGRITO. 
+NÃO USE MENOS DE 1400 caracteres
+NUNCA MAIS DE 2000 CARACTERES.
 
 Retorne APENAS o texto da descrição, sem títulos ou explicações.`;
   }
