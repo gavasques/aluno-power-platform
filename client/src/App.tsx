@@ -165,6 +165,19 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
+
+                          {/* Generic agent route - MUST be after specific routes */}
+                          <Route path="/agentes/:id">
+                            {(params) => (
+                              <ProtectedRoute>
+                                <Layout>
+                                  <Suspense fallback={<PageLoader />}>
+                                    <AgentProcessorPage />
+                                  </Suspense>
+                                </Layout>
+                              </ProtectedRoute>
+                            )}
+                          </Route>
                           
                           <Route path="/agents/amazon-listings-optimizer-new">
                             <ProtectedRoute>
