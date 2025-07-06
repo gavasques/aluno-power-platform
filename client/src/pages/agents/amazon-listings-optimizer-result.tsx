@@ -45,7 +45,7 @@ export default function AmazonListingsOptimizerResult() {
         throw new Error('Erro ao carregar resultados');
       }
       const data = await response.json();
-      setResults(data);
+      setResults(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
@@ -64,15 +64,15 @@ export default function AmazonListingsOptimizerResult() {
 RESULTADOS - OTIMIZADOR DE LISTAGENS AMAZON
 =========================================
 
-PRODUTO: ${results.productName || 'N/A'}
-MARCA: ${results.brand || 'N/A'}
-CATEGORIA: ${results.category || 'N/A'}
+PRODUTO: ${results.nomeProduto || 'N/A'}
+MARCA: ${results.marca || 'N/A'}
+CATEGORIA: ${results.categoria || 'N/A'}
 
 ANÁLISE DAS AVALIAÇÕES:
-${results.step1Result || 'Não disponível'}
+${results.reviewsInsight || 'Não disponível'}
 
 TÍTULOS OTIMIZADOS:
-${results.step2Result || 'Não disponível'}
+${results.titulos || 'Não disponível'}
 
 Data de geração: ${new Date().toLocaleString('pt-BR')}
     `.trim();
@@ -81,7 +81,7 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `amazon-listing-${results.productName || 'resultado'}.txt`;
+    a.download = `amazon-listing-${results.nomeProduto || 'resultado'}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -154,22 +154,22 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label className="text-sm font-medium">Produto</Label>
-                  <p className="text-sm text-muted-foreground">{results.productName || 'N/A'}</p>
+                  <p className="text-sm text-muted-foreground">{results.nomeProduto || 'N/A'}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Marca</Label>
-                  <p className="text-sm text-muted-foreground">{results.brand || 'N/A'}</p>
+                  <p className="text-sm text-muted-foreground">{results.marca || 'N/A'}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Categoria</Label>
-                  <p className="text-sm text-muted-foreground">{results.category || 'N/A'}</p>
+                  <p className="text-sm text-muted-foreground">{results.categoria || 'N/A'}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Step 1 Results */}
-          {results.step1Result && (
+          {results.reviewsInsight && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -177,7 +177,7 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => copyToClipboard(results.step1Result)}
+                    onClick={() => copyToClipboard(results.reviewsInsight)}
                   >
                     <Copy className="h-4 w-4 mr-2" />
                     Copiar
@@ -186,7 +186,7 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
               </CardHeader>
               <CardContent>
                 <Textarea
-                  value={results.step1Result}
+                  value={results.reviewsInsight}
                   readOnly
                   className="min-h-[300px] font-mono text-sm"
                 />
@@ -195,7 +195,7 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
           )}
 
           {/* Step 2 Results */}
-          {results.step2Result && (
+          {results.titulos && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -203,7 +203,7 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => copyToClipboard(results.step2Result)}
+                    onClick={() => copyToClipboard(results.titulos)}
                   >
                     <Copy className="h-4 w-4 mr-2" />
                     Copiar
@@ -212,7 +212,7 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
               </CardHeader>
               <CardContent>
                 <Textarea
-                  value={results.step2Result}
+                  value={results.titulos}
                   readOnly
                   className="min-h-[200px] font-mono text-sm"
                 />

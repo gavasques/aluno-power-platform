@@ -64,16 +64,81 @@ export default function AmazonListingsOptimizerNew() {
   };
 
   const handleSubmit = async () => {
+    if (!isFormValid) return;
+    
     setIsProcessing(true);
     
     try {
-      // Simulate processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Preparar dados do formulário para envio
+      let reviewsData = formData.reviewsData;
       
-      // Navigate to results page
-      navigate("/agents/amazon-listings-optimizer/result?session=demo");
+      // Se há arquivos carregados, processar conteúdo (simular por enquanto)
+      if (reviewsTab === "upload" && uploadedFiles.length > 0) {
+        reviewsData = uploadedFiles.map(file => `[Arquivo: ${file.name}]`).join('\n');
+      }
+      
+      const submitData = {
+        nomeProduto: formData.productName,
+        marca: formData.brand,
+        categoria: formData.category,
+        keywords: formData.keywords,
+        longTailKeywords: formData.longTailKeywords,
+        principaisCaracteristicas: formData.features,
+        publicoAlvo: formData.targetAudience,
+        reviewsData: reviewsData
+      };
+      
+      // 1. Criar sessão
+      const sessionResponse = await fetch('/api/amazon-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idUsuario: 'user-1' })
+      });
+      
+      if (!sessionResponse.ok) {
+        throw new Error('Erro ao criar sessão');
+      }
+      
+      const sessionData = await sessionResponse.json();
+      const sessionId = sessionData.session.id;
+      
+      // 2. Salvar dados do produto
+      const dataResponse = await fetch(`/api/amazon-sessions/${sessionId}/data`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitData)
+      });
+      
+      if (!dataResponse.ok) {
+        throw new Error('Erro ao salvar dados do produto');
+      }
+      
+      // 3. Processar Etapa 1 (Análise)
+      const step1Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step1`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!step1Response.ok) {
+        throw new Error('Erro na análise das avaliações');
+      }
+      
+      // 4. Processar Etapa 2 (Títulos)
+      const step2Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step2`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!step2Response.ok) {
+        throw new Error('Erro na geração de títulos');
+      }
+      
+      // 5. Navegar para resultados
+      navigate(`/agents/amazon-listings-optimizer/result?session=${sessionId}`);
+      
     } catch (error) {
       console.error("Error processing:", error);
+      alert(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     } finally {
       setIsProcessing(false);
     }
