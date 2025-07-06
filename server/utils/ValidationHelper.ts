@@ -53,4 +53,15 @@ export class ValidationHelper {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
+
+  /**
+   * Validate request parameters (used by controllers)
+   */
+  static validateParams(params: any, requiredFields: string[]): void {
+    for (const field of requiredFields) {
+      if (!params[field]) {
+        throw new Error(`Missing required parameter: ${field}`);
+      }
+    }
+  }
 }

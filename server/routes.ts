@@ -155,12 +155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerModularRoutes(app);
   console.log('✅ [PHASE_2] Modular routes registered successfully');
   
-  // 🏗️  [PHASE_3] MATERIAL DOMAIN MODULAR INTEGRATION
-  console.log('🏗️  [PHASE_3] Registering material modular routes...');
-  app.use('/api/materials', materialRoutes);
-  app.use('/api/material-categories', materialCategoryRoutes);
-  app.use('/api/material-types', materialTypeRoutes);
-  console.log('✅ [PHASE_3] Material modular routes registered successfully');
+  // PHASE 3 & 4: All modular routes are now registered in registerModularRoutes()
+  // No more duplicate registrations needed here
 
   // Serve static files from uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -826,172 +822,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Products
-  app.get('/api/products', async (req, res) => {
-    try {
-      const products = await storage.getProducts();
-      res.json(products);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      res.status(500).json({ error: 'Failed to fetch products' });
-    }
-  });
+  // PRODUCTS ROUTES MOVED TO MODULAR SYSTEM: server/routes/productRoutes.ts
+  // PHASE 4: Products Domain Modularization - SOLID/DRY/KISS Implementation
 
-  app.get('/api/products/:id', async (req, res) => {
-    try {
-      const product = await storage.getProduct(parseInt(req.params.id));
-      if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
-      res.json(product);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch product' });
-    }
-  });
+  // POST /api/products MOVED TO MODULAR SYSTEM: server/routes/productRoutes.ts
 
-  app.post('/api/products', requireAuth, upload.single('photo'), async (req, res) => {
-    try {
-      console.log("📝 [POST /api/products] Recebendo dados:", {
-        body: req.body,
-        file: req.file ? req.file.filename : 'Nenhum arquivo'
-      });
-      
-      // Parse FormData fields
-      const productData: any = {
-        name: req.body.name,
-        sku: req.body.sku || '',  // Required field
-        freeCode: req.body.freeCode || null,
-        supplierCode: req.body.supplierCode || null,
-        ean: req.body.ean || null,
-        brand: req.body.brand || null,
-        category: req.body.categoryId || null,  // categoryId from frontend maps to category in DB
-        supplierId: req.body.supplierId ? parseInt(req.body.supplierId) : null,
-        ncm: req.body.ncm || null,
-        dimensions: req.body.dimensions ? JSON.parse(req.body.dimensions) : null,
-        weight: req.body.weight ? String(req.body.weight) : "0",
-        costItem: req.body.costItem ? String(req.body.costItem) : "0",
-        taxPercent: req.body.taxPercent ? String(req.body.taxPercent) : "0",
-        packCost: req.body.packCost ? String(req.body.packCost) : "0",
-        observations: req.body.observations || null,
-        channels: req.body.channels ? (typeof req.body.channels === 'string' ? JSON.parse(req.body.channels) : req.body.channels) : [],
-        photo: req.file ? `/uploads/${req.file.filename}` : (req.body.photo || null),
-        active: true,
-      };
+  // PUT /api/products/:id MOVED TO MODULAR SYSTEM: server/routes/productRoutes.ts
 
-      console.log("📋 [POST /api/products] Dados processados:", productData);
-      
-      const validatedData = insertProductSchema.parse(productData);
-      console.log("✅ [POST /api/products] Dados validados:", validatedData);
-      
-      const product = await storage.createProduct(validatedData);
-      console.log("💾 [POST /api/products] Produto criado:", product);
-      
-      res.status(201).json(product);
-    } catch (error) {
-      console.error('Error creating product:', error);
-      res.status(400).json({ error: 'Invalid product data', details: error });
-    }
-  });
+  // DELETE /api/products/:id MOVED TO MODULAR SYSTEM: server/routes/productRoutes.ts
 
-  app.put('/api/products/:id', requireAuth, upload.single('photo'), async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      
-      console.log("🔍 [PUT PRODUCT] ProductId:", id);
-      console.log("🔍 [PUT PRODUCT] All form fields:", Object.keys(req.body));
-      console.log("🔍 [PUT PRODUCT] Raw body content:", req.body);
-      console.log("🔍 [PUT PRODUCT] SKU:", req.body.sku);
-      console.log("🔍 [PUT PRODUCT] CategoryId:", req.body.categoryId);
-      console.log("🔍 [PUT PRODUCT] BrandId:", req.body.brandId);
-      
-      // Parse FormData fields - only include fields that were actually sent
-      const productData: any = {
-        name: req.body.name,
-        sku: req.body.sku || '',  // Required field
-      };
+  // GET /api/products/:id/cost-history MOVED TO MODULAR SYSTEM: server/routes/productRoutes.ts
 
-      // Handle costs object from frontend
-      if (req.body.costs) {
-        const costs = typeof req.body.costs === 'string' ? JSON.parse(req.body.costs) : req.body.costs;
-        if (costs.currentCost !== undefined) productData.costItem = String(costs.currentCost);
-        if (costs.taxPercent !== undefined) productData.taxPercent = String(costs.taxPercent);
-        if (costs.observations !== undefined) productData.observations = costs.observations;
-      }
-
-      // Only add optional fields if they were explicitly sent in the request
-      if ('freeCode' in req.body) productData.freeCode = req.body.freeCode || null;
-      if ('supplierCode' in req.body) productData.supplierCode = req.body.supplierCode || null;
-      if ('ean' in req.body) productData.ean = req.body.ean || null;
-      if ('brand' in req.body) productData.brand = req.body.brand || null;
-      if ('brandId' in req.body) productData.brandId = req.body.brandId ? parseInt(req.body.brandId) : null;
-      if ('categoryId' in req.body) productData.category = req.body.categoryId || null;  // Keep as string to match schema
-      if ('supplierId' in req.body) productData.supplierId = req.body.supplierId ? parseInt(req.body.supplierId) : null;
-      if ('ncm' in req.body) productData.ncm = req.body.ncm || null;
-      if ('dimensions' in req.body) productData.dimensions = req.body.dimensions ? JSON.parse(req.body.dimensions) : null;
-      if ('weight' in req.body) productData.weight = req.body.weight ? String(req.body.weight) : "0";
-      
-      // Direct fields (not from costs object)
-      if ('costItem' in req.body && !req.body.costs) productData.costItem = req.body.costItem ? String(req.body.costItem) : "0";
-      if ('taxPercent' in req.body && !req.body.costs) productData.taxPercent = req.body.taxPercent ? String(req.body.taxPercent) : "0";
-      if ('packCost' in req.body) productData.packCost = req.body.packCost ? String(req.body.packCost) : "0";
-      if ('observations' in req.body && !req.body.costs) productData.observations = req.body.observations || null;
-      if ('channels' in req.body) productData.channels = typeof req.body.channels === 'string' ? JSON.parse(req.body.channels) : req.body.channels;
-      
-      console.log("🔍 [BACKEND] Parsed productData dimensions:", productData.dimensions);
-      console.log("🔍 [BACKEND] Parsed productData weight:", productData.weight);
-
-      // Handle photo update
-      if (req.file) {
-        productData.photo = `/uploads/${req.file.filename}`;
-      } else if (req.body.photo !== undefined) {
-        productData.photo = req.body.photo || null;
-      }
-
-      console.log("💾 [PUT PRODUCT] Final productData:", productData);
-      
-      const validatedData = insertProductSchema.partial().parse(productData);
-      console.log("✅ [PUT PRODUCT] Validated data:", validatedData);
-      
-      const product = await storage.updateProduct(id, validatedData);
-      console.log("🎯 [PUT PRODUCT] Updated product:", product);
-      
-      res.json(product);
-    } catch (error) {
-      console.error('Error updating product:', error);
-      res.status(400).json({ error: 'Failed to update product', details: error });
-    }
-  });
-
-  app.delete('/api/products/:id', async (req, res) => {
-    try {
-      await storage.deleteProduct(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete product' });
-    }
-  });
-
-  app.get('/api/products/:id/cost-history', async (req, res) => {
-    try {
-      const productId = parseInt(req.params.id);
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-      console.log('📊 [COST HISTORY ENDPOINT] Fetching for product:', productId, 'limit:', limit);
-      const history = await storage.getProductCostHistory(productId, limit);
-      console.log('📊 [COST HISTORY ENDPOINT] Found entries:', history.length);
-      res.json(history);
-    } catch (error) {
-      console.error('Error fetching cost history:', error);
-      res.status(500).json({ error: 'Failed to fetch cost history' });
-    }
-  });
-
-  app.get('/api/products/search/:query', async (req, res) => {
-    try {
-      const products = await storage.searchProducts(req.params.query);
-      res.json(products);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to search products' });
-    }
-  });
+  // GET /api/products/search/:query MOVED TO MODULAR SYSTEM: server/routes/productRoutes.ts
 
   // Categories
   app.get('/api/categories', async (req, res) => {

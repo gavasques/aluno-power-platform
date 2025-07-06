@@ -13,6 +13,7 @@ import { supplierConversationRoutes } from './supplierConversationRoutes';
 import materialRoutes from './materialRoutes';
 import materialCategoryRoutes from './materialCategoryRoutes';
 import materialTypeRoutes from './materialTypeRoutes';
+import productRoutes from './productRoutes';
 
 /**
  * Register all modular routes
@@ -30,8 +31,10 @@ export function registerModularRoutes(app: Express): void {
   app.use('/api/material-categories', materialCategoryRoutes);
   app.use('/api/material-types', materialTypeRoutes);
   
+  // PHASE 4: Products Domain Modularization - SOLID/DRY/KISS
+  app.use('/api/products', productRoutes);
+  
   // Future modular routes will be added here:
-  // app.use('/api/products', productRoutes);
   // app.use('/api/agents', agentRoutes);
   // app.use('/api/users', userRoutes);
 }
@@ -43,5 +46,6 @@ export {
   supplierRoutes,
   materialRoutes,
   materialCategoryRoutes,
-  materialTypeRoutes
+  materialTypeRoutes,
+  productRoutes
 };
