@@ -65,7 +65,7 @@ const UpscaleControls = ({
   </div>
 );
 
-function ImageUpscale() {
+export default function ImageUpscale() {
   const {
     uploadedImage,
     processedImage,
