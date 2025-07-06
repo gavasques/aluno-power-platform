@@ -108,8 +108,17 @@ export default function StripeCheckout({ currentPlan }: StripeCheckoutProps) {
 
       const { checkoutUrl } = await response.json();
       
-      // Redirecionar para o Stripe Checkout
-      window.location.href = checkoutUrl;
+      // Abrir Stripe Checkout em nova aba (evita problemas de iframe)
+      const newWindow = window.open(checkoutUrl, '_blank');
+      
+      if (!newWindow) {
+        toast({
+          title: "Pop-up bloqueado",
+          description: "Por favor, permita pop-ups e tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
       
     } catch (error) {
       console.error('Erro no checkout:', error);
@@ -194,6 +203,7 @@ export default function StripeCheckout({ currentPlan }: StripeCheckoutProps) {
                 onClick={() => handlePlanPurchase(plan)}
                 disabled={isLoading === plan.id || isCurrentPlan(plan.id)}
                 variant={isCurrentPlan(plan.id) ? "secondary" : "default"}
+                title="Abrirá o checkout do Stripe em nova aba"
               >
                 {isLoading === plan.id && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
