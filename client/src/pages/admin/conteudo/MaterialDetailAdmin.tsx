@@ -143,7 +143,7 @@ const MaterialViewer = ({ material }: { material: Material }) => {
 const MaterialDetailAdmin = () => {
   const { id } = useParams<{ id: string }>();
   const { materials } = useMaterials();
-  const material = materials.find(m => m.id === parseInt(id || '0'));
+  const material = materials.find(m => m.id === id);
 
   if (!material) {
     return <div>Material não encontrado.</div>;
@@ -168,7 +168,7 @@ const MaterialDetailAdmin = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <MaterialViewer material={material as any} />
+          <MaterialViewer material={material} />
         </div>
         <div className="space-y-6">
           <Card>

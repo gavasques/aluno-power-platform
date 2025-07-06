@@ -29,13 +29,8 @@ class TokenManager {
   }
 
   static setToken(token: string): void {
-    console.log('🔧 TokenManager: Setting token and clearing logout flag');
     localStorage.setItem(TokenManager.TOKEN_KEY, token);
     localStorage.removeItem(TokenManager.LOGOUT_FLAG);
-    console.log('🔧 TokenManager: Token set, logout flag cleared:', {
-      hasToken: !!localStorage.getItem(TokenManager.TOKEN_KEY),
-      hasLogoutFlag: localStorage.getItem(TokenManager.LOGOUT_FLAG) === 'true'
-    });
   }
 
   static removeToken(): void {
@@ -44,17 +39,7 @@ class TokenManager {
   }
 
   static wasLoggedOut(): boolean {
-    const wasLoggedOut = localStorage.getItem(TokenManager.LOGOUT_FLAG) === 'true';
-    console.log('🔧 TokenManager: Checking logout flag:', {
-      logoutFlag: localStorage.getItem(TokenManager.LOGOUT_FLAG),
-      wasLoggedOut
-    });
-    return wasLoggedOut;
-  }
-
-  static clearLogoutFlag(): void {
-    localStorage.removeItem(TokenManager.LOGOUT_FLAG);
-    console.log('🔧 TokenManager: Logout flag manually cleared');
+    return localStorage.getItem(TokenManager.LOGOUT_FLAG) === 'true';
   }
 }
 
@@ -143,19 +128,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Login action seguindo Single Responsibility
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    console.log('🔐 CONTEXT LOGIN: Starting login attempt');
-    
-    // Clear logout flag before attempting login
-    TokenManager.clearLogoutFlag();
-    
     const credentials: LoginCredentials = { email, password };
     const result = await AuthService.login(credentials);
-
-    console.log('🔐 CONTEXT LOGIN: Login result:', {
-      success: result.success,
-      hasUser: !!result.user,
-      hasToken: !!result.token
-    });
 
     if (result.success && result.user && result.token) {
       TokenManager.setToken(result.token);
@@ -165,8 +139,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading: false,
         isAuthenticated: true,
       });
-      
-      console.log('🔐 CONTEXT LOGIN: State updated, user should be logged in');
     }
 
     return result;
