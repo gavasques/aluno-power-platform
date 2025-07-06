@@ -230,6 +230,17 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
+                          {/* SPECIFIC ROUTES BEFORE GENERIC */}
+                          <Route path="/agents/amazon-customer-service">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerService />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
                           <Route path="/agents/:id">
                             {(params) => (
                               <ProtectedRoute>
