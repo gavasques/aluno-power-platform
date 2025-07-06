@@ -3126,7 +3126,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   });
 
   // Specific Amazon Listings Optimizer endpoint with enhanced processing
-  app.post('/api/agents/amazon-listings-optimizer/process', async (req, res) => {
+  app.post('/api/agents/amazon-listings-optimizer/process', requireAuth, async (req, res) => {
     try {
       // Validate request method
       if (req.method !== 'POST') {
@@ -3171,15 +3171,20 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         format
       };
 
-      // TODO: Get from authenticated user session
-      const userId = "user-1";
-      const userName = "Demo User";
+      // Get authenticated user
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
       const agentId = "agent-amazon-listings";
 
+      console.log(`🚀 [AMAZON_LISTING_OPTIMIZER] Iniciando processamento para usuário: ${user.id} (${user.name})`);
+      
       const result = await openaiService.processAmazonListingOptimizer({
         agentId,
-        userId,
-        userName,
+        userId: user.id.toString(),
+        userName: user.name || user.username,
         ...sanitizedData
       });
 

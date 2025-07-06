@@ -252,182 +252,180 @@ export class OpenAIService {
       throw new Error('Agent not found');
     }
 
+    // Get prompts by type from database
+    const systemPrompt = agent.prompts.find(p => p.promptType === 'system')?.content || '';
+    const analysisPrompt = agent.prompts.find(p => p.promptType === 'analysis')?.content || '';
+    const titlePrompt = agent.prompts.find(p => p.promptType === 'title')?.content || '';
+    const bulletPointsPrompt = agent.prompts.find(p => p.promptType === 'bulletPoints')?.content || '';
+    const descriptionPrompt = agent.prompts.find(p => p.promptType === 'description')?.content || '';
+
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
 
     try {
-      // Etapa 1: Análise Profunda das Avaliações (10 perguntas do PDF)
-      const analysisPrompt = `
-Você é um especialista em análise de mercado Amazon. Analise as avaliações dos concorrentes e responda as seguintes 10 perguntas estratégicas:
+      console.log(`🚀 [AMAZON_LISTING_OPTIMIZER] Iniciando pipeline de 4 etapas para produto: ${request.productName}`);
 
-1. Quais são os 3 principais benefícios mencionados pelos clientes?
-2. Quais são as 3 principais dores/problemas relatados?
-3. Quais características técnicas são mais valorizadas?
-4. Qual é o perfil do público-alvo baseado nas avaliações?
-5. Quais são as fraquezas dos concorrentes mais citadas?
-6. Quais oportunidades de melhoria você identifica?
-7. Quais gatilhos emocionais aparecem nas avaliações?
-8. Qual é a intenção de busca predominante dos clientes?
-9. Como o preço é percebido pelos compradores?
-10. Quais diferenciadores de mercado são valorizados?
+      // ETAPA 1: ANÁLISE PROFUNDA DAS AVALIAÇÕES
+      console.log(`📊 [ETAPA 1] Analisando avaliações dos concorrentes...`);
+      
+      const analysisContent = `${analysisPrompt}
 
-Produto: ${request.productName}
-Categoria: ${request.category}
-Palavras-chave: ${request.keywords}
-${request.longTailKeywords ? `Long Tail: ${request.longTailKeywords}` : ''}
-${request.features ? `Características: ${request.features}` : ''}
-${request.targetAudience ? `Público-alvo: ${request.targetAudience}` : ''}
+DADOS DO PRODUTO:
+• Produto: ${request.productName}
+• Categoria: ${request.category}
+• Palavras-chave principais: ${request.keywords}
+• Palavras-chave long tail: ${request.longTailKeywords || 'Não informado'}
+• Características principais: ${request.features || 'Não informado'}
+• Público-alvo: ${request.targetAudience || 'Não informado'}
 
-Avaliações dos concorrentes:
+AVALIAÇÕES DOS CONCORRENTES:
 ${request.reviewsData}
 
-Retorne em formato JSON estruturado com as chaves: mainBenefits, painPoints, keyFeatures, targetAudience, competitorWeaknesses, opportunityAreas, emotionalTriggers, searchIntentAnalysis, pricePositioning, marketDifferentiators.`;
+Retorne em formato JSON estruturado conforme solicitado.`;
 
-      const analysisResponse = await openai.chat.completions.create({
+      const analysisResponse = await aiProviderService.generateResponse({
+        provider: agent.provider,
         model: agent.model,
         temperature: 0.7,
-        max_tokens: 2000,
+        maxTokens: 2000,
         messages: [
-          { 
-            role: 'system', 
-            content: 'Você é um especialista em análise de mercado Amazon. Sempre responda em formato JSON válido.' 
-          },
-          { role: 'user', content: analysisPrompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: analysisContent }
         ],
       });
 
-      const analysisResult = JSON.parse(analysisResponse.choices[0].message.content || '{}');
+      const analysisResult = JSON.parse(analysisResponse.content || '{}');
       totalInputTokens += analysisResponse.usage?.prompt_tokens || 0;
       totalOutputTokens += analysisResponse.usage?.completion_tokens || 0;
+      
+      console.log(`✅ [ETAPA 1] Análise concluída - ${analysisResponse.usage?.prompt_tokens || 0} tokens de entrada, ${analysisResponse.usage?.completion_tokens || 0} tokens de saída`);
 
-      // Etapa 2: Geração de 10 Títulos (150-200 caracteres)
-      const titlesPrompt = `
-Baseado na análise realizada, gere 10 títulos otimizados para Amazon com as seguintes especificações:
+      // ETAPA 2: GERAÇÃO DE TÍTULOS
+      console.log(`📝 [ETAPA 2] Gerando títulos otimizados...`);
+      
+      const titleContent = `${titlePrompt}
 
-- Entre 150-200 caracteres cada
-- Use as palavras-chave principais: ${request.keywords}
-- Incorpore long tail keywords: ${request.longTailKeywords || 'N/A'}
-- Destaque os principais benefícios identificados
-- Use características técnicas importantes
-- Inclua elementos de urgência/escassez quando apropriado
-- Mantenha legibilidade e atratividade
-- Siga estrutura: Marca/Nome | Benefício Principal | Características | Diferencial
+DADOS DO PRODUTO:
+• Produto: ${request.productName}
+• Categoria: ${request.category}
+• Palavras-chave principais: ${request.keywords}
+• Palavras-chave long tail: ${request.longTailKeywords || 'Não informado'}
+• Características principais: ${request.features || 'Não informado'}
+• Público-alvo: ${request.targetAudience || 'Não informado'}
 
-Análise do produto:
+ANÁLISE DOS REVIEWS (ETAPA 1):
 ${JSON.stringify(analysisResult, null, 2)}
 
-Retorne um array JSON com 10 títulos otimizados.`;
+Gere títulos otimizados seguindo as diretrizes acima.`;
 
-      const titlesResponse = await openai.chat.completions.create({
+      const titlesResponse = await aiProviderService.generateResponse({
+        provider: agent.provider,
         model: agent.model,
         temperature: 0.8,
-        max_tokens: 1500,
+        maxTokens: 1500,
         messages: [
-          { 
-            role: 'system', 
-            content: 'Você é um copywriter especialista em títulos Amazon. Sempre responda com um array JSON válido.' 
-          },
-          { role: 'user', content: titlesPrompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: titleContent }
         ],
       });
 
-      const titles = JSON.parse(titlesResponse.choices[0].message.content || '[]');
+      const titles = JSON.parse(titlesResponse.content || '[]');
       totalInputTokens += titlesResponse.usage?.prompt_tokens || 0;
       totalOutputTokens += titlesResponse.usage?.completion_tokens || 0;
+      
+      console.log(`✅ [ETAPA 2] Títulos gerados - ${titlesResponse.usage?.prompt_tokens || 0} tokens de entrada, ${titlesResponse.usage?.completion_tokens || 0} tokens de saída`);
 
-      // Etapa 3: Geração de 21 Bullet Points (3 para cada benefício/dor)
-      const bulletPointsPrompt = `
-Gere 21 bullet points estratégicos para Amazon:
+      // ETAPA 3: GERAÇÃO DE BULLET POINTS
+      console.log(`🎯 [ETAPA 3] Gerando bullet points otimizados...`);
+      
+      const bulletPointsContent = `${bulletPointsPrompt}
 
-- 3 bullet points para cada um dos principais benefícios identificados
-- 3 bullet points para cada uma das principais dores/problemas (como soluções)
-- Use símbolos visuais (✓, ★, ⚡, 🔥, etc.)
-- Máximo 200 caracteres por bullet point
-- Foque em benefícios específicos e mensuráveis
-- Use linguagem persuasiva e emocional
-- Inclua características técnicas relevantes
-- Destaque diferenciadores competitivos
+DADOS DO PRODUTO:
+• Produto: ${request.productName}
+• Categoria: ${request.category}
+• Palavras-chave principais: ${request.keywords}
+• Palavras-chave long tail: ${request.longTailKeywords || 'Não informado'}
+• Características principais: ${request.features || 'Não informado'}
+• Público-alvo: ${request.targetAudience || 'Não informado'}
 
-Após gerar os 21, selecione e reescreva os 5 MELHORES bullet points finais que serão usados na listagem.
-
-Análise:
+ANÁLISE DOS REVIEWS (ETAPA 1):
 ${JSON.stringify(analysisResult, null, 2)}
 
-Retorne JSON com: "allBulletPoints" (array com 21) e "finalBulletPoints" (array com os 5 melhores reescritos).`;
-
-      const bulletPointsResponse = await openai.chat.completions.create({
-        model: agent.model,
-        temperature: 0.7,
-        max_tokens: 2000,
-        messages: [
-          { 
-            role: 'system', 
-            content: 'Você é um especialista em bullet points persuasivos para Amazon. Sempre responda em JSON válido.' 
-          },
-          { role: 'user', content: bulletPointsPrompt }
-        ],
-      });
-
-      const bulletPointsData = JSON.parse(bulletPointsResponse.choices[0].message.content || '{"finalBulletPoints": []}');
-      const bulletPoints = bulletPointsData.finalBulletPoints || bulletPointsData.allBulletPoints?.slice(0, 5) || [];
-      totalInputTokens += bulletPointsResponse.usage?.prompt_tokens || 0;
-      totalOutputTokens += bulletPointsResponse.usage?.completion_tokens || 0;
-
-      // Etapa 4: Descrição Completa (1700-2000 caracteres)
-      const descriptionPrompt = `
-Crie uma descrição completa e otimizada para Amazon com 1700-2000 caracteres:
-
-ESTRUTURA OBRIGATÓRIA:
-1. Parágrafo de abertura impactante (repetindo palavra-chave principal)
-2. Seção de benefícios principais com dados específicos
-3. Características técnicas detalhadas
-4. Diferenciadores competitivos
-5. Garantias e confiabilidade
-6. CTA forte e persuasivo no final
-
-REQUISITOS:
-- Repita a palavra-chave principal "${request.keywords.split(',')[0]}" pelo menos 3-4 vezes naturalmente
-- Use formatação HTML básica (<br>, <b>, <i>)
-- Inclua números e especificações técnicas
-- Destaque garantias e certificações
-- Termine com call-to-action poderoso
-- Tom persuasivo mas informativo
-- Entre 1700-2000 caracteres exatos
-
-Análise do produto:
-${JSON.stringify(analysisResult, null, 2)}
-
-Títulos de referência:
+TÍTULOS GERADOS (ETAPA 2) - Para referência:
 ${JSON.stringify(titles.slice(0, 3), null, 2)}
 
-Bullet points de referência:
-${JSON.stringify(bulletPoints, null, 2)}
+Gere bullet points otimizados seguindo as diretrizes acima.`;
 
-Retorne apenas o texto da descrição otimizada.`;
-
-      const descriptionResponse = await openai.chat.completions.create({
+      const bulletPointsResponse = await aiProviderService.generateResponse({
+        provider: agent.provider,
         model: agent.model,
-        temperature: 0.6,
-        max_tokens: 1000,
+        temperature: 0.7,
+        maxTokens: 2000,
         messages: [
-          { 
-            role: 'system', 
-            content: 'Você é um copywriter especialista em descrições Amazon otimizadas. Responda apenas com o texto da descrição.' 
-          },
-          { role: 'user', content: descriptionPrompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: bulletPointsContent }
         ],
       });
 
-      const description = descriptionResponse.choices[0].message.content || '';
+      const bulletPointsResult = JSON.parse(bulletPointsResponse.content || '[]');
+      // Handle both array format or object format from AI response
+      const bulletPoints = Array.isArray(bulletPointsResult) ? bulletPointsResult : 
+                          (bulletPointsResult.finalBulletPoints || bulletPointsResult.allBulletPoints || []);
+      
+      totalInputTokens += bulletPointsResponse.usage?.prompt_tokens || 0;
+      totalOutputTokens += bulletPointsResponse.usage?.completion_tokens || 0;
+      
+      console.log(`✅ [ETAPA 3] Bullet points gerados - ${bulletPointsResponse.usage?.prompt_tokens || 0} tokens de entrada, ${bulletPointsResponse.usage?.completion_tokens || 0} tokens de saída`);
+
+      // ETAPA 4: GERAÇÃO DE DESCRIÇÃO COMPLETA
+      console.log(`📄 [ETAPA 4] Gerando descrição completa e otimizada...`);
+      
+      const descriptionContent = `${descriptionPrompt}
+
+DADOS DO PRODUTO:
+• Produto: ${request.productName}
+• Categoria: ${request.category}
+• Palavras-chave principais: ${request.keywords}
+• Palavras-chave long tail: ${request.longTailKeywords || 'Não informado'}
+• Características principais: ${request.features || 'Não informado'}
+• Público-alvo: ${request.targetAudience || 'Não informado'}
+
+ANÁLISE DOS REVIEWS (ETAPA 1):
+${JSON.stringify(analysisResult, null, 2)}
+
+TÍTULOS GERADOS (ETAPA 2) - Para referência:
+${JSON.stringify(titles.slice(0, 3), null, 2)}
+
+BULLET POINTS GERADOS (ETAPA 3):
+${JSON.stringify(bulletPoints, null, 2)}
+
+Crie uma descrição completa seguindo as diretrizes acima.`;
+
+      const descriptionResponse = await aiProviderService.generateResponse({
+        provider: agent.provider,
+        model: agent.model,
+        temperature: 0.6,
+        maxTokens: 1000,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: descriptionContent }
+        ],
+      });
+
+      const description = descriptionResponse.content || '';
       totalInputTokens += descriptionResponse.usage?.prompt_tokens || 0;
       totalOutputTokens += descriptionResponse.usage?.completion_tokens || 0;
+      
+      console.log(`✅ [ETAPA 4] Descrição gerada - ${descriptionResponse.usage?.prompt_tokens || 0} tokens de entrada, ${descriptionResponse.usage?.completion_tokens || 0} tokens de saída`);
 
       // Calcular custos e tempo
       const totalTokens = totalInputTokens + totalOutputTokens;
-      const inputCostPer1M = 15.00; // GPT-4 pricing
-      const outputCostPer1M = 60.00;
-      const cost = (totalInputTokens * inputCostPer1M / 1000000) + (totalOutputTokens * outputCostPer1M / 1000000);
+      const cost = (totalTokens / 1000) * parseFloat(agent.costPer1kTokens.toString());
       const processingTime = Date.now() - startTime;
+      
+      console.log(`🎯 [PIPELINE CONCLUÍDO] 4 etapas finalizadas em ${processingTime}ms`);
+      console.log(`📊 [TOKENS FINAIS] Input: ${totalInputTokens}, Output: ${totalOutputTokens}, Total: ${totalTokens}`);
+      console.log(`💰 [CUSTO FINAL] $${cost.toFixed(6)} USD`);
 
       // Salvar registro de uso
       const usageId = uuidv4();
@@ -444,7 +442,7 @@ Retorne apenas o texto da descrição otimizada.`;
         status: 'success'
       });
 
-      // Salvar geração
+      // Salvar geração completa
       const generationId = uuidv4();
       await storage.createAgentGeneration({
         id: generationId,
@@ -463,6 +461,8 @@ Retorne apenas o texto da descrição otimizada.`;
         bulletPoints,
         description
       });
+      
+      console.log(`💾 [DADOS SALVOS] UsageId: ${usageId}, GenerationId: ${generationId}`);
 
       return {
         analysis: analysisResult,
@@ -481,6 +481,8 @@ Retorne apenas o texto da descrição otimizada.`;
       };
 
     } catch (error: any) {
+      console.error(`❌ [PIPELINE ERRO] Falha no processamento: ${error.message}`);
+      
       // Salvar erro
       const usageId = uuidv4();
       await storage.createAgentUsage({
@@ -497,7 +499,7 @@ Retorne apenas o texto da descrição otimizada.`;
         errorMessage: error.message
       });
 
-      throw new Error(`Falha no processamento: ${error.message}`);
+      throw new Error(`Falha no processamento do Amazon Listing Optimizer: ${error.message}`);
     }
   }
 }
