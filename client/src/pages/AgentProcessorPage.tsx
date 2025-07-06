@@ -17,7 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 export default function AgentProcessorPage() {
   const { id } = useParams();
-  console.log("🔥 AgentProcessorPage loading for ID:", id);
+  console.log("❌ WRONG! AgentProcessorPage loading for ID:", id, "URL:", window.location.pathname);
   const { toast } = useToast();
   const [productName, setProductName] = useState("");
   const [productInfo, setProductInfo] = useState("");

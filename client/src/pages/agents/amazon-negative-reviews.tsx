@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 const AmazonNegativeReviews = () => {
-  console.log("🔥 AmazonNegativeReviews component is loading!");
+  console.log("✅ AmazonNegativeReviews component SUCCESSFULLY LOADED!");
   const [negativeReview, setNegativeReview] = useState("");
   const [userInfo, setUserInfo] = useState("");
   const [sellerName, setSellerName] = useState("");

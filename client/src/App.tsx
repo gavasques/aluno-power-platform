@@ -125,7 +125,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* Agents routes */}
+                          {/* SPECIFIC AGENT ROUTES - MUST BE FIRST */}
                           <Route path="/agentes/amazon-negative-reviews/resultado/:sessionId">
                             <ProtectedRoute>
                               <Layout>
@@ -164,19 +164,6 @@ function App() {
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
-                          </Route>
-
-                          {/* Generic agent route - MUST be after specific routes */}
-                          <Route path="/agentes/:id">
-                            {(params) => (
-                              <ProtectedRoute>
-                                <Layout>
-                                  <Suspense fallback={<PageLoader />}>
-                                    <AgentProcessorPage />
-                                  </Suspense>
-                                </Layout>
-                              </ProtectedRoute>
-                            )}
                           </Route>
                           
                           <Route path="/agents/amazon-listings-optimizer-new">
@@ -276,6 +263,18 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
+                          <Route path="/agents">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AgentsPage />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          {/* GENERIC ROUTE - TEMPORARILY COMMENTED FOR DEBUGGING */}
+                          {/*
                           <Route path="/agents/:id">
                             {(params) => (
                               <ProtectedRoute>
@@ -287,16 +286,7 @@ function App() {
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
-                          <Route path="/agents">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AgentsPage />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
+                          */}
 
                           {/* Detail routes with Layout - Protected */}
                           <Route path="/hub/materiais/:id">
