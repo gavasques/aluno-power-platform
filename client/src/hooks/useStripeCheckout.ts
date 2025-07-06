@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { useStripe } from '../components/stripe/StripeProvider';
-import { apiRequest } from '@/lib/queryClient';
 
 interface UseStripeCheckoutOptions {
   onSuccess?: () => void;
@@ -8,31 +6,35 @@ interface UseStripeCheckoutOptions {
 }
 
 export const useStripeCheckout = (options: UseStripeCheckoutOptions = {}) => {
-  const { stripe } = useStripe();
   const [loading, setLoading] = useState(false);
 
   const createSubscriptionCheckout = async (priceId: string) => {
-    if (!stripe) {
-      options.onError?.('Stripe não está carregado');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const response = await apiRequest('/api/stripe/create-subscription-checkout', {
+      const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
-        body: JSON.stringify({ priceId }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          priceId,
+          successUrl: `${window.location.origin}/minha-area/assinaturas?success=true`,
+          cancelUrl: `${window.location.origin}/minha-area/assinaturas?canceled=true`
+        })
       });
 
-      const { sessionId } = response as { sessionId: string };
-      const { error } = await stripe.redirectToCheckout({ sessionId });
-
-      if (error) {
-        options.onError?.(error.message || 'Erro no checkout');
-      } else {
-        options.onSuccess?.();
+      if (!response.ok) {
+        throw new Error('Erro ao criar sessão de checkout');
       }
+
+      const { checkoutUrl } = await response.json();
+      
+      // Redirect directly to Stripe Checkout (avoids iframe issues)
+      window.location.href = checkoutUrl;
+      
+      options.onSuccess?.();
     } catch (error: any) {
       const message = error.message || 'Erro ao iniciar checkout';
       options.onError?.(message);
@@ -42,27 +44,28 @@ export const useStripeCheckout = (options: UseStripeCheckoutOptions = {}) => {
   };
 
   const createCreditsCheckout = async (priceId: string, quantity: number = 1) => {
-    if (!stripe) {
-      options.onError?.('Stripe não está carregado');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const response = await apiRequest('/api/stripe/create-credits-checkout', {
+      const response = await fetch('/api/stripe/create-credits-checkout', {
         method: 'POST',
-        body: JSON.stringify({ priceId, quantity }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({ priceId, quantity })
       });
 
-      const { sessionId } = response as { sessionId: string };
-      const { error } = await stripe.redirectToCheckout({ sessionId });
-
-      if (error) {
-        options.onError?.(error.message || 'Erro no checkout');
-      } else {
-        options.onSuccess?.();
+      if (!response.ok) {
+        throw new Error('Erro ao criar checkout de créditos');
       }
+
+      const { url } = await response.json();
+      
+      // Redirect directly to Stripe Checkout (avoids iframe issues)
+      window.location.href = url;
+      
+      options.onSuccess?.();
     } catch (error: any) {
       const message = error.message || 'Erro ao iniciar checkout';
       options.onError?.(message);

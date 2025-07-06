@@ -85,9 +85,17 @@ export interface ProductsResponse {
 export const stripeService = {
   // Create subscription checkout session
   createSubscriptionCheckout: async (request: CreateCheckoutRequest): Promise<CheckoutResponse> => {
-    const response = await apiRequest('/api/stripe/create-subscription-checkout', {
+    const response = await fetch('/api/stripe/create-checkout-session', {
       method: 'POST',
-      body: JSON.stringify(request),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      },
+      body: JSON.stringify({
+        priceId: request.priceId,
+        successUrl: request.successUrl || `${window.location.origin}/minha-area/assinaturas?success=true`,
+        cancelUrl: request.cancelUrl || `${window.location.origin}/minha-area/assinaturas?canceled=true`
+      })
     });
 
     if (!response.ok) {
@@ -95,7 +103,8 @@ export const stripeService = {
       throw new Error(error.details || 'Failed to create subscription checkout');
     }
 
-    return response.json();
+    const data = await response.json();
+    return { sessionId: data.sessionId, url: data.checkoutUrl };
   },
 
   // Create credits checkout session
