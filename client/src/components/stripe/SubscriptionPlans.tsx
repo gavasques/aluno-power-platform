@@ -21,6 +21,16 @@ interface SubscriptionStatus {
   };
 }
 
+// Helper function to get plan ID from price ID
+const getPlanIdFromPriceId = (priceId: string): string => {
+  const priceToPlansMap: Record<string, string> = {
+    'price_1RhzvQJX2OwQ92jArTiSMjIn': 'basic',
+    'price_1Rhzw4JX2OwQ92jAwXdSc4mk': 'premium', 
+    'price_1RhzwJJX2OwQ92jAhoyOwZQY': 'master'
+  };
+  return priceToPlansMap[priceId] || 'basic';
+};
+
 export const SubscriptionPlans: React.FC = () => {
   const [isCreatingCheckout, setIsCreatingCheckout] = useState<string | null>(null);
   const { toast } = useToast();
@@ -33,20 +43,19 @@ export const SubscriptionPlans: React.FC = () => {
 
   const createCheckoutMutation = useMutation({
     mutationFn: async (priceId: string) => {
-      const response = await apiRequest('/api/stripe/create-checkout', {
+      const response = await apiRequest('/api/stripe/create-checkout-session', {
         method: 'POST',
         body: JSON.stringify({
-          priceId,
-          mode: 'subscription',
+          planId: getPlanIdFromPriceId(priceId),
           successUrl: `${window.location.origin}/minha-area/assinaturas?success=true`,
           cancelUrl: `${window.location.origin}/minha-area/assinaturas?cancelled=true`
         })
       });
       return response;
     },
-    onSuccess: (data) => {
-      if (data.url) {
-        window.location.href = data.url;
+    onSuccess: (data: any) => {
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
       }
     },
     onError: (error: any) => {
