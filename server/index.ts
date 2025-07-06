@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
-import { registerRoutes } from "./routes";
+import { registerCompleteModularRoutes } from "./modularRoutes";
 import { setupVite, serveStatic, log } from "./vite";
 import { scheduler } from "./services/scheduler";
 
@@ -115,7 +115,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  const server = await registerCompleteModularRoutes(app);
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
