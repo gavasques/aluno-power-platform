@@ -113,6 +113,12 @@ export class AmazonListingService {
 
       const duration = Date.now() - startTime;
 
+      // Salvar análise na sessão  
+      await this.updateSessionData(sessionId, { 
+        reviewsInsight: analysisResult,
+        status: 'step1_completed'
+      });
+
       // Simular resposta completa do AI provider (formato OpenAI)
       const prompt1Output = {
         id: `chatcmpl-${Date.now()}`,
@@ -276,6 +282,12 @@ export class AmazonListingService {
       const titlesResult = titlesResponse.content;
 
       const duration = Date.now() - startTime;
+
+      // Salvar títulos na sessão
+      await this.updateSessionData(sessionId, { 
+        titulos: titlesResult,
+        status: 'step2_completed'
+      });
 
       // Simular resposta completa do AI provider para Prompt 2
       const prompt2Output = {
@@ -463,6 +475,12 @@ export class AmazonListingService {
 
       const duration = Date.now() - startTime;
 
+      // Salvar bullet points na sessão
+      await this.updateSessionData(sessionId, { 
+        bulletPoints: bulletPointsResult,
+        status: 'step3_completed'
+      });
+
       // Simular resposta completa do AI provider para Prompt 3
       const prompt3Output = {
         id: `chatcmpl-${Date.now()}`,
@@ -525,10 +543,16 @@ export class AmazonListingService {
       }
 
       // Salvar resultado no banco
+      console.log('💾 Salvando bullet points na sessão:', { 
+        sessionId, 
+        bulletPointsLength: bulletPointsResult?.length || 0,
+        bulletPointsPreview: bulletPointsResult?.substring(0, 100) + '...'
+      });
+      
       await this.updateSessionData(sessionId, {
         bulletPoints: bulletPointsResult,
         currentStep: 3,
-        status: 'completed'
+        status: 'step3_completed'
       });
 
       return bulletPointsResult;
@@ -545,8 +569,27 @@ export class AmazonListingService {
     if (!session) throw new Error('Sessão não encontrada');
 
     // Verificar se etapas anteriores foram concluídas
-    if (!session.reviewsInsight || !session.titulos || !session.bulletPoints) {
-      throw new Error('Todas as etapas anteriores devem ser concluídas primeiro');
+    console.log('🔍 DEBUG - Session validation:', {
+      sessionId,
+      hasReviewsInsight: !!session.reviewsInsight,
+      hasTitulos: !!session.titulos,
+      hasBulletPoints: !!session.bulletPoints,
+      reviewsInsightLength: session.reviewsInsight?.length || 0,
+      titulosLength: session.titulos?.length || 0,
+      bulletPointsLength: session.bulletPoints?.length || 0,
+      sessionStatus: session.status,
+      currentStep: session.currentStep
+    });
+    
+    // Simplificar validação temporariamente para debug
+    if (!session.reviewsInsight) {
+      throw new Error('Etapa 1 (Análise) não foi concluída. ReviewsInsight não encontrado.');
+    }
+    if (!session.titulos) {
+      throw new Error('Etapa 2 (Títulos) não foi concluída. Titulos não encontrado.');
+    }
+    if (!session.bulletPoints) {
+      throw new Error('Etapa 3 (Bullet Points) não foi concluída. BulletPoints não encontrado.');
     }
 
     // Atualizar status
