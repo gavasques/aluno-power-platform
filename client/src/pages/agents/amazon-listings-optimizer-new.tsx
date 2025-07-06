@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from '@tanstack/react-query';
 import { 
   ArrowLeft, 
   ShoppingCart, 
@@ -39,6 +40,12 @@ export default function AmazonListingsOptimizerNew() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [reviewsTab, setReviewsTab] = useState<"upload" | "text">("upload");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
+  // Buscar departamentos da API
+  const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
+    queryKey: ['/api/departments'],
+    select: (data: any[]) => data?.sort((a, b) => a.name.localeCompare(b.name)) || []
+  });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -138,11 +145,17 @@ export default function AmazonListingsOptimizerNew() {
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="electronics">Eletrônicos</SelectItem>
-                    <SelectItem value="home">Casa e Jardim</SelectItem>
-                    <SelectItem value="sports">Esportes</SelectItem>
-                    <SelectItem value="beauty">Beleza</SelectItem>
-                    <SelectItem value="clothing">Roupas</SelectItem>
+                    {isDepartmentsLoading ? (
+                      <SelectItem value="" disabled>Carregando categorias...</SelectItem>
+                    ) : departments?.length > 0 ? (
+                      departments.map((dept: any) => (
+                        <SelectItem key={dept.id} value={dept.name}>
+                          {dept.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled>Nenhuma categoria encontrada</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
