@@ -25,19 +25,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Plus, 
-  Save, 
   Trash2, 
-  FileDown, 
   Calculator,
   Building2,
   TrendingUp,
   DollarSign,
   Percent,
-  Calendar
+  Calendar,
+  BarChart3
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -48,20 +46,10 @@ interface MesSimulacao {
   ano: number;
   faturamento: string;
   anexo: string;
-  soma12Meses?: string;
-  media12Meses?: string;
-  disponivelMedia?: string;
-  disponivelAnual?: string;
-  aliquotaEfetiva?: string;
-  valorImposto?: string;
-}
-
-interface SimplesSimulation {
-  id?: number;
-  nomeSimulacao: string;
-  dataCreated?: string;
-  dataLastModified?: string;
-  meses?: MesSimulacao[];
+  rbt12: string;
+  aliquotaEfetiva: string;
+  impostoDevido: string;
+  disponivelAnual: string;
 }
 
 interface FaixaAliquota {
@@ -73,7 +61,13 @@ interface FaixaAliquota {
   valorDeduzir: string;
 }
 
-const meses = [
+interface SimulationData {
+  id?: number;
+  nomeSimulacao: string;
+  meses: MesSimulacao[];
+}
+
+const MESES = [
   { value: 1, label: 'Janeiro' },
   { value: 2, label: 'Fevereiro' },
   { value: 3, label: 'Março' },
@@ -88,595 +82,466 @@ const meses = [
   { value: 12, label: 'Dezembro' }
 ];
 
-const anos = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+const ANOS = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i);
+
+const formatCurrency = (value: string | number): string => {
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(numValue || 0);
+};
+
+const formatPercentage = (value: string | number): string => {
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'percent',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format((numValue || 0) / 100);
+};
 
 export default function SimplesNacional() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // States
-  const [activeSimulation, setActiveSimulation] = useState<SimplesSimulation>({
-    nomeSimulacao: 'Nova Simulação Simples Nacional',
+  
+  // Estado da simulação única
+  const [simulationData, setSimulationData] = useState<SimulationData>({
+    nomeSimulacao: 'Simulação Simples Nacional',
     meses: []
   });
-  const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
-  const [newMes, setNewMes] = useState<Omit<MesSimulacao, 'id'>>({
-    competencia: new Date().getMonth() + 1,
-    ano: new Date().getFullYear(),
+  
+  // Formulário para adicionar mês
+  const [formData, setFormData] = useState({
+    competencia: '',
+    ano: '',
     faturamento: '',
     anexo: 'Anexo I'
   });
-  const [activeTab, setActiveTab] = useState('simulation');
-  const [isEditingName, setIsEditingName] = useState(false);
 
-  // API Queries
-  const { data: simulations = [], isLoading } = useQuery({
+  // Carregar simulação existente do usuário
+  const { data: existingSimulation, isLoading } = useQuery({
     queryKey: ['/api/simulations/simples'],
-    enabled: true,
+    select: (data: any[]) => data[0] || null // Pega apenas a primeira simulação
   });
 
-  const { data: faixasAnexo1 = [] } = useQuery<FaixaAliquota[]>({
-    queryKey: ['/api/simulations/simples/faixas/Anexo I'],
-    enabled: true,
+  // Carregar faixas de alíquotas
+  const { data: faixasAnexoI = [] } = useQuery<FaixaAliquota[]>({
+    queryKey: ['/api/simulations/simples/faixas/Anexo I']
   });
 
-  const { data: faixasAnexo2 = [] } = useQuery<FaixaAliquota[]>({
-    queryKey: ['/api/simulations/simples/faixas/Anexo II'],
-    enabled: true,
+  const { data: faixasAnexoII = [] } = useQuery<FaixaAliquota[]>({
+    queryKey: ['/api/simulations/simples/faixas/Anexo II']
   });
 
-  // Mutations
-  const createSimulationMutation = useMutation({
-    mutationFn: (data: { nomeSimulacao: string }) =>
-      apiRequest('/api/simulations/simples', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      }),
-    onSuccess: (data) => {
-      setSelectedSimulationId(data.id);
-      setActiveSimulation({ ...activeSimulation, ...data });
+  // Carregar dados na primeira vez
+  useEffect(() => {
+    if (existingSimulation) {
+      setSimulationData(existingSimulation);
+    }
+  }, [existingSimulation]);
+
+  // Criar ou atualizar simulação
+  const saveSimulationMutation = useMutation({
+    mutationFn: async (data: SimulationData) => {
+      if (data.id) {
+        return await apiRequest(`/api/simulations/simples/${data.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ nomeSimulacao: data.nomeSimulacao })
+        });
+      } else {
+        return await apiRequest('/api/simulations/simples', {
+          method: 'POST',
+          body: JSON.stringify({ nomeSimulacao: data.nomeSimulacao })
+        });
+      }
+    },
+    onSuccess: (result) => {
+      setSimulationData(prev => ({ ...prev, id: result.id }));
       queryClient.invalidateQueries({ queryKey: ['/api/simulations/simples'] });
-      toast({ title: 'Simulação criada com sucesso!' });
-    },
-    onError: () => {
-      toast({ title: 'Erro ao criar simulação', variant: 'destructive' });
-    },
+    }
   });
 
-  const updateSimulationMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: { nomeSimulacao: string } }) =>
-      apiRequest(`/api/simulations/simples/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      }),
+  // Adicionar mês
+  const addMonthMutation = useMutation({
+    mutationFn: async (monthData: Omit<MesSimulacao, 'id'>) => {
+      // Garantir que temos uma simulação salva primeiro
+      let simulationId = simulationData.id;
+      if (!simulationId) {
+        const newSimulation = await saveSimulationMutation.mutateAsync(simulationData);
+        simulationId = newSimulation.id;
+      }
+      
+      return await apiRequest(`/api/simulations/simples/${simulationId}/meses`, {
+        method: 'POST',
+        body: JSON.stringify({
+          competencia: parseInt(monthData.competencia.toString()),
+          ano: parseInt(monthData.ano.toString()),
+          faturamento: parseFloat(monthData.faturamento.replace(/[^\d,]/g, '').replace(',', '.')),
+          anexo: monthData.anexo
+        })
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/simulations/simples'] });
-      toast({ title: 'Simulação atualizada com sucesso!' });
-    },
-    onError: () => {
-      toast({ title: 'Erro ao atualizar simulação', variant: 'destructive' });
-    },
-  });
-
-  const addMesMutation = useMutation({
-    mutationFn: ({ simulationId, data }: { simulationId: number; data: Omit<MesSimulacao, 'id'> }) =>
-      apiRequest(`/api/simulations/simples/${simulationId}/mes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      }),
-    onSuccess: (data) => {
-      setActiveSimulation(prev => ({
-        ...prev,
-        meses: [...(prev.meses || []), data]
-      }));
-      setNewMes({
-        competencia: new Date().getMonth() + 1,
-        ano: new Date().getFullYear(),
-        faturamento: '',
-        anexo: 'Anexo I'
+      setFormData({ competencia: '', ano: '', faturamento: '', anexo: 'Anexo I' });
+      toast({
+        title: 'Mês adicionado',
+        description: 'Dados do mês foram salvos com sucesso.',
       });
-      toast({ title: 'Mês adicionado com sucesso!' });
     },
-    onError: () => {
-      toast({ title: 'Erro ao adicionar mês', variant: 'destructive' });
-    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro',
+        description: error.response?.data?.error || 'Erro ao adicionar mês.',
+        variant: 'destructive'
+      });
+    }
   });
 
-  const deleteMesMutation = useMutation({
-    mutationFn: ({ simulationId, mesId }: { simulationId: number; mesId: number }) =>
-      apiRequest(`/api/simulations/simples/${simulationId}/mes/${mesId}`, {
-        method: 'DELETE',
-      }),
-    onSuccess: (_, { mesId }) => {
-      setActiveSimulation(prev => ({
-        ...prev,
-        meses: prev.meses?.filter(mes => mes.id !== mesId) || []
-      }));
-      toast({ title: 'Mês excluído com sucesso!' });
+  // Remover mês
+  const removeMonthMutation = useMutation({
+    mutationFn: async (monthId: number) => {
+      return await apiRequest(`/api/simulations/simples/${simulationData.id}/meses/${monthId}`, {
+        method: 'DELETE'
+      });
     },
-    onError: () => {
-      toast({ title: 'Erro ao excluir mês', variant: 'destructive' });
-    },
-  });
-
-  const deleteSimulationMutation = useMutation({
-    mutationFn: (id: number) =>
-      apiRequest(`/api/simulations/simples/${id}`, {
-        method: 'DELETE',
-      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/simulations/simples'] });
-      toast({ title: 'Simulação excluída com sucesso!' });
-    },
-    onError: () => {
-      toast({ title: 'Erro ao excluir simulação', variant: 'destructive' });
-    },
+      toast({
+        title: 'Mês removido',
+        description: 'Dados do mês foram removidos com sucesso.',
+      });
+    }
   });
 
-  // Load simulation
-  const loadSimulation = async (simulation: SimplesSimulation) => {
-    if (!simulation.id) return;
-
-    try {
-      const response = await apiRequest(`/api/simulations/simples/${simulation.id}`);
-      setActiveSimulation(response);
-      setSelectedSimulationId(simulation.id);
-      setActiveTab('simulation');
-      toast({ title: 'Simulação carregada com sucesso!' });
-    } catch (error) {
-      toast({ title: 'Erro ao carregar simulação', variant: 'destructive' });
-    }
-  };
-
-  // Save simulation
-  const saveSimulation = () => {
-    if (selectedSimulationId) {
-      updateSimulationMutation.mutate({
-        id: selectedSimulationId,
-        data: { nomeSimulacao: activeSimulation.nomeSimulacao }
+  const handleAddMonth = () => {
+    if (!formData.competencia || !formData.ano || !formData.faturamento) {
+      toast({
+        title: 'Campos obrigatórios',
+        description: 'Preencha todos os campos para adicionar um mês.',
+        variant: 'destructive'
       });
-    } else {
-      createSimulationMutation.mutate({
-        nomeSimulacao: activeSimulation.nomeSimulacao
-      });
-    }
-  };
-
-  // Add month
-  const addMes = () => {
-    if (!selectedSimulationId) {
-      toast({ title: 'Salve a simulação primeiro', variant: 'destructive' });
       return;
     }
 
-    if (!newMes.faturamento || parseFloat(newMes.faturamento) <= 0) {
-      toast({ title: 'Informe o faturamento', variant: 'destructive' });
-      return;
-    }
-
-    addMesMutation.mutate({
-      simulationId: selectedSimulationId,
-      data: newMes
+    addMonthMutation.mutate({
+      competencia: parseInt(formData.competencia),
+      ano: parseInt(formData.ano),
+      faturamento: formData.faturamento,
+      anexo: formData.anexo,
+      rbt12: '0',
+      aliquotaEfetiva: '0',
+      impostoDevido: '0',
+      disponivelAnual: '0'
     });
   };
 
-  // Format currency
-  const formatCurrency = (value: string | number) => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(num || 0);
+  const handleRemoveMonth = (monthId: number) => {
+    if (!monthId) return;
+    removeMonthMutation.mutate(monthId);
   };
 
-  // Format percentage
-  const formatPercentage = (value: string | number) => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return `${(num * 100).toFixed(2)}%`;
-  };
+  // Calcular totais
+  const faturamentoTotal = simulationData.meses.reduce((total, mes) => 
+    total + parseFloat(mes.faturamento || '0'), 0
+  );
 
-  // Calculate totals
-  const totalFaturamento = activeSimulation.meses?.reduce(
-    (acc, mes) => acc + parseFloat(mes.faturamento || '0'), 0
-  ) || 0;
+  const impostoTotal = simulationData.meses.reduce((total, mes) => 
+    total + parseFloat(mes.impostoDevido || '0'), 0
+  );
 
-  const totalImposto = activeSimulation.meses?.reduce(
-    (acc, mes) => acc + parseFloat(mes.valorImposto || '0'), 0
-  ) || 0;
+  const limiteAnual = 3600000; // R$ 3.600.000 limite do Simples Nacional
+  const disponivel = limiteAnual - faturamentoTotal;
 
-  const aliquotaMedia = totalFaturamento > 0 
-    ? (totalImposto / totalFaturamento) 
-    : 0;
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center space-x-2">
+          <Calculator className="h-6 w-6" />
+          <h1 className="text-3xl font-bold">Carregando...</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Simulador Simples Nacional</h1>
-        <p className="text-muted-foreground">
-          Calcule impostos e taxas do regime tributário Simples Nacional para Anexos I e II
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center space-x-2">
+            <Calculator className="h-6 w-6" />
+            <h1 className="text-3xl font-bold">Simulador Simples Nacional</h1>
+          </div>
+          <p className="text-muted-foreground mt-1">
+            Calcule impostos e taxas do regime tributário Simples Nacional para Anexos I e II
+          </p>
+        </div>
+        <Badge variant="outline" className="text-sm">
+          Não Salva
+        </Badge>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="simulation">Simulação Ativa</TabsTrigger>
-          <TabsTrigger value="saved">Simulações Salvas</TabsTrigger>
-        </TabsList>
+      {/* Cards de Resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Faturamento Total</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              {formatCurrency(faturamentoTotal)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {simulationData.meses.length} meses
+            </p>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="simulation" className="space-y-6">
-          {/* Simulation Name and Actions */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                {isEditingName ? (
-                  <Input
-                    value={activeSimulation.nomeSimulacao}
-                    onChange={(e) => setActiveSimulation(prev => ({ ...prev, nomeSimulacao: e.target.value }))}
-                    onBlur={() => setIsEditingName(false)}
-                    onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
-                    className="text-xl font-semibold max-w-md"
-                    autoFocus
-                  />
-                ) : (
-                  <CardTitle 
-                    className="text-xl cursor-pointer hover:text-primary"
-                    onClick={() => setIsEditingName(true)}
-                  >
-                    {activeSimulation.nomeSimulacao}
-                  </CardTitle>
-                )}
-                <div className="flex items-center gap-2">
-                  <Badge variant={selectedSimulationId ? "default" : "secondary"}>
-                    {selectedSimulationId ? "Salva" : "Não Salva"}
-                  </Badge>
-                  <Button onClick={saveSimulation} size="sm">
-                    <Save className="h-4 w-4 mr-1" />
-                    Salvar
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Imposto Total</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {formatCurrency(impostoTotal)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {impostoTotal > 0 ? formatPercentage((impostoTotal / faturamentoTotal) * 100) : '0,00%'} média
+            </p>
+          </CardContent>
+        </Card>
 
-          {/* Summary Cards */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Faturamento Total</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">
-                  {formatCurrency(totalFaturamento)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {activeSimulation.meses?.length || 0} meses
-                </p>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Limite Anual</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(limiteAnual)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Simples Nacional
+            </p>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Imposto Total</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {formatCurrency(totalImposto)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {formatPercentage(aliquotaMedia)} média
-                </p>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Disponível</CardTitle>
+            <Percent className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${disponivel > 0 ? 'text-orange-600' : 'text-red-600'}`}>
+              {formatCurrency(disponivel)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {formatPercentage((disponivel / limiteAnual) * 100)} restante
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Limite Anual</CardTitle>
-                <Building2 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(3600000)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Simples Nacional
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Disponível</CardTitle>
-                <Percent className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-orange-600">
-                  {formatCurrency(3600000 - totalFaturamento)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {formatPercentage((3600000 - totalFaturamento) / 3600000)} restante
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Add Month Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Adicionar Mês
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-5">
-                <div className="space-y-2">
-                  <Label>Mês</Label>
-                  <Select
-                    value={newMes.competencia.toString()}
-                    onValueChange={(value) => setNewMes(prev => ({ ...prev, competencia: parseInt(value) }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {meses.map(mes => (
-                        <SelectItem key={mes.value} value={mes.value.toString()}>
-                          {mes.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Ano</Label>
-                  <Select
-                    value={newMes.ano.toString()}
-                    onValueChange={(value) => setNewMes(prev => ({ ...prev, ano: parseInt(value) }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {anos.map(ano => (
-                        <SelectItem key={ano} value={ano.toString()}>
-                          {ano}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Faturamento</Label>
-                  <Input
-                    type="number"
-                    placeholder="0,00"
-                    value={newMes.faturamento}
-                    onChange={(e) => setNewMes(prev => ({ ...prev, faturamento: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Anexo</Label>
-                  <Select
-                    value={newMes.anexo}
-                    onValueChange={(value) => setNewMes(prev => ({ ...prev, anexo: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Anexo I">Anexo I</SelectItem>
-                      <SelectItem value="Anexo II">Anexo II</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-end">
-                  <Button onClick={addMes} className="w-full">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Adicionar
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Monthly Data Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Dados Mensais
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {activeSimulation.meses && activeSimulation.meses.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Período</TableHead>
-                        <TableHead>Anexo</TableHead>
-                        <TableHead className="text-right">Faturamento</TableHead>
-                        <TableHead className="text-right">RBT12</TableHead>
-                        <TableHead className="text-right">Alíquota Efetiva</TableHead>
-                        <TableHead className="text-right">Imposto</TableHead>
-                        <TableHead className="text-right">Disponível Anual</TableHead>
-                        <TableHead className="w-[50px]"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {activeSimulation.meses.map((mes) => (
-                        <TableRow key={mes.id}>
-                          <TableCell className="font-medium">
-                            {meses.find(m => m.value === mes.competencia)?.label} {mes.ano}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={mes.anexo === 'Anexo I' ? 'default' : 'secondary'}>
-                              {mes.anexo}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right font-semibold">
-                            {formatCurrency(mes.faturamento)}
-                          </TableCell>
-                          <TableCell className="text-right text-blue-600">
-                            {formatCurrency(mes.soma12Meses || '0')}
-                          </TableCell>
-                          <TableCell className="text-right text-green-600">
-                            {formatPercentage(mes.aliquotaEfetiva || '0')}
-                          </TableCell>
-                          <TableCell className="text-right font-bold text-orange-600">
-                            {formatCurrency(mes.valorImposto || '0')}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency(mes.disponivelAnual || '0')}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => mes.id && selectedSimulationId && deleteMesMutation.mutate({
-                                simulationId: selectedSimulationId,
-                                mesId: mes.id
-                              })}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calculator className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Nenhum mês adicionado ainda.</p>
-                  <p className="text-sm">Adicione o primeiro mês para começar a simulação.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Tax Brackets Table */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Anexo I - Faixas de Alíquotas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Faixa de Receita</TableHead>
-                      <TableHead className="text-right">Alíquota</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {faixasAnexo1.map((faixa) => (
-                      <TableRow key={faixa.id}>
-                        <TableCell>
-                          {formatCurrency(faixa.faixaInicial)} - {formatCurrency(faixa.faixaFinal)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatPercentage(faixa.aliquotaNominal)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Anexo II - Faixas de Alíquotas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Faixa de Receita</TableHead>
-                      <TableHead className="text-right">Alíquota</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {faixasAnexo2.map((faixa) => (
-                      <TableRow key={faixa.id}>
-                        <TableCell>
-                          {formatCurrency(faixa.faixaInicial)} - {formatCurrency(faixa.faixaFinal)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatPercentage(faixa.aliquotaNominal)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="saved" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Simulações Salvas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="text-center py-8">Carregando simulações...</div>
-              ) : simulations.length > 0 ? (
-                <div className="space-y-4">
-                  {simulations.map((simulation: SimplesSimulation) => (
-                    <div
-                      key={simulation.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                    >
-                      <div>
-                        <h3 className="font-semibold">{simulation.nomeSimulacao}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Criada em {new Date(simulation.dataCreated!).toLocaleDateString('pt-BR')}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => loadSimulation(simulation)}
-                        >
-                          Carregar
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => simulation.id && deleteSimulationMutation.mutate(simulation.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+      {/* Formulário para Adicionar Mês */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Plus className="h-5 w-5" />
+            <span>Adicionar Mês</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+              <Label htmlFor="mes">Mês</Label>
+              <Select value={formData.competencia} onValueChange={(value) => setFormData(prev => ({ ...prev, competencia: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o mês" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MESES.map(mes => (
+                    <SelectItem key={mes.value} value={mes.value.toString()}>
+                      {mes.label}
+                    </SelectItem>
                   ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Nenhuma simulação salva ainda.</p>
-                  <p className="text-sm">Crie sua primeira simulação na aba "Simulação Ativa".</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="ano">Ano</Label>
+              <Select value={formData.ano} onValueChange={(value) => setFormData(prev => ({ ...prev, ano: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ANOS.map(ano => (
+                    <SelectItem key={ano} value={ano.toString()}>
+                      {ano}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="faturamento">Faturamento</Label>
+              <Input
+                type="text"
+                placeholder="R$ 0,00"
+                value={formData.faturamento}
+                onChange={(e) => setFormData(prev => ({ ...prev, faturamento: e.target.value }))}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="anexo">Anexo</Label>
+              <Select value={formData.anexo} onValueChange={(value) => setFormData(prev => ({ ...prev, anexo: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Anexo I">Anexo I</SelectItem>
+                  <SelectItem value="Anexo II">Anexo II</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-end">
+              <Button 
+                onClick={handleAddMonth} 
+                disabled={addMonthMutation.isPending}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabela de Dados Mensais */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <BarChart3 className="h-5 w-5" />
+            <span>Dados Mensais</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {simulationData.meses.length === 0 ? (
+            <div className="text-center py-8">
+              <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-2">Nenhum mês adicionado ainda.</p>
+              <p className="text-sm text-muted-foreground">
+                Adicione o primeiro mês para começar a simulação.
+              </p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Período</TableHead>
+                  <TableHead>Anexo</TableHead>
+                  <TableHead>Faturamento</TableHead>
+                  <TableHead>RBT12</TableHead>
+                  <TableHead>Alíquota Efetiva</TableHead>
+                  <TableHead>Imposto</TableHead>
+                  <TableHead>Disponível Anual</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {simulationData.meses.map((mes) => (
+                  <TableRow key={`${mes.competencia}-${mes.ano}`}>
+                    <TableCell>
+                      {MESES.find(m => m.value === mes.competencia)?.label}/{mes.ano}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{mes.anexo}</Badge>
+                    </TableCell>
+                    <TableCell>{formatCurrency(mes.faturamento)}</TableCell>
+                    <TableCell>{formatCurrency(mes.rbt12)}</TableCell>
+                    <TableCell>{formatPercentage(mes.aliquotaEfetiva)}</TableCell>
+                    <TableCell>{formatCurrency(mes.impostoDevido)}</TableCell>
+                    <TableCell>{formatCurrency(mes.disponivelAnual)}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveMonth(mes.id!)}
+                        disabled={removeMonthMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Faixas de Alíquotas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Anexo I - Faixas de Alíquotas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Faixa de Receita</TableHead>
+                  <TableHead>Alíquota</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {faixasAnexoI.map((faixa) => (
+                  <TableRow key={faixa.id}>
+                    <TableCell>
+                      {formatCurrency(faixa.faixaInicial)} - {formatCurrency(faixa.faixaFinal)}
+                    </TableCell>
+                    <TableCell>{formatPercentage(faixa.aliquotaNominal)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Anexo II - Faixas de Alíquotas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Faixa de Receita</TableHead>
+                  <TableHead>Alíquota</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {faixasAnexoII.map((faixa) => (
+                  <TableRow key={faixa.id}>
+                    <TableCell>
+                      {formatCurrency(faixa.faixaInicial)} - {formatCurrency(faixa.faixaFinal)}
+                    </TableCell>
+                    <TableCell>{formatPercentage(faixa.aliquotaNominal)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
