@@ -38,7 +38,7 @@ export function registerModularRoutes(app: Express): void {
   app.use('/api/products', productRoutes);
   
   // User Dashboard Routes - Complete Dashboard System
-  app.use('/api/user/dashboard', dashboardRoutes);
+  app.use('/api/dashboard', dashboardRoutes);
   
   // Stripe Payment Routes - Complete Stripe Integration
   app.use('/api/stripe', stripeRoutes);

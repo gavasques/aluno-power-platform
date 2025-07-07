@@ -180,9 +180,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files from uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
   
-  // Dashboard routes for user dashboard system
-  app.use('/api/user/dashboard', dashboardRoutes);
-  
   // User dashboard routes
   app.use('/api/user/dashboard', userDashboardRoutes);
   
