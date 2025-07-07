@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 import AdminStandardLayout, { AdminCard, AdminGrid, AdminLoader } from '@/components/layout/AdminStandardLayout';
 
 interface User {
@@ -34,6 +35,7 @@ const UserManagement = memo(() => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState<'users' | 'groups'>('users');
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Users query
   const { data: users, isLoading } = useQuery<User[]>({
@@ -68,11 +70,51 @@ const UserManagement = memo(() => {
   const deleteUser = useMutation({
     mutationFn: async (userId: number) => {
       const response = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete user');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete user');
+      }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      toast({
+        title: "Usuário deletado",
+        description: data.message,
+      });
       queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao deletar usuário",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Bulk delete test users
+  const deleteTestUsers = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/admin/test-users', { method: 'DELETE' });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete test users');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Usuários de teste deletados",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao deletar usuários de teste",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   });
 
@@ -131,6 +173,19 @@ const UserManagement = memo(() => {
         onClick: () => setLocation('/admin/usuarios/novo'),
         icon: Plus
       }}
+      secondaryActions={[
+        {
+          label: deleteTestUsers.isPending ? 'Deletando...' : 'Limpar Usuários Teste',
+          onClick: () => {
+            if (window.confirm('Confirma a exclusão de todos os usuários de teste? Esta ação não pode ser desfeita.')) {
+              deleteTestUsers.mutate();
+            }
+          },
+          icon: Trash2,
+          variant: 'destructive' as const,
+          disabled: deleteTestUsers.isPending
+        }
+      ]}
     >
       <div className="space-y-6">
         {/* Tabs */}

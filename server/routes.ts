@@ -101,7 +101,7 @@ import materialTypeRoutes from "./routes/materialTypeRoutes";
 import { aiProviderService } from "./services/aiProviderService";
 import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
-import { requireAuth } from "./security";
+import { requireAuth, requireRole } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, isNotNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
 import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs } from '@shared/schema';
@@ -4642,27 +4642,44 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  app.delete('/api/users/:id', async (req, res) => {
+  app.delete('/api/users/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     try {
-      const { id } = req.params;
-      
-      // Delete user group memberships first
-      await db.execute('DELETE FROM user_group_members WHERE user_id = $1', [id]);
-      
-      // Delete user sessions
-      await db.execute('DELETE FROM user_sessions WHERE user_id = $1', [id]);
-      
-      // Delete user
-      const result = await db.execute('DELETE FROM users WHERE id = $1 RETURNING id', [id]);
-      
-      if (result.rows.length === 0) {
-        return res.status(404).json({ error: 'User not found' });
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: 'ID inválido' });
       }
+
+      // Import the deletion service
+      const { UserDeletionService } = await import('./services/userDeletionService');
       
-      res.status(204).send();
-    } catch (error) {
+      // Use safe deletion method
+      const result = await UserDeletionService.deleteUserWithDependencies(id);
+      
+      if (!result.success) {
+        return res.status(400).json({ error: result.message });
+      }
+
+      res.json({ 
+        success: true, 
+        message: result.message,
+        deletedRecords: result.deletedRecords
+      });
+    } catch (error: any) {
       console.error('Error deleting user:', error);
-      res.status(500).json({ error: 'Failed to delete user' });
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Bulk delete test users
+  app.delete('/api/admin/test-users', requireAuth, requireRole(['admin']), async (req, res) => {
+    try {
+      const { UserDeletionService } = await import('./services/userDeletionService');
+      const result = await UserDeletionService.deleteTestUsers();
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error deleting test users:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
     }
   });
 
