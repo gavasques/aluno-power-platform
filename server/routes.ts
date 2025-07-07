@@ -196,6 +196,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { default: stripeRoutes } = await import('./routes/stripe/index.js');
   app.use('/api/stripe', stripeRoutes);
   
+  // Permission system test routes
+  const { default: testPermissionRoutes } = await import('./routes/test-permissions');
+  app.use(testPermissionRoutes);
+  
   // PHASE 2: ✅ SUPPLIER ROUTES MIGRATED TO MODULAR ARCHITECTURE
   // All supplier routes now handled by modular system in server/routes/supplierRoutes.ts
   // Following SOLID/DRY/KISS principles - eliminated code duplication

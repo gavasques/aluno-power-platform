@@ -24,6 +24,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const UserEdit = lazy(() => import("./pages/admin/UserEdit"));
 const GroupEdit = lazy(() => import("./pages/admin/GroupEdit"));
+const PermissionsTestDashboard = lazy(() => import("./pages/admin/PermissionsTestDashboard"));
 
 const GeneralSettings = lazy(() => import("./pages/admin/GeneralSettings"));
 const ContentManagement = lazy(() => import("./pages/admin/ContentManagement"));
@@ -532,6 +533,16 @@ function App() {
                               <AdminLayout>
                                 <Suspense fallback={<PageLoader />}>
                                   <UserManagement />
+                                </Suspense>
+                              </AdminLayout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/admin/permissions-test">
+                            <ProtectedRoute requireAdmin>
+                              <AdminLayout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <PermissionsTestDashboard />
                                 </Suspense>
                               </AdminLayout>
                             </ProtectedRoute>
