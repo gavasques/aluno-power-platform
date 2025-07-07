@@ -205,20 +205,19 @@ export default function AgentsPage() {
   });
   const { balance: userBalance } = useUserCreditBalance();
 
-  // Categorias disponíveis para filtros
+  // Categorias disponíveis para filtros - baseadas nos agentes existentes
   const categories = [
     { name: "Todos", icon: Filter },
     { name: "Favoritos", icon: Star },
     { name: "Novo!", icon: Sparkles },
     { name: "Beta", icon: Bot },
-    { name: "Vendas", icon: Zap },
-    { name: "YouTube", icon: Youtube },
-    { name: "Copywriting", icon: MessageSquare },
-    { name: "E-mails", icon: Mail },
-    { name: "Marketing", icon: TrendingUp },
-    { name: "Anúncios", icon: Target },
-    { name: "Conteúdo", icon: PenTool },
-    { name: "E-commerce", icon: ShoppingCart }
+    { name: "Amazon", icon: ShoppingCart },
+    { name: "Amazon FBA", icon: ShoppingCart },
+    { name: "E-commerce", icon: ShoppingCart },
+    { name: "Imagens", icon: PenTool },
+    { name: "Edição de Imagem", icon: PenTool },
+    { name: "Geração de Imagens", icon: PenTool },
+    { name: "Customer Service", icon: Mail }
   ];
 
   // Filtrar agentes baseado na busca e categoria

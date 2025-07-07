@@ -111,6 +111,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 07, 2025 - 07:20 PM**: ✅ SISTEMA DE CRÉDITOS DINÂMICOS EM AGENTES IMPLEMENTADO E CATEGORIAS REORGANIZADAS
+  - **Mapeamento de Agentes Corrigido**:
+    - ✅ **AGENT_FEATURE_MAP criado**: Conecta IDs dos agentes (agent-amazon-listings) com nomes no banco (agents.amazon_listing)
+    - ✅ **9 agentes mapeados**: Amazon Listing, HTML Descriptions, Bullet Points, Main Image Editor, Lifestyle Model, Infographic Editor, Advanced Infographic, Customer Service, Negative Reviews
+    - ✅ **CreditCostBadge funcional**: Badges de créditos agora aparecem dinamicamente nos cards dos agentes (3-15 créditos)
+    - ✅ **Botões limpos**: Removidos créditos dos botões "Usar Agente", mantendo apenas no badge superior
+  - **Categorias de Filtros Reorganizadas**:
+    - ✅ **Categorias atualizadas**: Baseadas nos agentes reais existentes (Amazon, Amazon FBA, E-commerce, Imagens, Edição de Imagem, Geração de Imagens, Customer Service)
+    - ✅ **Interface mais organizada**: Filtros agora refletem as categorias reais dos agentes ao invés de categorias genéricas
+    - ✅ **Experiência melhorada**: Usuários podem filtrar agentes por categorias relevantes e funcionais
+  - **Benefícios Técnicos**:
+    - Sistema de créditos 100% dinâmico integrado ao banco de dados
+    - Interface limpa com informação de custos apenas onde necessário
+    - Categorização lógica facilitando descoberta de agentes específicos
+    - Mapeamento robusto entre frontend e backend para custos precisos
+
 - **January 07, 2025 - 06:00 PM**: ✅ LOGGING SYSTEM SCHEMA & CREDITS INTEGRATION COMPLETED - REAL-TIME COST TRACKING OPERATIONAL
   - **Database Schema Enhanced for Credits Tracking**:
     - ✅ **credits_used column**: Added to both ai_generation_logs and ai_img_generation_logs tables
