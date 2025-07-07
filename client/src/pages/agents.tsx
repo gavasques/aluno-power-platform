@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { CreditCostBadge } from "@/components/CreditCostButton";
+import { CreditCostBadge, CreditCostButton } from "@/components/CreditCostButton";
 import { useUserCreditBalance } from "@/hooks/useUserCredits";
 import type { Agent } from "../types/agent.types";
 
