@@ -9,18 +9,22 @@ import { ResetButton } from "@/components/ai/common/ResetButton";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
 import { BACKGROUND_REMOVAL_CONFIG } from "@/config/ai-image";
 import { PermissionGuard } from "@/components/guards";
+import { CreditCostButton } from "@/components/CreditCostButton";
+import { useUserCreditBalance } from "@/hooks/useUserCredits";
 
 // Componente inline para controles de background removal
 const BackgroundRemovalControls = ({ 
   onProcess, 
   isProcessing, 
   isUploading, 
-  hasUploadedImage 
+  hasUploadedImage,
+  userBalance
 }: {
   onProcess: () => void;
   isProcessing: boolean;
   isUploading: boolean;
   hasUploadedImage: boolean;
+  userBalance: number;
 }) => (
   <div className="space-y-4">
     <div className="text-sm text-muted-foreground space-y-2">
@@ -28,15 +32,17 @@ const BackgroundRemovalControls = ({
       <p>• Formato de saída: PNG transparente</p>
     </div>
 
-    <Button 
-      onClick={onProcess}
+    <CreditCostButton
+      featureName="tools.background_removal"
+      userBalance={userBalance}
+      onProcess={onProcess}
       disabled={!hasUploadedImage || isProcessing || isUploading}
       className="w-full"
       size="lg"
     >
       <Scissors className="h-4 w-4 mr-2" />
       {isProcessing ? 'Removendo Background...' : 'Remover Background'}
-    </Button>
+    </CreditCostButton>
   </div>
 );
 
@@ -53,6 +59,7 @@ export default function BackgroundRemoval() {
 
   const { isProcessing, isUploading, error, step } = state;
   const hasUploadedImage = !!uploadedImage;
+  const { balance: userBalance, isLoading: creditsLoading } = useUserCreditBalance();
 
   const handleProcess = () => {
     processBackgroundRemoval({ format: 'png' });
@@ -74,7 +81,7 @@ export default function BackgroundRemoval() {
       />
 
       <PermissionGuard 
-        featureCode="ai.background_removal"
+        featureCode="tools.background_removal"
         showMessage={true}
         message="Você não tem permissão para usar a ferramenta de remoção de background."
       >
@@ -121,6 +128,7 @@ export default function BackgroundRemoval() {
                 isProcessing={isProcessing}
                 isUploading={isUploading}
                 hasUploadedImage={hasUploadedImage}
+                userBalance={userBalance}
               />
             </CardContent>
           </Card>

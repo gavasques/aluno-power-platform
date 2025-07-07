@@ -19,6 +19,7 @@ import stripeRoutes from './stripe';
 import { permissionRoutes } from './permissions';
 import userGroupsRoutes from './admin/userGroups';
 import stripeWebhookTestRoutes from './stripe/webhook-test';
+import featureCostsRoutes from './featureCosts';
 
 /**
  * Register all modular routes
@@ -47,6 +48,9 @@ export function registerModularRoutes(app: Express): void {
   
   // Permission Management Routes - Group-based Access Control
   app.use('/api/permissions', permissionRoutes);
+  
+  // Feature Costs Management - Credit System
+  app.use('/api/feature-costs', featureCostsRoutes);
   
   // Admin User Groups Management Routes
   app.use('/api/admin/user-groups', userGroupsRoutes);
