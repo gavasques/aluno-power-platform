@@ -210,15 +210,21 @@ export default function ImportacaoSimplificada() {
       }
     },
     onSuccess: (savedSimulation) => {
+      // Invalidar todas as queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['/api/simulations/import'] });
-      toast({ title: "Simulação salva com sucesso!" });
-      setShowSaveDialog(false);
       
-      // Se foi uma nova simulação criada, atualizar o ID e selectedSimulationId
-      if (savedSimulation?.id && !activeSimulation.id) {
-        setActiveSimulation(prev => ({ ...prev, id: savedSimulation.id }));
+      // Atualizar a simulação ativa com os dados retornados do servidor
+      if (savedSimulation) {
+        setActiveSimulation({
+          ...savedSimulation,
+          nomeFornecedor: savedSimulation.nomeFornecedor || "",
+          observacoes: savedSimulation.observacoes || "",
+        });
         setSelectedSimulationId(savedSimulation.id);
       }
+      
+      toast({ title: "Simulação salva com sucesso!" });
+      setShowSaveDialog(false);
     },
     onError: () => {
       toast({ title: "Erro ao salvar simulação", variant: "destructive" });
@@ -376,16 +382,21 @@ export default function ImportacaoSimplificada() {
   };
 
   const loadSimulation = (simulation: any) => {
+    // Garantir que todos os dados sejam carregados corretamente
     setActiveSimulation({
       ...simulation,
       id: simulation.id, // Incluir o ID para manter a referência
+      nomeSimulacao: simulation.nomeSimulacao || "Nova Simulação",
       nomeFornecedor: simulation.nomeFornecedor || "",
       observacoes: simulation.observacoes || "",
-      configuracoesGerais: simulation.configuracoesGerais,
-      produtos: simulation.produtos
+      configuracoesGerais: simulation.configuracoesGerais || defaultConfig,
+      produtos: simulation.produtos || []
     });
     setSelectedSimulationId(simulation.id);
     setActiveTab("simulation"); // Switch to active simulation tab
+    
+    // Invalidar queries para garantir que dados estejam atualizados
+    queryClient.invalidateQueries({ queryKey: ['/api/simulations/import'] });
   };
 
   const newSimulation = () => {

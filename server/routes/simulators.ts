@@ -71,6 +71,8 @@ router.post('/import', requireAuth, async (req, res) => {
       .values({
         userId: userId,
         nomeSimulacao: req.body.nomeSimulacao,
+        nomeFornecedor: req.body.nomeFornecedor,
+        observacoes: req.body.observacoes,
         configuracoesGerais: req.body.configuracoesGerais,
         produtos: req.body.produtos
       })
@@ -105,6 +107,8 @@ router.put('/import/:id', requireAuth, async (req, res) => {
       .update(importSimulations)
       .set({
         nomeSimulacao: req.body.nomeSimulacao,
+        nomeFornecedor: req.body.nomeFornecedor,
+        observacoes: req.body.observacoes,
         configuracoesGerais: req.body.configuracoesGerais,
         produtos: req.body.produtos,
         dataLastModified: new Date()
