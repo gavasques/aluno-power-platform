@@ -52,13 +52,7 @@ const menuItems = [
       { title: "Amazon Keyword Suggestions", href: "/ferramentas/keyword-suggestions", icon: Tag },
     ],
   },
-  {
-    title: "Agentes",
-    items: [
-      { title: "Editor de Imagem Principal", href: "/agents/agent-amazon-product-photography", icon: Bot },
-      { title: "Todos os Agentes", href: "/agentes", icon: BrainCircuit },
-    ],
-  },
+
   {
     title: "Hub",
     items: [
@@ -125,6 +119,13 @@ export function Header() {
                 <Link to="/" className={navigationMenuTriggerStyle()}>
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
+                </Link>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <Link to="/agentes" className={navigationMenuTriggerStyle()}>
+                  <BrainCircuit className="mr-2 h-4 w-4" />
+                  Agentes
                 </Link>
               </NavigationMenuItem>
               
