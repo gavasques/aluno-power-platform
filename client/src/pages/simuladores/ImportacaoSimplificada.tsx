@@ -431,7 +431,7 @@ export default function ImportacaoSimplificada() {
         produto.descricao_produto,
         produto.quantidade.toString(),
         `US$ ${formatBrazilianNumber(produto.valor_unitario_usd)}`,
-        `${formatBrazilianNumber(produto.peso_bruto_unitario_kg, 3)} kg`,
+        `${formatBrazilianNumber(produto.peso_bruto_unitario_kg, 2)} kg`,
         `R$ ${formatBrazilianNumber(produto.custo_produto_brl || 0)}`,
         `R$ ${formatBrazilianNumber(produto.custo_frete_por_produto_brl || 0)}`,
         `R$ ${formatBrazilianNumber(produto.valor_ii_brl || 0)}`,
@@ -845,10 +845,10 @@ export default function ImportacaoSimplificada() {
                             <BrazilianNumberInput
                               value={produto.peso_bruto_unitario_kg}
                               onChange={(value) => updateProduct(index, 'peso_bruto_unitario_kg', value)}
-                              decimals={3}
+                              decimals={2}
                               min={0}
                               className="w-24"
-                              placeholder="0,000"
+                              placeholder="0,00"
                             />
                           </td>
                           <td className="p-2 text-sm text-right">
@@ -911,7 +911,7 @@ export default function ImportacaoSimplificada() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-indigo-600">
-                      {formatBrazilianNumber(calculatedResults.totals.peso_total_kg, 3)} kg
+                      {formatBrazilianNumber(calculatedResults.totals.peso_total_kg, 2)} kg
                     </div>
                     <div className="text-sm text-muted-foreground">Peso Total</div>
                   </div>
