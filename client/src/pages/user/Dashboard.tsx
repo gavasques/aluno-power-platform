@@ -15,7 +15,10 @@ import {
   ArrowUpRight,
   Target,
   Gift,
-  Star
+  Star,
+  CheckCircle,
+  BarChart3,
+  AlertTriangle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
