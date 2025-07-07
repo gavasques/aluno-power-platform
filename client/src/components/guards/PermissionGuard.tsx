@@ -35,7 +35,7 @@ export function PermissionGuard({
     if (showMessage) {
       toast({
         title: "Acesso Negado",
-        description: message || "Você não tem permissão para acessar este recurso. Entre em contato com o administrador.",
+        description: message || "Você não tem permissão para acessar esse recurso. Recurso de uso exclusivo de determinadas turmas do curso ou mentorias.",
         variant: "destructive",
       });
     }

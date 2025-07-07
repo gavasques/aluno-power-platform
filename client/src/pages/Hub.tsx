@@ -118,33 +118,7 @@ export default function Hub() {
         ))}
       </div>
 
-      {/* Estatísticas rápidas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">150+</div>
-            <div className="text-sm text-muted-foreground">Vídeos</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">50+</div>
-            <div className="text-sm text-muted-foreground">Parceiros</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">200+</div>
-            <div className="text-sm text-muted-foreground">Fornecedores</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">100+</div>
-            <div className="text-sm text-muted-foreground">Materiais</div>
-          </CardContent>
-        </Card>
-      </div>
+
     </div>
   );
 }
