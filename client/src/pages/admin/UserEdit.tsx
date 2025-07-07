@@ -55,11 +55,13 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
     staleTime: 2 * 60 * 1000,
   });
 
-  // Fetch available groups
-  const { data: groups } = useQuery({
-    queryKey: ['/api/user-groups'],
+  // Fetch available permission groups
+  const { data: groupsResponse } = useQuery({
+    queryKey: ['/api/permissions/groups'],
     staleTime: 5 * 60 * 1000,
   });
+
+  const groups = groupsResponse?.groups || [];
 
   // Fetch user groups for editing
   const { data: userGroups } = useQuery({

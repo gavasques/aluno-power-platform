@@ -41,11 +41,13 @@ const UserManagement = memo(() => {
     staleTime: 2 * 60 * 1000,
   });
 
-  // Groups query
-  const { data: groups } = useQuery({
-    queryKey: ['/api/user-groups'],
+  // Permission groups query
+  const { data: groupsResponse } = useQuery({
+    queryKey: ['/api/permissions/groups'],
     staleTime: 2 * 60 * 1000,
   });
+
+  const groups = groupsResponse?.groups || [];
 
   // Mutations for user actions
   const toggleUserStatus = useMutation({
