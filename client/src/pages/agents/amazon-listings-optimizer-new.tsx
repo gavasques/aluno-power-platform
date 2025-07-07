@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
 
 export default function AmazonListingsOptimizerNew() {
   const [location, navigate] = useLocation();
@@ -188,6 +189,12 @@ export default function AmazonListingsOptimizerNew() {
           Otimize suas listagens da Amazon com análise de avaliações dos concorrentes
         </p>
       </div>
+
+      <PermissionGuard 
+        featureCode="agents.amazon_listing"
+        showMessage={true}
+        message="Você não tem permissão para usar o Amazon Listings Optimizer."
+      >
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Form */}
@@ -445,6 +452,7 @@ export default function AmazonListingsOptimizerNew() {
           </Card>
         </div>
       </div>
+      </PermissionGuard>
     </div>
   );
 }

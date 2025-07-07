@@ -10,7 +10,7 @@ import { ProcessingFeedback } from "@/components/ai/common/ProcessingFeedback";
 import { ResetButton } from "@/components/ai/common/ResetButton";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
 import { UPSCALE_CONFIG } from "@/config/ai-image";
-import { PermissionGuard } from "@/components/guards";
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
 
 // Componente para controles de upscale
 const UpscaleControls = ({ 

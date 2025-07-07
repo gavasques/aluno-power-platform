@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Upload, CheckCircle, ArrowRight, Image, Download } from 'lucide-react';
+import { PermissionGuard } from '@/components/guards/PermissionGuard';
 
 interface ProductData {
   name: string;
@@ -272,7 +273,12 @@ export default function AdvancedInfographicGenerator() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <PermissionGuard 
+      featureCode="agents.advanced_infographic_generator"
+      showMessage={true}
+      message="Você não tem permissão para usar o Gerador Avançado de Infográficos."
+    >
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Gerador Avançado de Infográficos
@@ -631,5 +637,6 @@ export default function AdvancedInfographicGenerator() {
         </DialogContent>
       </Dialog>
     </div>
+    </PermissionGuard>
   );
 }

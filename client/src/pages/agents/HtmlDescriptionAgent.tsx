@@ -27,6 +27,7 @@ import {
   Loader2,
   Wand2
 } from 'lucide-react';
+import { PermissionGuard } from '@/components/guards/PermissionGuard';
 
 const HtmlDescriptionAgent: React.FC = () => {
   const [textInput, setTextInput] = useState('');
@@ -337,6 +338,11 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
 
   return (
     <Layout>
+      <PermissionGuard 
+        featureCode="agents.html_description"
+        showMessage={true}
+        message="Você não tem permissão para usar o Gerador de Descrições HTML."
+      >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header do Agente */}
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border">
@@ -516,6 +522,7 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </PermissionGuard>
     </Layout>
   );
 };
