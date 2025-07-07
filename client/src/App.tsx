@@ -59,7 +59,7 @@ const AmazonCustomerServiceResult = lazy(() => import("./pages/agents/amazon-cus
 const AmazonNegativeReviews = lazy(() => import("./pages/agents/amazon-negative-reviews"));
 const AmazonNegativeReviewsResult = lazy(() => import("./pages/agents/amazon-negative-reviews-result"));
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
-const GeneratedImages = lazy(() => import("./pages/admin/GeneratedImages"));
+
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
@@ -507,15 +507,7 @@ function App() {
                           </Route>
 
                           {/* Admin routes - Protected with admin requirement */}
-                          <Route path="/admin/images">
-                            <ProtectedRoute requireAdmin>
-                              <AdminLayout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <GeneratedImages />
-                                </Suspense>
-                              </AdminLayout>
-                            </ProtectedRoute>
-                          </Route>
+
                           
                           <Route path="/admin/agents/providers">
                             <ProtectedRoute requireAdmin>

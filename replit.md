@@ -111,6 +111,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 07, 2025 - 01:40 PM**: 🧹 IMAGENS GERADAS SECTION COMPLETELY REMOVED - UNNECESSARY ADMIN AREA ELIMINATED
+  - **Complete Generated Images Section Removal**:
+    - ✅ **Removed GeneratedImages.tsx component**: Entire generated images admin interface eliminated
+    - ✅ **Removed navigation link**: "Imagens Geradas" removed from AdminHeader Agentes de IA section
+    - ✅ **Cleaned up routing**: /admin/images route removed from App.tsx
+    - ✅ **Backend API cleanup**: All 3 API endpoints removed (/api/generated-images GET, GET/:id, DELETE/:id)
+  - **Why Generated Images Were Removed**:
+    - User request to completely remove this functionality
+    - Admin area was showing generated image history but no longer needed
+    - Simplifies admin interface by removing unused features
+    - Reduces backend complexity and unused API endpoints
+  - **Result**: Admin Agentes de IA section now only contains "Configurações de Provedores"
+
 - **January 07, 2025 - 01:36 PM**: 🧹 ADMIN SETTINGS SECTION COMPLETELY REMOVED - UNNECESSARY FUNCTIONALITY ELIMINATED
   - **Complete Settings Section Removal**:
     - ✅ **Removed GeneralSettings.tsx component**: Non-functional settings interface completely eliminated

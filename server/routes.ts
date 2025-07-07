@@ -3230,54 +3230,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // Get all generated images
-  app.get('/api/generated-images', async (req, res) => {
-    try {
-      const images = await db.select({
-        id: generatedImages.id,
-        agentId: generatedImages.agentId,
-        sessionId: generatedImages.sessionId,
-        model: generatedImages.model,
-        prompt: generatedImages.prompt,
-        cost: generatedImages.cost,
-        createdAt: generatedImages.createdAt,
-        metadata: generatedImages.metadata
-      }).from(generatedImages).orderBy(desc(generatedImages.createdAt));
-      res.json(images);
-    } catch (error) {
-      console.error('Error fetching generated images:', error);
-      res.status(500).json({ error: 'Failed to fetch generated images' });
-    }
-  });
 
-  // Get generated image by ID
-  app.get('/api/generated-images/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const [image] = await db.select().from(generatedImages).where(eq(generatedImages.id, id));
-      
-      if (!image) {
-        return res.status(404).json({ error: 'Image not found' });
-      }
-      
-      res.json(image);
-    } catch (error) {
-      console.error('Error fetching generated image:', error);
-      res.status(500).json({ error: 'Failed to fetch generated image' });
-    }
-  });
-
-  // Delete generated image
-  app.delete('/api/generated-images/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      await db.delete(generatedImages).where(eq(generatedImages.id, id));
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting generated image:', error);
-      res.status(500).json({ error: 'Failed to delete generated image' });
-    }
-  });
 
   // Save AI generation log
   app.post('/api/ai-generation-logs', async (req, res) => {
