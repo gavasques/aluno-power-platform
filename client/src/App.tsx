@@ -48,6 +48,7 @@ const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails
 const CNPJConsulta = lazy(() => import("./pages/hub/CNPJConsulta"));
 const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSuggestions"));
 const Hub = lazy(() => import("./pages/Hub"));
+const Ferramentas = lazy(() => import("./pages/Ferramentas"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const AgentsPage = lazy(() => import("./pages/agents"));
 const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
@@ -108,6 +109,27 @@ function App() {
                             <Switch>
                           <Route path="/login" component={Login} />
                           <Route path="/auth" component={Login} />
+
+                          {/* Páginas principais de listagem */}
+                          <Route path="/ferramentas">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Ferramentas />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/hub">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Hub />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
 
                           {/* Ferramentas routes (migrated from AI and Hub) */}
                           <Route path="/ferramentas/image-upscale">

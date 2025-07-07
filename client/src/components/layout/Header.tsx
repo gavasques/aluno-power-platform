@@ -35,35 +35,9 @@ import {
   Youtube,
   Star,
   Tag,
-  Zap,
-  ImageIcon,
 } from "lucide-react";
 
 const menuItems = [
-  {
-    title: "Ferramentas",
-    items: [
-      { title: "Upscale de Imagem", href: "/ferramentas/image-upscale", icon: ImageIcon },
-      { title: "Remover Background", href: "/ferramentas/background-removal", icon: Zap },
-      { title: "Amazon Reviews", href: "/ferramentas/amazon-reviews", icon: Star },
-      { title: "Relatório de Keywords", href: "/ferramentas/relatorio-keywords", icon: FileDigit },
-      { title: "Detalhes do Produto", href: "/ferramentas/produto-detalhes", icon: Package },
-      { title: "Consulta de CNPJ", href: "/ferramentas/consulta-cnpj", icon: Building },
-      { title: "Amazon Keyword Suggestions", href: "/ferramentas/keyword-suggestions", icon: Tag },
-    ],
-  },
-
-  {
-    title: "Hub",
-    items: [
-      { title: "Vídeos", href: "/videos", icon: Youtube },
-      { title: "Parceiros", href: "/hub/parceiros", icon: Users },
-      { title: "Fornecedores", href: "/hub/fornecedores", icon: Truck },
-      { title: "Ferramentas", href: "/hub/ferramentas", icon: Wrench },
-      { title: "Templates", href: "/hub/templates", icon: FileText },
-      { title: "Materiais", href: "/hub/materiais", icon: BookCopy },
-    ],
-  },
   {
     title: "Minha Área",
     items: [
@@ -126,6 +100,20 @@ export function Header() {
                 <Link to="/agentes" className={navigationMenuTriggerStyle()}>
                   <BrainCircuit className="mr-2 h-4 w-4" />
                   Agentes
+                </Link>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <Link to="/ferramentas" className={navigationMenuTriggerStyle()}>
+                  <Wrench className="mr-2 h-4 w-4" />
+                  Ferramentas
+                </Link>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <Link to="/hub" className={navigationMenuTriggerStyle()}>
+                  <Archive className="mr-2 h-4 w-4" />
+                  HUB
                 </Link>
               </NavigationMenuItem>
               

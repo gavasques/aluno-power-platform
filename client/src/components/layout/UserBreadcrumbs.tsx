@@ -13,6 +13,7 @@ import {
 
 const breadcrumbMap: Record<string, string> = {
   "/": "Dashboard",
+  "/hub": "HUB",
   "/hub/parceiros": "Parceiros",
   "/hub/ferramentas": "Ferramentas",
   "/hub/materiais": "Materiais", 
