@@ -23,16 +23,19 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// User Groups table
+// User Groups table - 5 grupos com permissões granulares
 export const userGroups = pgTable("user_groups", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  name: text("name").notNull().unique(),
+  displayName: text("display_name").notNull(),
   description: text("description"),
-  permissions: jsonb("permissions").notNull().default([]),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => ({
+  nameIdx: index("user_groups_name_idx").on(table.name),
+  activeIdx: index("user_groups_active_idx").on(table.isActive),
+}));
 
 // User Group Members table
 export const userGroupMembers = pgTable("user_group_members", {
@@ -1243,20 +1246,40 @@ export const userActivityLogs = pgTable("user_activity_logs", {
 // EXTENDED TABLES FOR CREDITS AND SUBSCRIPTIONS SYSTEM
 // =============================================================================
 
-// Feature Costs - Definir custo em créditos de cada funcionalidade
+// Feature Costs - Sistema completo de funcionalidades com custos granulares
 export const featureCosts = pgTable("feature_costs", {
   id: serial("id").primaryKey(),
-  featureName: text("feature_name").notNull().unique(),
-  costPerUse: integer("cost_per_use").notNull(),
+  featureKey: text("feature_key").notNull().unique(),
+  featureName: text("feature_name").notNull(),
+  featureCategory: text("feature_category").notNull(),
+  creditCost: integer("credit_cost").notNull(),
+  estimatedApiCost: decimal("estimated_api_cost", { precision: 8, scale: 4 }),
+  displayOrder: integer("display_order").notNull().default(0),
   description: text("description"),
-  category: text("category"),
+  icon: text("icon"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => ({
-  featureNameIdx: index("feature_costs_name_idx").on(table.featureName),
-  categoryIdx: index("feature_costs_category_idx").on(table.category),
+  featureKeyIdx: index("feature_costs_key_idx").on(table.featureKey),
+  categoryIdx: index("feature_costs_category_idx").on(table.featureCategory),
   activeIdx: index("feature_costs_active_idx").on(table.isActive),
+  displayOrderIdx: index("feature_costs_display_order_idx").on(table.displayOrder),
+}));
+
+// Feature Permissions - Controle granular de permissões por grupo de usuário
+export const featurePermissions = pgTable("feature_permissions", {
+  id: serial("id").primaryKey(),
+  featureCostId: integer("feature_cost_id").references(() => featureCosts.id, { onDelete: "cascade" }).notNull(),
+  userGroupId: integer("user_group_id").references(() => userGroups.id, { onDelete: "cascade" }).notNull(),
+  hasAccess: boolean("has_access").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  featureGroupIdx: index("feature_permissions_feature_group_idx").on(table.featureCostId, table.userGroupId),
+  groupIdx: index("feature_permissions_group_idx").on(table.userGroupId),
+  featureIdx: index("feature_permissions_feature_idx").on(table.featureCostId),
+  uniqueFeatureGroup: index("feature_permissions_unique_idx").on(table.featureCostId, table.userGroupId),
 }));
 
 // Subscription Plans - Definir os planos de assinatura disponíveis
@@ -2520,9 +2543,45 @@ export const insertAdminActionSchema = createInsertSchema(adminActions).omit({
 export type InsertAdminAction = z.infer<typeof insertAdminActionSchema>;
 export type AdminAction = typeof adminActions.$inferSelect;
 
+// Updated Feature Costs schemas
+export const insertUpdatedFeatureCostSchema = createInsertSchema(featureCosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertUpdatedFeatureCost = z.infer<typeof insertUpdatedFeatureCostSchema>;
+export type UpdatedFeatureCost = typeof featureCosts.$inferSelect;
+
+// Feature Permissions schemas
+export const insertFeaturePermissionSchema = createInsertSchema(featurePermissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertFeaturePermission = z.infer<typeof insertFeaturePermissionSchema>;
+export type FeaturePermission = typeof featurePermissions.$inferSelect;
+
+// User Groups schemas (already declared earlier - using existing declaration)
+
 // Extended tables relations
 export const featureCostsRelations = relations(featureCosts, ({ many }) => ({
-  // Feature costs don't need direct relations, used by reference
+  permissions: many(featurePermissions),
+}));
+
+export const featurePermissionsRelations = relations(featurePermissions, ({ one }) => ({
+  feature: one(featureCosts, {
+    fields: [featurePermissions.featureCostId],
+    references: [featureCosts.id],
+  }),
+  userGroup: one(userGroups, {
+    fields: [featurePermissions.userGroupId],
+    references: [userGroups.id],
+  }),
+}));
+
+export const userGroupsRelations = relations(userGroups, ({ many }) => ({
+  members: many(userGroupMembers),
+  permissions: many(featurePermissions),
 }));
 
 export const subscriptionPlansRelations = relations(subscriptionPlans, ({ many }) => ({

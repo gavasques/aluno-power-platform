@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, CreditCard, MessageSquare, Newspaper, Save } from "lucide-react";
+import { Settings, CreditCard, MessageSquare, Newspaper, Save, Shield } from "lucide-react";
+import PermissionsMatrix from "./PermissionsMatrix";
 
 interface GeneralSettingsProps {
   subsection?: string;
@@ -52,6 +53,10 @@ const GeneralSettings = ({ subsection }: GeneralSettingsProps) => {
           <TabsTrigger value="noticias" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground">
             <Newspaper className="h-4 w-4 mr-2" />
             Notícias
+          </TabsTrigger>
+          <TabsTrigger value="permissoes" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground">
+            <Shield className="h-4 w-4 mr-2" />
+            Permissões
           </TabsTrigger>
         </TabsList>
 
@@ -133,6 +138,10 @@ const GeneralSettings = ({ subsection }: GeneralSettingsProps) => {
               <p className="text-muted-foreground">Configurações do feed de notícias em desenvolvimento...</p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="permissoes">
+          <PermissionsMatrix />
         </TabsContent>
       </Tabs>
     </div>
