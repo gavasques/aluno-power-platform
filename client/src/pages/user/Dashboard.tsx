@@ -13,7 +13,11 @@ import {
   Calendar,
   ArrowUpRight,
   Star,
-  CheckCircle
+  CheckCircle,
+  Play,
+  Youtube,
+  ExternalLink,
+  Clock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -63,12 +67,30 @@ interface DashboardData {
   };
 }
 
+interface YouTubeVideo {
+  id: number;
+  videoId: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  publishedAt: string;
+  duration: string;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+}
+
 const UserDashboard = () => {
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState('overview');
 
   const { data: dashboardData, isLoading, error } = useQuery<DashboardData>({
     queryKey: ['/api/test/dashboard'],
+    enabled: true
+  });
+
+  const { data: youtubeVideos, isLoading: videosLoading } = useQuery<YouTubeVideo[]>({
+    queryKey: ['/api/youtube-videos'],
     enabled: true
   });
 
@@ -104,6 +126,28 @@ const UserDashboard = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const formatViewCount = (count: number) => {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M`;
+    } else if (count >= 1000) {
+      return `${(count / 1000).toFixed(0)}K`;
+    }
+    return count.toString();
+  };
+
+  const formatPublishedDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return 'Ontem';
+    if (diffDays < 7) return `${diffDays} dias atrás`;
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} semana${Math.ceil(diffDays / 7) > 1 ? 's' : ''} atrás`;
+    if (diffDays < 365) return `${Math.ceil(diffDays / 30)} mês${Math.ceil(diffDays / 30) > 1 ? 'es' : ''} atrás`;
+    return `${Math.ceil(diffDays / 365)} ano${Math.ceil(diffDays / 365) > 1 ? 's' : ''} atrás`;
   };
 
   const getPlanColor = (level: string) => {
@@ -273,7 +317,7 @@ const UserDashboard = () => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
               {/* Ações Rápidas */}
               <div>
@@ -320,6 +364,92 @@ const UserDashboard = () => {
                       <ArrowUpRight className="h-4 w-4 mr-2" />
                       Meus Produtos
                     </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Últimos Vídeos do YouTube */}
+              <div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Youtube className="h-5 w-5 text-red-600" />
+                      Últimos Vídeos
+                    </CardTitle>
+                    <CardDescription>
+                      Os 6 vídeos mais recentes do canal
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {videosLoading ? (
+                      <div className="space-y-3">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="flex items-center space-x-3 animate-pulse">
+                            <div className="w-16 h-12 bg-gray-200 rounded"></div>
+                            <div className="flex-1">
+                              <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
+                              <div className="h-2 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : youtubeVideos && youtubeVideos.length > 0 ? (
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {youtubeVideos.slice(0, 6).map((video) => (
+                          <div 
+                            key={video.id} 
+                            className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-100"
+                            onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
+                          >
+                            <div className="relative flex-shrink-0">
+                              <img
+                                src={video.thumbnailUrl}
+                                alt={video.title}
+                                className="w-20 h-14 rounded object-cover"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded opacity-0 hover:opacity-100 transition-opacity">
+                                <Play className="h-6 w-6 text-white" />
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-medium text-gray-900 line-clamp-2 leading-5">
+                                {video.title}
+                              </h4>
+                              <div className="flex items-center justify-between mt-1">
+                                <div className="flex items-center text-xs text-gray-500 space-x-2">
+                                  <span className="flex items-center">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    {formatPublishedDate(video.publishedAt)}
+                                  </span>
+                                  <span>•</span>
+                                  <span>{formatViewCount(video.viewCount)} visualizações</span>
+                                </div>
+                                <ExternalLink className="h-3 w-3 text-gray-400" />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Youtube className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                        <p>Nenhum vídeo encontrado</p>
+                      </div>
+                    )}
+                    
+                    {youtubeVideos && youtubeVideos.length > 6 && (
+                      <div className="mt-4 pt-3 border-t">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => window.location.href = '/videos'}
+                        >
+                          Ver Todos os Vídeos
+                          <ArrowUpRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
