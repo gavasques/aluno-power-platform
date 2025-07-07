@@ -283,6 +283,7 @@ const AmazonNegativeReviews = () => {
         </div>
       </div>
     </div>
+    </PermissionGuard>
   );
 };
 
