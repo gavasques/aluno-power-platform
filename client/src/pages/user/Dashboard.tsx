@@ -17,7 +17,8 @@ import {
   Play,
   Youtube,
   ExternalLink,
-  Clock
+  Clock,
+  AlertTriangle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
