@@ -41,10 +41,15 @@ import {
 
 const menuItems = [
   {
-    title: "IA",
+    title: "Ferramentas",
     items: [
-      { title: "Upscale de Imagem", href: "/ai/image-upscale", icon: ImageIcon },
-      { title: "Remover Background", href: "/ai/background-removal", icon: Zap },
+      { title: "Upscale de Imagem", href: "/ferramentas/image-upscale", icon: ImageIcon },
+      { title: "Remover Background", href: "/ferramentas/background-removal", icon: Zap },
+      { title: "Amazon Reviews", href: "/ferramentas/amazon-reviews", icon: Star },
+      { title: "Relatório de Keywords", href: "/ferramentas/relatorio-keywords", icon: FileDigit },
+      { title: "Detalhes do Produto", href: "/ferramentas/produto-detalhes", icon: Package },
+      { title: "Consulta de CNPJ", href: "/ferramentas/consulta-cnpj", icon: Building },
+      { title: "Amazon Keyword Suggestions", href: "/ferramentas/keyword-suggestions", icon: Tag },
     ],
   },
   {
@@ -55,14 +60,9 @@ const menuItems = [
     ],
   },
   {
-    title: "Hub de Recursos",
+    title: "HUB",
     items: [
       { title: "Vídeos", href: "/videos", icon: Youtube },
-      { title: "Amazon Reviews", href: "/hub/amazon-reviews", icon: Star },
-      { title: "Relatório de Keywords", href: "/hub/relatorio-keywords", icon: FileDigit },
-      { title: "Detalhes do Produto", href: "/hub/produto-detalhes", icon: Package },
-      { title: "Consulta de CNPJ", href: "/hub/consulta-cnpj", icon: Building },
-      { title: "Amazon Keyword Suggestions", href: "/hub/keyword-suggestions", icon: Tag },
       { title: "Parceiros", href: "/hub/parceiros", icon: Users },
       { title: "Fornecedores", href: "/hub/fornecedores", icon: Truck },
       { title: "Ferramentas", href: "/hub/ferramentas", icon: Wrench },

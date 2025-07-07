@@ -109,8 +109,8 @@ function App() {
                           <Route path="/login" component={Login} />
                           <Route path="/auth" component={Login} />
 
-                          {/* AI routes */}
-                          <Route path="/ai/image-upscale">
+                          {/* Ferramentas routes (migrated from AI and Hub) */}
+                          <Route path="/ferramentas/image-upscale">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -120,7 +120,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/ai/background-removal">
+                          <Route path="/ferramentas/background-removal">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -360,8 +360,7 @@ function App() {
                             )}
                           </Route>
 
-                          {/* Hub section routes - Protected */}
-                          <Route path="/hub/amazon-reviews">
+                          <Route path="/ferramentas/amazon-reviews">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -371,7 +370,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/hub/relatorio-keywords">
+                          <Route path="/ferramentas/relatorio-keywords">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -381,7 +380,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/hub/produto-detalhes">
+                          <Route path="/ferramentas/produto-detalhes">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -391,7 +390,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/hub/consulta-cnpj">
+                          <Route path="/ferramentas/consulta-cnpj">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -401,7 +400,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/hub/keyword-suggestions">
+                          <Route path="/ferramentas/keyword-suggestions">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -435,6 +434,56 @@ function App() {
                             {() => {
                               // Redirect to the new agent route
                               window.location.href = '/agents/html-description-generator';
+                              return null;
+                            }}
+                          </Route>
+
+                          {/* Redirects for backwards compatibility */}
+                          <Route path="/ai/image-upscale">
+                            {() => {
+                              window.location.href = '/ferramentas/image-upscale';
+                              return null;
+                            }}
+                          </Route>
+                          
+                          <Route path="/ai/background-removal">
+                            {() => {
+                              window.location.href = '/ferramentas/background-removal';
+                              return null;
+                            }}
+                          </Route>
+                          
+                          <Route path="/hub/amazon-reviews">
+                            {() => {
+                              window.location.href = '/ferramentas/amazon-reviews';
+                              return null;
+                            }}
+                          </Route>
+                          
+                          <Route path="/hub/relatorio-keywords">
+                            {() => {
+                              window.location.href = '/ferramentas/relatorio-keywords';
+                              return null;
+                            }}
+                          </Route>
+                          
+                          <Route path="/hub/produto-detalhes">
+                            {() => {
+                              window.location.href = '/ferramentas/produto-detalhes';
+                              return null;
+                            }}
+                          </Route>
+                          
+                          <Route path="/hub/consulta-cnpj">
+                            {() => {
+                              window.location.href = '/ferramentas/consulta-cnpj';
+                              return null;
+                            }}
+                          </Route>
+                          
+                          <Route path="/hub/keyword-suggestions">
+                            {() => {
+                              window.location.href = '/ferramentas/keyword-suggestions';
                               return null;
                             }}
                           </Route>

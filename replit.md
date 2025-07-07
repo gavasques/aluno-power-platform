@@ -111,6 +111,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 07, 2025 - 05:20 PM**: 🔄 REORGANIZAÇÃO COMPLETA DA NAVEGAÇÃO - HUB DE RECURSOS RENOMEADO E NOVA ÁREA FERRAMENTAS CRIADA
+  - **Reorganização Estrutural Implementada**:
+    - ✅ **"Hub de Recursos" renomeado para "HUB"**: Menu principal agora exibe "HUB" ao invés de "Hub de Recursos"
+    - ✅ **Nova área "Ferramentas" criada**: Consolidação de todas as funcionalidades de IA e ferramentas utilitárias
+    - ✅ **Migração de IA para Ferramentas**: Upscale de Imagem e Remover Background movidos para /ferramentas/
+    - ✅ **Migração de Hub para Ferramentas**: Amazon Reviews, Relatório Keywords, Detalhes Produto, CNPJ, Amazon Keyword Suggestions movidos para /ferramentas/
+  - **Arquitetura de Rotas Atualizada**:
+    - ✅ **Novas rotas /ferramentas/***: Todas as 7 ferramentas agora disponíveis sob nova estrutura
+    - ✅ **Redirecionamentos automáticos**: Links antigos (/ai/, /hub/) redirecionam automaticamente para /ferramentas/
+    - ✅ **Breadcrumbs atualizados**: Sistema de navegação reconhece nova estrutura de ferramentas
+    - ✅ **Permissões atualizadas**: Sistema de permissões reorganizado com categoria "Ferramentas"
+  - **Benefícios da Reorganização**:
+    - Interface mais intuitiva com ferramentas consolidadas em uma única área
+    - HUB simplificado focado em conteúdo de referência (Vídeos, Parceiros, Fornecedores, etc.)
+    - Área Ferramentas unificada facilita descoberta e acesso às funcionalidades práticas
+    - Compatibilidade mantida através de redirecionamentos automáticos
+
 - **January 07, 2025 - 05:06 PM**: ✅ SISTEMA DE EXCLUSÃO DE USUÁRIOS COMPLETAMENTE APRIMORADO - GERENCIAMENTO ROBUSTO IMPLEMENTADO
   - **Problema Crítico Resolvido**: Exclusão do usuário João Silva finalizada com sucesso após remoção de todas as dependências
   - **Sistema de Exclusão Robusto Implementado**:

@@ -23,6 +23,15 @@ const breadcrumbMap: Record<string, string> = {
   "/minha-area/fornecedores": "Meus Fornecedores",
   "/minha-area/produtos": "Meus Produtos",
   "/minha-area/materiais": "Meus Materiais",
+  // Nova área de Ferramentas
+  "/ferramentas": "Ferramentas",
+  "/ferramentas/image-upscale": "Upscale de Imagem",
+  "/ferramentas/background-removal": "Remover Background",
+  "/ferramentas/amazon-reviews": "Amazon Reviews",
+  "/ferramentas/relatorio-keywords": "Relatório de Keywords",
+  "/ferramentas/produto-detalhes": "Detalhes do Produto",
+  "/ferramentas/consulta-cnpj": "Consulta CNPJ",
+  "/ferramentas/keyword-suggestions": "Amazon Keyword Suggestions",
 };
 
 export function UserBreadcrumbs() {

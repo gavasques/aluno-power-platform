@@ -246,12 +246,14 @@ export class PermissionService {
       { code: 'agents.customer_service', name: 'Amazon Customer Service Email', category: 'Agentes', sortOrder: 8 },
       { code: 'agents.negative_reviews', name: 'Amazon Negative Reviews Response', category: 'Agentes', sortOrder: 9 },
       
-      // Hub de Recursos
-      { code: 'hub.keyword_report', name: 'Relatório de Keywords', category: 'Hub de Recursos', sortOrder: 1 },
-      { code: 'hub.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Hub de Recursos', sortOrder: 2 },
-      { code: 'hub.product_details', name: 'Detalhes do Produto', category: 'Hub de Recursos', sortOrder: 3 },
-      { code: 'hub.amazon_reviews', name: 'Amazon Reviews', category: 'Hub de Recursos', sortOrder: 4 },
-      { code: 'hub.cnpj_lookup', name: 'Consulta CNPJ', category: 'Hub de Recursos', sortOrder: 5 },
+      // Ferramentas (migradas de Hub de Recursos e IA)
+      { code: 'tools.image_upscale', name: 'Upscale de Imagem', category: 'Ferramentas', sortOrder: 1 },
+      { code: 'tools.background_removal', name: 'Remover Background', category: 'Ferramentas', sortOrder: 2 },
+      { code: 'tools.amazon_reviews', name: 'Amazon Reviews', category: 'Ferramentas', sortOrder: 3 },
+      { code: 'tools.keyword_report', name: 'Relatório de Keywords', category: 'Ferramentas', sortOrder: 4 },
+      { code: 'tools.product_details', name: 'Detalhes do Produto', category: 'Ferramentas', sortOrder: 5 },
+      { code: 'tools.cnpj_lookup', name: 'Consulta CNPJ', category: 'Ferramentas', sortOrder: 6 },
+      { code: 'tools.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Ferramentas', sortOrder: 7 },
       
       // Minha Área
       { code: 'myarea.suppliers', name: 'Meus Fornecedores', category: 'Minha Área', sortOrder: 1 },
