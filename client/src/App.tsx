@@ -50,6 +50,7 @@ const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSug
 const Hub = lazy(() => import("./pages/Hub"));
 const Ferramentas = lazy(() => import("./pages/Ferramentas"));
 const MyArea = lazy(() => import("./pages/MyArea"));
+const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const AgentsPage = lazy(() => import("./pages/agents"));
 const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
 const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer"));
@@ -551,6 +552,17 @@ function App() {
                           </Route>
 
 
+
+                          {/* Minha Área Index - Protected */}
+                          <Route path="/minha-area">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <MinhaAreaIndex />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
 
                           {/* Minha Área routes - Protected */}
                           <Route path="/minha-area/:section/:id?/:action?">

@@ -40,15 +40,6 @@ import {
 
 const menuItems = [
   {
-    title: "Minha Área",
-    items: [
-      { title: "Meus Fornecedores", href: "/minha-area/fornecedores", icon: Folder },
-      { title: "Meus Produtos", href: "/minha-area/produtos", icon: Package },
-      { title: "Minhas Marcas", href: "/minha-area/marcas", icon: Building },
-      { title: "Minhas Assinaturas", href: "/minha-area/assinaturas", icon: Star },
-    ],
-  },
-  {
     title: "Simuladores",
     items: [
       {
@@ -115,6 +106,13 @@ export function Header() {
                 <Link to="/hub" className={navigationMenuTriggerStyle()}>
                   <Archive className="mr-2 h-4 w-4" />
                   HUB
+                </Link>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <Link to="/minha-area" className={navigationMenuTriggerStyle()}>
+                  <User className="mr-2 h-4 w-4" />
+                  Minha Área
                 </Link>
               </NavigationMenuItem>
               

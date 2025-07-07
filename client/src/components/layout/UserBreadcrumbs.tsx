@@ -21,6 +21,7 @@ const breadcrumbMap: Record<string, string> = {
   "/hub/templates": "Templates",
   "/hub/prompts-ia": "Prompts IA",
   "/hub/descricao-html": "Descrição em HTML",
+  "/minha-area": "Minha Área",
   "/minha-area/fornecedores": "Meus Fornecedores",
   "/minha-area/produtos": "Meus Produtos",
   "/minha-area/materiais": "Meus Materiais",
