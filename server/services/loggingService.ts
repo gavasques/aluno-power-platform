@@ -16,6 +16,7 @@ export class LoggingService {
     outputTokens: number = 0,
     totalTokens: number = 0,
     cost: number = 0,
+    creditsUsed: number = 0,
     duration: number = 0
   ): Promise<void> {
     try {
@@ -31,13 +32,14 @@ export class LoggingService {
         outputTokens,
         totalTokens,
         cost: cost.toString(),
+        creditsUsed: creditsUsed.toString(),
         duration,
         feature
       };
 
       await db.insert(aiGenerationLogs).values(logData);
       
-      console.log(`💾 [AI_LOG] ${feature} saved for user ${userId} - ${provider}/${model}`);
+      console.log(`💾 [AI_LOG] ${feature} saved for user ${userId} - ${provider}/${model} - Cost: ${cost} - Credits: ${creditsUsed}`);
     } catch (error) {
       console.error(`❌ [AI_LOG] Error saving ${feature} log:`, error);
     }
@@ -53,7 +55,11 @@ export class LoggingService {
     imageUrl: string,
     provider: string = "openai",
     model: string = "dall-e-3",
+    inputTokens: number = 0,
+    outputTokens: number = 0,
+    totalTokens: number = 0,
     cost: number = 0,
+    creditsUsed: number = 0,
     duration: number = 0,
     metadata: any = {}
   ): Promise<void> {
@@ -62,18 +68,33 @@ export class LoggingService {
         userId,
         provider,
         model,
-        prompt: prompt.substring(0, 5000),
-        imageUrl,
-        promptCharacters: prompt.length,
-        cost: cost.toString(),
-        duration,
         feature,
+        originalImageName: null,
+        originalImageSize: null,
+        generatedImageUrl: imageUrl,
+        generatedImageSize: null,
+        prompt: prompt.substring(0, 5000),
+        scale: null,
+        quality: null,
+        apiResponse: metadata ? JSON.stringify(metadata) : null,
+        status: 'success',
+        errorMessage: null,
+        inputTokens,
+        outputTokens,
+        totalTokens,
+        cost: cost.toString(),
+        creditsUsed: creditsUsed.toString(),
+        duration,
+        requestId: null,
+        sessionId: null,
+        userAgent: null,
+        ipAddress: null,
         metadata: metadata ? JSON.stringify(metadata) : null
       };
 
       await db.insert(aiImgGenerationLogs).values(logData);
       
-      console.log(`🖼️ [IMG_LOG] ${feature} saved for user ${userId} - ${provider}/${model}`);
+      console.log(`🖼️ [IMG_LOG] ${feature} saved for user ${userId} - ${provider}/${model} - Cost: ${cost} - Credits: ${creditsUsed}`);
     } catch (error) {
       console.error(`❌ [IMG_LOG] Error saving ${feature} log:`, error);
     }
@@ -90,7 +111,8 @@ export class LoggingService {
     provider: string = "external-api",
     model: string = "api",
     duration: number = 0,
-    cost: number = 0
+    cost: number = 0,
+    creditsUsed: number = 0
   ): Promise<void> {
     try {
       const logData = {
@@ -105,13 +127,14 @@ export class LoggingService {
         outputTokens: 0,
         totalTokens: 0,
         cost: cost.toString(),
+        creditsUsed: creditsUsed.toString(),
         duration,
         feature
       };
 
       await db.insert(aiGenerationLogs).values(logData);
       
-      console.log(`🌐 [API_LOG] ${feature} saved for user ${userId} - ${provider}`);
+      console.log(`🌐 [API_LOG] ${feature} saved for user ${userId} - ${provider} - Cost: ${cost} - Credits: ${creditsUsed}`);
     } catch (error) {
       console.error(`❌ [API_LOG] Error saving ${feature} log:`, error);
     }

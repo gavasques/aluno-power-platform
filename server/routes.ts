@@ -4003,7 +4003,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           'rapidapi',
           'amazon-data-scraper',
           0, // duration
-          0 // sem custo
+          0, // sem custo da API
+          5 // 5 créditos conforme tabela feature_costs (tools.amazon_reviews)
         );
       } catch (logError) {
         console.error('❌ Erro ao salvar log de API:', logError);
@@ -5114,7 +5115,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           'rapidapi',
           'real-time-amazon-data',
           0, // duration
-          0 // sem custo
+          0, // sem custo da API
+          3 // 3 créditos conforme tabela feature_costs (tools.keyword_report)
         );
       } catch (logError) {
         console.error('❌ Erro ao salvar log de API:', logError);
@@ -5183,7 +5185,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           'rapidapi',
           'amazon-data-scraper141',
           0, // duration
-          0 // sem custo
+          0, // sem custo da API
+          3 // 3 créditos conforme tabela feature_costs (tools.keyword_suggestions)
         );
       } catch (logError) {
         console.error('❌ Erro ao salvar log de API:', logError);
@@ -5265,7 +5268,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             'rapidapi',
             'dados-cnpj-api',
             Date.now() - Date.now(), // duration será calculado se necessário
-            0 // sem custo
+            0, // sem custo da API
+            1 // 1 crédito conforme tabela feature_costs (tools.cnpj_lookup)
           );
         } catch (logError) {
           console.error('❌ Erro ao salvar log de API:', logError);
@@ -5360,7 +5364,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             'demo-api',
             'dados-cnpj-demo',
             0, // duration
-            0 // sem custo
+            0, // sem custo da API
+            1 // 1 crédito conforme tabela feature_costs (tools.cnpj_lookup)
           );
         } catch (logError) {
           console.error('❌ Erro ao salvar log de API demo:', logError);

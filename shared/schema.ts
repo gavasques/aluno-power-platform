@@ -1035,6 +1035,7 @@ export const aiGenerationLogs = pgTable("ai_generation_logs", {
   outputTokens: integer("output_tokens").notNull().default(0),
   totalTokens: integer("total_tokens").notNull().default(0),
   cost: decimal("cost", { precision: 10, scale: 6 }).notNull().default("0"),
+  creditsUsed: decimal("credits_used", { precision: 10, scale: 2 }).notNull().default("0"),
   duration: integer("duration").notNull().default(0), // milliseconds
   feature: text("feature").notNull().default("html-description"), // feature that used the AI
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -1102,7 +1103,11 @@ export const aiImgGenerationLogs = pgTable("ai_img_generation_logs", {
   apiResponse: jsonb("api_response"), // full API response for debugging
   status: text("status").notNull().default("success"), // success, failed, timeout
   errorMessage: text("error_message"), // error details if failed
+  inputTokens: integer("input_tokens").notNull().default(0),
+  outputTokens: integer("output_tokens").notNull().default(0),
+  totalTokens: integer("total_tokens").notNull().default(0),
   cost: decimal("cost", { precision: 10, scale: 6 }).notNull().default("0"), // processing cost
+  creditsUsed: decimal("credits_used", { precision: 10, scale: 2 }).notNull().default("0"),
   duration: integer("duration").notNull().default(0), // processing time in milliseconds
   requestId: text("request_id"), // unique request identifier
   sessionId: text("session_id"), // user session tracking

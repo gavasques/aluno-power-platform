@@ -111,33 +111,35 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 07, 2025 - 05:45 PM**: ✅ SISTEMA DE LOGGING UNIVERSAL IMPLEMENTADO COMPLETAMENTE - TODAS AS FERRAMENTAS COM LOGS OPERACIONAIS
-  - **LoggingService Criado e Operacional**:
-    - ✅ **saveAiLog()**: Para ferramentas que usam IA (OpenAI, Claude, etc.) → ai_generation_logs
-    - ✅ **saveImageLog()**: Para ferramentas de geração de imagem → ai_img_generation_logs  
-    - ✅ **saveApiLog()**: Para APIs externas (CNPJ, Keywords, etc.) → ai_generation_logs
-    - ✅ **Estrutura modular**: Serviço centralizado com error handling e logs detalhados
-  - **Ferramentas com Logging Implementado**:
-    - ✅ **CNPJ Consulta**: saveApiLog com provider='rapidapi', model='dados-cnpj-api'
-    - ✅ **Amazon Keyword Suggestions**: saveApiLog com provider='rapidapi', model='amazon-data-scraper141'
-    - ✅ **Amazon Reviews Extractor**: saveApiLog com provider='rapidapi', model='amazon-data-scraper'
-    - ✅ **Amazon Product Details**: saveApiLog com provider='rapidapi', model='real-time-amazon-data'
-    - ✅ **Amazon Keyword Search**: saveApiLog com provider='rapidapi', model='real-time-amazon-data'
-    - ✅ **Background Removal**: saveImageLog já implementado anteriormente
-    - ✅ **Upscale de Imagem**: saveImageLog já implementado anteriormente
-  - **Sistema Duplo Mantido**:
-    - Nova tabela ai_generation_logs: Logs específicos para análise de IA e custos
-    - Tabela tool_usage_logs existente: Mantida para compatibilidade e analytics gerais
-    - Ambos salvos simultaneamente para transição suave
-  - **Testes Validados**:
-    - Teste CNPJ consulta executado com sucesso (ID log 45)
-    - LoggingService salvando corretamente com todos os campos
-    - Sistema operacional e registrando atividades em tempo real
-  - **Benefícios Implementados**:
-    - Rastreamento completo de uso de IA e APIs externas
-    - Base para sistema de custos e billing
-    - Auditoria completa de ferramentas para análise de performance
-    - Logs estruturados para relatórios de uso e otimização
+- **January 07, 2025 - 06:00 PM**: ✅ LOGGING SYSTEM SCHEMA & CREDITS INTEGRATION COMPLETED - REAL-TIME COST TRACKING OPERATIONAL
+  - **Database Schema Enhanced for Credits Tracking**:
+    - ✅ **credits_used column**: Added to both ai_generation_logs and ai_img_generation_logs tables
+    - ✅ **Token tracking complete**: input_tokens, output_tokens, total_tokens added to ai_img_generation_logs
+    - ✅ **Schema synchronized**: shared/schema.ts updated with all new columns and proper types
+    - ✅ **LoggingService upgraded**: All methods now accept creditsUsed parameter for accurate tracking
+  - **Real-Time Cost Integration with Feature Costs**:
+    - ✅ **CNPJ Consulta**: 1 credit per use (tools.cnpj_lookup) ✓ UPDATED
+    - ✅ **Amazon Reviews Extractor**: 5 credits per use (tools.amazon_reviews) ✓ UPDATED  
+    - ✅ **Amazon Keyword Suggestions**: 3 credits per use (tools.keyword_suggestions) ✓ UPDATED
+    - ✅ **Amazon Keyword Search**: 3 credits per use (tools.keyword_report) ✓ UPDATED
+    - ✅ **Background Removal**: 1 credit per use (tools.background_removal) ✓ READY
+    - ✅ **Image Upscale**: 2 credits per use (tools.image_upscale) ✓ READY
+  - **Credit System Integration Achieved**:
+    - Real-time cost retrieval from feature_costs table eliminates hardcoded zero values
+    - Accurate credit consumption tracking for all external API calls
+    - Dual logging system maintains both ai_generation_logs and tool_usage_logs simultaneously
+    - Foundation prepared for credit-based billing and user cost management
+  - **Technical Validation Complete**:
+    - Database schema migrations applied successfully to production tables
+    - LoggingService methods updated across all tool implementations
+    - Cost values dynamically retrieved from feature_costs table instead of hardcoded zeros
+    - Credits tracking operational for comprehensive tool usage analytics
+  - **Business Intelligence Benefits Delivered**:
+    - Complete audit trail of all tool usage with precise credit tracking
+    - Foundation for usage-based billing and subscription management
+    - Real-time cost monitoring enables accurate financial projections
+    - Structured data supports advanced analytics and user optimization recommendations
+    - Seamless integration with existing permission system for comprehensive platform control
 
 - **January 07, 2025 - 05:20 PM**: 🔄 REORGANIZAÇÃO COMPLETA DA NAVEGAÇÃO - HUB DE RECURSOS RENOMEADO E NOVA ÁREA FERRAMENTAS CRIADA
   - **Reorganização Estrutural Implementada**:
