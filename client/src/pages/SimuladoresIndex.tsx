@@ -14,6 +14,7 @@ interface SimuladorItem {
   icon: React.ComponentType<{ className?: string }>;
   category: string;
   isNew?: boolean;
+  isAvailable?: boolean;
 }
 
 const simuladorItems: SimuladorItem[] = [
@@ -24,6 +25,7 @@ const simuladorItems: SimuladorItem[] = [
     href: "/simuladores/simples-nacional",
     icon: FileDigit,
     category: "Tributário",
+    isAvailable: true,
   },
   {
     id: "importacao-simplificada", 
@@ -175,10 +177,10 @@ export default function SimuladoresIndex() {
                   {item.description}
                 </CardDescription>
                 
-                <Button asChild className="w-full">
+                <Button asChild className="w-full" disabled={!item.isAvailable}>
                   <Link to={item.href}>
                     <Calculator className="w-4 h-4 mr-2" />
-                    Simular
+                    {item.isAvailable ? 'Simular' : 'Em breve'}
                   </Link>
                 </Button>
               </CardContent>

@@ -53,6 +53,7 @@ const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
+const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
 const AgentsPage = lazy(() => import("./pages/agents"));
 const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
 const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer"));
@@ -584,6 +585,17 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <ImportacaoSimplificada />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Simples Nacional Simulator - Protected */}
+                          <Route path="/simuladores/simples-nacional">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <SimplesNacional />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
