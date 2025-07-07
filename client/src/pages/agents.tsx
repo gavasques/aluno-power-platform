@@ -289,167 +289,120 @@ export default function AgentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        
-        {/* Header da página */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Agentes de IA
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Descubra e use agentes especializados para otimizar seu negócio
-          </p>
-        </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold text-foreground">Agentes de IA</h1>
+        <p className="text-muted-foreground">
+          Descubra e use agentes especializados para otimizar seu negócio
+        </p>
+      </div>
 
-        {/* Barra de busca e contadores */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-            {/* Campo de busca */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                placeholder="Buscar agentes por nome ou descrição..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 bg-white shadow-sm"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            
-            {/* Contador de resultados */}
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600 bg-white px-3 py-2 rounded-lg shadow-sm border">
-                {filteredAgents.length} {filteredAgents.length === 1 ? 'agente encontrado' : 'agentes encontrados'}
-              </span>
-            </div>
-          </div>
-
-          {/* Filtros de categoria */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {categories.map((category, index) => {
-              const IconComponent = category.icon;
-              const isSelected = selectedCategory === category.name;
-              const count = category.name === "Todos" ? agents.length :
-                          category.name === "Favoritos" ? favorites.size :
-                          agents.filter(agent => {
-                            if (category.name === "Novo!") {
-                              return agent.createdAt && new Date(agent.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
-                            }
-                            if (category.name === "Beta") {
-                              return agent.name.toLowerCase().includes('beta') || agent.description?.toLowerCase().includes('beta');
-                            }
-                            return agent.category === category.name;
-                          }).length;
-              
-              return (
-                <Button
-                  key={`${category.name}-${index}`}
-                  variant={isSelected ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.name)}
-                  className={`text-sm transition-all duration-200 ${
-                    isSelected 
-                      ? "bg-blue-600 text-white shadow-md hover:bg-blue-700" 
-                      : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
-                  }`}
-                >
-                  <IconComponent className="w-4 h-4 mr-2" />
-                  {category.name}
-                  {count > 0 && (
-                    <Badge className="ml-2 bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5">
-                      {count}
-                    </Badge>
-                  )}
-                </Button>
-              );
-            })}
-          </div>
-
-          {/* Filtros ativos */}
-          {(searchQuery || selectedCategory !== "Todos") && (
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-sm text-gray-500">Filtros ativos:</span>
-              {searchQuery && (
-                <Badge variant="outline" className="text-xs">
-                  Busca: "{searchQuery}"
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="ml-1 hover:text-red-500"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              )}
-              {selectedCategory !== "Todos" && (
-                <Badge variant="outline" className="text-xs">
-                  Categoria: {selectedCategory}
-                  <button
-                    onClick={() => setSelectedCategory("Todos")}
-                    className="ml-1 hover:text-red-500"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                className="text-xs text-gray-500 hover:text-gray-700"
-              >
-                Limpar todos
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Grid de agentes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {filteredAgents.map((agent: Agent) => (
-            <AgentCard
-              key={agent.id}
-              agent={agent}
-              isFavorited={favorites.has(agent.id)}
-              onToggleFavorite={toggleFavorite}
-            />
-          ))}
-        </div>
-
-        {/* Estado vazio */}
-        {filteredAgents.length === 0 && (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-              <Bot className="w-12 h-12 text-gray-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              Nenhum agente encontrado
-            </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-              {searchQuery || selectedCategory !== "Todos" 
-                ? "Tente ajustar seus filtros para encontrar o agente ideal para suas necessidades."
-                : "Ainda não temos agentes disponíveis. Volte em breve para descobrir nossas novidades!"
-              }
-            </p>
-            {(searchQuery || selectedCategory !== "Todos") && (
-              <Button 
-                onClick={clearFilters}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Limpar Filtros
-              </Button>
-            )}
-          </div>
+      {/* Barra de busca */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+        <Input
+          placeholder="Buscar agentes por nome ou descrição..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-4 h-4" />
+          </button>
         )}
       </div>
+
+      {/* Filtros por categoria */}
+      <div className="flex flex-wrap gap-2">
+        {categories.map((category) => {
+          const IconComponent = category.icon;
+          const isSelected = selectedCategory === category.name;
+          const count = category.name === "Todos" ? agents.length :
+                      category.name === "Favoritos" ? favorites.size :
+                      agents.filter(agent => {
+                        if (category.name === "Novo!") {
+                          return agent.createdAt && new Date(agent.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
+                        }
+                        if (category.name === "Beta") {
+                          return agent.name.toLowerCase().includes('beta') || agent.description?.toLowerCase().includes('beta');
+                        }
+                        return agent.category === category.name;
+                      }).length;
+          
+          return (
+            <Badge 
+              key={category.name}
+              variant={isSelected ? "default" : "secondary"}
+              className="cursor-pointer hover:bg-primary/80"
+              onClick={() => setSelectedCategory(category.name)}
+            >
+              <IconComponent className="w-3 h-3 mr-1" />
+              {category.name}
+              {count > 0 && ` (${count})`}
+            </Badge>
+          );
+        })}
+      </div>
+
+      {/* Contador de resultados */}
+      {(searchQuery || selectedCategory !== "Todos") && (
+        <div className="text-sm text-muted-foreground">
+          {filteredAgents.length} {filteredAgents.length === 1 ? 'agente encontrado' : 'agentes encontrados'}
+          {(searchQuery || selectedCategory !== "Todos") && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="ml-2 h-6 px-2 text-xs"
+            >
+              Limpar filtros
+              <X className="w-3 h-3 ml-1" />
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Grid de agentes */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredAgents.map((agent: Agent) => (
+          <AgentCard
+            key={agent.id}
+            agent={agent}
+            isFavorited={favorites.has(agent.id)}
+            onToggleFavorite={toggleFavorite}
+          />
+        ))}
+      </div>
+
+      {/* Estado vazio */}
+      {filteredAgents.length === 0 && (
+        <div className="text-center py-12">
+          <Bot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="text-lg font-semibold mb-2">
+            Nenhum agente encontrado
+          </h3>
+          <p className="text-muted-foreground mb-4">
+            {searchQuery || selectedCategory !== "Todos" 
+              ? "Tente ajustar seus filtros para encontrar o agente ideal."
+              : "Ainda não temos agentes disponíveis."
+            }
+          </p>
+          {(searchQuery || selectedCategory !== "Todos") && (
+            <Button 
+              onClick={clearFilters}
+              variant="outline"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              Limpar Filtros
+            </Button>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }
