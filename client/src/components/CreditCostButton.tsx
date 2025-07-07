@@ -13,6 +13,7 @@ interface CreditCostButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
+  showCreditsInButton?: boolean; // Nova prop para controlar se mostra créditos no botão
 }
 
 export function CreditCostButton({
@@ -23,7 +24,8 @@ export function CreditCostButton({
   disabled = false,
   className,
   variant = "default",
-  size = "default"
+  size = "default",
+  showCreditsInButton = true
 }: CreditCostButtonProps) {
   const { getFeatureCost, isLoading: costsLoading } = useGetFeatureCost();
   const { canProcess } = useCanProcessFeature();
@@ -57,7 +59,7 @@ export function CreditCostButton({
         <div className="flex items-center gap-2">
           <CreditCard className="h-4 w-4" />
           {children}
-          {requiredCredits > 0 && (
+          {showCreditsInButton && requiredCredits > 0 && (
             <Badge 
               variant={canAfford ? "secondary" : "destructive"} 
               className="ml-2 text-xs"
