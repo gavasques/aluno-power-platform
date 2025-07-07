@@ -196,10 +196,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { default: stripeRoutes } = await import('./routes/stripe/index.js');
   app.use('/api/stripe', stripeRoutes);
   
-  // Simple credit system test routes
-  const { simpleCreditTestRoutes } = await import('./routes/simple-credit-test.js');
-  app.use('/api/credit-test', simpleCreditTestRoutes);
-  
   // PHASE 2: ✅ SUPPLIER ROUTES MIGRATED TO MODULAR ARCHITECTURE
   // All supplier routes now handled by modular system in server/routes/supplierRoutes.ts
   // Following SOLID/DRY/KISS principles - eliminated code duplication

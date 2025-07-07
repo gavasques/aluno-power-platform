@@ -24,7 +24,6 @@ const Admin = lazy(() => import("./pages/Admin"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const UserEdit = lazy(() => import("./pages/admin/UserEdit"));
 const GroupEdit = lazy(() => import("./pages/admin/GroupEdit"));
-const CreditTest = lazy(() => import("./pages/CreditTest"));
 
 const GeneralSettings = lazy(() => import("./pages/admin/GeneralSettings"));
 const ContentManagement = lazy(() => import("./pages/admin/ContentManagement"));
@@ -285,15 +284,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/teste-creditos">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <CreditTest />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
+
 
                           {/* Detail routes with Layout - Protected */}
                           <Route path="/hub/materiais/:id">
@@ -545,8 +536,6 @@ function App() {
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
-                          
-
                           
                           <Route path="/admin/usuarios/:id/editar">
                             {(params) => (
