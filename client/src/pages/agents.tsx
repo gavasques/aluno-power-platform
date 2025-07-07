@@ -24,6 +24,19 @@ import { CreditCostBadge, CreditCostButton } from "@/components/CreditCostButton
 import { useUserCreditBalance } from "@/hooks/useUserCredits";
 import type { Agent } from "../types/agent.types";
 
+// Mapeamento entre IDs dos agentes e nomes das features no banco
+const AGENT_FEATURE_MAP: Record<string, string> = {
+  "agent-amazon-listings": "agents.amazon_listing",
+  "html-description-generator": "agents.html_descriptions", 
+  "bullet-points-generator": "agents.bullet_points",
+  "agent-amazon-product-photography": "agents.main_image_editor",
+  "agent-lifestyle-with-model": "agents.lifestyle_model",
+  "agent-infographic-generator": "agents.infographic_editor", 
+  "advanced-infographic-generator": "agents.advanced_infographic",
+  "amazon-customer-service": "agents.customer_service",
+  "amazon-negative-reviews": "agents.negative_reviews"
+};
+
 // Configuração das cores e ícones das categorias - padrão Lovable/DeepSeek
 const categoryConfig = {
   "E-commerce": { 
@@ -145,7 +158,7 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
             {agent.category || "Geral"}
           </Badge>
           <CreditCostBadge 
-            featureName={`agents.${agent.id}`}
+            featureName={AGENT_FEATURE_MAP[agent.id] || `agents.${agent.id}`}
             className="text-xs"
           />
         </div>
@@ -164,7 +177,7 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
         
         {/* Botão de ação com créditos */}
         <CreditCostButton
-          featureName={`agents.${agent.id}`}
+          featureName={AGENT_FEATURE_MAP[agent.id] || `agents.${agent.id}`}
           userBalance={userBalance}
           onProcess={() => {
             const href = agent.id === 'agent-amazon-listings' ? '/agents/amazon-listings-optimizer' : `/agents/${agent.id}`;
