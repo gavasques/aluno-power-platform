@@ -33,7 +33,7 @@ import {
   youtubeVideos,
   news,
   updates,
-  webhookConfigs,
+
   agents,
   agentPrompts,
   agentUsage,
@@ -106,8 +106,7 @@ import {
   type InsertNews,
   type Update,
   type InsertUpdate,
-  type WebhookConfig,
-  type InsertWebhookConfig,
+
   type Agent,
   type InsertAgent,
   type AgentPrompt,
@@ -357,12 +356,8 @@ export interface IStorage {
   updateUpdate(id: number, update: Partial<InsertUpdate>): Promise<Update>;
   deleteUpdate(id: number): Promise<void>;
 
-  // Webhook Configs
-  getWebhookConfigs(): Promise<WebhookConfig[]>;
-  getWebhookConfig(id: number): Promise<WebhookConfig | undefined>;
-  createWebhookConfig(config: InsertWebhookConfig): Promise<WebhookConfig>;
-  updateWebhookConfig(id: number, config: Partial<InsertWebhookConfig>): Promise<WebhookConfig>;
-  deleteWebhookConfig(id: number): Promise<void>;
+
+
 
   // Agents
   getAgents(): Promise<Agent[]>;
@@ -1951,36 +1946,8 @@ export class DatabaseStorage implements IStorage {
     await db.delete(updates).where(eq(updates.id, id));
   }
 
-  // Webhook Config methods
-  async getWebhookConfigs(): Promise<WebhookConfig[]> {
-    return await db.select().from(webhookConfigs).orderBy(desc(webhookConfigs.createdAt));
-  }
 
-  async getWebhookConfig(id: number): Promise<WebhookConfig | undefined> {
-    const [config] = await db.select().from(webhookConfigs).where(eq(webhookConfigs.id, id));
-    return config || undefined;
-  }
 
-  async createWebhookConfig(configData: InsertWebhookConfig): Promise<WebhookConfig> {
-    const [createdConfig] = await db
-      .insert(webhookConfigs)
-      .values(configData)
-      .returning();
-    return createdConfig;
-  }
-
-  async updateWebhookConfig(id: number, configData: Partial<InsertWebhookConfig>): Promise<WebhookConfig> {
-    const [updatedConfig] = await db
-      .update(webhookConfigs)
-      .set(configData)
-      .where(eq(webhookConfigs.id, id))
-      .returning();
-    return updatedConfig;
-  }
-
-  async deleteWebhookConfig(id: number): Promise<void> {
-    await db.delete(webhookConfigs).where(eq(webhookConfigs.id, id));
-  }
 
   // Tool Reviews
   async getToolReviews(toolId: number): Promise<ToolReviewWithUser[]> {

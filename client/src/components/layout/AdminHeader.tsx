@@ -46,7 +46,7 @@ const adminMenuItems = [
       { title: "Prompts de IA", href: "/admin/conteudo/prompts-ia", icon: Bot },
       { title: "Central de Notícias", href: "/admin/conteudo/noticias", icon: FileText },
       { title: "Central de Novidades", href: "/admin/conteudo/novidades", icon: FileText },
-      { title: "Configurações de Webhook", href: "/admin/conteudo/webhooks", icon: Settings },
+
     ],
   },
   {

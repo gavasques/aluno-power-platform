@@ -563,18 +563,7 @@ export const toolVideos = pgTable("tool_videos", {
   videoIdx: index("tool_videos_video_idx").on(table.videoId),
 }));
 
-// Webhook configurations
-export const webhookConfigs = pgTable("webhook_configs", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  url: text("url").notNull(),
-  secret: text("secret"),
-  isActive: boolean("is_active").notNull().default(true),
-  type: text("type").notNull(), // 'news', 'updates'
-  lastUsed: timestamp("last_used"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+
 
 // Agents table
 export const agents = pgTable("agents", {
@@ -1747,11 +1736,7 @@ export const insertUpdateSchema = createInsertSchema(updates).omit({
   updatedAt: true,
 });
 
-export const insertWebhookConfigSchema = createInsertSchema(webhookConfigs).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+
 
 export const insertTemplateCategorySchema = createInsertSchema(templateCategories).omit({
   id: true,
@@ -1873,8 +1858,7 @@ export type News = typeof news.$inferSelect;
 export type InsertUpdate = z.infer<typeof insertUpdateSchema>;
 export type Update = typeof updates.$inferSelect;
 
-export type InsertWebhookConfig = z.infer<typeof insertWebhookConfigSchema>;
-export type WebhookConfig = typeof webhookConfigs.$inferSelect;
+
 
 export type InsertTemplateCategory = z.infer<typeof insertTemplateCategorySchema>;
 export type TemplateCategory = typeof templateCategories.$inferSelect;

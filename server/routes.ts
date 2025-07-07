@@ -79,7 +79,7 @@ import {
 
   insertUpdateSchema,
   insertGeneratedImageSchema,
-  insertWebhookConfigSchema,
+
   insertAgentSchema,
   insertAgentPromptSchema,
   insertAgentUsageSchema,
@@ -1398,56 +1398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Webhook Config routes
-  app.get('/api/webhook-configs', async (req, res) => {
-    try {
-      const configs = await storage.getWebhookConfigs();
-      res.json(configs);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch webhook configs' });
-    }
-  });
 
-  app.get('/api/webhook-configs/:id', async (req, res) => {
-    try {
-      const config = await storage.getWebhookConfig(parseInt(req.params.id));
-      if (!config) {
-        return res.status(404).json({ error: 'Webhook config not found' });
-      }
-      res.json(config);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch webhook config' });
-    }
-  });
-
-  app.post('/api/webhook-configs', async (req, res) => {
-    try {
-      const validatedData = insertWebhookConfigSchema.parse(req.body);
-      const config = await storage.createWebhookConfig(validatedData);
-      res.status(201).json(config);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid webhook config data' });
-    }
-  });
-
-  app.put('/api/webhook-configs/:id', async (req, res) => {
-    try {
-      const validatedData = insertWebhookConfigSchema.partial().parse(req.body);
-      const config = await storage.updateWebhookConfig(parseInt(req.params.id), validatedData);
-      res.json(config);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid webhook config data' });
-    }
-  });
-
-  app.delete('/api/webhook-configs/:id', async (req, res) => {
-    try {
-      await storage.deleteWebhookConfig(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete webhook config' });
-    }
-  });
 
   // Partner Types routes
   app.get('/api/partner-types', async (req, res) => {
