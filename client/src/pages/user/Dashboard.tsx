@@ -8,17 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Crown, 
   Coins, 
-  TrendingUp, 
   CreditCard, 
   Zap,
   Calendar,
   ArrowUpRight,
-  Target,
-  Gift,
   Star,
-  CheckCircle,
-  BarChart3,
-  AlertTriangle
+  CheckCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -82,13 +77,19 @@ const UserDashboard = () => {
       // Implementar ações rápidas
       switch (action) {
         case 'buy-credits':
-          window.location.href = '/minha-area/assinaturas?tab=plans';
+          window.location.href = '/assinatura';
           break;
         case 'upgrade':
-          window.location.href = '/minha-area/assinaturas?tab=plans';
+          window.location.href = '/assinatura';
           break;
         case 'manage-subscription':
-          window.location.href = '/minha-area/assinaturas';
+          window.location.href = '/assinatura';
+          break;
+        case 'agents':
+          window.location.href = '/agentes';
+          break;
+        case 'products':
+          window.location.href = '/minha-area/produtos';
           break;
         default:
           toast({
@@ -209,8 +210,8 @@ const UserDashboard = () => {
           </div>
         </div>
 
-        {/* Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Status Cards - Only showing Credits and Subscription */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Créditos */}
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -262,51 +263,6 @@ const UserDashboard = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Uso Mensal */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Uso Mensal</CardTitle>
-              <BarChart3 className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {dashboardData.usage.thisMonth.toLocaleString()}
-              </div>
-              <div className="flex items-center mt-2">
-                <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                <p className="text-xs text-gray-500">
-                  {dashboardData.usage.thisMonth > dashboardData.usage.lastMonth ? '+' : ''}
-                  {((dashboardData.usage.thisMonth - dashboardData.usage.lastMonth) / dashboardData.usage.lastMonth * 100).toFixed(1)}% vs mês anterior
-                </p>
-              </div>
-              <div className="mt-3 text-xs text-gray-500">
-                Projeção: {dashboardData.usage.projection.toLocaleString()} créditos
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Economia */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Economia</CardTitle>
-              <Gift className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
-                R$ {dashboardData.user.savings.toFixed(2)}
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Economia vs compra avulsa
-              </p>
-              <div className="mt-3 flex items-center gap-1">
-                <Target className="h-3 w-3 text-orange-500" />
-                <span className="text-xs text-gray-500">
-                  Total investido: R$ {dashboardData.user.totalSpent.toFixed(2)}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Main Content Tabs */}
@@ -350,7 +306,7 @@ const UserDashboard = () => {
                     <Button 
                       className="w-full justify-start" 
                       variant="outline"
-                      onClick={() => window.location.href = '/agents'}
+                      onClick={() => handleQuickAction('agents')}
                     >
                       <Zap className="h-4 w-4 mr-2" />
                       Usar Agentes IA
@@ -359,7 +315,7 @@ const UserDashboard = () => {
                     <Button 
                       className="w-full justify-start" 
                       variant="outline"
-                      onClick={() => window.location.href = '/minha-area/produtos'}
+                      onClick={() => handleQuickAction('products')}
                     >
                       <ArrowUpRight className="h-4 w-4 mr-2" />
                       Meus Produtos
