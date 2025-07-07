@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
 import { 
   Search, 
   Star, 
@@ -87,6 +86,7 @@ interface AgentCardProps {
 function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
   const categoryInfo = getCategoryConfig(agent.category);
   const IconComponent = categoryInfo.icon;
+  const { balance: userBalance } = useUserCreditBalance();
   
   // Verificar se é um agente novo ou beta
   const isNew = agent.createdAt && new Date(agent.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -162,16 +162,19 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
         
         {/* Informações técnicas removidas para interface mais limpa */}
         
-        {/* Botão de ação */}
-        <Button 
-          asChild 
+        {/* Botão de ação com créditos */}
+        <CreditCostButton
+          featureName={`agents.${agent.id}`}
+          userBalance={userBalance}
+          onProcess={() => {
+            const href = agent.id === 'agent-amazon-listings' ? '/agents/amazon-listings-optimizer' : `/agents/${agent.id}`;
+            window.location.href = href;
+          }}
           className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200"
         >
-          <Link href={agent.id === 'agent-amazon-listings' ? '/agents/amazon-listings-optimizer' : `/agents/${agent.id}`}>
-            <Sparkles className="w-4 h-4 mr-2" />
-            Usar Agente
-          </Link>
-        </Button>
+          <Sparkles className="w-4 h-4 mr-2" />
+          Usar Agente
+        </CreditCostButton>
       </CardContent>
     </Card>
   );
