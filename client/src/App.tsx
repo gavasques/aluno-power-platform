@@ -52,6 +52,7 @@ const Ferramentas = lazy(() => import("./pages/Ferramentas"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
+const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
 const AgentsPage = lazy(() => import("./pages/agents"));
 const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
 const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer"));
@@ -572,6 +573,17 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <SimuladoresIndex />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Import Cost Simulator - Protected */}
+                          <Route path="/simuladores/importacao-simplificada">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ImportacaoSimplificada />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

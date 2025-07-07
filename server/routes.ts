@@ -191,6 +191,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User profile routes
   app.use('/api/user/profile', userProfileRoutes);
   
+  // Simulator routes
+  const simulatorRoutes = await import('./routes/simulators');
+  app.use('/api/simulations', simulatorRoutes.default);
+  
   // Advanced functionality routes (coupons, trial, abandoned cart, analytics)
   registerAdvancedRoutes(app);
   

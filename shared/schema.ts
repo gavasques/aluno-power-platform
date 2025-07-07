@@ -10,6 +10,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
+  phone: text("phone"),
   role: text("role").notNull().default("user"), // admin, support, user
   isActive: boolean("is_active").notNull().default(true),
   lastLogin: timestamp("last_login"),
@@ -2603,6 +2604,19 @@ export const userPermissionGroups = pgTable("user_permission_groups", {
   groupIdx: index("user_permission_groups_group_idx").on(table.groupId),
 }));
 
+// Import Cost Simulations
+export const importSimulations = pgTable("import_simulations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  nomeSimulacao: text("nome_simulacao").notNull(),
+  dataCreated: timestamp("data_criacao").notNull().defaultNow(),
+  dataLastModified: timestamp("data_ultima_modificacao").notNull().defaultNow(),
+  configuracoesGerais: jsonb("configuracoes_gerais").notNull(), // JSON with all general settings
+  produtos: jsonb("produtos").notNull(), // JSON array with all products
+}, (table) => ({
+  userIdx: index("import_simulations_user_idx").on(table.userId),
+}));
+
 // Permission System Types
 export const insertPermissionGroupSchema = createInsertSchema(permissionGroups).omit({
   id: true,
@@ -2670,6 +2684,23 @@ export const userPermissionGroupsRelations = relations(userPermissionGroups, ({ 
   }),
   assignedByUser: one(users, {
     fields: [userPermissionGroups.assignedBy],
+    references: [users.id],
+  }),
+}));
+
+// Import Simulations Types
+export const insertImportSimulationSchema = createInsertSchema(importSimulations).omit({
+  id: true,
+  dataCreated: true,
+  dataLastModified: true,
+});
+export type InsertImportSimulation = z.infer<typeof insertImportSimulationSchema>;
+export type ImportSimulation = typeof importSimulations.$inferSelect;
+
+// Import Simulations Relations
+export const importSimulationsRelations = relations(importSimulations, ({ one }) => ({
+  user: one(users, {
+    fields: [importSimulations.userId],
     references: [users.id],
   }),
 }));
