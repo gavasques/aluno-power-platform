@@ -38,33 +38,7 @@ import {
   Tag,
 } from "lucide-react";
 
-const menuItems = [
-  {
-    title: "Simuladores",
-    items: [
-      {
-        title: "Simples Nacional",
-        href: "/simuladores/simples-nacional",
-        icon: FileDigit,
-      },
-      {
-        title: "Importação Simplificada",
-        href: "/simuladores/importacao-simplificada",
-        icon: Ship,
-      },
-      {
-        title: "Importação Formal",
-        href: "/simuladores/importacao-formal",
-        icon: Building,
-      },
-      {
-        title: "Viabilidade de Produto",
-        href: "/simuladores/viabilidade-de-produto",
-        icon: ClipboardCheck,
-      },
-    ],
-  },
-];
+const menuItems: any[] = [];
 
 export function Header() {
   return (
@@ -113,6 +87,13 @@ export function Header() {
                 <Link to="/minha-area" className={navigationMenuTriggerStyle()}>
                   <User className="mr-2 h-4 w-4" />
                   Minha Área
+                </Link>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <Link to="/simuladores" className={navigationMenuTriggerStyle()}>
+                  <Calculator className="mr-2 h-4 w-4" />
+                  Simuladores
                 </Link>
               </NavigationMenuItem>
               

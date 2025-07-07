@@ -51,6 +51,7 @@ const Hub = lazy(() => import("./pages/Hub"));
 const Ferramentas = lazy(() => import("./pages/Ferramentas"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
+const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const AgentsPage = lazy(() => import("./pages/agents"));
 const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
 const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer"));
@@ -559,6 +560,17 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <MinhaAreaIndex />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Simuladores Index - Protected */}
+                          <Route path="/simuladores">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <SimuladoresIndex />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

@@ -25,6 +25,11 @@ const breadcrumbMap: Record<string, string> = {
   "/minha-area/fornecedores": "Meus Fornecedores",
   "/minha-area/produtos": "Meus Produtos",
   "/minha-area/materiais": "Meus Materiais",
+  "/simuladores": "Simuladores",
+  "/simuladores/simples-nacional": "Simples Nacional",
+  "/simuladores/importacao-simplificada": "Importação Simplificada",
+  "/simuladores/importacao-formal": "Importação Formal",
+  "/simuladores/viabilidade-de-produto": "Viabilidade de Produto",
   // Nova área de Ferramentas
   "/ferramentas": "Ferramentas",
   "/ferramentas/image-upscale": "Upscale de Imagem",
