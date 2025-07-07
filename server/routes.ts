@@ -14,6 +14,7 @@ import os from "os";
 import { db } from "./db";
 import { aiGenerationLogs } from "../shared/schema";
 import dashboardRoutes from "./routes/dashboard-fixed";
+import { LoggingService } from "./services/loggingService";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -3989,6 +3990,25 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log(`✅ [AMAZON_REVIEWS] ${filteredReviews.length} reviews extraídos - ASIN: ${asin}, Página: ${page}`);
 
+      // Log da consulta na tabela ai_generation_logs usando LoggingService
+      try {
+        await LoggingService.saveApiLog(
+          2, // userId admin por enquanto
+          'amazon-reviews-extractor',
+          `Amazon Reviews Extractor: ASIN ${asin}, Page ${page}, Country ${country}`,
+          JSON.stringify({
+            reviews: filteredReviews,
+            metadata: { asin, page, country, sort_by, total_reviews: filteredReviews.length }
+          }),
+          'rapidapi',
+          'amazon-data-scraper',
+          0, // duration
+          0 // sem custo
+        );
+      } catch (logError) {
+        console.error('❌ Erro ao salvar log de API:', logError);
+      }
+
       res.json({
         success: true,
         status: 'OK',
@@ -4966,7 +4986,23 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       if (data.status === 'OK' && data.data) {
         console.log(`✅ [AMAZON_PRODUCT] Produto encontrado - Título: ${data.data.product_title}`);
         
-        // Log da busca de produto
+        // Log da consulta na tabela ai_generation_logs usando LoggingService
+        try {
+          await LoggingService.saveApiLog(
+            2, // userId admin
+            'amazon-product-details',
+            `Amazon Product Details: ASIN ${asin}, Country ${country}`,
+            JSON.stringify(data),
+            'rapidapi',
+            'real-time-amazon-data',
+            0, // duration
+            0 // sem custo
+          );
+        } catch (logError) {
+          console.error('❌ Erro ao salvar log de API:', logError);
+        }
+        
+        // Log da busca de produto (manter existente)
         try {
           await db.insert(toolUsageLogs).values({
             userId: 2, // ID do usuário admin padrão
@@ -5064,7 +5100,25 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log(`✅ [AMAZON_KEYWORDS] ${data.data.products?.length || 0} produtos encontrados - Query: ${query}, Página: ${page}`);
 
-
+      // Log da consulta na tabela ai_generation_logs usando LoggingService
+      try {
+        await LoggingService.saveApiLog(
+          2, // userId admin por enquanto
+          'amazon-keyword-search',
+          `Amazon Keyword Search: Query "${query}", Page ${page}, Country ${country}`,
+          JSON.stringify({
+            total_products: data.data.total_products,
+            products_count: data.data.products?.length || 0,
+            query_parameters: { query, page, country, sort_by, min_price, max_price, brand, seller_id, deals_and_discounts }
+          }),
+          'rapidapi',
+          'real-time-amazon-data',
+          0, // duration
+          0 // sem custo
+        );
+      } catch (logError) {
+        console.error('❌ Erro ao salvar log de API:', logError);
+      }
 
       res.json({
         success: true,
@@ -5117,7 +5171,25 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const data = await response.json();
       console.log(`✅ [KEYWORD_SUGGESTIONS] ${data.data?.suggestions?.length || 0} sugestões encontradas para: "${prefix}"`);
 
-      // Log da consulta na tabela tool_usage_logs - capturando usuário autenticado
+      // Log da consulta na tabela ai_generation_logs usando LoggingService
+      try {
+        const user = req.user || { id: 2, username: 'gavasques', email: 'gavasques@gmail.com', name: 'Guilherme Vasques' };
+        
+        await LoggingService.saveApiLog(
+          user.id,
+          'amazon-keyword-suggestions',
+          `Amazon Keyword Suggestions: ${prefix} (${region})`,
+          JSON.stringify(data),
+          'rapidapi',
+          'amazon-data-scraper141',
+          0, // duration
+          0 // sem custo
+        );
+      } catch (logError) {
+        console.error('❌ Erro ao salvar log de API:', logError);
+      }
+
+      // Log da consulta na tabela tool_usage_logs - capturando usuário autenticado (manter existente)
       try {
         // Pega o usuário autenticado da sessão
         const user = req.user || { id: 2, username: 'gavasques', email: 'gavasques@gmail.com', name: 'Guilherme Vasques' };
@@ -5183,7 +5255,23 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const data = await response.json();
         console.log(`✅ [CNPJ_CONSULTA] Dados recebidos para CNPJ: ${cnpjNumbers}`, data.status ? 'SUCESSO' : 'FALHA');
         
-        // Log da consulta na tabela tool_usage_logs
+        // Log da consulta na tabela ai_generation_logs usando LoggingService
+        try {
+          await LoggingService.saveApiLog(
+            2, // userId admin
+            'cnpj-consulta',
+            `Consulta CNPJ: ${cnpjNumbers}`,
+            JSON.stringify(data),
+            'rapidapi',
+            'dados-cnpj-api',
+            Date.now() - Date.now(), // duration será calculado se necessário
+            0 // sem custo
+          );
+        } catch (logError) {
+          console.error('❌ Erro ao salvar log de API:', logError);
+        }
+
+        // Log da consulta na tabela tool_usage_logs (manter existente)
         try {
           await db.insert(toolUsageLogs).values({
             userId: 2, // ID do usuário admin padrão
@@ -5262,7 +5350,23 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           "status": true
         };
 
-        // Log da consulta demo na tabela tool_usage_logs
+        // Log da consulta demo na tabela ai_generation_logs usando LoggingService
+        try {
+          await LoggingService.saveApiLog(
+            2, // userId admin
+            'cnpj-consulta-demo',
+            `Consulta CNPJ Demo: ${cnpjNumbers}`,
+            JSON.stringify(demoData),
+            'demo-api',
+            'dados-cnpj-demo',
+            0, // duration
+            0 // sem custo
+          );
+        } catch (logError) {
+          console.error('❌ Erro ao salvar log de API demo:', logError);
+        }
+
+        // Log da consulta demo na tabela tool_usage_logs (manter existente)
         try {
           await db.insert(toolUsageLogs).values({
             userId: 2, // ID do usuário admin padrão
