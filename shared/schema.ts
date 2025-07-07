@@ -2609,12 +2609,16 @@ export const importSimulations = pgTable("import_simulations", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   nomeSimulacao: text("nome_simulacao").notNull(),
+  codigoSimulacao: text("codigo_simulacao").notNull(), // Código único de 8 caracteres alfanuméricos
+  nomeFornecedor: text("nome_fornecedor"),
+  observacoes: text("observacoes"),
   dataCreated: timestamp("data_criacao").notNull().defaultNow(),
   dataLastModified: timestamp("data_ultima_modificacao").notNull().defaultNow(),
   configuracoesGerais: jsonb("configuracoes_gerais").notNull(), // JSON with all general settings
   produtos: jsonb("produtos").notNull(), // JSON array with all products
 }, (table) => ({
   userIdx: index("import_simulations_user_idx").on(table.userId),
+  codigoIdx: index("import_simulations_codigo_idx").on(table.codigoSimulacao),
 }));
 
 // Permission System Types
@@ -2691,6 +2695,7 @@ export const userPermissionGroupsRelations = relations(userPermissionGroups, ({ 
 // Import Simulations Types
 export const insertImportSimulationSchema = createInsertSchema(importSimulations).omit({
   id: true,
+  codigoSimulacao: true,
   dataCreated: true,
   dataLastModified: true,
 });

@@ -5,6 +5,16 @@ import { requireAuth } from '../security';
 import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
+// Função para gerar código único de 8 caracteres alfanuméricos
+function generateSimulationCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 const router = Router();
 
 // Get all import simulations for user
@@ -66,11 +76,15 @@ router.post('/import', requireAuth, async (req, res) => {
       });
     }
 
+    // Gerar código único de simulação
+    const codigoSimulacao = generateSimulationCode();
+
     const newSimulation = await db
       .insert(importSimulations)
       .values({
         userId: userId,
         nomeSimulacao: req.body.nomeSimulacao,
+        codigoSimulacao: codigoSimulacao,
         nomeFornecedor: req.body.nomeFornecedor,
         observacoes: req.body.observacoes,
         configuracoesGerais: req.body.configuracoesGerais,
@@ -169,12 +183,18 @@ router.post('/import/:id/duplicate', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'Simulação não encontrada' });
     }
 
+    // Gerar código único para a cópia
+    const codigoSimulacao = generateSimulationCode();
+
     // Create duplicate
     const duplicatedSimulation = await db
       .insert(importSimulations)
       .values({
         userId: userId,
         nomeSimulacao: `${originalSimulation[0].nomeSimulacao} (Cópia)`,
+        codigoSimulacao: codigoSimulacao,
+        nomeFornecedor: originalSimulation[0].nomeFornecedor,
+        observacoes: originalSimulation[0].observacoes,
         configuracoesGerais: originalSimulation[0].configuracoesGerais,
         produtos: originalSimulation[0].produtos
       })

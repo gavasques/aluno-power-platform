@@ -145,6 +145,7 @@ interface ProdutoSimulacao {
 interface SimulacaoCompleta {
   id?: number;
   nomeSimulacao: string;
+  codigoSimulacao?: string;
   nomeFornecedor?: string;
   observacoes?: string;
   configuracoesGerais: ConfiguracoesGerais;
@@ -634,12 +635,19 @@ export default function ImportacaoSimplificada() {
                     autoFocus
                   />
                 ) : (
-                  <CardTitle 
-                    className="text-xl cursor-pointer hover:text-primary"
-                    onClick={() => setIsEditingName(true)}
-                  >
-                    {activeSimulation.nomeSimulacao}
-                  </CardTitle>
+                  <div className="flex flex-col">
+                    <CardTitle 
+                      className="text-xl cursor-pointer hover:text-primary"
+                      onClick={() => setIsEditingName(true)}
+                    >
+                      {activeSimulation.nomeSimulacao}
+                    </CardTitle>
+                    {activeSimulation.codigoSimulacao && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Código: {activeSimulation.codigoSimulacao}
+                      </p>
+                    )}
+                  </div>
                 )}
                 <Badge variant="secondary">
                   {selectedSimulationId ? "Salva" : "Não Salva"}
@@ -1016,7 +1024,14 @@ export default function ImportacaoSimplificada() {
                   {simulations.map((simulation: any) => (
                     <div key={simulation.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
-                        <h3 className="font-medium">{simulation.nomeSimulacao}</h3>
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-medium">{simulation.nomeSimulacao}</h3>
+                          {simulation.codigoSimulacao && (
+                            <Badge variant="outline" className="text-xs">
+                              {simulation.codigoSimulacao}
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">
                           {simulation.produtos?.length || 0} produtos • 
                           Atualizada em {new Date(simulation.dataLastModified).toLocaleDateString('pt-BR')}
