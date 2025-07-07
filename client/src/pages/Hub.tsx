@@ -9,30 +9,81 @@ import Partners from "./hub/Partners";
 import AmazonReviewExtractor from "./hub/AmazonReviewExtractor";
 import KeywordSearchReport from "./hub/KeywordSearchReport";
 import AmazonProductDetails from "./hub/AmazonProductDetails";
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 const Hub = () => {
   const { section } = useParams();
+  const { isLoading } = usePermissions();
+
+  // Show loading state while permissions are being fetched
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+        </div>
+      </div>
+    );
+  }
 
   // Renderizar componente específico baseado na seção
   switch (section) {
     case "parceiros":
-      return <Partners />;
+      return (
+        <PermissionGuard featureCode="hub.partners.view">
+          <Partners />
+        </PermissionGuard>
+      );
     case "prompts-ia":
-      return <PromptsIA />;
+      return (
+        <PermissionGuard featureCode="hub.prompts.view">
+          <PromptsIA />
+        </PermissionGuard>
+      );
     case "materiais":
-      return <Materials />;
+      return (
+        <PermissionGuard featureCode="hub.materials.view">
+          <Materials />
+        </PermissionGuard>
+      );
     case "templates":
-      return <Templates />;
+      return (
+        <PermissionGuard featureCode="hub.templates.view">
+          <Templates />
+        </PermissionGuard>
+      );
     case "ferramentas":
-      return <Tools />;
+      return (
+        <PermissionGuard featureCode="hub.tools.view">
+          <Tools />
+        </PermissionGuard>
+      );
     case "fornecedores":
-      return <Suppliers />;
+      return (
+        <PermissionGuard featureCode="hub.suppliers.view">
+          <Suppliers />
+        </PermissionGuard>
+      );
     case "amazon-reviews":
-      return <AmazonReviewExtractor />;
+      return (
+        <PermissionGuard featureCode="hub.tools.view">
+          <AmazonReviewExtractor />
+        </PermissionGuard>
+      );
     case "relatorio-keywords":
-      return <KeywordSearchReport />;
+      return (
+        <PermissionGuard featureCode="hub.tools.view">
+          <KeywordSearchReport />
+        </PermissionGuard>
+      );
     case "produto-detalhes":
-      return <AmazonProductDetails />;
+      return (
+        <PermissionGuard featureCode="hub.tools.view">
+          <AmazonProductDetails />
+        </PermissionGuard>
+      );
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Hub de Recursos";
       return (

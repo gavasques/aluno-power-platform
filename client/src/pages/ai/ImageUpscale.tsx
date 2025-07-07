@@ -10,6 +10,7 @@ import { ProcessingFeedback } from "@/components/ai/common/ProcessingFeedback";
 import { ResetButton } from "@/components/ai/common/ResetButton";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
 import { UPSCALE_CONFIG } from "@/config/ai-image";
+import { PermissionGuard } from "@/components/guards";
 
 // Componente para controles de upscale
 const UpscaleControls = ({ 
@@ -101,13 +102,18 @@ export default function ImageUpscale() {
         gradient={true}
       />
 
-      <ProcessingFeedback 
-        isProcessing={isProcessing}
-        isUploading={isUploading}
-        error={error}
-        step={step}
-        processingColor="blue"
-      />
+      <PermissionGuard 
+        featureCode="ai.upscale"
+        showMessage={true}
+        message="Você não tem permissão para usar a ferramenta de upscale de imagens."
+      >
+        <ProcessingFeedback 
+          isProcessing={isProcessing}
+          isUploading={isUploading}
+          error={error}
+          step={step}
+          processingColor="blue"
+        />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Coluna Esquerda: Upload e Controles */}
@@ -189,13 +195,14 @@ export default function ImageUpscale() {
         </div>
       </div>
 
-      {/* Botão de Reset */}
-      {(hasUploadedImage || processedImage) && (
-        <ResetButton 
-          onReset={reset}
-          disabled={isProcessing || isUploading}
-        />
-      )}
+        {/* Botão de Reset */}
+        {(hasUploadedImage || processedImage) && (
+          <ResetButton 
+            onReset={reset}
+            disabled={isProcessing || isUploading}
+          />
+        )}
+      </PermissionGuard>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, index, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -2551,6 +2551,136 @@ export const adminActionsRelations = relations(adminActions, ({ one }) => ({
   }),
   targetUser: one(users, {
     fields: [adminActions.targetUserId],
+    references: [users.id],
+  }),
+}));
+
+// Permission System Tables
+export const permissionGroups = pgTable("permission_groups", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(), // gratuito, pagantes, alunos, mentorados, admin
+  name: text("name").notNull().unique(), // Gratuito, Pagantes, Alunos, Mentorados, Admin
+  description: text("description"),
+  priority: integer("priority").notNull().default(0), // Higher priority = more permissions
+  isActive: boolean("is_active").notNull().default(true),
+  isSystem: boolean("is_system").notNull().default(false), // System groups cannot be deleted
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  codeIdx: index("permission_groups_code_idx").on(table.code),
+  nameIdx: index("permission_groups_name_idx").on(table.name),
+  priorityIdx: index("permission_groups_priority_idx").on(table.priority),
+  activeIdx: index("permission_groups_active_idx").on(table.isActive),
+}));
+
+export const systemFeatures = pgTable("system_features", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(), // e.g., 'ai.upscale', 'agents.amazon_listing'
+  name: text("name").notNull(),
+  category: text("category").notNull(), // AI, Agentes, Hub de Recursos, etc
+  parentCode: text("parent_code"), // For nested features
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  codeIdx: index("system_features_code_idx").on(table.code),
+  categoryIdx: index("system_features_category_idx").on(table.category),
+  parentIdx: index("system_features_parent_idx").on(table.parentCode),
+  activeIdx: index("system_features_active_idx").on(table.isActive),
+}));
+
+export const groupPermissions = pgTable("group_permissions", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").references(() => permissionGroups.id).notNull(),
+  featureId: integer("feature_id").references(() => systemFeatures.id).notNull(),
+  hasAccess: boolean("has_access").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  groupFeatureIdx: unique("group_permissions_unique").on(table.groupId, table.featureId),
+  groupIdx: index("group_permissions_group_idx").on(table.groupId),
+  featureIdx: index("group_permissions_feature_idx").on(table.featureId),
+}));
+
+export const userPermissionGroups = pgTable("user_permission_groups", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  groupId: integer("group_id").references(() => permissionGroups.id).notNull(),
+  assignedAt: timestamp("assigned_at").notNull().defaultNow(),
+  assignedBy: integer("assigned_by").references(() => users.id),
+}, (table) => ({
+  userIdx: index("user_permission_groups_user_idx").on(table.userId),
+  groupIdx: index("user_permission_groups_group_idx").on(table.groupId),
+}));
+
+// Permission System Types
+export const insertPermissionGroupSchema = createInsertSchema(permissionGroups).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPermissionGroup = z.infer<typeof insertPermissionGroupSchema>;
+export type PermissionGroup = typeof permissionGroups.$inferSelect;
+
+export const insertSystemFeatureSchema = createInsertSchema(systemFeatures).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertSystemFeature = z.infer<typeof insertSystemFeatureSchema>;
+export type SystemFeature = typeof systemFeatures.$inferSelect;
+
+export const insertGroupPermissionSchema = createInsertSchema(groupPermissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertGroupPermission = z.infer<typeof insertGroupPermissionSchema>;
+export type GroupPermission = typeof groupPermissions.$inferSelect;
+
+export const insertUserPermissionGroupSchema = createInsertSchema(userPermissionGroups).omit({
+  id: true,
+  assignedAt: true,
+});
+export type InsertUserPermissionGroup = z.infer<typeof insertUserPermissionGroupSchema>;
+export type UserPermissionGroup = typeof userPermissionGroups.$inferSelect;
+
+// Permission System Relations
+export const permissionGroupsRelations = relations(permissionGroups, ({ many }) => ({
+  permissions: many(groupPermissions),
+  users: many(userPermissionGroups),
+}));
+
+export const systemFeaturesRelations = relations(systemFeatures, ({ many, one }) => ({
+  permissions: many(groupPermissions),
+  parent: one(systemFeatures, {
+    fields: [systemFeatures.parentCode],
+    references: [systemFeatures.code],
+  }),
+}));
+
+export const groupPermissionsRelations = relations(groupPermissions, ({ one }) => ({
+  group: one(permissionGroups, {
+    fields: [groupPermissions.groupId],
+    references: [permissionGroups.id],
+  }),
+  feature: one(systemFeatures, {
+    fields: [groupPermissions.featureId],
+    references: [systemFeatures.id],
+  }),
+}));
+
+export const userPermissionGroupsRelations = relations(userPermissionGroups, ({ one }) => ({
+  user: one(users, {
+    fields: [userPermissionGroups.userId],
+    references: [users.id],
+  }),
+  group: one(permissionGroups, {
+    fields: [userPermissionGroups.groupId],
+    references: [permissionGroups.id],
+  }),
+  assignedByUser: one(users, {
+    fields: [userPermissionGroups.assignedBy],
     references: [users.id],
   }),
 }));

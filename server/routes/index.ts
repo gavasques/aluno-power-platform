@@ -16,6 +16,7 @@ import materialTypeRoutes from './materialTypeRoutes';
 import productRoutes from './productRoutes';
 import dashboardRoutes from './dashboard';
 import stripeRoutes from './stripe';
+import { permissionRoutes } from './permissions';
 
 /**
  * Register all modular routes
@@ -41,6 +42,9 @@ export function registerModularRoutes(app: Express): void {
   
   // Stripe Payment Routes - Complete Stripe Integration
   app.use('/api/stripe', stripeRoutes);
+  
+  // Permission Management Routes - Group-based Access Control
+  app.use('/api/permissions', permissionRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

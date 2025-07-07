@@ -8,6 +8,7 @@ import { TemplatesProvider } from "./TemplatesContext";
 import { PromptsProvider } from "./PromptsContext";
 import { YoutubeProvider } from "./YoutubeContext";
 import { AgentsProvider } from "./AgentsContext";
+import { PermissionProvider } from "./PermissionContext";
 
 interface CombinedProviderProps {
   children: ReactNode;
@@ -19,24 +20,26 @@ interface CombinedProviderProps {
  */
 export function CombinedProvider({ children }: CombinedProviderProps) {
   return (
-    <YoutubeProvider>
-      <PartnersProvider>
-        <SuppliersProvider>
-          <MaterialsProvider>
-            <ProductProvider>
-              <ToolsProvider>
-                <TemplatesProvider>
-                  <PromptsProvider>
-                    <AgentsProvider>
-                      {children}
-                    </AgentsProvider>
-                  </PromptsProvider>
-                </TemplatesProvider>
-              </ToolsProvider>
-            </ProductProvider>
-          </MaterialsProvider>
-        </SuppliersProvider>
-      </PartnersProvider>
-    </YoutubeProvider>
+    <PermissionProvider>
+      <YoutubeProvider>
+        <PartnersProvider>
+          <SuppliersProvider>
+            <MaterialsProvider>
+              <ProductProvider>
+                <ToolsProvider>
+                  <TemplatesProvider>
+                    <PromptsProvider>
+                      <AgentsProvider>
+                        {children}
+                      </AgentsProvider>
+                    </PromptsProvider>
+                  </TemplatesProvider>
+                </ToolsProvider>
+              </ProductProvider>
+            </MaterialsProvider>
+          </SuppliersProvider>
+        </PartnersProvider>
+      </YoutubeProvider>
+    </PermissionProvider>
   );
 }

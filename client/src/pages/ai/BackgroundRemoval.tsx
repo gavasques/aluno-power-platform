@@ -8,6 +8,7 @@ import { ProcessingFeedback } from "@/components/ai/common/ProcessingFeedback";
 import { ResetButton } from "@/components/ai/common/ResetButton";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
 import { BACKGROUND_REMOVAL_CONFIG } from "@/config/ai-image";
+import { PermissionGuard } from "@/components/guards";
 
 // Componente inline para controles de background removal
 const BackgroundRemovalControls = ({ 
@@ -72,34 +73,39 @@ export default function BackgroundRemoval() {
         description="Remova automaticamente o fundo de suas imagens usando inteligência artificial avançada. Ideal para fotos de produtos, retratos e criação de conteúdo profissional."
       />
 
-      <ProcessingFeedback 
-        isProcessing={isProcessing}
-        isUploading={isUploading}
-        error={error}
-        step={step}
-        processingColor="purple"
-      />
+      <PermissionGuard 
+        featureCode="ai.background_removal"
+        showMessage={true}
+        message="Você não tem permissão para usar a ferramenta de remoção de background."
+      >
+        <ProcessingFeedback 
+          isProcessing={isProcessing}
+          isUploading={isUploading}
+          error={error}
+          step={step}
+          processingColor="purple"
+        />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        {/* Coluna Esquerda: Upload e Controles */}
-        <div className="space-y-6">
-          {/* Upload da Imagem */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload da Imagem</CardTitle>
-              <CardDescription>
-                Selecione uma imagem para remover o fundo automaticamente
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ImageUploader
-                onFileSelect={uploadImage}
-                uploadedImage={uploadedImage}
-                onRemoveImage={reset}
-                isUploading={isUploading}
-              />
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Coluna Esquerda: Upload e Controles */}
+          <div className="space-y-6">
+            {/* Upload da Imagem */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload da Imagem</CardTitle>
+                <CardDescription>
+                  Selecione uma imagem para remover o fundo automaticamente
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ImageUploader
+                  onFileSelect={uploadImage}
+                  uploadedImage={uploadedImage}
+                  onRemoveImage={reset}
+                  isUploading={isUploading}
+                />
+              </CardContent>
+            </Card>
 
           {/* Controles de Remoção */}
           <Card>
@@ -149,13 +155,14 @@ export default function BackgroundRemoval() {
         </div>
       </div>
 
-      {/* Botão de Reset */}
-      {(hasUploadedImage || processedImage) && (
-        <ResetButton 
-          onReset={reset}
-          disabled={isProcessing || isUploading}
-        />
-      )}
+        {/* Botão de Reset */}
+        {(hasUploadedImage || processedImage) && (
+          <ResetButton 
+            onReset={reset}
+            disabled={isProcessing || isUploading}
+          />
+        )}
+      </PermissionGuard>
     </div>
   );
 }
