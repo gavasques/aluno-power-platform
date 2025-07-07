@@ -141,22 +141,29 @@ Preferred communication style: Simple, everyday language.
     - Structured data supports advanced analytics and user optimization recommendations
     - Seamless integration with existing permission system for comprehensive platform control
 
-- **January 07, 2025 - 05:20 PM**: 🔄 REORGANIZAÇÃO COMPLETA DA NAVEGAÇÃO - HUB DE RECURSOS RENOMEADO E NOVA ÁREA FERRAMENTAS CRIADA
-  - **Reorganização Estrutural Implementada**:
-    - ✅ **"Hub de Recursos" renomeado para "HUB"**: Menu principal agora exibe "HUB" ao invés de "Hub de Recursos"
-    - ✅ **Nova área "Ferramentas" criada**: Consolidação de todas as funcionalidades de IA e ferramentas utilitárias
-    - ✅ **Migração de IA para Ferramentas**: Upscale de Imagem e Remover Background movidos para /ferramentas/
-    - ✅ **Migração de Hub para Ferramentas**: Amazon Reviews, Relatório Keywords, Detalhes Produto, CNPJ, Amazon Keyword Suggestions movidos para /ferramentas/
-  - **Arquitetura de Rotas Atualizada**:
-    - ✅ **Novas rotas /ferramentas/***: Todas as 7 ferramentas agora disponíveis sob nova estrutura
-    - ✅ **Redirecionamentos automáticos**: Links antigos (/ai/, /hub/) redirecionam automaticamente para /ferramentas/
-    - ✅ **Breadcrumbs atualizados**: Sistema de navegação reconhece nova estrutura de ferramentas
-    - ✅ **Permissões atualizadas**: Sistema de permissões reorganizado com categoria "Ferramentas"
+- **January 07, 2025 - 06:50 PM**: ✅ NAVEGAÇÃO REORGANIZADA COMPLETAMENTE - FERRAMENTAS E HUB AGORA SÃO PÁGINAS DIRETAS
+  - **Problema de Tela Branca Resolvido**:
+    - ✅ **Erro crítico corrigido**: Ícone Archive não importado no Header.tsx causando falha no carregamento
+    - ✅ **Sistema funcionando**: Aplicação carregando normalmente após correção do import
+  - **Reorganização de Navegação Implementada**:
+    - ✅ **Ferramentas e HUB como páginas diretas**: Removidos dropdowns, criados links diretos no header
+    - ✅ **Páginas de listagem criadas**: /ferramentas e /hub exibem grids organizados por categoria
+    - ✅ **Sistema de permissões preservado**: PermissionGuard mantido em todos os componentes
+    - ✅ **Rotas adicionadas**: App.tsx atualizado com rotas para Ferramentas.tsx e Hub.tsx
+    - ✅ **Breadcrumbs atualizados**: Navegação reconhece /hub e /ferramentas como páginas principais
+  - **Estrutura de Menu Simplificada**:
+    - Dashboard (link direto)
+    - Agentes (link direto)
+    - Ferramentas (link direto - nova página)
+    - HUB (link direto - nova página)
+    - Minha Área (dropdown mantido)
+    - Simuladores (dropdown mantido)
+    - Nossos Cursos (link externo)
   - **Benefícios da Reorganização**:
-    - Interface mais intuitiva com ferramentas consolidadas em uma única área
-    - HUB simplificado focado em conteúdo de referência (Vídeos, Parceiros, Fornecedores, etc.)
-    - Área Ferramentas unificada facilita descoberta e acesso às funcionalidades práticas
-    - Compatibilidade mantida através de redirecionamentos automáticos
+    - Interface mais limpa sem dropdowns desnecessários
+    - Acesso direto às principais funcionalidades
+    - Páginas organizadas com filtros por categoria
+    - Sistema de custos em créditos visível em cada ferramenta
 
 - **January 07, 2025 - 05:06 PM**: ✅ SISTEMA DE EXCLUSÃO DE USUÁRIOS COMPLETAMENTE APRIMORADO - GERENCIAMENTO ROBUSTO IMPLEMENTADO
   - **Problema Crítico Resolvido**: Exclusão do usuário João Silva finalizada com sucesso após remoção de todas as dependências

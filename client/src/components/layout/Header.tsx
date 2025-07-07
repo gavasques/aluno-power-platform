@@ -18,6 +18,7 @@ import {
   Users,
   Truck,
   Wrench,
+  Archive,
   FileText,
   BookCopy,
   BrainCircuit,
