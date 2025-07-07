@@ -3,7 +3,7 @@ import AdminDashboard from "./admin/AdminDashboard";
 import UserManagement from "./admin/UserManagement";
 import ContentManagement from "./admin/ContentManagement";
 
-import GeneralSettings from "./admin/GeneralSettings";
+
 import AdminCadastros from "./admin/AdminCadastros";
 import { Shield, ShieldX } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,9 +54,7 @@ const Admin = () => {
       return <ContentManagement />;
     
 
-    case "configuracoes":
-      if (!hasAccess("configuracoes")) return renderAccessDenied();
-      return <GeneralSettings subsection={subsection} />;
+
     
     default:
       if (!hasAccess("dashboard")) return renderAccessDenied();

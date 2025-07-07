@@ -25,7 +25,7 @@ const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const UserEdit = lazy(() => import("./pages/admin/UserEdit"));
 const GroupEdit = lazy(() => import("./pages/admin/GroupEdit"));
 
-const GeneralSettings = lazy(() => import("./pages/admin/GeneralSettings"));
+
 const ContentManagement = lazy(() => import("./pages/admin/ContentManagement"));
 const Suppliers = lazy(() => import("./pages/hub/Suppliers"));
 const Partners = lazy(() => import("./pages/hub/Partners"));
@@ -583,17 +583,7 @@ function App() {
                           
 
                           
-                          <Route path="/admin/configuracoes/:section?">
-                            {(params) => (
-                              <ProtectedRoute requireAdmin>
-                                <AdminLayout>
-                                  <Suspense fallback={<PageLoader />}>
-                                    <GeneralSettings />
-                                  </Suspense>
-                                </AdminLayout>
-                              </ProtectedRoute>
-                            )}
-                          </Route>
+
                           
                           <Route path="/admin/conteudo/:subsection?/:id?/:action?">
                             {(params) => (

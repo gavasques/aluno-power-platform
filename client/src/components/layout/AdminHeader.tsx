@@ -56,14 +56,7 @@ const adminMenuItems = [
       { title: "Imagens Geradas", href: "/admin/images", icon: FileText },
     ],
   },
-  {
-    title: "Configurações",
-    items: [
-      { title: "Plataforma", href: "/admin/configuracoes/plataforma", icon: Settings },
-      { title: "Créditos IA", href: "/admin/configuracoes/creditos-ia", icon: Settings },
-      { title: "Templates de Resposta", href: "/admin/configuracoes/templates-resposta", icon: FileText },
-    ],
-  },
+
 ];
 
 export function AdminHeader() {

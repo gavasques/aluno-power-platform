@@ -48,12 +48,7 @@ export function AdminNav() {
               <span>Meu Perfil</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild className="text-foreground hover:text-primary hover:bg-primary/10 focus:text-primary focus:bg-primary/10">
-            <Link to="/configuracoes">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Configurações</span>
-            </Link>
-          </DropdownMenuItem>
+
 
           <DropdownMenuSeparator className="bg-border" />
           <DropdownMenuItem asChild className="text-foreground hover:text-primary hover:bg-primary/10 focus:text-primary focus:bg-primary/10">
