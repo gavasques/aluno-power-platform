@@ -2709,3 +2709,45 @@ export const importSimulationsRelations = relations(importSimulations, ({ one })
     references: [users.id],
   }),
 }));
+
+// Simples Nacional Simulations
+export const simplesNacionalSimulations = pgTable("simples_nacional_simulations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  nomeSimulacao: text("nome_simulacao").notNull(),
+  codigoSimulacao: text("codigo_simulacao").notNull(),
+  observacoes: text("observacoes"),
+  faturamento12Meses: decimal("faturamento_12_meses", { precision: 15, scale: 2 }).notNull(),
+  faturamentoSemST: decimal("faturamento_sem_st", { precision: 15, scale: 2 }).notNull(),
+  faturamentoComST: decimal("faturamento_com_st", { precision: 15, scale: 2 }).notNull(),
+  faturamentoTotal: decimal("faturamento_total", { precision: 15, scale: 2 }).notNull(),
+  aliquotaBase: decimal("aliquota_base", { precision: 8, scale: 6 }).notNull(),
+  valorReduzir: decimal("valor_reduzir", { precision: 15, scale: 2 }).notNull(),
+  aliquotaEfetiva: decimal("aliquota_efetiva", { precision: 8, scale: 6 }).notNull(),
+  percentualICMS: decimal("percentual_icms", { precision: 8, scale: 6 }).notNull(),
+  valorSimplesSemST: decimal("valor_simples_sem_st", { precision: 15, scale: 2 }).notNull(),
+  valorSimplesComST: decimal("valor_simples_com_st", { precision: 15, scale: 2 }).notNull(),
+  valorTotalSimples: decimal("valor_total_simples", { precision: 15, scale: 2 }).notNull(),
+  dataCreated: timestamp("data_criacao").notNull().defaultNow(),
+  dataLastModified: timestamp("data_ultima_modificacao").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("simples_nacional_simulations_user_idx").on(table.userId),
+  codigoIdx: index("simples_nacional_simulations_codigo_idx").on(table.codigoSimulacao),
+}));
+
+export const insertSimplesNacionalSimulationSchema = createInsertSchema(simplesNacionalSimulations).omit({
+  id: true,
+  codigoSimulacao: true,
+  dataCreated: true,
+  dataLastModified: true,
+});
+export type InsertSimplesNacionalSimulation = z.infer<typeof insertSimplesNacionalSimulationSchema>;
+export type SimplesNacionalSimulation = typeof simplesNacionalSimulations.$inferSelect;
+
+// Simples Nacional Simulations Relations
+export const simplesNacionalSimulationsRelations = relations(simplesNacionalSimulations, ({ one }) => ({
+  user: one(users, {
+    fields: [simplesNacionalSimulations.userId],
+    references: [users.id],
+  }),
+}));
