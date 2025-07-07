@@ -13,6 +13,98 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
+// Brazilian number formatting utilities
+const formatBrazilianNumber = (value: number, decimals: number = 2): string => {
+  if (value === 0) return '';
+  return value.toLocaleString('pt-BR', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+};
+
+const parseBrazilianNumber = (value: string): number => {
+  if (!value || value.trim() === '') return 0;
+  
+  // Remove all dots (thousand separators) and replace comma with dot for parsing
+  const cleanValue = value
+    .replace(/\./g, '')  // Remove dots
+    .replace(',', '.');  // Replace comma with dot
+  
+  const parsed = parseFloat(cleanValue);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
+// Custom Brazilian number input component
+interface BrazilianNumberInputProps {
+  value: number;
+  onChange: (value: number) => void;
+  decimals?: number;
+  min?: number;
+  max?: number;
+  step?: string;
+  className?: string;
+  id?: string;
+  placeholder?: string;
+}
+
+const BrazilianNumberInput = ({ 
+  value, 
+  onChange, 
+  decimals = 2, 
+  min, 
+  max, 
+  className, 
+  id, 
+  placeholder 
+}: BrazilianNumberInputProps) => {
+  const [displayValue, setDisplayValue] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    if (!isFocused) {
+      setDisplayValue(value === 0 ? '' : formatBrazilianNumber(value, decimals));
+    }
+  }, [value, decimals, isFocused]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    setDisplayValue(inputValue);
+    
+    const numericValue = parseBrazilianNumber(inputValue);
+    
+    // Apply min/max constraints
+    let constrainedValue = numericValue;
+    if (min !== undefined && constrainedValue < min) constrainedValue = min;
+    if (max !== undefined && constrainedValue > max) constrainedValue = max;
+    
+    onChange(constrainedValue);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    // Re-format the display value on blur
+    if (value !== 0) {
+      setDisplayValue(formatBrazilianNumber(value, decimals));
+    }
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  return (
+    <Input
+      id={id}
+      className={className}
+      value={displayValue}
+      onChange={handleChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      placeholder={placeholder}
+    />
+  );
+};
+
 // Types based on the specification
 interface ConfiguracoesGerais {
   taxa_cambio_usd_brl: number;
@@ -290,16 +382,16 @@ export default function ImportacaoSimplificada() {
     const rows = calculatedResults.produtos.map(p => [
       p.descricao_produto,
       p.quantidade,
-      p.valor_unitario_usd,
-      p.peso_bruto_unitario_kg,
-      p.custo_produto_brl?.toFixed(2),
-      p.custo_frete_por_produto_brl?.toFixed(2),
-      p.produto_mais_frete_brl?.toFixed(2),
-      p.valor_ii_brl?.toFixed(2),
-      p.valor_icms_brl?.toFixed(2),
-      p.valor_total_produto_impostos_brl?.toFixed(2),
-      p.custo_unitario_sem_imposto_brl?.toFixed(2),
-      p.custo_unitario_com_imposto_brl?.toFixed(2)
+      formatBrazilianNumber(p.valor_unitario_usd),
+      formatBrazilianNumber(p.peso_bruto_unitario_kg, 3),
+      formatBrazilianNumber(p.custo_produto_brl || 0),
+      formatBrazilianNumber(p.custo_frete_por_produto_brl || 0),
+      formatBrazilianNumber(p.produto_mais_frete_brl || 0),
+      formatBrazilianNumber(p.valor_ii_brl || 0),
+      formatBrazilianNumber(p.valor_icms_brl || 0),
+      formatBrazilianNumber(p.valor_total_produto_impostos_brl || 0),
+      formatBrazilianNumber(p.custo_unitario_sem_imposto_brl || 0),
+      formatBrazilianNumber(p.custo_unitario_com_imposto_brl || 0)
     ]);
 
     const csvContent = [headers, ...rows]
@@ -385,71 +477,51 @@ export default function ImportacaoSimplificada() {
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="taxa_cambio">Taxa de Câmbio USD/BRL</Label>
-                <Input
+                <BrazilianNumberInput
                   id="taxa_cambio"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={activeSimulation.configuracoesGerais.taxa_cambio_usd_brl.toString()}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                    if (!isNaN(value)) {
-                      updateConfig('taxa_cambio_usd_brl', value);
-                    }
-                  }}
+                  value={activeSimulation.configuracoesGerais.taxa_cambio_usd_brl}
+                  onChange={(value) => updateConfig('taxa_cambio_usd_brl', value)}
+                  decimals={4}
+                  min={0}
+                  placeholder="Ex: 5,20"
                 />
               </div>
               
               <div>
                 <Label htmlFor="aliquota_ii">Alíquota II (%)</Label>
-                <Input
+                <BrazilianNumberInput
                   id="aliquota_ii"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="100"
-                  value={(activeSimulation.configuracoesGerais.aliquota_ii_percentual * 100).toString()}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                    if (!isNaN(value)) {
-                      updateConfig('aliquota_ii_percentual', value / 100);
-                    }
-                  }}
+                  value={activeSimulation.configuracoesGerais.aliquota_ii_percentual * 100}
+                  onChange={(value) => updateConfig('aliquota_ii_percentual', value / 100)}
+                  decimals={2}
+                  min={0}
+                  max={100}
+                  placeholder="Ex: 60,00"
                 />
               </div>
 
               <div>
                 <Label htmlFor="aliquota_icms">Alíquota ICMS (%)</Label>
-                <Input
+                <BrazilianNumberInput
                   id="aliquota_icms"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="100"
-                  value={(activeSimulation.configuracoesGerais.aliquota_icms_percentual * 100).toString()}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                    if (!isNaN(value)) {
-                      updateConfig('aliquota_icms_percentual', value / 100);
-                    }
-                  }}
+                  value={activeSimulation.configuracoesGerais.aliquota_icms_percentual * 100}
+                  onChange={(value) => updateConfig('aliquota_icms_percentual', value / 100)}
+                  decimals={2}
+                  min={0}
+                  max={100}
+                  placeholder="Ex: 17,00"
                 />
               </div>
 
               <div>
                 <Label htmlFor="frete_total">Custo Frete Internacional Total</Label>
-                <Input
+                <BrazilianNumberInput
                   id="frete_total"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={activeSimulation.configuracoesGerais.custo_frete_internacional_total_moeda_original.toString()}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                    if (!isNaN(value)) {
-                      updateConfig('custo_frete_internacional_total_moeda_original', value);
-                    }
-                  }}
+                  value={activeSimulation.configuracoesGerais.custo_frete_internacional_total_moeda_original}
+                  onChange={(value) => updateConfig('custo_frete_internacional_total_moeda_original', value)}
+                  decimals={2}
+                  min={0}
+                  placeholder="Ex: 1.500,00"
                 />
               </div>
 
@@ -471,18 +543,13 @@ export default function ImportacaoSimplificada() {
 
               <div>
                 <Label htmlFor="outras_despesas">Outras Despesas Aduaneiras (BRL)</Label>
-                <Input
+                <BrazilianNumberInput
                   id="outras_despesas"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={activeSimulation.configuracoesGerais.outras_despesas_aduaneiras_total_brl.toString()}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                    if (!isNaN(value)) {
-                      updateConfig('outras_despesas_aduaneiras_total_brl', value);
-                    }
-                  }}
+                  value={activeSimulation.configuracoesGerais.outras_despesas_aduaneiras_total_brl}
+                  onChange={(value) => updateConfig('outras_despesas_aduaneiras_total_brl', value)}
+                  decimals={2}
+                  min={0}
+                  placeholder="Ex: 250,00"
                 />
               </div>
 
@@ -585,58 +652,48 @@ export default function ImportacaoSimplificada() {
                             />
                           </td>
                           <td className="p-2">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={produto.valor_unitario_usd.toString()}
-                              onChange={(e) => {
-                                const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                                if (!isNaN(value)) {
-                                  updateProduct(index, 'valor_unitario_usd', value);
-                                }
-                              }}
+                            <BrazilianNumberInput
+                              value={produto.valor_unitario_usd}
+                              onChange={(value) => updateProduct(index, 'valor_unitario_usd', value)}
+                              decimals={2}
+                              min={0}
                               className="w-24"
+                              placeholder="0,00"
                             />
                           </td>
                           <td className="p-2">
-                            <Input
-                              type="number"
-                              step="0.001"
-                              min="0"
-                              value={produto.peso_bruto_unitario_kg.toString()}
-                              onChange={(e) => {
-                                const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                                if (!isNaN(value)) {
-                                  updateProduct(index, 'peso_bruto_unitario_kg', value);
-                                }
-                              }}
+                            <BrazilianNumberInput
+                              value={produto.peso_bruto_unitario_kg}
+                              onChange={(value) => updateProduct(index, 'peso_bruto_unitario_kg', value)}
+                              decimals={3}
+                              min={0}
                               className="w-24"
+                              placeholder="0,000"
                             />
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {produto.custo_produto_brl?.toFixed(2) || '0.00'}
+                            R$ {formatBrazilianNumber(produto.custo_produto_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {produto.custo_frete_por_produto_brl?.toFixed(2) || '0.00'}
+                            R$ {formatBrazilianNumber(produto.custo_frete_por_produto_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right font-medium">
-                            R$ {produto.produto_mais_frete_brl?.toFixed(2) || '0.00'}
+                            R$ {formatBrazilianNumber(produto.produto_mais_frete_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {produto.valor_ii_brl?.toFixed(2) || '0.00'}
+                            R$ {formatBrazilianNumber(produto.valor_ii_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {produto.valor_icms_brl?.toFixed(2) || '0.00'}
+                            R$ {formatBrazilianNumber(produto.valor_icms_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right font-bold text-primary">
-                            R$ {produto.valor_total_produto_impostos_brl?.toFixed(2) || '0.00'}
+                            R$ {formatBrazilianNumber(produto.valor_total_produto_impostos_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {produto.custo_unitario_sem_imposto_brl?.toFixed(2) || '0.00'}
+                            R$ {formatBrazilianNumber(produto.custo_unitario_sem_imposto_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right font-medium">
-                            R$ {produto.custo_unitario_com_imposto_brl?.toFixed(2) || '0.00'}
+                            R$ {formatBrazilianNumber(produto.custo_unitario_com_imposto_brl || 0)}
                           </td>
                           <td className="p-2">
                             <Button
@@ -673,31 +730,31 @@ export default function ImportacaoSimplificada() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      R$ {calculatedResults.totals.total_sim_produto_mais_frete_brl.toFixed(2)}
+                      R$ {formatBrazilianNumber(calculatedResults.totals.total_sim_produto_mais_frete_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">Produto + Frete</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">
-                      R$ {calculatedResults.totals.total_sim_valor_ii_brl.toFixed(2)}
+                      R$ {formatBrazilianNumber(calculatedResults.totals.total_sim_valor_ii_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">Total II</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-600">
-                      R$ {calculatedResults.totals.total_sim_valor_icms_brl.toFixed(2)}
+                      R$ {formatBrazilianNumber(calculatedResults.totals.total_sim_valor_icms_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">Total ICMS</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-purple-600">
-                      R$ {calculatedResults.totals.total_sim_outras_despesas_aduaneiras_brl.toFixed(2)}
+                      R$ {formatBrazilianNumber(calculatedResults.totals.total_sim_outras_despesas_aduaneiras_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">Outras Despesas</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-red-600">
-                      R$ {calculatedResults.totals.custo_total_importacao_brl.toFixed(2)}
+                      R$ {formatBrazilianNumber(calculatedResults.totals.custo_total_importacao_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">Custo Total</div>
                   </div>
