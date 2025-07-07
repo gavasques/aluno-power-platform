@@ -226,7 +226,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     })
     .where(eq(userSubscriptions.stripeSubscriptionId, subscription.id));
 
-  // If subscription became active, add credits
+  // If subscription became active, add credits and update user group
   if (oldStatus !== 'active' && newStatus === 'active') {
     const priceId = subscription.items.data[0].price.id;
     const planInfo = await getPlanInfoByPriceId(priceId);
@@ -240,6 +240,16 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
         subscription.id
       );
     }
+
+    // Move user to "Pagantes" group (with exception for Alunos/Mentorados)
+    const { UserGroupService } = await import('../services/userGroupService');
+    await UserGroupService.handleSubscriptionActivated(existingSubscription.userId);
+  }
+
+  // If subscription became inactive, move user back to "Gratuito"
+  if (oldStatus === 'active' && ['canceled', 'unpaid', 'past_due', 'incomplete_expired'].includes(newStatus)) {
+    const { UserGroupService } = await import('../services/userGroupService');
+    await UserGroupService.handleSubscriptionEnded(existingSubscription.userId);
   }
 
   console.log(`✅ Subscription updated: ${subscription.id} (${oldStatus} → ${newStatus})`);
@@ -247,6 +257,12 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
 // Process subscription deletion
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+  // Get user before updating subscription
+  const [existingSubscription] = await db.select()
+    .from(userSubscriptions)
+    .where(eq(userSubscriptions.stripeSubscriptionId, subscription.id))
+    .limit(1);
+
   await db.update(userSubscriptions)
     .set({
       status: 'canceled',
@@ -258,6 +274,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const user = await getUserByCustomerId(subscription.customer as string);
   if (user) {
     await emailService.sendSubscriptionCanceled(user.email);
+
+    // Move user back to "Gratuito" group (with exception for Alunos/Mentorados)
+    if (existingSubscription) {
+      const { UserGroupService } = await import('../services/userGroupService');
+      await UserGroupService.handleSubscriptionEnded(existingSubscription.userId);
+    }
   }
 
   console.log(`✅ Subscription canceled: ${subscription.id}`);

@@ -4263,6 +4263,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       // Create session token
       const sessionToken = await AuthService.createSession(user.id);
 
+      // Assign new user to "Gratuito" group
+      const { UserGroupService } = await import('./services/userGroupService');
+      await UserGroupService.assignDefaultGroup(user.id);
+
       res.status(201).json({
         success: true,
         user: {

@@ -17,6 +17,8 @@ import productRoutes from './productRoutes';
 import dashboardRoutes from './dashboard';
 import stripeRoutes from './stripe';
 import { permissionRoutes } from './permissions';
+import userGroupsRoutes from './admin/userGroups';
+import stripeWebhookTestRoutes from './stripe/webhook-test';
 
 /**
  * Register all modular routes
@@ -45,6 +47,12 @@ export function registerModularRoutes(app: Express): void {
   
   // Permission Management Routes - Group-based Access Control
   app.use('/api/permissions', permissionRoutes);
+  
+  // Admin User Groups Management Routes
+  app.use('/api/admin/user-groups', userGroupsRoutes);
+  
+  // Stripe Webhook Testing Routes (Admin only)
+  app.use('/api/stripe/test', stripeWebhookTestRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);
