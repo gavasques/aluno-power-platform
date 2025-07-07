@@ -84,10 +84,23 @@ const UserDashboard = () => {
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState('overview');
 
-  const { data: dashboardData, isLoading, error } = useQuery<DashboardData>({
-    queryKey: ['/api/test/dashboard'],
+  // Buscar dados reais do usuário
+  const { data: userSummary, isLoading: summaryLoading } = useQuery({
+    queryKey: ['/api/dashboard/summary'],
     enabled: true
   });
+
+  const { data: creditData, isLoading: creditsLoading } = useQuery({
+    queryKey: ['/api/dashboard/credits'],
+    enabled: true
+  });
+
+  const { data: subscriptionData, isLoading: subscriptionLoading } = useQuery({
+    queryKey: ['/api/dashboard/subscription'],
+    enabled: true
+  });
+
+  const isLoading = summaryLoading || creditsLoading || subscriptionLoading;
 
   const { data: youtubeVideos, isLoading: videosLoading } = useQuery<YouTubeVideo[]>({
     queryKey: ['/api/youtube-videos'],
@@ -195,7 +208,7 @@ const UserDashboard = () => {
     );
   }
 
-  if (error || !dashboardData) {
+  if (!userSummary) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <div className="container mx-auto px-4 py-8">
@@ -220,6 +233,19 @@ const UserDashboard = () => {
     );
   }
 
+  // Extrair dados reais do sistema
+  const currentUser = userSummary?.user || {};
+  const creditBalance = creditData?.balance || userSummary?.credits?.current || 0;
+  const creditsUsedThisMonth = creditData?.recentTransactions?.reduce((total: number, tx: any) => 
+    tx.amount < 0 ? total + Math.abs(tx.amount) : total, 0
+  ) || userSummary?.credits?.usageThisMonth || 0;
+  
+  const subscription = subscriptionData || userSummary?.subscription || {};
+  const planName = subscription?.planName || userSummary?.user?.plan || 'Sem Plano';
+  const planStatus = subscription?.status || 'cancelled';
+  const nextBilling = subscription?.nextBilling || subscription?.nextBillingDate || 'N/A';
+  const planCredits = subscription?.planCredits || 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       <div className="container mx-auto px-4 py-8 space-y-8">
@@ -229,7 +255,7 @@ const UserDashboard = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Olá, {dashboardData.user.name}! 👋
+                Olá, {currentUser.name || 'Usuário'}! 👋
               </h1>
               <p className="text-gray-600 mt-1">
                 Aqui está um resumo da sua conta e atividades recentes
@@ -237,17 +263,17 @@ const UserDashboard = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <Badge className={`${getPlanColor(dashboardData.user.plan.level)} flex items-center gap-1`}>
-                {getPlanIcon(dashboardData.user.plan.level)}
-                {dashboardData.user.plan.name}
+              <Badge className={`${getPlanColor('basic')} flex items-center gap-1`}>
+                {getPlanIcon('basic')}
+                {planName}
               </Badge>
               
               <div className="text-right">
                 <div className="text-2xl font-bold text-gray-900">
-                  {dashboardData.user.creditBalance.toLocaleString()} créditos
+                  {creditBalance.toLocaleString()} créditos
                 </div>
                 <div className="text-sm text-gray-500">
-                  Próxima cobrança: {dashboardData.user.plan.nextBilling}
+                  Próxima cobrança: {nextBilling}
                 </div>
               </div>
             </div>
@@ -324,18 +350,18 @@ const UserDashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-blue-600">
-                      {dashboardData.user.creditBalance.toLocaleString()}
+                      {creditBalance.toLocaleString()}
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <p className="text-xs text-gray-500">
-                        {dashboardData.usage.thisMonth} usados
+                        {creditsUsedThisMonth} usados
                       </p>
                       <Button size="sm" onClick={() => handleQuickAction('buy-credits')}>
                         Comprar
                       </Button>
                     </div>
                     <Progress 
-                      value={(dashboardData.usage.thisMonth / dashboardData.user.plan.credits) * 100} 
+                      value={planCredits > 0 ? (creditsUsedThisMonth / planCredits) * 100 : 0} 
                       className="mt-3"
                     />
                   </CardContent>
@@ -349,11 +375,11 @@ const UserDashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-purple-600">
-                      {dashboardData.user.plan.name}
+                      {planName}
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <p className="text-xs text-gray-500">
-                        Status: {dashboardData.user.plan.status === 'active' ? 'Ativo' : 'Inativo'}
+                        Status: {planStatus === 'active' ? 'Ativo' : 'Inativo'}
                       </p>
                       <Button size="sm" onClick={() => handleQuickAction('manage-subscription')}>
                         Gerenciar
@@ -362,7 +388,7 @@ const UserDashboard = () => {
                     <div className="mt-3 flex items-center gap-1">
                       <CheckCircle className="h-3 w-3 text-green-500" />
                       <span className="text-xs text-gray-500">
-                        {dashboardData.user.plan.credits.toLocaleString()} créditos/mês
+                        {planCredits > 0 ? planCredits.toLocaleString() : '0'} créditos/mês
                       </span>
                     </div>
                   </CardContent>
