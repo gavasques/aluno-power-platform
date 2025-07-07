@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Plus, Save, FileDown, Calculator, Copy, FileText } from "lucide-react";
+import { Trash2, Plus, Save, FileDown, Calculator, FileText } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -539,14 +539,7 @@ export default function ImportacaoSimplificada() {
     }
   };
 
-  const duplicateSimulation = () => {
-    setActiveSimulation(prev => ({
-      ...prev,
-      nomeSimulacao: prev.nomeSimulacao + " (Cópia)",
-      id: undefined
-    }));
-    setSelectedSimulationId(null);
-  };
+
 
   const exportToCsv = () => {
     const headers = [
@@ -598,14 +591,6 @@ export default function ImportacaoSimplificada() {
           <Button onClick={newSimulation} variant="outline">
             <Plus className="w-4 h-4 mr-2" />
             Nova Simulação
-          </Button>
-          <Button onClick={duplicateSimulation} variant="outline">
-            <Copy className="w-4 h-4 mr-2" />
-            Duplicar
-          </Button>
-          <Button onClick={exportToPDF} variant="outline">
-            <FileText className="w-4 h-4 mr-2" />
-            Exportar PDF
           </Button>
           <Button onClick={() => setShowSaveDialog(true)}>
             <Save className="w-4 h-4 mr-2" />
@@ -994,10 +979,14 @@ export default function ImportacaoSimplificada() {
                   </div>
                 </div>
                 
-                <div className="flex justify-center mt-6">
+                <div className="flex justify-center gap-4 mt-6">
                   <Button onClick={exportToCsv} variant="outline">
                     <FileDown className="w-4 h-4 mr-2" />
                     Exportar CSV
+                  </Button>
+                  <Button onClick={exportToPDF} variant="outline">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Exportar PDF
                   </Button>
                 </div>
               </CardContent>
