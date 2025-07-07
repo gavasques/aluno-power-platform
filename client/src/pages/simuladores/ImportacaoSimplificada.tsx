@@ -1010,37 +1010,94 @@ export default function ImportacaoSimplificada() {
                 </div>
               ) : (
                 <div className="grid gap-4">
-                  {simulations.map((simulation: any) => (
-                    <div key={simulation.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <h3 className="font-medium">{simulation.nomeSimulacao}</h3>
-                          {simulation.codigoSimulacao && (
-                            <Badge variant="outline" className="text-xs">
-                              {simulation.codigoSimulacao}
-                            </Badge>
-                          )}
+                  {simulations.map((simulation: any) => {
+                    const produtos = simulation.produtos || [];
+                    const config = simulation.configuracoesGerais || {};
+                    
+                    // Calcular valor total da importação
+                    let valorTotalImportacao = 0;
+                    produtos.forEach((produto: any) => {
+                      const valorFOB = produto.quantidade * produto.valor_unitario_usd;
+                      const valorFOBBRL = valorFOB * config.taxa_cambio_usd_brl;
+                      
+                      // Calcular frete por produto
+                      const pesoTotalKg = produtos.reduce((acc: number, p: any) => acc + (p.quantidade * p.peso_bruto_unitario_kg), 0);
+                      let custoProdutoFrete = 0;
+                      if (config.metodo_rateio_frete === "peso") {
+                        const pesoTotalProduto = produto.quantidade * produto.peso_bruto_unitario_kg;
+                        const proporcaoFrete = pesoTotalKg > 0 ? pesoTotalProduto / pesoTotalKg : 0;
+                        custoProdutoFrete = proporcaoFrete * (config.custo_frete_internacional_total_moeda_original * config.taxa_cambio_usd_brl);
+                      }
+                      
+                      // Calcular II
+                      const baseCalculoII = valorFOBBRL + custoProdutoFrete;
+                      const valorII = baseCalculoII * config.aliquota_ii_percentual;
+                      
+                      // Calcular ICMS
+                      const valorComII = valorFOBBRL + custoProdutoFrete + valorII;
+                      const baseCalculoICMS = valorComII / (1 - config.aliquota_icms_percentual);
+                      const valorICMS = baseCalculoICMS - valorComII;
+                      
+                      valorTotalImportacao += baseCalculoICMS;
+                    });
+                    
+                    return (
+                      <div key={simulation.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-2">
+                            <h3 className="font-medium">{simulation.nomeSimulacao}</h3>
+                            {simulation.codigoSimulacao && (
+                              <Badge variant="outline" className="text-xs">
+                                {simulation.codigoSimulacao}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => loadSimulation(simulation)}>
+                              Carregar
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => deleteMutation.mutate(simulation.id)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {simulation.produtos?.length || 0} produtos • 
-                          Atualizada em {new Date(simulation.dataLastModified).toLocaleDateString('pt-BR')}
-                        </p>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-blue-600">
+                              R$ {formatBrazilianNumber(valorTotalImportacao)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Valor Total</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-green-600">
+                              {produtos.length}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Itens</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-orange-600">
+                              R$ {formatBrazilianNumber(config.taxa_cambio_usd_brl || 0)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Cotação USD</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-muted-foreground">
+                              Atualizada em
+                            </div>
+                            <div className="text-sm font-medium">
+                              {new Date(simulation.dataLastModified).toLocaleDateString('pt-BR')}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => loadSimulation(simulation)}>
-                          Carregar
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => deleteMutation.mutate(simulation.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>

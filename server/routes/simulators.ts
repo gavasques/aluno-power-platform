@@ -17,7 +17,7 @@ function generateSimulationCode(): string {
 
 const router = Router();
 
-// Get all import simulations for user
+// Get last 30 import simulations for user
 router.get('/import', requireAuth, async (req, res) => {
   try {
     const userId = (req as any).user.id;
@@ -26,7 +26,8 @@ router.get('/import', requireAuth, async (req, res) => {
       .select()
       .from(importSimulations)
       .where(eq(importSimulations.userId, userId))
-      .orderBy(desc(importSimulations.dataLastModified));
+      .orderBy(desc(importSimulations.dataLastModified))
+      .limit(30);
 
     res.json(simulations);
   } catch (error) {
