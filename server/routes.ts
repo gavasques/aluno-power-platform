@@ -15,6 +15,7 @@ import { db } from "./db";
 import { aiGenerationLogs } from "../shared/schema";
 import dashboardRoutes from "./routes/dashboard-fixed";
 import { LoggingService } from "./services/loggingService";
+import userProfileRoutes from "./routes/user/profile";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -186,6 +187,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // User usage routes
   app.use('/api/user/usage', requireAuth, userUsageRoutes);
+  
+  // User profile routes
+  app.use('/api/user/profile', userProfileRoutes);
   
   // Advanced functionality routes (coupons, trial, abandoned cart, analytics)
   registerAdvancedRoutes(app);

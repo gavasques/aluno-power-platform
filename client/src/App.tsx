@@ -71,6 +71,7 @@ const UserDashboardNew = lazy(() => import("./pages/user/Dashboard"));
 const FastDashboard = lazy(() => import("./pages/user/FastDashboard"));
 const UserUsage = lazy(() => import("./pages/user/Usage"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
+const UserProfile = lazy(() => import("./pages/myarea/UserProfile"));
 
 
 // Keep Login as eager import for immediate authentication
@@ -577,6 +578,16 @@ function App() {
                           </Route>
 
                           {/* Minha Área routes - Protected */}
+                          <Route path="/minha-area/perfil">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <UserProfile />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
                           <Route path="/minha-area/:section/:id?/:action?">
                             {(params) => (
                               <ProtectedRoute>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, Folder, Package, Building, Star, ArrowRight } from "lucide-react";
+import { Search, X, Folder, Package, Building, Star, ArrowRight, User } from "lucide-react";
 
 interface MinhaAreaItem {
   id: string;
@@ -48,6 +48,14 @@ const minhaAreaItems: MinhaAreaItem[] = [
     href: "/minha-area/assinaturas", 
     icon: Star,
     category: "Billing",
+  },
+  {
+    id: "perfil",
+    title: "Meu Perfil",
+    description: "Gerencie suas informações pessoais e altere sua senha",
+    href: "/minha-area/perfil",
+    icon: User,
+    category: "Gestão",
   },
 ];
 

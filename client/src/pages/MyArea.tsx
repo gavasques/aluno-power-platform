@@ -18,6 +18,7 @@ const SupplierDetailRefactored = lazy(() => import("./myarea/SupplierDetailRefac
 const MaterialDetail = lazy(() => import("./myarea/MaterialDetail"));
 const MaterialForm = lazy(() => import("./myarea/MaterialForm"));
 const MySubscriptions = lazy(() => import("../pages/myarea/MySubscriptions"));
+const UserProfile = lazy(() => import("./myarea/UserProfile"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -121,6 +122,13 @@ const MyArea = () => {
             <MySubscriptions />
           </Suspense>
         </PermissionGuard>
+      );
+    case "perfil":
+    case "profile":
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
+          <UserProfile />
+        </Suspense>
       );
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Minha Área";

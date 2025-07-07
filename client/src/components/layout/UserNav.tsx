@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Settings, LogOut, Home, Shield } from "lucide-react";
+import { User, LogOut, Home, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function UserNav() {
@@ -53,15 +53,9 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link to="/perfil" className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-100 rounded transition">
+            <Link to="/minha-area/perfil" className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-100 rounded transition">
               <User className="h-5 w-5 text-neutral-500" />
               <span>Meu Perfil</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/configuracoes" className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-100 rounded transition">
-              <Settings className="h-5 w-5 text-neutral-500" />
-              <span>Configurações</span>
             </Link>
           </DropdownMenuItem>
 
