@@ -109,6 +109,87 @@ permissionRoutes.get("/groups", requireAuth, async (req: Request, res: Response)
   }
 });
 
+// Get single group (admin only)
+permissionRoutes.get("/groups/:groupId", requireAuth, async (req: Request, res: Response) => {
+  try {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const groupId = parseInt(req.params.groupId);
+    const groups = await PermissionService.getGroups();
+    const group = groups.find(g => g.id === groupId);
+    
+    if (!group) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+
+    res.json({ group });
+  } catch (error) {
+    console.error("Error getting group:", error);
+    res.status(500).json({ error: "Failed to get group" });
+  }
+});
+
+// Create new group (admin only)
+permissionRoutes.post("/groups", requireAuth, async (req: Request, res: Response) => {
+  try {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const { name, description, isActive } = req.body;
+    
+    // Generate code from name
+    const code = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    
+    const result = await db.insert(permissionGroups).values({
+      name,
+      description,
+      code,
+      isActive: isActive !== false,
+      priority: 50, // Default priority
+      isSystem: false
+    }).returning();
+
+    res.json({ message: "Group created successfully", group: result[0] });
+  } catch (error) {
+    console.error("Error creating group:", error);
+    res.status(500).json({ error: "Failed to create group" });
+  }
+});
+
+// Update group (admin only)
+permissionRoutes.put("/groups/:groupId", requireAuth, async (req: Request, res: Response) => {
+  try {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const groupId = parseInt(req.params.groupId);
+    const { name, description, isActive } = req.body;
+
+    const result = await db.update(permissionGroups)
+      .set({
+        name,
+        description,
+        isActive: isActive !== false,
+        updatedAt: new Date()
+      })
+      .where(eq(permissionGroups.id, groupId))
+      .returning();
+
+    if (!result[0]) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+
+    res.json({ message: "Group updated successfully", group: result[0] });
+  } catch (error) {
+    console.error("Error updating group:", error);
+    res.status(500).json({ error: "Failed to update group" });
+  }
+});
+
 // Get group permissions (admin only)
 permissionRoutes.get("/groups/:groupId/permissions", requireAuth, async (req: Request, res: Response) => {
   try {
