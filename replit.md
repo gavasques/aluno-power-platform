@@ -111,6 +111,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 07, 2025 - 08:30 PM**: ✅ SIMULADOR DE CUSTO DE IMPORTAÇÃO SIMPLIFICADA COMPLETAMENTE IMPLEMENTADO E FUNCIONAL
+  - **Comprehensive Import Cost Simulator Created**:
+    - ✅ **Complete Database Schema**: import_simulations table with JSONB fields for flexible data storage
+    - ✅ **Full Backend API**: Complete CRUD operations with authentication and validation
+    - ✅ **Advanced React Interface**: Real-time calculations following complex II and ICMS formulas
+    - ✅ **Product Management**: Add/edit/remove products with automatic cost calculations per item
+    - ✅ **Configuration System**: Currency exchange, tax rates, freight allocation methods
+    - ✅ **Simulation Management**: Save, load, duplicate, and delete simulations with proper user isolation
+    - ✅ **CSV Export**: Complete export functionality for analysis and reporting
+  - **Technical Implementation Highlights**:
+    - Complex calculation engine with proper freight and expense allocation (weight/value/quantity based)
+    - Real-time ICMS calculation using spreadsheet logic: (produto+frete+II) / (1-aliquota_icms)
+    - Input validation and form handling for all numeric fields with proper string conversion
+    - Route integration at /simuladores/importacao-simplificada with protected access
+    - Complete type safety with TypeScript interfaces and Zod validation schemas
+  - **Input Field Fix Applied**:
+    - ✅ **Numeric Input Handling**: Fixed all configuration fields that were stuck at 0
+    - ✅ **Form Validation**: Proper onChange handlers with empty string and NaN validation
+    - ✅ **User Experience**: Added min/max attributes and improved value conversion
+    - ✅ **Real-time Updates**: All calculations update instantly as values are entered
+  - **User Testing Success**: System validated with actual simulation creation and database persistence
+
 - **January 07, 2025 - 08:10 PM**: ✅ SISTEMA DE PERFIL DO USUÁRIO IMPLEMENTADO - NAVEGAÇÃO LIMPA E CONFIGURAÇÕES REMOVIDAS
   - **Página de Perfil do Usuário Criada**:
     - ✅ **UserProfile.tsx**: Nova página de perfil em /minha-area/perfil com edição de informações pessoais

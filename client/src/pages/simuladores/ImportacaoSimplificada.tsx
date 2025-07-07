@@ -389,8 +389,14 @@ export default function ImportacaoSimplificada() {
                   id="taxa_cambio"
                   type="number"
                   step="0.01"
-                  value={activeSimulation.configuracoesGerais.taxa_cambio_usd_brl}
-                  onChange={(e) => updateConfig('taxa_cambio_usd_brl', parseFloat(e.target.value) || 0)}
+                  min="0"
+                  value={activeSimulation.configuracoesGerais.taxa_cambio_usd_brl.toString()}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      updateConfig('taxa_cambio_usd_brl', value);
+                    }
+                  }}
                 />
               </div>
               
@@ -400,8 +406,15 @@ export default function ImportacaoSimplificada() {
                   id="aliquota_ii"
                   type="number"
                   step="0.01"
-                  value={(activeSimulation.configuracoesGerais.aliquota_ii_percentual * 100).toFixed(2)}
-                  onChange={(e) => updateConfig('aliquota_ii_percentual', (parseFloat(e.target.value) || 0) / 100)}
+                  min="0"
+                  max="100"
+                  value={(activeSimulation.configuracoesGerais.aliquota_ii_percentual * 100).toString()}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      updateConfig('aliquota_ii_percentual', value / 100);
+                    }
+                  }}
                 />
               </div>
 
@@ -411,8 +424,15 @@ export default function ImportacaoSimplificada() {
                   id="aliquota_icms"
                   type="number"
                   step="0.01"
-                  value={(activeSimulation.configuracoesGerais.aliquota_icms_percentual * 100).toFixed(2)}
-                  onChange={(e) => updateConfig('aliquota_icms_percentual', (parseFloat(e.target.value) || 0) / 100)}
+                  min="0"
+                  max="100"
+                  value={(activeSimulation.configuracoesGerais.aliquota_icms_percentual * 100).toString()}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      updateConfig('aliquota_icms_percentual', value / 100);
+                    }
+                  }}
                 />
               </div>
 
@@ -422,8 +442,14 @@ export default function ImportacaoSimplificada() {
                   id="frete_total"
                   type="number"
                   step="0.01"
-                  value={activeSimulation.configuracoesGerais.custo_frete_internacional_total_moeda_original}
-                  onChange={(e) => updateConfig('custo_frete_internacional_total_moeda_original', parseFloat(e.target.value) || 0)}
+                  min="0"
+                  value={activeSimulation.configuracoesGerais.custo_frete_internacional_total_moeda_original.toString()}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      updateConfig('custo_frete_internacional_total_moeda_original', value);
+                    }
+                  }}
                 />
               </div>
 
@@ -449,8 +475,14 @@ export default function ImportacaoSimplificada() {
                   id="outras_despesas"
                   type="number"
                   step="0.01"
-                  value={activeSimulation.configuracoesGerais.outras_despesas_aduaneiras_total_brl}
-                  onChange={(e) => updateConfig('outras_despesas_aduaneiras_total_brl', parseFloat(e.target.value) || 0)}
+                  min="0"
+                  value={activeSimulation.configuracoesGerais.outras_despesas_aduaneiras_total_brl.toString()}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      updateConfig('outras_despesas_aduaneiras_total_brl', value);
+                    }
+                  }}
                 />
               </div>
 
@@ -541,8 +573,14 @@ export default function ImportacaoSimplificada() {
                           <td className="p-2">
                             <Input
                               type="number"
-                              value={produto.quantidade}
-                              onChange={(e) => updateProduct(index, 'quantidade', parseInt(e.target.value) || 0)}
+                              min="1"
+                              value={produto.quantidade.toString()}
+                              onChange={(e) => {
+                                const value = e.target.value === '' ? 1 : parseInt(e.target.value);
+                                if (!isNaN(value) && value > 0) {
+                                  updateProduct(index, 'quantidade', value);
+                                }
+                              }}
                               className="w-20"
                             />
                           </td>
@@ -550,8 +588,14 @@ export default function ImportacaoSimplificada() {
                             <Input
                               type="number"
                               step="0.01"
-                              value={produto.valor_unitario_usd}
-                              onChange={(e) => updateProduct(index, 'valor_unitario_usd', parseFloat(e.target.value) || 0)}
+                              min="0"
+                              value={produto.valor_unitario_usd.toString()}
+                              onChange={(e) => {
+                                const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                if (!isNaN(value)) {
+                                  updateProduct(index, 'valor_unitario_usd', value);
+                                }
+                              }}
                               className="w-24"
                             />
                           </td>
@@ -559,8 +603,14 @@ export default function ImportacaoSimplificada() {
                             <Input
                               type="number"
                               step="0.001"
-                              value={produto.peso_bruto_unitario_kg}
-                              onChange={(e) => updateProduct(index, 'peso_bruto_unitario_kg', parseFloat(e.target.value) || 0)}
+                              min="0"
+                              value={produto.peso_bruto_unitario_kg.toString()}
+                              onChange={(e) => {
+                                const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                if (!isNaN(value)) {
+                                  updateProduct(index, 'peso_bruto_unitario_kg', value);
+                                }
+                              }}
                               className="w-24"
                             />
                           </td>
