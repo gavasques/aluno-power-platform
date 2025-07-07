@@ -12,6 +12,8 @@ import { saveAs } from 'file-saver';
 import { useApiRequest } from '@/hooks/useApiRequest';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { CreditCostButton } from '@/components/CreditCostButton';
+import { useUserCreditBalance } from '@/hooks/useUserCredits';
 
 // Types
 interface Product {
@@ -84,6 +86,7 @@ export default function KeywordSearchReport() {
   });
 
   const { execute, loading } = useApiRequest();
+  const { balance: userBalance } = useUserCreditBalance();
 
   const updateSearchParam = (key: string, value: any) => {
     setSearchParams(prev => ({ ...prev, [key]: value }));
@@ -376,14 +379,16 @@ export default function KeywordSearchReport() {
 
           {/* Botão de Busca */}
           <div className="flex gap-3">
-            <Button
-              onClick={startSearch}
+            <CreditCostButton
+              featureName="tools.keyword_report"
+              userBalance={userBalance}
+              onProcess={startSearch}
               disabled={state.isSearching || !searchParams.query.trim()}
               className="flex-1"
             >
               <Search className="w-4 h-4 mr-2" />
               {state.isSearching ? 'Buscando...' : 'Iniciar Busca (7 páginas)'}
-            </Button>
+            </CreditCostButton>
             
             {state.isSearching && (
               <Button variant="outline" onClick={stopSearch}>

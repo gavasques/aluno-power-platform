@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useApiRequest } from '@/hooks/useApiRequest';
+import { CreditCostButton } from '@/components/CreditCostButton';
+import { useUserCreditBalance } from '@/hooks/useUserCredits';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CopyButton } from '@/components/common/CopyButton';
@@ -32,6 +34,7 @@ export default function AmazonKeywordSuggestions() {
   const { execute, loading, error } = useApiRequest<KeywordSuggestionsData>({
     successMessage: 'Sugestões carregadas com sucesso!',
   });
+  const { balance: userBalance } = useUserCreditBalance();
 
   const handleSearch = async () => {
     if (!keyword.trim()) return;
@@ -85,14 +88,16 @@ export default function AmazonKeywordSuggestions() {
             />
           </div>
 
-          <Button 
-            onClick={handleSearch} 
+          <CreditCostButton
+            featureName="tools.keyword_suggestions"
+            userBalance={userBalance}
+            onProcess={handleSearch}
             disabled={loading || !keyword.trim()}
             className="w-full"
           >
             <Search className="mr-2 h-4 w-4" />
             {loading ? 'Buscando...' : 'Buscar Sugestões'}
-          </Button>
+          </CreditCostButton>
 
           {loading && <LoadingSpinner message="Buscando sugestões..." />}
           

@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { CreditCostBadge } from "@/components/CreditCostButton";
+import { useUserCreditBalance } from "@/hooks/useUserCredits";
 import type { Agent } from "../types/agent.types";
 
 // Configuração das cores e ícones das categorias - padrão Lovable/DeepSeek
@@ -134,13 +136,19 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
       </CardHeader>
       
       <CardContent className="pt-0">
-        {/* Badge da categoria */}
-        <Badge 
-          variant="outline"
-          className={`mb-3 text-xs font-medium border ${categoryInfo.color}`}
-        >
-          {agent.category || "Geral"}
-        </Badge>
+        {/* Badge da categoria e créditos */}
+        <div className="flex items-center justify-between mb-3">
+          <Badge 
+            variant="outline"
+            className={`text-xs font-medium border ${categoryInfo.color}`}
+          >
+            {agent.category || "Geral"}
+          </Badge>
+          <CreditCostBadge 
+            featureName={`agents.${agent.id}`}
+            className="text-xs"
+          />
+        </div>
         
         {/* Nome do agente */}
         <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
@@ -178,6 +186,7 @@ export default function AgentsPage() {
   const { data: agents = [], isLoading } = useQuery<Agent[]>({
     queryKey: ["/api/agents"],
   });
+  const { balance: userBalance } = useUserCreditBalance();
 
   // Categorias disponíveis para filtros
   const categories = [

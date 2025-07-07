@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useApiRequest } from '@/hooks/useApiRequest';
 import { CountrySelector } from '@/components/common/CountrySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { CreditCostButton } from '@/components/CreditCostButton';
+import { useUserCreditBalance } from '@/hooks/useUserCredits';
 
 // Types
 interface ReviewData {
@@ -70,6 +72,7 @@ export default function AmazonReviewExtractor() {
   });
 
   const { execute, loading } = useApiRequest();
+  const { balance: userBalance } = useUserCreditBalance();
 
   const addUrl = () => {
     if (!urlInput.trim()) return;
@@ -293,13 +296,15 @@ Comentário: ${comment}
             </div>
           )}
 
-          <Button 
-            onClick={extractReviews}
+          <CreditCostButton
+            featureName="tools.amazon_reviews"
+            userBalance={userBalance}
+            onProcess={extractReviews}
             disabled={state.urls.length === 0 || state.isExtracting}
             className="w-full"
           >
             {state.isExtracting ? 'Extraindo...' : `Extrair Reviews (${state.urls.length} produtos)`}
-          </Button>
+          </CreditCostButton>
         </CardContent>
       </Card>
 

@@ -5,6 +5,8 @@ import { Search, Building, Users, MapPin, Phone, Mail, Calendar, DollarSign, Fil
 import { useApiRequest } from '@/hooks/useApiRequest';
 import { CNPJInput, validateCNPJ } from '@/components/common/CNPJInput';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { CreditCostButton } from '@/components/CreditCostButton';
+import { useUserCreditBalance } from '@/hooks/useUserCredits';
 
 // Types
 interface EnderecoData {
@@ -104,6 +106,7 @@ export default function CNPJConsulta() {
   const { execute, loading, error } = useApiRequest<CNPJResponse>({
     successMessage: 'Dados da empresa consultados com sucesso!',
   });
+  const { balance: userBalance } = useUserCreditBalance();
 
   const handleSubmit = async () => {
     if (!validateCNPJ(cnpj)) return;
@@ -169,14 +172,16 @@ export default function CNPJConsulta() {
             />
           </div>
 
-          <Button 
-            onClick={handleSubmit} 
+          <CreditCostButton
+            featureName="tools.cnpj_lookup"
+            userBalance={userBalance}
+            onProcess={handleSubmit}
             disabled={loading || !validateCNPJ(cnpj)}
             className="w-full"
           >
             <Search className="mr-2 h-4 w-4" />
             {loading ? 'Consultando...' : 'Consultar CNPJ'}
-          </Button>
+          </CreditCostButton>
 
           {loading && <LoadingSpinner message="Consultando dados da empresa..." />}
 

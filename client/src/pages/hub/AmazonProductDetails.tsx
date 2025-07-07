@@ -24,6 +24,8 @@ import {
   Download
 } from "lucide-react";
 import { useApiRequest } from '@/hooks/useApiRequest';
+import { CreditCostButton } from '@/components/CreditCostButton';
+import { useUserCreditBalance } from '@/hooks/useUserCredits';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
@@ -132,6 +134,7 @@ export default function AmazonProductDetails() {
   const { execute, loading, error } = useApiRequest<ProductData>({
     successMessage: 'Produto encontrado com sucesso!',
   });
+  const { balance: userBalance } = useUserCreditBalance();
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -270,13 +273,15 @@ export default function AmazonProductDetails() {
             </div>
             
             <div className="flex items-end">
-              <Button 
-                onClick={searchProduct} 
+              <CreditCostButton
+                featureName="tools.product_lookup"
+                userBalance={userBalance}
+                onProcess={searchProduct}
                 disabled={loading || !validateAsin(asin)}
                 className="w-full sm:w-auto"
               >
                 {loading ? "Buscando..." : "Buscar"}
-              </Button>
+              </CreditCostButton>
             </div>
           </div>
 

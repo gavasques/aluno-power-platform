@@ -11,6 +11,8 @@ import { ResetButton } from "@/components/ai/common/ResetButton";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
 import { UPSCALE_CONFIG } from "@/config/ai-image";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
+import { CreditCostButton } from "@/components/CreditCostButton";
+import { useUserCreditBalance } from "@/hooks/useUserCredits";
 
 // Componente para controles de upscale
 const UpscaleControls = ({ 
@@ -19,7 +21,8 @@ const UpscaleControls = ({
   isUploading, 
   hasUploadedImage,
   scale,
-  setScale
+  setScale,
+  userBalance
 }: {
   onProcess: (scale: 2 | 4) => void;
   isProcessing: boolean;
@@ -27,6 +30,7 @@ const UpscaleControls = ({
   hasUploadedImage: boolean;
   scale: 2 | 4;
   setScale: (scale: 2 | 4) => void;
+  userBalance: number;
 }) => (
   <div className="space-y-6">
     {/* Seleção de escala */}
@@ -54,15 +58,17 @@ const UpscaleControls = ({
     </div>
 
     {/* Botão de processamento */}
-    <Button 
-      onClick={() => onProcess(scale)}
+    <CreditCostButton
+      featureName="tools.image_upscale"
+      userBalance={userBalance}
+      onProcess={() => onProcess(scale)}
       disabled={!hasUploadedImage || isProcessing || isUploading}
       className="w-full"
       size="lg"
     >
       <Sparkles className="h-4 w-4 mr-2" />
       {isProcessing ? `Processando ${scale}x...` : `Processar Upscale ${scale}x`}
-    </Button>
+    </CreditCostButton>
   </div>
 );
 
@@ -78,6 +84,7 @@ export default function ImageUpscale() {
   } = useImageProcessing();
 
   const [scale, setScale] = useState<2 | 4>(UPSCALE_CONFIG.defaultScale);
+  const { balance: userBalance } = useUserCreditBalance();
 
   const { isProcessing, isUploading, error, step } = state;
   const hasUploadedImage = !!uploadedImage;
@@ -152,6 +159,7 @@ export default function ImageUpscale() {
                 hasUploadedImage={hasUploadedImage}
                 scale={scale}
                 setScale={setScale}
+                userBalance={userBalance}
               />
             </CardContent>
           </Card>
