@@ -209,10 +209,16 @@ export default function ImportacaoSimplificada() {
         });
       }
     },
-    onSuccess: () => {
+    onSuccess: (savedSimulation) => {
       queryClient.invalidateQueries({ queryKey: ['/api/simulations/import'] });
       toast({ title: "Simulação salva com sucesso!" });
       setShowSaveDialog(false);
+      
+      // Se foi uma nova simulação criada, atualizar o ID e selectedSimulationId
+      if (savedSimulation?.id && !activeSimulation.id) {
+        setActiveSimulation(prev => ({ ...prev, id: savedSimulation.id }));
+        setSelectedSimulationId(savedSimulation.id);
+      }
     },
     onError: () => {
       toast({ title: "Erro ao salvar simulação", variant: "destructive" });
@@ -372,6 +378,7 @@ export default function ImportacaoSimplificada() {
   const loadSimulation = (simulation: any) => {
     setActiveSimulation({
       ...simulation,
+      id: simulation.id, // Incluir o ID para manter a referência
       nomeFornecedor: simulation.nomeFornecedor || "",
       observacoes: simulation.observacoes || "",
       configuracoesGerais: simulation.configuracoesGerais,
@@ -387,7 +394,8 @@ export default function ImportacaoSimplificada() {
       nomeFornecedor: "",
       observacoes: "",
       configuracoesGerais: defaultConfig,
-      produtos: []
+      produtos: [],
+      id: undefined // Garantir que não há ID para nova simulação
     });
     setSelectedSimulationId(null);
   };
