@@ -317,135 +317,141 @@ const UserDashboard = () => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-              {/* Ações Rápidas */}
-              <div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ações Rápidas</CardTitle>
-                    <CardDescription>
-                      Acesso direto às funcionalidades principais
-                    </CardDescription>
+              {/* Ações Rápidas - Compacta */}
+              <div className="lg:col-span-1">
+                <Card className="h-fit">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg">Ações Rápidas</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="space-y-2">
                     <Button 
                       className="w-full justify-start" 
                       variant="outline"
+                      size="sm"
                       onClick={() => handleQuickAction('buy-credits')}
                     >
                       <Coins className="h-4 w-4 mr-2" />
-                      Comprar Créditos
+                      Créditos
                     </Button>
                     
                     <Button 
                       className="w-full justify-start" 
                       variant="outline"
+                      size="sm"
                       onClick={() => handleQuickAction('upgrade')}
                     >
                       <Crown className="h-4 w-4 mr-2" />
-                      Fazer Upgrade
+                      Upgrade
                     </Button>
                     
                     <Button 
                       className="w-full justify-start" 
                       variant="outline"
+                      size="sm"
                       onClick={() => handleQuickAction('agents')}
                     >
                       <Zap className="h-4 w-4 mr-2" />
-                      Usar Agentes IA
+                      Agentes IA
                     </Button>
                     
                     <Button 
                       className="w-full justify-start" 
                       variant="outline"
+                      size="sm"
                       onClick={() => handleQuickAction('products')}
                     >
                       <ArrowUpRight className="h-4 w-4 mr-2" />
-                      Meus Produtos
+                      Produtos
                     </Button>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Últimos Vídeos do YouTube */}
-              <div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Youtube className="h-5 w-5 text-red-600" />
-                      Últimos Vídeos
+              {/* Últimos Vídeos do YouTube - Destaque Principal */}
+              <div className="lg:col-span-2">
+                <Card className="h-fit">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      <Youtube className="h-6 w-6 text-red-600" />
+                      Últimos Vídeos do Canal
                     </CardTitle>
-                    <CardDescription>
-                      Os 6 vídeos mais recentes do canal
+                    <CardDescription className="text-base">
+                      Conteúdo mais recente para impulsionar suas vendas na Amazon
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {videosLoading ? (
-                      <div className="space-y-3">
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="flex items-center space-x-3 animate-pulse">
-                            <div className="w-16 h-12 bg-gray-200 rounded"></div>
-                            <div className="flex-1">
-                              <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
-                              <div className="h-2 bg-gray-200 rounded w-1/2"></div>
-                            </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[...Array(6)].map((_, i) => (
+                          <div key={i} className="animate-pulse">
+                            <div className="w-full h-32 bg-gray-200 rounded-lg mb-3"></div>
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                           </div>
                         ))}
                       </div>
                     ) : youtubeVideos && youtubeVideos.length > 0 ? (
-                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {youtubeVideos.slice(0, 6).map((video) => (
                           <div 
                             key={video.id} 
-                            className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-100"
+                            className="group cursor-pointer bg-white rounded-lg border border-gray-200 hover:border-red-300 hover:shadow-md transition-all duration-200"
                             onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
                           >
-                            <div className="relative flex-shrink-0">
+                            <div className="relative overflow-hidden rounded-t-lg">
                               <img
                                 src={video.thumbnailUrl}
                                 alt={video.title}
-                                className="w-20 h-14 rounded object-cover"
+                                className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-200"
                               />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded opacity-0 hover:opacity-100 transition-opacity">
-                                <Play className="h-6 w-6 text-white" />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                                <div className="bg-red-600 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                  <Play className="h-6 w-6 text-white fill-white" />
+                                </div>
+                              </div>
+                              <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                                {video.duration || ''}
                               </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-medium text-gray-900 line-clamp-2 leading-5">
+                            <div className="p-4">
+                              <h4 className="font-semibold text-gray-900 line-clamp-2 leading-5 mb-2 group-hover:text-red-600 transition-colors">
                                 {video.title}
                               </h4>
-                              <div className="flex items-center justify-between mt-1">
-                                <div className="flex items-center text-xs text-gray-500 space-x-2">
+                              <div className="flex items-center justify-between text-sm text-gray-500">
+                                <div className="flex items-center space-x-3">
                                   <span className="flex items-center">
                                     <Clock className="h-3 w-3 mr-1" />
                                     {formatPublishedDate(video.publishedAt)}
                                   </span>
-                                  <span>•</span>
-                                  <span>{formatViewCount(video.viewCount)} visualizações</span>
+                                  <span className="flex items-center">
+                                    <Play className="h-3 w-3 mr-1" />
+                                    {formatViewCount(video.viewCount)}
+                                  </span>
                                 </div>
-                                <ExternalLink className="h-3 w-3 text-gray-400" />
+                                <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
                               </div>
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <Youtube className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                        <p>Nenhum vídeo encontrado</p>
+                      <div className="text-center py-12 text-gray-500">
+                        <Youtube className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                        <p className="text-lg font-medium">Nenhum vídeo encontrado</p>
+                        <p className="text-sm">Os vídeos mais recentes aparecerão aqui</p>
                       </div>
                     )}
                     
                     {youtubeVideos && youtubeVideos.length > 6 && (
-                      <div className="mt-4 pt-3 border-t">
+                      <div className="mt-6 pt-4 border-t">
                         <Button 
                           variant="outline" 
-                          size="sm" 
                           className="w-full"
                           onClick={() => window.location.href = '/videos'}
                         >
-                          Ver Todos os Vídeos
+                          Ver Todos os Vídeos do Canal
                           <ArrowUpRight className="h-4 w-4 ml-2" />
                         </Button>
                       </div>
