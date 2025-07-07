@@ -236,7 +236,11 @@ export default function ImportacaoSimplificada() {
     const produtos = activeSimulation.produtos;
 
     // Global calculations
-    const peso_bruto_total_simulacao_kg = produtos.reduce((sum, p) => sum + (p.quantidade * p.peso_bruto_unitario_kg), 0);
+    const peso_bruto_total_simulacao_kg = produtos.reduce((sum, p) => {
+      const pesoTotal = p.quantidade * p.peso_bruto_unitario_kg;
+      console.log(`Produto: ${p.descricao_produto}, Qtd: ${p.quantidade}, Peso Unit: ${p.peso_bruto_unitario_kg}, Peso Total: ${pesoTotal}`);
+      return sum + pesoTotal;
+    }, 0);
     const valor_fob_total_simulacao_usd = produtos.reduce((sum, p) => sum + (p.quantidade * p.valor_unitario_usd), 0);
     const quantidade_total_itens_simulacao = produtos.reduce((sum, p) => sum + p.quantidade, 0);
 
@@ -246,8 +250,8 @@ export default function ImportacaoSimplificada() {
 
     // Calculate per product
     const produtosCalculados = produtos.map(p => {
-      const peso_bruto_total_produto_kg = p.quantidade * p.peso_bruto_unitario_kg;
-      const valor_total_produto_usd = p.quantidade * p.valor_unitario_usd;
+      const peso_bruto_total_produto_kg = Number(p.quantidade) * Number(p.peso_bruto_unitario_kg);
+      const valor_total_produto_usd = Number(p.quantidade) * Number(p.valor_unitario_usd);
       const custo_produto_brl = valor_total_produto_usd * cfg.taxa_cambio_usd_brl;
 
       // Freight cost per product
@@ -313,7 +317,7 @@ export default function ImportacaoSimplificada() {
     const custo_total_importacao_brl = totals.total_sim_produto_mais_frete_brl + totals.total_sim_valor_ii_brl + totals.total_sim_valor_icms_brl + totals.total_sim_outras_despesas_aduaneiras_brl;
     
     // Additional calculations
-    const peso_total_kg = peso_bruto_total_simulacao_kg;
+    const peso_total_kg = Number(peso_bruto_total_simulacao_kg.toFixed(2));
     const preco_por_kg_usd = peso_total_kg > 0 ? cfg.custo_frete_internacional_total_moeda_original / peso_total_kg : 0;
     const multiplicador_importacao = valor_fob_total_simulacao_usd > 0 ? custo_total_importacao_brl / (valor_fob_total_simulacao_usd * cfg.taxa_cambio_usd_brl) : 0;
 
