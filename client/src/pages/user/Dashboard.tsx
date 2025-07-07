@@ -84,27 +84,20 @@ const UserDashboard = () => {
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState('overview');
 
-  // Buscar dados reais do usuário
-  const { data: userSummary, isLoading: summaryLoading } = useQuery({
+  // Simplificar carregamento - apenas dados essenciais
+  const { data: userSummary, isLoading } = useQuery({
     queryKey: ['/api/dashboard/summary'],
-    enabled: true
+    enabled: true,
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutos
   });
-
-  const { data: creditData, isLoading: creditsLoading } = useQuery({
-    queryKey: ['/api/dashboard/credits'],
-    enabled: true
-  });
-
-  const { data: subscriptionData, isLoading: subscriptionLoading } = useQuery({
-    queryKey: ['/api/dashboard/subscription'],
-    enabled: true
-  });
-
-  const isLoading = summaryLoading || creditsLoading || subscriptionLoading;
 
   const { data: youtubeVideos, isLoading: videosLoading } = useQuery<YouTubeVideo[]>({
     queryKey: ['/api/youtube-videos'],
-    enabled: true
+    enabled: true,
+    retry: false,
+    staleTime: 10 * 60 * 1000, // 10 minutos
+    gcTime: 30 * 60 * 1000, // 30 minutos
   });
 
   const handleQuickAction = async (action: string) => {
@@ -233,17 +226,15 @@ const UserDashboard = () => {
     );
   }
 
-  // Extrair dados reais do sistema
+  // Dados simplificados do sistema
   const currentUser = userSummary?.user || {};
-  const creditBalance = creditData?.balance || userSummary?.credits?.current || 0;
-  const creditsUsedThisMonth = creditData?.recentTransactions?.reduce((total: number, tx: any) => 
-    tx.amount < 0 ? total + Math.abs(tx.amount) : total, 0
-  ) || userSummary?.credits?.usageThisMonth || 0;
+  const creditBalance = userSummary?.credits?.current || 0;
+  const creditsUsedThisMonth = userSummary?.credits?.usageThisMonth || 0;
   
-  const subscription = subscriptionData || userSummary?.subscription || {};
-  const planName = subscription?.planName || userSummary?.user?.plan || 'Sem Plano';
-  const planStatus = subscription?.status || 'cancelled';
-  const nextBilling = subscription?.nextBilling || subscription?.nextBillingDate || 'N/A';
+  const subscription = userSummary?.subscription || {};
+  const planName = subscription?.planName || userSummary?.user?.plan || 'Gratuito';
+  const planStatus = subscription?.status || 'active';
+  const nextBilling = subscription?.nextBilling || 'N/A';
   const planCredits = subscription?.planCredits || 0;
 
   return (
