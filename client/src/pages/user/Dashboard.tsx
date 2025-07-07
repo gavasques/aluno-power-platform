@@ -254,60 +254,7 @@ const UserDashboard = () => {
           </div>
         </div>
 
-        {/* Status Cards - Only showing Credits and Subscription */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Créditos */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Créditos Disponíveis</CardTitle>
-              <Coins className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {dashboardData.user.creditBalance.toLocaleString()}
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-gray-500">
-                  {dashboardData.usage.thisMonth} usados este mês
-                </p>
-                <Button size="sm" onClick={() => handleQuickAction('buy-credits')}>
-                  Comprar
-                </Button>
-              </div>
-              <Progress 
-                value={(dashboardData.usage.thisMonth / dashboardData.user.plan.credits) * 100} 
-                className="mt-3"
-              />
-            </CardContent>
-          </Card>
 
-          {/* Assinatura */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Assinatura</CardTitle>
-              <Crown className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {dashboardData.user.plan.name}
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-gray-500">
-                  Status: {dashboardData.user.plan.status === 'active' ? 'Ativo' : 'Inativo'}
-                </p>
-                <Button size="sm" onClick={() => handleQuickAction('manage-subscription')}>
-                  Gerenciar
-                </Button>
-              </div>
-              <div className="mt-3 flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-500" />
-                <span className="text-xs text-gray-500">
-                  {dashboardData.user.plan.credits.toLocaleString()} créditos/mês
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Main Content Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
@@ -317,10 +264,11 @@ const UserDashboard = () => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-              {/* Ações Rápidas - Compacta */}
-              <div className="lg:col-span-1">
+              {/* Coluna da Esquerda - Ações Rápidas + Status Cards */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Ações Rápidas */}
                 <Card className="h-fit">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg">Ações Rápidas</CardTitle>
@@ -367,10 +315,62 @@ const UserDashboard = () => {
                     </Button>
                   </CardContent>
                 </Card>
+
+                {/* Créditos Disponíveis */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Créditos Disponíveis</CardTitle>
+                    <Coins className="h-4 w-4 text-blue-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {dashboardData.user.creditBalance.toLocaleString()}
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-gray-500">
+                        {dashboardData.usage.thisMonth} usados
+                      </p>
+                      <Button size="sm" onClick={() => handleQuickAction('buy-credits')}>
+                        Comprar
+                      </Button>
+                    </div>
+                    <Progress 
+                      value={(dashboardData.usage.thisMonth / dashboardData.user.plan.credits) * 100} 
+                      className="mt-3"
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Assinatura */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Assinatura</CardTitle>
+                    <Crown className="h-4 w-4 text-purple-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {dashboardData.user.plan.name}
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-gray-500">
+                        Status: {dashboardData.user.plan.status === 'active' ? 'Ativo' : 'Inativo'}
+                      </p>
+                      <Button size="sm" onClick={() => handleQuickAction('manage-subscription')}>
+                        Gerenciar
+                      </Button>
+                    </div>
+                    <div className="mt-3 flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      <span className="text-xs text-gray-500">
+                        {dashboardData.user.plan.credits.toLocaleString()} créditos/mês
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Últimos Vídeos do YouTube - Destaque Principal */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-3">
                 <Card className="h-fit">
                   <CardHeader className="pb-4">
                     <CardTitle className="flex items-center gap-2 text-xl">
@@ -383,17 +383,17 @@ const UserDashboard = () => {
                   </CardHeader>
                   <CardContent>
                     {videosLoading ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {[...Array(6)].map((_, i) => (
                           <div key={i} className="animate-pulse">
-                            <div className="w-full h-32 bg-gray-200 rounded-lg mb-3"></div>
+                            <div className="w-full h-40 bg-gray-200 rounded-lg mb-3"></div>
                             <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                             <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                           </div>
                         ))}
                       </div>
                     ) : youtubeVideos && youtubeVideos.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {youtubeVideos.slice(0, 6).map((video) => (
                           <div 
                             key={video.id} 
@@ -404,7 +404,7 @@ const UserDashboard = () => {
                               <img
                                 src={video.thumbnailUrl}
                                 alt={video.title}
-                                className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-200"
+                                className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200"
                               />
                               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
                                 <div className="bg-red-600 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -416,11 +416,11 @@ const UserDashboard = () => {
                               </div>
                             </div>
                             <div className="p-4">
-                              <h4 className="font-semibold text-gray-900 line-clamp-2 leading-5 mb-2 group-hover:text-red-600 transition-colors">
+                              <h4 className="font-semibold text-gray-900 line-clamp-2 leading-5 mb-2 group-hover:text-red-600 transition-colors text-sm">
                                 {video.title}
                               </h4>
-                              <div className="flex items-center justify-between text-sm text-gray-500">
-                                <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <div className="flex items-center space-x-2">
                                   <span className="flex items-center">
                                     <Clock className="h-3 w-3 mr-1" />
                                     {formatPublishedDate(video.publishedAt)}
@@ -430,7 +430,7 @@ const UserDashboard = () => {
                                     {formatViewCount(video.viewCount)}
                                   </span>
                                 </div>
-                                <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
+                                <ExternalLink className="h-3 w-3 text-gray-400 group-hover:text-red-500" />
                               </div>
                             </div>
                           </div>
