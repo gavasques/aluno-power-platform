@@ -186,6 +186,7 @@ export default function ImportacaoSimplificada() {
   const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
+  const [activeTab, setActiveTab] = useState("simulation");
 
   // API queries
   const { data: simulations = [], isLoading } = useQuery({
@@ -310,10 +311,22 @@ export default function ImportacaoSimplificada() {
     };
 
     const custo_total_importacao_brl = totals.total_sim_produto_mais_frete_brl + totals.total_sim_valor_ii_brl + totals.total_sim_valor_icms_brl + totals.total_sim_outras_despesas_aduaneiras_brl;
+    
+    // Additional calculations
+    const peso_total_kg = peso_bruto_total_simulacao_kg;
+    const preco_por_kg_usd = peso_total_kg > 0 ? cfg.custo_frete_internacional_total_moeda_original / peso_total_kg : 0;
+    const multiplicador_importacao = valor_fob_total_simulacao_usd > 0 ? custo_total_importacao_brl / (valor_fob_total_simulacao_usd * cfg.taxa_cambio_usd_brl) : 0;
 
     return {
       produtos: produtosCalculados,
-      totals: { ...totals, custo_total_importacao_brl }
+      totals: { 
+        ...totals, 
+        custo_total_importacao_brl,
+        peso_total_kg,
+        preco_por_kg_usd,
+        multiplicador_importacao,
+        valor_fob_total_usd: valor_fob_total_simulacao_usd
+      }
     };
   }, [activeSimulation]);
 
@@ -361,6 +374,7 @@ export default function ImportacaoSimplificada() {
       produtos: simulation.produtos
     });
     setSelectedSimulationId(simulation.id);
+    setActiveTab("simulation"); // Switch to active simulation tab
   };
 
   const newSimulation = () => {
@@ -576,7 +590,7 @@ export default function ImportacaoSimplificada() {
         </div>
       </div>
 
-      <Tabs defaultValue="simulation" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="simulation">Simulação Ativa</TabsTrigger>
           <TabsTrigger value="saved">Simulações Salvas</TabsTrigger>
@@ -887,13 +901,36 @@ export default function ImportacaoSimplificada() {
                 <CardTitle>Resumo da Simulação</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {/* First row: Key metrics */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-blue-50 rounded-lg">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
                       {calculatedResults.totals.total_sim_quantidade_itens}
                     </div>
                     <div className="text-sm text-muted-foreground">Total Itens</div>
                   </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-indigo-600">
+                      {formatBrazilianNumber(calculatedResults.totals.peso_total_kg, 3)} kg
+                    </div>
+                    <div className="text-sm text-muted-foreground">Peso Total</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-cyan-600">
+                      US$ {formatBrazilianNumber(calculatedResults.totals.preco_por_kg_usd)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Preço/Kg Frete</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-amber-600">
+                      {formatBrazilianNumber(calculatedResults.totals.multiplicador_importacao)}x
+                    </div>
+                    <div className="text-sm text-muted-foreground">Multiplicador</div>
+                  </div>
+                </div>
+                
+                {/* Second row: Cost breakdown */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
                       R$ {formatBrazilianNumber(calculatedResults.totals.total_sim_produto_mais_frete_brl)}
@@ -922,7 +959,7 @@ export default function ImportacaoSimplificada() {
                     <div className="text-3xl font-bold text-red-600">
                       R$ {formatBrazilianNumber(calculatedResults.totals.custo_total_importacao_brl)}
                     </div>
-                    <div className="text-sm text-muted-foreground">Custo Total</div>
+                    <div className="text-sm text-muted-foreground">CUSTO TOTAL</div>
                   </div>
                 </div>
                 

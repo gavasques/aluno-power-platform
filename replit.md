@@ -111,6 +111,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 07, 2025 - 08:50 PM**: ✅ SIMULADOR DE IMPORTAÇÃO - FUNCIONALIDADES ANALÍTICAS AVANÇADAS E PDF EXPORT COMPLETO
+  - **Auto-Switch para Simulação Ativa**: Carregar simulação agora muda automaticamente para aba "Simulação Ativa"
+  - **Campos de Fornecedor e Observações**: Implementados campos "Nome do Fornecedor" e "Observações" no cabeçalho da simulação
+  - **Export PDF Profissional**: Função completa de exportação em PDF com:
+    - Cabeçalho com nome da simulação e fornecedor
+    - Resumo de configurações (câmbio, alíquotas, frete, despesas)
+    - Tabela detalhada de produtos com cálculos
+    - Totais resumidos e observações incluídas
+    - Formatação profissional com destaque para "Custo unitário com imposto"
+  - **Styling Aprimorado**: Coluna "Custo unitário com imposto" com fonte maior, negrito e azul
+  - **Métricas Analíticas Avançadas**:
+    - ✅ **Peso Total**: Soma de todos os produtos em kg com destaque visual
+    - ✅ **Preço por Kg do Frete**: Cálculo dinâmico (Frete USD ÷ Peso Total)
+    - ✅ **Multiplicador de Importação**: Fator de custo (Custo Total ÷ Valor FOB) - quanto maior, pior a eficiência
+    - ✅ **Layout de Métricas**: Primeira linha destacada em azul com métricas-chave, segunda linha com breakdown de custos
+  - **Benefícios para Tomada de Decisão**:
+    - Indicador claro de eficiência logística via preço por kg
+    - Multiplicador revela impacto real dos impostos e taxas no custo final
+    - Peso total facilita planejamento logístico e negociação de frete
+    - PDF completo para compartilhamento com fornecedores e equipe
+
 - **January 07, 2025 - 08:30 PM**: ✅ SIMULADOR DE CUSTO DE IMPORTAÇÃO SIMPLIFICADA COMPLETAMENTE IMPLEMENTADO E FUNCIONAL
   - **Comprehensive Import Cost Simulator Created**:
     - ✅ **Complete Database Schema**: import_simulations table with JSONB fields for flexible data storage
