@@ -111,6 +111,36 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 07, 2025 - 10:00 PM**: ✅ SIMULADOR SIMPLES NACIONAL COMPLETAMENTE IMPLEMENTADO - ANEXOS I E II OPERACIONAIS
+  - **Database Schema Completo**:
+    - ✅ **3 novas tabelas criadas**: simples_simulations, mes_simulacao, faixa_aliquota com relacionamentos e índices otimizados
+    - ✅ **Dados de faixas inseridos**: Anexo I e II com alíquotas nominais e valores de dedução conforme tabela oficial 2024
+    - ✅ **Constraints e validação**: Competência (1-12), anexos válidos, cascade delete para integridade referencial
+  - **Backend API Robusto**:
+    - ✅ **9 endpoints funcionais**: CRUD completo para simulações e meses com autenticação e validação
+    - ✅ **Cálculo automático avançado**: RBT12 (receita bruta últimos 12 meses), média móvel, alíquota efetiva
+    - ✅ **Fórmula oficial implementada**: ((RBT12 × alíquota_nominal) - valor_deduzir) / RBT12 para alíquota efetiva
+    - ✅ **Disponível anual/mensal**: Cálculo dinâmico baseado no limite de R$ 3,6M do Simples Nacional
+  - **Interface Frontend Completa**:
+    - ✅ **Simulação ativa e simulações salvas**: Interface tabbed com gestão completa de simulações
+    - ✅ **Cards analíticos**: Faturamento total, imposto total, limite anual, disponível com formatação brasileira
+    - ✅ **Tabela de dados mensais**: Período, anexo, faturamento, RBT12, alíquota efetiva, imposto, disponível anual
+    - ✅ **Formulário de adição**: Mês/ano, faturamento, anexo com validação e feedback em tempo real
+    - ✅ **Faixas de alíquotas**: Visualização das tabelas oficiais Anexo I e II lado a lado
+  - **Funcionalidades Avançadas**:
+    - Cálculo automático baseado em histórico de 12 meses (rolling window)
+    - Validação de duplicatas (uma entrada por mês/ano por simulação)
+    - Estados vazios informativos com CTAs claros
+    - Formatação monetária brasileira (R$) e percentual em toda interface
+    - Delete cascata automático (excluir simulação remove todos os meses)
+    - Sistema de toast para feedback imediato de todas as operações
+  - **Benefícios para o Usuário**:
+    - Cálculo preciso de impostos Simples Nacional seguindo legislação brasileira
+    - Simulação de diferentes cenários com multiple anexos
+    - Acompanhamento do limite anual com alertas visuais
+    - Histórico completo de simulações para comparação e análise
+    - Interface intuitiva sem necessidade de conhecimento técnico tributário
+
 - **January 07, 2025 - 08:50 PM**: ✅ SIMULADOR DE IMPORTAÇÃO - FUNCIONALIDADES ANALÍTICAS AVANÇADAS E PDF EXPORT COMPLETO
   - **Auto-Switch para Simulação Ativa**: Carregar simulação agora muda automaticamente para aba "Simulação Ativa"
   - **Campos de Fornecedor e Observações**: Implementados campos "Nome do Fornecedor" e "Observações" no cabeçalho da simulação

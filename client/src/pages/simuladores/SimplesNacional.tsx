@@ -1,301 +1,682 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Calculator, Info, AlertTriangle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Plus, 
+  Save, 
+  Trash2, 
+  FileDown, 
+  Calculator,
+  Building2,
+  TrendingUp,
+  DollarSign,
+  Percent,
+  Calendar
+} from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
 
-// Brazilian number formatting utilities
-const formatBrazilianNumber = (value: number, decimals: number = 2): string => {
-  if (value === 0) return '';
-  return value.toLocaleString('pt-BR', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
-  });
-};
-
-const parseBrazilianNumber = (value: string): number => {
-  if (!value || value.trim() === '') return 0;
-  
-  const cleanValue = value
-    .replace(/\./g, '')  // Remove dots
-    .replace(',', '.');  // Replace comma with dot
-  
-  const parsed = parseFloat(cleanValue);
-  return isNaN(parsed) ? 0 : parsed;
-};
-
-// Custom Brazilian number input component
-interface BrazilianNumberInputProps {
-  value: number;
-  onChange: (value: number) => void;
-  decimals?: number;
-  min?: number;
-  max?: number;
-  className?: string;
-  id?: string;
-  placeholder?: string;
+// Types
+interface MesSimulacao {
+  id?: number;
+  competencia: number;
+  ano: number;
+  faturamento: string;
+  anexo: string;
+  soma12Meses?: string;
+  media12Meses?: string;
+  disponivelMedia?: string;
+  disponivelAnual?: string;
+  aliquotaEfetiva?: string;
+  valorImposto?: string;
 }
 
-const BrazilianNumberInput = ({ 
-  value, 
-  onChange, 
-  decimals = 2, 
-  min, 
-  max, 
-  className, 
-  id, 
-  placeholder 
-}: BrazilianNumberInputProps) => {
-  const [displayValue, setDisplayValue] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    setDisplayValue(inputValue);
-    
-    const numericValue = parseBrazilianNumber(inputValue);
-    
-    let constrainedValue = numericValue;
-    if (min !== undefined && constrainedValue < min) constrainedValue = min;
-    if (max !== undefined && constrainedValue > max) constrainedValue = max;
-    
-    onChange(constrainedValue);
-  };
-
-  const handleBlur = () => {
-    setIsFocused(false);
-    if (value !== 0) {
-      setDisplayValue(formatBrazilianNumber(value, decimals));
-    }
-  };
-
-  const handleFocus = () => {
-    setIsFocused(true);
-  };
-
-  return (
-    <Input
-      id={id}
-      className={className}
-      value={isFocused ? displayValue : (value === 0 ? '' : formatBrazilianNumber(value, decimals))}
-      onChange={handleChange}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      placeholder={placeholder}
-    />
-  );
-};
-
-interface SimplesNacionalData {
-  receitaBrutaAnual: number;
-  anexo: 'I' | 'II' | 'III' | 'IV' | 'V';
-  receita12Meses: number;
+interface SimplesSimulation {
+  id?: number;
+  nomeSimulacao: string;
+  dataCreated?: string;
+  dataLastModified?: string;
+  meses?: MesSimulacao[];
 }
+
+interface FaixaAliquota {
+  id: number;
+  anexo: string;
+  faixaInicial: string;
+  faixaFinal: string;
+  aliquotaNominal: string;
+  valorDeduzir: string;
+}
+
+const meses = [
+  { value: 1, label: 'Janeiro' },
+  { value: 2, label: 'Fevereiro' },
+  { value: 3, label: 'Março' },
+  { value: 4, label: 'Abril' },
+  { value: 5, label: 'Maio' },
+  { value: 6, label: 'Junho' },
+  { value: 7, label: 'Julho' },
+  { value: 8, label: 'Agosto' },
+  { value: 9, label: 'Setembro' },
+  { value: 10, label: 'Outubro' },
+  { value: 11, label: 'Novembro' },
+  { value: 12, label: 'Dezembro' }
+];
+
+const anos = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
 
 export default function SimplesNacional() {
-  const [data, setData] = useState<SimplesNacionalData>({
-    receitaBrutaAnual: 0,
-    anexo: 'I',
-    receita12Meses: 0
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // States
+  const [activeSimulation, setActiveSimulation] = useState<SimplesSimulation>({
+    nomeSimulacao: 'Nova Simulação Simples Nacional',
+    meses: []
+  });
+  const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
+  const [newMes, setNewMes] = useState<Omit<MesSimulacao, 'id'>>({
+    competencia: new Date().getMonth() + 1,
+    ano: new Date().getFullYear(),
+    faturamento: '',
+    anexo: 'Anexo I'
+  });
+  const [activeTab, setActiveTab] = useState('simulation');
+  const [isEditingName, setIsEditingName] = useState(false);
+
+  // API Queries
+  const { data: simulations = [], isLoading } = useQuery({
+    queryKey: ['/api/simulations/simples'],
+    enabled: true,
   });
 
-  // Simples Nacional tax tables (2024)
-  const anexoIRanges = [
-    { min: 0, max: 180000, aliquota: 4.0, deducao: 0 },
-    { min: 180000.01, max: 360000, aliquota: 7.3, deducao: 5940 },
-    { min: 360000.01, max: 720000, aliquota: 9.5, deducao: 13860 },
-    { min: 720000.01, max: 1800000, aliquota: 10.7, deducao: 22500 },
-    { min: 1800000.01, max: 3600000, aliquota: 14.3, deducao: 87300 },
-    { min: 3600000.01, max: 4800000, aliquota: 19.0, deducao: 378000 }
-  ];
+  const { data: faixasAnexo1 = [] } = useQuery<FaixaAliquota[]>({
+    queryKey: ['/api/simulations/simples/faixas/Anexo I'],
+    enabled: true,
+  });
 
-  const calculateTax = () => {
-    const receita = data.receita12Meses || data.receitaBrutaAnual;
-    
-    if (receita === 0) return { aliquotaEfetiva: 0, impostoMensal: 0, impostoAnual: 0 };
-    
-    // Find the appropriate tax range
-    const range = anexoIRanges.find(r => receita >= r.min && receita <= r.max);
-    
-    if (!range) {
-      return { aliquotaEfetiva: 0, impostoMensal: 0, impostoAnual: 0, error: "Receita acima do limite do Simples Nacional" };
+  const { data: faixasAnexo2 = [] } = useQuery<FaixaAliquota[]>({
+    queryKey: ['/api/simulations/simples/faixas/Anexo II'],
+    enabled: true,
+  });
+
+  // Mutations
+  const createSimulationMutation = useMutation({
+    mutationFn: (data: { nomeSimulacao: string }) =>
+      apiRequest('/api/simulations/simples', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }),
+    onSuccess: (data) => {
+      setSelectedSimulationId(data.id);
+      setActiveSimulation({ ...activeSimulation, ...data });
+      queryClient.invalidateQueries({ queryKey: ['/api/simulations/simples'] });
+      toast({ title: 'Simulação criada com sucesso!' });
+    },
+    onError: () => {
+      toast({ title: 'Erro ao criar simulação', variant: 'destructive' });
+    },
+  });
+
+  const updateSimulationMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: { nomeSimulacao: string } }) =>
+      apiRequest(`/api/simulations/simples/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/simulations/simples'] });
+      toast({ title: 'Simulação atualizada com sucesso!' });
+    },
+    onError: () => {
+      toast({ title: 'Erro ao atualizar simulação', variant: 'destructive' });
+    },
+  });
+
+  const addMesMutation = useMutation({
+    mutationFn: ({ simulationId, data }: { simulationId: number; data: Omit<MesSimulacao, 'id'> }) =>
+      apiRequest(`/api/simulations/simples/${simulationId}/mes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }),
+    onSuccess: (data) => {
+      setActiveSimulation(prev => ({
+        ...prev,
+        meses: [...(prev.meses || []), data]
+      }));
+      setNewMes({
+        competencia: new Date().getMonth() + 1,
+        ano: new Date().getFullYear(),
+        faturamento: '',
+        anexo: 'Anexo I'
+      });
+      toast({ title: 'Mês adicionado com sucesso!' });
+    },
+    onError: () => {
+      toast({ title: 'Erro ao adicionar mês', variant: 'destructive' });
+    },
+  });
+
+  const deleteMesMutation = useMutation({
+    mutationFn: ({ simulationId, mesId }: { simulationId: number; mesId: number }) =>
+      apiRequest(`/api/simulations/simples/${simulationId}/mes/${mesId}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: (_, { mesId }) => {
+      setActiveSimulation(prev => ({
+        ...prev,
+        meses: prev.meses?.filter(mes => mes.id !== mesId) || []
+      }));
+      toast({ title: 'Mês excluído com sucesso!' });
+    },
+    onError: () => {
+      toast({ title: 'Erro ao excluir mês', variant: 'destructive' });
+    },
+  });
+
+  const deleteSimulationMutation = useMutation({
+    mutationFn: (id: number) =>
+      apiRequest(`/api/simulations/simples/${id}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/simulations/simples'] });
+      toast({ title: 'Simulação excluída com sucesso!' });
+    },
+    onError: () => {
+      toast({ title: 'Erro ao excluir simulação', variant: 'destructive' });
+    },
+  });
+
+  // Load simulation
+  const loadSimulation = async (simulation: SimplesSimulation) => {
+    if (!simulation.id) return;
+
+    try {
+      const response = await apiRequest(`/api/simulations/simples/${simulation.id}`);
+      setActiveSimulation(response);
+      setSelectedSimulationId(simulation.id);
+      setActiveTab('simulation');
+      toast({ title: 'Simulação carregada com sucesso!' });
+    } catch (error) {
+      toast({ title: 'Erro ao carregar simulação', variant: 'destructive' });
     }
-    
-    // Calculate effective rate
-    const aliquotaEfetiva = ((receita * range.aliquota / 100) - range.deducao) / receita * 100;
-    const impostoAnual = receita * aliquotaEfetiva / 100;
-    const impostoMensal = impostoAnual / 12;
-    
-    return { aliquotaEfetiva, impostoMensal, impostoAnual };
   };
 
-  const results = calculateTax();
-  const isValidReceita = data.receita12Meses > 0 || data.receitaBrutaAnual > 0;
+  // Save simulation
+  const saveSimulation = () => {
+    if (selectedSimulationId) {
+      updateSimulationMutation.mutate({
+        id: selectedSimulationId,
+        data: { nomeSimulacao: activeSimulation.nomeSimulacao }
+      });
+    } else {
+      createSimulationMutation.mutate({
+        nomeSimulacao: activeSimulation.nomeSimulacao
+      });
+    }
+  };
+
+  // Add month
+  const addMes = () => {
+    if (!selectedSimulationId) {
+      toast({ title: 'Salve a simulação primeiro', variant: 'destructive' });
+      return;
+    }
+
+    if (!newMes.faturamento || parseFloat(newMes.faturamento) <= 0) {
+      toast({ title: 'Informe o faturamento', variant: 'destructive' });
+      return;
+    }
+
+    addMesMutation.mutate({
+      simulationId: selectedSimulationId,
+      data: newMes
+    });
+  };
+
+  // Format currency
+  const formatCurrency = (value: string | number) => {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(num || 0);
+  };
+
+  // Format percentage
+  const formatPercentage = (value: string | number) => {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return `${(num * 100).toFixed(2)}%`;
+  };
+
+  // Calculate totals
+  const totalFaturamento = activeSimulation.meses?.reduce(
+    (acc, mes) => acc + parseFloat(mes.faturamento || '0'), 0
+  ) || 0;
+
+  const totalImposto = activeSimulation.meses?.reduce(
+    (acc, mes) => acc + parseFloat(mes.valorImposto || '0'), 0
+  ) || 0;
+
+  const aliquotaMedia = totalFaturamento > 0 
+    ? (totalImposto / totalFaturamento) 
+    : 0;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Calculator className="w-8 h-8" />
-          Simulador Simples Nacional
-        </h1>
+        <h1 className="text-3xl font-bold">Simulador Simples Nacional</h1>
         <p className="text-muted-foreground">
-          Calcule a carga tributária do seu negócio no regime do Simples Nacional
+          Calcule impostos e taxas do regime tributário Simples Nacional para Anexos I e II
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Dados da Empresa</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="receita_anual">Receita Bruta Anual Projetada (R$)</Label>
-              <BrazilianNumberInput
-                id="receita_anual"
-                value={data.receitaBrutaAnual}
-                onChange={(value) => setData(prev => ({ ...prev, receitaBrutaAnual: value }))}
-                placeholder="Ex: 500.000,00"
-                min={0}
-              />
-            </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="simulation">Simulação Ativa</TabsTrigger>
+          <TabsTrigger value="saved">Simulações Salvas</TabsTrigger>
+        </TabsList>
 
-            <div>
-              <Label htmlFor="receita_12m">Receita Bruta Últimos 12 Meses (R$)</Label>
-              <BrazilianNumberInput
-                id="receita_12m"
-                value={data.receita12Meses}
-                onChange={(value) => setData(prev => ({ ...prev, receita12Meses: value }))}
-                placeholder="Ex: 450.000,00"
-                min={0}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Se preenchido, será usado para o cálculo ao invés da receita anual projetada
-              </p>
-            </div>
-
-            <div>
-              <Label>Anexo do Simples Nacional</Label>
-              <div className="flex gap-2 mt-2">
-                {['I', 'II', 'III', 'IV', 'V'].map((anexo) => (
-                  <Button
-                    key={anexo}
-                    variant={data.anexo === anexo ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setData(prev => ({ ...prev, anexo: anexo as any }))}
+        <TabsContent value="simulation" className="space-y-6">
+          {/* Simulation Name and Actions */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                {isEditingName ? (
+                  <Input
+                    value={activeSimulation.nomeSimulacao}
+                    onChange={(e) => setActiveSimulation(prev => ({ ...prev, nomeSimulacao: e.target.value }))}
+                    onBlur={() => setIsEditingName(false)}
+                    onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
+                    className="text-xl font-semibold max-w-md"
+                    autoFocus
+                  />
+                ) : (
+                  <CardTitle 
+                    className="text-xl cursor-pointer hover:text-primary"
+                    onClick={() => setIsEditingName(true)}
                   >
-                    Anexo {anexo}
+                    {activeSimulation.nomeSimulacao}
+                  </CardTitle>
+                )}
+                <div className="flex items-center gap-2">
+                  <Badge variant={selectedSimulationId ? "default" : "secondary"}>
+                    {selectedSimulationId ? "Salva" : "Não Salva"}
+                  </Badge>
+                  <Button onClick={saveSimulation} size="sm">
+                    <Save className="h-4 w-4 mr-1" />
+                    Salvar
                   </Button>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Anexo I: Comércio | Anexo II: Indústria | Anexo III: Serviços
-              </p>
-            </div>
-
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Atualmente simulando apenas Anexo I (Comércio). Os cálculos são baseados na tabela 2024.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Resultado da Simulação</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {!isValidReceita ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Calculator className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p>Informe a receita para calcular os impostos</p>
-              </div>
-            ) : results.error ? (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{results.error}</AlertDescription>
-              </Alert>
-            ) : (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {results.aliquotaEfetiva.toFixed(2)}%
-                    </div>
-                    <div className="text-sm text-muted-foreground">Alíquota Efetiva</div>
-                  </div>
-                  
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
-                      R$ {formatBrazilianNumber(results.impostoMensal)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Imposto Mensal</div>
-                  </div>
-                </div>
-
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-3xl font-bold text-purple-600">
-                    R$ {formatBrazilianNumber(results.impostoAnual)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Imposto Anual Total</div>
-                </div>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Receita Base:</span>
-                    <span>R$ {formatBrazilianNumber(data.receita12Meses || data.receitaBrutaAnual)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Anexo:</span>
-                    <span>{data.anexo} - Comércio</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Regime:</span>
-                    <span>Simples Nacional</span>
-                  </div>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </CardHeader>
+          </Card>
 
-      {/* Additional Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Informações Importantes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <h4 className="font-semibold mb-2">Limite do Simples Nacional (2024)</h4>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• Receita bruta até R$ 4.800.000,00 por ano</li>
-                <li>• Cálculo baseado nos últimos 12 meses</li>
-                <li>• Regime pode ser obrigatório ou optativo</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Anexos do Simples Nacional</h4>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• <strong>Anexo I:</strong> Comércio</li>
-                <li>• <strong>Anexo II:</strong> Indústria</li>
-                <li>• <strong>Anexo III:</strong> Serviços (exceto especificados)</li>
-                <li>• <strong>Anexo IV/V:</strong> Serviços específicos</li>
-              </ul>
-            </div>
+          {/* Summary Cards */}
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Faturamento Total</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">
+                  {formatCurrency(totalFaturamento)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {activeSimulation.meses?.length || 0} meses
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Imposto Total</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {formatCurrency(totalImposto)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {formatPercentage(aliquotaMedia)} média
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Limite Anual</CardTitle>
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {formatCurrency(3600000)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Simples Nacional
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Disponível</CardTitle>
+                <Percent className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">
+                  {formatCurrency(3600000 - totalFaturamento)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {formatPercentage((3600000 - totalFaturamento) / 3600000)} restante
+                </p>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Add Month Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Adicionar Mês
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-5">
+                <div className="space-y-2">
+                  <Label>Mês</Label>
+                  <Select
+                    value={newMes.competencia.toString()}
+                    onValueChange={(value) => setNewMes(prev => ({ ...prev, competencia: parseInt(value) }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {meses.map(mes => (
+                        <SelectItem key={mes.value} value={mes.value.toString()}>
+                          {mes.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Ano</Label>
+                  <Select
+                    value={newMes.ano.toString()}
+                    onValueChange={(value) => setNewMes(prev => ({ ...prev, ano: parseInt(value) }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {anos.map(ano => (
+                        <SelectItem key={ano} value={ano.toString()}>
+                          {ano}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Faturamento</Label>
+                  <Input
+                    type="number"
+                    placeholder="0,00"
+                    value={newMes.faturamento}
+                    onChange={(e) => setNewMes(prev => ({ ...prev, faturamento: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Anexo</Label>
+                  <Select
+                    value={newMes.anexo}
+                    onValueChange={(value) => setNewMes(prev => ({ ...prev, anexo: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Anexo I">Anexo I</SelectItem>
+                      <SelectItem value="Anexo II">Anexo II</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-end">
+                  <Button onClick={addMes} className="w-full">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Adicionar
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Monthly Data Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Dados Mensais
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activeSimulation.meses && activeSimulation.meses.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Período</TableHead>
+                        <TableHead>Anexo</TableHead>
+                        <TableHead className="text-right">Faturamento</TableHead>
+                        <TableHead className="text-right">RBT12</TableHead>
+                        <TableHead className="text-right">Alíquota Efetiva</TableHead>
+                        <TableHead className="text-right">Imposto</TableHead>
+                        <TableHead className="text-right">Disponível Anual</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {activeSimulation.meses.map((mes) => (
+                        <TableRow key={mes.id}>
+                          <TableCell className="font-medium">
+                            {meses.find(m => m.value === mes.competencia)?.label} {mes.ano}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={mes.anexo === 'Anexo I' ? 'default' : 'secondary'}>
+                              {mes.anexo}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">
+                            {formatCurrency(mes.faturamento)}
+                          </TableCell>
+                          <TableCell className="text-right text-blue-600">
+                            {formatCurrency(mes.soma12Meses || '0')}
+                          </TableCell>
+                          <TableCell className="text-right text-green-600">
+                            {formatPercentage(mes.aliquotaEfetiva || '0')}
+                          </TableCell>
+                          <TableCell className="text-right font-bold text-orange-600">
+                            {formatCurrency(mes.valorImposto || '0')}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(mes.disponivelAnual || '0')}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => mes.id && selectedSimulationId && deleteMesMutation.mutate({
+                                simulationId: selectedSimulationId,
+                                mesId: mes.id
+                              })}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Calculator className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Nenhum mês adicionado ainda.</p>
+                  <p className="text-sm">Adicione o primeiro mês para começar a simulação.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Tax Brackets Table */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Anexo I - Faixas de Alíquotas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Faixa de Receita</TableHead>
+                      <TableHead className="text-right">Alíquota</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {faixasAnexo1.map((faixa) => (
+                      <TableRow key={faixa.id}>
+                        <TableCell>
+                          {formatCurrency(faixa.faixaInicial)} - {formatCurrency(faixa.faixaFinal)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatPercentage(faixa.aliquotaNominal)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Anexo II - Faixas de Alíquotas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Faixa de Receita</TableHead>
+                      <TableHead className="text-right">Alíquota</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {faixasAnexo2.map((faixa) => (
+                      <TableRow key={faixa.id}>
+                        <TableCell>
+                          {formatCurrency(faixa.faixaInicial)} - {formatCurrency(faixa.faixaFinal)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatPercentage(faixa.aliquotaNominal)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="saved" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Simulações Salvas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="text-center py-8">Carregando simulações...</div>
+              ) : simulations.length > 0 ? (
+                <div className="space-y-4">
+                  {simulations.map((simulation: SimplesSimulation) => (
+                    <div
+                      key={simulation.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                    >
+                      <div>
+                        <h3 className="font-semibold">{simulation.nomeSimulacao}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Criada em {new Date(simulation.dataCreated!).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => loadSimulation(simulation)}
+                        >
+                          Carregar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => simulation.id && deleteSimulationMutation.mutate(simulation.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Nenhuma simulação salva ainda.</p>
+                  <p className="text-sm">Crie sua primeira simulação na aba "Simulação Ativa".</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
