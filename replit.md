@@ -111,6 +111,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 07, 2025 - 03:00 PM**: 🎬 DASHBOARD VÍDEOS SIMPLIFICADOS - TEMPO DE PUBLICAÇÃO E VIEWS REMOVIDOS
+  - **Limpeza Visual dos Vídeos**:
+    - ✅ **Removido indicador de tempo**: "3 semanas atrás", "4 meses atrás" eliminados
+    - ✅ **Removido contador de views**: "5,2K", "844", "2K" views eliminados  
+    - ✅ **Interface minimalista**: Apenas título do vídeo e ícone de link externo
+    - ✅ **Imports otimizados**: Removidos ícones Clock e Play não utilizados
+  - **Benefícios da Simplificação**:
+    - Interface mais limpa e focada no conteúdo
+    - Redução de informações desnecessárias que distraem do objetivo principal
+    - Maior destaque para os títulos dos vídeos
+    - Layout mais consistente com design minimalista da plataforma
+
 - **January 07, 2025 - 02:47 PM**: 🚀 USER PERMISSION GROUP SYSTEM FULLY IMPLEMENTED - AUTOMATIC STRIPE INTEGRATION COMPLETE
   - **Complete Permission Group Management System**:
     - ✅ **UserGroupService**: Complete service with automated group transitions (gratuito ↔ pagantes)

@@ -14,10 +14,8 @@ import {
   ArrowUpRight,
   Star,
   CheckCircle,
-  Play,
   Youtube,
   ExternalLink,
-  Clock,
   AlertTriangle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -446,17 +444,7 @@ const UserDashboard = () => {
                               <h4 className="font-semibold text-gray-900 line-clamp-2 leading-5 mb-2 group-hover:text-red-600 transition-colors text-sm">
                                 {video.title}
                               </h4>
-                              <div className="flex items-center justify-between text-xs text-gray-500">
-                                <div className="flex items-center space-x-2">
-                                  <span className="flex items-center">
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    {formatPublishedDate(video.publishedAt)}
-                                  </span>
-                                  <span className="flex items-center">
-                                    <Play className="h-3 w-3 mr-1" />
-                                    {formatViewCount(video.viewCount)}
-                                  </span>
-                                </div>
+                              <div className="flex items-center justify-end text-xs text-gray-500">
                                 <ExternalLink className="h-3 w-3 text-gray-400 group-hover:text-red-500" />
                               </div>
                             </div>
