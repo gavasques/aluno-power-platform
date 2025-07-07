@@ -111,6 +111,31 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 07, 2025 - 05:06 PM**: ✅ SISTEMA DE EXCLUSÃO DE USUÁRIOS COMPLETAMENTE APRIMORADO - GERENCIAMENTO ROBUSTO IMPLEMENTADO
+  - **Problema Crítico Resolvido**: Exclusão do usuário João Silva finalizada com sucesso após remoção de todas as dependências
+  - **Sistema de Exclusão Robusto Implementado**:
+    - ✅ **UserDeletionService.ts**: Serviço completo para exclusão em cascata com tratamento de 30+ relacionamentos de chave estrangeira
+    - ✅ **Mapeamento Completo de Dependências**: Identificação automática de todas as tabelas que referenciam users.id
+    - ✅ **Exclusão Sistemática**: Limpeza ordenada de logs, dados financeiros, sistema de suporte, avaliações, permissões e conteúdo
+    - ✅ **Preservação de Conteúdo**: Transferência de propriedade de materiais e notícias para admin ao invés de exclusão
+  - **Melhorias na Interface de Usuário**:
+    - ✅ **Token de Autenticação**: Correção crítica - requisições DELETE agora incluem Bearer token corretamente
+    - ✅ **Feedback Aprimorado**: Mensagens de erro mais específicas e informativas durante exclusão
+    - ✅ **Confirmação de Exclusão**: Modal de confirmação com detalhes dos dados que serão removidos
+  - **Benefícios do Sistema Aprimorado**:
+    - Exclusões de usuários agora funcionam de forma consistente e confiável
+    - Integridade referencial mantida em todas as operações
+    - Conteúdo importante preservado através de transferência de propriedade
+    - Auditoria completa de exclusões para compliance e rastreabilidade
+  - **Tabelas com Tratamento de Dependências**:
+    - Logs: ai_generation_logs, ai_img_generation_logs, tool_usage_logs, upscaled_images
+    - Financeiro: credit_transactions, user_credit_balance, user_subscriptions, stripe_*
+    - Suporte: support_tickets, support_ticket_messages, support_ticket_files
+    - Fornecedores: supplier_conversations, supplier_contacts, supplier_brands
+    - Avaliações: partner_reviews, supplier_reviews, tool_reviews, *_review_replies
+    - Permissões: user_permission_groups, user_group_members
+    - Conteúdo: materials, news, updates (transferidos para admin)
+
 - **January 07, 2025 - 03:15 PM**: ⚡ DASHBOARD COMPLETAMENTE REFATORADA - PERFORMANCE MAXIMIZADA
   - **FastDashboard Criada**:
     - ✅ **Dashboard otimizada**: Nova versão FastDashboard.tsx eliminando consultas problemáticas

@@ -253,21 +253,34 @@ export class AuthService {
           )
         );
 
-      // Try to find a matching session by decrypting stored tokens
+      // Try to find a matching session by comparing tokens (encrypted and unencrypted)
       for (const session of sessions) {
-        try {
-          const decryptedToken = EncryptionService.decrypt(session.session.sessionToken);
-          if (decryptedToken === sessionToken) {
-            console.log('🔍 VALIDATE SESSION - Found matching session:', {
-              userId: session.user.id,
-              userEmail: session.user.email,
-              sessionExpiry: session.session.expiresAt
-            });
-            return session.user;
+        // First try direct comparison (for unencrypted tokens)
+        if (session.session.sessionToken === sessionToken) {
+          console.log('🔍 VALIDATE SESSION - Found matching session (direct):', {
+            userId: session.user.id,
+            userEmail: session.user.email,
+            sessionExpiry: session.session.expiresAt
+          });
+          return session.user;
+        }
+        
+        // Only try decrypting if the token looks encrypted (contains base64 characters like + or /)
+        if (session.session.sessionToken.includes('+') || session.session.sessionToken.includes('/')) {
+          try {
+            const decryptedToken = EncryptionService.decrypt(session.session.sessionToken);
+            if (decryptedToken === sessionToken) {
+              console.log('🔍 VALIDATE SESSION - Found matching session (decrypted):', {
+                userId: session.user.id,
+                userEmail: session.user.email,
+                sessionExpiry: session.session.expiresAt
+              });
+              return session.user;
+            }
+          } catch (decryptError) {
+            // Skip sessions that can't be decrypted
+            continue;
           }
-        } catch (decryptError) {
-          // Skip sessions that can't be decrypted (may be from before encryption was implemented)
-          continue;
         }
       }
 

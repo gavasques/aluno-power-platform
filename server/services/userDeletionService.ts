@@ -5,7 +5,7 @@ import {
   userGroupMembers, userSessions, aiGenerationLogs, toolUsageLogs,
   upscaledImages, aiImgGenerationLogs, supplierBrands, supplierContacts,
   supplierConversations, supportTickets, supportTicketMessages,
-  supportTicketFiles, infographics, infographicGenerations,
+  supportTicketFiles, infographics,
   userSubscriptions, userCreditBalance, stripePaymentIntents,
   stripeCheckoutSessions, userPermissionGroups, creditTransactions
 } from '../../shared/schema';
@@ -45,8 +45,7 @@ export class UserDeletionService {
       const infographicsData = await db.delete(infographics).where(eq(infographics.userId, userId)).returning();
       deletedRecords.infographics = infographicsData.length;
 
-      const infographicGens = await db.delete(infographicGenerations).where(eq(infographicGenerations.userId, userId)).returning();
-      deletedRecords.infographicGenerations = infographicGens.length;
+      // infographicGenerations table doesn't exist - skipping
 
       // 7. Delete user reviews and replies
       const partnerRevs = await db.delete(partnerReviews).where(eq(partnerReviews.userId, userId)).returning();

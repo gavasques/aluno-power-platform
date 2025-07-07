@@ -69,7 +69,14 @@ const UserManagement = memo(() => {
 
   const deleteUser = useMutation({
     mutationFn: async (userId: number) => {
-      const response = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/users/${userId}`, { 
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to delete user');
@@ -95,7 +102,14 @@ const UserManagement = memo(() => {
   // Bulk delete test users
   const deleteTestUsers = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/admin/test-users', { method: 'DELETE' });
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('/api/admin/test-users', { 
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to delete test users');
