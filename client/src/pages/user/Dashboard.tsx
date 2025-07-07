@@ -3,20 +3,16 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Crown, 
   Coins, 
   TrendingUp, 
-  Activity, 
   CreditCard, 
   Zap,
   Calendar,
-  AlertTriangle,
-  CheckCircle,
   ArrowUpRight,
-  BarChart3,
   Target,
   Gift,
   Star
@@ -312,45 +308,13 @@ const UserDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="usage">Uso Detalhado</TabsTrigger>
-            <TabsTrigger value="activity">Atividade</TabsTrigger>
-            <TabsTrigger value="recommendations">Dicas</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Funcionalidades Mais Usadas */}
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="h-5 w-5" />
-                      Funcionalidades Mais Usadas
-                    </CardTitle>
-                    <CardDescription>
-                      Suas ferramentas favoritas este mês
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {dashboardData.usage.topFeatures.map((feature, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium">{feature.name}</span>
-                            <span className="text-sm text-gray-500">
-                              {feature.usage} usos ({feature.percentage}%)
-                            </span>
-                          </div>
-                          <Progress value={feature.percentage} className="h-2" />
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
 
               {/* Ações Rápidas */}
               <div>
@@ -403,119 +367,9 @@ const UserDashboard = () => {
             </div>
           </TabsContent>
 
-          {/* Usage Tab */}
-          <TabsContent value="usage" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Estatísticas de Uso</CardTitle>
-                <CardDescription>
-                  Análise detalhada do seu consumo de créditos
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {dashboardData.stats.totalGenerations}
-                    </div>
-                    <div className="text-sm text-gray-500">Total de Gerações</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">
-                      {dashboardData.stats.averageSessionTime}min
-                    </div>
-                    <div className="text-sm text-gray-500">Tempo Médio por Sessão</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {dashboardData.stats.featuresUsed}
-                    </div>
-                    <div className="text-sm text-gray-500">Funcionalidades Usadas</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">
-                      {dashboardData.stats.successRate}%
-                    </div>
-                    <div className="text-sm text-gray-500">Taxa de Sucesso</div>
-                  </div>
-                </div>
-                
-                {/* Gráfico de uso diário seria implementado aqui */}
-                <div className="bg-gray-50 rounded-lg p-4 text-center">
-                  <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Gráfico de uso diário será implementado</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          {/* Activity Tab */}
-          <TabsContent value="activity" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Atividade Recente</CardTitle>
-                <CardDescription>
-                  Suas últimas interações com a plataforma
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {dashboardData.activity.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between border-b pb-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-2 h-2 rounded-full ${
-                          item.status === 'completed' ? 'bg-green-500' :
-                          item.status === 'processing' ? 'bg-yellow-500' : 'bg-red-500'
-                        }`} />
-                        <div>
-                          <p className="font-medium">{item.description}</p>
-                          <p className="text-sm text-gray-500">{item.timestamp}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">{item.cost} créditos</div>
-                        <div className={`text-xs ${
-                          item.status === 'completed' ? 'text-green-600' :
-                          item.status === 'processing' ? 'text-yellow-600' : 'text-red-600'
-                        }`}>
-                          {item.status === 'completed' ? 'Concluído' :
-                           item.status === 'processing' ? 'Processando' : 'Falhou'}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          {/* Recommendations Tab */}
-          <TabsContent value="recommendations" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {dashboardData.recommendations.map((rec) => (
-                <Card key={rec.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{rec.title}</CardTitle>
-                      <Badge variant={rec.priority === 'high' ? 'destructive' : 'secondary'}>
-                        {rec.priority === 'high' ? 'Alta' : rec.priority === 'medium' ? 'Média' : 'Baixa'}
-                      </Badge>
-                    </div>
-                    <CardDescription>{rec.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      className="w-full"
-                      onClick={() => window.location.href = rec.actionUrl}
-                    >
-                      {rec.actionText}
-                      <ArrowUpRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+
         </Tabs>
       </div>
     </div>
