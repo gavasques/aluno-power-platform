@@ -5224,7 +5224,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   });
 
   // CNPJ Consulta API
-  app.get('/api/cnpj-consulta', async (req: Request, res: Response) => {
+  app.get('/api/cnpj-consulta', requireAuth, async (req: Request, res: Response) => {
+    const startTime = Date.now();
+    const user = (req as any).user;
+    
     try {
       const { cnpj } = req.query;
       
@@ -5261,13 +5264,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         // Log da consulta na tabela ai_generation_logs usando LoggingService
         try {
           await LoggingService.saveApiLog(
-            2, // userId admin
+            user?.id || 2, // usar ID do usuário logado
             'cnpj-consulta',
             `Consulta CNPJ: ${cnpjNumbers}`,
             JSON.stringify(data),
             'rapidapi',
             'dados-cnpj-api',
-            Date.now() - Date.now(), // duration será calculado se necessário
+            Date.now() - startTime, // calcular duration corretamente
             0, // sem custo da API
             1 // 1 crédito conforme tabela feature_costs (tools.cnpj_lookup)
           );
