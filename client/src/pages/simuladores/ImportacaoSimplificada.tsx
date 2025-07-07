@@ -6,12 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Plus, Save, FileDown, Calculator, Copy } from "lucide-react";
+import { Trash2, Plus, Save, FileDown, Calculator, Copy, FileText } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 // Brazilian number formatting utilities
 const formatBrazilianNumber = (value: number, decimals: number = 2): string => {
@@ -142,6 +145,8 @@ interface ProdutoSimulacao {
 interface SimulacaoCompleta {
   id?: number;
   nomeSimulacao: string;
+  nomeFornecedor?: string;
+  observacoes?: string;
   configuracoesGerais: ConfiguracoesGerais;
   produtos: ProdutoSimulacao[];
 }
@@ -172,6 +177,8 @@ export default function ImportacaoSimplificada() {
   // State management
   const [activeSimulation, setActiveSimulation] = useState<SimulacaoCompleta>({
     nomeSimulacao: "Nova Simulação",
+    nomeFornecedor: "",
+    observacoes: "",
     configuracoesGerais: defaultConfig,
     produtos: []
   });
@@ -348,6 +355,8 @@ export default function ImportacaoSimplificada() {
   const loadSimulation = (simulation: any) => {
     setActiveSimulation({
       ...simulation,
+      nomeFornecedor: simulation.nomeFornecedor || "",
+      observacoes: simulation.observacoes || "",
       configuracoesGerais: simulation.configuracoesGerais,
       produtos: simulation.produtos
     });
@@ -357,10 +366,139 @@ export default function ImportacaoSimplificada() {
   const newSimulation = () => {
     setActiveSimulation({
       nomeSimulacao: "Nova Simulação",
+      nomeFornecedor: "",
+      observacoes: "",
       configuracoesGerais: defaultConfig,
       produtos: []
     });
     setSelectedSimulationId(null);
+  };
+
+  // PDF Export function
+  const exportToPDF = () => {
+    try {
+      const doc = new jsPDF();
+      
+      // Title
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Relatório de Simulação de Importação', 105, 30, { align: 'center' });
+      
+      // Simulation info
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      
+      let yPos = 50;
+      
+      // Simulation details
+      doc.text(`Nome da Simulação: ${activeSimulation.nomeSimulacao}`, 20, yPos);
+      yPos += 10;
+      
+      if (activeSimulation.nomeFornecedor) {
+        doc.text(`Fornecedor: ${activeSimulation.nomeFornecedor}`, 20, yPos);
+        yPos += 10;
+      }
+      
+      // Configuration summary
+      const cfg = activeSimulation.configuracoesGerais;
+      doc.text(`Taxa de Câmbio USD/BRL: R$ ${formatBrazilianNumber(cfg.taxa_cambio_usd_brl)}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Alíquota II: ${(cfg.aliquota_ii_percentual * 100).toFixed(1)}%`, 20, yPos);
+      yPos += 8;
+      doc.text(`Alíquota ICMS: ${(cfg.aliquota_icms_percentual * 100).toFixed(1)}%`, 20, yPos);
+      yPos += 8;
+      doc.text(`Frete Internacional: ${cfg.moeda_frete_internacional} ${formatBrazilianNumber(cfg.custo_frete_internacional_total_moeda_original)}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Outras Despesas: R$ ${formatBrazilianNumber(cfg.outras_despesas_aduaneiras_total_brl)}`, 20, yPos);
+      yPos += 15;
+
+      // Products table
+      const tableData = calculatedResults.produtos.map(produto => [
+        produto.descricao_produto,
+        produto.quantidade.toString(),
+        `US$ ${formatBrazilianNumber(produto.valor_unitario_usd)}`,
+        `${formatBrazilianNumber(produto.peso_bruto_unitario_kg, 3)} kg`,
+        `R$ ${formatBrazilianNumber(produto.custo_produto_brl || 0)}`,
+        `R$ ${formatBrazilianNumber(produto.custo_frete_por_produto_brl || 0)}`,
+        `R$ ${formatBrazilianNumber(produto.valor_ii_brl || 0)}`,
+        `R$ ${formatBrazilianNumber(produto.valor_icms_brl || 0)}`,
+        `R$ ${formatBrazilianNumber(produto.custo_unitario_com_imposto_brl || 0)}`
+      ]);
+
+      autoTable(doc, {
+        head: [['Produto', 'Qtd', 'Valor Unit. USD', 'Peso Unit.', 'Custo Produto BRL', 'Frete BRL', 'II BRL', 'ICMS BRL', 'Custo Unit. c/ Imp.']],
+        body: tableData,
+        startY: yPos,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [59, 130, 246], textColor: 255 },
+        columnStyles: {
+          8: { fontStyle: 'bold', textColor: [59, 130, 246] } // Custo Unit. c/ Imp. column
+        }
+      });
+
+      yPos = (doc as any).lastAutoTable.finalY + 20;
+
+      // Summary totals
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('Resumo da Simulação:', 20, yPos);
+      yPos += 15;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      
+      const totals = calculatedResults.totals;
+      doc.text(`Total de Itens: ${totals.total_sim_quantidade_itens}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Produto + Frete: R$ ${formatBrazilianNumber(totals.total_sim_produto_mais_frete_brl)}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Total II: R$ ${formatBrazilianNumber(totals.total_sim_valor_ii_brl)}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Total ICMS: R$ ${formatBrazilianNumber(totals.total_sim_valor_icms_brl)}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Outras Despesas: R$ ${formatBrazilianNumber(totals.total_sim_outras_despesas_aduaneiras_brl)}`, 20, yPos);
+      yPos += 10;
+      
+      // Total final em destaque
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(59, 130, 246);
+      doc.text(`CUSTO TOTAL: R$ ${formatBrazilianNumber(totals.custo_total_importacao_brl)}`, 20, yPos);
+
+      // Observations
+      if (activeSimulation.observacoes) {
+        yPos += 20;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Observações:', 20, yPos);
+        yPos += 10;
+        
+        doc.setFont('helvetica', 'normal');
+        const observacoes = doc.splitTextToSize(activeSimulation.observacoes, 170);
+        doc.text(observacoes, 20, yPos);
+      }
+
+      // Footer
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(128, 128, 128);
+        doc.text(`Página ${i} de ${pageCount}`, 105, 285, { align: 'center' });
+        doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 285);
+      }
+
+      // Save the PDF
+      const fileName = `Simulacao_Importacao_${activeSimulation.nomeSimulacao.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
+      doc.save(fileName);
+      
+      toast({ title: "PDF exportado com sucesso!" });
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({ title: "Erro ao gerar PDF", variant: "destructive" });
+    }
   };
 
   const duplicateSimulation = () => {
@@ -427,6 +565,10 @@ export default function ImportacaoSimplificada() {
             <Copy className="w-4 h-4 mr-2" />
             Duplicar
           </Button>
+          <Button onClick={exportToPDF} variant="outline">
+            <FileText className="w-4 h-4 mr-2" />
+            Exportar PDF
+          </Button>
           <Button onClick={() => setShowSaveDialog(true)}>
             <Save className="w-4 h-4 mr-2" />
             Salvar
@@ -467,6 +609,30 @@ export default function ImportacaoSimplificada() {
                 </Badge>
               </div>
             </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="nomeFornecedor">Nome do Fornecedor</Label>
+                  <Input
+                    id="nomeFornecedor"
+                    value={activeSimulation.nomeFornecedor || ""}
+                    onChange={(e) => setActiveSimulation(prev => ({ ...prev, nomeFornecedor: e.target.value }))}
+                    placeholder="Digite o nome do fornecedor"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="observacoes">Observações</Label>
+                <Textarea
+                  id="observacoes"
+                  value={activeSimulation.observacoes || ""}
+                  onChange={(e) => setActiveSimulation(prev => ({ ...prev, observacoes: e.target.value }))}
+                  placeholder="Digite observações sobre esta simulação..."
+                  rows={3}
+                />
+              </div>
+            </CardContent>
           </Card>
 
           {/* Configuration */}
@@ -623,7 +789,7 @@ export default function ImportacaoSimplificada() {
                         <th className="text-left p-2">ICMS BRL</th>
                         <th className="text-left p-2">Total c/ Impostos</th>
                         <th className="text-left p-2">Custo Unit. s/ Imp.</th>
-                        <th className="text-left p-2">Custo Unit. c/ Imp.</th>
+                        <th className="text-left p-2 font-bold text-blue-600 text-base">Custo Unit. c/ Imp.</th>
                         <th className="text-left p-2">Ações</th>
                       </tr>
                     </thead>
@@ -692,7 +858,7 @@ export default function ImportacaoSimplificada() {
                           <td className="p-2 text-sm text-right">
                             R$ {formatBrazilianNumber(produto.custo_unitario_sem_imposto_brl || 0)}
                           </td>
-                          <td className="p-2 text-sm text-right font-medium">
+                          <td className="p-2 text-base text-right font-bold text-blue-600">
                             R$ {formatBrazilianNumber(produto.custo_unitario_com_imposto_brl || 0)}
                           </td>
                           <td className="p-2">
