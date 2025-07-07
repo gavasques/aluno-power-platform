@@ -251,6 +251,19 @@ export class PermissionService {
       { code: 'hub.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Hub de Recursos', sortOrder: 2 },
       { code: 'hub.product_details', name: 'Detalhes do Produto', category: 'Hub de Recursos', sortOrder: 3 },
       { code: 'hub.amazon_reviews', name: 'Amazon Reviews', category: 'Hub de Recursos', sortOrder: 4 },
+      { code: 'hub.cnpj_lookup', name: 'Consulta CNPJ', category: 'Hub de Recursos', sortOrder: 5 },
+      
+      // Minha Área
+      { code: 'myarea.suppliers', name: 'Meus Fornecedores', category: 'Minha Área', sortOrder: 1 },
+      { code: 'myarea.products', name: 'Meus Produtos', category: 'Minha Área', sortOrder: 2 },
+      { code: 'myarea.materials', name: 'Meus Materiais', category: 'Minha Área', sortOrder: 3 },
+      { code: 'myarea.brands', name: 'Minhas Marcas', category: 'Minha Área', sortOrder: 4 },
+      { code: 'myarea.subscriptions', name: 'Minhas Assinaturas', category: 'Minha Área', sortOrder: 5 },
+      
+      // Dashboard e Conteúdo
+      { code: 'content.videos', name: 'Vídeos do YouTube', category: 'Conteúdo', sortOrder: 1 },
+      { code: 'content.news', name: 'Notícias', category: 'Conteúdo', sortOrder: 2 },
+      { code: 'content.updates', name: 'Novidades', category: 'Conteúdo', sortOrder: 3 },
       
       // Admin Area
       { code: 'admin.access', name: 'Acesso à Área Admin', category: 'Admin', sortOrder: 1 },

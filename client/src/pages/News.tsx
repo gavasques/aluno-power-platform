@@ -15,6 +15,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { News } from "@shared/schema";
 import { AdvancedSearch, SearchFilter } from "@/components/ui/advanced-search";
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
 
 const News = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -106,7 +107,8 @@ const News = () => {
   const featuredNews = newsData.filter(news => news.isFeatured);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <PermissionGuard featureCode="content.news">
+      <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -317,6 +319,7 @@ const News = () => {
         </div>
       </div>
     </div>
+    </PermissionGuard>
   );
 };
 

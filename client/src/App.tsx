@@ -611,7 +611,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* Main user routes - Protected */}
+                          {/* Main user routes - Protected with permissions */}
                           <Route path="/videos">
                             <ProtectedRoute>
                               <Layout>

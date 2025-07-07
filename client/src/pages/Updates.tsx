@@ -18,6 +18,7 @@ import {
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Update } from "@shared/schema";
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
 
 const Updates = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -93,8 +94,9 @@ const Updates = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+    <PermissionGuard featureCode="content.updates">
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
@@ -360,6 +362,7 @@ const Updates = () => {
         </div>
       </div>
     </div>
+    </PermissionGuard>
   );
 };
 

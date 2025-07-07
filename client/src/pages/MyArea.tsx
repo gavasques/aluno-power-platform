@@ -2,6 +2,7 @@
 import { useParams } from "wouter";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
 
 // Lazy load components for better performance
 const MySuppliers = lazy(() => import("./myarea/MySuppliers"));
@@ -40,95 +41,86 @@ const MyArea = () => {
   switch (section) {
     case "fornecedores":
     case "suppliers":
-      if (id) {
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <SupplierDetailRefactored />
-          </Suspense>
-        );
-      }
       return (
-        <Suspense fallback={<LoadingSpinner />}>
-          <MySuppliers />
-        </Suspense>
+        <PermissionGuard featureCode="myarea.suppliers">
+          {id ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <SupplierDetailRefactored />
+            </Suspense>
+          ) : (
+            <Suspense fallback={<LoadingSpinner />}>
+              <MySuppliers />
+            </Suspense>
+          )}
+        </PermissionGuard>
       );
     case "produtos":
     case "products":
-      if (id === "novo" || id === "new") {
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProductPricingForm />
-          </Suspense>
-        );
-      }
-      if (id && subId === "editar") {
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProductPricingForm />
-          </Suspense>
-        );
-      }
-      if (id && subId === "pricing") {
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProductPricing />
-          </Suspense>
-        );
-      }
-      if (id) {
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProductDetail />
-          </Suspense>
-        );
-      }
-      // Se não tem ID, mostra a lista de produtos
       return (
-        <Suspense fallback={<LoadingSpinner />}>
-          <MyProductsList />
-        </Suspense>
+        <PermissionGuard featureCode="myarea.products">
+          {id === "novo" || id === "new" ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <ProductPricingForm />
+            </Suspense>
+          ) : id && subId === "editar" ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <ProductPricingForm />
+            </Suspense>
+          ) : id && subId === "pricing" ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <ProductPricing />
+            </Suspense>
+          ) : id ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <ProductDetail />
+            </Suspense>
+          ) : (
+            <Suspense fallback={<LoadingSpinner />}>
+              <MyProductsList />
+            </Suspense>
+          )}
+        </PermissionGuard>
       );
     case "materiais":
     case "materials":
-      if (id === "novo" || id === "new") {
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <MaterialForm />
-          </Suspense>
-        );
-      }
-      if (fullPath.includes("/edit")) {
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <MaterialForm />
-          </Suspense>
-        );
-      }
-      if (id) {
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <MaterialDetail />
-          </Suspense>
-        );
-      }
       return (
-        <Suspense fallback={<LoadingSpinner />}>
-          <MyMaterials />
-        </Suspense>
+        <PermissionGuard featureCode="myarea.materials">
+          {id === "novo" || id === "new" ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <MaterialForm />
+            </Suspense>
+          ) : fullPath.includes("/edit") ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <MaterialForm />
+            </Suspense>
+          ) : id ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <MaterialDetail />
+            </Suspense>
+          ) : (
+            <Suspense fallback={<LoadingSpinner />}>
+              <MyMaterials />
+            </Suspense>
+          )}
+        </PermissionGuard>
       );
     case "marcas":
     case "brands":
       return (
-        <Suspense fallback={<LoadingSpinner />}>
-          <MyBrands />
-        </Suspense>
+        <PermissionGuard featureCode="myarea.brands">
+          <Suspense fallback={<LoadingSpinner />}>
+            <MyBrands />
+          </Suspense>
+        </PermissionGuard>
       );
     case "assinaturas":
     case "subscriptions":
       return (
-        <Suspense fallback={<LoadingSpinner />}>
-          <MySubscriptions />
-        </Suspense>
+        <PermissionGuard featureCode="myarea.subscriptions">
+          <Suspense fallback={<LoadingSpinner />}>
+            <MySubscriptions />
+          </Suspense>
+        </PermissionGuard>
       );
     default:
       const title = section ? section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, " ") : "Minha Área";
