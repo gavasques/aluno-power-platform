@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Save, Calculator, FileText, AlertTriangle } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Save, Calculator, FileText, AlertTriangle, FolderOpen } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -125,7 +125,13 @@ export default function SimplesNacional() {
   const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [activeTab, setActiveTab] = useState("simulation");
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
+
+  // Queries
+  const savedSimulationsQuery = useQuery({
+    queryKey: ['/api/simulations/simples-nacional'],
+    staleTime: 5 * 60 * 1000,
+  });
 
   // API queries
   const { data: simulations = [], isLoading } = useQuery({
@@ -165,28 +171,6 @@ export default function SimplesNacional() {
     }
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest(`/api/simulations/simples-nacional/${id}`, {
-        method: 'DELETE'
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Simulação excluída",
-        description: "Simulação excluída com sucesso!",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/simulations/simples-nacional'] });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir simulação",
-        variant: "destructive",
-      });
-    }
-  });
-
   // Calcular resultados em tempo real
   const calculoResult = useMemo(() => {
     if (activeSimulation.faturamento12Meses <= 0) return null;
@@ -201,7 +185,6 @@ export default function SimplesNacional() {
   const novaSimulacao = () => {
     setActiveSimulation(defaultSimulation);
     setSelectedSimulationId(null);
-    setActiveTab("simulation");
   };
 
   const loadSimulation = (simulation: any) => {
@@ -213,7 +196,11 @@ export default function SimplesNacional() {
       faturamentoComST: parseFloat(simulation.faturamentoComST) || 0
     });
     setSelectedSimulationId(simulation.id);
-    setActiveTab("simulation");
+    setShowLoadDialog(false);
+    toast({
+      title: "Simulação carregada",
+      description: `Simulação "${simulation.nomeSimulacao}" carregada com sucesso!`,
+    });
   };
 
   const handleSaveClick = () => {
@@ -258,305 +245,221 @@ export default function SimplesNacional() {
           <Button onClick={novaSimulacao} variant="outline">
             Nova Simulação
           </Button>
+          <Button onClick={() => setShowLoadDialog(true)} variant="outline">
+            <FolderOpen className="w-4 h-4 mr-2" />
+            Carregar
+          </Button>
           <Button onClick={handleSaveClick} disabled={!calculoResult || !!calculoResult?.erro}>
             <Save className="w-4 h-4 mr-2" />
             Salvar
           </Button>
         </div>
       </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="simulation">Simulação Ativa</TabsTrigger>
-          <TabsTrigger value="saved">Simulações Salvas</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="simulation">
-          {/* Header da Simulação */}
-          <Card className="mb-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  {isEditingName ? (
-                    <Input
-                      value={activeSimulation.nomeSimulacao}
-                      onChange={(e) => updateSimulation('nomeSimulacao', e.target.value)}
-                      onBlur={() => setIsEditingName(false)}
-                      onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
-                      className="text-lg font-semibold"
-                      autoFocus
-                    />
-                  ) : (
-                    <h2 
-                      className="text-lg font-semibold cursor-pointer hover:text-blue-600"
-                      onClick={() => setIsEditingName(true)}
-                    >
-                      {activeSimulation.nomeSimulacao}
-                    </h2>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <Label htmlFor="observacoes">Observações</Label>
-                  <Textarea
-                    id="observacoes"
-                    placeholder="Adicione observações sobre esta simulação..."
-                    value={activeSimulation.observacoes}
-                    onChange={(e) => updateSimulation('observacoes', e.target.value)}
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-
-          {/* Campos de Entrada */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="w-5 h-5" />
-                Dados de Entrada
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="faturamento12meses">Faturamento dos últimos 12 meses (R$)</Label>
-                  <Input
-                    id="faturamento12meses"
-                    type="number"
-                    placeholder="0,00"
-                    value={activeSimulation.faturamento12Meses || ''}
-                    onChange={(e) => updateSimulation('faturamento12Meses', parseFloat(e.target.value) || 0)}
-                    min="0"
-                    step="0.01"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Valor que determina a faixa de alíquota
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="faturamentoSemST">Faturamento do mês sem ST (R$)</Label>
-                  <Input
-                    id="faturamentoSemST"
-                    type="number"
-                    placeholder="0,00"
-                    value={activeSimulation.faturamentoSemST || ''}
-                    onChange={(e) => updateSimulation('faturamentoSemST', parseFloat(e.target.value) || 0)}
-                    min="0"
-                    step="0.01"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Faturamento mensal sem Substituição Tributária
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="faturamentoComST">Faturamento do mês com ST (R$)</Label>
-                  <Input
-                    id="faturamentoComST"
-                    type="number"
-                    placeholder="0,00"
-                    value={activeSimulation.faturamentoComST || ''}
-                    onChange={(e) => updateSimulation('faturamentoComST', parseFloat(e.target.value) || 0)}
-                    min="0"
-                    step="0.01"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Faturamento mensal com Substituição Tributária
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Resultados */}
-          {calculoResult && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Resultados da Simulação
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {calculoResult.erro ? (
-                  <div className="flex items-center gap-2 p-4 border rounded-lg bg-red-50 border-red-200">
-                    <AlertTriangle className="w-5 h-5 text-red-600" />
-                    <span className="text-red-800 font-medium">{calculoResult.erro}</span>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="space-y-4">
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-muted-foreground">Faturamento Total do Mês</div>
-                        <div className="text-lg font-semibold text-blue-600">
-                          {formatCurrency(calculoResult.faturamentoTotal)}
-                        </div>
-                      </div>
-                      
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-muted-foreground">Faixa</div>
-                        <div className="text-lg font-semibold">
-                          {calculoResult.faixaDescricao}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-muted-foreground">Alíquota Base</div>
-                        <div className="text-lg font-semibold">
-                          {formatPercent(calculoResult.aliquotaBase)}
-                        </div>
-                      </div>
-
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-muted-foreground">Valor a Reduzir</div>
-                        <div className="text-lg font-semibold">
-                          {formatCurrency(calculoResult.valorReduzir)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-muted-foreground">Alíquota Efetiva</div>
-                        <div className="text-lg font-semibold text-green-600">
-                          {formatPercent(calculoResult.aliquotaEfetiva)}
-                        </div>
-                      </div>
-
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-muted-foreground">Percentual ICMS</div>
-                        <div className="text-lg font-semibold">
-                          {formatPercent(calculoResult.percentualICMS)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-muted-foreground">Simples sem ST</div>
-                        <div className="text-lg font-semibold">
-                          {formatCurrency(calculoResult.valorSimplesSemST)}
-                        </div>
-                      </div>
-
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-muted-foreground">Simples com ST</div>
-                        <div className="text-lg font-semibold">
-                          {formatCurrency(calculoResult.valorSimplesComST)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="md:col-span-2 lg:col-span-4">
-                      <div className="p-6 border rounded-lg bg-blue-50 border-blue-200">
-                        <div className="text-sm text-blue-700 mb-1">Valor Total do Simples Nacional</div>
-                        <div className="text-2xl font-bold text-blue-800">
-                          {formatCurrency(calculoResult.valorTotalSimples)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Aviso legal */}
-                <div className="mt-6 p-4 border rounded-lg bg-yellow-50 border-yellow-200">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                    <div className="text-sm text-yellow-800">
-                      <strong>Aviso importante:</strong> Este simulador é apenas para fins de estimativa. 
-                      Para valores oficiais e orientações específicas, consulte sempre um contador qualificado.
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="saved">
-          <Card>
-            <CardHeader>
-              <CardTitle>Simulações Salvas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div>Carregando simulações...</div>
-              ) : simulations.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calculator className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nenhuma simulação salva</p>
-                  <p className="text-sm">Crie e salve uma simulação para vê-la aqui</p>
-                </div>
+      {/* Header da Simulação */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              {isEditingName ? (
+                <Input
+                  value={activeSimulation.nomeSimulacao}
+                  onChange={(e) => updateSimulation('nomeSimulacao', e.target.value)}
+                  onBlur={() => setIsEditingName(false)}
+                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
+                  className="text-lg font-semibold"
+                  autoFocus
+                />
               ) : (
-                <div className="grid gap-4">
-                  {simulations.map((simulation: any) => (
-                    <div key={simulation.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          <h3 className="font-medium">{simulation.nomeSimulacao}</h3>
-                          {simulation.codigoSimulacao && (
-                            <Badge variant="outline" className="text-xs">
-                              {simulation.codigoSimulacao}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" onClick={() => loadSimulation(simulation)}>
-                            Carregar
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => deleteMutation.mutate(simulation.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-600">
-                            {formatCurrency(parseFloat(simulation.valorTotalSimples))}
-                          </div>
-                          <div className="text-xs text-muted-foreground">Valor Total Simples</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-green-600">
-                            {formatPercent(parseFloat(simulation.aliquotaEfetiva))}
-                          </div>
-                          <div className="text-xs text-muted-foreground">Alíquota Efetiva</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-orange-600">
-                            {formatCurrency(parseFloat(simulation.faturamento12Meses))}
-                          </div>
-                          <div className="text-xs text-muted-foreground">Faturamento 12M</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-muted-foreground">
-                            Atualizada em
-                          </div>
-                          <div className="text-sm font-medium">
-                            {new Date(simulation.dataLastModified).toLocaleDateString('pt-BR')}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <h2 
+                  className="text-lg font-semibold cursor-pointer hover:text-blue-600"
+                  onClick={() => setIsEditingName(true)}
+                >
+                  {activeSimulation.nomeSimulacao}
+                </h2>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <Label htmlFor="observacoes">Observações</Label>
+              <Textarea
+                id="observacoes"
+                placeholder="Adicione observações sobre esta simulação..."
+                value={activeSimulation.observacoes}
+                onChange={(e) => updateSimulation('observacoes', e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Campos de Entrada */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="w-5 h-5" />
+            Dados de Entrada
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="faturamento12meses">Faturamento dos últimos 12 meses (R$)</Label>
+              <Input
+                id="faturamento12meses"
+                type="number"
+                placeholder="0,00"
+                value={activeSimulation.faturamento12Meses || ''}
+                onChange={(e) => updateSimulation('faturamento12Meses', parseFloat(e.target.value) || 0)}
+                min="0"
+                step="0.01"
+              />
+              <p className="text-xs text-muted-foreground">
+                Valor que determina a faixa de alíquota
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="faturamentoSemST">Faturamento do mês sem ST (R$)</Label>
+              <Input
+                id="faturamentoSemST"
+                type="number"
+                placeholder="0,00"
+                value={activeSimulation.faturamentoSemST || ''}
+                onChange={(e) => updateSimulation('faturamentoSemST', parseFloat(e.target.value) || 0)}
+                min="0"
+                step="0.01"
+              />
+              <p className="text-xs text-muted-foreground">
+                Faturamento mensal sem Substituição Tributária
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="faturamentoComST">Faturamento do mês com ST (R$)</Label>
+              <Input
+                id="faturamentoComST"
+                type="number"
+                placeholder="0,00"
+                value={activeSimulation.faturamentoComST || ''}
+                onChange={(e) => updateSimulation('faturamentoComST', parseFloat(e.target.value) || 0)}
+                min="0"
+                step="0.01"
+              />
+              <p className="text-xs text-muted-foreground">
+                Faturamento mensal com Substituição Tributária
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Resultados */}
+      {calculoResult && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Resultados da Simulação
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {calculoResult.erro ? (
+              <div className="flex items-center gap-2 p-4 border rounded-lg bg-red-50 border-red-200">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <span className="text-red-800 font-medium">{calculoResult.erro}</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm text-muted-foreground">Faturamento Total do Mês</div>
+                    <div className="text-lg font-semibold text-blue-600">
+                      {formatCurrency(calculoResult.faturamentoTotal)}
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm text-muted-foreground">Faixa</div>
+                    <div className="text-lg font-semibold">
+                      {calculoResult.faixaDescricao}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm text-muted-foreground">Alíquota Base</div>
+                    <div className="text-lg font-semibold">
+                      {formatPercent(calculoResult.aliquotaBase)}
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm text-muted-foreground">Valor a Reduzir</div>
+                    <div className="text-lg font-semibold">
+                      {formatCurrency(calculoResult.valorReduzir)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm text-muted-foreground">Alíquota Efetiva</div>
+                    <div className="text-lg font-semibold text-green-600">
+                      {formatPercent(calculoResult.aliquotaEfetiva)}
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm text-muted-foreground">Percentual ICMS</div>
+                    <div className="text-lg font-semibold">
+                      {formatPercent(calculoResult.percentualICMS)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm text-muted-foreground">Simples sem ST</div>
+                    <div className="text-lg font-semibold">
+                      {formatCurrency(calculoResult.valorSimplesSemST)}
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm text-muted-foreground">Simples com ST</div>
+                    <div className="text-lg font-semibold">
+                      {formatCurrency(calculoResult.valorSimplesComST)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 lg:col-span-4">
+                  <div className="p-6 border rounded-lg bg-blue-50 border-blue-200">
+                    <div className="text-sm text-blue-700 mb-1">Valor Total do Simples Nacional</div>
+                    <div className="text-2xl font-bold text-blue-800">
+                      {formatCurrency(calculoResult.valorTotalSimples)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Aviso legal */}
+            <div className="mt-6 p-4 border rounded-lg bg-yellow-50 border-yellow-200">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                <div className="text-sm text-yellow-800">
+                  <strong>Aviso importante:</strong> Este simulador é apenas para fins de estimativa. 
+                  Para valores oficiais e orientações específicas, consulte sempre um contador qualificado.
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Dialog para salvar */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
@@ -588,6 +491,74 @@ export default function SimplesNacional() {
               {saveMutation.isPending ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para carregar simulações */}
+      <Dialog open={showLoadDialog} onOpenChange={setShowLoadDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Carregar Simulação</DialogTitle>
+            <DialogDescription>
+              Selecione uma simulação salva para carregar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {savedSimulationsQuery.isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <div className="text-muted-foreground">Carregando simulações...</div>
+                </div>
+              </div>
+            ) : savedSimulationsQuery.data?.length === 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <div className="text-muted-foreground mb-4">Nenhuma simulação salva encontrada</div>
+                  <Button onClick={() => setShowLoadDialog(false)}>
+                    Fechar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-4 max-h-96 overflow-y-auto">
+                {savedSimulationsQuery.data?.map((simulation: any) => (
+                  <div key={simulation.id} className="border rounded-lg p-4 hover:bg-muted/50 cursor-pointer" onClick={() => loadSimulation(simulation)}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold">{simulation.nomeSimulacao}</h3>
+                        <Badge variant="secondary">{simulation.codigoSimulacao}</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {new Date(simulation.dataUltimaModificacao).toLocaleDateString('pt-BR')}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                      <div>
+                        <span className="font-medium">12 meses:</span> {formatCurrency(parseFloat(simulation.faturamento12Meses))}
+                      </div>
+                      <div>
+                        <span className="font-medium">Sem ST:</span> {formatCurrency(parseFloat(simulation.faturamentoSemST))}
+                      </div>
+                      <div>
+                        <span className="font-medium">Com ST:</span> {formatCurrency(parseFloat(simulation.faturamentoComST))}
+                      </div>
+                      <div>
+                        <span className="font-medium">Total Simples:</span> {formatCurrency(parseFloat(simulation.valorTotalSimples))}
+                      </div>
+                    </div>
+
+                    {simulation.observacoes && (
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        <span className="font-medium">Observações:</span> {simulation.observacoes}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
