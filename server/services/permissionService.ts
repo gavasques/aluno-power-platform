@@ -231,11 +231,16 @@ export class PermissionService {
    */
   static async initializeFeatures() {
     const features = [
-      // AI Features
-      { code: 'ai.upscale', name: 'Upscale de Imagem', category: 'IA', sortOrder: 1, isActive: true },
-      { code: 'ai.background_removal', name: 'Remover Background', category: 'IA', sortOrder: 2, isActive: true },
+      // Ferramentas (consolidadas de IA e Hub de Recursos)
+      { code: 'tools.image_upscale', name: 'Upscale de Imagem', category: 'Ferramentas', sortOrder: 1 },
+      { code: 'tools.background_removal', name: 'Remover Background', category: 'Ferramentas', sortOrder: 2 },
+      { code: 'tools.amazon_reviews', name: 'Amazon Reviews', category: 'Ferramentas', sortOrder: 3 },
+      { code: 'tools.keyword_report', name: 'Relatório de Keywords', category: 'Ferramentas', sortOrder: 4 },
+      { code: 'tools.product_details', name: 'Detalhes do Produto', category: 'Ferramentas', sortOrder: 5 },
+      { code: 'tools.cnpj_lookup', name: 'Consulta CNPJ', category: 'Ferramentas', sortOrder: 6 },
+      { code: 'tools.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Ferramentas', sortOrder: 7 },
       
-      // Agents
+      // Agentes IA
       { code: 'agents.amazon_listing', name: 'Amazon Listing Optimizer', category: 'Agentes', sortOrder: 1 },
       { code: 'agents.html_descriptions', name: 'Gerador de Descrições HTML', category: 'Agentes', sortOrder: 2 },
       { code: 'agents.bullet_points', name: 'Gerar Bullet Points', category: 'Agentes', sortOrder: 3 },
@@ -246,14 +251,13 @@ export class PermissionService {
       { code: 'agents.customer_service', name: 'Amazon Customer Service Email', category: 'Agentes', sortOrder: 8 },
       { code: 'agents.negative_reviews', name: 'Amazon Negative Reviews Response', category: 'Agentes', sortOrder: 9 },
       
-      // Ferramentas (migradas de Hub de Recursos e IA)
-      { code: 'tools.image_upscale', name: 'Upscale de Imagem', category: 'Ferramentas', sortOrder: 1 },
-      { code: 'tools.background_removal', name: 'Remover Background', category: 'Ferramentas', sortOrder: 2 },
-      { code: 'tools.amazon_reviews', name: 'Amazon Reviews', category: 'Ferramentas', sortOrder: 3 },
-      { code: 'tools.keyword_report', name: 'Relatório de Keywords', category: 'Ferramentas', sortOrder: 4 },
-      { code: 'tools.product_details', name: 'Detalhes do Produto', category: 'Ferramentas', sortOrder: 5 },
-      { code: 'tools.cnpj_lookup', name: 'Consulta CNPJ', category: 'Ferramentas', sortOrder: 6 },
-      { code: 'tools.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Ferramentas', sortOrder: 7 },
+      // HUB (antigo Hub de Recursos)
+      { code: 'hub.videos', name: 'Vídeos do YouTube', category: 'HUB', sortOrder: 1 },
+      { code: 'hub.partners', name: 'Parceiros', category: 'HUB', sortOrder: 2 },
+      { code: 'hub.suppliers', name: 'Fornecedores', category: 'HUB', sortOrder: 3 },
+      { code: 'hub.tools', name: 'Ferramentas', category: 'HUB', sortOrder: 4 },
+      { code: 'hub.templates', name: 'Templates', category: 'HUB', sortOrder: 5 },
+      { code: 'hub.materials', name: 'Materiais', category: 'HUB', sortOrder: 6 },
       
       // Minha Área
       { code: 'myarea.suppliers', name: 'Meus Fornecedores', category: 'Minha Área', sortOrder: 1 },
@@ -262,10 +266,15 @@ export class PermissionService {
       { code: 'myarea.brands', name: 'Minhas Marcas', category: 'Minha Área', sortOrder: 4 },
       { code: 'myarea.subscriptions', name: 'Minhas Assinaturas', category: 'Minha Área', sortOrder: 5 },
       
-      // Dashboard e Conteúdo
-      { code: 'content.videos', name: 'Vídeos do YouTube', category: 'Conteúdo', sortOrder: 1 },
-      { code: 'content.news', name: 'Notícias', category: 'Conteúdo', sortOrder: 2 },
-      { code: 'content.updates', name: 'Novidades', category: 'Conteúdo', sortOrder: 3 },
+      // Simuladores e Outros
+      { code: 'simulators.simples_nacional', name: 'Simples Nacional', category: 'Simuladores', sortOrder: 1 },
+      { code: 'simulators.importacao_simples', name: 'Importação Simplificada', category: 'Simuladores', sortOrder: 2 },
+      { code: 'simulators.importacao_formal', name: 'Importação Formal', category: 'Simuladores', sortOrder: 3 },
+      { code: 'simulators.viabilidade_produto', name: 'Viabilidade de Produto', category: 'Simuladores', sortOrder: 4 },
+      
+      // Conteúdo e Notícias
+      { code: 'content.news', name: 'Notícias', category: 'Conteúdo', sortOrder: 1 },
+      { code: 'content.updates', name: 'Novidades', category: 'Conteúdo', sortOrder: 2 },
       
       // Admin Area
       { code: 'admin.access', name: 'Acesso à Área Admin', category: 'Admin', sortOrder: 1 },

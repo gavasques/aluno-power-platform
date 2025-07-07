@@ -60,7 +60,7 @@ const menuItems = [
     ],
   },
   {
-    title: "HUB",
+    title: "Hub",
     items: [
       { title: "Vídeos", href: "/videos", icon: Youtube },
       { title: "Parceiros", href: "/hub/parceiros", icon: Users },
