@@ -111,6 +111,33 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 08, 2025 - 03:18 AM**: 🐛 BUG CRÍTICO CORRIGIDO - CÁLCULO RBT12 NO SIMULADOR SIMPLES NACIONAL COMPLETO
+  - **Problema identificado**: RBT12 não estava somando corretamente o mês atual + 11 meses anteriores
+  - **Correção implementada**: 
+    - ✅ **Função calcularSomaUltimos12Meses otimizada**: Agora calcula corretamente mês atual + 11 anteriores
+    - ✅ **UseMemo refatorado**: Cálculos sequenciais garantem que faturamento total seja calculado antes do RBT12
+    - ✅ **Logs de debug adicionados**: Console logs para verificar cálculos em tempo real
+    - ✅ **Validação de dados**: Proteção contra valores undefined com fallback para 0
+  - **Exemplo corrigido**: Mês 05/2023 agora soma corretamente 6.296,56 + 8.848,89 = 15.145,45
+  - **Impacto**: Alíquota efetiva agora é calculada com base no RBT12 correto, garantindo precisão tributária
+
+- **January 08, 2025 - 03:00 AM**: ✅ SIMULADOR SIMPLES NACIONAL COMPLETO IMPLEMENTADO COM ESPECIFICAÇÕES TÉCNICAS AVANÇADAS
+  - **Simulador de tela única criado**: Interface intuitiva com formulário de entrada e tabela de resultados
+  - **Implementação completa das especificações técnicas**:
+    - ✅ **Distinção entre faturamento com e sem ST**: Cálculos específicos para cada tipo
+    - ✅ **Tabelas de alíquotas Anexo I e II**: Implementação fiel das faixas tributárias
+    - ✅ **Cálculos automáticos em tempo real**: RBT12, alíquota efetiva, percentual ICMS
+    - ✅ **Formatação brasileira**: R$ X.XXX.XXX,XX em todos os valores monetários
+    - ✅ **Validações robustas**: Formato MM/AAAA, valores positivos, limites do Simples Nacional
+  - **Funcionalidades avançadas**:
+    - Persistência automática no localStorage
+    - Exportação para CSV com dados completos
+    - Resumo executivo com métricas principais
+    - Sistema de alertas para limites próximos
+    - Interface responsiva para desktop e mobile
+  - **Integração completa**: Rota /simuladores/simulador-simples-nacional-completo ativa
+  - **Badge "Novo!"**: Destacado na página de simuladores para maior visibilidade
+
 - **January 07, 2025 - 08:50 PM**: ✅ SIMULADOR DE IMPORTAÇÃO - FUNCIONALIDADES ANALÍTICAS AVANÇADAS E PDF EXPORT COMPLETO
   - **Auto-Switch para Simulação Ativa**: Carregar simulação agora muda automaticamente para aba "Simulação Ativa"
   - **Campos de Fornecedor e Observações**: Implementados campos "Nome do Fornecedor" e "Observações" no cabeçalho da simulação

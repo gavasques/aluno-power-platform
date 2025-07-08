@@ -76,100 +76,55 @@ const buscarFaixaAnexo = (rbt12: number, anexo: 'Anexo I' | 'Anexo II') => {
   return tabela[0];
 };
 
-// Função para calcular a soma dos últimos 12 meses
+// Função para calcular a soma dos últimos 12 meses (mês atual + 11 anteriores)
 const calcularSomaUltimos12Meses = (meses: MesSimulacao[], indiceAtual: number): number => {
-  if (indiceAtual < 12) {
-    return meses.slice(0, indiceAtual + 1)
-      .reduce((soma, mes) => soma + mes.faturamentoTotal, 0);
+  // Se temos menos de 12 meses, somar todos desde o início até o mês atual (incluindo)
+  if (indiceAtual < 11) {
+    const somaParcial = meses.slice(0, indiceAtual + 1)
+      .reduce((soma, mes) => soma + (mes.faturamentoTotal || 0), 0);
+    console.log(`RBT12 parcial (${indiceAtual + 1} meses):`, formatCurrency(somaParcial));
+    return somaParcial;
   }
   
-  return meses.slice(indiceAtual - 11, indiceAtual + 1)
-    .reduce((soma, mes) => soma + mes.faturamentoTotal, 0);
+  // Se temos 12 ou mais meses, pegar os últimos 12 meses (índices de indiceAtual-11 até indiceAtual)
+  const inicio = indiceAtual - 11;
+  const fim = indiceAtual + 1;
+  const mesesPara12 = meses.slice(inicio, fim);
+  
+  const soma12Meses = mesesPara12.reduce((soma, mes) => soma + (mes.faturamentoTotal || 0), 0);
+  console.log(`RBT12 completo (12 meses do índice ${inicio} ao ${indiceAtual}):`, formatCurrency(soma12Meses));
+  
+  return soma12Meses;
 };
 
 // Função para calcular a média dos últimos 12 meses
 const calcularMediaUltimos12Meses = (meses: MesSimulacao[], indiceAtual: number): number => {
-  if (indiceAtual < 12) {
+  if (indiceAtual < 11) {
     const mesesDisponiveis = meses.slice(0, indiceAtual + 1);
-    return mesesDisponiveis.reduce((soma, mes) => soma + mes.faturamentoTotal, 0) / mesesDisponiveis.length;
+    return mesesDisponiveis.reduce((soma, mes) => soma + (mes.faturamentoTotal || 0), 0) / mesesDisponiveis.length;
   }
   
   const ultimos12Meses = meses.slice(indiceAtual - 11, indiceAtual + 1);
-  return ultimos12Meses.reduce((soma, mes) => soma + mes.faturamentoTotal, 0) / 12;
+  return ultimos12Meses.reduce((soma, mes) => soma + (mes.faturamentoTotal || 0), 0) / 12;
 };
 
-// Função para calcular todos os campos derivados
-const calcularCampos = (mes: Omit<MesSimulacao, 'faturamentoTotal' | 'faturamentoAcumulado12Meses' | 'rbt12' | 'media12Meses' | 'disponivelMedia' | 'disponivelAnual' | 'aliquotaEfetiva' | 'percentualICMS' | 'valorSemST' | 'valorComST' | 'valorTotal'>, meses: MesSimulacao[], indiceAtual: number): MesSimulacao => {
-  // 1. Faturamento Total
-  const faturamentoTotal = mes.faturamentoSemST + mes.faturamentoComST;
+// Função auxiliar para debug - vamos adicionar logs para verificar os cálculos
+const debugCalculos = (meses: any[], indice: number, rbt12: number) => {
+  console.log(`=== DEBUG MÊS ${indice + 1} ===`);
+  console.log(`Mês atual: ${meses[indice]?.mesAno} - Fat. Total: ${formatCurrency(meses[indice]?.faturamentoTotal || 0)}`);
   
-  // Criar mes temporário para cálculos
-  const mesTemp: MesSimulacao = {
-    ...mes,
-    faturamentoTotal,
-    faturamentoAcumulado12Meses: 0,
-    rbt12: 0,
-    media12Meses: 0,
-    disponivelMedia: 0,
-    disponivelAnual: 0,
-    aliquotaEfetiva: 0,
-    percentualICMS: 0,
-    valorSemST: 0,
-    valorComST: 0,
-    valorTotal: 0
-  };
+  const inicio = Math.max(0, indice - 11);
+  const fim = indice + 1;
+  console.log(`Calculando RBT12 do índice ${inicio} ao ${fim - 1} (${fim - inicio} meses)`);
   
-  // Atualizar array temporário para cálculos
-  const mesesTemp = [...meses];
-  mesesTemp[indiceAtual] = mesTemp;
+  for (let i = inicio; i < fim; i++) {
+    if (meses[i]) {
+      console.log(`  ${i}: ${meses[i].mesAno} = ${formatCurrency(meses[i].faturamentoTotal)}`);
+    }
+  }
   
-  // 2. Faturamento Acumulado 12 meses
-  const faturamentoAcumulado12Meses = calcularSomaUltimos12Meses(mesesTemp, indiceAtual);
-  
-  // 3. RBT12 (mesmo valor do acumulado)
-  const rbt12 = faturamentoAcumulado12Meses;
-  
-  // 4. Média 12 meses
-  const media12Meses = calcularMediaUltimos12Meses(mesesTemp, indiceAtual);
-  
-  // 5. Disponível Média
-  const disponivelMedia = 300000 - media12Meses;
-  
-  // 6. Disponível Anual
-  const disponivelAnual = 3600000 - rbt12;
-  
-  // 7. Buscar faixa de alíquota
-  const faixa = buscarFaixaAnexo(rbt12, mes.anexo);
-  
-  // 8. Alíquota Efetiva
-  const aliquotaEfetiva = rbt12 > 0 ? (rbt12 * faixa.aliquotaNominal - faixa.valorDeduzir) / rbt12 : 0;
-  
-  // 9. Percentual ICMS
-  const percentualICMS = faixa.percentualICMS;
-  
-  // 10. Valor sem ST (aplica alíquota efetiva normal)
-  const valorSemST = mes.faturamentoSemST * aliquotaEfetiva;
-  
-  // 11. Valor com ST (aplica alíquota efetiva com redução do ICMS)
-  const valorComST = mes.faturamentoComST * aliquotaEfetiva * (1 - percentualICMS);
-  
-  // 12. Valor Total
-  const valorTotal = valorSemST + valorComST;
-  
-  return {
-    ...mes,
-    faturamentoTotal,
-    faturamentoAcumulado12Meses,
-    rbt12,
-    media12Meses,
-    disponivelMedia,
-    disponivelAnual,
-    aliquotaEfetiva,
-    percentualICMS,
-    valorSemST,
-    valorComST,
-    valorTotal
-  };
+  console.log(`RBT12 Total: ${formatCurrency(rbt12)}`);
+  console.log(`========================`);
 };
 
 export default function SimplesNacionalCompleto() {
@@ -206,8 +161,49 @@ export default function SimplesNacionalCompleto() {
 
   // Recalcular todos os meses quando algum for alterado
   const mesesCalculados = useMemo(() => {
-    return meses.map((mes, index) => {
-      return calcularCampos(mes, meses, index);
+    // Primeiro, atualizar apenas os faturamentos totais
+    const mesesComFaturamentoTotal = meses.map(mes => ({
+      ...mes,
+      faturamentoTotal: mes.faturamentoSemST + mes.faturamentoComST
+    }));
+    
+    // Depois, calcular todos os campos derivados com base nos faturamentos atualizados
+    return mesesComFaturamentoTotal.map((mes, index) => {
+      // Usar mesesComFaturamentoTotal para os cálculos de soma
+      const faturamentoAcumulado12Meses = calcularSomaUltimos12Meses(mesesComFaturamentoTotal, index);
+      const rbt12 = faturamentoAcumulado12Meses;
+      
+      // Debug: verificar se o cálculo está correto
+      if (index === mesesComFaturamentoTotal.length - 1) {
+        debugCalculos(mesesComFaturamentoTotal, index, rbt12);
+      }
+      const media12Meses = calcularMediaUltimos12Meses(mesesComFaturamentoTotal, index);
+      
+      const disponivelMedia = 300000 - media12Meses;
+      const disponivelAnual = 3600000 - rbt12;
+      
+      const faixa = buscarFaixaAnexo(rbt12, mes.anexo);
+      const aliquotaEfetiva = rbt12 > 0 ? (rbt12 * faixa.aliquotaNominal - faixa.valorDeduzir) / rbt12 : 0;
+      const percentualICMS = faixa.percentualICMS;
+      
+      const valorSemST = mes.faturamentoSemST * aliquotaEfetiva;
+      const valorComST = mes.faturamentoComST * aliquotaEfetiva * (1 - percentualICMS);
+      const valorTotal = valorSemST + valorComST;
+      
+      return {
+        ...mes,
+        faturamentoTotal: mes.faturamentoTotal,
+        faturamentoAcumulado12Meses,
+        rbt12,
+        media12Meses,
+        disponivelMedia,
+        disponivelAnual,
+        aliquotaEfetiva,
+        percentualICMS,
+        valorSemST,
+        valorComST,
+        valorTotal
+      };
     });
   }, [meses]);
 
