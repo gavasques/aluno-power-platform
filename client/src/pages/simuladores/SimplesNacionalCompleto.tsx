@@ -183,7 +183,20 @@ export default function SimplesNacionalCompleto() {
       const disponivelAnual = 3600000 - rbt12;
       
       const faixa = buscarFaixaAnexo(rbt12, mes.anexo);
-      const aliquotaEfetiva = rbt12 > 0 ? (rbt12 * faixa.aliquotaNominal - faixa.valorDeduzir) / rbt12 : 0;
+      
+      // Fórmula correta da alíquota efetiva do Simples Nacional
+      // Alíquota Efetiva = (RBT12 x Alíquota Nominal – Valor a Deduzir) / RBT12
+      const aliquotaEfetiva = rbt12 > 0 ? ((rbt12 * faixa.aliquotaNominal) - faixa.valorDeduzir) / rbt12 : 0;
+      
+      // Debug: verificar cálculo da alíquota efetiva
+      if (index === mesesComFaturamentoTotal.length - 1) {
+        console.log(`Anexo: ${mes.anexo}`);
+        console.log(`RBT12: ${formatCurrency(rbt12)}`);
+        console.log(`Alíquota Nominal: ${(faixa.aliquotaNominal * 100).toFixed(2)}%`);
+        console.log(`Valor a Deduzir: ${formatCurrency(faixa.valorDeduzir)}`);
+        console.log(`Cálculo: (${formatCurrency(rbt12)} × ${(faixa.aliquotaNominal * 100).toFixed(2)}% - ${formatCurrency(faixa.valorDeduzir)}) ÷ ${formatCurrency(rbt12)}`);
+        console.log(`Alíquota Efetiva: ${(aliquotaEfetiva * 100).toFixed(4)}%`);
+      }
       const percentualICMS = faixa.percentualICMS;
       
       const valorSemST = mes.faturamentoSemST * aliquotaEfetiva;
