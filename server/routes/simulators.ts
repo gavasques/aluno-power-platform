@@ -1,6 +1,15 @@
 import { Router } from 'express';
 import { db } from '../db';
-import { importSimulations, insertImportSimulationSchema, simplesNacionalSimulations, insertSimplesNacionalSimulationSchema } from '../../shared/schema';
+import { 
+  importSimulations, 
+  insertImportSimulationSchema, 
+  simplesNacionalSimulations, 
+  insertSimplesNacionalSimulationSchema,
+  formalImportSimulations,
+  insertFormalImportSimulationSchema,
+  investmentSimulations,
+  insertInvestmentSimulationSchema
+} from '../../shared/schema';
 import { requireAuth } from '../security';
 import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
@@ -456,6 +465,414 @@ router.delete('/simples-nacional/:id', requireAuth, async (req, res) => {
     res.json({ message: 'Simulação excluída com sucesso' });
   } catch (error) {
     console.error('Error deleting Simples Nacional simulation:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// ===== CBM CALCULATION ENGINE FOR FORMAL IMPORT SIMULATOR =====
+
+// Default values as per specification
+const impostosDefault = [
+  {
+    nome: "Imposto de Importação (II)",
+    aliquota: 0.60, // 60%
+    baseCalculo: "valor_fob_real",
+    valor: 0
+  },
+  {
+    nome: "IPI",
+    aliquota: 0.15, // 15%
+    baseCalculo: "base_ii_ipi",
+    valor: 0
+  },
+  {
+    nome: "PIS",
+    aliquota: 0.0233, // 2.33%
+    baseCalculo: "total_base_calculo",
+    valor: 0
+  },
+  {
+    nome: "COFINS",
+    aliquota: 0.1074, // 10.74%
+    baseCalculo: "total_base_calculo",
+    valor: 0
+  },
+  {
+    nome: "ICMS",
+    aliquota: 0.17, // 17%
+    baseCalculo: "total_base_calculo",
+    valor: 0
+  }
+];
+
+const despesasDefault = [
+  {
+    nome: "Taxa SISCOMEX",
+    valorDolar: 0,
+    valorReal: 214.50
+  },
+  {
+    nome: "Honorários Despachante",
+    valorDolar: 0,
+    valorReal: 500.00
+  },
+  {
+    nome: "Armazenagem",
+    valorDolar: 0,
+    valorReal: 0
+  },
+  {
+    nome: "Transporte Interno",
+    valorDolar: 0,
+    valorReal: 0
+  }
+];
+
+// CBM calculation functions
+function calcularCBM(comprimento: number, largura: number, altura: number): number {
+  // Converte de cm³ para m³ (divide por 1.000.000)
+  return (comprimento * largura * altura) / 1000000;
+}
+
+function converterDolarParaReal(valorDolar: number, taxaDolar: number): number {
+  return valorDolar * taxaDolar;
+}
+
+function calcularCFR(valorFOB: number, valorFrete: number): number {
+  return valorFOB + valorFrete;
+}
+
+function calcularSeguro(valorCFR: number, percentualSeguro: number): number {
+  return valorCFR * (percentualSeguro / 100);
+}
+
+// Tax calculation functions
+function calcularBaseII(valorFOBReal: number): number {
+  return valorFOBReal;
+}
+
+function calcularBaseIPI(valorFOBReal: number, valorFreteReal: number, valorII: number): number {
+  return valorFOBReal + valorFreteReal + valorII;
+}
+
+function calcularBaseTotalImpostos(valorFOBReal: number, valorFreteReal: number, valorII: number, valorIPI: number): number {
+  return valorFOBReal + valorFreteReal + valorII + valorIPI;
+}
+
+function calcularImposto(baseCalculo: number, aliquota: number): number {
+  return baseCalculo * aliquota;
+}
+
+// Complete simulation calculation engine
+function calcularSimulacaoCompleta(simulacao: any): any {
+  // Valores base convertidos
+  const valorFOBReal = converterDolarParaReal(simulacao.valorFobDolar, simulacao.taxaDolar);
+  const valorFreteReal = converterDolarParaReal(simulacao.valorFreteDolar, simulacao.taxaDolar);
+  const valorCFRDolar = calcularCFR(simulacao.valorFobDolar, simulacao.valorFreteDolar);
+  const valorCFRReal = converterDolarParaReal(valorCFRDolar, simulacao.taxaDolar);
+  const valorSeguro = calcularSeguro(valorCFRDolar, simulacao.percentualSeguro);
+
+  // Cálculo de impostos seguindo a sequência correta
+  const baseII = calcularBaseII(valorFOBReal);
+  const valorII = calcularImposto(baseII, simulacao.impostos.find((i: any) => i.nome.includes("II"))?.aliquota || 0.60);
+  
+  const baseIPI = calcularBaseIPI(valorFOBReal, valorFreteReal, valorII);
+  const valorIPI = calcularImposto(baseIPI, simulacao.impostos.find((i: any) => i.nome.includes("IPI"))?.aliquota || 0.15);
+  
+  const baseTotalImpostos = calcularBaseTotalImpostos(valorFOBReal, valorFreteReal, valorII, valorIPI);
+  
+  // Calcular outros impostos
+  const valorPIS = calcularImposto(baseTotalImpostos, simulacao.impostos.find((i: any) => i.nome.includes("PIS"))?.aliquota || 0.0233);
+  const valorCOFINS = calcularImposto(baseTotalImpostos, simulacao.impostos.find((i: any) => i.nome.includes("COFINS"))?.aliquota || 0.1074);
+  const valorICMS = calcularImposto(baseTotalImpostos, simulacao.impostos.find((i: any) => i.nome.includes("ICMS"))?.aliquota || 0.17);
+  
+  const totalImpostos = valorII + valorIPI + valorPIS + valorCOFINS + valorICMS;
+
+  // Calcular total de despesas adicionais
+  let totalDespesas = 0;
+  simulacao.despesasAdicionais.forEach((despesa: any) => {
+    if (despesa.valorDolar > 0) {
+      despesa.valorReal = converterDolarParaReal(despesa.valorDolar, simulacao.taxaDolar);
+    }
+    totalDespesas += despesa.valorReal;
+  });
+
+  // Calcular CBM total e percentuais do container
+  let cbmTotal = 0;
+  simulacao.produtos.forEach((produto: any) => {
+    produto.cbmUnitario = calcularCBM(produto.comprimento, produto.largura, produto.altura);
+    produto.cbmTotal = produto.cbmUnitario * produto.quantidade;
+    cbmTotal += produto.cbmTotal;
+  });
+
+  // Calcular percentuais do container e rateios
+  simulacao.produtos.forEach((produto: any) => {
+    produto.percentualContainer = cbmTotal > 0 ? produto.cbmTotal / cbmTotal : 0;
+    
+    // Valores do produto
+    produto.valorTotalUSD = produto.valorUnitarioUsd * produto.quantidade;
+    produto.valorTotalBRL = converterDolarParaReal(produto.valorTotalUSD, simulacao.taxaDolar);
+    
+    // Rateios por CBM
+    produto.freteRateio = valorFreteReal * produto.percentualContainer;
+    produto.despesasRateio = totalDespesas * produto.percentualContainer;
+    
+    // Impostos rateados
+    produto.impostos = {
+      ii: valorII * produto.percentualContainer,
+      ipi: valorIPI * produto.percentualContainer,
+      pis: valorPIS * produto.percentualContainer,
+      cofins: valorCOFINS * produto.percentualContainer,
+      icms: valorICMS * produto.percentualContainer
+    };
+    
+    const totalImpostosProduto = produto.impostos.ii + produto.impostos.ipi + 
+                                produto.impostos.pis + produto.impostos.cofins + produto.impostos.icms;
+    
+    produto.custoTotal = produto.valorTotalBRL + produto.freteRateio + produto.despesasRateio + totalImpostosProduto;
+    produto.custoUnitario = produto.quantidade > 0 ? produto.custoTotal / produto.quantidade : 0;
+  });
+
+  // Atualizar objeto de resultados
+  simulacao.resultados = {
+    valorFobReal,
+    valorFreteReal,
+    valorCfrDolar: valorCFRDolar,
+    valorCfrReal: valorCFRReal,
+    valorSeguro,
+    totalImpostos,
+    totalDespesas,
+    custoTotal: valorFOBReal + valorFreteReal + valorSeguro + totalImpostos + totalDespesas,
+    cbmTotal
+  };
+
+  return simulacao;
+}
+
+// ===== FORMAL IMPORT SIMULATION ROUTES =====
+
+// Get formal import simulations for user
+router.get('/formal-import', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    
+    const simulations = await db
+      .select()
+      .from(formalImportSimulations)
+      .where(eq(formalImportSimulations.userId, userId))
+      .orderBy(desc(formalImportSimulations.dataModificacao))
+      .limit(30);
+
+    res.json(simulations);
+  } catch (error) {
+    console.error('Error fetching formal import simulations:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Get specific formal import simulation
+router.get('/formal-import/:id', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const simulationId = parseInt(req.params.id);
+
+    const simulation = await db
+      .select()
+      .from(formalImportSimulations)
+      .where(eq(formalImportSimulations.id, simulationId))
+      .limit(1);
+
+    if (!simulation.length || simulation[0].userId !== userId) {
+      return res.status(404).json({ error: 'Simulação não encontrada' });
+    }
+
+    res.json(simulation[0]);
+  } catch (error) {
+    console.error('Error fetching formal import simulation:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Create new formal import simulation
+router.post('/formal-import', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    
+    // Validate and prepare data
+    const simulationData = {
+      userId,
+      nome: req.body.nome || "Nova Simulação Formal",
+      fornecedor: req.body.fornecedor || "",
+      despachante: req.body.despachante || "",
+      agenteCargas: req.body.agenteCargas || "",
+      status: req.body.status || "Em andamento",
+      taxaDolar: parseFloat(req.body.taxaDolar) || 5.5,
+      valorFobDolar: parseFloat(req.body.valorFobDolar) || 0,
+      valorFreteDolar: parseFloat(req.body.valorFreteDolar) || 0,
+      percentualSeguro: parseFloat(req.body.percentualSeguro) || 0.5,
+      impostos: req.body.impostos || impostosDefault,
+      despesasAdicionais: req.body.despesasAdicionais || despesasDefault,
+      produtos: req.body.produtos || [],
+      resultados: {},
+      codigoSimulacao: generateSimulationCode()
+    };
+
+    // Calculate complete simulation
+    const calculatedSimulation = calcularSimulacaoCompleta(simulationData);
+
+    const newSimulation = await db
+      .insert(formalImportSimulations)
+      .values(calculatedSimulation)
+      .returning();
+
+    res.status(201).json(newSimulation[0]);
+  } catch (error) {
+    console.error('Error creating formal import simulation:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Update formal import simulation
+router.put('/formal-import/:id', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const simulationId = parseInt(req.params.id);
+
+    // Check if simulation exists and belongs to user
+    const existingSimulation = await db
+      .select()
+      .from(formalImportSimulations)
+      .where(eq(formalImportSimulations.id, simulationId))
+      .limit(1);
+
+    if (!existingSimulation.length || existingSimulation[0].userId !== userId) {
+      return res.status(404).json({ error: 'Simulação não encontrada' });
+    }
+
+    // Prepare updated data
+    const updatedData = {
+      nome: req.body.nome,
+      fornecedor: req.body.fornecedor,
+      despachante: req.body.despachante,
+      agenteCargas: req.body.agenteCargas,
+      status: req.body.status,
+      taxaDolar: parseFloat(req.body.taxaDolar),
+      valorFobDolar: parseFloat(req.body.valorFobDolar),
+      valorFreteDolar: parseFloat(req.body.valorFreteDolar),
+      percentualSeguro: parseFloat(req.body.percentualSeguro),
+      impostos: req.body.impostos,
+      despesasAdicionais: req.body.despesasAdicionais,
+      produtos: req.body.produtos,
+      dataModificacao: new Date()
+    };
+
+    // Calculate complete simulation
+    const calculatedSimulation = calcularSimulacaoCompleta(updatedData);
+
+    const updatedSimulation = await db
+      .update(formalImportSimulations)
+      .set(calculatedSimulation)
+      .where(eq(formalImportSimulations.id, simulationId))
+      .returning();
+
+    res.json(updatedSimulation[0]);
+  } catch (error) {
+    console.error('Error updating formal import simulation:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Delete formal import simulation
+router.delete('/formal-import/:id', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const simulationId = parseInt(req.params.id);
+
+    // Check if simulation exists and belongs to user
+    const existingSimulation = await db
+      .select()
+      .from(formalImportSimulations)
+      .where(eq(formalImportSimulations.id, simulationId))
+      .limit(1);
+
+    if (!existingSimulation.length || existingSimulation[0].userId !== userId) {
+      return res.status(404).json({ error: 'Simulação não encontrada' });
+    }
+
+    // Delete simulation
+    await db
+      .delete(formalImportSimulations)
+      .where(eq(formalImportSimulations.id, simulationId));
+
+    res.json({ message: 'Simulação excluída com sucesso' });
+  } catch (error) {
+    console.error('Error deleting formal import simulation:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Duplicate formal import simulation
+router.post('/formal-import/:id/duplicate', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const simulationId = parseInt(req.params.id);
+
+    // Get original simulation
+    const originalSimulation = await db
+      .select()
+      .from(formalImportSimulations)
+      .where(eq(formalImportSimulations.id, simulationId))
+      .limit(1);
+
+    if (!originalSimulation.length || originalSimulation[0].userId !== userId) {
+      return res.status(404).json({ error: 'Simulação não encontrada' });
+    }
+
+    // Generate new code
+    const codigoSimulacao = generateSimulationCode();
+
+    // Create duplicate
+    const duplicatedSimulation = await db
+      .insert(formalImportSimulations)
+      .values({
+        userId: userId,
+        nome: `${originalSimulation[0].nome} (Cópia)`,
+        codigoSimulacao: codigoSimulacao,
+        fornecedor: originalSimulation[0].fornecedor,
+        despachante: originalSimulation[0].despachante,
+        agenteCargas: originalSimulation[0].agenteCargas,
+        status: "Em andamento",
+        taxaDolar: originalSimulation[0].taxaDolar,
+        valorFobDolar: originalSimulation[0].valorFobDolar,
+        valorFreteDolar: originalSimulation[0].valorFreteDolar,
+        percentualSeguro: originalSimulation[0].percentualSeguro,
+        impostos: originalSimulation[0].impostos,
+        despesasAdicionais: originalSimulation[0].despesasAdicionais,
+        produtos: originalSimulation[0].produtos,
+        resultados: originalSimulation[0].resultados
+      })
+      .returning();
+
+    res.status(201).json(duplicatedSimulation[0]);
+  } catch (error) {
+    console.error('Error duplicating formal import simulation:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Get calculation results for a simulation (real-time calculation endpoint)
+router.post('/formal-import/calculate', requireAuth, async (req, res) => {
+  try {
+    // This endpoint performs real-time calculations without saving
+    const simulationData = req.body;
+    const calculatedSimulation = calcularSimulacaoCompleta(simulationData);
+    
+    res.json({
+      produtos: calculatedSimulation.produtos,
+      resultados: calculatedSimulation.resultados
+    });
+  } catch (error) {
+    console.error('Error calculating formal import simulation:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });

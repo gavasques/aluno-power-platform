@@ -47,13 +47,14 @@ const simuladorItems: SimuladorItem[] = [
     isAvailable: true,
   },
   {
-    id: "importacao-formal",
-    title: "Importação Formal",
-    description: "Calcule todos os custos envolvidos na importação formal de mercadorias",
-    href: "/simuladores/importacao-formal",
+    id: "importacao-formal-direta",
+    title: "Importação Formal Direta",
+    description: "Simulador completo com rateio por CBM e cálculo detalhado de impostos de importação",
+    href: "/simuladores/importacao-formal-direta",
     icon: Building,
     category: "Importação",
     isAvailable: true,
+    isNew: true,
   },
   {
     id: "viabilidade-produto",

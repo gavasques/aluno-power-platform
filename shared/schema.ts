@@ -2655,6 +2655,48 @@ export const importSimulations = pgTable("import_simulations", {
   codigoIdx: index("import_simulations_codigo_idx").on(table.codigoSimulacao),
 }));
 
+// Formal Import Simulations (CBM-based cost allocation)
+export const formalImportSimulations = pgTable("formal_import_simulations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  nome: text("nome").notNull(),
+  dataCriacao: timestamp("data_criacao").notNull().defaultNow(),
+  dataModificacao: timestamp("data_modificacao").notNull().defaultNow(),
+  fornecedor: text("fornecedor"),
+  despachante: text("despachante"),
+  agenteCargas: text("agente_cargas"),
+  status: text("status").notNull().default("Em andamento"), // Em andamento, Finalizada, etc.
+  
+  // Seção 1: Informações Iniciais
+  taxaDolar: decimal("taxa_dolar", { precision: 10, scale: 4 }).notNull(),
+  valorFobDolar: decimal("valor_fob_dolar", { precision: 15, scale: 2 }).notNull(),
+  valorFreteDolar: decimal("valor_frete_dolar", { precision: 15, scale: 2 }).notNull(),
+  
+  // Seção 2: Seguro
+  percentualSeguro: decimal("percentual_seguro", { precision: 5, scale: 2 }).notNull().default("0.5"),
+  
+  // Seção 3: Impostos de Nacionalização
+  impostos: jsonb("impostos").notNull(), // Array of tax objects
+  
+  // Seção 4: Despesas Adicionais
+  despesasAdicionais: jsonb("despesas_adicionais").notNull(), // Array of additional expenses
+  
+  // Seção 5: Produtos
+  produtos: jsonb("produtos").notNull(), // Array of products with CBM calculations
+  
+  // Seção 6 e 7: Resultados e Total da Importação (calculated fields)
+  resultados: jsonb("resultados").notNull(), // Summary results object
+  
+  codigoSimulacao: text("codigo_simulacao").notNull().unique(), // Código único de 8 caracteres alfanuméricos
+}, (table) => ({
+  userIdx: index("formal_import_simulations_user_idx").on(table.userId),
+  codigoIdx: index("formal_import_simulations_codigo_idx").on(table.codigoSimulacao),
+  statusIdx: index("formal_import_simulations_status_idx").on(table.status),
+  dataModificacaoIdx: index("formal_import_simulations_data_modificacao_idx").on(table.dataModificacao),
+}));
+
+
+
 // Permission System Types
 export const insertPermissionGroupSchema = createInsertSchema(permissionGroups).omit({
   id: true,
@@ -2743,6 +2785,26 @@ export const importSimulationsRelations = relations(importSimulations, ({ one })
     references: [users.id],
   }),
 }));
+
+// Formal Import Simulations Types
+export const insertFormalImportSimulationSchema = createInsertSchema(formalImportSimulations).omit({
+  id: true,
+  codigoSimulacao: true,
+  dataCriacao: true,
+  dataModificacao: true,
+});
+export type InsertFormalImportSimulation = z.infer<typeof insertFormalImportSimulationSchema>;
+export type FormalImportSimulation = typeof formalImportSimulations.$inferSelect;
+
+// Formal Import Simulations Relations
+export const formalImportSimulationsRelations = relations(formalImportSimulations, ({ one }) => ({
+  user: one(users, {
+    fields: [formalImportSimulations.userId],
+    references: [users.id],
+  }),
+}));
+
+
 
 // Simples Nacional Simulations
 export const simplesNacionalSimulations = pgTable("simples_nacional_simulations", {
