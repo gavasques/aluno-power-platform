@@ -28,6 +28,16 @@ const simuladorItems: SimuladorItem[] = [
     isAvailable: true,
   },
   {
+    id: "simples-nacional-completo",
+    title: "Simples Nacional Completo",
+    description: "Simulador avançado com distinção entre faturamento com e sem ST",
+    href: "/simuladores/simulador-simples-nacional-completo",
+    icon: Calculator,
+    category: "Tributário",
+    isAvailable: true,
+    isNew: true,
+  },
+  {
     id: "importacao-simplificada", 
     title: "Importação Simplificada",
     description: "Simule custos e impostos para importação simplificada de produtos",
