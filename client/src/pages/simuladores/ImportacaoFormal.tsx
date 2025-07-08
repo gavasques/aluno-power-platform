@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -84,7 +85,7 @@ export default function ImportacaoFormal() {
     },
     produtos: []
   });
-  // Products are now stored in currentSimulation.produtos
+  
   const [newProduct, setNewProduct] = useState<ImportProduct>({
     descricao: "",
     quantidade: 1,

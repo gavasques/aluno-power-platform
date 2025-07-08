@@ -3,11 +3,12 @@ import { db } from "../db";
 import { importSimulations, type ImportSimulation, insertImportSimulationSchema } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { z } from "zod";
+import { requireAuth } from "../security";
 
 const router = Router();
 
 // Get all import simulations for current user
-router.get("/", async (req: any, res) => {
+router.get("/", requireAuth, async (req: any, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -37,7 +38,7 @@ router.get("/", async (req: any, res) => {
 });
 
 // Get single import simulation
-router.get("/:id", async (req: any, res) => {
+router.get("/:id", requireAuth, async (req: any, res) => {
   try {
     const userId = req.user?.id;
     const simulationId = parseInt(req.params.id);
@@ -67,7 +68,7 @@ router.get("/:id", async (req: any, res) => {
 });
 
 // Create new import simulation
-router.post("/", async (req: any, res) => {
+router.post("/", requireAuth, async (req: any, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -101,7 +102,7 @@ router.post("/", async (req: any, res) => {
 });
 
 // Update import simulation
-router.put("/:id", async (req: any, res) => {
+router.put("/:id", requireAuth, async (req: any, res) => {
   try {
     const userId = req.user?.id;
     const simulationId = parseInt(req.params.id);
@@ -146,7 +147,7 @@ router.put("/:id", async (req: any, res) => {
 });
 
 // Delete import simulation
-router.delete("/:id", async (req: any, res) => {
+router.delete("/:id", requireAuth, async (req: any, res) => {
   try {
     const userId = req.user?.id;
     const simulationId = parseInt(req.params.id);
