@@ -114,7 +114,6 @@ import dashboardRoutes from './routes/dashboard';
 import { registerAdvancedRoutes } from './routes/advanced';
 import userDashboardRoutes from './routes/user/dashboard';
 import userUsageRoutes from './routes/user/usage';
-import importSimulationsRoutes from './routes/import-simulations';
 
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();

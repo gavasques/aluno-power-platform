@@ -383,42 +383,25 @@ export default function InvestimentosROI() {
       doc.text(`Ganho Líquido: ${formatCurrency(totais.ganhoLiquido)}`, 30, 110);
       doc.text(`ROI Total: ${formatPercent(totais.roiTotal)}`, 30, 120);
 
-      // Tabela de giros - removendo formatação de moeda para evitar conflitos
+      // Tabela de giros
       const tableColumns = ['Giro', 'Investimento', 'ROI%', 'Retorno', 'Aporte', 'Retirada', 'Saldo'];
       const tableRows = girosCalculados.map(giro => [
         giro.numero.toString(),
-        `R$ ${giro.investimento.toLocaleString('pt-BR')}`,
-        `${giro.roiGiro.toFixed(2)}%`,
-        `R$ ${giro.retorno.toLocaleString('pt-BR')}`,
-        `R$ ${giro.aporte.toLocaleString('pt-BR')}`,
-        `R$ ${giro.retirada.toLocaleString('pt-BR')}`,
-        `R$ ${giro.saldo.toLocaleString('pt-BR')}`
+        formatCurrency(giro.investimento),
+        formatPercent(giro.roiGiro),
+        formatCurrency(giro.retorno),
+        formatCurrency(giro.aporte),
+        formatCurrency(giro.retirada),
+        formatCurrency(giro.saldo)
       ]);
 
-      // Verificar se autoTable está disponível
-      if (typeof (doc as any).autoTable === 'function') {
-        (doc as any).autoTable({
-          head: [tableColumns],
-          body: tableRows,
-          startY: 135,
-          styles: { fontSize: 8 },
-          headStyles: { fillColor: [41, 128, 185] }
-        });
-      } else {
-        // Fallback: adicionar dados como texto simples
-        let yPosition = 135;
-        doc.setFontSize(10);
-        tableColumns.forEach((col, index) => {
-          doc.text(col, 20 + (index * 25), yPosition);
-        });
-        
-        yPosition += 10;
-        tableRows.forEach((row, rowIndex) => {
-          row.forEach((cell, cellIndex) => {
-            doc.text(cell, 20 + (cellIndex * 25), yPosition + (rowIndex * 8));
-          });
-        });
-      }
+      (doc as any).autoTable({
+        head: [tableColumns],
+        body: tableRows,
+        startY: 135,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [41, 128, 185] }
+      });
 
       doc.save(`simulacao_investimentos_${new Date().toISOString().split('T')[0]}.pdf`);
       
