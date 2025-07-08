@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Plus, Save, FileDown, Calculator, FileText } from "lucide-react";
+import { Trash2, Plus, Save, FileDown, Calculator, FileText, FolderOpen } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -186,8 +186,8 @@ export default function ImportacaoSimplificada() {
   
   const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [activeTab, setActiveTab] = useState("simulation");
 
   // API queries
   const { data: simulations = [], isLoading } = useQuery({
@@ -589,8 +589,11 @@ export default function ImportacaoSimplificada() {
         </div>
         <div className="flex gap-2">
           <Button onClick={newSimulation} variant="outline">
-            <Plus className="w-4 h-4 mr-2" />
             Nova Simulação
+          </Button>
+          <Button onClick={() => setShowLoadDialog(true)} variant="outline">
+            <FolderOpen className="w-4 h-4 mr-2" />
+            Carregar
           </Button>
           <Button onClick={() => setShowSaveDialog(true)}>
             <Save className="w-4 h-4 mr-2" />
@@ -599,13 +602,7 @@ export default function ImportacaoSimplificada() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="simulation">Simulação Ativa</TabsTrigger>
-          <TabsTrigger value="saved">Simulações Salvas</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="simulation" className="space-y-6">
+      <div className="space-y-6">
           {/* Simulation Name */}
           <Card>
             <CardHeader>
@@ -992,118 +989,7 @@ export default function ImportacaoSimplificada() {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-
-        <TabsContent value="saved">
-          <Card>
-            <CardHeader>
-              <CardTitle>Simulações Salvas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div>Carregando simulações...</div>
-              ) : simulations.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calculator className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nenhuma simulação salva</p>
-                  <p className="text-sm">Crie e salve uma simulação para vê-la aqui</p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {simulations.map((simulation: any) => {
-                    const produtos = simulation.produtos || [];
-                    const config = simulation.configuracoesGerais || {};
-                    
-                    // Calcular valor total da importação
-                    let valorTotalImportacao = 0;
-                    produtos.forEach((produto: any) => {
-                      const valorFOB = produto.quantidade * produto.valor_unitario_usd;
-                      const valorFOBBRL = valorFOB * config.taxa_cambio_usd_brl;
-                      
-                      // Calcular frete por produto
-                      const pesoTotalKg = produtos.reduce((acc: number, p: any) => acc + (p.quantidade * p.peso_bruto_unitario_kg), 0);
-                      let custoProdutoFrete = 0;
-                      if (config.metodo_rateio_frete === "peso") {
-                        const pesoTotalProduto = produto.quantidade * produto.peso_bruto_unitario_kg;
-                        const proporcaoFrete = pesoTotalKg > 0 ? pesoTotalProduto / pesoTotalKg : 0;
-                        custoProdutoFrete = proporcaoFrete * (config.custo_frete_internacional_total_moeda_original * config.taxa_cambio_usd_brl);
-                      }
-                      
-                      // Calcular II
-                      const baseCalculoII = valorFOBBRL + custoProdutoFrete;
-                      const valorII = baseCalculoII * config.aliquota_ii_percentual;
-                      
-                      // Calcular ICMS
-                      const valorComII = valorFOBBRL + custoProdutoFrete + valorII;
-                      const baseCalculoICMS = valorComII / (1 - config.aliquota_icms_percentual);
-                      const valorICMS = baseCalculoICMS - valorComII;
-                      
-                      valorTotalImportacao += baseCalculoICMS;
-                    });
-                    
-                    return (
-                      <div key={simulation.id} className="p-4 border rounded-lg">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-2">
-                            <h3 className="font-medium">{simulation.nomeSimulacao}</h3>
-                            {simulation.codigoSimulacao && (
-                              <Badge variant="outline" className="text-xs">
-                                {simulation.codigoSimulacao}
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" onClick={() => loadSimulation(simulation)}>
-                              Carregar
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => deleteMutation.mutate(simulation.id)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-blue-600">
-                              R$ {formatBrazilianNumber(valorTotalImportacao)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">Valor Total</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-green-600">
-                              {produtos.length}
-                            </div>
-                            <div className="text-xs text-muted-foreground">Itens</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-orange-600">
-                              R$ {formatBrazilianNumber(config.taxa_cambio_usd_brl || 0)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">Cotação USD</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-xs text-muted-foreground">
-                              Atualizada em
-                            </div>
-                            <div className="text-sm font-medium">
-                              {new Date(simulation.dataLastModified).toLocaleDateString('pt-BR')}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      </div>
 
       {/* Save Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
@@ -1128,6 +1014,139 @@ export default function ImportacaoSimplificada() {
             </Button>
             <Button onClick={() => saveMutation.mutate(activeSimulation)} disabled={saveMutation.isPending}>
               {saveMutation.isPending ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Load Dialog */}
+      <Dialog open={showLoadDialog} onOpenChange={setShowLoadDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Carregar Simulação</DialogTitle>
+            <DialogDescription>
+              Selecione uma simulação salva para carregar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <div className="text-muted-foreground">Carregando simulações...</div>
+                </div>
+              </div>
+            ) : simulations.length === 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <div className="text-muted-foreground mb-4">Nenhuma simulação salva encontrada</div>
+                  <Button onClick={() => setShowLoadDialog(false)}>
+                    Fechar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-4 max-h-96 overflow-y-auto">
+                {simulations.map((simulation: any) => {
+                  const produtos = simulation.produtos || [];
+                  const config = simulation.configuracoesGerais || {};
+                  
+                  // Calcular valor total da importação
+                  let valorTotalImportacao = 0;
+                  produtos.forEach((produto: any) => {
+                    const valorFOB = produto.quantidade * produto.valor_unitario_usd;
+                    const valorFOBBRL = valorFOB * config.taxa_cambio_usd_brl;
+                    
+                    // Calcular frete por produto
+                    const pesoTotalKg = produtos.reduce((acc: number, p: any) => acc + (p.quantidade * p.peso_bruto_unitario_kg), 0);
+                    let custoProdutoFrete = 0;
+                    if (config.metodo_rateio_frete === "peso") {
+                      const pesoTotalProduto = produto.quantidade * produto.peso_bruto_unitario_kg;
+                      const proporcaoFrete = pesoTotalKg > 0 ? pesoTotalProduto / pesoTotalKg : 0;
+                      custoProdutoFrete = proporcaoFrete * (config.custo_frete_internacional_total_moeda_original * config.taxa_cambio_usd_brl);
+                    }
+                    
+                    // Calcular II
+                    const baseCalculoII = valorFOBBRL + custoProdutoFrete;
+                    const valorII = baseCalculoII * config.aliquota_ii_percentual;
+                    
+                    // Calcular ICMS
+                    const valorComII = valorFOBBRL + custoProdutoFrete + valorII;
+                    const baseCalculoICMS = valorComII / (1 - config.aliquota_icms_percentual);
+                    const valorICMS = baseCalculoICMS - valorComII;
+                    
+                    valorTotalImportacao += baseCalculoICMS;
+                  });
+                  
+                  return (
+                    <div key={simulation.id} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-medium">{simulation.nomeSimulacao}</h3>
+                          {simulation.codigoSimulacao && (
+                            <Badge variant="outline" className="text-xs">
+                              {simulation.codigoSimulacao}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" onClick={() => {
+                            loadSimulation(simulation);
+                            setShowLoadDialog(false);
+                          }}>
+                            Carregar
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => deleteMutation.mutate(simulation.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-blue-600">
+                            R$ {formatBrazilianNumber(valorTotalImportacao)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Valor Total</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-green-600">
+                            {produtos.length}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Itens</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-orange-600">
+                            R$ {formatBrazilianNumber(config.taxa_cambio_usd_brl || 0)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Cotação USD</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground">
+                            Atualizada em
+                          </div>
+                          <div className="text-sm font-medium">
+                            {simulation.dataLastModified 
+                              ? new Date(simulation.dataLastModified).toLocaleDateString('pt-BR')
+                              : 'Não disponível'
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLoadDialog(false)}>
+              Fechar
             </Button>
           </DialogFooter>
         </DialogContent>
