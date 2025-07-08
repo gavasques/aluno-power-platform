@@ -38,47 +38,34 @@ const formatPercent = (value: number): string => {
   return `${(value || 0).toFixed(2)}%`;
 };
 
-// Componente de input de moeda brasileira
-const CurrencyInput = ({ value, onChange, className = "", placeholder = "R$ 0,00" }: {
+// Componente de input de moeda brasileira simplificado
+const CurrencyInput = ({ value, onChange, className = "", placeholder = "0" }: {
   value: number;
   onChange: (value: number) => void;
   className?: string;
   placeholder?: string;
 }) => {
-  const [displayValue, setDisplayValue] = useState<string>('');
-
-  useEffect(() => {
-    if (value === 0) {
-      setDisplayValue('');
-    } else {
-      setDisplayValue(value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-    }
-  }, [value]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     
     // Remove tudo exceto números, vírgulas e pontos
-    const numbersOnly = inputValue.replace(/[^\d,\.]/g, '');
+    const cleanValue = inputValue.replace(/[^\d,\.]/g, '');
     
     // Se estiver vazio, zera o valor
-    if (numbersOnly === '') {
-      setDisplayValue('');
+    if (cleanValue === '') {
       onChange(0);
       return;
     }
     
     // Converte para número (substitui vírgula por ponto para parseFloat)
-    const numericValue = parseFloat(numbersOnly.replace(',', '.')) || 0;
-    
-    setDisplayValue(numbersOnly);
+    const numericValue = parseFloat(cleanValue.replace(',', '.')) || 0;
     onChange(numericValue);
   };
 
   return (
     <Input
       type="text"
-      value={displayValue}
+      value={value === 0 ? '' : value.toString()}
       onChange={handleChange}
       placeholder={placeholder}
       className={className}
@@ -487,7 +474,7 @@ export default function InvestimentosROI() {
             <CardHeader>
               <CardTitle>Detalhamento por Giro</CardTitle>
               <CardDescription>
-                Análise detalhada de cada giro da simulação - campos editáveis: Aporte e Retirada
+                Análise detalhada de cada giro da simulação - campos editáveis: Aporte, Retirada e ROI %
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -501,7 +488,7 @@ export default function InvestimentosROI() {
                       <th className="text-center p-3 w-32 bg-gray-50 font-semibold">Aporte</th>
                       <th className="text-center p-3 w-32 bg-gray-50 font-semibold">Retirada</th>
                       <th className="text-center p-3 w-32 bg-gray-50 font-semibold">Saldo</th>
-                      <th className="text-center p-3 w-20 bg-gray-50 font-semibold">ROI</th>
+                      <th className="text-center p-3 w-20 bg-gray-50 font-semibold">ROI %</th>
                       <th className="text-center p-3 w-20 bg-gray-50 font-semibold">Tempo</th>
                     </tr>
                   </thead>
@@ -530,13 +517,14 @@ export default function InvestimentosROI() {
                         <td className="p-3 text-center font-semibold text-blue-600">{formatCurrency(giro.saldo)}</td>
                         <td className="p-3">
                           <Input
-                            type="number"
-                            value={giro.roiGiro}
-                            onChange={(e) => updateRoi(index, Number(e.target.value) || 0)}
-                            className="w-full h-8 text-center text-xs"
-                            min="0"
-                            max="100"
-                            step="0.1"
+                            type="text"
+                            value={giro.roiGiro.toString()}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^\d,\.]/g, '');
+                              const numericValue = parseFloat(value.replace(',', '.')) || 0;
+                              updateRoi(index, numericValue);
+                            }}
+                            className="w-full h-8 text-center text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="20"
                           />
                         </td>
