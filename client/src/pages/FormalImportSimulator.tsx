@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Calculator, Plus, Trash2, Copy, Save, Download, ArrowLeft, ArrowRight, X, History } from 'lucide-react';
+import { Calculator, Plus, Trash2, Copy, Save, Download, ArrowLeft, ArrowRight, X, History, Check } from 'lucide-react';
 import { useLocation, useRoute } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -295,6 +295,56 @@ export default function FormalImportSimulator() {
         description: "Erro inesperado ao salvar",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleCompleteSimulation = () => {
+    try {
+      const completedSimulation = {
+        ...simulation,
+        status: "Concluída"
+      };
+      saveMutation.mutate(completedSimulation);
+    } catch (error) {
+      console.error('Erro ao concluir simulação:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao concluir simulação",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Delete simulation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/simulators/formal-import/${id}`, {
+        method: 'DELETE'
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Simulação excluída",
+        description: "A simulação foi excluída com sucesso"
+      });
+      setTimeout(() => {
+        setLocation("/simuladores/importacao-formal-direta");
+      }, 1000);
+      queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+    },
+    onError: (error) => {
+      console.error('Erro ao excluir simulação:', error);
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir a simulação",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleDeleteSimulation = () => {
+    if (simulationId && window.confirm('Tem certeza que deseja excluir esta simulação?')) {
+      deleteMutation.mutate(simulationId);
     }
   };
 
@@ -691,10 +741,33 @@ export default function FormalImportSimulator() {
             <Calculator className="h-4 w-4 mr-2" />
             Calcular
           </Button>
-          <Button onClick={handleSave} disabled={saveMutation.isPending}>
-            <Save className="h-4 w-4 mr-2" />
-            Salvar
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleSave} disabled={saveMutation.isPending}>
+              <Save className="h-4 w-4 mr-2" />
+              Salvar
+            </Button>
+            
+            <Button 
+              onClick={handleCompleteSimulation} 
+              disabled={saveMutation.isPending}
+              variant="outline"
+              className="bg-green-50 hover:bg-green-100 text-green-700"
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Concluir
+            </Button>
+            
+            {simulationId && (
+              <Button 
+                onClick={handleDeleteSimulation} 
+                disabled={deleteMutation.isPending}
+                variant="destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1172,7 +1245,7 @@ export default function FormalImportSimulator() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {(simulation.produtos || []).map((produto, index) => (
+                          {simulation.produtos && simulation.produtos.length > 0 ? simulation.produtos.map((produto, index) => (
                             <TableRow key={produto.id || index}>
                               <TableCell>
                                 <Input
@@ -1374,7 +1447,7 @@ export default function FormalImportSimulator() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {(simulation.produtos || []).map((produto, index) => (
+                            {simulation.produtos && simulation.produtos.length > 0 ? simulation.produtos.map((produto, index) => (
                               <TableRow key={produto.id || index}>
                                 <TableCell className="font-medium">{produto.nome}</TableCell>
                                 <TableCell>{formatCurrency(produto.valorTotalBRL || 0)}</TableCell>
@@ -1388,7 +1461,13 @@ export default function FormalImportSimulator() {
                                 <TableCell className="font-bold">{formatCurrency(produto.custoTotal || 0)}</TableCell>
                                 <TableCell className="font-bold text-blue-600">{formatCurrency(produto.custoUnitario || 0)}</TableCell>
                               </TableRow>
-                            ))}
+                            )) : (
+                              <TableRow>
+                                <TableCell colSpan={10} className="text-center py-4">
+                                  Nenhum produto adicionado
+                                </TableCell>
+                              </TableRow>
+                            )}
                           </TableBody>
                         </Table>
                       </div>
