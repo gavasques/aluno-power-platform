@@ -111,8 +111,8 @@ export default function FormalImportSimulator() {
     agenteCargas: "",
     status: "Em andamento",
     taxaDolar: 5.50,
-    valorFobDolar: 0,
-    valorFreteDolar: 0,
+    valorFobDolar: 1000,
+    valorFreteDolar: 200,
     percentualSeguro: 0.5,
     impostos: defaultTaxes,
     despesasAdicionais: defaultExpenses,
@@ -122,10 +122,10 @@ export default function FormalImportSimulator() {
         nome: "Produto 1",
         ncm: "",
         quantidade: 1,
-        valorUnitarioUsd: 0,
-        comprimento: 0,
-        largura: 0,
-        altura: 0
+        valorUnitarioUsd: 100,
+        comprimento: 30,
+        largura: 20,
+        altura: 15
       }
     ],
     resultados: {}
