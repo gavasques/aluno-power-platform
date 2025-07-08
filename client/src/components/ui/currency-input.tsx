@@ -1,88 +1,57 @@
-import * as React from "react";
-import { Input } from "./input";
+import React from 'react';
+import { Input } from './input';
 
-interface CurrencyInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
-  value?: number;
-  onChange?: (value: number) => void;
+interface CurrencyInputProps {
+  value: number;
+  onChange: (value: number) => void;
+  placeholder?: string;
+  className?: string;
+  isEditable?: boolean;
 }
 
-const formatBRL = (value: number): string => {
-  if (!value || value === 0) return '';
-  return value.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-};
+export function CurrencyInput({ value, onChange, placeholder, className, isEditable = true }: CurrencyInputProps) {
+  const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
 
-const parseBRL = (value: string | number): number => {
-  if (!value) return 0;
-  // Converte para string se for número
-  const stringValue = typeof value === 'number' ? value.toString() : value;
-  // Remove tudo exceto números, vírgula e ponto
-  const cleaned = stringValue.replace(/[^\d,.-]/g, '');
-  // Substitui vírgula por ponto para parseFloat
-  const normalized = cleaned.replace(',', '.');
-  const parsed = parseFloat(normalized);
-  return isNaN(parsed) ? 0 : parsed;
-};
-
-export function CurrencyInput({ value, onChange, className, ...props }: CurrencyInputProps) {
-  const [inputValue, setInputValue] = React.useState('');
-  const [isFocused, setIsFocused] = React.useState(false);
-  const [lastValueProp, setLastValueProp] = React.useState<number | undefined>();
-
-  // Atualiza o valor de exibição apenas quando o value prop mudar externamente
-  // e o input não estiver focado
-  React.useEffect(() => {
-    // Só atualiza se:
-    // 1. Input não está focado
-    // 2. Value prop mudou de fato (não é o mesmo valor anterior)
-    if (!isFocused && value !== lastValueProp) {
-      const formattedValue = value ? formatBRL(value) : '';
-      setInputValue(formattedValue);
-      setLastValueProp(value);
-    }
-  }, [value, isFocused, lastValueProp]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isEditable) return;
     
-    // Chama onChange apenas com valores válidos
-    const numericValue = parseBRL(newValue);
-    onChange?.(numericValue);
+    const rawValue = e.target.value.replace(/\D/g, '');
+    const numValue = parseInt(rawValue || '0', 10);
+    onChange(numValue);
   };
 
-  const handleFocus = () => {
-    setIsFocused(true);
-  };
-
-  const handleBlur = () => {
-    setIsFocused(false);
-    // Formata o valor no blur se houver um valor válido
-    const numericValue = parseBRL(inputValue);
-    if (numericValue > 0) {
-      setInputValue(formatBRL(numericValue));
-    } else {
-      setInputValue('');
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow backspace, delete, tab, escape, enter, and arrow keys
+    if ([8, 9, 27, 13, 37, 38, 39, 40, 46].includes(e.keyCode) ||
+        // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (e.keyCode === 65 && e.ctrlKey) ||
+        (e.keyCode === 67 && e.ctrlKey) ||
+        (e.keyCode === 86 && e.ctrlKey) ||
+        (e.keyCode === 88 && e.ctrlKey)) {
+      return;
+    }
+    // Only allow numbers
+    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+      e.preventDefault();
     }
   };
 
   return (
-    <div className="relative">
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground z-10">
-        R$
-      </span>
-      <Input
-        {...props}
-        type="text"
-        value={inputValue}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        className={`pl-12 ${className || ''}`}
-        placeholder="0,00"
-      />
-    </div>
+    <Input
+      type="text"
+      value={formatCurrency(value)}
+      onChange={handleInputChange}
+      onKeyDown={handleKeyDown}
+      placeholder={placeholder}
+      className={className}
+      readOnly={!isEditable}
+    />
   );
 }

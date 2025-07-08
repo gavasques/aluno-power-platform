@@ -713,6 +713,23 @@ export const amazonListingSessions = pgTable("amazon_listing_sessions", {
   createdIdx: index("amazon_listing_sessions_created_idx").on(table.dataHoraCreated),
 }));
 
+// Investment ROI Simulations
+export const investmentSimulations = pgTable("investment_simulations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  name: text("name").notNull().default("Nova Simulação"),
+  initialInvestment: integer("initial_investment").notNull().default(10000),
+  cycleDuration: integer("cycle_duration").notNull().default(45), // days
+  cycleUnit: text("cycle_unit").notNull().default("Dias"),
+  numberOfCycles: integer("number_of_cycles").notNull().default(12),
+  cycles: jsonb("cycles").notNull().default([]), // Array of cycle data with ROI, aporte, retirada
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("investment_simulations_user_idx").on(table.userId),
+  createdIdx: index("investment_simulations_created_idx").on(table.createdAt),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
@@ -721,6 +738,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   materials: many(materials),
   news: many(news),
   updates: many(updates),
+  investmentSimulations: many(investmentSimulations),
 }));
 
 export const newsRelations = relations(news, ({ one }) => ({
@@ -1000,6 +1018,13 @@ export const agentSessionFilesRelations = relations(agentSessionFiles, ({ one })
 
 export const amazonListingSessionsRelations = relations(amazonListingSessions, ({ many }) => ({
   // Future relations if needed
+}));
+
+export const investmentSimulationsRelations = relations(investmentSimulations, ({ one }) => ({
+  user: one(users, {
+    fields: [investmentSimulations.userId],
+    references: [users.id],
+  }),
 }));
 
 // Generated Images Storage
@@ -1941,6 +1966,15 @@ export const insertAmazonListingSessionSchema = createInsertSchema(amazonListing
 
 export type InsertAmazonListingSession = z.infer<typeof insertAmazonListingSessionSchema>;
 export type AmazonListingSession = typeof amazonListingSessions.$inferSelect;
+
+// Insert schemas for investment simulations
+export const insertInvestmentSimulationSchema = createInsertSchema(investmentSimulations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertInvestmentSimulation = z.infer<typeof insertInvestmentSimulationSchema>;
+export type InvestmentSimulation = typeof investmentSimulations.$inferSelect;
 
 // Agent with prompts type
 export type AgentWithPrompts = Agent & {

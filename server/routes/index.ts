@@ -20,6 +20,7 @@ import { permissionRoutes } from './permissions';
 import userGroupsRoutes from './admin/userGroups';
 import stripeWebhookTestRoutes from './stripe/webhook-test';
 import featureCostsRoutes from './featureCosts';
+import investmentSimulationsRoutes from './investment-simulations';
 
 /**
  * Register all modular routes
@@ -57,6 +58,9 @@ export function registerModularRoutes(app: Express): void {
   
   // Stripe Webhook Testing Routes (Admin only)
   app.use('/api/stripe/test', stripeWebhookTestRoutes);
+  
+  // Investment Simulations Routes
+  app.use('/api/investment-simulations', investmentSimulationsRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

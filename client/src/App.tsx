@@ -625,6 +625,17 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
+                          {/* Investimentos e ROI Simulator - Short URL - Protected */}
+                          <Route path="/simuladores/investimentos-roi">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <InvestimentosROI />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
                           {/* Minha Área routes - Protected */}
                           <Route path="/minha-area/perfil">
                             <ProtectedRoute>
