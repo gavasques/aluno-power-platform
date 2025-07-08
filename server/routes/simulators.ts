@@ -574,19 +574,34 @@ function calcularSimulacaoCompleta(simulacao: any): any {
 
   // Cálculo de impostos seguindo a sequência correta
   const baseII = calcularBaseII(valorFOBReal);
-  const valorII = calcularImposto(baseII, simulacao.impostos.find((i: any) => i.nome.includes("II"))?.aliquota || 0.60);
+  const aliquotaII = (simulacao.impostos.find((i: any) => i.nome.includes("II"))?.aliquota || 14.4) / 100;
+  const valorII = calcularImposto(baseII, aliquotaII);
   
   const baseIPI = calcularBaseIPI(valorFOBReal, valorFreteReal, valorII);
-  const valorIPI = calcularImposto(baseIPI, simulacao.impostos.find((i: any) => i.nome.includes("IPI"))?.aliquota || 0.15);
+  const aliquotaIPI = (simulacao.impostos.find((i: any) => i.nome.includes("IPI"))?.aliquota || 3.25) / 100;
+  const valorIPI = calcularImposto(baseIPI, aliquotaIPI);
   
   const baseTotalImpostos = calcularBaseTotalImpostos(valorFOBReal, valorFreteReal, valorII, valorIPI);
   
   // Calcular outros impostos
-  const valorPIS = calcularImposto(baseTotalImpostos, simulacao.impostos.find((i: any) => i.nome.includes("PIS"))?.aliquota || 0.0233);
-  const valorCOFINS = calcularImposto(baseTotalImpostos, simulacao.impostos.find((i: any) => i.nome.includes("COFINS"))?.aliquota || 0.1074);
-  const valorICMS = calcularImposto(baseTotalImpostos, simulacao.impostos.find((i: any) => i.nome.includes("ICMS"))?.aliquota || 0.17);
+  const aliquotaPIS = (simulacao.impostos.find((i: any) => i.nome.includes("PIS"))?.aliquota || 2.1) / 100;
+  const aliquotaCOFINS = (simulacao.impostos.find((i: any) => i.nome.includes("COFINS"))?.aliquota || 9.65) / 100;
+  const aliquotaICMS = (simulacao.impostos.find((i: any) => i.nome.includes("ICMS"))?.aliquota || 12) / 100;
+  
+  const valorPIS = calcularImposto(baseTotalImpostos, aliquotaPIS);
+  const valorCOFINS = calcularImposto(baseTotalImpostos, aliquotaCOFINS);
+  const valorICMS = calcularImposto(baseTotalImpostos, aliquotaICMS);
   
   const totalImpostos = valorII + valorIPI + valorPIS + valorCOFINS + valorICMS;
+
+  // Debug logs para verificar valores calculados
+  console.log('🧮 CÁLCULO DE IMPOSTOS:');
+  console.log('- Base II:', baseII.toFixed(2));
+  console.log('- Valor II:', valorII.toFixed(2));
+  console.log('- Base IPI:', baseIPI.toFixed(2));
+  console.log('- Valor IPI:', valorIPI.toFixed(2));
+  console.log('- Base Total:', baseTotalImpostos.toFixed(2));
+  console.log('- Total Impostos:', totalImpostos.toFixed(2));
 
   // Calcular total de despesas adicionais
   let totalDespesas = 0;
@@ -863,9 +878,21 @@ router.post('/formal-import/:id/duplicate', requireAuth, async (req, res) => {
 // Get calculation results for a simulation (real-time calculation endpoint)
 router.post('/formal-import/calculate', requireAuth, async (req, res) => {
   try {
+    console.log('🔥 CALCULATE API - Dados recebidos:');
+    console.log('- FOB Dólar:', req.body.valorFobDolar);
+    console.log('- Frete Dólar:', req.body.valorFreteDolar);
+    console.log('- Taxa Dólar:', req.body.taxaDolar);
+    console.log('- Produtos:', req.body.produtos?.length || 0);
+    console.log('- Impostos:', req.body.impostos?.map((i: any) => `${i.nome}: ${i.aliquota}%`));
+    
     // This endpoint performs real-time calculations without saving
     const simulationData = req.body;
     const calculatedSimulation = calcularSimulacaoCompleta(simulationData);
+    
+    console.log('🔥 CALCULATE API - Resultados calculados:');
+    console.log('- Total Impostos:', calculatedSimulation.resultados?.totalImpostos);
+    console.log('- Custo Total:', calculatedSimulation.resultados?.custoTotal);
+    console.log('- Produtos calculados:', calculatedSimulation.produtos?.length);
     
     res.json({
       produtos: calculatedSimulation.produtos,
