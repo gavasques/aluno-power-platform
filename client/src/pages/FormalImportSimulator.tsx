@@ -179,17 +179,30 @@ export default function FormalImportSimulator() {
   // Real-time calculation
   const calculateMutation = useMutation({
     mutationFn: async (data: FormalImportSimulation) => {
-      return await apiRequest(`/api/simulators/formal-import/calculate`, {
-        method: 'POST',
-        body: data
-      });
+      try {
+        return await apiRequest(`/api/simulators/formal-import/calculate`, {
+          method: 'POST',
+          body: data
+        });
+      } catch (error) {
+        console.error('Calculate mutation error:', error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setSimulation(prev => ({
         ...prev,
-        produtos: data.produtos,
-        resultados: data.resultados
+        produtos: data.produtos || prev.produtos,
+        resultados: data.resultados || prev.resultados
       }));
+    },
+    onError: (error) => {
+      console.error('Erro no cálculo:', error);
+      toast({
+        title: "Erro no cálculo",
+        description: "Verifique os dados e tente novamente",
+        variant: "destructive"
+      });
     }
   });
 
@@ -221,7 +234,26 @@ export default function FormalImportSimulator() {
   });
 
   const handleCalculate = () => {
-    calculateMutation.mutate(simulation);
+    try {
+      // Validar dados antes de calcular
+      if (!simulation.produtos || simulation.produtos.length === 0) {
+        toast({
+          title: "Aviso",
+          description: "Adicione pelo menos um produto para calcular",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      calculateMutation.mutate(simulation);
+    } catch (error) {
+      console.error('Erro ao iniciar cálculo:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao calcular",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSave = () => {
@@ -253,13 +285,18 @@ export default function FormalImportSimulator() {
           
           // Calcular CBM automaticamente quando dimensões mudarem
           if (['comprimento', 'largura', 'altura', 'quantidade'].includes(field)) {
-            const cbmUnitario = (updatedProduct.comprimento * updatedProduct.largura * updatedProduct.altura) / 1000000;
-            const cbmTotal = cbmUnitario * updatedProduct.quantidade;
+            const comp = parseFloat(updatedProduct.comprimento) || 0;
+            const larg = parseFloat(updatedProduct.largura) || 0;
+            const alt = parseFloat(updatedProduct.altura) || 0;
+            const quant = parseFloat(updatedProduct.quantidade) || 0;
+            
+            const cbmUnitario = comp > 0 && larg > 0 && alt > 0 ? (comp * larg * alt) / 1000000 : 0;
+            const cbmTotal = cbmUnitario * quant;
             
             return {
               ...updatedProduct,
-              cbmUnitario: cbmUnitario > 0 ? cbmUnitario : 0,
-              cbmTotal: cbmTotal > 0 ? cbmTotal : 0
+              cbmUnitario: Number(cbmUnitario.toFixed(6)),
+              cbmTotal: Number(cbmTotal.toFixed(6))
             };
           }
           
@@ -281,8 +318,14 @@ export default function FormalImportSimulator() {
       };
     });
 
-    // Calcular automaticamente quando houver mudanças
-    setTimeout(() => handleCalculate(), 100);
+    // Calcular automaticamente quando houver mudanças (com timeout para evitar calls excessivos)
+    setTimeout(() => {
+      try {
+        handleCalculate();
+      } catch (error) {
+        console.error('Erro no cálculo automático:', error);
+      }
+    }, 300);
   };
 
   const removeProduct = (index: number) => {
@@ -561,6 +604,20 @@ export default function FormalImportSimulator() {
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Verificação de segurança para evitar tela branca
+  if (!simulation) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center">
+          <p>Erro ao carregar simulação. Tente novamente.</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Recarregar
+          </Button>
         </div>
       </div>
     );
@@ -1063,9 +1120,9 @@ export default function FormalImportSimulator() {
                             <TableHead>Comp.(cm)</TableHead>
                             <TableHead>Larg.(cm)</TableHead>
                             <TableHead>Alt.(cm)</TableHead>
-                            <TableHead>CBM Unit.</TableHead>
-                            <TableHead>CBM Total</TableHead>
-                            <TableHead>% Container</TableHead>
+                            <TableHead className="bg-blue-100">CBM Unit.</TableHead>
+                            <TableHead className="bg-green-100">CBM Total</TableHead>
+                            <TableHead className="bg-yellow-100">% Container</TableHead>
                             <TableHead>Custo Unitário</TableHead>
                             <TableHead>Custo Total</TableHead>
                             <TableHead>Ações</TableHead>

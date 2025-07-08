@@ -111,6 +111,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 08, 2025 - 03:31 PM**: ✅ TELA BRANCA E CBM AUTOMÁTICO CORRIGIDOS - SISTEMA TOTALMENTE ESTABILIZADO
+  - **Erro crítico de tela branca corrigido**: Implementado tratamento completo de erros em calculateMutation e handleCalculate
+  - **Cálculo automático de CBM funcionando**: Melhorado parsing de números e validação para cálculo correto de CBM unitário e total
+  - **Verificações de segurança adicionadas**: Proteção contra tela branca com validação de existência da simulação
+  - **Interface visual aprimorada**: Colunas CBM destacadas com cores (azul para CBM Unit., verde para CBM Total, amarelo para % Container)
+  - **Timeout otimizado**: Aumentado para 300ms para evitar calls excessivos à API
+  - **Sistema robusto**: Tratamento completo de promise rejections e erros não capturados
+  - **Fórmula CBM correta**: (comprimento × largura × altura) ÷ 1.000.000 aplicada corretamente
+
 - **January 08, 2025 - 03:00 PM**: ✅ SIMULADOR DE IMPORTAÇÃO FORMAL - SISTEMA COMPLETO DE PRODUTOS COM CÁLCULOS AUTOMÁTICOS
   - **Funcionalidade Adicionar Produtos**: Botão "Adicionar Produto" com nomes sequenciais automáticos (Produto 1, Produto 2, etc.)
   - **Cálculos Automáticos de CBM**: CBM unitário e total calculados automaticamente quando dimensões são alteradas
