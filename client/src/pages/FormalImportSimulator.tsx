@@ -252,6 +252,37 @@ export default function FormalImportSimulator() {
     return `${(value * 100).toFixed(2)}%`;
   };
 
+  // Função para calcular valores estimados dos impostos em tempo real
+  const calculateTaxEstimate = (tax: Tax) => {
+    const valorFobReal = simulation.valorFobDolar * simulation.taxaDolar;
+    const valorFreteReal = simulation.valorFreteDolar * simulation.taxaDolar;
+    const valorCfrReal = valorFobReal + valorFreteReal;
+    const valorSeguro = valorCfrReal * (simulation.percentualSeguro / 100);
+    
+    let baseValue = 0;
+    
+    switch (tax.baseCalculo) {
+      case 'valor_fob_real':
+        baseValue = valorFobReal;
+        break;
+      case 'base_ii_ipi':
+        // Base II + IPI = FOB + Frete + Seguro + II
+        const ii = valorFobReal * (simulation.impostos.find(i => i.nome === 'Imposto de Importação (II)')?.aliquota || 0) / 100;
+        baseValue = valorFobReal + valorFreteReal + valorSeguro + ii;
+        break;
+      case 'total_base_calculo':
+        // Base total = FOB + Frete + Seguro + II + IPI
+        const iiTotal = valorFobReal * (simulation.impostos.find(i => i.nome === 'Imposto de Importação (II)')?.aliquota || 0) / 100;
+        const ipi = (valorFobReal + valorFreteReal + valorSeguro + iiTotal) * (simulation.impostos.find(i => i.nome === 'IPI')?.aliquota || 0) / 100;
+        baseValue = valorFobReal + valorFreteReal + valorSeguro + iiTotal + ipi;
+        break;
+      default:
+        baseValue = 0;
+    }
+    
+    return baseValue * (tax.aliquota / 100);
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-6">
@@ -479,7 +510,9 @@ export default function FormalImportSimulator() {
                             <Badge variant="outline">{tax.baseCalculo}</Badge>
                           </TableCell>
                           <TableCell>
-                            {formatCurrency(tax.valor || 0)}
+                            <Badge variant="secondary">
+                              {formatCurrency(calculateTaxEstimate(tax))}
+                            </Badge>
                           </TableCell>
                         </TableRow>
                       ))}
