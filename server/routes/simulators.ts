@@ -908,14 +908,19 @@ router.post('/formal-import/calculate', requireAuth, async (req, res) => {
 router.get('/formal-import', requireAuth, async (req, res) => {
   try {
     const user = req.user as { id: number };
-    const simulations = await req.db.query.formalImportSimulations.findMany({
+    console.log('🔥 LISTAGEM - Buscando simulações para usuário:', user.id);
+    
+    const simulations = await db.query.formalImportSimulations.findMany({
       where: eq(formalImportSimulations.userId, user.id),
       orderBy: desc(formalImportSimulations.dataModificacao)
     });
     
+    console.log('🔥 LISTAGEM - Simulações encontradas:', simulations.length);
+    console.log('🔥 LISTAGEM - Dados:', simulations.map(s => ({ id: s.id, nome: s.nome, status: s.status })));
+    
     res.json(simulations);
   } catch (error) {
-    console.error('Error fetching formal import simulations:', error);
+    console.error('❌ LISTAGEM - Erro ao buscar simulações:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -926,7 +931,7 @@ router.get('/formal-import/:id', requireAuth, async (req, res) => {
     const user = req.user as { id: number };
     const simulationId = parseInt(req.params.id);
     
-    const simulation = await req.db.query.formalImportSimulations.findFirst({
+    const simulation = await db.query.formalImportSimulations.findFirst({
       where: and(
         eq(formalImportSimulations.id, simulationId),
         eq(formalImportSimulations.userId, user.id)
@@ -951,7 +956,7 @@ router.delete('/formal-import/:id', requireAuth, async (req, res) => {
     const simulationId = parseInt(req.params.id);
     
     // Check if simulation exists and belongs to user
-    const simulation = await req.db.query.formalImportSimulations.findFirst({
+    const simulation = await db.query.formalImportSimulations.findFirst({
       where: and(
         eq(formalImportSimulations.id, simulationId),
         eq(formalImportSimulations.userId, user.id)
@@ -962,7 +967,7 @@ router.delete('/formal-import/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'Simulação não encontrada' });
     }
     
-    await req.db.delete(formalImportSimulations).where(eq(formalImportSimulations.id, simulationId));
+    await db.delete(formalImportSimulations).where(eq(formalImportSimulations.id, simulationId));
     
     res.json({ message: 'Simulação excluída com sucesso' });
   } catch (error) {
@@ -978,7 +983,7 @@ router.post('/formal-import/:id/duplicate', requireAuth, async (req, res) => {
     const simulationId = parseInt(req.params.id);
     
     // Get the original simulation
-    const originalSimulation = await req.db.query.formalImportSimulations.findFirst({
+    const originalSimulation = await db.query.formalImportSimulations.findFirst({
       where: and(
         eq(formalImportSimulations.id, simulationId),
         eq(formalImportSimulations.userId, user.id)
@@ -1002,7 +1007,7 @@ router.post('/formal-import/:id/duplicate', requireAuth, async (req, res) => {
     
     delete newSimulation.id;
     
-    const [duplicatedSimulation] = await req.db
+    const [duplicatedSimulation] = await db
       .insert(formalImportSimulations)
       .values(newSimulation)
       .returning();

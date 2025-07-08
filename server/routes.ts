@@ -193,7 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Simulator routes
   const simulatorRoutes = await import('./routes/simulators');
-  app.use('/api/simulations', simulatorRoutes.default);
+  app.use('/api/simulators', simulatorRoutes.default);
   
   // Advanced functionality routes (coupons, trial, abandoned cart, analytics)
   registerAdvancedRoutes(app);

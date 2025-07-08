@@ -79,6 +79,12 @@ const FormalImportSimulationsList: React.FC = () => {
   const { data: simulations = [], isLoading, error } = useQuery<FormalImportSimulation[]>({
     queryKey: ['/api/simulators/formal-import'],
     staleTime: 5 * 60 * 1000, // 5 minutes
+    onError: (error: any) => {
+      console.error('❌ FRONTEND - Erro ao carregar simulações:', error);
+    },
+    onSuccess: (data) => {
+      console.log('✅ FRONTEND - Simulações carregadas:', data?.length || 0);
+    }
   });
 
   // Delete simulation mutation
