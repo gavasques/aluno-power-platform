@@ -231,7 +231,7 @@ export default function FormalImportSimulator() {
   const addProduct = () => {
     const newProduct: Product = {
       id: Date.now().toString(),
-      nome: "",
+      nome: `Produto ${simulation.produtos.length + 1}`,
       ncm: "",
       quantidade: 1,
       valorUnitarioUsd: 0,
@@ -246,12 +246,43 @@ export default function FormalImportSimulator() {
   };
 
   const updateProduct = (index: number, field: keyof Product, value: any) => {
-    setSimulation(prev => ({
-      ...prev,
-      produtos: prev.produtos.map((produto, i) => 
-        i === index ? { ...produto, [field]: value } : produto
-      )
-    }));
+    setSimulation(prev => {
+      const updatedProducts = prev.produtos.map((produto, i) => {
+        if (i === index) {
+          const updatedProduct = { ...produto, [field]: value };
+          
+          // Calcular CBM automaticamente quando dimensões mudarem
+          if (['comprimento', 'largura', 'altura', 'quantidade'].includes(field)) {
+            const cbmUnitario = (updatedProduct.comprimento * updatedProduct.largura * updatedProduct.altura) / 1000000;
+            const cbmTotal = cbmUnitario * updatedProduct.quantidade;
+            
+            return {
+              ...updatedProduct,
+              cbmUnitario: cbmUnitario > 0 ? cbmUnitario : 0,
+              cbmTotal: cbmTotal > 0 ? cbmTotal : 0
+            };
+          }
+          
+          return updatedProduct;
+        }
+        return produto;
+      });
+
+      // Calcular percentuais de container e rateio automaticamente
+      const totalCBM = updatedProducts.reduce((sum, p) => sum + (p.cbmTotal || 0), 0);
+      const productsWithPercentages = updatedProducts.map(product => ({
+        ...product,
+        percentualContainer: totalCBM > 0 ? (product.cbmTotal || 0) / totalCBM : 0
+      }));
+
+      return {
+        ...prev,
+        produtos: productsWithPercentages
+      };
+    });
+
+    // Calcular automaticamente quando houver mudanças
+    setTimeout(() => handleCalculate(), 100);
   };
 
   const removeProduct = (index: number) => {
@@ -952,7 +983,9 @@ export default function FormalImportSimulator() {
                             <TableHead>CBM Unit.</TableHead>
                             <TableHead>CBM Total</TableHead>
                             <TableHead>% Container</TableHead>
+                            <TableHead>Custo Unitário</TableHead>
                             <TableHead>Custo Total</TableHead>
+                            <TableHead>Ações</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -1029,14 +1062,53 @@ export default function FormalImportSimulator() {
                                 </Badge>
                               </TableCell>
                               <TableCell>
-                                <Badge variant="outline">
+                                <Badge variant="outline" className="font-bold text-blue-600">
+                                  {produto.custoUnitario ? formatCurrency(produto.custoUnitario) : '-'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="font-bold">
                                   {produto.custoTotal ? formatCurrency(produto.custoTotal) : '-'}
                                 </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => removeProduct(index)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
                       </Table>
+
+                      {/* Botão para adicionar produto */}
+                      <div className="mt-4 flex justify-between items-center">
+                        <Button onClick={addProduct}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Adicionar Produto
+                        </Button>
+                        
+                        {/* Resumo totais */}
+                        <div className="flex gap-4 text-sm">
+                          <div className="text-center">
+                            <div className="text-muted-foreground">CBM Total</div>
+                            <div className="font-bold">
+                              {formatCBM(simulation.produtos.reduce((sum, p) => sum + (p.cbmTotal || 0), 0))}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-muted-foreground">Custo Total</div>
+                            <div className="font-bold text-blue-600">
+                              {formatCurrency(simulation.produtos.reduce((sum, p) => sum + (p.custoTotal || 0), 0))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </CardContent>

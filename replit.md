@@ -111,6 +111,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 08, 2025 - 03:00 PM**: ✅ SIMULADOR DE IMPORTAÇÃO FORMAL - SISTEMA COMPLETO DE PRODUTOS COM CÁLCULOS AUTOMÁTICOS
+  - **Funcionalidade Adicionar Produtos**: Botão "Adicionar Produto" com nomes sequenciais automáticos (Produto 1, Produto 2, etc.)
+  - **Cálculos Automáticos de CBM**: CBM unitário e total calculados automaticamente quando dimensões são alteradas
+  - **Rateio Automático**: Percentual de container e distribuição de custos calculados em tempo real
+  - **Campos de Custo Adicionados**: Colunas "Custo Unitário" e "Custo Total" na tabela de produtos
+  - **Botão Remover Produtos**: Coluna "Ações" com botão para remover produtos individualmente
+  - **Totalizadores**: Resumo automático com CBM total e custo total de todos os produtos
+  - **Cálculos em Tempo Real**: Sistema recalcula automaticamente ao modificar qualquer campo de produto
+
+- **January 08, 2025 - 02:56 PM**: ✅ SIMULADOR DE IMPORTAÇÃO FORMAL - VALORES DE REFERÊNCIA IMPLEMENTADOS
+  - **Valores de Referência**: Texto pequeno "Ref: R$ XXX,XX" abaixo de cada campo BRL das despesas padrão
+  - **Orientação ao Usuário**: Valores padrão mostrados discretamente para facilitar preenchimento
+  - **Apenas Despesas Padrão**: Valores de referência aparecem apenas para as 13 despesas padrão (não para personalizadas)
+
 - **January 08, 2025 - 02:50 PM**: ✅ SIMULADOR DE IMPORTAÇÃO FORMAL - SISTEMA COMPLETO DE DESPESAS ADICIONAIS COM VALORES PADRÃO
   - **13 Despesas Padrão Implementadas**: AFRMM (R$ 1.650), CAPATAZIA (R$ 1.300), TX LIBER./BL/AWB (R$ 585), THC Movimentação (R$ 620), Desconsolidação (R$ 350), ISPS (R$ 200), Container/Lacre (R$ 270), Damage Fee ($45), Taxa SISCOMEX (R$ 162,42), Frete Nacional (R$ 10.001), Honorários Despachante (R$ 1.500), DOC Fee (R$ 195), DAS (R$ 262,40)
   - **Conversão Automática USD ↔ Real**: Digite em USD e converte automaticamente para Real usando taxa do dólar (e vice-versa)
