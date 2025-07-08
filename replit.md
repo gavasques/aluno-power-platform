@@ -111,6 +111,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 08, 2025 - 02:17 PM**: ✅ SIMULADOR DE IMPORTAÇÃO FORMAL - CAMPOS DE ENTRADA OTIMIZADOS E INTERFACE SIMPLIFICADA
+  - **Campos de Entrada Corrigidos**: Taxa do Dólar, Valor FOB e Valor Frete agora são editáveis facilmente
+    - ✅ **Campos vazios quando valor é 0**: Não mostram mais "0" fixo, permitem limpeza total
+    - ✅ **Placeholders informativos**: "Ex: 5.50", "Ex: 1000.00", "Ex: 500.00" para orientar preenchimento
+    - ✅ **Lógica de edição melhorada**: Campos não travam em 0, conversão adequada de valores vazios
+  - **Interface Simplificada Conforme Solicitado**:
+    - ✅ **Botões Add/Remove removidos**: Eliminado botão "Adicionar Produto" e botões de lixeira
+    - ✅ **Coluna "Ações" removida**: Tabela de produtos mais limpa sem coluna de ações
+    - ✅ **Produto padrão incluído**: "Produto 1" disponível por padrão para configuração imediata
+  - **Benefícios da Otimização**:
+    - Experiência de usuário muito mais fluida para preenchimento de valores
+    - Interface focada apenas no essencial sem elementos confusos
+    - Formulário simplificado seguindo feedback direto do usuário
+
 - **January 08, 2025 - 04:05 AM**: ✅ SIMULADOR DE INVESTIMENTOS E ROI SIMPLIFICADO - INTERFACE FOCADA EM TABELA EDITÁVEL
   - **Interface Simplificada**: Removidas abas desnecessárias, mantida apenas configuração + tabela principal
   - **Tabela Editável Implementada**: 

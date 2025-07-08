@@ -116,7 +116,18 @@ export default function FormalImportSimulator() {
     percentualSeguro: 0.5,
     impostos: defaultTaxes,
     despesasAdicionais: defaultExpenses,
-    produtos: [],
+    produtos: [
+      {
+        id: "1",
+        nome: "Produto 1",
+        ncm: "",
+        quantidade: 1,
+        valorUnitarioUsd: 0,
+        comprimento: 0,
+        largura: 0,
+        altura: 0
+      }
+    ],
     resultados: {}
   });
 
@@ -349,8 +360,12 @@ export default function FormalImportSimulator() {
                         id="taxaDolar"
                         type="number"
                         step="0.0001"
-                        value={simulation.taxaDolar}
-                        onChange={(e) => setSimulation(prev => ({ ...prev, taxaDolar: parseFloat(e.target.value) || 0 }))}
+                        placeholder="Ex: 5.50"
+                        value={simulation.taxaDolar === 0 ? "" : simulation.taxaDolar}
+                        onChange={(e) => {
+                          const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                          setSimulation(prev => ({ ...prev, taxaDolar: isNaN(value) ? 0 : value }));
+                        }}
                       />
                     </div>
                     <div>
@@ -359,8 +374,12 @@ export default function FormalImportSimulator() {
                         id="valorFobDolar"
                         type="number"
                         step="0.01"
-                        value={simulation.valorFobDolar}
-                        onChange={(e) => setSimulation(prev => ({ ...prev, valorFobDolar: parseFloat(e.target.value) || 0 }))}
+                        placeholder="Ex: 1000.00"
+                        value={simulation.valorFobDolar === 0 ? "" : simulation.valorFobDolar}
+                        onChange={(e) => {
+                          const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                          setSimulation(prev => ({ ...prev, valorFobDolar: isNaN(value) ? 0 : value }));
+                        }}
                       />
                     </div>
                     <div>
@@ -369,8 +388,12 @@ export default function FormalImportSimulator() {
                         id="valorFreteDolar"
                         type="number"
                         step="0.01"
-                        value={simulation.valorFreteDolar}
-                        onChange={(e) => setSimulation(prev => ({ ...prev, valorFreteDolar: parseFloat(e.target.value) || 0 }))}
+                        placeholder="Ex: 500.00"
+                        value={simulation.valorFreteDolar === 0 ? "" : simulation.valorFreteDolar}
+                        onChange={(e) => {
+                          const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                          setSimulation(prev => ({ ...prev, valorFreteDolar: isNaN(value) ? 0 : value }));
+                        }}
                       />
                     </div>
                   </div>
@@ -526,23 +549,15 @@ export default function FormalImportSimulator() {
             <TabsContent value="products" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Produtos</CardTitle>
-                      <CardDescription>
-                        Adicione os produtos com dimensões para cálculo do CBM
-                      </CardDescription>
-                    </div>
-                    <Button onClick={addProduct}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Produto
-                    </Button>
-                  </div>
+                  <CardTitle>Produtos</CardTitle>
+                  <CardDescription>
+                    Configure os produtos com dimensões para cálculo do CBM
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {simulation.produtos.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
-                      Nenhum produto adicionado. Clique em "Adicionar Produto" para começar.
+                      Nenhum produto configurado. Os produtos serão adicionados automaticamente quando você calcular a simulação.
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
@@ -560,7 +575,6 @@ export default function FormalImportSimulator() {
                             <TableHead>CBM Total</TableHead>
                             <TableHead>% Container</TableHead>
                             <TableHead>Custo Total</TableHead>
-                            <TableHead>Ações</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -640,15 +654,6 @@ export default function FormalImportSimulator() {
                                 <Badge variant="outline">
                                   {produto.custoTotal ? formatCurrency(produto.custoTotal) : '-'}
                                 </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => removeProduct(index)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
                               </TableCell>
                             </TableRow>
                           ))}
