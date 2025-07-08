@@ -781,50 +781,62 @@ export default function FormalImportSimulator() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {simulation.despesasAdicionais.map((expense, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">{expense.nome}</TableCell>
-                          <TableCell>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={expense.valorDolar === 0 ? "" : expense.valorDolar}
-                              placeholder="0.00"
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value) || 0;
-                                handleExpenseUSDChange(index, value);
-                              }}
-                              className="w-24"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={expense.valorReal === 0 ? "" : expense.valorReal}
-                              placeholder="0.00"
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value) || 0;
-                                handleExpenseRealChange(index, value);
-                              }}
-                              className="w-24"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {/* Só permite remover despesas que não sejam padrão */}
-                            {index >= defaultExpenses.length && (
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => removeExpense(index)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {simulation.despesasAdicionais.map((expense, index) => {
+                        // Buscar valor de referência padrão se existir
+                        const defaultExpense = index < defaultExpenses.length ? defaultExpenses[index] : null;
+                        
+                        return (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{expense.nome}</TableCell>
+                            <TableCell>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={expense.valorDolar === 0 ? "" : expense.valorDolar}
+                                placeholder="0.00"
+                                onChange={(e) => {
+                                  const value = parseFloat(e.target.value) || 0;
+                                  handleExpenseUSDChange(index, value);
+                                }}
+                                className="w-24"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={expense.valorReal === 0 ? "" : expense.valorReal}
+                                  placeholder="0.00"
+                                  onChange={(e) => {
+                                    const value = parseFloat(e.target.value) || 0;
+                                    handleExpenseRealChange(index, value);
+                                  }}
+                                  className="w-24"
+                                />
+                                {defaultExpense && (
+                                  <span className="text-xs text-muted-foreground">
+                                    Ref: R$ {defaultExpense.valorReal.toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {/* Só permite remover despesas que não sejam padrão */}
+                              {index >= defaultExpenses.length && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => removeExpense(index)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
 
