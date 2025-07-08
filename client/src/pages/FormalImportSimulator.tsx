@@ -231,7 +231,7 @@ export default function FormalImportSimulator() {
   const addProduct = () => {
     const newProduct: Product = {
       id: Date.now().toString(),
-      nome: `Produto ${simulation.produtos.length + 1}`,
+      nome: `Produto ${(simulation.produtos || []).length + 1}`,
       ncm: "",
       quantidade: 1,
       valorUnitarioUsd: 0,
@@ -241,13 +241,13 @@ export default function FormalImportSimulator() {
     };
     setSimulation(prev => ({
       ...prev,
-      produtos: [...prev.produtos, newProduct]
+      produtos: [...(prev.produtos || []), newProduct]
     }));
   };
 
   const updateProduct = (index: number, field: keyof Product, value: any) => {
     setSimulation(prev => {
-      const updatedProducts = prev.produtos.map((produto, i) => {
+      const updatedProducts = (prev.produtos || []).map((produto, i) => {
         if (i === index) {
           const updatedProduct = { ...produto, [field]: value };
           
@@ -288,7 +288,7 @@ export default function FormalImportSimulator() {
   const removeProduct = (index: number) => {
     setSimulation(prev => ({
       ...prev,
-      produtos: prev.produtos.filter((_, i) => i !== index)
+      produtos: (prev.produtos || []).filter((_, i) => i !== index)
     }));
   };
 
@@ -312,6 +312,89 @@ export default function FormalImportSimulator() {
 
   const formatPercentage = (value: number) => {
     return `${(value * 100).toFixed(2)}%`;
+  };
+
+  // Função para exportar para PDF
+  const exportToPDF = () => {
+    // Implementar usando html2canvas e jsPDF
+    import('jspdf').then(({ default: jsPDF }) => {
+      import('html2canvas').then(({ default: html2canvas }) => {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        // Título do documento
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('SIMULADOR DE IMPORTAÇÃO FORMAL', 20, 20);
+        
+        // Subtitle
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Cálculo com rateio por CBM', 20, 30);
+        
+        // Data de emissão
+        const today = new Date().toLocaleDateString('pt-BR');
+        pdf.text(`DATA DE EMISSÃO: ${today}`, 20, 40);
+        
+        // Informações gerais
+        let yPos = 50;
+        pdf.setFontSize(10);
+        pdf.text(`NOME: ${simulation.nome}`, 20, yPos);
+        yPos += 7;
+        pdf.text(`FORNECEDOR: ${simulation.fornecedor || 'Não informado'}`, 20, yPos);
+        yPos += 7;
+        pdf.text(`DESPACHANTE: ${simulation.despachante || 'Não informado'}`, 20, yPos);
+        yPos += 7;
+        pdf.text(`AGENTE DE CARGAS: ${simulation.agenteCargas || 'Não informado'}`, 20, yPos);
+        yPos += 7;
+        pdf.text(`TAXA DO DÓLAR: ${formatCurrency(simulation.taxaDolar)}`, 20, yPos);
+        yPos += 15;
+        
+        // Seção Valores USD
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('VALORES EM USD', 20, yPos);
+        yPos += 10;
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`FOB: ${formatUSD(simulation.valorFobDolar)}`, 20, yPos);
+        yPos += 7;
+        pdf.text(`FRETE: ${formatUSD(simulation.valorFreteDolar)}`, 20, yPos);
+        yPos += 7;
+        pdf.text(`CFR: ${formatUSD(simulation.valorFobDolar + simulation.valorFreteDolar)}`, 20, yPos);
+        yPos += 15;
+        
+        // Seção Valores BRL
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('VALORES EM BRL', 20, yPos);
+        yPos += 10;
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`FOB: ${formatCurrency(simulation.resultados?.valorFobReal || 0)}`, 20, yPos);
+        yPos += 7;
+        pdf.text(`FRETE: ${formatCurrency(simulation.resultados?.valorFreteReal || 0)}`, 20, yPos);
+        yPos += 7;
+        pdf.text(`IMPOSTOS: ${formatCurrency(simulation.resultados?.totalImpostos || 0)}`, 20, yPos);
+        yPos += 7;
+        pdf.text(`DESPESAS: ${formatCurrency(simulation.resultados?.totalDespesas || 0)}`, 20, yPos);
+        yPos += 10;
+        
+        // Total em destaque
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`TOTAL: ${formatCurrency(simulation.resultados?.custoTotal || 0)}`, 20, yPos);
+        
+        // Salvar arquivo
+        pdf.save(`${simulation.nome || 'simulacao'}-importacao-formal.pdf`);
+        
+        toast({
+          title: "PDF exportado com sucesso!",
+          description: "O arquivo foi baixado para seu computador."
+        });
+      });
+    });
   };
 
   // Função para calcular valores estimados dos impostos em tempo real
@@ -460,14 +543,14 @@ export default function FormalImportSimulator() {
 
   // Função para conversão automática USD -> Real
   const handleExpenseUSDChange = (index: number, value: number) => {
-    const novasDespesas = [...simulation.despesasAdicionais];
+    const novasDespesas = [...(simulation.despesasAdicionais || [])];
     novasDespesas[index].valorDolar = value;
     novasDespesas[index].valorReal = value * simulation.taxaDolar;
     setSimulation(prev => ({ ...prev, despesasAdicionais: novasDespesas }));
   };
 
   const handleExpenseRealChange = (index: number, value: number) => {
-    const novasDespesas = [...simulation.despesasAdicionais];
+    const novasDespesas = [...(simulation.despesasAdicionais || [])];
     novasDespesas[index].valorReal = value;
     novasDespesas[index].valorDolar = value / simulation.taxaDolar;
     setSimulation(prev => ({ ...prev, despesasAdicionais: novasDespesas }));
@@ -812,7 +895,7 @@ export default function FormalImportSimulator() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {simulation.despesasAdicionais.map((expense, index) => {
+                      {(simulation.despesasAdicionais || []).map((expense, index) => {
                         // Buscar valor de referência padrão se existir
                         const defaultExpense = index < defaultExpenses.length ? defaultExpenses[index] : null;
                         
@@ -989,7 +1072,7 @@ export default function FormalImportSimulator() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {simulation.produtos.map((produto, index) => (
+                          {(simulation.produtos || []).map((produto, index) => (
                             <TableRow key={produto.id || index}>
                               <TableCell>
                                 <Input
@@ -1098,13 +1181,13 @@ export default function FormalImportSimulator() {
                           <div className="text-center">
                             <div className="text-muted-foreground">CBM Total</div>
                             <div className="font-bold">
-                              {formatCBM(simulation.produtos.reduce((sum, p) => sum + (p.cbmTotal || 0), 0))}
+                              {formatCBM((simulation.produtos || []).reduce((sum, p) => sum + (p.cbmTotal || 0), 0))}
                             </div>
                           </div>
                           <div className="text-center">
                             <div className="text-muted-foreground">Custo Total</div>
                             <div className="font-bold text-blue-600">
-                              {formatCurrency(simulation.produtos.reduce((sum, p) => sum + (p.custoTotal || 0), 0))}
+                              {formatCurrency((simulation.produtos || []).reduce((sum, p) => sum + (p.custoTotal || 0), 0))}
                             </div>
                           </div>
                         </div>
@@ -1186,7 +1269,7 @@ export default function FormalImportSimulator() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {simulation.produtos.map((produto, index) => (
+                            {(simulation.produtos || []).map((produto, index) => (
                               <TableRow key={produto.id || index}>
                                 <TableCell className="font-medium">{produto.nome}</TableCell>
                                 <TableCell>{formatCurrency(produto.valorTotalBRL || 0)}</TableCell>
@@ -1311,6 +1394,126 @@ export default function FormalImportSimulator() {
                       </div>
                     </CardContent>
                   </Card>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="total">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calculator className="h-5 w-5" />
+                    Total da Importação
+                  </CardTitle>
+                  <CardDescription>
+                    Resumo executivo completo da simulação
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Resumo Financeiro */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Valores em USD */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Valores em USD</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex justify-between">
+                          <span>FOB:</span>
+                          <span className="font-bold">{formatUSD(simulation.valorFobDolar)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Frete:</span>
+                          <span className="font-bold">{formatUSD(simulation.valorFreteDolar)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>CFR:</span>
+                          <span className="font-bold">{formatUSD(simulation.valorFobDolar + simulation.valorFreteDolar)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Seguro:</span>
+                          <span className="font-bold">{formatUSD(((simulation.valorFobDolar + simulation.valorFreteDolar) * simulation.taxaDolar * (simulation.percentualSeguro / 100)) / simulation.taxaDolar)}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Valores em BRL */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Valores em BRL</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex justify-between">
+                          <span>FOB:</span>
+                          <span className="font-bold">{formatCurrency(simulation.resultados?.valorFobReal || 0)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Frete:</span>
+                          <span className="font-bold">{formatCurrency(simulation.resultados?.valorFreteReal || 0)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Impostos:</span>
+                          <span className="font-bold">{formatCurrency(simulation.resultados?.totalImpostos || 0)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Despesas:</span>
+                          <span className="font-bold">{formatCurrency(simulation.resultados?.totalDespesas || 0)}</span>
+                        </div>
+                        <hr />
+                        <div className="flex justify-between text-lg font-bold text-blue-600">
+                          <span>Total:</span>
+                          <span>{formatCurrency(simulation.resultados?.custoTotal || 0)}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Informações da Simulação */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Informações da Simulação</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <div className="flex justify-between py-2 border-b">
+                            <span>Nome:</span>
+                            <span className="font-medium">{simulation.nome}</span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b">
+                            <span>Fornecedor:</span>
+                            <span className="font-medium">{simulation.fornecedor || 'Não informado'}</span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b">
+                            <span>Despachante:</span>
+                            <span className="font-medium">{simulation.despachante || 'Não informado'}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex justify-between py-2 border-b">
+                            <span>Agente de Cargas:</span>
+                            <span className="font-medium">{simulation.agenteCargas || 'Não informado'}</span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b">
+                            <span>Taxa do Dólar:</span>
+                            <span className="font-medium">{formatCurrency(simulation.taxaDolar)}</span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b">
+                            <span>CBM Total:</span>
+                            <span className="font-medium">{formatCBM(simulation.resultados?.cbmTotal || 0)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Botão Exportar PDF */}
+                  <div className="flex justify-center">
+                    <Button onClick={() => exportToPDF()} className="w-full max-w-md" size="lg">
+                      <Download className="h-4 w-4 mr-2" />
+                      Exportar para PDF
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
