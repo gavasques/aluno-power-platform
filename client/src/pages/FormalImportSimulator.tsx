@@ -10,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Calculator, Plus, Trash2, Copy, Save, Download, ArrowLeft, ArrowRight, X, History, Check } from 'lucide-react';
+import { Calculator, Plus, Trash2, Copy, Save, Download, ArrowLeft, ArrowRight, X, History, Check, FileText } from 'lucide-react';
 import { useLocation, useRoute } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
+import jsPDF from 'jspdf';
 
 interface Tax {
   nome: string;
@@ -108,10 +109,188 @@ const defaultExpenses: Expense[] = [
   { nome: "DAS", valorDolar: 47.71, valorReal: 262.40 }
 ];
 
+// Função de formatação CBM específica para PDF
+const formatCBM = (value: number) => `${value.toFixed(6)} m³`;
+
+// Função de exportar PDF
+const exportToPDF = (simulation: FormalImportSimulation) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  let yPosition = 30;
+
+  // Configuração de fonte padrão
+  doc.setFont('helvetica');
+
+  // CABEÇALHO
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SIMULAÇÃO DE IMPORTAÇÃO FORMAL', pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 15;
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${simulation.nome || 'Simulação'} - ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 20;
+
+  // INFORMAÇÕES DA SIMULAÇÃO
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('INFORMAÇÕES DA SIMULAÇÃO', margin, yPosition);
+  yPosition += 10;
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const infoItems = [
+    `Fornecedor: ${simulation.fornecedor || 'Não informado'}`,
+    `Despachante: ${simulation.despachante || 'Não informado'}`,
+    `Agente de Cargas: ${simulation.agenteCargas || 'Não informado'}`,
+    `Taxa do Dólar: R$ ${(simulation.taxaDolar || 0).toFixed(4)}`,
+    `CBM Total: ${formatCBM((simulation.resultados || {}).cbmTotal || 0)}`
+  ];
+
+  infoItems.forEach(item => {
+    doc.text(item, margin, yPosition);
+    yPosition += 7;
+  });
+  yPosition += 15;
+
+  // VALORES RESUMO
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('RESUMO FINANCEIRO', margin, yPosition);
+  yPosition += 10;
+
+  // Valores em USD (coluna esquerda)
+  doc.setFontSize(12);
+  doc.text('Valores em USD:', margin, yPosition);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  yPosition += 8;
+
+  const usdValues = [
+    `FOB: ${formatUSD(simulation.valorFobDolar || 0)}`,
+    `Frete: ${formatUSD(simulation.valorFreteDolar || 0)}`,
+    `CFR: ${formatUSD((simulation.resultados || {}).valorCfrDolar || 0)}`,
+    `Seguro: ${formatUSD((simulation.resultados || {}).valorSeguro || 0)}`
+  ];
+
+  usdValues.forEach(item => {
+    doc.text(item, margin, yPosition);
+    yPosition += 6;
+  });
+
+  // Valores em BRL (coluna direita)
+  let yPositionBRL = yPosition - (usdValues.length * 6) - 8;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Valores em BRL:', pageWidth / 2, yPositionBRL);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  yPositionBRL += 8;
+
+  const brlValues = [
+    `FOB: ${formatCurrency((simulation.resultados || {}).valorFobReal || 0)}`,
+    `Frete: ${formatCurrency((simulation.resultados || {}).valorFreteReal || 0)}`,
+    `Impostos: ${formatCurrency((simulation.resultados || {}).totalImpostos || 0)}`,
+    `Despesas: ${formatCurrency((simulation.resultados || {}).totalDespesas || 0)}`
+  ];
+
+  brlValues.forEach(item => {
+    doc.text(item, pageWidth / 2, yPositionBRL);
+    yPositionBRL += 6;
+  });
+
+  // TOTAL DESTACADO
+  yPosition += 15;
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 100, 200);
+  doc.text(`TOTAL GERAL: ${formatCurrency((simulation.resultados || {}).custoTotal || 0)}`, margin, yPosition);
+  doc.setTextColor(0, 0, 0);
+  yPosition += 20;
+
+  // Nova página para produtos se necessário
+  if (yPosition > 200) {
+    doc.addPage();
+    yPosition = 30;
+  }
+
+  // DETALHAMENTO POR PRODUTO
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('DETALHAMENTO POR PRODUTO', margin, yPosition);
+  yPosition += 15;
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+
+  (simulation.produtos || []).forEach((produto, index) => {
+    if (yPosition > 250) {
+      doc.addPage();
+      yPosition = 30;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${index + 1}. ${produto.nome}`, margin, yPosition);
+    yPosition += 8;
+
+    doc.setFont('helvetica', 'normal');
+    const produtoInfo = [
+      `NCM: ${produto.ncm}  |  Qtd: ${produto.quantidade}  |  Valor Unit. USD: ${formatUSD(produto.valorUnitarioUsd || 0)}`,
+      `Dimensões: ${produto.comprimento}x${produto.largura}x${produto.altura} cm  |  CBM: ${formatCBM(produto.cbmTotal || 0)}`,
+      `Valor Total BRL: ${formatCurrency(produto.valorTotalBRL || 0)}`,
+      `Frete Rateio: ${formatCurrency(produto.freteRateio || 0)}  |  Despesas Rateio: ${formatCurrency(produto.despesasRateio || 0)}`,
+      `Impostos - II: ${formatCurrency(produto.impostos?.ii || 0)}  |  IPI: ${formatCurrency(produto.impostos?.ipi || 0)}`,
+      `PIS: ${formatCurrency(produto.impostos?.pis || 0)}  |  COFINS: ${formatCurrency(produto.impostos?.cofins || 0)}  |  ICMS: ${formatCurrency(produto.impostos?.icms || 0)}`,
+      `CUSTO TOTAL: ${formatCurrency(produto.custoTotal || 0)}  |  CUSTO UNITÁRIO: ${formatCurrency(produto.custoUnitario || 0)}`
+    ];
+
+    produtoInfo.forEach(info => {
+      doc.text(info, margin + 5, yPosition);
+      yPosition += 5;
+    });
+    yPosition += 10;
+  });
+
+  // RODAPÉ
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'italic');
+    doc.text(`Simulação gerada em ${new Date().toLocaleString('pt-BR')} - Página ${i} de ${pageCount}`, 
+      pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+  }
+
+  // Salvar arquivo
+  const fileName = `simulacao-importacao-${simulation.nome?.replace(/[^a-zA-Z0-9]/g, '-') || 'simulacao'}-${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+};
+
 export default function FormalImportSimulator() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Funções de formatação
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const formatUSD = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
+  };
+
+  const formatPercentage = (value: number) => {
+    return `${((value || 0) * 100).toFixed(2)}%`;
+  };
   
   // Extrair ID da simulação dos parâmetros da URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -1592,8 +1771,8 @@ export default function FormalImportSimulator() {
             {/* Removido duplicação - esta seção está na aba "total" abaixo */}
           </Tabs>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-6">
+          {/* Navigation and Action Buttons */}
+          <div className="flex justify-between items-center mt-6">
             <Button
               variant="outline"
               onClick={() => {
@@ -1608,6 +1787,20 @@ export default function FormalImportSimulator() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Anterior
             </Button>
+
+            {/* Central Action Buttons */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => exportToPDF(simulation)}
+                disabled={!simulation.resultados?.custoTotal}
+                className="bg-blue-50 hover:bg-blue-100 border-blue-300"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Exportar PDF
+              </Button>
+            </div>
+
             <Button
               onClick={() => {
                 const tabs = ["info", "insurance", "taxes", "expenses", "products", "results", "total"];
