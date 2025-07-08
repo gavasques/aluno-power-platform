@@ -51,7 +51,7 @@ const Hub = lazy(() => import("./pages/Hub"));
 const Ferramentas = lazy(() => import("./pages/Ferramentas"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
-const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIconTest"));
+const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
 const FormalImportSimulator = lazy(() => import("./pages/FormalImportSimulator"));
 const FormalImportSimulationsList = lazy(() => import("./pages/FormalImportSimulationsList"));

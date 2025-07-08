@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, FileDigit, Ship, Building, ClipboardCheck, Calculator, ArrowRight, TrendingUp } from "lucide-react";
+import { Search, X, Calculator, Ship, Building, ClipboardCheck, TrendingUp, FileText } from "lucide-react";
 
 interface SimuladorItem {
   id: string;
@@ -23,7 +23,7 @@ const simuladorItems: SimuladorItem[] = [
     title: "Simples Nacional",
     description: "Calcule impostos e taxas do regime tributário Simples Nacional para seu negócio",
     href: "/simuladores/simples-nacional",
-    icon: FileDigit,
+    icon: FileText,
     category: "Tributário",
     isAvailable: true,
   },
