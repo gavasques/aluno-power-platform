@@ -148,8 +148,8 @@ export default function FormalImportSimulator() {
     valorFobDolar: 1000,
     valorFreteDolar: 200,
     percentualSeguro: 0.18,
-    impostos: defaultTaxes,
-    despesasAdicionais: defaultExpenses,
+    impostos: [...defaultTaxes], // Use spread to create new array
+    despesasAdicionais: [...defaultExpenses], // Use spread to create new array
     produtos: [
       {
         id: "1",
@@ -175,7 +175,14 @@ export default function FormalImportSimulator() {
 
   useEffect(() => {
     if (existingSimulation) {
-      setSimulation(existingSimulation);
+      // Ensure all required arrays are properly initialized
+      const processedSimulation = {
+        ...existingSimulation,
+        impostos: existingSimulation.impostos || defaultTaxes,
+        despesasAdicionais: existingSimulation.despesasAdicionais || defaultExpenses,
+        produtos: existingSimulation.produtos || []
+      };
+      setSimulation(processedSimulation);
     }
   }, [existingSimulation]);
 
@@ -195,8 +202,10 @@ export default function FormalImportSimulator() {
     onSuccess: (data) => {
       setSimulation(prev => ({
         ...prev,
-        produtos: data.produtos || prev.produtos,
-        resultados: data.resultados || prev.resultados
+        produtos: data?.produtos || prev.produtos || [],
+        resultados: data?.resultados || prev.resultados || {},
+        impostos: prev.impostos || defaultTaxes,
+        despesasAdicionais: prev.despesasAdicionais || defaultExpenses
       }));
     },
     onError: (error) => {
@@ -564,7 +573,7 @@ export default function FormalImportSimulator() {
     }
 
     // Verificar se já existe um imposto com o mesmo nome
-    if (simulation.impostos.some(tax => tax.nome.toLowerCase() === newTax.nome.toLowerCase())) {
+    if ((simulation.impostos || []).some(tax => tax.nome.toLowerCase() === newTax.nome.toLowerCase())) {
       toast({
         title: "Erro",
         description: "Já existe um imposto com esse nome",
@@ -573,7 +582,7 @@ export default function FormalImportSimulator() {
       return;
     }
 
-    const newImpostos = [...simulation.impostos, { ...newTax }];
+    const newImpostos = [...(simulation.impostos || []), { ...newTax }];
     setSimulation(prev => ({ ...prev, impostos: newImpostos }));
     
     // Resetar formulário
@@ -592,7 +601,7 @@ export default function FormalImportSimulator() {
   };
 
   const removeCustomTax = (index: number) => {
-    const tax = simulation.impostos[index];
+    const tax = (simulation.impostos || [])[index];
     
     // Não permitir remover impostos padrão
     if (defaultTaxNames.includes(tax.nome)) {
@@ -604,7 +613,7 @@ export default function FormalImportSimulator() {
       return;
     }
 
-    const newImpostos = simulation.impostos.filter((_, i) => i !== index);
+    const newImpostos = (simulation.impostos || []).filter((_, i) => i !== index);
     setSimulation(prev => ({ ...prev, impostos: newImpostos }));
 
     toast({
@@ -999,7 +1008,7 @@ export default function FormalImportSimulator() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {simulation.impostos.map((tax, index) => (
+                      {(simulation.impostos || []).map((tax, index) => (
                         <TableRow key={index}>
                           <TableCell className="font-medium">{tax.nome}</TableCell>
                           <TableCell>
@@ -1008,7 +1017,7 @@ export default function FormalImportSimulator() {
                               step="0.01"
                               value={tax.aliquota}
                               onChange={(e) => {
-                                const newImpostos = [...simulation.impostos];
+                                const newImpostos = [...(simulation.impostos || [])];
                                 newImpostos[index].aliquota = parseFloat(e.target.value) || 0;
                                 setSimulation(prev => ({ ...prev, impostos: newImpostos }));
                               }}
