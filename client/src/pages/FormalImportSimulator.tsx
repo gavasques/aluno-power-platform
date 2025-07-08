@@ -394,8 +394,8 @@ export default function FormalImportSimulator() {
             
             return {
               ...updatedProduct,
-              cbmUnitario: Number(cbmUnitario.toFixed(6)),
-              cbmTotal: Number(cbmTotal.toFixed(6))
+              cbmUnitario: Number((cbmUnitario || 0).toFixed(6)),
+              cbmTotal: Number((cbmTotal || 0).toFixed(6))
             };
           }
           
@@ -445,11 +445,11 @@ export default function FormalImportSimulator() {
   };
 
   const formatCBM = (value: number) => {
-    return `${value.toFixed(6)} m³`;
+    return `${(value || 0).toFixed(6)} m³`;
   };
 
   const formatPercentage = (value: number) => {
-    return `${(value * 100).toFixed(2)}%`;
+    return `${((value || 0) * 100).toFixed(2)}%`;
   };
 
   // Função para exportar para PDF
@@ -809,7 +809,7 @@ export default function FormalImportSimulator() {
                       <Label htmlFor="nome">Nome da Simulação</Label>
                       <Input
                         id="nome"
-                        value={simulation.nome}
+                        value={simulation.nome || ""}
                         onChange={(e) => setSimulation(prev => ({ ...prev, nome: e.target.value }))}
                       />
                     </div>
@@ -817,7 +817,7 @@ export default function FormalImportSimulator() {
                       <Label htmlFor="fornecedor">Fornecedor</Label>
                       <Input
                         id="fornecedor"
-                        value={simulation.fornecedor}
+                        value={simulation.fornecedor || ""}
                         onChange={(e) => setSimulation(prev => ({ ...prev, fornecedor: e.target.value }))}
                       />
                     </div>
@@ -825,7 +825,7 @@ export default function FormalImportSimulator() {
                       <Label htmlFor="despachante">Despachante</Label>
                       <Input
                         id="despachante"
-                        value={simulation.despachante}
+                        value={simulation.despachante || ""}
                         onChange={(e) => setSimulation(prev => ({ ...prev, despachante: e.target.value }))}
                       />
                     </div>
@@ -833,7 +833,7 @@ export default function FormalImportSimulator() {
                       <Label htmlFor="agenteCargas">Agente de Cargas</Label>
                       <Input
                         id="agenteCargas"
-                        value={simulation.agenteCargas}
+                        value={simulation.agenteCargas || ""}
                         onChange={(e) => setSimulation(prev => ({ ...prev, agenteCargas: e.target.value }))}
                       />
                     </div>
@@ -904,7 +904,7 @@ export default function FormalImportSimulator() {
                         id="percentualSeguro"
                         type="number"
                         step="0.01"
-                        value={simulation.percentualSeguro}
+                        value={simulation.percentualSeguro || 0}
                         onChange={(e) => setSimulation(prev => ({ ...prev, percentualSeguro: parseFloat(e.target.value) || 0 }))}
                       />
                     </div>
@@ -955,7 +955,7 @@ export default function FormalImportSimulator() {
                             <Label htmlFor="taxName">Nome do Imposto</Label>
                             <Input
                               id="taxName"
-                              value={newTax.nome}
+                              value={newTax.nome || ""}
                               onChange={(e) => setNewTax(prev => ({ ...prev, nome: e.target.value }))}
                               placeholder="Ex: Taxa Especial"
                             />
@@ -966,14 +966,14 @@ export default function FormalImportSimulator() {
                               id="taxRate"
                               type="number"
                               step="0.01"
-                              value={newTax.aliquota}
+                              value={newTax.aliquota || 0}
                               onChange={(e) => setNewTax(prev => ({ ...prev, aliquota: parseFloat(e.target.value) || 0 }))}
                               placeholder="0.00"
                             />
                           </div>
                           <div>
                             <Label htmlFor="taxBase">Base de Cálculo</Label>
-                            <Select value={newTax.baseCalculo} onValueChange={(value) => setNewTax(prev => ({ ...prev, baseCalculo: value }))}>
+                            <Select value={newTax.baseCalculo || ""} onValueChange={(value) => setNewTax(prev => ({ ...prev, baseCalculo: value }))}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Selecione a base de cálculo" />
                               </SelectTrigger>
@@ -1015,7 +1015,7 @@ export default function FormalImportSimulator() {
                             <Input
                               type="number"
                               step="0.01"
-                              value={tax.aliquota}
+                              value={tax.aliquota || 0}
                               onChange={(e) => {
                                 const newImpostos = [...(simulation.impostos || [])];
                                 newImpostos[index].aliquota = parseFloat(e.target.value) || 0;
@@ -1110,7 +1110,7 @@ export default function FormalImportSimulator() {
                                   }}
                                   className="w-24"
                                 />
-                                {defaultExpense && (
+                                {defaultExpense && defaultExpense.valorReal && (
                                   <span className="text-xs text-muted-foreground">
                                     Ref: R$ {defaultExpense.valorReal.toFixed(2)}
                                   </span>
@@ -1160,7 +1160,7 @@ export default function FormalImportSimulator() {
                       <Label htmlFor="expenseName">Nome da Despesa</Label>
                       <Input
                         id="expenseName"
-                        value={newExpense.nome}
+                        value={newExpense.nome || ""}
                         onChange={(e) => setNewExpense(prev => ({ ...prev, nome: e.target.value }))}
                         placeholder="Ex: Certificado de Origem"
                       />
@@ -1204,7 +1204,7 @@ export default function FormalImportSimulator() {
                       </div>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Taxa de câmbio: R$ {simulation.taxaDolar.toFixed(4)}
+                      Taxa de câmbio: R$ {(simulation.taxaDolar || 0).toFixed(4)}
                     </div>
                   </div>
                   <DialogFooter>
@@ -1407,7 +1407,7 @@ export default function FormalImportSimulator() {
                           <CardContent className="p-4">
                             <div className="text-sm text-muted-foreground">FOB Real</div>
                             <div className="text-lg font-bold">
-                              {formatCurrency(simulation.resultados.valorFobReal || 0)}
+                              {formatCurrency((simulation.resultados || {}).valorFobReal || 0)}
                             </div>
                           </CardContent>
                         </Card>
@@ -1415,7 +1415,7 @@ export default function FormalImportSimulator() {
                           <CardContent className="p-4">
                             <div className="text-sm text-muted-foreground">Frete Real</div>
                             <div className="text-lg font-bold">
-                              {formatCurrency(simulation.resultados.valorFreteReal || 0)}
+                              {formatCurrency((simulation.resultados || {}).valorFreteReal || 0)}
                             </div>
                           </CardContent>
                         </Card>
@@ -1423,7 +1423,7 @@ export default function FormalImportSimulator() {
                           <CardContent className="p-4">
                             <div className="text-sm text-muted-foreground">Total Impostos</div>
                             <div className="text-lg font-bold">
-                              {formatCurrency(simulation.resultados.totalImpostos || 0)}
+                              {formatCurrency((simulation.resultados || {}).totalImpostos || 0)}
                             </div>
                           </CardContent>
                         </Card>
@@ -1431,7 +1431,7 @@ export default function FormalImportSimulator() {
                           <CardContent className="p-4">
                             <div className="text-sm text-muted-foreground">CBM Total</div>
                             <div className="text-lg font-bold">
-                              {formatCBM(simulation.resultados.cbmTotal || 0)}
+                              {formatCBM((simulation.resultados || {}).cbmTotal || 0)}
                             </div>
                           </CardContent>
                         </Card>
@@ -1507,11 +1507,11 @@ export default function FormalImportSimulator() {
                         </div>
                         <div className="flex justify-between">
                           <span>CFR:</span>
-                          <span className="font-bold">{formatUSD(simulation.resultados.valorCfrDolar || 0)}</span>
+                          <span className="font-bold">{formatUSD((simulation.resultados || {}).valorCfrDolar || 0)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Seguro:</span>
-                          <span className="font-bold">{formatUSD(simulation.resultados.valorSeguro || 0)}</span>
+                          <span className="font-bold">{formatUSD((simulation.resultados || {}).valorSeguro || 0)}</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -1524,24 +1524,24 @@ export default function FormalImportSimulator() {
                       <CardContent className="space-y-2">
                         <div className="flex justify-between">
                           <span>FOB:</span>
-                          <span className="font-bold">{formatCurrency(simulation.resultados.valorFobReal || 0)}</span>
+                          <span className="font-bold">{formatCurrency((simulation.resultados || {}).valorFobReal || 0)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Frete:</span>
-                          <span className="font-bold">{formatCurrency(simulation.resultados.valorFreteReal || 0)}</span>
+                          <span className="font-bold">{formatCurrency((simulation.resultados || {}).valorFreteReal || 0)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Impostos:</span>
-                          <span className="font-bold">{formatCurrency(simulation.resultados.totalImpostos || 0)}</span>
+                          <span className="font-bold">{formatCurrency((simulation.resultados || {}).totalImpostos || 0)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Despesas:</span>
-                          <span className="font-bold">{formatCurrency(simulation.resultados.totalDespesas || 0)}</span>
+                          <span className="font-bold">{formatCurrency((simulation.resultados || {}).totalDespesas || 0)}</span>
                         </div>
                         <hr />
                         <div className="flex justify-between text-lg">
                           <span className="font-bold">Total:</span>
-                          <span className="font-bold text-blue-600">{formatCurrency(simulation.resultados.custoTotal || 0)}</span>
+                          <span className="font-bold text-blue-600">{formatCurrency((simulation.resultados || {}).custoTotal || 0)}</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -1572,11 +1572,11 @@ export default function FormalImportSimulator() {
                         </div>
                         <div>
                           <Label>Taxa do Dólar:</Label>
-                          <div className="p-2 bg-gray-50 rounded">R$ {simulation.taxaDolar.toFixed(4)}</div>
+                          <div className="p-2 bg-gray-50 rounded">R$ {(simulation.taxaDolar || 0).toFixed(4)}</div>
                         </div>
                         <div>
                           <Label>CBM Total:</Label>
-                          <div className="p-2 bg-gray-50 rounded">{formatCBM(simulation.resultados.cbmTotal || 0)}</div>
+                          <div className="p-2 bg-gray-50 rounded">{formatCBM((simulation.resultados || {}).cbmTotal || 0)}</div>
                         </div>
                       </div>
                     </CardContent>
