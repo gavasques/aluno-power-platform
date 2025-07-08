@@ -296,6 +296,12 @@ export default function FormalImportSimulator() {
             const cbmUnitario = comp > 0 && larg > 0 && alt > 0 ? (comp * larg * alt) / 1000000 : 0;
             const cbmTotal = cbmUnitario * quant;
             
+            console.log(`🔥 CBM CALCULATION - Produto ${index + 1}:`, {
+              dimensoes: { comp, larg, alt, quant },
+              cbmUnitario,
+              cbmTotal
+            });
+            
             return {
               ...updatedProduct,
               cbmUnitario: Number(cbmUnitario.toFixed(6)),
@@ -314,6 +320,16 @@ export default function FormalImportSimulator() {
         ...product,
         percentualContainer: totalCBM > 0 ? (product.cbmTotal || 0) / totalCBM : 0
       }));
+
+      console.log(`🔥 CBM TOTAL CALCULATION:`, {
+        totalCBM,
+        produtos: productsWithPercentages.map(p => ({ 
+          nome: p.nome, 
+          cbmUnitario: p.cbmUnitario, 
+          cbmTotal: p.cbmTotal, 
+          percentual: p.percentualContainer 
+        }))
+      });
 
       return {
         ...prev,
@@ -1198,17 +1214,17 @@ export default function FormalImportSimulator() {
                               </TableCell>
                               <TableCell>
                                 <Badge variant="outline">
-                                  {produto.cbmUnitario ? formatCBM(produto.cbmUnitario) : '-'}
+                                  {produto.cbmUnitario !== undefined && produto.cbmUnitario >= 0 ? formatCBM(produto.cbmUnitario) : '-'}
                                 </Badge>
                               </TableCell>
                               <TableCell>
                                 <Badge variant="outline">
-                                  {produto.cbmTotal ? formatCBM(produto.cbmTotal) : '-'}
+                                  {produto.cbmTotal !== undefined && produto.cbmTotal >= 0 ? formatCBM(produto.cbmTotal) : '-'}
                                 </Badge>
                               </TableCell>
                               <TableCell>
                                 <Badge variant="outline">
-                                  {produto.percentualContainer ? formatPercentage(produto.percentualContainer) : '-'}
+                                  {produto.percentualContainer !== undefined && produto.percentualContainer >= 0 ? formatPercentage(produto.percentualContainer) : '-'}
                                 </Badge>
                               </TableCell>
                               <TableCell>
