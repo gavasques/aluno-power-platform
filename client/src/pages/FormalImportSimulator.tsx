@@ -93,10 +93,17 @@ const defaultTaxes: Tax[] = [
 ];
 
 const defaultExpenses: Expense[] = [
+  { nome: "AFRMM (Marinha Mercante)", valorDolar: 0, valorReal: 0 },
+  { nome: "CAPATAZIA", valorDolar: 0, valorReal: 0 },
+  { nome: "TX LIBER./BL/AWB", valorDolar: 0, valorReal: 0 },
+  { nome: "THC Movimentação", valorDolar: 0, valorReal: 0 },
+  { nome: "Desconsolidação", valorDolar: 0, valorReal: 0 },
+  { nome: "ISPS", valorDolar: 0, valorReal: 0 },
+  { nome: "Container/Lacre", valorDolar: 0, valorReal: 0 },
+  { nome: "Damage Fee", valorDolar: 0, valorReal: 0 },
   { nome: "Taxa SISCOMEX", valorDolar: 0, valorReal: 214.50 },
-  { nome: "Honorários Despachante", valorDolar: 0, valorReal: 500.00 },
-  { nome: "Armazenagem", valorDolar: 0, valorReal: 0 },
-  { nome: "Transporte Interno", valorDolar: 0, valorReal: 0 }
+  { nome: "Frete Nacional", valorDolar: 0, valorReal: 0 },
+  { nome: "Honorários Despachante", valorDolar: 0, valorReal: 500.00 }
 ];
 
 export default function FormalImportSimulator() {
@@ -113,6 +120,14 @@ export default function FormalImportSimulator() {
     aliquota: 0,
     baseCalculo: "fob_frete_seguro",
     valor: 0
+  });
+
+  // Estado para despesas adicionais personalizadas
+  const [showAddExpenseDialog, setShowAddExpenseDialog] = useState(false);
+  const [newExpense, setNewExpense] = useState<Expense>({
+    nome: "",
+    valorDolar: 0,
+    valorReal: 0
   });
 
   // Lista de impostos padrão que não podem ser removidos
@@ -361,6 +376,68 @@ export default function FormalImportSimulator() {
       valor: 0
     });
     setShowAddTaxDialog(false);
+  };
+
+  // Funções para despesas adicionais personalizadas
+  const addNewExpense = () => {
+    if (!newExpense.nome || (newExpense.valorDolar === 0 && newExpense.valorReal === 0)) {
+      toast({
+        title: "Erro",
+        description: "Preencha o nome da despesa e pelo menos um valor",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const novasDespesas = [...simulation.despesasAdicionais, { ...newExpense }];
+    setSimulation(prev => ({ ...prev, despesasAdicionais: novasDespesas }));
+    
+    // Resetar formulário
+    setNewExpense({
+      nome: "",
+      valorDolar: 0,
+      valorReal: 0
+    });
+    setShowAddExpenseDialog(false);
+
+    toast({
+      title: "Sucesso",
+      description: "Despesa adicional adicionada com sucesso",
+    });
+  };
+
+  const removeExpense = (index: number) => {
+    const novasDespesas = simulation.despesasAdicionais.filter((_, i) => i !== index);
+    setSimulation(prev => ({ ...prev, despesasAdicionais: novasDespesas }));
+    
+    toast({
+      title: "Sucesso",
+      description: "Despesa removida com sucesso",
+    });
+  };
+
+  const resetNewExpenseForm = () => {
+    setNewExpense({
+      nome: "",
+      valorDolar: 0,
+      valorReal: 0
+    });
+    setShowAddExpenseDialog(false);
+  };
+
+  // Função para conversão automática USD -> Real
+  const handleExpenseUSDChange = (index: number, value: number) => {
+    const novasDespesas = [...simulation.despesasAdicionais];
+    novasDespesas[index].valorDolar = value;
+    novasDespesas[index].valorReal = value * simulation.taxaDolar;
+    setSimulation(prev => ({ ...prev, despesasAdicionais: novasDespesas }));
+  };
+
+  const handleExpenseRealChange = (index: number, value: number) => {
+    const novasDespesas = [...simulation.despesasAdicionais];
+    novasDespesas[index].valorReal = value;
+    novasDespesas[index].valorDolar = value / simulation.taxaDolar;
+    setSimulation(prev => ({ ...prev, despesasAdicionais: novasDespesas }));
   };
 
   if (isLoading) {
@@ -698,6 +775,7 @@ export default function FormalImportSimulator() {
                         <TableHead>Despesa</TableHead>
                         <TableHead>Valor USD</TableHead>
                         <TableHead>Valor BRL</TableHead>
+                        <TableHead>Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -708,11 +786,11 @@ export default function FormalImportSimulator() {
                             <Input
                               type="number"
                               step="0.01"
-                              value={expense.valorDolar}
+                              value={expense.valorDolar === 0 ? "" : expense.valorDolar}
+                              placeholder="0.00"
                               onChange={(e) => {
-                                const newDespesas = [...simulation.despesasAdicionais];
-                                newDespesas[index].valorDolar = parseFloat(e.target.value) || 0;
-                                setSimulation(prev => ({ ...prev, despesasAdicionais: newDespesas }));
+                                const value = parseFloat(e.target.value) || 0;
+                                handleExpenseUSDChange(index, value);
                               }}
                               className="w-24"
                             />
@@ -721,21 +799,114 @@ export default function FormalImportSimulator() {
                             <Input
                               type="number"
                               step="0.01"
-                              value={expense.valorReal}
+                              value={expense.valorReal === 0 ? "" : expense.valorReal}
+                              placeholder="0.00"
                               onChange={(e) => {
-                                const newDespesas = [...simulation.despesasAdicionais];
-                                newDespesas[index].valorReal = parseFloat(e.target.value) || 0;
-                                setSimulation(prev => ({ ...prev, despesasAdicionais: newDespesas }));
+                                const value = parseFloat(e.target.value) || 0;
+                                handleExpenseRealChange(index, value);
                               }}
                               className="w-24"
                             />
+                          </TableCell>
+                          <TableCell>
+                            {/* Só permite remover despesas que não sejam padrão */}
+                            {index >= defaultExpenses.length && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => removeExpense(index)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
+
+                  {/* Botão para adicionar nova despesa */}
+                  <div className="mt-4 flex justify-end">
+                    <Button onClick={() => setShowAddExpenseDialog(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar Despesa
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
+
+              {/* Dialog para adicionar nova despesa */}
+              <Dialog open={showAddExpenseDialog} onOpenChange={setShowAddExpenseDialog}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Adicionar Despesa Adicional</DialogTitle>
+                    <DialogDescription>
+                      Adicione uma nova despesa à sua simulação de importação
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="expenseName">Nome da Despesa</Label>
+                      <Input
+                        id="expenseName"
+                        value={newExpense.nome}
+                        onChange={(e) => setNewExpense(prev => ({ ...prev, nome: e.target.value }))}
+                        placeholder="Ex: Certificado de Origem"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="expenseUSD">Valor USD</Label>
+                        <Input
+                          id="expenseUSD"
+                          type="number"
+                          step="0.01"
+                          value={newExpense.valorDolar === 0 ? "" : newExpense.valorDolar}
+                          onChange={(e) => {
+                            const usdValue = parseFloat(e.target.value) || 0;
+                            setNewExpense(prev => ({ 
+                              ...prev, 
+                              valorDolar: usdValue,
+                              valorReal: usdValue * simulation.taxaDolar
+                            }));
+                          }}
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="expenseBRL">Valor BRL</Label>
+                        <Input
+                          id="expenseBRL"
+                          type="number"
+                          step="0.01"
+                          value={newExpense.valorReal === 0 ? "" : newExpense.valorReal}
+                          onChange={(e) => {
+                            const brlValue = parseFloat(e.target.value) || 0;
+                            setNewExpense(prev => ({ 
+                              ...prev, 
+                              valorReal: brlValue,
+                              valorDolar: brlValue / simulation.taxaDolar
+                            }));
+                          }}
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Taxa de câmbio: R$ {simulation.taxaDolar.toFixed(4)}
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={resetNewExpenseForm}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={addNewExpense}>
+                      Adicionar
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </TabsContent>
 
             {/* Seção 5: Produtos */}
