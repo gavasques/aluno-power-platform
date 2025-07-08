@@ -1030,6 +1030,7 @@ export default function FormalImportSimulator() {
                         type="number"
                         step="0.0001"
                         placeholder="Ex: 5.50"
+                        className="no-spin"
                         value={simulation.taxaDolar === 0 ? "" : simulation.taxaDolar}
                         onChange={(e) => {
                           const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
@@ -1044,6 +1045,7 @@ export default function FormalImportSimulator() {
                         type="number"
                         step="0.01"
                         placeholder="Ex: 1000.00"
+                        className="no-spin"
                         value={simulation.valorFobDolar === 0 ? "" : simulation.valorFobDolar}
                         onChange={(e) => {
                           const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
@@ -1058,6 +1060,7 @@ export default function FormalImportSimulator() {
                         type="number"
                         step="0.01"
                         placeholder="Ex: 500.00"
+                        className="no-spin"
                         value={simulation.valorFreteDolar === 0 ? "" : simulation.valorFreteDolar}
                         onChange={(e) => {
                           const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
@@ -1087,6 +1090,7 @@ export default function FormalImportSimulator() {
                         id="percentualSeguro"
                         type="number"
                         step="0.01"
+                        className="no-spin"
                         value={simulation.percentualSeguro || 0}
                         onChange={(e) => setSimulation(prev => ({ ...prev, percentualSeguro: parseFloat(e.target.value) || 0 }))}
                       />
@@ -1149,6 +1153,7 @@ export default function FormalImportSimulator() {
                               id="taxRate"
                               type="number"
                               step="0.01"
+                              className="no-spin"
                               value={newTax.aliquota || 0}
                               onChange={(e) => setNewTax(prev => ({ ...prev, aliquota: parseFloat(e.target.value) || 0 }))}
                               placeholder="0.00"
@@ -1198,6 +1203,7 @@ export default function FormalImportSimulator() {
                             <Input
                               type="number"
                               step="0.01"
+                              className="no-spin"
                               value={tax.aliquota || 0}
                               onChange={(e) => {
                                 const newImpostos = [...(simulation.impostos || [])];
@@ -1271,13 +1277,13 @@ export default function FormalImportSimulator() {
                               <Input
                                 type="number"
                                 step="0.01"
+                                className="w-24 no-spin"
                                 value={expense.valorDolar === 0 ? "" : expense.valorDolar}
                                 placeholder="0.00"
                                 onChange={(e) => {
                                   const value = parseFloat(e.target.value) || 0;
                                   handleExpenseUSDChange(index, value);
                                 }}
-                                className="w-24"
                               />
                             </TableCell>
                             <TableCell>
@@ -1285,6 +1291,7 @@ export default function FormalImportSimulator() {
                                 <Input
                                   type="number"
                                   step="0.01"
+                                  className="no-spin"
                                   value={expense.valorReal === 0 ? "" : expense.valorReal}
                                   placeholder="0.00"
                                   onChange={(e) => {
@@ -1355,6 +1362,7 @@ export default function FormalImportSimulator() {
                           id="expenseUSD"
                           type="number"
                           step="0.01"
+                          className="no-spin"
                           value={newExpense.valorDolar === 0 ? "" : newExpense.valorDolar}
                           onChange={(e) => {
                             const usdValue = parseFloat(e.target.value) || 0;
@@ -1373,6 +1381,7 @@ export default function FormalImportSimulator() {
                           id="expenseBRL"
                           type="number"
                           step="0.01"
+                          className="no-spin"
                           value={newExpense.valorReal === 0 ? "" : newExpense.valorReal}
                           onChange={(e) => {
                             const brlValue = parseFloat(e.target.value) || 0;
@@ -1456,9 +1465,9 @@ export default function FormalImportSimulator() {
                               <TableCell>
                                 <Input
                                   type="number"
+                                  className="w-16 no-spin"
                                   value={produto.quantidade || ''}
                                   onChange={(e) => updateProduct(index, 'quantidade', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
-                                  className="w-16"
                                   placeholder="Qtd"
                                 />
                               </TableCell>
@@ -1466,36 +1475,36 @@ export default function FormalImportSimulator() {
                                 <Input
                                   type="number"
                                   step="0.01"
+                                  className="w-20 no-spin"
                                   value={produto.valorUnitarioUsd || ''}
                                   onChange={(e) => updateProduct(index, 'valorUnitarioUsd', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
-                                  className="w-20"
                                   placeholder="USD"
                                 />
                               </TableCell>
                               <TableCell>
                                 <Input
                                   type="number"
+                                  className="w-16 no-spin"
                                   value={produto.comprimento || ''}
                                   onChange={(e) => updateProduct(index, 'comprimento', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
-                                  className="w-16"
                                   placeholder="cm"
                                 />
                               </TableCell>
                               <TableCell>
                                 <Input
                                   type="number"
+                                  className="w-16 no-spin"
                                   value={produto.largura || ''}
                                   onChange={(e) => updateProduct(index, 'largura', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
-                                  className="w-16"
                                   placeholder="cm"
                                 />
                               </TableCell>
                               <TableCell>
                                 <Input
                                   type="number"
+                                  className="w-16 no-spin"
                                   value={produto.altura || ''}
                                   onChange={(e) => updateProduct(index, 'altura', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
-                                  className="w-16"
                                   placeholder="cm"
                                 />
                               </TableCell>
