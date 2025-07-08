@@ -1378,7 +1378,7 @@ export default function FormalImportSimulator() {
                           <div className="text-center">
                             <div className="text-muted-foreground">Custo Total</div>
                             <div className="font-bold text-blue-600">
-                              {formatCurrency((simulation.produtos || []).reduce((sum, p) => sum + (p.custoTotal || 0), 0))}
+                              {formatCurrency((simulation.resultados || {}).custoTotal || 0)}
                             </div>
                           </div>
                         </div>
