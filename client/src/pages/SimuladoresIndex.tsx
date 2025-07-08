@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, FileDigit, Ship, Building, ClipboardCheck, Calculator, ArrowRight } from "lucide-react";
+import { Search, X, FileDigit, Ship, Building, ClipboardCheck, Calculator, ArrowRight, TrendingUp } from "lucide-react";
 
 interface SimuladorItem {
   id: string;
@@ -63,6 +63,16 @@ const simuladorItems: SimuladorItem[] = [
     icon: ClipboardCheck,
     category: "Análise",
     isAvailable: true,
+  },
+  {
+    id: "investimentos-roi",
+    title: "Simulador de Investimentos e ROI",
+    description: "Calcule crescimento de capital através de giros de investimento",
+    href: "/simuladores/simulador-de-investimentos-e-roi",
+    icon: TrendingUp,
+    category: "Análise",
+    isAvailable: true,
+    isNew: true,
   },
 ];
 

@@ -55,6 +55,7 @@ const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
 const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
+const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
 const AgentsPage = lazy(() => import("./pages/agents"));
 const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
 const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer"));
@@ -608,6 +609,17 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <SimplesNacionalCompleto />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Investimentos e ROI Simulator - Protected */}
+                          <Route path="/simuladores/simulador-de-investimentos-e-roi">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <InvestimentosROI />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
