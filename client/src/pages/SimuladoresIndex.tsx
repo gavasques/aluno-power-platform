@@ -46,6 +46,15 @@ const simuladorItems: SimuladorItem[] = [
     isAvailable: true,
   },
   {
+    id: "simples-nacional-completo",
+    title: "Simples Nacional Completo",
+    description: "Simulador avançado com cálculo sequencial de meses e análise detalhada",
+    href: "/simuladores/simples-nacional-completo",
+    icon: Calculator,
+    category: "Tributário",
+    isAvailable: true,
+  },
+  {
     id: "viabilidade-produto",
     title: "Viabilidade de Produto",
     description: "Analise a viabilidade econômica e rentabilidade de novos produtos",
