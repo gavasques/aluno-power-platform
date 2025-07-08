@@ -594,23 +594,23 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* Formal Import Simulator - Protected */}
-                          <Route path="/simuladores/importacao-formal-direta/:id?">
+                          {/* Formal Import Simulations List - Main Page */}
+                          <Route path="/simuladores/importacao-formal-direta">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <FormalImportSimulator />
+                                  <FormalImportSimulationsList />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
 
-                          {/* Formal Import Simulations List - Protected */}
-                          <Route path="/simuladores/importacao-formal-direta-historico">
+                          {/* Formal Import Simulator - New/Edit */}
+                          <Route path="/simuladores/importacao-formal-direta/nova">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <FormalImportSimulationsList />
+                                  <FormalImportSimulator />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

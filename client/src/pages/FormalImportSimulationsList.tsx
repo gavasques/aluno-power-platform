@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -71,7 +71,7 @@ interface FormalImportSimulation {
 const FormalImportSimulationsList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -162,7 +162,7 @@ const FormalImportSimulationsList: React.FC = () => {
 
   const handleEdit = (simulation: FormalImportSimulation) => {
     // Navigate to simulator with simulation ID
-    navigate(`/simuladores/importacao-formal-direta?id=${simulation.id}`);
+    setLocation(`/simuladores/importacao-formal-direta/nova?id=${simulation.id}`);
   };
 
   const handleDelete = (id: number) => {
@@ -174,7 +174,7 @@ const FormalImportSimulationsList: React.FC = () => {
   };
 
   const handleNewSimulation = () => {
-    navigate('/simuladores/importacao-formal-direta');
+    setLocation('/simuladores/importacao-formal-direta/nova');
   };
 
   if (isLoading) {

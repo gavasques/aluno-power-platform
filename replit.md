@@ -111,6 +111,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 08, 2025 - 04:30 PM**: ✅ LISTAGEM DE SIMULAÇÕES IMPLEMENTADA COM FLUXO DE NAVEGAÇÃO CORRIGIDO
+  - **Sistema de listagem completo**: Implementada interface de histórico com filtros, busca e estatísticas
+  - **Fluxo de navegação reorganizado**: `/simuladores/importacao-formal-direta` mostra listagem por padrão
+  - **Rota de simulador**: `/simuladores/importacao-formal-direta/nova` para criar/editar simulações
+  - **Correção de imports**: Substituído `useNavigate` por `useLocation` para compatibilidade com wouter
+  - **Leitura de ID por query params**: Simulador agora lê ID da simulação via ?id=123 na URL
+  - **Endpoints backend funcionais**: GET /list, GET /:id, POST /duplicate, DELETE /:id implementados
+  - **Botão "Voltar à Lista"**: Navegação direta entre simulador e listagem
+
 - **January 08, 2025 - 03:31 PM**: ✅ TELA BRANCA E CBM AUTOMÁTICO CORRIGIDOS - SISTEMA TOTALMENTE ESTABILIZADO
   - **Erro crítico de tela branca corrigido**: Implementado tratamento completo de erros em calculateMutation e handleCalculate
   - **Cálculo automático de CBM funcionando**: Melhorado parsing de números e validação para cálculo correto de CBM unitário e total

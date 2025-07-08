@@ -110,9 +110,12 @@ const defaultExpenses: Expense[] = [
 
 export default function FormalImportSimulator() {
   const [, setLocation] = useLocation();
-  const [match, params] = useRoute('/simuladores/importacao-formal-direta/:id?');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Extrair ID da simulação dos parâmetros da URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const simulationId = urlParams.get('id');
   
   const [activeTab, setActiveTab] = useState("info");
   // Estado para impostos personalizados
@@ -162,12 +165,12 @@ export default function FormalImportSimulator() {
     resultados: {}
   });
 
-  const simulationId = params?.id ? parseInt(params.id) : null;
+  const simulationIdNumber = simulationId ? parseInt(simulationId) : null;
 
   // Load existing simulation
   const { data: existingSimulation, isLoading } = useQuery({
-    queryKey: ['/api/simulators/formal-import', simulationId],
-    enabled: !!simulationId
+    queryKey: ['/api/simulators/formal-import', simulationIdNumber],
+    enabled: !!simulationIdNumber
   });
 
   useEffect(() => {
@@ -630,7 +633,7 @@ export default function FormalImportSimulator() {
         <div className="flex items-center space-x-4">
           <Button
             variant="outline"
-            onClick={() => setLocation('/simuladores')}
+            onClick={() => setLocation('/simuladores/importacao-formal-direta')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
@@ -646,10 +649,10 @@ export default function FormalImportSimulator() {
           )}
           <Button 
             variant="outline" 
-            onClick={() => setLocation('/simuladores/importacao-formal-direta-historico')}
+            onClick={() => setLocation('/simuladores/importacao-formal-direta')}
           >
             <History className="h-4 w-4 mr-2" />
-            Histórico
+            Voltar à Lista
           </Button>
           <Button onClick={handleCalculate} disabled={calculateMutation.isPending}>
             <Calculator className="h-4 w-4 mr-2" />
