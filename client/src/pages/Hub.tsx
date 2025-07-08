@@ -91,7 +91,7 @@ export default function Hub() {
       {/* Grid de recursos do hub */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {hubItems.map((item) => (
-          <PermissionGuard key={item.href} requiredFeature={item.permission}>
+          <PermissionGuard key={item.href} featureCode={item.permission}>
             <Card className="group hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
