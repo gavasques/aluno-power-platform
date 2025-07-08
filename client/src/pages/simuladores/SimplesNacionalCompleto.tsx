@@ -8,14 +8,20 @@ import { Trash2, Plus, Download, AlertCircle, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Formatação brasileira de moeda - formato R$ X.XXX.XXXX,XX
-const formatCurrency = (value: number): string => {
+const formatCurrency = (value: number | undefined): string => {
+  if (value === undefined || value === null || isNaN(value)) {
+    return "R$ 0,00";
+  }
   return `R$ ${value.toLocaleString('pt-BR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })}`;
 };
 
-const formatPercent = (value: number): string => {
+const formatPercent = (value: number | undefined): string => {
+  if (value === undefined || value === null || isNaN(value)) {
+    return "0,00%";
+  }
   return `${(value * 100).toFixed(2)}%`;
 };
 
@@ -77,22 +83,22 @@ function buscarDadosTabela(rbt12: number, anexo: "Anexo I" | "Anexo II") {
 function calcularSomaUltimos12Meses(meses: MesSimulacao[], indiceAtual: number): number {
   if (indiceAtual < 12) {
     return meses.slice(0, indiceAtual + 1)
-      .reduce((soma, mes) => soma + mes.faturamento, 0);
+      .reduce((soma, mes) => soma + (mes.faturamento || 0), 0);
   }
   
   return meses.slice(indiceAtual - 11, indiceAtual + 1)
-    .reduce((soma, mes) => soma + mes.faturamento, 0);
+    .reduce((soma, mes) => soma + (mes.faturamento || 0), 0);
 }
 
 // Função para calcular média dos últimos 12 meses
 function calcularMediaUltimos12Meses(meses: MesSimulacao[], indiceAtual: number): number {
   if (indiceAtual < 12) {
     const mesesDisponiveis = meses.slice(0, indiceAtual + 1);
-    return mesesDisponiveis.reduce((soma, mes) => soma + mes.faturamento, 0) / mesesDisponiveis.length;
+    return mesesDisponiveis.reduce((soma, mes) => soma + (mes.faturamento || 0), 0) / mesesDisponiveis.length;
   }
   
   const ultimos12Meses = meses.slice(indiceAtual - 11, indiceAtual + 1);
-  return ultimos12Meses.reduce((soma, mes) => soma + mes.faturamento, 0) / 12;
+  return ultimos12Meses.reduce((soma, mes) => soma + (mes.faturamento || 0), 0) / 12;
 }
 
 // Função para calcular todos os campos de um mês
@@ -285,17 +291,17 @@ export default function SimplesNacionalCompleto() {
   };
 
   // Calcular resumo
-  const faturamentoTotalAcumulado = meses.reduce((sum, mes) => sum + mes.faturamento, 0);
-  const faturamentoSemSTTotal = meses.reduce((sum, mes) => sum + mes.faturamentoSemST, 0);
-  const faturamentoComSTTotal = meses.reduce((sum, mes) => sum + mes.faturamentoComST, 0);
-  const valorTotalImpostos = meses.reduce((sum, mes) => sum + mes.valorDevidoTotal, 0);
+  const faturamentoTotalAcumulado = meses.reduce((sum, mes) => sum + (mes.faturamento || 0), 0);
+  const faturamentoSemSTTotal = meses.reduce((sum, mes) => sum + (mes.faturamentoSemST || 0), 0);
+  const faturamentoComSTTotal = meses.reduce((sum, mes) => sum + (mes.faturamentoComST || 0), 0);
+  const valorTotalImpostos = meses.reduce((sum, mes) => sum + (mes.valorDevidoTotal || 0), 0);
   const mediaFaturamento = meses.length > 0 ? faturamentoTotalAcumulado / meses.length : 0;
-  const aliquotaEfetivaMedia = meses.length > 0 ? meses.reduce((sum, mes) => sum + mes.aliquotaEfetiva, 0) / meses.length : 0;
+  const aliquotaEfetivaMedia = meses.length > 0 ? meses.reduce((sum, mes) => sum + (mes.aliquotaEfetiva || 0), 0) / meses.length : 0;
 
   // Verificar alertas
   const ultimoMes = meses[meses.length - 1];
-  const proximoLimiteMedia = ultimoMes?.disponivelMedia < 50000;
-  const proximoLimiteAnual = ultimoMes?.disponivelAnual < 360000;
+  const proximoLimiteMedia = ultimoMes && (ultimoMes.disponivelMedia || 0) < 50000;
+  const proximoLimiteAnual = ultimoMes && (ultimoMes.disponivelAnual || 0) < 360000;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -320,10 +326,10 @@ export default function SimplesNacionalCompleto() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {proximoLimiteMedia && (
+            {proximoLimiteMedia && ultimoMes && (
               <div>⚠️ Atenção: Próximo ao limite de média mensal (restam {formatCurrency(ultimoMes.disponivelMedia)})</div>
             )}
-            {proximoLimiteAnual && (
+            {proximoLimiteAnual && ultimoMes && (
               <div>⚠️ Atenção: Próximo ao limite anual (restam {formatCurrency(ultimoMes.disponivelAnual)})</div>
             )}
           </AlertDescription>
@@ -524,10 +530,10 @@ export default function SimplesNacionalCompleto() {
                       </td>
                       <td className="p-2 text-right">{formatCurrency(mes.faturamentoAcumulado12Meses)}</td>
                       <td className="p-2 text-right">{formatCurrency(mes.media12Meses)}</td>
-                      <td className={`p-2 text-right ${mes.disponivelMedia < 50000 ? 'text-red-600 font-bold' : ''}`}>
+                      <td className={`p-2 text-right ${(mes.disponivelMedia || 0) < 50000 ? 'text-red-600 font-bold' : ''}`}>
                         {formatCurrency(mes.disponivelMedia)}
                       </td>
-                      <td className={`p-2 text-right ${mes.disponivelAnual < 360000 ? 'text-red-600 font-bold' : ''}`}>
+                      <td className={`p-2 text-right ${(mes.disponivelAnual || 0) < 360000 ? 'text-red-600 font-bold' : ''}`}>
                         {formatCurrency(mes.disponivelAnual)}
                       </td>
                       <td className="p-2 text-right">{formatPercent(mes.aliquotaEfetiva)}</td>
