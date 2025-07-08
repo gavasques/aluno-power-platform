@@ -38,34 +38,51 @@ const formatPercent = (value: number): string => {
   return `${(value || 0).toFixed(2)}%`;
 };
 
-// Componente de input de moeda brasileira simplificado
-const CurrencyInput = ({ value, onChange, className = "", placeholder = "0" }: {
+// Componente de input de moeda brasileira para valores inteiros
+const CurrencyInput = ({ value, onChange, className = "", placeholder = "R$ 0" }: {
   value: number;
   onChange: (value: number) => void;
   className?: string;
   placeholder?: string;
 }) => {
+  const [displayValue, setDisplayValue] = useState<string>('');
+
+  useEffect(() => {
+    if (value === 0) {
+      setDisplayValue('');
+    } else {
+      // Formatar como moeda brasileira sem decimais
+      setDisplayValue(value.toLocaleString('pt-BR', { 
+        style: 'currency', 
+        currency: 'BRL',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }));
+    }
+  }, [value]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     
-    // Remove tudo exceto números, vírgulas e pontos
-    const cleanValue = inputValue.replace(/[^\d,\.]/g, '');
+    // Remove tudo exceto números
+    const numbersOnly = inputValue.replace(/[^\d]/g, '');
     
     // Se estiver vazio, zera o valor
-    if (cleanValue === '') {
+    if (numbersOnly === '') {
+      setDisplayValue('');
       onChange(0);
       return;
     }
     
-    // Converte para número (substitui vírgula por ponto para parseFloat)
-    const numericValue = parseFloat(cleanValue.replace(',', '.')) || 0;
+    // Converte para número inteiro
+    const numericValue = parseInt(numbersOnly) || 0;
     onChange(numericValue);
   };
 
   return (
     <Input
       type="text"
-      value={value === 0 ? '' : value.toString()}
+      value={displayValue}
       onChange={handleChange}
       placeholder={placeholder}
       className={className}
@@ -503,7 +520,7 @@ export default function InvestimentosROI() {
                             value={giro.aporte}
                             onChange={(value) => updateAporte(index, value)}
                             className="w-full h-8 text-center text-xs"
-                            placeholder="0"
+                            placeholder="R$ 0"
                           />
                         </td>
                         <td className="p-3">
@@ -511,7 +528,7 @@ export default function InvestimentosROI() {
                             value={giro.retirada}
                             onChange={(value) => updateRetirada(index, value)}
                             className="w-full h-8 text-center text-xs"
-                            placeholder="0"
+                            placeholder="R$ 0"
                           />
                         </td>
                         <td className="p-3 text-center font-semibold text-blue-600">{formatCurrency(giro.saldo)}</td>
