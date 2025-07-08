@@ -85,11 +85,11 @@ interface FormalImportSimulation {
 }
 
 const defaultTaxes: Tax[] = [
-  { nome: "Imposto de Importação (II)", aliquota: 14.4, baseCalculo: "valor_fob_real", valor: 0 },
-  { nome: "IPI", aliquota: 3.25, baseCalculo: "base_ii_ipi", valor: 0 },
-  { nome: "PIS", aliquota: 2.1, baseCalculo: "total_base_calculo", valor: 0 },
-  { nome: "COFINS", aliquota: 9.65, baseCalculo: "total_base_calculo", valor: 0 },
-  { nome: "ICMS", aliquota: 12, baseCalculo: "total_base_calculo", valor: 0 }
+  { nome: "Imposto de Importação (II)", aliquota: 14.4, baseCalculo: "fob_frete_seguro", valor: 0 },
+  { nome: "IPI", aliquota: 3.25, baseCalculo: "fob_frete_seguro", valor: 0 },
+  { nome: "PIS", aliquota: 2.1, baseCalculo: "fob_frete_seguro", valor: 0 },
+  { nome: "COFINS", aliquota: 9.65, baseCalculo: "fob_frete_seguro", valor: 0 },
+  { nome: "ICMS", aliquota: 12, baseCalculo: "fob_frete_seguro", valor: 0 }
 ];
 
 const defaultExpenses: Expense[] = [
@@ -111,7 +111,7 @@ export default function FormalImportSimulator() {
   const [newTax, setNewTax] = useState<Tax>({
     nome: "",
     aliquota: 0,
-    baseCalculo: "valor_fob_real",
+    baseCalculo: "fob_frete_seguro",
     valor: 0
   });
 
@@ -272,26 +272,21 @@ export default function FormalImportSimulator() {
     const valorFreteReal = simulation.valorFreteDolar * simulation.taxaDolar;
     const valorCfrReal = valorFobReal + valorFreteReal;
     const valorSeguro = valorCfrReal * (simulation.percentualSeguro / 100);
+    const baseTotal = valorFobReal + valorFreteReal + valorSeguro;
     
     let baseValue = 0;
     
     switch (tax.baseCalculo) {
-      case 'valor_fob_real':
+      case 'fob_frete_seguro':
+        // FOB + Frete + Seguro (para todos os impostos padrão)
+        baseValue = baseTotal;
+        break;
+      case 'fob_apenas':
+        // Apenas FOB (para impostos personalizados)
         baseValue = valorFobReal;
         break;
-      case 'base_ii_ipi':
-        // Base II + IPI = FOB + Frete + Seguro + II
-        const ii = valorFobReal * (simulation.impostos.find(i => i.nome === 'Imposto de Importação (II)')?.aliquota || 0) / 100;
-        baseValue = valorFobReal + valorFreteReal + valorSeguro + ii;
-        break;
-      case 'total_base_calculo':
-        // Base total = FOB + Frete + Seguro + II + IPI
-        const iiTotal = valorFobReal * (simulation.impostos.find(i => i.nome === 'Imposto de Importação (II)')?.aliquota || 0) / 100;
-        const ipi = (valorFobReal + valorFreteReal + valorSeguro + iiTotal) * (simulation.impostos.find(i => i.nome === 'IPI')?.aliquota || 0) / 100;
-        baseValue = valorFobReal + valorFreteReal + valorSeguro + iiTotal + ipi;
-        break;
       default:
-        baseValue = 0;
+        baseValue = baseTotal;
     }
     
     return baseValue * (tax.aliquota / 100);
@@ -325,7 +320,7 @@ export default function FormalImportSimulator() {
     setNewTax({
       nome: "",
       aliquota: 0,
-      baseCalculo: "valor_fob_real",
+      baseCalculo: "fob_frete_seguro",
       valor: 0
     });
     setShowAddTaxDialog(false);
@@ -362,7 +357,7 @@ export default function FormalImportSimulator() {
     setNewTax({
       nome: "",
       aliquota: 0,
-      baseCalculo: "valor_fob_real",
+      baseCalculo: "fob_frete_seguro",
       valor: 0
     });
     setShowAddTaxDialog(false);
@@ -608,9 +603,8 @@ export default function FormalImportSimulator() {
                                 <SelectValue placeholder="Selecione a base de cálculo" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="valor_fob_real">Valor FOB Real</SelectItem>
-                                <SelectItem value="base_ii_ipi">Base II + IPI</SelectItem>
-                                <SelectItem value="total_base_calculo">Base Total de Cálculo</SelectItem>
+                                <SelectItem value="fob_frete_seguro">FOB + Frete + Seguro</SelectItem>
+                                <SelectItem value="fob_apenas">FOB Apenas</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -656,7 +650,10 @@ export default function FormalImportSimulator() {
                             />
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{tax.baseCalculo}</Badge>
+                            <Badge variant="outline">
+                              {tax.baseCalculo === "fob_frete_seguro" && "FOB + Frete + Seguro"}
+                              {tax.baseCalculo === "fob_apenas" && "FOB Apenas"}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge variant="secondary">
