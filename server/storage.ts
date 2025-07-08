@@ -1658,8 +1658,6 @@ export class DatabaseStorage implements IStorage {
           id: 0,
           username: 'Usuário Desconhecido',
           name: 'Usuário Desconhecido',
-          phone: null,
-          stripeCustomerId: null,
           email: '',
           password: '',
           role: 'user',
@@ -2355,11 +2353,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: aiImgGenerationLogs.createdAt,
         ipAddress: aiImgGenerationLogs.ipAddress,
         userAgent: aiImgGenerationLogs.userAgent,
-        metadata: aiImgGenerationLogs.metadata,
-        inputTokens: aiImgGenerationLogs.inputTokens,
-        outputTokens: aiImgGenerationLogs.outputTokens,
-        totalTokens: aiImgGenerationLogs.totalTokens,
-        creditsUsed: aiImgGenerationLogs.creditsUsed
+        metadata: aiImgGenerationLogs.metadata
       })
       .from(aiImgGenerationLogs)
       .limit(limit)
