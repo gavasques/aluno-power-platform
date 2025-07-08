@@ -212,27 +212,43 @@ export default function FormalImportSimulator() {
   // Save simulation
   const saveMutation = useMutation({
     mutationFn: async (data: FormalImportSimulation) => {
-      if (simulationId) {
-        return await apiRequest(`/api/simulators/formal-import/${simulationId}`, {
-          method: 'PUT',
-          body: data
-        });
-      } else {
-        return await apiRequest(`/api/simulators/formal-import`, {
-          method: 'POST',
-          body: data
-        });
+      try {
+        if (simulationId) {
+          return await apiRequest(`/api/simulators/formal-import/${simulationId}`, {
+            method: 'PUT',
+            body: data
+          });
+        } else {
+          return await apiRequest(`/api/simulators/formal-import`, {
+            method: 'POST',
+            body: data
+          });
+        }
+      } catch (error) {
+        console.error('Save mutation error:', error);
+        throw error;
       }
     },
     onSuccess: (data) => {
       toast({
         title: "Simulação salva com sucesso!",
-        description: `Código: ${data.codigoSimulacao}`
+        description: `Código: ${data.codigoSimulacao || data.nome}`
       });
-      if (!simulationId) {
-        setLocation(`/simuladores/importacao-formal-direta/${data.id}`);
-      }
+      
+      // Voltar para a lista ao invés de navegar para URL específica
+      setTimeout(() => {
+        setLocation("/simuladores/importacao-formal-direta");
+      }, 1000);
+      
       queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+    },
+    onError: (error) => {
+      console.error('Erro ao salvar simulação:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Verifique os dados e tente novamente",
+        variant: "destructive"
+      });
     }
   });
 
@@ -260,7 +276,26 @@ export default function FormalImportSimulator() {
   };
 
   const handleSave = () => {
-    saveMutation.mutate(simulation);
+    try {
+      // Verificar se simulação tem dados mínimos necessários
+      if (!simulation.nome || !simulation.produtos || simulation.produtos.length === 0) {
+        toast({
+          title: "Dados incompletos",
+          description: "Preencha ao menos o nome da simulação e adicione produtos",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      saveMutation.mutate(simulation);
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao salvar",
+        variant: "destructive"
+      });
+    }
   };
 
   const addProduct = () => {
@@ -1468,125 +1503,7 @@ export default function FormalImportSimulator() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="total">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="h-5 w-5" />
-                    Total da Importação
-                  </CardTitle>
-                  <CardDescription>
-                    Resumo executivo completo da simulação
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Resumo Financeiro */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Valores em USD */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Valores em USD</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex justify-between">
-                          <span>FOB:</span>
-                          <span className="font-bold">{formatUSD(simulation.valorFobDolar)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Frete:</span>
-                          <span className="font-bold">{formatUSD(simulation.valorFreteDolar)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>CFR:</span>
-                          <span className="font-bold">{formatUSD(simulation.valorFobDolar + simulation.valorFreteDolar)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Seguro:</span>
-                          <span className="font-bold">{formatUSD(((simulation.valorFobDolar + simulation.valorFreteDolar) * simulation.taxaDolar * (simulation.percentualSeguro / 100)) / simulation.taxaDolar)}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Valores em BRL */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Valores em BRL</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex justify-between">
-                          <span>FOB:</span>
-                          <span className="font-bold">{formatCurrency(simulation.resultados?.valorFobReal || 0)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Frete:</span>
-                          <span className="font-bold">{formatCurrency(simulation.resultados?.valorFreteReal || 0)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Impostos:</span>
-                          <span className="font-bold">{formatCurrency(simulation.resultados?.totalImpostos || 0)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Despesas:</span>
-                          <span className="font-bold">{formatCurrency(simulation.resultados?.totalDespesas || 0)}</span>
-                        </div>
-                        <hr />
-                        <div className="flex justify-between text-lg font-bold text-blue-600">
-                          <span>Total:</span>
-                          <span>{formatCurrency(simulation.resultados?.custoTotal || 0)}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Informações da Simulação */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Informações da Simulação</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <div className="flex justify-between py-2 border-b">
-                            <span>Nome:</span>
-                            <span className="font-medium">{simulation.nome}</span>
-                          </div>
-                          <div className="flex justify-between py-2 border-b">
-                            <span>Fornecedor:</span>
-                            <span className="font-medium">{simulation.fornecedor || 'Não informado'}</span>
-                          </div>
-                          <div className="flex justify-between py-2 border-b">
-                            <span>Despachante:</span>
-                            <span className="font-medium">{simulation.despachante || 'Não informado'}</span>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="flex justify-between py-2 border-b">
-                            <span>Agente de Cargas:</span>
-                            <span className="font-medium">{simulation.agenteCargas || 'Não informado'}</span>
-                          </div>
-                          <div className="flex justify-between py-2 border-b">
-                            <span>Taxa do Dólar:</span>
-                            <span className="font-medium">{formatCurrency(simulation.taxaDolar)}</span>
-                          </div>
-                          <div className="flex justify-between py-2 border-b">
-                            <span>CBM Total:</span>
-                            <span className="font-medium">{formatCBM(simulation.resultados?.cbmTotal || 0)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Botão Exportar PDF */}
-                  <div className="flex justify-center">
-                    <Button onClick={() => exportToPDF()} className="w-full max-w-md" size="lg">
-                      <Download className="h-4 w-4 mr-2" />
-                      Exportar para PDF
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+            {/* Removido duplicação - esta seção está na aba "total" abaixo */}
           </Tabs>
 
           {/* Navigation Buttons */}
