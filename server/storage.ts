@@ -1660,6 +1660,7 @@ export class DatabaseStorage implements IStorage {
           name: 'Usuário Desconhecido',
           email: '',
           password: '',
+          phone: null,
           role: 'user',
           isActive: true,
           createdAt: new Date(),
@@ -1669,7 +1670,8 @@ export class DatabaseStorage implements IStorage {
           resetTokenExpiry: null,
           magicLinkToken: null,
           magicLinkExpiresAt: null,
-          emailVerified: false
+          emailVerified: false,
+          stripeCustomerId: null
         },
         replies: repliesByReview[row.review.id] || [],
       }));
@@ -2353,7 +2355,11 @@ export class DatabaseStorage implements IStorage {
         createdAt: aiImgGenerationLogs.createdAt,
         ipAddress: aiImgGenerationLogs.ipAddress,
         userAgent: aiImgGenerationLogs.userAgent,
-        metadata: aiImgGenerationLogs.metadata
+        metadata: aiImgGenerationLogs.metadata,
+        inputTokens: aiImgGenerationLogs.inputTokens,
+        outputTokens: aiImgGenerationLogs.outputTokens,
+        totalTokens: aiImgGenerationLogs.totalTokens,
+        creditsUsed: aiImgGenerationLogs.creditsUsed
       })
       .from(aiImgGenerationLogs)
       .limit(limit)
