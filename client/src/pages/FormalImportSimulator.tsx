@@ -1229,7 +1229,7 @@ export default function FormalImportSimulator() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {simulation.produtos.length === 0 ? (
+                  {(simulation.produtos || []).length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       Nenhum produto configurado. Os produtos serão adicionados automaticamente quando você calcular a simulação.
                     </div>
@@ -1254,7 +1254,7 @@ export default function FormalImportSimulator() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {simulation.produtos && simulation.produtos.length > 0 ? simulation.produtos.map((produto, index) => (
+                          {(simulation.produtos || []).map((produto, index) => (
                             <TableRow key={produto.id || index}>
                               <TableCell>
                                 <Input
@@ -1395,7 +1395,7 @@ export default function FormalImportSimulator() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {simulation.produtos.length === 0 ? (
+                  {(simulation.produtos || []).length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       Adicione produtos na seção anterior para ver os resultados.
                     </div>
@@ -1456,7 +1456,7 @@ export default function FormalImportSimulator() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {simulation.produtos && simulation.produtos.length > 0 ? simulation.produtos.map((produto, index) => (
+                            {(simulation.produtos || []).map((produto, index) => (
                               <TableRow key={produto.id || index}>
                                 <TableCell className="font-medium">{produto.nome}</TableCell>
                                 <TableCell>{formatCurrency(produto.valorTotalBRL || 0)}</TableCell>
@@ -1470,13 +1470,7 @@ export default function FormalImportSimulator() {
                                 <TableCell className="font-bold">{formatCurrency(produto.custoTotal || 0)}</TableCell>
                                 <TableCell className="font-bold text-blue-600">{formatCurrency(produto.custoUnitario || 0)}</TableCell>
                               </TableRow>
-                            )) : (
-                              <TableRow>
-                                <TableCell colSpan={10} className="text-center py-4">
-                                  Nenhum produto adicionado
-                                </TableCell>
-                              </TableRow>
-                            )}
+                            ))}
                           </TableBody>
                         </Table>
                       </div>
