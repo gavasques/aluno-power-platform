@@ -111,6 +111,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 08, 2025 - 04:05 AM**: ✅ SIMULADOR DE INVESTIMENTOS E ROI SIMPLIFICADO - INTERFACE FOCADA EM TABELA EDITÁVEL
+  - **Interface Simplificada**: Removidas abas desnecessárias, mantida apenas configuração + tabela principal
+  - **Tabela Editável Implementada**: 
+    - ✅ **Colunas editáveis**: Aporte e Retirada podem ser editadas diretamente na tabela
+    - ✅ **Cálculos dinâmicos**: Mudanças nos aportes/retiradas atualizam automaticamente os cálculos
+    - ✅ **ROI por giro**: Alterado de ROI acumulado para ROI individual de cada giro
+    - ✅ **Coluna Retirada**: Nova coluna que reduz o capital disponível para próximo giro
+  - **Configurações Simplificadas**:
+    - ✅ **Configuração limpa**: Apenas investimento inicial, ROI por giro, duração e número de giros
+    - ✅ **Removidos campos complexos**: Eliminadas configurações de aportes/retiradas, meta de retorno
+    - ✅ **Foco na duração**: Configuração centrada no tempo do giro conforme solicitado
+  - **Funcionalidades Mantidas**:
+    - Persistência automática no localStorage para aportes, retiradas e configurações
+    - Exportação CSV com novos campos (aporte, retirada, ROI do giro)
+    - Formatação brasileira (R$) e cálculos em tempo real
+    - Resumo com totais na parte inferior da tabela
+  - **Benefícios da Simplificação**:
+    - Interface mais limpa e focada no essencial
+    - Edição direta na tabela elimina complexidade de configuração
+    - ROI por giro oferece visão mais clara da performance individual
+    - Layout responsivo otimizado para uso prático
+
 - **January 08, 2025 - 03:18 AM**: 🐛 BUG CRÍTICO CORRIGIDO - CÁLCULO RBT12 NO SIMULADOR SIMPLES NACIONAL COMPLETO
   - **Problema identificado**: RBT12 não estava somando corretamente o mês atual + 11 meses anteriores
   - **Correção implementada**: 
