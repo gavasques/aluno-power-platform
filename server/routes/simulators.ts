@@ -11,7 +11,7 @@ import {
   insertInvestmentSimulationSchema
 } from '../../shared/schema';
 import { requireAuth } from '../security';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Função para gerar código único de 8 caracteres alfanuméricos
@@ -900,6 +900,116 @@ router.post('/formal-import/calculate', requireAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Error calculating formal import simulation:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Get all formal import simulations for the current user
+router.get('/formal-import', requireAuth, async (req, res) => {
+  try {
+    const user = req.user as { id: number };
+    const simulations = await req.db.query.formalImportSimulations.findMany({
+      where: eq(formalImportSimulations.userId, user.id),
+      orderBy: desc(formalImportSimulations.dataModificacao)
+    });
+    
+    res.json(simulations);
+  } catch (error) {
+    console.error('Error fetching formal import simulations:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Get a specific formal import simulation
+router.get('/formal-import/:id', requireAuth, async (req, res) => {
+  try {
+    const user = req.user as { id: number };
+    const simulationId = parseInt(req.params.id);
+    
+    const simulation = await req.db.query.formalImportSimulations.findFirst({
+      where: and(
+        eq(formalImportSimulations.id, simulationId),
+        eq(formalImportSimulations.userId, user.id)
+      )
+    });
+    
+    if (!simulation) {
+      return res.status(404).json({ error: 'Simulação não encontrada' });
+    }
+    
+    res.json(simulation);
+  } catch (error) {
+    console.error('Error fetching formal import simulation:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Delete a formal import simulation
+router.delete('/formal-import/:id', requireAuth, async (req, res) => {
+  try {
+    const user = req.user as { id: number };
+    const simulationId = parseInt(req.params.id);
+    
+    // Check if simulation exists and belongs to user
+    const simulation = await req.db.query.formalImportSimulations.findFirst({
+      where: and(
+        eq(formalImportSimulations.id, simulationId),
+        eq(formalImportSimulations.userId, user.id)
+      )
+    });
+    
+    if (!simulation) {
+      return res.status(404).json({ error: 'Simulação não encontrada' });
+    }
+    
+    await req.db.delete(formalImportSimulations).where(eq(formalImportSimulations.id, simulationId));
+    
+    res.json({ message: 'Simulação excluída com sucesso' });
+  } catch (error) {
+    console.error('Error deleting formal import simulation:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Duplicate a formal import simulation
+router.post('/formal-import/:id/duplicate', requireAuth, async (req, res) => {
+  try {
+    const user = req.user as { id: number };
+    const simulationId = parseInt(req.params.id);
+    
+    // Get the original simulation
+    const originalSimulation = await req.db.query.formalImportSimulations.findFirst({
+      where: and(
+        eq(formalImportSimulations.id, simulationId),
+        eq(formalImportSimulations.userId, user.id)
+      )
+    });
+    
+    if (!originalSimulation) {
+      return res.status(404).json({ error: 'Simulação não encontrada' });
+    }
+    
+    // Create a new simulation based on the original
+    const newSimulation = {
+      ...originalSimulation,
+      id: undefined,
+      nome: `${originalSimulation.nome} (Cópia)`,
+      codigoSimulacao: `SIM-${Date.now().toString().slice(-8)}`,
+      dataCriacao: new Date().toISOString(),
+      dataModificacao: new Date().toISOString(),
+      userId: user.id
+    };
+    
+    delete newSimulation.id;
+    
+    const [duplicatedSimulation] = await req.db
+      .insert(formalImportSimulations)
+      .values(newSimulation)
+      .returning();
+    
+    res.json(duplicatedSimulation);
+  } catch (error) {
+    console.error('Error duplicating formal import simulation:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });

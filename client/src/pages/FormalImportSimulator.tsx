@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Calculator, Plus, Trash2, Copy, Save, Download, ArrowLeft, ArrowRight, X } from 'lucide-react';
+import { Calculator, Plus, Trash2, Copy, Save, Download, ArrowLeft, ArrowRight, X, History } from 'lucide-react';
 import { useLocation, useRoute } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -644,6 +644,13 @@ export default function FormalImportSimulator() {
           {simulation.codigoSimulacao && (
             <Badge variant="secondary">{simulation.codigoSimulacao}</Badge>
           )}
+          <Button 
+            variant="outline" 
+            onClick={() => setLocation('/simuladores/importacao-formal-direta-historico')}
+          >
+            <History className="h-4 w-4 mr-2" />
+            Histórico
+          </Button>
           <Button onClick={handleCalculate} disabled={calculateMutation.isPending}>
             <Calculator className="h-4 w-4 mr-2" />
             Calcular

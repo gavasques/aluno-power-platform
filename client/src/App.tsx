@@ -54,6 +54,7 @@ const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
 const FormalImportSimulator = lazy(() => import("./pages/FormalImportSimulator"));
+const FormalImportSimulationsList = lazy(() => import("./pages/FormalImportSimulationsList"));
 const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
 const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
@@ -599,6 +600,17 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <FormalImportSimulator />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Formal Import Simulations List - Protected */}
+                          <Route path="/simuladores/importacao-formal-direta-historico">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <FormalImportSimulationsList />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
