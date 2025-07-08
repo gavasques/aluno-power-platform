@@ -169,15 +169,19 @@ export default function FormalImportSimulator() {
 
   // Load existing simulation
   const { data: existingSimulation, isLoading } = useQuery({
-    queryKey: ['/api/simulators/formal-import', simulationIdNumber],
+    queryKey: [`/api/simulators/formal-import/${simulationIdNumber}`],
     enabled: !!simulationIdNumber
   });
 
   useEffect(() => {
     if (existingSimulation) {
-      // Ensure all required arrays are properly initialized
+      // Ensure all required arrays are properly initialized and convert strings to numbers
       const processedSimulation = {
         ...existingSimulation,
+        taxaDolar: parseFloat(existingSimulation.taxaDolar) || 5.50,
+        valorFobDolar: parseFloat(existingSimulation.valorFobDolar) || 0,
+        valorFreteDolar: parseFloat(existingSimulation.valorFreteDolar) || 0,
+        percentualSeguro: parseFloat(existingSimulation.percentualSeguro) || 0.18,
         impostos: existingSimulation.impostos || defaultTaxes,
         despesasAdicionais: existingSimulation.despesasAdicionais || defaultExpenses,
         produtos: existingSimulation.produtos || []
