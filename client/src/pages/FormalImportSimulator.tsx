@@ -296,11 +296,7 @@ export default function FormalImportSimulator() {
             const cbmUnitario = comp > 0 && larg > 0 && alt > 0 ? (comp * larg * alt) / 1000000 : 0;
             const cbmTotal = cbmUnitario * quant;
             
-            console.log(`🔥 CBM CALCULATION - Produto ${index + 1}:`, {
-              dimensoes: { comp, larg, alt, quant },
-              cbmUnitario,
-              cbmTotal
-            });
+            // CBM calculation completed
             
             return {
               ...updatedProduct,
@@ -321,15 +317,7 @@ export default function FormalImportSimulator() {
         percentualContainer: totalCBM > 0 ? (product.cbmTotal || 0) / totalCBM : 0
       }));
 
-      console.log(`🔥 CBM TOTAL CALCULATION:`, {
-        totalCBM,
-        produtos: productsWithPercentages.map(p => ({ 
-          nome: p.nome, 
-          cbmUnitario: p.cbmUnitario, 
-          cbmTotal: p.cbmTotal, 
-          percentual: p.percentualContainer 
-        }))
-      });
+      // CBM total calculation completed
 
       return {
         ...prev,
@@ -337,14 +325,8 @@ export default function FormalImportSimulator() {
       };
     });
 
-    // Calcular automaticamente quando houver mudanças (com timeout para evitar calls excessivos)
-    setTimeout(() => {
-      try {
-        handleCalculate();
-      } catch (error) {
-        console.error('Erro no cálculo automático:', error);
-      }
-    }, 300);
+    // Não fazer cálculo automático - apenas quando clicar no botão "Calcular"
+    // setTimeout removido para melhorar performance
   };
 
   const removeProduct = (index: number) => {
@@ -1174,42 +1156,47 @@ export default function FormalImportSimulator() {
                               <TableCell>
                                 <Input
                                   type="number"
-                                  value={produto.quantidade}
-                                  onChange={(e) => updateProduct(index, 'quantidade', parseFloat(e.target.value) || 0)}
+                                  value={produto.quantidade || ''}
+                                  onChange={(e) => updateProduct(index, 'quantidade', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                                   className="w-16"
+                                  placeholder="Qtd"
                                 />
                               </TableCell>
                               <TableCell>
                                 <Input
                                   type="number"
                                   step="0.01"
-                                  value={produto.valorUnitarioUsd}
-                                  onChange={(e) => updateProduct(index, 'valorUnitarioUsd', parseFloat(e.target.value) || 0)}
+                                  value={produto.valorUnitarioUsd || ''}
+                                  onChange={(e) => updateProduct(index, 'valorUnitarioUsd', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                                   className="w-20"
+                                  placeholder="USD"
                                 />
                               </TableCell>
                               <TableCell>
                                 <Input
                                   type="number"
-                                  value={produto.comprimento}
-                                  onChange={(e) => updateProduct(index, 'comprimento', parseFloat(e.target.value) || 0)}
+                                  value={produto.comprimento || ''}
+                                  onChange={(e) => updateProduct(index, 'comprimento', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                                   className="w-16"
+                                  placeholder="cm"
                                 />
                               </TableCell>
                               <TableCell>
                                 <Input
                                   type="number"
-                                  value={produto.largura}
-                                  onChange={(e) => updateProduct(index, 'largura', parseFloat(e.target.value) || 0)}
+                                  value={produto.largura || ''}
+                                  onChange={(e) => updateProduct(index, 'largura', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                                   className="w-16"
+                                  placeholder="cm"
                                 />
                               </TableCell>
                               <TableCell>
                                 <Input
                                   type="number"
-                                  value={produto.altura}
-                                  onChange={(e) => updateProduct(index, 'altura', parseFloat(e.target.value) || 0)}
+                                  value={produto.altura || ''}
+                                  onChange={(e) => updateProduct(index, 'altura', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                                   className="w-16"
+                                  placeholder="cm"
                                 />
                               </TableCell>
                               <TableCell>
