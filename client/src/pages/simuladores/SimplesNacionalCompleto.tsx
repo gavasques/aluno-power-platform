@@ -23,7 +23,9 @@ const formatPercent = (value: number): string => {
 interface MesSimulacao {
   id: string;
   mesAno: string;
-  faturamento: number;
+  faturamentoSemST: number;
+  faturamentoComST: number;
+  faturamento: number; // Total (sem ST + com ST)
   anexo: "Anexo I" | "Anexo II";
   // Campos calculados
   faturamentoTotal: number;
@@ -35,7 +37,9 @@ interface MesSimulacao {
   aliquotaEfetiva: number;
   percentualICMS: number;
   aliquotaFinal: number;
-  valorDevido: number;
+  valorDevidoSemST: number;
+  valorDevidoComST: number;
+  valorDevidoTotal: number;
 }
 
 // Tabelas de alíquotas Anexo I (Comércio)
@@ -125,8 +129,10 @@ function calcularCamposMes(meses: MesSimulacao[], indiceAtual: number): Partial<
   // 10. Alíquota Final
   const aliquotaFinal = aliquotaEfetiva * (1 - percentualICMS);
   
-  // 11. Valor Devido
-  const valorDevido = mesAtual.faturamento * aliquotaEfetiva;
+  // 11. Valores Devidos
+  const valorDevidoSemST = mesAtual.faturamentoSemST * aliquotaEfetiva;
+  const valorDevidoComST = 0; // ST não paga Simples Nacional, apenas ICMS-ST
+  const valorDevidoTotal = valorDevidoSemST + valorDevidoComST;
   
   return {
     faturamentoTotal,
@@ -138,7 +144,9 @@ function calcularCamposMes(meses: MesSimulacao[], indiceAtual: number): Partial<
     aliquotaEfetiva,
     percentualICMS,
     aliquotaFinal,
-    valorDevido
+    valorDevidoSemST,
+    valorDevidoComST,
+    valorDevidoTotal
   };
 }
 
@@ -146,7 +154,8 @@ export default function SimplesNacionalCompleto() {
   const [meses, setMeses] = useState<MesSimulacao[]>([]);
   const [novoMes, setNovoMes] = useState({
     mesAno: "",
-    faturamento: "",
+    faturamentoSemST: "",
+    faturamentoComST: "",
     anexo: "Anexo I" as "Anexo I" | "Anexo II"
   });
 
@@ -171,16 +180,20 @@ export default function SimplesNacionalCompleto() {
   }, [meses]);
 
   const adicionarMes = () => {
-    if (!novoMes.mesAno || !novoMes.faturamento) {
-      alert("Por favor, preencha todos os campos");
+    if (!novoMes.mesAno || (!novoMes.faturamentoSemST && !novoMes.faturamentoComST)) {
+      alert("Por favor, preencha pelo menos um tipo de faturamento");
       return;
     }
 
-    const faturamento = parseFloat(novoMes.faturamento.replace(/\./g, '').replace(',', '.')) || 0;
+    const faturamentoSemST = parseFloat(novoMes.faturamentoSemST.replace(/\./g, '').replace(',', '.')) || 0;
+    const faturamentoComST = parseFloat(novoMes.faturamentoComST.replace(/\./g, '').replace(',', '.')) || 0;
+    const faturamento = faturamentoSemST + faturamentoComST;
     
     const novoMesData: MesSimulacao = {
       id: Date.now().toString(),
       mesAno: novoMes.mesAno,
+      faturamentoSemST,
+      faturamentoComST,
       faturamento,
       anexo: novoMes.anexo,
       faturamentoTotal: 0,
@@ -192,7 +205,9 @@ export default function SimplesNacionalCompleto() {
       aliquotaEfetiva: 0,
       percentualICMS: 0,
       aliquotaFinal: 0,
-      valorDevido: 0
+      valorDevidoSemST: 0,
+      valorDevidoComST: 0,
+      valorDevidoTotal: 0
     };
 
     const novosMeses = [...meses, novoMesData];
@@ -204,7 +219,7 @@ export default function SimplesNacionalCompleto() {
     });
 
     setMeses(mesesComCalculos);
-    setNovoMes({ mesAno: "", faturamento: "", anexo: "Anexo I" });
+    setNovoMes({ mesAno: "", faturamentoSemST: "", faturamentoComST: "", anexo: "Anexo I" });
   };
 
   const removerMes = (id: string) => {
@@ -230,16 +245,17 @@ export default function SimplesNacionalCompleto() {
     if (meses.length === 0) return;
     
     const headers = [
-      "Mês/Ano", "Faturamento", "Anexo", "Faturamento Total", "Fat. Acumulado 12M",
+      "Mês/Ano", "Fat. sem ST", "Fat. com ST", "Total", "Anexo", "Fat. Acumulado 12M",
       "RBT12", "Média 12M", "Disponível Média", "Disponível Anual", 
-      "Alíquota Efetiva", "% ICMS", "Alíquota Final", "Valor Devido"
+      "Alíquota Efetiva", "% ICMS", "Alíquota Final", "Valor Devido sem ST", "Valor Devido com ST", "Valor Devido Total"
     ];
     
     const rows = meses.map(mes => [
       mes.mesAno,
+      mes.faturamentoSemST.toFixed(2),
+      mes.faturamentoComST.toFixed(2),
       mes.faturamento.toFixed(2),
       mes.anexo,
-      mes.faturamentoTotal.toFixed(2),
       mes.faturamentoAcumulado12Meses.toFixed(2),
       mes.rbt12.toFixed(2),
       mes.media12Meses.toFixed(2),
@@ -248,7 +264,9 @@ export default function SimplesNacionalCompleto() {
       (mes.aliquotaEfetiva * 100).toFixed(4),
       (mes.percentualICMS * 100).toFixed(2),
       (mes.aliquotaFinal * 100).toFixed(4),
-      mes.valorDevido.toFixed(2)
+      mes.valorDevidoSemST.toFixed(2),
+      mes.valorDevidoComST.toFixed(2),
+      mes.valorDevidoTotal.toFixed(2)
     ]);
 
     const csvContent = [headers, ...rows]
@@ -268,7 +286,9 @@ export default function SimplesNacionalCompleto() {
 
   // Calcular resumo
   const faturamentoTotalAcumulado = meses.reduce((sum, mes) => sum + mes.faturamento, 0);
-  const valorTotalImpostos = meses.reduce((sum, mes) => sum + mes.valorDevido, 0);
+  const faturamentoSemSTTotal = meses.reduce((sum, mes) => sum + mes.faturamentoSemST, 0);
+  const faturamentoComSTTotal = meses.reduce((sum, mes) => sum + mes.faturamentoComST, 0);
+  const valorTotalImpostos = meses.reduce((sum, mes) => sum + mes.valorDevidoTotal, 0);
   const mediaFaturamento = meses.length > 0 ? faturamentoTotalAcumulado / meses.length : 0;
   const aliquotaEfetivaMedia = meses.length > 0 ? meses.reduce((sum, mes) => sum + mes.aliquotaEfetiva, 0) / meses.length : 0;
 
@@ -282,7 +302,7 @@ export default function SimplesNacionalCompleto() {
       <div className="text-center">
         <h1 className="text-3xl font-bold">Simulador Completo do Simples Nacional</h1>
         <p className="text-muted-foreground mt-2">
-          Sistema avançado para cálculo sequencial de impostos do Simples Nacional
+          Sistema avançado com separação de faturamento com e sem Substituição Tributária (ST)
         </p>
       </div>
 
@@ -319,7 +339,7 @@ export default function SimplesNacionalCompleto() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
               <Label htmlFor="mesAno">Mês/Ano</Label>
               <Input
@@ -340,11 +360,11 @@ export default function SimplesNacionalCompleto() {
             </div>
             
             <div>
-              <Label htmlFor="faturamento">Faturamento</Label>
+              <Label htmlFor="faturamentoSemST">Faturamento sem ST</Label>
               <Input
-                id="faturamento"
+                id="faturamentoSemST"
                 placeholder="0,00"
-                value={novoMes.faturamento}
+                value={novoMes.faturamentoSemST}
                 onChange={(e) => {
                   let value = e.target.value.replace(/[^\d,]/g, '');
                   // Formato brasileiro: permitir apenas vírgula como separador decimal
@@ -354,7 +374,27 @@ export default function SimplesNacionalCompleto() {
                       value = parts[0] + ',' + parts[1];
                     }
                   }
-                  setNovoMes(prev => ({ ...prev, faturamento: value }));
+                  setNovoMes(prev => ({ ...prev, faturamentoSemST: value }));
+                }}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="faturamentoComST">Faturamento com ST</Label>
+              <Input
+                id="faturamentoComST"
+                placeholder="0,00"
+                value={novoMes.faturamentoComST}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^\d,]/g, '');
+                  // Formato brasileiro: permitir apenas vírgula como separador decimal
+                  if (value.includes(',')) {
+                    const parts = value.split(',');
+                    if (parts.length > 2) {
+                      value = parts[0] + ',' + parts[1];
+                    }
+                  }
+                  setNovoMes(prev => ({ ...prev, faturamentoComST: value }));
                 }}
               />
             </div>
@@ -389,30 +429,42 @@ export default function SimplesNacionalCompleto() {
             <CardTitle>Resumo Geral</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
                   {formatCurrency(faturamentoTotalAcumulado)}
                 </div>
-                <div className="text-sm text-muted-foreground">Faturamento Total</div>
+                <div className="text-sm text-muted-foreground">Total Geral</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-xl font-bold text-green-600">
+                  {formatCurrency(faturamentoSemSTTotal)}
+                </div>
+                <div className="text-sm text-muted-foreground">Total sem ST</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-bold text-orange-600">
+                  {formatCurrency(faturamentoComSTTotal)}
+                </div>
+                <div className="text-sm text-muted-foreground">Total com ST</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-bold text-cyan-600">
                   {formatCurrency(mediaFaturamento)}
                 </div>
-                <div className="text-sm text-muted-foreground">Média de Faturamento</div>
+                <div className="text-sm text-muted-foreground">Média Mensal</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">
+                <div className="text-xl font-bold text-red-600">
                   {formatCurrency(valorTotalImpostos)}
                 </div>
-                <div className="text-sm text-muted-foreground">Total de Impostos</div>
+                <div className="text-sm text-muted-foreground">Total Impostos</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
+                <div className="text-xl font-bold text-purple-600">
                   {formatPercent(aliquotaEfetivaMedia)}
                 </div>
-                <div className="text-sm text-muted-foreground">Alíquota Efetiva Média</div>
+                <div className="text-sm text-muted-foreground">Alíq. Média</div>
               </div>
             </div>
           </CardContent>
@@ -443,14 +495,15 @@ export default function SimplesNacionalCompleto() {
                 <thead>
                   <tr className="border-b">
                     <th className="p-2 text-left">Mês/Ano</th>
-                    <th className="p-2 text-right">Faturamento</th>
+                    <th className="p-2 text-right">Fat. sem ST</th>
+                    <th className="p-2 text-right">Fat. com ST</th>
+                    <th className="p-2 text-right">Total</th>
                     <th className="p-2 text-center">Anexo</th>
                     <th className="p-2 text-right">Fat. Acum. 12M</th>
                     <th className="p-2 text-right">Média 12M</th>
                     <th className="p-2 text-right">Disp. Média</th>
                     <th className="p-2 text-right">Disp. Anual</th>
                     <th className="p-2 text-right">Alíq. Efetiva</th>
-                    <th className="p-2 text-right">% ICMS</th>
                     <th className="p-2 text-right">Valor Devido</th>
                     <th className="p-2 text-center">Ações</th>
                   </tr>
@@ -459,7 +512,9 @@ export default function SimplesNacionalCompleto() {
                   {meses.map((mes) => (
                     <tr key={mes.id} className="border-b hover:bg-muted/50">
                       <td className="p-2 font-medium">{mes.mesAno}</td>
-                      <td className="p-2 text-right">{formatCurrency(mes.faturamento)}</td>
+                      <td className="p-2 text-right">{formatCurrency(mes.faturamentoSemST)}</td>
+                      <td className="p-2 text-right">{formatCurrency(mes.faturamentoComST)}</td>
+                      <td className="p-2 text-right font-medium">{formatCurrency(mes.faturamento)}</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-1 rounded text-xs ${
                           mes.anexo === "Anexo I" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"
@@ -476,8 +531,7 @@ export default function SimplesNacionalCompleto() {
                         {formatCurrency(mes.disponivelAnual)}
                       </td>
                       <td className="p-2 text-right">{formatPercent(mes.aliquotaEfetiva)}</td>
-                      <td className="p-2 text-right">{formatPercent(mes.percentualICMS)}</td>
-                      <td className="p-2 text-right font-bold text-blue-600">{formatCurrency(mes.valorDevido)}</td>
+                      <td className="p-2 text-right font-bold text-blue-600">{formatCurrency(mes.valorDevidoTotal)}</td>
                       <td className="p-2 text-center">
                         <Button
                           variant="outline"
@@ -503,7 +557,10 @@ export default function SimplesNacionalCompleto() {
             <div className="text-muted-foreground">
               <Plus className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>Nenhum mês adicionado ainda.</p>
-              <p className="text-sm">Comece adicionando o primeiro mês para ver os cálculos.</p>
+              <p className="text-sm">Preencha os campos de faturamento sem ST e/ou com ST para começar.</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                ST = Substituição Tributária (produtos que não pagam Simples Nacional)
+              </p>
             </div>
           </CardContent>
         </Card>
