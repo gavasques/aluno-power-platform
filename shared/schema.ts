@@ -730,6 +730,8 @@ export const investmentSimulations = pgTable("investment_simulations", {
   createdIdx: index("investment_simulations_created_idx").on(table.createdAt),
 }));
 
+
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
@@ -739,6 +741,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   news: many(news),
   updates: many(updates),
   investmentSimulations: many(investmentSimulations),
+
 }));
 
 export const newsRelations = relations(news, ({ one }) => ({
@@ -1026,6 +1029,8 @@ export const investmentSimulationsRelations = relations(investmentSimulations, (
     references: [users.id],
   }),
 }));
+
+
 
 // Generated Images Storage
 export const generatedImages = pgTable("generated_images", {
@@ -1975,6 +1980,8 @@ export const insertInvestmentSimulationSchema = createInsertSchema(investmentSim
 });
 export type InsertInvestmentSimulation = z.infer<typeof insertInvestmentSimulationSchema>;
 export type InvestmentSimulation = typeof investmentSimulations.$inferSelect;
+
+
 
 // Agent with prompts type
 export type AgentWithPrompts = Agent & {
