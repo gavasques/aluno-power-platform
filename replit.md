@@ -111,6 +111,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 08, 2025 - 02:50 PM**: ✅ SIMULADOR DE IMPORTAÇÃO FORMAL - SISTEMA COMPLETO DE DESPESAS ADICIONAIS COM VALORES PADRÃO
+  - **13 Despesas Padrão Implementadas**: AFRMM (R$ 1.650), CAPATAZIA (R$ 1.300), TX LIBER./BL/AWB (R$ 585), THC Movimentação (R$ 620), Desconsolidação (R$ 350), ISPS (R$ 200), Container/Lacre (R$ 270), Damage Fee ($45), Taxa SISCOMEX (R$ 162,42), Frete Nacional (R$ 10.001), Honorários Despachante (R$ 1.500), DOC Fee (R$ 195), DAS (R$ 262,40)
+  - **Conversão Automática USD ↔ Real**: Digite em USD e converte automaticamente para Real usando taxa do dólar (e vice-versa)
+  - **Campos de Entrada Corrigidos**: Não mostram mais "0" fixo, aparecem vazios quando valor é zero com placeholders "0.00"
+  - **Sistema de Despesas Personalizadas**: Botão "Adicionar Despesa" para incluir despesas customizadas com remoção individual
+  - **Validação Inteligente**: Apenas despesas personalizadas podem ser removidas, despesas padrão são protegidas
+  - **Interface Melhorada**: Coluna "Ações" com botões de remoção, dialog modal para adição de despesas com conversão em tempo real
+
 - **January 08, 2025 - 02:17 PM**: ✅ SIMULADOR DE IMPORTAÇÃO FORMAL - CAMPOS DE ENTRADA OTIMIZADOS E INTERFACE SIMPLIFICADA
   - **Campos de Entrada Corrigidos**: Taxa do Dólar, Valor FOB e Valor Frete agora são editáveis facilmente
     - ✅ **Campos vazios quando valor é 0**: Não mostram mais "0" fixo, permitem limpeza total

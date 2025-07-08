@@ -93,17 +93,19 @@ const defaultTaxes: Tax[] = [
 ];
 
 const defaultExpenses: Expense[] = [
-  { nome: "AFRMM (Marinha Mercante)", valorDolar: 0, valorReal: 0 },
-  { nome: "CAPATAZIA", valorDolar: 0, valorReal: 0 },
-  { nome: "TX LIBER./BL/AWB", valorDolar: 0, valorReal: 0 },
-  { nome: "THC Movimentação", valorDolar: 0, valorReal: 0 },
-  { nome: "Desconsolidação", valorDolar: 0, valorReal: 0 },
-  { nome: "ISPS", valorDolar: 0, valorReal: 0 },
-  { nome: "Container/Lacre", valorDolar: 0, valorReal: 0 },
-  { nome: "Damage Fee", valorDolar: 0, valorReal: 0 },
-  { nome: "Taxa SISCOMEX", valorDolar: 0, valorReal: 214.50 },
-  { nome: "Frete Nacional", valorDolar: 0, valorReal: 0 },
-  { nome: "Honorários Despachante", valorDolar: 0, valorReal: 500.00 }
+  { nome: "AFRMM (Marinha Mercante)", valorDolar: 300, valorReal: 1650.00 },
+  { nome: "CAPATAZIA", valorDolar: 236.36, valorReal: 1300.00 },
+  { nome: "TX LIBER./BL/AWB", valorDolar: 106.36, valorReal: 585.00 },
+  { nome: "THC Movimentação", valorDolar: 112.73, valorReal: 620.00 },
+  { nome: "Desconsolidação", valorDolar: 63.64, valorReal: 350.00 },
+  { nome: "ISPS", valorDolar: 36.36, valorReal: 200.00 },
+  { nome: "Container/Lacre", valorDolar: 49.09, valorReal: 270.00 },
+  { nome: "Damage Fee", valorDolar: 45.00, valorReal: 247.50 },
+  { nome: "Taxa SISCOMEX", valorDolar: 29.53, valorReal: 162.42 },
+  { nome: "Frete Nacional", valorDolar: 1818.36, valorReal: 10001.00 },
+  { nome: "Honorários Despachante", valorDolar: 272.73, valorReal: 1500.00 },
+  { nome: "DOC Fee", valorDolar: 35.45, valorReal: 195.00 },
+  { nome: "DAS", valorDolar: 47.71, valorReal: 262.40 }
 ];
 
 export default function FormalImportSimulator() {
