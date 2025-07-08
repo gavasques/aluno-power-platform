@@ -650,7 +650,7 @@ function calcularSimulacaoCompleta(simulacao: any): any {
 
   // Atualizar objeto de resultados
   simulacao.resultados = {
-    valorFobReal,
+    valorFobReal: valorFOBReal,
     valorFreteReal,
     valorCfrDolar: valorCFRDolar,
     valorCfrReal: valorCFRReal,
