@@ -53,6 +53,7 @@ const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
+const ImportacaoFormal = lazy(() => import("./pages/simuladores/ImportacaoFormal"));
 const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
 const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
@@ -587,6 +588,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <ImportacaoSimplificada />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          <Route path="/simuladores/importacao-formal">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ImportacaoFormal />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
