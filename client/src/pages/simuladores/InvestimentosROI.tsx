@@ -10,7 +10,6 @@ import { Calculator, Download, RotateCcw } from 'lucide-react';
 // Interfaces
 interface ConfiguracaoSimulacao {
   investimentoInicial: number;
-  roiPorGiro: number;
   duracaoGiro: number;
   unidadeTempo: 'dias' | 'semanas' | 'meses';
   numeroGiros: number;
@@ -39,34 +38,84 @@ const formatPercent = (value: number): string => {
   return `${(value || 0).toFixed(2)}%`;
 };
 
+// Componente de input de moeda brasileira
+const CurrencyInput = ({ value, onChange, className = "", placeholder = "R$ 0,00" }: {
+  value: number;
+  onChange: (value: number) => void;
+  className?: string;
+  placeholder?: string;
+}) => {
+  const [displayValue, setDisplayValue] = useState<string>('');
+
+  useEffect(() => {
+    if (value === 0) {
+      setDisplayValue('');
+    } else {
+      setDisplayValue(value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    
+    // Remove tudo exceto números, vírgulas e pontos
+    const numbersOnly = inputValue.replace(/[^\d,\.]/g, '');
+    
+    // Se estiver vazio, zera o valor
+    if (numbersOnly === '') {
+      setDisplayValue('');
+      onChange(0);
+      return;
+    }
+    
+    // Converte para número (substitui vírgula por ponto para parseFloat)
+    const numericValue = parseFloat(numbersOnly.replace(',', '.')) || 0;
+    
+    setDisplayValue(numbersOnly);
+    onChange(numericValue);
+  };
+
+  return (
+    <Input
+      type="text"
+      value={displayValue}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className={className}
+    />
+  );
+};
+
 export default function InvestimentosROI() {
   const { toast } = useToast();
   
   // Estado da configuração
   const [config, setConfig] = useState<ConfiguracaoSimulacao>({
     investimentoInicial: 10000,
-    roiPorGiro: 10,
     duracaoGiro: 45,
     unidadeTempo: 'dias',
     numeroGiros: 12
   });
 
-  // Estado para aportes e retiradas editáveis
+  // Estado para aportes, retiradas e ROIs editáveis
   const [aportes, setAportes] = useState<number[]>(Array(12).fill(0));
   const [retiradas, setRetiradas] = useState<number[]>(Array(12).fill(0));
+  const [rois, setRois] = useState<number[]>(Array(12).fill(20)); // 20% por padrão
 
   // Salvar no localStorage
   useEffect(() => {
     localStorage.setItem('investimentos-roi-config', JSON.stringify(config));
     localStorage.setItem('investimentos-roi-aportes', JSON.stringify(aportes));
     localStorage.setItem('investimentos-roi-retiradas', JSON.stringify(retiradas));
-  }, [config, aportes, retiradas]);
+    localStorage.setItem('investimentos-roi-rois', JSON.stringify(rois));
+  }, [config, aportes, retiradas, rois]);
 
   // Carregar do localStorage
   useEffect(() => {
     const savedConfig = localStorage.getItem('investimentos-roi-config');
     const savedAportes = localStorage.getItem('investimentos-roi-aportes');
     const savedRetiradas = localStorage.getItem('investimentos-roi-retiradas');
+    const savedRois = localStorage.getItem('investimentos-roi-rois');
     
     if (savedConfig) {
       try {
@@ -89,6 +138,14 @@ export default function InvestimentosROI() {
         setRetiradas(JSON.parse(savedRetiradas));
       } catch (error) {
         console.warn('Erro ao carregar retiradas salvas:', error);
+      }
+    }
+    
+    if (savedRois) {
+      try {
+        setRois(JSON.parse(savedRois));
+      } catch (error) {
+        console.warn('Erro ao carregar ROIs salvos:', error);
       }
     }
   }, []);
@@ -114,7 +171,17 @@ export default function InvestimentosROI() {
         return newRetiradas.slice(0, config.numeroGiros);
       });
     }
-  }, [config.numeroGiros, aportes.length, retiradas.length]);
+    
+    if (rois.length !== config.numeroGiros) {
+      setRois(prev => {
+        const newRois = [...prev];
+        while (newRois.length < config.numeroGiros) {
+          newRois.push(20); // 20% por padrão
+        }
+        return newRois.slice(0, config.numeroGiros);
+      });
+    }
+  }, [config.numeroGiros, aportes.length, retiradas.length, rois.length]);
 
   // Calcular giros com base na configuração
   const giros = useMemo(() => {
@@ -122,12 +189,12 @@ export default function InvestimentosROI() {
     let investimentoAtual = config.investimentoInicial;
     
     for (let i = 1; i <= config.numeroGiros; i++) {
-      const retorno = investimentoAtual * (config.roiPorGiro / 100);
+      const roiGiro = rois[i - 1] || 20;
+      const retorno = investimentoAtual * (roiGiro / 100);
       const aporte = aportes[i - 1] || 0;
       const retirada = retiradas[i - 1] || 0;
       
       const saldo = investimentoAtual + retorno + aporte - retirada;
-      const roiGiro = investimentoAtual > 0 ? (retorno / investimentoAtual) * 100 : 0;
       const tempoDecorrido = i * config.duracaoGiro;
       
       girosCalculados.push({
@@ -145,7 +212,7 @@ export default function InvestimentosROI() {
     }
     
     return girosCalculados;
-  }, [config, aportes, retiradas]);
+  }, [config, aportes, retiradas, rois]);
 
   // Atualizar configuração
   const updateConfig = (key: keyof ConfiguracaoSimulacao, value: any) => {
@@ -170,17 +237,26 @@ export default function InvestimentosROI() {
     });
   };
 
+  // Atualizar ROI
+  const updateRoi = (index: number, value: number) => {
+    setRois(prev => {
+      const newRois = [...prev];
+      newRois[index] = value;
+      return newRois;
+    });
+  };
+
   // Resetar configuração
   const resetConfig = () => {
     setConfig({
       investimentoInicial: 10000,
-      roiPorGiro: 10,
       duracaoGiro: 45,
       unidadeTempo: 'dias',
       numeroGiros: 12
     });
     setAportes(Array(12).fill(0));
     setRetiradas(Array(12).fill(0));
+    setRois(Array(12).fill(20));
     toast({
       title: "Configuração resetada",
       description: "Todos os valores foram restaurados para o padrão"
@@ -225,9 +301,83 @@ export default function InvestimentosROI() {
     document.body.removeChild(link);
     
     toast({
-      title: "Exportação concluída",
+      title: "Exportação CSV concluída",
       description: "Arquivo CSV baixado com sucesso"
     });
+  };
+
+  // Exportar para PDF
+  const exportarPDF = async () => {
+    try {
+      // Dinamicamente importar jsPDF
+      const { jsPDF } = await import('jspdf');
+      require('jspdf-autotable');
+      
+      const doc = new jsPDF();
+      
+      // Configurações do documento
+      doc.setFont('helvetica');
+      
+      // Título
+      doc.setFontSize(16);
+      doc.text('Simulador de Investimentos e ROI', 105, 20, { align: 'center' });
+      
+      // Configurações
+      doc.setFontSize(10);
+      doc.text(`Investimento Inicial: ${formatCurrency(config.investimentoInicial)}`, 14, 35);
+      doc.text(`Duração do Giro: ${config.duracaoGiro} ${config.unidadeTempo}`, 14, 42);
+      doc.text(`Número de Giros: ${config.numeroGiros}`, 14, 49);
+      
+      // Tabela
+      const tableData = giros.map(giro => [
+        giro.numero.toString(),
+        formatCurrency(giro.investimento),
+        formatCurrency(giro.retorno),
+        formatCurrency(giro.aporte),
+        formatCurrency(giro.retirada),
+        formatCurrency(giro.saldo),
+        formatPercent(giro.roiGiro),
+        `${giro.tempoDecorrido}`
+      ]);
+      
+      (doc as any).autoTable({
+        head: [['Giro', 'Investimento', 'Retorno', 'Aporte', 'Retirada', 'Saldo', 'ROI', 'Tempo']],
+        body: tableData,
+        startY: 60,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [59, 130, 246] }
+      });
+      
+      // Resumo
+      const finalY = (doc as any).lastAutoTable.finalY + 10;
+      doc.setFontSize(12);
+      doc.text('Resumo:', 14, finalY);
+      
+      doc.setFontSize(10);
+      const totalAportes = aportes.reduce((sum, aporte) => sum + aporte, 0);
+      const totalRetiradas = retiradas.reduce((sum, retirada) => sum + retirada, 0);
+      const capitalFinal = giros[giros.length - 1]?.saldo || 0;
+      
+      doc.text(`Capital Final: ${formatCurrency(capitalFinal)}`, 14, finalY + 8);
+      doc.text(`Total Aportes: ${formatCurrency(totalAportes)}`, 14, finalY + 15);
+      doc.text(`Total Retiradas: ${formatCurrency(totalRetiradas)}`, 14, finalY + 22);
+      doc.text(`Tempo Total: ${config.numeroGiros * config.duracaoGiro} ${config.unidadeTempo}`, 14, finalY + 29);
+      
+      // Salvar
+      doc.save('simulacao-investimentos-roi.pdf');
+      
+      toast({
+        title: "Exportação PDF concluída",
+        description: "Arquivo PDF baixado com sucesso"
+      });
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast({
+        title: "Erro na exportação",
+        description: "Não foi possível gerar o arquivo PDF",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -269,18 +419,7 @@ export default function InvestimentosROI() {
                 />
               </div>
 
-              {/* ROI por Giro */}
-              <div>
-                <Label htmlFor="roiPorGiro">ROI por Giro (%)</Label>
-                <Input
-                  id="roiPorGiro"
-                  type="number"
-                  value={config.roiPorGiro}
-                  onChange={(e) => updateConfig('roiPorGiro', Number(e.target.value))}
-                  min="0"
-                  step="0.1"
-                />
-              </div>
+
 
               {/* Duração do Giro */}
               <div className="grid grid-cols-2 gap-2">
@@ -322,15 +461,21 @@ export default function InvestimentosROI() {
                 />
               </div>
 
-              <div className="flex gap-2">
-                <Button onClick={resetConfig} variant="outline" size="sm" className="flex-1">
+              <div className="space-y-2">
+                <Button onClick={resetConfig} variant="outline" size="sm" className="w-full">
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Resetar
                 </Button>
-                <Button onClick={exportarCSV} variant="outline" size="sm" className="flex-1">
-                  <Download className="h-4 w-4 mr-2" />
-                  Exportar
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={exportarCSV} variant="outline" size="sm" className="flex-1">
+                    <Download className="h-4 w-4 mr-2" />
+                    CSV
+                  </Button>
+                  <Button onClick={exportarPDF} variant="outline" size="sm" className="flex-1">
+                    <Download className="h-4 w-4 mr-2" />
+                    PDF
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -347,48 +492,55 @@ export default function InvestimentosROI() {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm border-collapse">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Giro</th>
-                      <th className="text-right p-2">Investimento</th>
-                      <th className="text-right p-2">Retorno</th>
-                      <th className="text-right p-2">Aporte</th>
-                      <th className="text-right p-2">Retirada</th>
-                      <th className="text-right p-2">Saldo</th>
-                      <th className="text-right p-2">ROI</th>
-                      <th className="text-right p-2">Tempo</th>
+                    <tr className="border-b-2 border-gray-300">
+                      <th className="text-center p-3 w-16 bg-gray-50 font-semibold">Giro</th>
+                      <th className="text-center p-3 w-32 bg-gray-50 font-semibold">Investimento</th>
+                      <th className="text-center p-3 w-32 bg-gray-50 font-semibold">Retorno</th>
+                      <th className="text-center p-3 w-32 bg-gray-50 font-semibold">Aporte</th>
+                      <th className="text-center p-3 w-32 bg-gray-50 font-semibold">Retirada</th>
+                      <th className="text-center p-3 w-32 bg-gray-50 font-semibold">Saldo</th>
+                      <th className="text-center p-3 w-20 bg-gray-50 font-semibold">ROI</th>
+                      <th className="text-center p-3 w-20 bg-gray-50 font-semibold">Tempo</th>
                     </tr>
                   </thead>
                   <tbody>
                     {giros.map((giro, index) => (
                       <tr key={giro.numero} className="border-b hover:bg-gray-50">
-                        <td className="p-2 font-medium">{giro.numero}</td>
-                        <td className="p-2 text-right">{formatCurrency(giro.investimento)}</td>
-                        <td className="p-2 text-right text-green-600 font-medium">{formatCurrency(giro.retorno)}</td>
-                        <td className="p-2">
-                          <Input
-                            type="number"
+                        <td className="p-3 text-center font-medium">{giro.numero}</td>
+                        <td className="p-3 text-center">{formatCurrency(giro.investimento)}</td>
+                        <td className="p-3 text-center text-green-600 font-medium">{formatCurrency(giro.retorno)}</td>
+                        <td className="p-3">
+                          <CurrencyInput
                             value={giro.aporte}
-                            onChange={(e) => updateAporte(index, Number(e.target.value) || 0)}
-                            className="w-24 h-8 text-right text-xs"
-                            min="0"
-                            step="100"
+                            onChange={(value) => updateAporte(index, value)}
+                            className="w-full h-8 text-center text-xs"
+                            placeholder="0"
                           />
                         </td>
-                        <td className="p-2">
+                        <td className="p-3">
+                          <CurrencyInput
+                            value={giro.retirada}
+                            onChange={(value) => updateRetirada(index, value)}
+                            className="w-full h-8 text-center text-xs"
+                            placeholder="0"
+                          />
+                        </td>
+                        <td className="p-3 text-center font-semibold text-blue-600">{formatCurrency(giro.saldo)}</td>
+                        <td className="p-3">
                           <Input
                             type="number"
-                            value={giro.retirada}
-                            onChange={(e) => updateRetirada(index, Number(e.target.value) || 0)}
-                            className="w-24 h-8 text-right text-xs"
+                            value={giro.roiGiro}
+                            onChange={(e) => updateRoi(index, Number(e.target.value) || 0)}
+                            className="w-full h-8 text-center text-xs"
                             min="0"
-                            step="100"
+                            max="100"
+                            step="0.1"
+                            placeholder="20"
                           />
                         </td>
-                        <td className="p-2 text-right font-semibold text-blue-600">{formatCurrency(giro.saldo)}</td>
-                        <td className="p-2 text-right">{formatPercent(giro.roiGiro)}</td>
-                        <td className="p-2 text-right">{giro.tempoDecorrido}</td>
+                        <td className="p-3 text-center">{giro.tempoDecorrido}</td>
                       </tr>
                     ))}
                   </tbody>
