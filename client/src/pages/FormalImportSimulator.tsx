@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Calculator, Plus, Trash2, Copy, Save, Download, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Calculator, Plus, Trash2, Copy, Save, Download, ArrowLeft, ArrowRight, X } from 'lucide-react';
 import { useLocation, useRoute } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -83,11 +85,11 @@ interface FormalImportSimulation {
 }
 
 const defaultTaxes: Tax[] = [
-  { nome: "Imposto de Importação (II)", aliquota: 60, baseCalculo: "valor_fob_real", valor: 0 },
-  { nome: "IPI", aliquota: 15, baseCalculo: "base_ii_ipi", valor: 0 },
-  { nome: "PIS", aliquota: 2.33, baseCalculo: "total_base_calculo", valor: 0 },
-  { nome: "COFINS", aliquota: 10.74, baseCalculo: "total_base_calculo", valor: 0 },
-  { nome: "ICMS", aliquota: 17, baseCalculo: "total_base_calculo", valor: 0 }
+  { nome: "Imposto de Importação (II)", aliquota: 14.4, baseCalculo: "valor_fob_real", valor: 0 },
+  { nome: "IPI", aliquota: 3.25, baseCalculo: "base_ii_ipi", valor: 0 },
+  { nome: "PIS", aliquota: 2.1, baseCalculo: "total_base_calculo", valor: 0 },
+  { nome: "COFINS", aliquota: 9.65, baseCalculo: "total_base_calculo", valor: 0 },
+  { nome: "ICMS", aliquota: 12, baseCalculo: "total_base_calculo", valor: 0 }
 ];
 
 const defaultExpenses: Expense[] = [
@@ -104,6 +106,18 @@ export default function FormalImportSimulator() {
   const queryClient = useQueryClient();
   
   const [activeTab, setActiveTab] = useState("info");
+  // Estado para impostos personalizados
+  const [showAddTaxDialog, setShowAddTaxDialog] = useState(false);
+  const [newTax, setNewTax] = useState<Tax>({
+    nome: "",
+    aliquota: 0,
+    baseCalculo: "valor_fob_real",
+    valor: 0
+  });
+
+  // Lista de impostos padrão que não podem ser removidos
+  const defaultTaxNames = ["Imposto de Importação (II)", "IPI", "PIS", "COFINS", "ICMS"];
+
   const [simulation, setSimulation] = useState<FormalImportSimulation>({
     nome: "Nova Simulação Formal",
     fornecedor: "",
@@ -281,6 +295,77 @@ export default function FormalImportSimulator() {
     }
     
     return baseValue * (tax.aliquota / 100);
+  };
+
+  // Funções para gerenciar impostos personalizados
+  const addCustomTax = () => {
+    if (!newTax.nome.trim()) {
+      toast({
+        title: "Erro",
+        description: "Nome do imposto é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Verificar se já existe um imposto com o mesmo nome
+    if (simulation.impostos.some(tax => tax.nome.toLowerCase() === newTax.nome.toLowerCase())) {
+      toast({
+        title: "Erro",
+        description: "Já existe um imposto com esse nome",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newImpostos = [...simulation.impostos, { ...newTax }];
+    setSimulation(prev => ({ ...prev, impostos: newImpostos }));
+    
+    // Resetar formulário
+    setNewTax({
+      nome: "",
+      aliquota: 0,
+      baseCalculo: "valor_fob_real",
+      valor: 0
+    });
+    setShowAddTaxDialog(false);
+
+    toast({
+      title: "Sucesso",
+      description: "Imposto personalizado adicionado",
+    });
+  };
+
+  const removeCustomTax = (index: number) => {
+    const tax = simulation.impostos[index];
+    
+    // Não permitir remover impostos padrão
+    if (defaultTaxNames.includes(tax.nome)) {
+      toast({
+        title: "Erro",
+        description: "Não é possível remover impostos padrão",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newImpostos = simulation.impostos.filter((_, i) => i !== index);
+    setSimulation(prev => ({ ...prev, impostos: newImpostos }));
+
+    toast({
+      title: "Sucesso",
+      description: "Imposto personalizado removido",
+    });
+  };
+
+  const resetNewTaxForm = () => {
+    setNewTax({
+      nome: "",
+      aliquota: 0,
+      baseCalculo: "valor_fob_real",
+      valor: 0
+    });
+    setShowAddTaxDialog(false);
   };
 
   if (isLoading) {
@@ -474,10 +559,73 @@ export default function FormalImportSimulator() {
             <TabsContent value="taxes" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Impostos de Nacionalização</CardTitle>
-                  <CardDescription>
-                    Configure as alíquotas dos impostos de importação
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Impostos de Nacionalização</CardTitle>
+                      <CardDescription>
+                        Configure as alíquotas dos impostos de importação
+                      </CardDescription>
+                    </div>
+                    <Dialog open={showAddTaxDialog} onOpenChange={setShowAddTaxDialog}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Adicionar Imposto
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Adicionar Imposto Personalizado</DialogTitle>
+                          <DialogDescription>
+                            Crie um novo imposto personalizado para sua simulação.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4">
+                          <div>
+                            <Label htmlFor="taxName">Nome do Imposto</Label>
+                            <Input
+                              id="taxName"
+                              value={newTax.nome}
+                              onChange={(e) => setNewTax(prev => ({ ...prev, nome: e.target.value }))}
+                              placeholder="Ex: Taxa Especial"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="taxRate">Alíquota (%)</Label>
+                            <Input
+                              id="taxRate"
+                              type="number"
+                              step="0.01"
+                              value={newTax.aliquota}
+                              onChange={(e) => setNewTax(prev => ({ ...prev, aliquota: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0.00"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="taxBase">Base de Cálculo</Label>
+                            <Select value={newTax.baseCalculo} onValueChange={(value) => setNewTax(prev => ({ ...prev, baseCalculo: value }))}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione a base de cálculo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="valor_fob_real">Valor FOB Real</SelectItem>
+                                <SelectItem value="base_ii_ipi">Base II + IPI</SelectItem>
+                                <SelectItem value="total_base_calculo">Base Total de Cálculo</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={resetNewTaxForm}>
+                            Cancelar
+                          </Button>
+                          <Button onClick={addCustomTax}>
+                            Adicionar Imposto
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -487,6 +635,7 @@ export default function FormalImportSimulator() {
                         <TableHead>Alíquota (%)</TableHead>
                         <TableHead>Base de Cálculo</TableHead>
                         <TableHead>Valor Estimado</TableHead>
+                        <TableHead>Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -513,6 +662,20 @@ export default function FormalImportSimulator() {
                             <Badge variant="secondary">
                               {formatCurrency(calculateTaxEstimate(tax))}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {!defaultTaxNames.includes(tax.nome) ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeCustomTax(index)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <span className="text-xs text-gray-400">Padrão</span>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
