@@ -34,6 +34,7 @@ const simuladorItems: SimuladorItem[] = [
     href: "/simuladores/importacao-simplificada",
     icon: Ship,
     category: "Importação",
+    isAvailable: true,
   },
   {
     id: "importacao-formal",
@@ -42,6 +43,7 @@ const simuladorItems: SimuladorItem[] = [
     href: "/simuladores/importacao-formal",
     icon: Building,
     category: "Importação",
+    isAvailable: true,
   },
   {
     id: "viabilidade-produto",
@@ -50,6 +52,7 @@ const simuladorItems: SimuladorItem[] = [
     href: "/simuladores/viabilidade-de-produto", 
     icon: ClipboardCheck,
     category: "Análise",
+    isAvailable: true,
   },
 ];
 

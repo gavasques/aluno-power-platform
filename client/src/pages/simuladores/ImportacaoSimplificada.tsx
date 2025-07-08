@@ -16,13 +16,20 @@ import { apiRequest } from "@/lib/queryClient";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-// Brazilian number formatting utilities
+// Brazilian number formatting utilities - formato R$ X.XXX.XXXX,XX
 const formatBrazilianNumber = (value: number, decimals: number = 2): string => {
   if (value === 0) return '';
   return value.toLocaleString('pt-BR', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
   });
+};
+
+const formatCurrency = (value: number): string => {
+  return `R$ ${value.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
 };
 
 const parseBrazilianNumber = (value: string): number => {
@@ -865,28 +872,28 @@ export default function ImportacaoSimplificada() {
                             />
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {formatBrazilianNumber(produto.custo_produto_brl || 0)}
+                            {formatCurrency(produto.custo_produto_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {formatBrazilianNumber(produto.custo_frete_por_produto_brl || 0)}
+                            {formatCurrency(produto.custo_frete_por_produto_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right font-medium">
-                            R$ {formatBrazilianNumber(produto.produto_mais_frete_brl || 0)}
+                            {formatCurrency(produto.produto_mais_frete_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {formatBrazilianNumber(produto.valor_ii_brl || 0)}
+                            {formatCurrency(produto.valor_ii_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {formatBrazilianNumber(produto.valor_icms_brl || 0)}
+                            {formatCurrency(produto.valor_icms_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right font-bold text-primary">
-                            R$ {formatBrazilianNumber(produto.valor_total_produto_impostos_brl || 0)}
+                            {formatCurrency(produto.valor_total_produto_impostos_brl || 0)}
                           </td>
                           <td className="p-2 text-sm text-right">
-                            R$ {formatBrazilianNumber(produto.custo_unitario_sem_imposto_brl || 0)}
+                            {formatCurrency(produto.custo_unitario_sem_imposto_brl || 0)}
                           </td>
                           <td className="p-2 text-base text-right font-bold text-blue-600">
-                            R$ {formatBrazilianNumber(produto.custo_unitario_com_imposto_brl || 0)}
+                            {formatCurrency(produto.custo_unitario_com_imposto_brl || 0)}
                           </td>
                           <td className="p-2">
                             <Button
@@ -946,31 +953,31 @@ export default function ImportacaoSimplificada() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      R$ {formatBrazilianNumber(calculatedResults.totals.total_sim_produto_mais_frete_brl)}
+                      {formatCurrency(calculatedResults.totals.total_sim_produto_mais_frete_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">Produto + Frete</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">
-                      R$ {formatBrazilianNumber(calculatedResults.totals.total_sim_valor_ii_brl)}
+                      {formatCurrency(calculatedResults.totals.total_sim_valor_ii_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">Total II</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-600">
-                      R$ {formatBrazilianNumber(calculatedResults.totals.total_sim_valor_icms_brl)}
+                      {formatCurrency(calculatedResults.totals.total_sim_valor_icms_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">Total ICMS</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-purple-600">
-                      R$ {formatBrazilianNumber(calculatedResults.totals.total_sim_outras_despesas_aduaneiras_brl)}
+                      {formatCurrency(calculatedResults.totals.total_sim_outras_despesas_aduaneiras_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">Outras Despesas</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-red-600">
-                      R$ {formatBrazilianNumber(calculatedResults.totals.custo_total_importacao_brl)}
+                      {formatCurrency(calculatedResults.totals.custo_total_importacao_brl)}
                     </div>
                     <div className="text-sm text-muted-foreground">CUSTO TOTAL</div>
                   </div>
@@ -1110,7 +1117,7 @@ export default function ImportacaoSimplificada() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
                         <div className="text-center">
                           <div className="text-lg font-bold text-blue-600">
-                            R$ {formatBrazilianNumber(valorTotalImportacao)}
+                            {formatCurrency(valorTotalImportacao)}
                           </div>
                           <div className="text-xs text-muted-foreground">Valor Total</div>
                         </div>
@@ -1122,7 +1129,7 @@ export default function ImportacaoSimplificada() {
                         </div>
                         <div className="text-center">
                           <div className="text-lg font-bold text-orange-600">
-                            R$ {formatBrazilianNumber(config.taxa_cambio_usd_brl || 0)}
+                            {formatCurrency(config.taxa_cambio_usd_brl || 0)}
                           </div>
                           <div className="text-xs text-muted-foreground">Cotação USD</div>
                         </div>

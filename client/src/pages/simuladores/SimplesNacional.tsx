@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
-// Formatação brasileira de números
+// Formatação brasileira de números com formato específico R$ X.XXX.XXXX,XX
 const formatBrazilianNumber = (value: number, decimals: number = 2): string => {
   return value.toLocaleString('pt-BR', {
     minimumFractionDigits: decimals,
@@ -21,10 +21,10 @@ const formatBrazilianNumber = (value: number, decimals: number = 2): string => {
 };
 
 const formatCurrency = (value: number): string => {
-  return value.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  });
+  return `R$ ${value.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
 };
 
 const formatPercent = (value: number): string => {
