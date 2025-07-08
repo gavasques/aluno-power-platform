@@ -127,7 +127,7 @@ export default function FormalImportSimulator() {
     taxaDolar: 5.50,
     valorFobDolar: 1000,
     valorFreteDolar: 200,
-    percentualSeguro: 0.5,
+    percentualSeguro: 0.18,
     impostos: defaultTaxes,
     despesasAdicionais: defaultExpenses,
     produtos: [
