@@ -613,110 +613,9 @@ export default function FormalImportSimulator() {
     }));
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
 
-  const formatUSD = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
-  };
 
-  const formatCBM = (value: number) => {
-    return `${(value || 0).toFixed(6)} m³`;
-  };
 
-  const formatPercentage = (value: number) => {
-    return `${((value || 0) * 100).toFixed(2)}%`;
-  };
-
-  // Função para exportar para PDF
-  const exportToPDF = () => {
-    // Implementar usando html2canvas e jsPDF
-    import('jspdf').then(({ default: jsPDF }) => {
-      import('html2canvas').then(({ default: html2canvas }) => {
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        // Título do documento
-        pdf.setFontSize(16);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('SIMULADOR DE IMPORTAÇÃO FORMAL', 20, 20);
-        
-        // Subtitle
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'normal');
-        pdf.text('Cálculo com rateio por CBM', 20, 30);
-        
-        // Data de emissão
-        const today = new Date().toLocaleDateString('pt-BR');
-        pdf.text(`DATA DE EMISSÃO: ${today}`, 20, 40);
-        
-        // Informações gerais
-        let yPos = 50;
-        pdf.setFontSize(10);
-        pdf.text(`NOME: ${simulation.nome}`, 20, yPos);
-        yPos += 7;
-        pdf.text(`FORNECEDOR: ${simulation.fornecedor || 'Não informado'}`, 20, yPos);
-        yPos += 7;
-        pdf.text(`DESPACHANTE: ${simulation.despachante || 'Não informado'}`, 20, yPos);
-        yPos += 7;
-        pdf.text(`AGENTE DE CARGAS: ${simulation.agenteCargas || 'Não informado'}`, 20, yPos);
-        yPos += 7;
-        pdf.text(`TAXA DO DÓLAR: ${formatCurrency(simulation.taxaDolar)}`, 20, yPos);
-        yPos += 15;
-        
-        // Seção Valores USD
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('VALORES EM USD', 20, yPos);
-        yPos += 10;
-        
-        pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(`FOB: ${formatUSD(simulation.valorFobDolar)}`, 20, yPos);
-        yPos += 7;
-        pdf.text(`FRETE: ${formatUSD(simulation.valorFreteDolar)}`, 20, yPos);
-        yPos += 7;
-        pdf.text(`CFR: ${formatUSD(simulation.valorFobDolar + simulation.valorFreteDolar)}`, 20, yPos);
-        yPos += 15;
-        
-        // Seção Valores BRL
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('VALORES EM BRL', 20, yPos);
-        yPos += 10;
-        
-        pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(`FOB: ${formatCurrency(simulation.resultados?.valorFobReal || 0)}`, 20, yPos);
-        yPos += 7;
-        pdf.text(`FRETE: ${formatCurrency(simulation.resultados?.valorFreteReal || 0)}`, 20, yPos);
-        yPos += 7;
-        pdf.text(`IMPOSTOS: ${formatCurrency(simulation.resultados?.totalImpostos || 0)}`, 20, yPos);
-        yPos += 7;
-        pdf.text(`DESPESAS: ${formatCurrency(simulation.resultados?.totalDespesas || 0)}`, 20, yPos);
-        yPos += 10;
-        
-        // Total em destaque
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(`TOTAL: ${formatCurrency(simulation.resultados?.custoTotal || 0)}`, 20, yPos);
-        
-        // Salvar arquivo
-        pdf.save(`${simulation.nome || 'simulacao'}-importacao-formal.pdf`);
-        
-        toast({
-          title: "PDF exportado com sucesso!",
-          description: "O arquivo foi baixado para seu computador."
-        });
-      });
-    });
-  };
 
   // Função para calcular valores estimados dos impostos em tempo real
   const calculateTaxEstimate = (tax: Tax) => {
@@ -1828,4 +1727,5 @@ export default function FormalImportSimulator() {
       </Card>
     </div>
   );
+}
 }
