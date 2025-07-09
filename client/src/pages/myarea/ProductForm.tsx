@@ -43,7 +43,7 @@ const ProductForm = () => {
     dimensions: productDetails.dimensions || { length: 0, width: 0, height: 0 },
     weight: parseFloat(productDetails.weight) || 0,
     brand: productDetails.brandId ? productDetails.brandId.toString() : (productDetails.brand || ''),
-    category: productDetails.category || '',
+    category: productDetails.categoryId ? productDetails.categoryId.toString() : (productDetails.category || ''),
     supplierId: productDetails.supplierId?.toString() || '',
     ncm: productDetails.ncm || '',
     costItem: parseFloat(productDetails.costItem) || 0,
@@ -142,19 +142,28 @@ const ProductForm = () => {
   const { data: brandsData } = useQuery({
     queryKey: ['/api/brands'],
     queryFn: async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No token found for brands request');
+        return { data: [] };
+      }
+      
       const response = await fetch('/api/brands', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
-      if (!response.ok) throw new Error('Failed to fetch brands');
+      if (!response.ok) {
+        console.error('Failed to fetch brands:', response.status, response.statusText);
+        return { data: [] };
+      }
       return response.json();
     },
   });
 
   const suppliers = suppliersData?.data || [];
   const categories = categoriesData || [];
-  const brands = brandsData || [];
+  const brands = brandsData?.data || [];
   
   // Show loading state while fetching product data in edit mode
   if (isEditMode && isLoadingProduct) {

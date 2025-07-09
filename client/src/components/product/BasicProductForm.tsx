@@ -30,7 +30,7 @@ interface BasicProductFormProps {
   onPhotoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   mockSuppliers: Array<{ id: string; tradeName: string }>;
   mockCategories: Array<{ id: string; name: string }>;
-  mockBrands?: Array<{ id: string; tradeName: string }>;
+  mockBrands?: Array<{ id: string; name: string }>;
   onOpenDescriptions?: () => void;
 }
 
@@ -144,7 +144,7 @@ export const BasicProductForm = ({
                 <SelectContent>
                   {mockBrands?.length > 0 ? (
                     mockBrands.map(brand => (
-                      <SelectItem key={brand.id} value={brand.id.toString()}>{brand.tradeName}</SelectItem>
+                      <SelectItem key={brand.id} value={brand.id.toString()}>{brand.name}</SelectItem>
                     ))
                   ) : (
                     <SelectItem value="no-brand" disabled>Nenhuma marca cadastrada</SelectItem>
@@ -166,7 +166,7 @@ export const BasicProductForm = ({
                 </SelectTrigger>
                 <SelectContent>
                   {mockCategories?.map(cat => (
-                    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                    <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
                   )) || []}
                 </SelectContent>
               </Select>
