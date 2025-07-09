@@ -243,6 +243,17 @@ export const SupplierInfoForm: React.FC<SupplierInfoFormProps> = ({
         />
       </div>
 
+      <div>
+        <Label htmlFor="additionalInfo">Informações Adicionais</Label>
+        <Textarea
+          id="additionalInfo"
+          value={editForm.additionalInfo || supplier.additionalInfo || ''}
+          onChange={(e) => onFormChange({ additionalInfo: e.target.value })}
+          placeholder="Informações adicionais livres sobre o fornecedor (observações, histórico, notas especiais, etc.)"
+          rows={4}
+        />
+      </div>
+
       <div className="flex justify-end gap-3 pt-4 border-t">
         <Button 
           type="button" 
