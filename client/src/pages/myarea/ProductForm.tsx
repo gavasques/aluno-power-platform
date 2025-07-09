@@ -9,6 +9,7 @@ import { useProductForm } from "@/hooks/useProductForm";
 import { channelNames, defaultChannels } from "@/config/channels";
 import { useLocation } from "wouter";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const ProductForm = () => {
   const [, setLocation] = useLocation();
@@ -53,6 +54,28 @@ const ProductForm = () => {
     const imageUrl = URL.createObjectURL(file);
     handleInputChange('imageUrl', imageUrl);
   };
+
+  // Fetch suppliers and categories
+  const { data: suppliersData } = useQuery({
+    queryKey: ['/api/suppliers'],
+    queryFn: async () => {
+      const response = await fetch('/api/suppliers');
+      if (!response.ok) throw new Error('Failed to fetch suppliers');
+      return response.json();
+    },
+  });
+
+  const { data: categoriesData } = useQuery({
+    queryKey: ['/api/categories'],
+    queryFn: async () => {
+      const response = await fetch('/api/categories');
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      return response.json();
+    },
+  });
+
+  const suppliers = suppliersData?.data || [];
+  const categories = categoriesData || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -102,7 +125,12 @@ const ProductForm = () => {
                 <BasicProductForm
                   productData={productData}
                   onInputChange={handleInputChange}
-                  onPhotoUpload={handlePhotoUpload}
+                  onPhotoUpload={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePhotoUpload(file);
+                  }}
+                  mockSuppliers={suppliers}
+                  mockCategories={categories}
                 />
               </div>
             </div>

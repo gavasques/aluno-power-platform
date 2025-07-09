@@ -134,9 +134,9 @@ export const BasicProductForm = ({
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockCategories.map(cat => (
+                  {mockCategories?.map(cat => (
                     <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                  ))}
+                  )) || []}
                 </SelectContent>
               </Select>
             </div>
@@ -148,9 +148,9 @@ export const BasicProductForm = ({
                   <SelectValue placeholder="Selecione um fornecedor" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockSuppliers.map(supplier => (
-                    <SelectItem key={supplier.id} value={supplier.id}>{supplier.tradeName}</SelectItem>
-                  ))}
+                  {mockSuppliers?.map(supplier => (
+                    <SelectItem key={supplier.id} value={supplier.id.toString()}>{supplier.tradeName}</SelectItem>
+                  )) || []}
                 </SelectContent>
               </Select>
             </div>
