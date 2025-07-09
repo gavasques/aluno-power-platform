@@ -29,6 +29,16 @@ const MySuppliers = () => {
   // Buscar fornecedores
   const { data: suppliers = [], isLoading } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
+    queryFn: async () => {
+      const response = await fetch('/api/suppliers', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch suppliers');
+      const data = await response.json();
+      return data.data || data; // Extract data field if it exists, otherwise return whole response
+    },
   });
 
   // Buscar departamentos para mostrar categoria
