@@ -1728,4 +1728,3 @@ export default function FormalImportSimulator() {
     </div>
   );
 }
-}
