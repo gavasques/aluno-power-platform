@@ -50,6 +50,9 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
     supplierType: '',
     description: '',
     additionalInfo: '',
+    paymentTerm: '',
+    deliveryTerm: '',
+    bankingData: '',
     status: 'ativo'
   });
 
@@ -80,6 +83,9 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
         supplierType: supplier.supplierType || '',
         description: supplier.description || '',
         additionalInfo: supplier.additionalInfo || '',
+        paymentTerm: supplier.paymentTerm || '',
+        deliveryTerm: supplier.deliveryTerm || '',
+        bankingData: supplier.bankingData || '',
         status: supplier.status || 'ativo'
       });
     }
@@ -271,6 +277,38 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
               value={formData.additionalInfo}
               onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
               placeholder="Informações adicionais livres sobre o fornecedor (observações, histórico, notas especiais, etc.)"
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="paymentTerm">Prazo de Pagamento</Label>
+              <Input
+                id="paymentTerm"
+                value={formData.paymentTerm}
+                onChange={(e) => setFormData({ ...formData, paymentTerm: e.target.value })}
+                placeholder="Ex: 30 dias, À vista, 15/30 dias"
+              />
+            </div>
+            <div>
+              <Label htmlFor="deliveryTerm">Prazo de Entrega</Label>
+              <Input
+                id="deliveryTerm"
+                value={formData.deliveryTerm}
+                onChange={(e) => setFormData({ ...formData, deliveryTerm: e.target.value })}
+                placeholder="Ex: 7 dias úteis, 15-20 dias"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="bankingData">Dados Bancários</Label>
+            <Textarea
+              id="bankingData"
+              value={formData.bankingData}
+              onChange={(e) => setFormData({ ...formData, bankingData: e.target.value })}
+              placeholder="Informações bancárias do fornecedor (banco, agência, conta, PIX, etc.)"
               rows={3}
             />
           </div>

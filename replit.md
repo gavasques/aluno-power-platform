@@ -111,6 +111,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 09, 2025 - 06:40 PM**: ✅ SUPPLIER-PRODUCT RELATIONSHIP AND ENHANCED SUPPLIER FIELDS IMPLEMENTED
+  - **Many-to-Many Product-Supplier Relationship Created**:
+    - ✅ **New productSuppliers table**: Complete relationship table with productId, supplierId, supplierCode, cost, isPrimary, and notes fields
+    - ✅ **Database indexes**: Strategic indexes for product, supplier, and primary supplier lookups
+    - ✅ **Unique constraints**: Prevents duplicate product-supplier relationships
+    - ✅ **Cascade delete**: Maintains referential integrity when products or suppliers are deleted
+  - **Enhanced Supplier Data Fields**:
+    - ✅ **Payment Terms (paymentTerm)**: Field for supplier payment conditions (30 days, cash, etc.)
+    - ✅ **Delivery Terms (deliveryTerm)**: Field for supplier delivery timeframes (7 business days, etc.)
+    - ✅ **Banking Data (bankingData)**: Text area for complete banking information (bank, account, PIX, etc.)
+  - **Frontend Interface Updates**:
+    - ✅ **SupplierEditDialog Enhanced**: Added input fields for payment terms, delivery terms, and banking data with proper placeholders
+    - ✅ **SupplierInfoDisplay Enhanced**: New "Termos Comerciais" and "Dados Bancários" sections showing the new fields
+    - ✅ **Professional Layout**: Organized commercial terms in grid layout with proper spacing and styling
+  - **Database Migration Complete**: SQL migrations applied successfully with proper column additions and table creation
+  - **TypeScript Integration**: Complete type safety with updated schemas and insert types
+  - **Benefits Delivered**:
+    - Suppliers can now be linked to multiple products with specific costs and codes
+    - Enhanced supplier management with comprehensive commercial and banking information
+    - Improved data organization supporting complex supplier-product relationships
+    - Foundation for advanced supplier management features and product sourcing workflows
+
 - **January 09, 2025 - 06:18 PM**: ⚡ GLOBAL CONTEXT PERFORMANCE OPTIMIZATION - REDUCED PAGE LOAD TIMES BY 90%+
   - **Critical Performance Issue Fixed**: Product edit page and all pages were loading slowly due to global contexts making unnecessary API calls
   - **Root Cause**: CombinedProvider loading 7+ contexts globally, each making 2+ second API calls on every page load

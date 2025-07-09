@@ -106,6 +106,29 @@ export const SupplierInfoDisplay: React.FC<SupplierInfoDisplayProps> = ({ suppli
           </p>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+            Termos Comerciais
+          </h4>
+          <div className="space-y-3">
+            <InfoRow label="Prazo de Pagamento" value={supplier.paymentTerm || "Não informado"} />
+            <InfoRow label="Prazo de Entrega" value={supplier.deliveryTerm || "Não informado"} />
+          </div>
+        </div>
+        
+        <div>
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+            Dados Bancários
+          </h4>
+          <div className="p-4 bg-gray-50 rounded border">
+            <p className="text-gray-700 leading-relaxed text-sm">
+              {supplier.bankingData || "Nenhum dado bancário fornecido"}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

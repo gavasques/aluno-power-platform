@@ -112,7 +112,11 @@ export const suppliers = pgTable("suppliers", {
   municipalRegistration: text("municipal_registration"),
   supplierType: text("supplier_type"), // 'distribuidora', 'importadora', 'fabricante', 'industria', 'representante'
   additionalInfo: text("additional_info"), // Informações Adicionais - campo de texto livre
+  paymentTerm: text("payment_term"), // Prazo de Pagamento
+  deliveryTerm: text("delivery_term"), // Prazo de Entrega
+  bankingData: text("banking_data"), // Dados Bancários
   status: text("status").default("ativo"), // 'ativo', 'inativo'
+  bankingData: text("banking_data"), // Dados Bancários - campo longo de texto
   
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -469,6 +473,25 @@ export const products = pgTable("products", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+// Product Suppliers - Tabela de relacionamento Produto x Fornecedor (many-to-many)
+export const productSuppliers = pgTable("product_suppliers", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").references(() => products.id, { onDelete: "cascade" }).notNull(),
+  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  supplierCode: text("supplier_code"), // Código do produto no fornecedor
+  cost: decimal("cost", { precision: 10, scale: 2 }), // Custo específico deste produto com este fornecedor
+  isPrimary: boolean("is_primary").notNull().default(false), // Indica se é o fornecedor principal
+  notes: text("notes"), // Observações específicas desta relação
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  // Garante que não há duplicatas produto-fornecedor
+  productSupplierUnique: unique("product_supplier_unique").on(table.productId, table.supplierId),
+  productIdx: index("product_suppliers_product_idx").on(table.productId),
+  supplierIdx: index("product_suppliers_supplier_idx").on(table.supplierId),
+  primaryIdx: index("product_suppliers_primary_idx").on(table.isPrimary),
+}));
 
 // Product Cost History
 export const productCostHistory = pgTable("product_cost_history", {
@@ -1466,6 +1489,15 @@ export const insertBrandSchema = createInsertSchema(brands).omit({
 });
 export type InsertBrand = z.infer<typeof insertBrandSchema>;
 export type Brand = typeof brands.$inferSelect;
+
+// Insert schemas for product suppliers
+export const insertProductSupplierSchema = createInsertSchema(productSuppliers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertProductSupplier = z.infer<typeof insertProductSupplierSchema>;
+export type ProductSupplier = typeof productSuppliers.$inferSelect;
 
 // Insert schemas for supplier conversations
 export const insertSupplierConversationSchema = createInsertSchema(supplierConversations).omit({
