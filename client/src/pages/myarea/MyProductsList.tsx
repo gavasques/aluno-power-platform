@@ -284,7 +284,7 @@ export default function MyProductsList() {
             <TableHeader>
               <TableRow className="border-b-2 border-gray-200 bg-gray-50/50">
                 <TableHead className="w-[40px] py-4"></TableHead>
-                <TableHead className="w-[90px] py-4 font-semibold text-gray-700">Foto</TableHead>
+                <TableHead className="w-[80px] py-4 font-semibold text-gray-700">Foto</TableHead>
                 <TableHead className="py-4 font-semibold text-gray-700">Nome do Produto</TableHead>
                 <TableHead className="w-[120px] py-4 font-semibold text-gray-700">SKU</TableHead>
                 <TableHead className="w-[140px] py-4 font-semibold text-gray-700">Marca</TableHead>
@@ -314,13 +314,12 @@ export default function MyProductsList() {
                   const isExpanded = expandedRows.has(product.id);
 
                   return (
-                    <>
+                    <React.Fragment key={product.id}>
                       <TableRow 
-                        key={product.id}
                         className="cursor-pointer hover:bg-blue-50/30 transition-colors border-b border-gray-100"
                         onClick={() => toggleRowExpansion(product.id)}
                       >
-                        <TableCell className="py-4">
+                        <TableCell className="py-3">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -333,27 +332,27 @@ export default function MyProductsList() {
                             {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                           </Button>
                         </TableCell>
-                        <TableCell className="py-4">
+                        <TableCell className="py-3">
                           {product.photo ? (
                             <img
                               src={product.photo}
                               alt={product.name}
-                              className="w-20 h-20 object-cover rounded-xl border-2 border-gray-300 shadow-md hover:shadow-lg transition-shadow duration-200"
+                              className="w-16 h-16 object-cover rounded-lg border-2 border-gray-300 shadow-md hover:shadow-lg transition-shadow duration-200"
                             />
                           ) : (
-                            <div className="w-20 h-20 bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-xl border-2 border-gray-300 shadow-md flex items-center justify-center text-xs text-gray-600 font-semibold">
+                            <div className="w-16 h-16 bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-lg border-2 border-gray-300 shadow-md flex items-center justify-center text-xs text-gray-600 font-semibold">
                               SEM FOTO
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="font-medium py-4">
+                        <TableCell className="font-medium py-3">
                           <div>
                             <div className="text-gray-900 font-semibold">{product.name}</div>
-                            <div className="mt-2">
+                            <div className="mt-1">
                               <Badge 
                                 variant={product.active ? "default" : "secondary"} 
                                 className={cn(
-                                  "text-xs px-2 py-1",
+                                  "text-xs px-2 py-0.5",
                                   product.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
                                 )}
                               >
@@ -362,27 +361,27 @@ export default function MyProductsList() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="py-4 text-gray-700 font-mono text-sm">
+                        <TableCell className="py-3 text-gray-700 font-mono text-sm">
                           {product.internalCode || product.sku || <span className="text-gray-400 italic">-</span>}
                         </TableCell>
-                        <TableCell className="py-4 text-gray-700">
+                        <TableCell className="py-3 text-gray-700">
                           {getBrandName(product) || <span className="text-gray-400 italic">Sem marca</span>}
                         </TableCell>
-                        <TableCell className="text-right py-4">
+                        <TableCell className="text-right py-3">
                           {product.costItem ? (
                             <span className="font-semibold text-gray-900">{formatBRL(product.costItem)}</span>
                           ) : (
                             <span className="text-gray-400 italic">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="min-w-[280px] py-4">
+                        <TableCell className="min-w-[280px] py-3">
                           {activeChannels.length > 0 ? (
-                            <div className="space-y-2">
-                              {activeChannels.slice(0, 3).map(({ channel, calculation }, index) => (
+                            <div className="space-y-1">
+                              {activeChannels.slice(0, 2).map(({ channel, calculation }, index) => (
                                 <div key={`${product.id}-${channel.id || channel.type}-${index}`} 
-                                     className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-2 border border-gray-200 shadow-sm max-w-[250px]">
+                                     className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-md p-1.5 border border-gray-200 shadow-sm max-w-[250px]">
                                   <div className="flex items-center justify-between">
-                                    <div className="flex flex-col min-w-0 flex-1">
+                                    <div className="flex items-center min-w-0 flex-1 gap-2">
                                       <span className="font-semibold text-xs text-gray-900 truncate">
                                         {CHANNEL_NAMES[channel.type] || channel.name}
                                       </span>
@@ -393,7 +392,7 @@ export default function MyProductsList() {
                                     <Badge 
                                       variant="outline"
                                       className={cn(
-                                        "text-xs px-2 py-1 font-bold border-0 rounded-full shadow-sm ml-2 flex-shrink-0",
+                                        "text-xs px-1.5 py-0.5 font-bold border-0 rounded-full shadow-sm ml-1 flex-shrink-0",
                                         calculation.marginPercent >= 30 ? "bg-green-100 text-green-800" :
                                         calculation.marginPercent >= 20 ? "bg-blue-100 text-blue-800" :
                                         calculation.marginPercent >= 10 ? "bg-yellow-100 text-yellow-800" :
@@ -405,28 +404,28 @@ export default function MyProductsList() {
                                   </div>
                                 </div>
                               ))}
-                              {activeChannels.length > 3 && (
-                                <div className="text-center">
-                                  <Badge variant="secondary" className="text-xs px-2 py-1 bg-gray-200 text-gray-700">
-                                    +{activeChannels.length - 3} outros canais
+                              {activeChannels.length > 2 && (
+                                <div className="text-center mt-1">
+                                  <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-gray-200 text-gray-600">
+                                    +{activeChannels.length - 2} outros
                                   </Badge>
                                 </div>
                               )}
                             </div>
                           ) : (
-                            <div className="text-center py-4">
-                              <div className="bg-gray-50 rounded-lg p-3 border-2 border-dashed border-gray-300 max-w-[200px] mx-auto">
-                                <span className="text-xs text-gray-500 italic">Nenhum canal ativo</span>
+                            <div className="text-center py-2">
+                              <div className="bg-gray-50 rounded-md p-2 border-2 border-dashed border-gray-300 max-w-[180px] mx-auto">
+                                <span className="text-xs text-gray-500 italic">Nenhum canal</span>
                               </div>
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="text-center py-4">
-                          <div className="flex gap-2 justify-center">
+                        <TableCell className="text-center py-3">
+                          <div className="flex gap-1 justify-center">
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-9 px-3 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-all duration-200"
+                              className="h-8 px-2 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEdit(product.id);
@@ -438,7 +437,7 @@ export default function MyProductsList() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-9 px-3 text-green-600 border-green-200 hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-all duration-200"
+                              className="h-8 px-2 text-green-600 border-green-200 hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setLocation(`/minha-area/produtos/${product.id}`);
@@ -450,7 +449,7 @@ export default function MyProductsList() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-9 px-3 text-red-600 border-red-200 hover:text-red-700 hover:bg-red-50 hover:border-red-400 transition-all duration-200"
+                              className="h-8 px-2 text-red-600 border-red-200 hover:text-red-700 hover:bg-red-50 hover:border-red-400 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(product.id, product.name);
@@ -572,7 +571,7 @@ export default function MyProductsList() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </>
+                    </React.Fragment>
                   );
                 })
               )}
