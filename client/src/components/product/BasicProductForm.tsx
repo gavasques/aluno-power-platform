@@ -43,6 +43,14 @@ export const BasicProductForm = ({
   mockBrands = [],
   onOpenDescriptions
 }: BasicProductFormProps) => {
+  // Debug logs
+  console.log('BasicProductForm received:', {
+    productData,
+    mockSuppliers: mockSuppliers.length,
+    mockCategories: mockCategories.length,
+    mockBrands: mockBrands.length
+  });
+
   // Ensure productData has all required fields with defaults
   const safeProductData = {
     name: '',
@@ -62,6 +70,8 @@ export const BasicProductForm = ({
     observations: '',
     ...productData
   };
+
+  console.log('SafeProductData:', safeProductData);
   return (
     <div className="space-y-8">
       {/* Photo Upload Section */}
@@ -137,7 +147,13 @@ export const BasicProductForm = ({
 
             <div>
               <Label className="text-sm font-medium">Marca</Label>
-              <Select value={safeProductData.brand} onValueChange={(value) => onInputChange('brand', value)}>
+              <Select 
+                value={safeProductData.brand ? safeProductData.brand.toString() : ""} 
+                onValueChange={(value) => {
+                  console.log('Brand change:', value);
+                  onInputChange('brand', value);
+                }}
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecione uma marca" />
                 </SelectTrigger>
@@ -156,20 +172,34 @@ export const BasicProductForm = ({
                   Cadastre suas marcas em <strong>Minha Área → Marcas</strong>
                 </p>
               )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Debug: {mockBrands?.length || 0} marcas disponíveis
+              </p>
             </div>
 
             <div>
               <Label className="text-sm font-medium">Categoria</Label>
-              <Select value={safeProductData.category} onValueChange={(value) => onInputChange('category', value)}>
+              <Select 
+                value={safeProductData.category ? safeProductData.category.toString() : ""} 
+                onValueChange={(value) => {
+                  console.log('Category change:', value);
+                  onInputChange('category', value);
+                }}
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockCategories?.map(cat => (
+                  {mockCategories?.length > 0 ? mockCategories.map(cat => (
                     <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
-                  )) || []}
+                  )) : (
+                    <SelectItem value="no-category" disabled>Carregando categorias...</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Debug: {mockCategories?.length || 0} categorias disponíveis
+              </p>
             </div>
 
             <div>
