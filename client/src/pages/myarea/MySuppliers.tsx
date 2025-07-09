@@ -17,9 +17,9 @@ import { Supplier, Department } from '@shared/schema';
 const MySuppliers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [countryFilter, setCountryFilter] = useState('');
-  const [stateFilter, setStateFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [countryFilter, setCountryFilter] = useState('all');
+  const [stateFilter, setStateFilter] = useState('all');
   const [contactFilter, setContactFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
@@ -111,9 +111,9 @@ const MySuppliers = () => {
       const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesCategory = !categoryFilter || supplier.categoryId === parseInt(categoryFilter);
-      const matchesCountry = !countryFilter || supplier.country?.toLowerCase().includes(countryFilter.toLowerCase());
-      const matchesState = !stateFilter || supplier.state?.toLowerCase().includes(stateFilter.toLowerCase());
+      const matchesCategory = !categoryFilter || categoryFilter === 'all' || supplier.categoryId === parseInt(categoryFilter);
+      const matchesCountry = !countryFilter || countryFilter === 'all' || supplier.country?.toLowerCase().includes(countryFilter.toLowerCase());
+      const matchesState = !stateFilter || stateFilter === 'all' || supplier.state?.toLowerCase().includes(stateFilter.toLowerCase());
       const matchesContact = !contactFilter || 
         supplier.commercialEmail?.toLowerCase().includes(contactFilter.toLowerCase()) ||
         supplier.supportEmail?.toLowerCase().includes(contactFilter.toLowerCase()) ||
@@ -197,7 +197,7 @@ const MySuppliers = () => {
                 <SelectValue placeholder="Todas as categorias" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas as categorias</SelectItem>
+                <SelectItem value="all">Todas as categorias</SelectItem>
                 {departments.map((dept) => (
                   <SelectItem key={dept.id} value={String(dept.id)}>
                     {dept.name}
@@ -211,7 +211,7 @@ const MySuppliers = () => {
                 <SelectValue placeholder="Todos os países" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os países</SelectItem>
+                <SelectItem value="all">Todos os países</SelectItem>
                 {uniqueCountries.map((country) => (
                   <SelectItem key={country} value={country}>
                     {country}
@@ -225,7 +225,7 @@ const MySuppliers = () => {
                 <SelectValue placeholder="Todos os estados" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os estados</SelectItem>
+                <SelectItem value="all">Todos os estados</SelectItem>
                 {uniqueStates.map((state) => (
                   <SelectItem key={state} value={state}>
                     {state}
@@ -241,14 +241,14 @@ const MySuppliers = () => {
               className="w-64"
             />
 
-            {(categoryFilter || countryFilter || stateFilter || contactFilter) && (
+            {(categoryFilter && categoryFilter !== 'all' || countryFilter && countryFilter !== 'all' || stateFilter && stateFilter !== 'all' || contactFilter) && (
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => {
-                  setCategoryFilter('');
-                  setCountryFilter('');
-                  setStateFilter('');
+                  setCategoryFilter('all');
+                  setCountryFilter('all');
+                  setStateFilter('all');
                   setContactFilter('');
                   setCurrentPage(1);
                 }}
@@ -469,7 +469,7 @@ const MySuppliers = () => {
               Nenhum fornecedor encontrado
             </h3>
             <p className="text-gray-600 mb-4">
-              {searchTerm || categoryFilter || countryFilter || stateFilter || contactFilter
+              {searchTerm || (categoryFilter && categoryFilter !== 'all') || (countryFilter && countryFilter !== 'all') || (stateFilter && stateFilter !== 'all') || contactFilter
                 ? 'Tente ajustar seus filtros de busca.' 
                 : 'Você ainda não possui fornecedores cadastrados.'}
             </p>
