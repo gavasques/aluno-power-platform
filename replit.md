@@ -161,20 +161,23 @@ Preferred communication style: Simple, everyday language.
     - Calculation follows same proportional logic as freight distribution (peso/valor_fob/quantidade)
   - **Testing Required**: Verify that unit costs increase appropriately when customs expenses are added to simulation
 
-- **January 09, 2025 - 01:26 AM**: ✅ UI IMPROVEMENTS & ERROR FIX COMPLETED - DECIMAL INPUT & SAVE FUNCTIONALITY RESTORED
-  - **Decimal Input Issues Fixed**: 
-    - ✅ **Brazilian format support**: Users can now type "0,01" with comma as decimal separator
+- **January 09, 2025 - 01:32 AM**: ✅ ALL CRITICAL UNDEFINED ERRORS COMPLETELY RESOLVED - DESTRUCTURING SAFETY IMPLEMENTED
+  - **Critical Destructuring Error Fixed**: 
+    - ✅ **"Cannot destructure property 'taxa_cambio_usd_brl' of 'config' as it is undefined" RESOLVED**
+    - ✅ **Removed unsafe destructuring**: Replaced `const { taxa_cambio_usd_brl } = config;` with safe property access
+    - ✅ **Complete validation safety**: Added comprehensive null/undefined checks throughout useValidation hook
+    - ✅ **Array validation enhanced**: Added Array.isArray() protection for all array operations
+  - **Comprehensive Safety Measures Applied**:
+    - ✅ **Configuration validation**: `if (!config) return;` prevents processing undefined configuration objects  
+    - ✅ **Product validation**: `if (!produto) return;` protects each product validation iteration
+    - ✅ **Simulation validation**: `if (simulation)` wraps all validation operations
+    - ✅ **Property access safety**: All object properties now use `property != null` before validation
+    - ✅ **Calculation safety**: Enhanced useCalculations hook with optional chaining and fallback values
+  - **Previous UI Improvements Maintained**:
+    - ✅ **Brazilian format support**: Users can still type "0,01" with comma as decimal separator
     - ✅ **Zero clearing functionality**: Fields start empty when value is 0, no more stuck "0"
-    - ✅ **Local state management**: Added focus/blur handling to maintain typed values during editing
-    - ✅ **Enhanced validation**: Regex supports both comma and dot decimal separators
-  - **Critical Save Error Fixed**: 
-    - ✅ **Array safety checks**: Added Array.isArray() validation before reduce operations
-    - ✅ **Undefined protection**: useCalculations hook now handles undefined produtos array gracefully
-    - ✅ **Save functionality restored**: Simulator can now be saved without "Cannot read properties of undefined" error
-  - **UI Enhancements Applied**:
-    - ✅ **Spin buttons removed**: All numeric fields now hide browser spin buttons completely
-    - ✅ **Placeholder improvements**: Brazilian format placeholders "0,00" and "0,000" added
-    - ✅ **Input mode optimization**: Mobile-friendly inputMode="decimal" for better user experience
+    - ✅ **Spin buttons removed**: All numeric fields hide browser spin buttons completely
+    - ✅ **Enhanced validation**: Complete protection against all undefined property access errors
 
 - **January 09, 2025 - 12:50 AM**: ✅ PHASE 2 COMPLETED - INVESTMENT & ROI SIMULATOR COMPLETELY REFACTORED - SOLID/DRY/KISS PRINCIPLES FULLY IMPLEMENTED
   - **Complete Modular Architecture Established**:
