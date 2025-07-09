@@ -9,7 +9,7 @@ import { safeNumber, safeDiv } from '../utils';
 export const useCalculations = (simulation: SimulacaoCompleta): CalculatedResults => {
   return useMemo(() => {
     const cfg = simulation.configuracoesGerais;
-    const produtos = simulation.produtos;
+    const produtos = Array.isArray(simulation.produtos) ? simulation.produtos : [];
 
     // Global calculations
     const peso_bruto_total_simulacao_kg = produtos.reduce((sum, p) => {
@@ -195,12 +195,15 @@ const calculateTotals = (
     peso_bruto_total_simulacao_kg: number;
   }
 ) => {
+  // Ensure produtosCalculados is an array
+  const produtos = Array.isArray(produtosCalculados) ? produtosCalculados : [];
+  
   const totals = {
     total_sim_quantidade_itens: globalData.quantidade_total_itens_simulacao,
-    total_sim_custo_produto_brl: produtosCalculados.reduce((sum, p) => sum + (p.custo_produto_brl || 0), 0),
-    total_sim_produto_mais_frete_brl: produtosCalculados.reduce((sum, p) => sum + (p.produto_mais_frete_brl || 0), 0),
-    total_sim_valor_ii_brl: produtosCalculados.reduce((sum, p) => sum + (p.valor_ii_brl || 0), 0),
-    total_sim_valor_icms_brl: produtosCalculados.reduce((sum, p) => sum + (p.valor_icms_brl || 0), 0),
+    total_sim_custo_produto_brl: produtos.reduce((sum, p) => sum + (p.custo_produto_brl || 0), 0),
+    total_sim_produto_mais_frete_brl: produtos.reduce((sum, p) => sum + (p.produto_mais_frete_brl || 0), 0),
+    total_sim_valor_ii_brl: produtos.reduce((sum, p) => sum + (p.valor_ii_brl || 0), 0),
+    total_sim_valor_icms_brl: produtos.reduce((sum, p) => sum + (p.valor_icms_brl || 0), 0),
     total_sim_outras_despesas_aduaneiras_brl: cfg.outras_despesas_aduaneiras_total_brl,
   };
 
