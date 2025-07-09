@@ -81,6 +81,11 @@ const UserUsage = lazy(() => import("./pages/user/Usage"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
 const UserProfile = lazy(() => import("./pages/myarea/UserProfile"));
 
+// My Area Product Management
+const MyProductsList = lazy(() => import('./pages/myarea/MyProductsList'));
+const ProductForm = lazy(() => import('./pages/myarea/ProductForm'));
+const ProductImportExport = lazy(() => import('./pages/myarea/ProductImportExport'));
+
 
 // Keep Login as eager import for immediate authentication
 import Login from "./pages/Login";
@@ -679,6 +684,48 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <UserProfile />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          {/* Product Import/Export - Protected */}
+                          <Route path="/minha-area/importacao-exportacao">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductImportExport />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          {/* Product Management - Protected */}
+                          <Route path="/minha-area/produtos">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <MyProductsList />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/minha-area/produtos/novo">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductForm />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/minha-area/produtos/:id/editar">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductForm />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

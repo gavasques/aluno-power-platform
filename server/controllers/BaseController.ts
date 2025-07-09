@@ -1,3 +1,8 @@
+/**
+ * Base Controller
+ * Common functionality for all controllers
+ */
+
 import { Request, Response, NextFunction } from 'express';
 
 /**
@@ -31,6 +36,10 @@ export class ResponseHandler {
 
   static noContent(res: Response) {
     res.status(204).send();
+  }
+
+  static badRequest(res: Response, message: string, errors?: any) {
+    res.status(400).json({ error: message, errors });
   }
 }
 

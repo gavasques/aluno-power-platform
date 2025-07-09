@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, Folder, Package, Building, Star, ArrowRight, User } from "lucide-react";
+import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet } from "lucide-react";
 
 interface MinhaAreaItem {
   id: string;
@@ -56,6 +56,15 @@ const minhaAreaItems: MinhaAreaItem[] = [
     href: "/minha-area/perfil",
     icon: User,
     category: "Gestão",
+  },
+  {
+    id: "importacao-exportacao",
+    title: "Importação & Exportação",
+    description: "Importe e exporte produtos e configurações via Excel (XLSX)",
+    href: "/minha-area/importacao-exportacao",
+    icon: FileSpreadsheet,
+    category: "Produtos",
+    isNew: true,
   },
 ];
 

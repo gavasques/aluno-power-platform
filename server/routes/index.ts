@@ -15,6 +15,7 @@ import materialCategoryRoutes from './materialCategoryRoutes';
 import materialTypeRoutes from './materialTypeRoutes';
 import productRoutes from './productRoutes';
 import { optimizedProductRoutes } from './optimizedProductRoutes';
+import { excelImportExportRoutes } from './excelImportExportRoutes';
 import dashboardRoutes from './dashboard';
 import stripeRoutes from './stripe';
 import { permissionRoutes } from './permissions';
@@ -45,6 +46,9 @@ export function registerModularRoutes(app: Express): void {
   
   // Optimized Products Routes - Enterprise-level performance for 800,000+ records
   app.use('/api/products', optimizedProductRoutes);
+  
+  // Excel Import/Export Routes - XLSX operations for products and channels
+  app.use('/api/excel', excelImportExportRoutes);
   
   // User Dashboard Routes - Complete Dashboard System
   app.use('/api/dashboard', dashboardRoutes);
