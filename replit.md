@@ -111,6 +111,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 09, 2025 - 03:50 PM**: ✅ CLEANUP - VIABILIDADE DE PRODUTO SIMULATOR REMOVED FROM ALL REFERENCES
+  - **Complete Removal**: Removed non-implemented "Viabilidade de Produto" simulator from all interface files
+  - **Files Updated**: Cleaned up references in:
+    - ✅ **SimuladoresIndex.tsx**: Removed simulator item and ClipboardCheck icon import
+    - ✅ **SimuladoresIconTest.tsx**: Removed simulator item and ClipboardCheck icon handling
+    - ✅ **UserBreadcrumbs.tsx**: Removed breadcrumb mapping for viabilidade-de-produto route
+    - ✅ **Simulators.tsx**: Removed from simulatorTitles object
+  - **Benefits**: 
+    - Cleaner interface without non-functional simulators
+    - Reduced confusion for users
+    - Improved navigation accuracy
+    - Better category filtering results
+
 - **January 09, 2025 - 03:45 PM**: ✅ UI ENHANCEMENT - DUPLICAR OPTION REMOVED FROM FORMAL IMPORT SIMULATIONS
   - **Menu Simplification**: Removed "Duplicar" (Duplicate) option from actions dropdown in FormalImportSimulationsList.tsx
   - **Code Cleanup**: Removed all related duplicate functionality including:

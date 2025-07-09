@@ -9,14 +9,13 @@ import { useState } from "react";
 import { Search, X, Calculator } from "lucide-react";
 
 // Teste primeiro com FileDigit, Ship, Building - estes podem estar causando problema
-let FileDigit, Ship, Building, ClipboardCheck, ArrowRight, TrendingUp;
+let FileDigit, Ship, Building, ArrowRight, TrendingUp;
 
 try {
   const icons = require("lucide-react");
   FileDigit = icons.FileDigit || Calculator;
   Ship = icons.Ship || Calculator;
   Building = icons.Building || Calculator;
-  ClipboardCheck = icons.ClipboardCheck || Calculator;
   ArrowRight = icons.ArrowRight || Calculator;
   TrendingUp = icons.TrendingUp || Calculator;
 } catch (e) {
@@ -24,7 +23,6 @@ try {
   FileDigit = Calculator;
   Ship = Calculator;
   Building = Calculator;
-  ClipboardCheck = Calculator;
   ArrowRight = Calculator;
   TrendingUp = Calculator;
 }
@@ -66,15 +64,6 @@ const simuladorItems: SimuladorItem[] = [
     href: "/simuladores/importacao-formal-direta", 
     icon: Building,
     category: "Importação",
-    isAvailable: true,
-  },
-  {
-    id: "viabilidade-produto",
-    title: "Viabilidade de Produto",
-    description: "Analise a viabilidade econômica e rentabilidade de novos produtos",
-    href: "/simuladores/viabilidade-de-produto", 
-    icon: ClipboardCheck,
-    category: "Análise",
     isAvailable: true,
   },
   {

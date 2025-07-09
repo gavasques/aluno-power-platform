@@ -5,7 +5,6 @@ const simulatorTitles = {
   "simples-nacional": "Simples Nacional",
   "importacao-simplificada": "Importação Simplificada",
   "importacao-formal": "Importação Formal",
-  "viabilidade-de-produto": "Viabilidade de Produto",
 };
 
 const Simulators = () => {

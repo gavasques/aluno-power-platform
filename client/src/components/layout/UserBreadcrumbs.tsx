@@ -29,7 +29,6 @@ const breadcrumbMap: Record<string, string> = {
   "/simuladores/simples-nacional": "Simples Nacional",
   "/simuladores/importacao-simplificada": "Importação Simplificada",
   "/simuladores/importacao-formal": "Importação Formal",
-  "/simuladores/viabilidade-de-produto": "Viabilidade de Produto",
   "/minha-area/perfil": "Meu Perfil",
   // Nova área de Ferramentas
   "/ferramentas": "Ferramentas",
