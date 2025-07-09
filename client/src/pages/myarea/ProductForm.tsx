@@ -152,19 +152,6 @@ const ProductForm = () => {
     },
   });
 
-  const { data: brandsData } = useQuery({
-    queryKey: ['/api/brands'],
-    queryFn: async () => {
-      const response = await fetch('/api/brands', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch brands');
-      return response.json();
-    },
-  });
-
   const suppliers = suppliersData?.data || [];
   const categories = categoriesData || [];
   const brands = brandsData || [];
