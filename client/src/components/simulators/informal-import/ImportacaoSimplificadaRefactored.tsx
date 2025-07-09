@@ -1,6 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
+import { ArrowLeft } from "lucide-react";
 
 // Enhanced modular imports with specialized hooks
 import { 
@@ -26,6 +28,9 @@ import { SummaryPanel } from './components/SummaryPanel';
  * Phase 3 - Complete separation of concerns with specialized hooks
  */
 export default function ImportacaoSimplificadaRefactored() {
+  // Navigation hooks
+  const [location, setLocation] = useLocation();
+  
   // Core state management
   const [activeSimulation, setActiveSimulation] = useState<SimulacaoCompleta>(DEFAULT_SIMULATION);
   const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
@@ -51,6 +56,20 @@ export default function ImportacaoSimplificadaRefactored() {
     calculatedResults
   );
 
+  // Load simulation from URL query params on mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const simulationId = searchParams.get('id');
+    
+    if (simulationId && simulations.length > 0) {
+      const simulation = simulations.find(s => s.id === parseInt(simulationId));
+      if (simulation) {
+        setActiveSimulation(simulation);
+        setSelectedSimulationId(simulation.id);
+      }
+    }
+  }, [simulations]);
+
   // Enhanced save confirmation with validation
   const handleConfirmSave = useMemo(() => {
     return () => {
@@ -73,6 +92,11 @@ export default function ImportacaoSimplificadaRefactored() {
     };
   }, [activeSimulation, saveMutation, setActiveSimulation, uiActions]);
 
+  // Handle back to list navigation
+  const handleBackToList = () => {
+    setLocation('/simuladores/importacao-simplificada');
+  };
+
   // Performance optimization with memoized component props
   const componentProps = useMemo(() => ({
     simulation: activeSimulation,
@@ -94,6 +118,18 @@ export default function ImportacaoSimplificadaRefactored() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Back to List Button */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="outline"
+          onClick={handleBackToList}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar à Lista
+        </Button>
+      </div>
+
       <SimulationHeader
         simulation={componentProps.simulation}
         selectedSimulationId={componentProps.selectedSimulationId}

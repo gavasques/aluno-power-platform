@@ -53,6 +53,8 @@ const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
+const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsList"));
+const InformalImportSimulator = lazy(() => import("./pages/InformalImportSimulator"));
 const FormalImportSimulator = lazy(() => import("./pages/FormalImportSimulator"));
 const FormalImportSimulationsList = lazy(() => import("./pages/FormalImportSimulationsList"));
 const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
@@ -583,12 +585,23 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* Import Cost Simulator - Protected */}
+                          {/* Informal Import Simulations List - Main Page */}
                           <Route path="/simuladores/importacao-simplificada">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <ImportacaoSimplificada />
+                                  <InformalImportSimulationsList />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Informal Import Simulator - New/Edit */}
+                          <Route path="/simuladores/importacao-simplificada/nova">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <InformalImportSimulator />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
