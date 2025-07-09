@@ -112,6 +112,12 @@ const defaultExpenses: Expense[] = [
 // Função de formatação CBM específica para PDF
 const formatCBM = (value: number) => `${value.toFixed(6)} m³`;
 
+// Função de formatação USD
+const formatUSD = (value: number) => `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+// Função de formatação de moeda brasileira
+const formatCurrency = (value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 // Função de exportar PDF
 const exportToPDF = (simulation: FormalImportSimulation) => {
   const doc = new jsPDF();
