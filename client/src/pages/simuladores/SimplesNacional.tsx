@@ -3,12 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+
 import { useToast } from "@/hooks/use-toast";
-import { Save, Calculator, FileText, AlertTriangle, FolderOpen } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Save, Calculator, FileText, AlertTriangle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -122,15 +120,7 @@ export default function SimplesNacional() {
   
   // State management
   const [activeSimulation, setActiveSimulation] = useState<SimulacaoCompleta>(defaultSimulation);
-  const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [showLoadDialog, setShowLoadDialog] = useState(false);
-
-  // Queries
-  const savedSimulationsQuery = useQuery({
-    queryKey: ['/api/simulations/simples-nacional'],
-    staleTime: 5 * 60 * 1000,
-  });
+  const [simulationId, setSimulationId] = useState<number | null>(null);
 
   // API queries
   const { data: simulations = [], isLoading } = useQuery({
@@ -138,11 +128,26 @@ export default function SimplesNacional() {
     enabled: true,
   });
 
+  // Load simulation automatically when component mounts
+  useEffect(() => {
+    if (simulations.length > 0) {
+      const latestSimulation = simulations[0]; // Get the most recent simulation
+      setActiveSimulation({
+        nomeSimulacao: latestSimulation.nomeSimulacao,
+        observacoes: latestSimulation.observacoes || "",
+        faturamento12Meses: parseFloat(latestSimulation.faturamento12Meses) || 0,
+        faturamentoSemST: parseFloat(latestSimulation.faturamentoSemST) || 0,
+        faturamentoComST: parseFloat(latestSimulation.faturamentoComST) || 0
+      });
+      setSimulationId(latestSimulation.id);
+    }
+  }, [simulations]);
+
   // Mutations
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
-      if (selectedSimulationId) {
-        return apiRequest(`/api/simulations/simples-nacional/${selectedSimulationId}`, {
+      if (simulationId) {
+        return apiRequest(`/api/simulations/simples-nacional/${simulationId}`, {
           method: 'PUT',
           body: data
         });
@@ -153,13 +158,15 @@ export default function SimplesNacional() {
         });
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (!simulationId) {
+        setSimulationId(data.id);
+      }
       toast({
         title: "Simulação salva",
         description: "Simulação salva com sucesso!",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/simulations/simples-nacional'] });
-      setShowSaveDialog(false);
     },
     onError: () => {
       toast({
@@ -181,28 +188,7 @@ export default function SimplesNacional() {
   }, [activeSimulation.faturamento12Meses, activeSimulation.faturamentoSemST, activeSimulation.faturamentoComST]);
 
   // Handlers
-  const novaSimulacao = () => {
-    setActiveSimulation(defaultSimulation);
-    setSelectedSimulationId(null);
-  };
-
-  const loadSimulation = (simulation: any) => {
-    setActiveSimulation({
-      nomeSimulacao: simulation.nomeSimulacao,
-      observacoes: simulation.observacoes || "",
-      faturamento12Meses: parseFloat(simulation.faturamento12Meses) || 0,
-      faturamentoSemST: parseFloat(simulation.faturamentoSemST) || 0,
-      faturamentoComST: parseFloat(simulation.faturamentoComST) || 0
-    });
-    setSelectedSimulationId(simulation.id);
-    setShowLoadDialog(false);
-    toast({
-      title: "Simulação carregada",
-      description: `Simulação "${simulation.nomeSimulacao}" carregada com sucesso!`,
-    });
-  };
-
-  const handleSaveClick = () => {
+  const handleSave = () => {
     if (!calculoResult || calculoResult.erro) {
       toast({
         title: "Erro",
@@ -211,10 +197,7 @@ export default function SimplesNacional() {
       });
       return;
     }
-    setShowSaveDialog(true);
-  };
-
-  const handleSave = () => {
+    
     saveMutation.mutate({
       nomeSimulacao: activeSimulation.nomeSimulacao,
       observacoes: activeSimulation.observacoes,
@@ -241,16 +224,9 @@ export default function SimplesNacional() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={novaSimulacao} variant="outline">
-            Nova Simulação
-          </Button>
-          <Button onClick={() => setShowLoadDialog(true)} variant="outline">
-            <FolderOpen className="w-4 h-4 mr-2" />
-            Carregar
-          </Button>
-          <Button onClick={handleSaveClick} disabled={!calculoResult || !!calculoResult?.erro}>
+          <Button onClick={handleSave} disabled={!calculoResult || !!calculoResult?.erro || saveMutation.isPending}>
             <Save className="w-4 h-4 mr-2" />
-            Salvar
+            {saveMutation.isPending ? 'Salvando...' : 'Salvar'}
           </Button>
         </div>
       </div>
@@ -453,106 +429,7 @@ export default function SimplesNacional() {
         </Card>
       )}
 
-      {/* Dialog para salvar */}
-      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Salvar Simulação</DialogTitle>
-            <DialogDescription>
-              Confirme os dados da simulação antes de salvar.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="nome" className="text-right">
-                Nome
-              </Label>
-              <Input
-                id="nome"
-                value={activeSimulation.nomeSimulacao}
-                onChange={(e) => updateSimulation('nomeSimulacao', e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? 'Salvando...' : 'Salvar'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      {/* Dialog para carregar simulações */}
-      <Dialog open={showLoadDialog} onOpenChange={setShowLoadDialog}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Carregar Simulação</DialogTitle>
-            <DialogDescription>
-              Selecione uma simulação salva para carregar.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            {savedSimulationsQuery.isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="text-center">
-                  <div className="text-muted-foreground">Carregando simulações...</div>
-                </div>
-              </div>
-            ) : savedSimulationsQuery.data?.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="text-center">
-                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <div className="text-muted-foreground mb-4">Nenhuma simulação salva encontrada</div>
-                  <Button onClick={() => setShowLoadDialog(false)}>
-                    Fechar
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="grid gap-4 max-h-96 overflow-y-auto">
-                {savedSimulationsQuery.data?.map((simulation: any) => (
-                  <div key={simulation.id} className="border rounded-lg p-4 hover:bg-muted/50 cursor-pointer" onClick={() => loadSimulation(simulation)}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold">{simulation.nomeSimulacao}</h3>
-                        <Badge variant="secondary">{simulation.codigoSimulacao}</Badge>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(simulation.dataUltimaModificacao).toLocaleDateString('pt-BR')}
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
-                      <div>
-                        <span className="font-medium">12 meses:</span> {formatCurrency(parseFloat(simulation.faturamento12Meses))}
-                      </div>
-                      <div>
-                        <span className="font-medium">Sem ST:</span> {formatCurrency(parseFloat(simulation.faturamentoSemST))}
-                      </div>
-                      <div>
-                        <span className="font-medium">Com ST:</span> {formatCurrency(parseFloat(simulation.faturamentoComST))}
-                      </div>
-                      <div>
-                        <span className="font-medium">Total Simples:</span> {formatCurrency(parseFloat(simulation.valorTotalSimples))}
-                      </div>
-                    </div>
-
-                    {simulation.observacoes && (
-                      <div className="mt-2 text-sm text-muted-foreground">
-                        <span className="font-medium">Observações:</span> {simulation.observacoes}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
