@@ -405,7 +405,6 @@ export default function MyProductsList() {
                               title="Editar informações"
                             >
                               <Edit className="h-4 w-4 mr-1" />
-                              <span className="text-xs">Editar informações</span>
                             </Button>
                             <Button
                               variant="ghost"
