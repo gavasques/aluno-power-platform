@@ -11,7 +11,7 @@ import {
   insertInvestmentSimulationSchema
 } from '../../shared/schema';
 import { requireAuth } from '../security';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Função para gerar código único de 8 caracteres alfanuméricos
@@ -26,19 +26,53 @@ function generateSimulationCode(): string {
 
 const router = Router();
 
-// Get last 30 import simulations for user
+// Get import simulations for user with pagination
 router.get('/import', requireAuth, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
+    // Parse pagination parameters
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 15;
+    const maxItems = parseInt(req.query.maxItems as string) || 100;
+    
+    // Calculate offset
+    const offset = (page - 1) * limit;
+    
+    // Ensure we don't exceed maxItems limit
+    const effectiveLimit = Math.min(limit, maxItems - offset);
+    
+    if (effectiveLimit <= 0) {
+      return res.json({ data: [], total: 0, page, totalPages: 0 });
+    }
+
+    // Get total count for pagination info
+    const totalResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(importSimulations)
+      .where(eq(importSimulations.userId, userId))
+      .limit(maxItems);
+    
+    const total = Math.min(totalResult[0]?.count || 0, maxItems);
+    const totalPages = Math.ceil(total / limit);
+
+    // Get paginated simulations
     const simulations = await db
       .select()
       .from(importSimulations)
       .where(eq(importSimulations.userId, userId))
       .orderBy(desc(importSimulations.dataLastModified))
-      .limit(30);
+      .limit(effectiveLimit)
+      .offset(offset);
 
-    res.json(simulations);
+    res.json({
+      data: simulations,
+      total,
+      page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    });
   } catch (error) {
     console.error('Error fetching import simulations:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });

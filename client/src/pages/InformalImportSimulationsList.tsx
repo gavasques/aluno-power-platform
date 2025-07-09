@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Edit, Plus, Search, Copy, FileText } from 'lucide-react';
+import { Trash2, Edit, Plus, Search, Copy, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -15,8 +15,8 @@ interface InformalImportSimulation {
   nomeSimulacao: string;
   nomeFornecedor?: string;
   observacoes?: string;
-  dataCriacao: string;
-  dataModificacao: string;
+  dataCreated: string;
+  dataLastModified: string;
   configuracoesGerais: {
     taxa_cambio_usd_brl: number;
     valor_fob_total_usd?: number;
@@ -31,15 +31,24 @@ interface InformalImportSimulation {
 const InformalImportSimulationsList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch simulations
-  const { data: simulations = [], isLoading, error } = useQuery<InformalImportSimulation[]>({
-    queryKey: ['/api/simulations/import'],
+  const ITEMS_PER_PAGE = 15;
+  const MAX_ITEMS = 100;
+
+  // Fetch simulations with pagination
+  const { data: apiResponse, isLoading, error } = useQuery({
+    queryKey: ['/api/simulations/import', currentPage],
     staleTime: 5 * 60 * 1000, // 5 minutes
+    queryFn: () => apiRequest(`/api/simulations/import?page=${currentPage}&limit=${ITEMS_PER_PAGE}&maxItems=${MAX_ITEMS}`)
   });
+
+  const simulations = apiResponse?.data || [];
+  const totalItems = apiResponse?.total || 0;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   // Log results
   if (error) {
@@ -102,6 +111,12 @@ const InformalImportSimulationsList: React.FC = () => {
     ''
   );
 
+  // Reset page when search changes
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
   // Calculate total value for a simulation
   const calculateTotalValue = (simulation: InformalImportSimulation) => {
     const totalFobUsd = simulation.produtos?.reduce((sum, produto) => 
@@ -136,7 +151,14 @@ const InformalImportSimulationsList: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return 'Data inválida';
+    }
+    
+    return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -182,7 +204,7 @@ const InformalImportSimulationsList: React.FC = () => {
             <Input
               placeholder="Buscar por nome da simulação ou fornecedor..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -207,7 +229,10 @@ const InformalImportSimulationsList: React.FC = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{simulations.length}</div>
+            <div className="text-2xl font-bold">{totalItems}</div>
+            <p className="text-xs text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -286,10 +311,10 @@ const InformalImportSimulationsList: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 text-sm text-gray-500">
                       <div>
-                        <span className="font-medium">Criado:</span> {formatDate(simulation.dataCriacao)}
+                        <span className="font-medium">Criado:</span> {formatDate(simulation.dataCreated)}
                       </div>
                       <div>
-                        <span className="font-medium">Modificado:</span> {formatDate(simulation.dataModificacao)}
+                        <span className="font-medium">Modificado:</span> {formatDate(simulation.dataLastModified)}
                       </div>
                     </div>
 
@@ -337,6 +362,53 @@ const InformalImportSimulationsList: React.FC = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!isLoading && totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <div className="text-sm text-gray-600">
+            Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1} a {Math.min(currentPage * ITEMS_PER_PAGE, totalItems)} de {totalItems} simulações
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Anterior
+            </Button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className="w-10 h-10"
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-1"
+            >
+              Próxima
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       )}
     </div>
