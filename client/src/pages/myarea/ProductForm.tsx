@@ -6,22 +6,53 @@ import { BasicProductForm } from "@/components/product/BasicProductForm";
 import { ProductSuppliersManager } from "@/components/product/ProductSuppliersManager";
 import { ChannelForm } from "@/components/product/ChannelForm";
 import { useProductForm } from "@/hooks/useProductForm";
-import { channelNames } from "@/config/channels";
+import { channelNames, defaultChannels } from "@/config/channels";
 import { useLocation } from "wouter";
+import { useState } from "react";
 
 const ProductForm = () => {
   const [, setLocation] = useLocation();
   const {
-    productData,
-    channels,
-    productSuppliers,
-    handleInputChange,
-    handleChannelToggle,
-    handleChannelInputChange,
-    handleSuppliersChange,
-    handlePhotoUpload,
-    handleSubmit
+    formData: productData,
+    updateField: handleInputChange,
+    handleSubmit,
+    isSubmitting,
+    errors
   } = useProductForm();
+
+  // Channel management state
+  const [channels, setChannels] = useState(defaultChannels);
+  const [productSuppliers, setProductSuppliers] = useState([]);
+  
+  const handleChannelToggle = (channelKey: string) => {
+    setChannels(prev => ({
+      ...prev,
+      [channelKey]: {
+        ...prev[channelKey as keyof typeof prev],
+        enabled: !prev[channelKey as keyof typeof prev]?.enabled
+      }
+    }));
+  };
+  
+  const handleChannelInputChange = (channelKey: string, field: string, value: any) => {
+    setChannels(prev => ({
+      ...prev,
+      [channelKey]: {
+        ...prev[channelKey as keyof typeof prev],
+        [field]: value
+      }
+    }));
+  };
+  
+  const handleSuppliersChange = (suppliers: any[]) => {
+    setProductSuppliers(suppliers);
+  };
+  
+  const handlePhotoUpload = (file: File) => {
+    // For now, just create a URL for the file
+    const imageUrl = URL.createObjectURL(file);
+    handleInputChange('imageUrl', imageUrl);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
