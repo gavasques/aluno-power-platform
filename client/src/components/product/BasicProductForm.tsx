@@ -37,10 +37,29 @@ export const BasicProductForm = ({
   productData, 
   onInputChange, 
   onPhotoUpload, 
-  mockSuppliers, 
-  mockCategories,
+  mockSuppliers = [], 
+  mockCategories = [],
   onOpenDescriptions
 }: BasicProductFormProps) => {
+  // Ensure productData has all required fields with defaults
+  const safeProductData = {
+    name: '',
+    photo: '',
+    sku: '',
+    internalCode: '',
+    ean: '',
+    dimensions: { length: 0, width: 0, height: 0 },
+    weight: 0,
+    brand: '',
+    category: '',
+    supplierId: '',
+    ncm: '',
+    costItem: 0,
+    packCost: 0,
+    taxPercent: 0,
+    observations: '',
+    ...productData
+  };
   return (
     <div className="space-y-8">
       {/* Photo Upload Section */}
@@ -53,18 +72,18 @@ export const BasicProductForm = ({
         </CardHeader>
         <CardContent>
           <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-muted-foreground/50 transition-colors">
-            {productData.photo ? (
+            {safeProductData.photo ? (
               <div className="space-y-4">
                 <img 
-                  src={productData.photo} 
+                  src={safeProductData.photo} 
                   alt="Preview" 
                   className="w-32 h-32 object-cover mx-auto rounded-lg border-2 border-muted"
                   onError={(e) => {
-                    console.error('Erro ao carregar imagem:', productData.photo);
+                    console.error('Erro ao carregar imagem:', safeProductData.photo);
                     e.currentTarget.style.display = 'none';
                   }}
                   onLoad={() => {
-                    console.log('Imagem carregada com sucesso:', productData.photo);
+                    console.log('Imagem carregada com sucesso:', safeProductData.photo);
                   }}
                 />
                 <p className="text-sm text-muted-foreground">Clique para alterar a foto</p>
@@ -87,7 +106,7 @@ export const BasicProductForm = ({
             />
             <Label htmlFor="photo-upload" className="cursor-pointer">
               <Button type="button" variant="outline" className="pointer-events-none mt-4">
-                {productData.photo ? "Alterar Foto" : "Escolher Arquivo"}
+                {safeProductData.photo ? "Alterar Foto" : "Escolher Arquivo"}
               </Button>
             </Label>
           </div>
@@ -107,7 +126,7 @@ export const BasicProductForm = ({
             <div>
               <Label className="text-sm font-medium">Nome do Produto *</Label>
               <Input
-                value={productData.name}
+                value={safeProductData.name}
                 onChange={(e) => onInputChange('name', e.target.value)}
                 placeholder="Digite o nome do produto"
                 className="mt-1"
@@ -119,7 +138,7 @@ export const BasicProductForm = ({
               <div className="relative mt-1">
                 <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  value={productData.brand}
+                  value={safeProductData.brand}
                   onChange={(e) => onInputChange('brand', e.target.value)}
                   placeholder="Marca do produto"
                   className="pl-10"
@@ -129,7 +148,7 @@ export const BasicProductForm = ({
 
             <div>
               <Label className="text-sm font-medium">Categoria *</Label>
-              <Select value={productData.category} onValueChange={(value) => onInputChange('category', value)}>
+              <Select value={safeProductData.category} onValueChange={(value) => onInputChange('category', value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
@@ -143,7 +162,7 @@ export const BasicProductForm = ({
 
             <div>
               <Label className="text-sm font-medium">Fornecedor Principal *</Label>
-              <Select value={productData.supplierId} onValueChange={(value) => onInputChange('supplierId', value)}>
+              <Select value={safeProductData.supplierId} onValueChange={(value) => onInputChange('supplierId', value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecione um fornecedor" />
                 </SelectTrigger>
@@ -160,7 +179,7 @@ export const BasicProductForm = ({
               <div className="relative mt-1">
                 <Code className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  value={productData.sku || ''}
+                  value={safeProductData.sku}
                   onChange={(e) => onInputChange('sku', e.target.value)}
                   placeholder="Código SKU"
                   className="pl-10"
@@ -173,7 +192,7 @@ export const BasicProductForm = ({
               <div className="relative mt-1">
                 <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  value={productData.internalCode || ''}
+                  value={safeProductData.internalCode}
                   onChange={(e) => onInputChange('internalCode', e.target.value)}
                   placeholder="Código interno"
                   className="pl-10"
@@ -186,7 +205,7 @@ export const BasicProductForm = ({
               <div className="relative mt-1">
                 <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  value={productData.ean}
+                  value={safeProductData.ean}
                   onChange={(e) => onInputChange('ean', e.target.value)}
                   placeholder="Código de barras"
                   className="pl-10"
@@ -199,7 +218,7 @@ export const BasicProductForm = ({
               <div className="relative mt-1">
                 <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  value={productData.ncm}
+                  value={safeProductData.ncm}
                   onChange={(e) => onInputChange('ncm', e.target.value)}
                   placeholder="Código NCM"
                   className="pl-10"
@@ -210,7 +229,7 @@ export const BasicProductForm = ({
             <div>
               <Label className="text-sm font-medium">Observações do Produto</Label>
               <Textarea
-                value={productData.observations || ''}
+                value={safeProductData.observations}
                 onChange={(e) => onInputChange('observations', e.target.value)}
                 placeholder="Digite observações importantes sobre o produto..."
                 className="mt-1 min-h-[100px]"
@@ -254,7 +273,7 @@ export const BasicProductForm = ({
                     <Input
                       type="number"
                       placeholder="Comprimento"
-                      value={productData.dimensions.length || ''}
+                      value={safeProductData.dimensions.length || ''}
                       onChange={(e) => onInputChange('dimensions.length', Number(e.target.value) || 0)}
                     />
                     <p className="text-xs text-muted-foreground mt-1">C</p>
@@ -263,7 +282,7 @@ export const BasicProductForm = ({
                     <Input
                       type="number"
                       placeholder="Largura"
-                      value={productData.dimensions.width || ''}
+                      value={safeProductData.dimensions.width || ''}
                       onChange={(e) => onInputChange('dimensions.width', Number(e.target.value) || 0)}
                     />
                     <p className="text-xs text-muted-foreground mt-1">L</p>
@@ -272,7 +291,7 @@ export const BasicProductForm = ({
                     <Input
                       type="number"
                       placeholder="Altura"
-                      value={productData.dimensions.height || ''}
+                      value={safeProductData.dimensions.height || ''}
                       onChange={(e) => onInputChange('dimensions.height', Number(e.target.value) || 0)}
                     />
                     <p className="text-xs text-muted-foreground mt-1">A</p>
@@ -286,7 +305,7 @@ export const BasicProductForm = ({
                   type="number"
                   step="0.01"
                   placeholder="0,00"
-                  value={productData.weight || ''}
+                  value={safeProductData.weight || ''}
                   onChange={(e) => onInputChange('weight', Number(e.target.value) || 0)}
                   className="mt-1"
                 />
@@ -307,7 +326,7 @@ export const BasicProductForm = ({
                 <Label className="text-sm font-medium">Custo do Item</Label>
                 <FormattedInput
                   type="currency"
-                  value={productData.costItem}
+                  value={safeProductData.costItem}
                   onChange={(value) => onInputChange('costItem', value)}
                   placeholder="R$ 0,00"
                   className="mt-1"
@@ -318,7 +337,7 @@ export const BasicProductForm = ({
                 <Label className="text-sm font-medium">Custo de Embalagem</Label>
                 <FormattedInput
                   type="currency"
-                  value={productData.packCost}
+                  value={safeProductData.packCost}
                   onChange={(value) => onInputChange('packCost', value)}
                   placeholder="R$ 0,00"
                   className="mt-1"
@@ -329,7 +348,7 @@ export const BasicProductForm = ({
                 <Label className="text-sm font-medium">Imposto Global</Label>
                 <FormattedInput
                   type="percentage"
-                  value={productData.taxPercent}
+                  value={safeProductData.taxPercent}
                   onChange={(value) => onInputChange('taxPercent', value)}
                   placeholder="0,00%"
                   className="mt-1"
