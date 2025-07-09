@@ -112,6 +112,7 @@ export const suppliers = pgTable("suppliers", {
   municipalRegistration: text("municipal_registration"),
   supplierType: text("supplier_type"), // 'distribuidora', 'importadora', 'fabricante', 'industria', 'representante'
   additionalInfo: text("additional_info"), // Informações Adicionais - campo de texto livre
+  status: text("status").default("ativo"), // 'ativo', 'inativo'
   
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

@@ -4,13 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Link } from 'wouter';
-import { SearchIcon, Building2, Globe, Star, Plus, Eye, Trash2 } from 'lucide-react';
+import { SearchIcon, Building2, Globe, Star, Plus, Eye, Trash2, MapPin, Building } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Supplier } from '@shared/schema';
+import { Supplier, Department } from '@shared/schema';
 
 const MySuppliers = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,6 +22,16 @@ const MySuppliers = () => {
   // Buscar fornecedores
   const { data: suppliers = [], isLoading } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
+  });
+
+  // Buscar departamentos para mostrar categoria
+  const { data: departments = [] } = useQuery<Department[]>({
+    queryKey: ['/api/departments'],
+    queryFn: async () => {
+      const response = await fetch('/api/departments');
+      if (!response.ok) throw new Error('Failed to fetch departments');
+      return response.json();
+    },
   });
 
   // Mutation para deletar fornecedor
@@ -46,8 +57,43 @@ const MySuppliers = () => {
     },
   });
 
+  // Mutation para alterar status
+  const statusMutation = useMutation({
+    mutationFn: async ({ supplierId, status }: { supplierId: number; status: string }) => {
+      return apiRequest(`/api/suppliers/${supplierId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/suppliers'] });
+      toast({
+        title: 'Status atualizado',
+        description: 'O status do fornecedor foi alterado com sucesso.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao atualizar status',
+        description: error.message || 'Não foi possível alterar o status.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const handleDeleteSupplier = (supplierId: number) => {
     deleteMutation.mutate(supplierId);
+  };
+
+  const handleStatusToggle = (supplierId: number, currentStatus: string) => {
+    const newStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo';
+    statusMutation.mutate({ supplierId, status: newStatus });
+  };
+
+  const getCategoryName = (categoryId: number | null) => {
+    if (!categoryId) return "Não informado";
+    const department = departments.find(d => d.id === categoryId);
+    return department?.name || "Não informado";
   };
 
 
@@ -117,7 +163,8 @@ const MySuppliers = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome da Empresa</TableHead>
+                <TableHead>Empresa & Categoria</TableHead>
+                <TableHead>Localização</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -126,20 +173,58 @@ const MySuppliers = () => {
               {filteredSuppliers.map((supplier) => (
                 <TableRow key={supplier.id} className="hover:bg-gray-50">
                   <TableCell>
-                    <div className="font-medium text-gray-900">
-                      {supplier.tradeName}
+                    <div className="space-y-1">
+                      <div className="font-medium text-gray-900">
+                        {supplier.tradeName}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Building className="h-3 w-3" />
+                        {getCategoryName(supplier.categoryId)}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    {supplier.isVerified ? (
-                      <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                        Verificado
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-xs">
-                        Não verificado
-                      </Badge>
-                    )}
+                    <div className="space-y-1">
+                      <div className="text-sm text-gray-900 flex items-center gap-1">
+                        <Globe className="h-3 w-3" />
+                        {supplier.country || "Não informado"}
+                      </div>
+                      <div className="text-sm text-gray-600 flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {supplier.state && supplier.city 
+                          ? `${supplier.city}, ${supplier.state}`
+                          : supplier.state || supplier.city || "Não informado"
+                        }
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={supplier.status === 'ativo'}
+                          onCheckedChange={() => handleStatusToggle(supplier.id, supplier.status || 'ativo')}
+                          disabled={statusMutation.isPending}
+                          className="data-[state=checked]:bg-green-600"
+                        />
+                        <span className="text-sm">
+                          {supplier.status === 'ativo' ? (
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                              Ativo
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 text-xs">
+                              Inativo
+                            </Badge>
+                          )}
+                        </span>
+                      </div>
+                      {supplier.isVerified && (
+                        <Badge variant="outline" className="text-xs">
+                          Verificado
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">

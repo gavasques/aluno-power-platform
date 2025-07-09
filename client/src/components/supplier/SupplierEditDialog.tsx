@@ -49,7 +49,8 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
     municipalRegistration: '',
     supplierType: '',
     description: '',
-    additionalInfo: ''
+    additionalInfo: '',
+    status: 'ativo'
   });
 
   const COUNTRIES = [
@@ -78,7 +79,8 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
         municipalRegistration: supplier.municipalRegistration || '',
         supplierType: supplier.supplierType || '',
         description: supplier.description || '',
-        additionalInfo: supplier.additionalInfo || ''
+        additionalInfo: supplier.additionalInfo || '',
+        status: supplier.status || 'ativo'
       });
     }
   }, [supplier, open]);
@@ -271,6 +273,19 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
               placeholder="Informações adicionais livres sobre o fornecedor (observações, histórico, notas especiais, etc.)"
               rows={3}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="status">Status do Fornecedor</Label>
+            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecionar status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ativo">Ativo</SelectItem>
+                <SelectItem value="inativo">Inativo</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <DialogFooter>

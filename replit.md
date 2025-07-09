@@ -111,6 +111,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 09, 2025 - 03:30 PM**: ✅ SUPPLIERS LIST ENHANCED WITH ADVANCED FIELDS AND STATUS TOGGLE SYSTEM
+  - **Enhanced Table Layout**: "Meus Fornecedores" now shows structured columns (Empresa & Categoria, Localização, Status, Ações)
+  - **Category Display**: Categoria Principal shown with building icon next to company name
+  - **Location Information**: Country (with globe icon) and State/City (with map pin icon) in dedicated column
+  - **Status Toggle System**: Interactive switch to mark suppliers as "Ativo" or "Inativo" with real-time updates
+  - **Visual Status Indicators**: Green badge for "Ativo", gray badge for "Inativo", separate verification badge
+  - **Database Schema Update**: Added status column to suppliers table with 'ativo' default value
+  - **Edit Dialog Integration**: Status field added to SupplierEditDialog with dropdown selection
+  - **Backend Support**: Mutation endpoint for status changes with proper API integration
+  - **User Experience**: Immediate visual feedback with toast notifications and proper loading states
+
 - **January 09, 2025 - 03:00 PM**: ✅ SUPPLIER MANAGEMENT ENHANCEMENT COMPLETED - ALL FIELDS NOW VISIBLE IN VISUALIZATION AND EDITING
   - **Complete Field Visibility**: All supplier fields (Categoria Principal, Estado, Cidade, Informações Adicionais) now appear in both view and edit modes
   - **Enhanced SupplierInfoDisplay**: Modified to always show all fields, even when empty with "Não informado" placeholder
