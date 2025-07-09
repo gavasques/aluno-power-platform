@@ -148,9 +148,10 @@ export const BasicProductForm = ({
             <div>
               <Label className="text-sm font-medium">Marca</Label>
               <Select 
-                value={safeProductData.brand ? safeProductData.brand.toString() : ""} 
+                key={`brand-${safeProductData.brand}`}
+                value={safeProductData.brand || ""} 
                 onValueChange={(value) => {
-                  console.log('Brand change:', value);
+                  console.log('🔥 Brand selection:', value);
                   onInputChange('brand', value);
                 }}
               >
@@ -173,16 +174,17 @@ export const BasicProductForm = ({
                 </p>
               )}
               <p className="text-xs text-muted-foreground mt-1">
-                Debug: {mockBrands?.length || 0} marcas disponíveis
+                Atual: "{safeProductData.brand}" | Disponíveis: {mockBrands?.length || 0}
               </p>
             </div>
 
             <div>
               <Label className="text-sm font-medium">Categoria</Label>
               <Select 
-                value={safeProductData.category ? safeProductData.category.toString() : ""} 
+                key={`category-${safeProductData.category}`}
+                value={safeProductData.category || ""} 
                 onValueChange={(value) => {
-                  console.log('Category change:', value);
+                  console.log('🔥 Category selection:', value);
                   onInputChange('category', value);
                 }}
               >
@@ -198,7 +200,7 @@ export const BasicProductForm = ({
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-1">
-                Debug: {mockCategories?.length || 0} categorias disponíveis
+                Atual: "{safeProductData.category}" | Disponíveis: {mockCategories?.length || 0}
               </p>
             </div>
 

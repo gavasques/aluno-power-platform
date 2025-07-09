@@ -82,11 +82,17 @@ export function useProductForm({
     return Object.keys(newErrors).length === 0;
   };
 
-  const updateField = (field: keyof ProductFormData, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const updateField = (field: string, value: any) => {
+    console.log('🔧 updateField called:', { field, value, currentFormData: formData });
+    
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      console.log('🔧 Updated formData:', updated);
+      return updated;
+    });
 
     // Clear field error when user starts typing
     if (errors[field]) {

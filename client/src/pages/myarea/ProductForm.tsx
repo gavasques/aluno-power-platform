@@ -266,8 +266,10 @@ const ProductForm = () => {
                 <BasicProductForm
                   productData={productData}
                   onInputChange={(field, value) => {
-                    console.log('Field change:', field, value);
+                    console.log('🔥 Field change in ProductForm:', field, value);
+                    console.log('🔥 Current productData before change:', productData);
                     handleInputChange(field, value);
+                    console.log('🔥 Current productData after change:', productData);
                   }}
                   onPhotoUpload={(e) => {
                     const file = e.target.files?.[0];
