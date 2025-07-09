@@ -112,22 +112,25 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 - **January 09, 2025 - 03:30 PM**: ✅ CACHE INVALIDATION ISSUE FIXED - FORMAL IMPORT SIMULATIONS LISTING PROBLEM RESOLVED
-  - **Root Cause Identified**: React Query cache with 5-minute staleTime was preventing new simulations from appearing in listing
+  - **Root Cause Identified**: React Query cache with 5-minute staleTime was preventing simulations from updating in listing after status changes
   - **Solutions Implemented**:
-    - ✅ **Reduced staleTime**: Changed from 5 minutes to 10 seconds in FormalImportSimulationsList.tsx
-    - ✅ **Added gcTime**: 2 minutes garbage collection for better cache management
-    - ✅ **Improved cache invalidation**: Moved queryClient.invalidateQueries to execute immediately after save success
-    - ✅ **Added refresh button**: New "Atualizar" button in filters section with RefreshCw icon
-    - ✅ **Enhanced handleRefresh**: Function that both invalidates and refetches queries
+    - ✅ **Reduced staleTime**: Changed from 5 minutes to 5 seconds for immediate updates
+    - ✅ **Enhanced cache invalidation**: Added `queryClient.refetchQueries()` for forced refresh after save/delete
+    - ✅ **Auto-refresh features**: `refetchOnWindowFocus: true` and `refetchOnMount: true`
+    - ✅ **Visibility listener**: Auto-invalidation when returning to page from simulator
+    - ✅ **Added refresh button**: Manual "Atualizar" button with async invalidation + refetch
+    - ✅ **Improved gcTime**: 2 minutes garbage collection for better cache management
   - **Technical Details**:
-    - Cache invalidation now happens before the navigation timeout
-    - Refresh button shows loading state and spinning icon during refetch
-    - API returns 2 simulations correctly (including newly created "45245q")
+    - Cache invalidation now happens immediately before navigation timeout
+    - useEffect with visibilitychange listener for seamless updates
+    - Forced refresh on page load to always show latest data
+    - API confirmed status update works (PO 4002 = "Concluída" in database)
   - **Benefits**:
+    - Status changes (like marking as "Concluída") appear immediately in listing
     - New simulations appear immediately after creation
-    - Users can manually refresh listing when needed
-    - Better user experience with visual feedback
-    - Consistent cache management across all operations
+    - Automatic refresh when switching between simulator and listing
+    - Manual refresh option for user control
+    - Consistent real-time data across all operations
 
 - **January 09, 2025 - 03:00 PM**: ✅ PHASE 4 COMPLETED - SIMPLES NACIONAL COMPLETO SIMULATOR COMPLETELY REFACTORED - SOLID/DRY/KISS PRINCIPLES FULLY IMPLEMENTED
   - **Complete Modular Architecture Established**: 

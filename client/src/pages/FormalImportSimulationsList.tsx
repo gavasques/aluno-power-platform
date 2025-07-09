@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
@@ -76,11 +76,31 @@ const FormalImportSimulationsList: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Auto-refresh when returning to this page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Force refresh on page load
+    queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [queryClient]);
+
   // Fetch simulations
-  const { data: simulations = [], isLoading, error } = useQuery<FormalImportSimulation[]>({
+  const { data: simulations = [], isLoading, error, refetch } = useQuery<FormalImportSimulation[]>({
     queryKey: ['/api/simulators/formal-import'],
-    staleTime: 10 * 1000, // 10 seconds instead of 5 minutes
+    staleTime: 5 * 1000, // 5 seconds for immediate updates
     gcTime: 2 * 60 * 1000, // 2 minutes garbage collection
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnMount: true, // Always refetch on mount
     onError: (error: any) => {
       console.error('❌ FRONTEND - Erro ao carregar simulações:', error);
     },
@@ -185,9 +205,9 @@ const FormalImportSimulationsList: React.FC = () => {
     setLocation('/simuladores/importacao-formal-direta/nova');
   };
 
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
-    queryClient.refetchQueries({ queryKey: ['/api/simulators/formal-import'] });
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+    await refetch();
   };
 
   if (isLoading) {

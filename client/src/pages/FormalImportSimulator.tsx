@@ -433,8 +433,9 @@ export default function FormalImportSimulator() {
         description: `Código: ${data.codigoSimulacao || data.nome}`
       });
       
-      // Invalidar cache imediatamente
+      // Invalidar cache imediatamente e forçar refetch
       queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+      queryClient.refetchQueries({ queryKey: ['/api/simulators/formal-import'] });
       
       // Voltar para a lista ao invés de navegar para URL específica
       setTimeout(() => {
@@ -527,8 +528,9 @@ export default function FormalImportSimulator() {
         description: "A simulação foi excluída com sucesso"
       });
       
-      // Invalidar cache imediatamente
+      // Invalidar cache imediatamente e forçar refetch
       queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+      queryClient.refetchQueries({ queryKey: ['/api/simulators/formal-import'] });
       
       setTimeout(() => {
         setLocation("/simuladores/importacao-formal-direta");
