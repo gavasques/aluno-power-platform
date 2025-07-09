@@ -124,7 +124,6 @@ export default function SimplesNacional() {
   const [activeSimulation, setActiveSimulation] = useState<SimulacaoCompleta>(defaultSimulation);
   const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
 
   // Queries
@@ -259,24 +258,17 @@ export default function SimplesNacional() {
       <Card className="mb-6">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              {isEditingName ? (
+            <div className="flex items-center space-x-4 flex-1">
+              <div className="flex-1 max-w-md">
+                <Label htmlFor="nomeSimulacao" className="text-sm font-medium">Nome da Simulação</Label>
                 <Input
+                  id="nomeSimulacao"
                   value={activeSimulation.nomeSimulacao}
                   onChange={(e) => updateSimulation('nomeSimulacao', e.target.value)}
-                  onBlur={() => setIsEditingName(false)}
-                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
-                  className="text-lg font-semibold"
-                  autoFocus
+                  className="text-lg font-semibold mt-1"
+                  placeholder="Digite o nome da simulação..."
                 />
-              ) : (
-                <h2 
-                  className="text-lg font-semibold cursor-pointer hover:text-blue-600"
-                  onClick={() => setIsEditingName(true)}
-                >
-                  {activeSimulation.nomeSimulacao}
-                </h2>
-              )}
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
