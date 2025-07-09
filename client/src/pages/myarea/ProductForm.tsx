@@ -100,25 +100,41 @@ const ProductForm = () => {
   
   // Update form data when product details are loaded
   useEffect(() => {
+    console.log('🔥 useEffect channels triggered:', { productDetails, isEditMode });
+    
     if (productDetails && isEditMode) {
+      console.log('🔥 Processing product details for channels...');
+      
       // Update channels if they exist in product data
       if (productDetails.channels) {
+        console.log('🔥 Product has channels:', productDetails.channels);
         const updatedChannels = { ...defaultChannels };
+        
         productDetails.channels.forEach((channel: any) => {
+          console.log('🔥 Processing channel:', channel);
           if (updatedChannels[channel.type]) {
             updatedChannels[channel.type] = {
               enabled: channel.isActive,
               ...channel.data
             };
+            console.log('🔥 Updated channel:', channel.type, updatedChannels[channel.type]);
+          } else {
+            console.log('🔥 Channel type not found in updatedChannels:', channel.type);
           }
         });
+        
+        console.log('🔥 Final updated channels:', updatedChannels);
         setChannels(updatedChannels);
+      } else {
+        console.log('🔥 No channels found in product details');
       }
       
       // Update suppliers if they exist
       if (productDetails.suppliers) {
         setProductSuppliers(productDetails.suppliers);
       }
+    } else {
+      console.log('🔥 Conditions not met for channel processing');
     }
   }, [productDetails, isEditMode]);
   
@@ -201,6 +217,12 @@ const ProductForm = () => {
   console.log('Categories data:', categoriesData);
   console.log('Product details:', productDetails);
   console.log('Current product data form:', productData);
+  console.log('🔥 CHANNELS DEBUG:', {
+    productDetailsChannels: productDetails?.channels,
+    currentChannelsState: channels,
+    defaultChannels,
+    isEditMode
+  });
   
   // Show loading state while fetching product data in edit mode
   if (isEditMode && isLoadingProduct) {
