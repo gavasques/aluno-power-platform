@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,6 +95,25 @@ const ProductRow = ({
   onUpdate: (index: number, field: keyof ProdutoSimulacao, value: any) => void;
   onRemove: (index: number) => void;
 }) => {
+  // Local state for input display values
+  const [unitValueDisplay, setUnitValueDisplay] = useState('');
+  const [weightDisplay, setWeightDisplay] = useState('');
+  const [isUnitValueFocused, setIsUnitValueFocused] = useState(false);
+  const [isWeightFocused, setIsWeightFocused] = useState(false);
+
+  // Update display values when produto changes (but not when focused)
+  useEffect(() => {
+    if (!isUnitValueFocused) {
+      setUnitValueDisplay(produto.valor_unitario_usd === 0 ? '' : produto.valor_unitario_usd.toString());
+    }
+  }, [produto.valor_unitario_usd, isUnitValueFocused]);
+
+  useEffect(() => {
+    if (!isWeightFocused) {
+      setWeightDisplay(produto.peso_bruto_unitario_kg === 0 ? '' : produto.peso_bruto_unitario_kg.toString());
+    }
+  }, [produto.peso_bruto_unitario_kg, isWeightFocused]);
+
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value === '' ? 1 : parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
@@ -103,22 +123,38 @@ const ProductRow = ({
 
   const handleUnitValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow empty string, numbers, and decimal points
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      const numValue = value === '' ? 0 : parseFloat(value);
-      if (!isNaN(numValue) && numValue >= 0) {
-        onUpdate(index, 'valor_unitario_usd', numValue);
+    setUnitValueDisplay(value);
+    
+    // Allow empty string, numbers, and decimal points (both . and ,)
+    if (value === '' || /^\d*[,.]?\d*$/.test(value)) {
+      if (value === '') {
+        onUpdate(index, 'valor_unitario_usd', 0);
+      } else {
+        // Convert Brazilian format (comma) to JavaScript format (dot)
+        const normalizedValue = value.replace(',', '.');
+        const numValue = parseFloat(normalizedValue);
+        if (!isNaN(numValue) && numValue >= 0) {
+          onUpdate(index, 'valor_unitario_usd', numValue);
+        }
       }
     }
   };
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow empty string, numbers, and decimal points
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      const numValue = value === '' ? 0 : parseFloat(value);
-      if (!isNaN(numValue) && numValue >= 0) {
-        onUpdate(index, 'peso_bruto_unitario_kg', numValue);
+    setWeightDisplay(value);
+    
+    // Allow empty string, numbers, and decimal points (both . and ,)
+    if (value === '' || /^\d*[,.]?\d*$/.test(value)) {
+      if (value === '') {
+        onUpdate(index, 'peso_bruto_unitario_kg', 0);
+      } else {
+        // Convert Brazilian format (comma) to JavaScript format (dot)
+        const normalizedValue = value.replace(',', '.');
+        const numValue = parseFloat(normalizedValue);
+        if (!isNaN(numValue) && numValue >= 0) {
+          onUpdate(index, 'peso_bruto_unitario_kg', numValue);
+        }
       }
     }
   };
@@ -145,20 +181,24 @@ const ProductRow = ({
         <Input
           type="text"
           inputMode="decimal"
-          value={produto.valor_unitario_usd.toString()}
+          value={unitValueDisplay}
           onChange={handleUnitValueChange}
+          onFocus={() => setIsUnitValueFocused(true)}
+          onBlur={() => setIsUnitValueFocused(false)}
           className="w-28"
-          placeholder="0.00"
+          placeholder="0,00"
         />
       </td>
       <td className="p-2">
         <Input
           type="text"
           inputMode="decimal"
-          value={produto.peso_bruto_unitario_kg.toString()}
+          value={weightDisplay}
           onChange={handleWeightChange}
+          onFocus={() => setIsWeightFocused(true)}
+          onBlur={() => setIsWeightFocused(false)}
           className="w-28"
-          placeholder="0.000"
+          placeholder="0,000"
         />
       </td>
       <td className="p-2 text-sm">
