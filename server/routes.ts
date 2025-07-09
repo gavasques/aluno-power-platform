@@ -206,17 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // All supplier routes now handled by modular system in server/routes/supplierRoutes.ts
   // Following SOLID/DRY/KISS principles - eliminated code duplication
 
-  // Product Brands endpoints
-  app.get('/api/brands', requireAuth, async (req, res) => {
-    try {
-      const userId = req.user?.id;
-      const suppliers = await storage.getSuppliers(userId);
-      res.json(suppliers);
-    } catch (error) {
-      console.error('Error fetching suppliers:', error);
-      res.status(500).json({ error: 'Failed to fetch suppliers' });
-    }
-  });
+  // Product Brands endpoints removed - now handled at line 558
 
   // Suppliers with pagination and filters
   app.get('/api/suppliers/paginated', async (req, res) => {

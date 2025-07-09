@@ -9,15 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, Trash2, Edit, Building2 } from "lucide-react";
-
-interface Brand {
-  id: number;
-  name: string;
-  userId: number;
-  isGlobal: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Brand } from "@shared/schema";
 
 export default function MyBrands() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
