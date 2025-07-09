@@ -39,13 +39,15 @@ const InformalImportSimulationsList: React.FC = () => {
   const { data: simulations = [], isLoading, error } = useQuery<InformalImportSimulation[]>({
     queryKey: ['/api/simulations/import'],
     staleTime: 5 * 60 * 1000, // 5 minutes
-    onError: (error: any) => {
-      console.error('❌ FRONTEND - Erro ao carregar simulações de importação simplificada:', error);
-    },
-    onSuccess: (data) => {
-      console.log('✅ FRONTEND - Simulações de importação simplificada carregadas:', data?.length || 0);
-    }
   });
+
+  // Log results
+  if (error) {
+    console.error('❌ FRONTEND - Erro ao carregar simulações de importação simplificada:', error);
+  }
+  if (simulations.length > 0) {
+    console.log('✅ FRONTEND - Simulações de importação simplificada carregadas:', simulations.length);
+  }
 
   // Delete simulation mutation
   const deleteMutation = useMutation({
