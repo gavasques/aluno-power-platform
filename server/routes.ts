@@ -6869,5 +6869,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     res.json(testData);
   });
 
+  // Import and register optimized supplier routes
+  try {
+    const { optimizedSupplierRoutes } = await import('./routes/optimizedSupplierRoutes');
+    app.use('/api/suppliers/optimized', optimizedSupplierRoutes);
+    console.log('✅ Optimized supplier routes registered successfully');
+  } catch (error) {
+    console.error('❌ Error registering optimized supplier routes:', error);
+  }
+
   return httpServer;
 }

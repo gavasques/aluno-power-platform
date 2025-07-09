@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { BaseController, ResponseHandler, ValidationHelper } from './BaseController';
+import { BaseController } from './BaseController';
 import { storage } from '../storage';
 import { insertSupplierSchema } from '@shared/schema';
 
@@ -19,15 +19,16 @@ export class SupplierController extends BaseController {
       const userId = (req as any).user?.id;
       
       if (!userId) {
-        ResponseHandler.error(res, 'Authentication required', 401);
+        res.status(401).json({ success: false, error: 'Authentication required' });
         return;
       }
 
-      this.logOperation('GET_ALL_SUPPLIERS', { userId });
+      console.log('GET_ALL_SUPPLIERS', { userId });
       const suppliers = await storage.getSuppliers(userId);
-      ResponseHandler.success(res, suppliers);
+      res.json({ success: true, data: suppliers });
     } catch (error) {
-      this.handleError(error, res, 'GET_ALL_SUPPLIERS');
+      this.logError(error, 'GET_ALL_SUPPLIERS');
+      res.status(500).json({ success: false, error: 'Failed to get suppliers' });
     }
   }
 
