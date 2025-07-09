@@ -8,8 +8,9 @@ import { safeNumber, safeDiv } from '../utils';
  */
 export const useCalculations = (simulation: SimulacaoCompleta): CalculatedResults => {
   return useMemo(() => {
-    const cfg = simulation.configuracoesGerais;
-    const produtos = Array.isArray(simulation.produtos) ? simulation.produtos : [];
+    // Safety checks for undefined objects
+    const cfg = simulation?.configuracoesGerais || {};
+    const produtos = Array.isArray(simulation?.produtos) ? simulation.produtos : [];
 
     // Global calculations
     const peso_bruto_total_simulacao_kg = produtos.reduce((sum, p) => {
@@ -23,9 +24,9 @@ export const useCalculations = (simulation: SimulacaoCompleta): CalculatedResult
     const quantidade_total_itens_simulacao = produtos.reduce((sum, p) => 
       sum + safeNumber(p.quantidade), 0);
 
-    const custo_frete_internacional_total_brl = cfg.moeda_frete_internacional === "USD" 
-      ? cfg.custo_frete_internacional_total_moeda_original * cfg.taxa_cambio_usd_brl
-      : cfg.custo_frete_internacional_total_moeda_original;
+    const custo_frete_internacional_total_brl = (cfg.moeda_frete_internacional === "USD") 
+      ? (cfg.custo_frete_internacional_total_moeda_original || 0) * (cfg.taxa_cambio_usd_brl || 1)
+      : (cfg.custo_frete_internacional_total_moeda_original || 0);
 
     // Calculate per product using helper function
     const produtosCalculados = produtos.map(p => 
@@ -65,38 +66,39 @@ const calculateProductCosts = (
     custo_frete_internacional_total_brl: number;
   }
 ): ProdutoSimulacao => {
-  const peso_bruto_total_produto_kg = safeNumber(produto.quantidade) * safeNumber(produto.peso_bruto_unitario_kg);
-  const valor_total_produto_usd = safeNumber(produto.quantidade) * safeNumber(produto.valor_unitario_usd);
-  const custo_produto_brl = valor_total_produto_usd * cfg.taxa_cambio_usd_brl;
+  const peso_bruto_total_produto_kg = safeNumber(produto?.quantidade) * safeNumber(produto?.peso_bruto_unitario_kg);
+  const valor_total_produto_usd = safeNumber(produto?.quantidade) * safeNumber(produto?.valor_unitario_usd);
+  const custo_produto_brl = valor_total_produto_usd * (cfg?.taxa_cambio_usd_brl || 1);
 
   // Calculate freight cost allocation
   const custo_frete_por_produto_brl = calculateFreightAllocation(
     produto,
-    cfg.metodo_rateio_frete,
+    cfg?.metodo_rateio_frete || 'peso',
     globalTotals,
     { peso_bruto_total_produto_kg, valor_total_produto_usd }
   );
 
   const produto_mais_frete_brl = custo_produto_brl + custo_frete_por_produto_brl;
   const base_calculo_ii_brl = produto_mais_frete_brl;
-  const valor_ii_brl = base_calculo_ii_brl * cfg.aliquota_ii_percentual;
+  const valor_ii_brl = base_calculo_ii_brl * (cfg?.aliquota_ii_percentual || 0);
 
   // Calculate other expenses allocation
   const outras_despesas_rateadas_brl = calculateExpensesAllocation(
     produto,
-    cfg.metodo_rateio_outras_despesas,
-    { ...globalTotals, outras_despesas_aduaneiras_total_brl: cfg.outras_despesas_aduaneiras_total_brl },
+    cfg?.metodo_rateio_outras_despesas || 'peso',
+    { ...globalTotals, outras_despesas_aduaneiras_total_brl: cfg?.outras_despesas_aduaneiras_total_brl || 0 },
     { peso_bruto_total_produto_kg, valor_total_produto_usd }
   );
 
   // ICMS calculation following spreadsheet logic
-  const base_calculo_icms_planilha_brl = (produto_mais_frete_brl + valor_ii_brl) / (1 - cfg.aliquota_icms_percentual);
-  const valor_icms_brl = base_calculo_icms_planilha_brl * cfg.aliquota_icms_percentual;
+  const icmsRate = cfg?.aliquota_icms_percentual || 0;
+  const base_calculo_icms_planilha_brl = icmsRate < 1 ? (produto_mais_frete_brl + valor_ii_brl) / (1 - icmsRate) : produto_mais_frete_brl + valor_ii_brl;
+  const valor_icms_brl = base_calculo_icms_planilha_brl * icmsRate;
 
   // Include outras despesas aduaneiras rateadas in final cost calculation
   const valor_total_produto_impostos_brl = produto_mais_frete_brl + valor_ii_brl + valor_icms_brl + outras_despesas_rateadas_brl;
-  const custo_unitario_sem_imposto_brl = safeDiv(produto_mais_frete_brl + outras_despesas_rateadas_brl, produto.quantidade);
-  const custo_unitario_com_imposto_brl = safeDiv(valor_total_produto_impostos_brl, produto.quantidade);
+  const custo_unitario_sem_imposto_brl = safeDiv(produto_mais_frete_brl + outras_despesas_rateadas_brl, produto?.quantidade || 1);
+  const custo_unitario_com_imposto_brl = safeDiv(valor_total_produto_impostos_brl, produto?.quantidade || 1);
 
   return {
     ...produto,
@@ -141,7 +143,7 @@ const calculateFreightAllocation = (
     
     case "quantidade":
       return globalTotals.quantidade_total_itens_simulacao > 0
-        ? safeDiv(produto.quantidade, globalTotals.quantidade_total_itens_simulacao) * custo_frete_internacional_total_brl
+        ? safeDiv(produto?.quantidade || 0, globalTotals.quantidade_total_itens_simulacao) * custo_frete_internacional_total_brl
         : 0;
     
     default:
@@ -174,7 +176,7 @@ const calculateExpensesAllocation = (
     
     case "quantidade":
       return cfg.quantidade_total_itens_simulacao > 0
-        ? safeDiv(produto.quantidade, cfg.quantidade_total_itens_simulacao) * cfg.outras_despesas_aduaneiras_total_brl
+        ? safeDiv(produto?.quantidade || 0, cfg.quantidade_total_itens_simulacao) * cfg.outras_despesas_aduaneiras_total_brl
         : 0;
     
     default:
@@ -204,7 +206,7 @@ const calculateTotals = (
     total_sim_produto_mais_frete_brl: produtos.reduce((sum, p) => sum + (p.produto_mais_frete_brl || 0), 0),
     total_sim_valor_ii_brl: produtos.reduce((sum, p) => sum + (p.valor_ii_brl || 0), 0),
     total_sim_valor_icms_brl: produtos.reduce((sum, p) => sum + (p.valor_icms_brl || 0), 0),
-    total_sim_outras_despesas_aduaneiras_brl: cfg.outras_despesas_aduaneiras_total_brl,
+    total_sim_outras_despesas_aduaneiras_brl: cfg?.outras_despesas_aduaneiras_total_brl || 0,
   };
 
   const custo_total_importacao_brl = totals.total_sim_produto_mais_frete_brl + 
@@ -213,10 +215,10 @@ const calculateTotals = (
     totals.total_sim_outras_despesas_aduaneiras_brl;
   
   // Additional calculations
-  const peso_total_kg = Number(globalData.peso_bruto_total_simulacao_kg.toFixed(2));
-  const preco_por_kg_usd = safeDiv(cfg.custo_frete_internacional_total_moeda_original, peso_total_kg);
-  const multiplicador_importacao = globalData.valor_fob_total_simulacao_usd > 0 
-    ? custo_total_importacao_brl / (globalData.valor_fob_total_simulacao_usd * cfg.taxa_cambio_usd_brl) 
+  const peso_total_kg = Number((globalData?.peso_bruto_total_simulacao_kg || 0).toFixed(2));
+  const preco_por_kg_usd = safeDiv(cfg?.custo_frete_internacional_total_moeda_original || 0, peso_total_kg);
+  const multiplicador_importacao = globalData?.valor_fob_total_simulacao_usd > 0 
+    ? custo_total_importacao_brl / ((globalData.valor_fob_total_simulacao_usd || 0) * (cfg?.taxa_cambio_usd_brl || 1)) 
     : 0;
 
   return {
