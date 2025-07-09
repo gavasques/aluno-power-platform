@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useLocation } from "wouter";
 import { 
   Table, 
   TableBody, 
@@ -78,6 +79,7 @@ export default function MyProductsList() {
   const { brands } = useBrands();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Debounce search term to avoid excessive re-renders
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -290,7 +292,7 @@ export default function MyProductsList() {
                 <TableHead className="w-[140px] py-4 font-semibold text-gray-700">Marca</TableHead>
                 <TableHead className="w-[120px] text-right py-4 font-semibold text-gray-700">Custo</TableHead>
                 <TableHead className="min-w-[280px] py-4 font-semibold text-gray-700">Canais Ativos</TableHead>
-                <TableHead className="w-[180px] text-center py-4 font-semibold text-gray-700">Ações</TableHead>
+                <TableHead className="w-[200px] text-center py-4 font-semibold text-gray-700">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -453,6 +455,7 @@ export default function MyProductsList() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
+                            <div className="w-2" /> {/* Spacer */}
                             <Button
                               variant="outline"
                               size="sm"
