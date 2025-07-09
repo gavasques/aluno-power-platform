@@ -78,7 +78,7 @@ export default function MyProductsList() {
   const { brands } = useBrands();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   // Debounce search term to avoid excessive re-renders
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -89,13 +89,13 @@ export default function MyProductsList() {
       const brand = brands?.find(b => b.id === product.brandId);
       return brand?.name || '-';
     }
-    
+
     // If brand field contains a number (legacy ID), try to find it
     if (product.brand && !isNaN(Number(product.brand))) {
       const brand = brands?.find(b => b.id === Number(product.brand));
       return brand?.name || product.brand;
     }
-    
+
     // Otherwise return the brand field as is (might be a string name)
     return product.brand || '-';
   };
@@ -140,14 +140,14 @@ export default function MyProductsList() {
 
   const getActiveChannels = (product: any): { channel: any; calculation: ChannelCalculationResult }[] => {
     if (!product.channels) return [];
-    
+
     try {
       const channels = typeof product.channels === 'string' 
         ? JSON.parse(product.channels) 
         : product.channels;
-      
+
       if (!Array.isArray(channels)) return [];
-      
+
       return channels
         .filter((channel: any) => channel.isActive)
         .map((channel: any) => {
@@ -155,7 +155,7 @@ export default function MyProductsList() {
             costItem: parseFloat(product.costItem) || 0,
             taxPercent: parseFloat(product.taxPercent) || 0,
           };
-          
+
           return {
             channel,
             calculation: calculateChannelProfitability(channel.type, channel.data || {}, productBase)
@@ -173,7 +173,7 @@ export default function MyProductsList() {
       console.warn('Products data is not an array:', products);
       return [];
     }
-    
+
     return products.filter((product: Product) =>
       product.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       product.sku?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
@@ -312,7 +312,7 @@ export default function MyProductsList() {
                 currentProducts.map((product: any) => {
                   const activeChannels = getActiveChannels(product);
                   const isExpanded = expandedRows.has(product.id);
-                  
+
                   return (
                     <React.Fragment key={product.id}>
                       <TableRow 
@@ -435,13 +435,13 @@ export default function MyProductsList() {
                           </div>
                         </TableCell>
                       </TableRow>
-                      
+
                       {/* Expanded calculation details */}
                       {isExpanded && activeChannels.length > 0 && (
                         <TableRow key={`${product.id}-details`}>
                           <TableCell colSpan={8} className="bg-gray-50 p-4">
                             <div className="space-y-4">
-                              <h4 className="font-semibold text-sm mb-2">Detalhes dos Cálculos por Canal</h4>
+                              <h4 className="font-semibold text-lg mb-2">Detalhes dos Cálculos por Canal</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {activeChannels.map(({ channel, calculation }, index) => (
                                   <div key={`${product.id}-${channel.type}-${index}`} className="bg-white rounded-lg border p-3 space-y-2">
@@ -459,7 +459,7 @@ export default function MyProductsList() {
                                         {calculation.marginPercent.toFixed(1)}% margem
                                       </Badge>
                                     </div>
-                                    
+
                                     <div className="space-y-1 text-xs">
                                       <div className="flex justify-between">
                                         <span className="text-gray-600">Preço de Venda:</span>
@@ -477,7 +477,7 @@ export default function MyProductsList() {
                                         </span>
                                         <span>{formatBRL(calculation.totalCosts)}</span>
                                       </div>
-                                      
+
                                       {expandedCosts[`${product.id}-${channel.type}`] && (() => {
                                         const costBreakdown = getDetailedCostBreakdown(
                                           channel.type,
@@ -488,7 +488,7 @@ export default function MyProductsList() {
                                           },
                                           product.packCost || 0
                                         );
-                                        
+
                                         return (
                                           <div className="ml-2 mt-1 space-y-1 text-xs border-l-2 border-gray-200 pl-2">
                                             {costBreakdown.map((item: CostBreakdownItem, index: number) => (
@@ -573,7 +573,7 @@ export default function MyProductsList() {
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            
+
             <div className="flex items-center gap-2">
               <Select
                 value={currentPage.toString()}
