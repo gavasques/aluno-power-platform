@@ -284,7 +284,7 @@ export default function MyProductsList() {
             <TableHeader>
               <TableRow className="border-b-2 border-gray-200 bg-gray-50/50">
                 <TableHead className="w-[40px] py-4"></TableHead>
-                <TableHead className="w-[80px] py-4 font-semibold text-gray-700">Foto</TableHead>
+                <TableHead className="w-[90px] py-4 font-semibold text-gray-700">Foto</TableHead>
                 <TableHead className="py-4 font-semibold text-gray-700">Nome do Produto</TableHead>
                 <TableHead className="w-[120px] py-4 font-semibold text-gray-700">SKU</TableHead>
                 <TableHead className="w-[140px] py-4 font-semibold text-gray-700">Marca</TableHead>
@@ -337,10 +337,10 @@ export default function MyProductsList() {
                             <img
                               src={product.photo}
                               alt={product.name}
-                              className="w-16 h-16 object-cover rounded-lg border-2 border-gray-300 shadow-md hover:shadow-lg transition-shadow duration-200"
+                              className="w-20 h-20 object-cover rounded-lg border-2 border-gray-300 shadow-md hover:shadow-lg transition-shadow duration-200"
                             />
                           ) : (
-                            <div className="w-16 h-16 bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-lg border-2 border-gray-300 shadow-md flex items-center justify-center text-xs text-gray-600 font-semibold">
+                            <div className="w-20 h-20 bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-lg border-2 border-gray-300 shadow-md flex items-center justify-center text-xs text-gray-600 font-semibold">
                               SEM FOTO
                             </div>
                           )}
@@ -348,6 +348,13 @@ export default function MyProductsList() {
                         <TableCell className="font-medium py-3">
                           <div>
                             <div className="text-gray-900 font-semibold">{product.name}</div>
+                            {product.category && (
+                              <div className="mt-1 mb-1">
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">
+                                  {product.category}
+                                </span>
+                              </div>
+                            )}
                             <div className="mt-1">
                               <Badge 
                                 variant={product.active ? "default" : "secondary"} 
