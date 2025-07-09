@@ -284,12 +284,12 @@ export default function MyProductsList() {
             <TableHeader>
               <TableRow className="border-b-2 border-gray-200 bg-gray-50/50">
                 <TableHead className="w-[40px] py-4"></TableHead>
-                <TableHead className="w-[60px] py-4 font-semibold text-gray-700">Foto</TableHead>
+                <TableHead className="w-[90px] py-4 font-semibold text-gray-700">Foto</TableHead>
                 <TableHead className="py-4 font-semibold text-gray-700">Nome do Produto</TableHead>
                 <TableHead className="w-[120px] py-4 font-semibold text-gray-700">SKU</TableHead>
                 <TableHead className="w-[140px] py-4 font-semibold text-gray-700">Marca</TableHead>
                 <TableHead className="w-[120px] text-right py-4 font-semibold text-gray-700">Custo</TableHead>
-                <TableHead className="min-w-[320px] py-4 font-semibold text-gray-700">Canais Ativos</TableHead>
+                <TableHead className="min-w-[280px] py-4 font-semibold text-gray-700">Canais Ativos</TableHead>
                 <TableHead className="w-[180px] text-center py-4 font-semibold text-gray-700">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -314,8 +314,9 @@ export default function MyProductsList() {
                   const isExpanded = expandedRows.has(product.id);
 
                   return (
-                    <React.Fragment key={product.id}>
+                    <>
                       <TableRow 
+                        key={product.id}
                         className="cursor-pointer hover:bg-blue-50/30 transition-colors border-b border-gray-100"
                         onClick={() => toggleRowExpansion(product.id)}
                       >
@@ -337,10 +338,10 @@ export default function MyProductsList() {
                             <img
                               src={product.photo}
                               alt={product.name}
-                              className="w-12 h-12 object-cover rounded-lg border border-gray-200"
+                              className="w-20 h-20 object-cover rounded-xl border-2 border-gray-300 shadow-md hover:shadow-lg transition-shadow duration-200"
                             />
                           ) : (
-                            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border border-gray-200 flex items-center justify-center text-xs text-gray-500 font-medium">
+                            <div className="w-20 h-20 bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-xl border-2 border-gray-300 shadow-md flex items-center justify-center text-xs text-gray-600 font-semibold">
                               SEM FOTO
                             </div>
                           )}
@@ -374,15 +375,15 @@ export default function MyProductsList() {
                             <span className="text-gray-400 italic">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="min-w-[320px] py-4">
+                        <TableCell className="min-w-[280px] py-4">
                           {activeChannels.length > 0 ? (
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                               {activeChannels.slice(0, 3).map(({ channel, calculation }, index) => (
                                 <div key={`${product.id}-${channel.id || channel.type}-${index}`} 
-                                     className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-3 border border-gray-200 shadow-sm">
+                                     className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-2 border border-gray-200 shadow-sm max-w-[250px]">
                                   <div className="flex items-center justify-between">
-                                    <div className="flex flex-col">
-                                      <span className="font-semibold text-sm text-gray-900">
+                                    <div className="flex flex-col min-w-0 flex-1">
+                                      <span className="font-semibold text-xs text-gray-900 truncate">
                                         {CHANNEL_NAMES[channel.type] || channel.name}
                                       </span>
                                       <span className="text-xs text-gray-600 font-medium">
@@ -392,7 +393,7 @@ export default function MyProductsList() {
                                     <Badge 
                                       variant="outline"
                                       className={cn(
-                                        "text-xs px-3 py-1 font-bold border-0 rounded-full shadow-sm",
+                                        "text-xs px-2 py-1 font-bold border-0 rounded-full shadow-sm ml-2 flex-shrink-0",
                                         calculation.marginPercent >= 30 ? "bg-green-100 text-green-800" :
                                         calculation.marginPercent >= 20 ? "bg-blue-100 text-blue-800" :
                                         calculation.marginPercent >= 10 ? "bg-yellow-100 text-yellow-800" :
@@ -406,16 +407,16 @@ export default function MyProductsList() {
                               ))}
                               {activeChannels.length > 3 && (
                                 <div className="text-center">
-                                  <Badge variant="secondary" className="text-xs px-3 py-1 bg-gray-200 text-gray-700">
+                                  <Badge variant="secondary" className="text-xs px-2 py-1 bg-gray-200 text-gray-700">
                                     +{activeChannels.length - 3} outros canais
                                   </Badge>
                                 </div>
                               )}
                             </div>
                           ) : (
-                            <div className="text-center py-6">
-                              <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
-                                <span className="text-sm text-gray-500 italic">Nenhum canal ativo</span>
+                            <div className="text-center py-4">
+                              <div className="bg-gray-50 rounded-lg p-3 border-2 border-dashed border-gray-300 max-w-[200px] mx-auto">
+                                <span className="text-xs text-gray-500 italic">Nenhum canal ativo</span>
                               </div>
                             </div>
                           )}
@@ -571,7 +572,7 @@ export default function MyProductsList() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </React.Fragment>
+                    </>
                   );
                 })
               )}
