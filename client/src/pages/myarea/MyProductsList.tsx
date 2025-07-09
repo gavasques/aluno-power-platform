@@ -413,8 +413,7 @@ export default function MyProductsList() {
                               className="p-2 h-8"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // Preview product - open in new tab
-                                window.open(`/minha-area/produtos/${product.id}/preview`, '_blank');
+                                setLocation(`/minha-area/produtos/${product.id}`);
                               }}
                               title="Visualizar página"
                             >
