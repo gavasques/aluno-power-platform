@@ -1243,16 +1243,31 @@ export class DatabaseStorage implements IStorage {
       brandId = brandIdFromText;
     }
 
-    // Return with proper brand mapping
+    // Return with proper brand mapping and channels
     return {
       ...product,
       brandId: brandId,
+      brandName: brandName,
       // For the brand field, use brandId if available, otherwise keep legacy value
-      brand: brandId ? brandId.toString() : product.brand || ''
+      brand: brandId ? brandId.toString() : product.brand || '',
+      // Parse channels from JSON string to array
+      channels: product.channels ? (typeof product.channels === 'string' ? JSON.parse(product.channels) : product.channels) : []
     };
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
+    // Check for duplicate SKU
+    if (product.sku) {
+      const [existingProduct] = await db
+        .select()
+        .from(products)
+        .where(eq(products.sku, product.sku));
+      
+      if (existingProduct) {
+        throw new Error('Já existe um produto com este SKU');
+      }
+    }
+
     const [created] = await db
       .insert(products)
       .values({
@@ -1273,6 +1288,18 @@ export class DatabaseStorage implements IStorage {
     
     console.log('🔄 [UPDATE PRODUCT] Current costItem:', currentProduct?.costItem);
     console.log('🔄 [UPDATE PRODUCT] New costItem:', product.costItem);
+    
+    // Check for duplicate SKU if SKU is being updated
+    if (product.sku && product.sku !== currentProduct?.sku) {
+      const [existingProduct] = await db
+        .select()
+        .from(products)
+        .where(eq(products.sku, product.sku));
+      
+      if (existingProduct) {
+        throw new Error('Já existe um produto com este SKU');
+      }
+    }
     
     // Update the product
     const [updated] = await db

@@ -11,6 +11,7 @@ export interface ProductFormData {
   tags: string[];
   isActive: boolean;
   userId: number;
+  sku: string;
 }
 
 export interface UseProductFormProps {
@@ -37,6 +38,7 @@ export function useProductForm({
     tags: [],
     isActive: true,
     userId: 0,
+    sku: '',
     ...initialData
   });
 
@@ -55,20 +57,13 @@ export function useProductForm({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
+    // Only Name and SKU are required
     if (!formData.name.trim()) {
       newErrors.name = 'Nome é obrigatório';
     }
 
-    if (!formData.description.trim()) {
-      newErrors.description = 'Descrição é obrigatória';
-    }
-
-    if (!formData.category.trim()) {
-      newErrors.category = 'Categoria é obrigatória';
-    }
-
-    if (formData.price <= 0) {
-      newErrors.price = 'Preço deve ser maior que zero';
+    if (!formData.sku || !formData.sku.trim()) {
+      newErrors.sku = 'SKU é obrigatório';
     }
 
     setErrors(newErrors);
@@ -160,9 +155,7 @@ export function useProductForm({
   };
 
   const isValid = formData.name.trim() && 
-                 formData.description.trim() && 
-                 formData.category.trim() && 
-                 formData.price > 0;
+                 formData.sku && formData.sku.trim();
 
   return {
     formData,

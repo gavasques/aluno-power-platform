@@ -239,6 +239,16 @@ export abstract class BaseController {
       });
       return;
     }
+
+    // Handle duplicate SKU error
+    if (error.message && error.message.includes('Já existe um produto com este SKU')) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
     
     // Handle specific application errors
     if (error.message && error.message.includes('not found')) {

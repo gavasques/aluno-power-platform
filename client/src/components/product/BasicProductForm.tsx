@@ -134,7 +134,7 @@ export const BasicProductForm = ({
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Marca *</Label>
+              <Label className="text-sm font-medium">Marca</Label>
               <div className="relative mt-1">
                 <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -147,7 +147,7 @@ export const BasicProductForm = ({
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Categoria *</Label>
+              <Label className="text-sm font-medium">Categoria</Label>
               <Select value={safeProductData.category} onValueChange={(value) => onInputChange('category', value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecione uma categoria" />
@@ -161,7 +161,7 @@ export const BasicProductForm = ({
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Fornecedor Principal *</Label>
+              <Label className="text-sm font-medium">Fornecedor Principal</Label>
               <Select value={safeProductData.supplierId} onValueChange={(value) => onInputChange('supplierId', value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecione um fornecedor" />
@@ -175,7 +175,7 @@ export const BasicProductForm = ({
             </div>
 
             <div>
-              <Label className="text-sm font-medium">SKU</Label>
+              <Label className="text-sm font-medium">SKU *</Label>
               <div className="relative mt-1">
                 <Code className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input

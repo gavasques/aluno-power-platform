@@ -82,7 +82,7 @@ export class ProductController extends BaseController {
       
       ResponseHandler.success(res, product);
     } catch (error) {
-      this.handleError(res, error, 'Failed to fetch product');
+      this.handleError(error, res, 'Failed to fetch product');
     }
   }
 
@@ -129,7 +129,7 @@ export class ProductController extends BaseController {
       ResponseHandler.created(res, product);
     } catch (error) {
       console.error('Error creating product:', error);
-      this.handleError(res, error, 'Failed to create product');
+      this.handleError(error, res, 'Failed to create product');
     }
   }
 
@@ -196,7 +196,7 @@ export class ProductController extends BaseController {
       ResponseHandler.success(res, product);
     } catch (error) {
       console.error('Error updating product:', error);
-      this.handleError(res, error, 'Failed to update product');
+      this.handleError(error, res, 'Failed to update product');
     }
   }
 
