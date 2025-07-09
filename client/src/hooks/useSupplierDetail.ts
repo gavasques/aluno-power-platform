@@ -193,11 +193,11 @@ export const useSupplierDetail = (supplierId: string) => {
 
   return {
     // Data
-    supplier: supplierQuery.data,
-    brands: brandQuery.data || [],
-    contacts: contactQuery.data || [],
-    conversations: conversationQuery.data || [],
-    files: fileQuery.data || [],
+    supplier: supplierQuery.data?.data || supplierQuery.data,
+    brands: brandQuery.data?.data || [],
+    contacts: contactQuery.data?.data || [],
+    conversations: conversationQuery.data?.data || [],
+    files: fileQuery.data?.data || [],
     
     // Loading states
     isLoading: supplierQuery.isLoading,
