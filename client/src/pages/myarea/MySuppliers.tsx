@@ -154,8 +154,7 @@ const MySuppliers = () => {
           <span>{suppliers.length} fornecedores</span>
           <span>•</span>
           <span>{filteredSuppliers.length} resultados</span>
-          <span>•</span>
-          <span>{suppliers.filter(s => s.isVerified).length} verificados</span>
+
         </div>
 
         {/* Lista de Fornecedores */}
@@ -219,11 +218,7 @@ const MySuppliers = () => {
                           )}
                         </span>
                       </div>
-                      {supplier.isVerified && (
-                        <Badge variant="outline" className="text-xs">
-                          Verificado
-                        </Badge>
-                      )}
+
                     </div>
                   </TableCell>
                   <TableCell>
