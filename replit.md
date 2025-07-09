@@ -111,6 +111,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 09, 2025 - 03:30 PM**: ✅ CACHE INVALIDATION ISSUE FIXED - FORMAL IMPORT SIMULATIONS LISTING PROBLEM RESOLVED
+  - **Root Cause Identified**: React Query cache with 5-minute staleTime was preventing new simulations from appearing in listing
+  - **Solutions Implemented**:
+    - ✅ **Reduced staleTime**: Changed from 5 minutes to 10 seconds in FormalImportSimulationsList.tsx
+    - ✅ **Added gcTime**: 2 minutes garbage collection for better cache management
+    - ✅ **Improved cache invalidation**: Moved queryClient.invalidateQueries to execute immediately after save success
+    - ✅ **Added refresh button**: New "Atualizar" button in filters section with RefreshCw icon
+    - ✅ **Enhanced handleRefresh**: Function that both invalidates and refetches queries
+  - **Technical Details**:
+    - Cache invalidation now happens before the navigation timeout
+    - Refresh button shows loading state and spinning icon during refetch
+    - API returns 2 simulations correctly (including newly created "45245q")
+  - **Benefits**:
+    - New simulations appear immediately after creation
+    - Users can manually refresh listing when needed
+    - Better user experience with visual feedback
+    - Consistent cache management across all operations
+
 - **January 09, 2025 - 03:00 PM**: ✅ PHASE 4 COMPLETED - SIMPLES NACIONAL COMPLETO SIMULATOR COMPLETELY REFACTORED - SOLID/DRY/KISS PRINCIPLES FULLY IMPLEMENTED
   - **Complete Modular Architecture Established**: 
     - ✅ **types.ts**: Comprehensive TypeScript interfaces for MesSimulacao, NovoMesForm, FaixaAliquota, ResumoSimulacao, ValidationResult

@@ -42,7 +42,8 @@ import {
   Package,
   FileText,
   Search,
-  Filter
+  Filter,
+  RefreshCw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
@@ -78,7 +79,8 @@ const FormalImportSimulationsList: React.FC = () => {
   // Fetch simulations
   const { data: simulations = [], isLoading, error } = useQuery<FormalImportSimulation[]>({
     queryKey: ['/api/simulators/formal-import'],
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 10 * 1000, // 10 seconds instead of 5 minutes
+    gcTime: 2 * 60 * 1000, // 2 minutes garbage collection
     onError: (error: any) => {
       console.error('❌ FRONTEND - Erro ao carregar simulações:', error);
     },
@@ -181,6 +183,11 @@ const FormalImportSimulationsList: React.FC = () => {
 
   const handleNewSimulation = () => {
     setLocation('/simuladores/importacao-formal-direta/nova');
+  };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+    queryClient.refetchQueries({ queryKey: ['/api/simulators/formal-import'] });
   };
 
   if (isLoading) {
@@ -301,6 +308,15 @@ const FormalImportSimulationsList: React.FC = () => {
             size="sm"
           >
             Concluído
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            size="sm"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Atualizar
           </Button>
         </div>
       </div>

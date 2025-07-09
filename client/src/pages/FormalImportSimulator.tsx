@@ -433,12 +433,13 @@ export default function FormalImportSimulator() {
         description: `Código: ${data.codigoSimulacao || data.nome}`
       });
       
+      // Invalidar cache imediatamente
+      queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+      
       // Voltar para a lista ao invés de navegar para URL específica
       setTimeout(() => {
         setLocation("/simuladores/importacao-formal-direta");
       }, 1000);
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
     },
     onError: (error) => {
       console.error('Erro ao salvar simulação:', error);
@@ -525,10 +526,13 @@ export default function FormalImportSimulator() {
         title: "Simulação excluída",
         description: "A simulação foi excluída com sucesso"
       });
+      
+      // Invalidar cache imediatamente
+      queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
+      
       setTimeout(() => {
         setLocation("/simuladores/importacao-formal-direta");
       }, 1000);
-      queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
     },
     onError: (error) => {
       console.error('Erro ao excluir simulação:', error);
