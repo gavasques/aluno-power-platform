@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Edit, Building2, Save, X } from 'lucide-react';
 import { useSupplierDetail } from '@/hooks/useSupplierDetail';
 import { SupplierInfoDisplay } from '@/components/supplier/SupplierInfoDisplay';
-import { SupplierInfoForm } from '@/components/supplier/SupplierInfoForm';
+// SupplierInfoForm removido - agora usando edição inline
 import { 
   BrandList, 
   ContactList, 
@@ -14,7 +14,7 @@ import {
   FileList 
 } from '@/components/supplier/SupplierTabsManager';
 import { BrandDialog, ContactDialog, ConversationDialog } from '@/components/supplier/SupplierDialogs';
-import { SupplierEditDialog } from '@/components/supplier/SupplierEditDialog';
+// SupplierEditDialog removido - agora usando edição inline
 import { FileUploadDialog } from '@/components/supplier/FileUploadDialog';
 import type { Supplier } from '@shared/schema';
 
@@ -46,10 +46,8 @@ const SupplierDetailRefactored = () => {
     isUploadingFile
   } = useSupplierDetail(supplierId);
 
-  // Local state for editing
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<Supplier>>({});
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  // Estados antigos de edição removidos - agora usando edição inline por seção
+  // showEditDialog removido - agora usando edição inline
   const [editingConversation, setEditingConversation] = useState<any>(null);
 
   // Dialog states
@@ -66,39 +64,7 @@ const SupplierDetailRefactored = () => {
     editConversation: false
   });
 
-  const handleEditStart = () => {
-    console.log('🔥 EDIT BUTTON CLICKED - Opening Dialog', { 
-      supplier: supplier?.tradeName, 
-      showEditDialog 
-    });
-    
-    if (!supplier) {
-      console.error('❌ No supplier data available');
-      return;
-    }
-    
-    setShowEditDialog(true);
-    console.log('✅ Edit dialog opened');
-  };
-
-  const handleEditCancel = () => {
-    setEditForm({});
-    setIsEditing(false);
-  };
-
-  const handleEditSave = async () => {
-    try {
-      await updateSupplier(editForm);
-      setIsEditing(false);
-      setEditForm({});
-    } catch (error) {
-      console.error('Error updating supplier:', error);
-    }
-  };
-
-  const handleFormChange = (updates: Partial<Supplier>) => {
-    setEditForm(prev => ({ ...prev, ...updates }));
-  };
+  // Handlers antigos de edição removidos - agora usando edição inline por seção
 
   // Dialog handlers
   const handleAddBrand = () => setBrandDialogOpen(true);
@@ -179,20 +145,12 @@ const SupplierDetailRefactored = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               {supplier.tradeName}
-              {isEditing && <span className="ml-2 text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded">Editando</span>}
             </h1>
             <p className="text-gray-600">{supplier.corporateName}</p>
           </div>
         </div>
         
-        <Button 
-          onClick={handleEditStart} 
-          disabled={isUpdating}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <Edit className="h-4 w-4 mr-2" />
-          Editar Informações
-        </Button>
+        {/* Botão de edição removido - agora usando edição inline por seção */}
       </div>
 
       {/* Main Content */}
@@ -217,18 +175,8 @@ const SupplierDetailRefactored = () => {
 
             {/* Information Tab */}
             <TabsContent value="info" className="mt-6">
-              {isEditing ? (
-                <SupplierInfoForm
-                  supplier={supplier}
-                  editForm={editForm}
-                  onFormChange={handleFormChange}
-                  onSave={handleEditSave}
-                  onCancel={handleEditCancel}
-                  isLoading={isUpdating}
-                />
-              ) : (
-                <SupplierInfoDisplay supplier={supplier} />
-              )}
+              {/* Sempre usa SupplierInfoDisplay com edição inline */}
+              <SupplierInfoDisplay supplier={supplier} />
             </TabsContent>
 
             {/* Conversations Tab */}
@@ -318,13 +266,7 @@ const SupplierDetailRefactored = () => {
         isLoading={isUploadingFile}
       />
 
-      <SupplierEditDialog
-        open={showEditDialog}
-        onClose={() => setShowEditDialog(false)}
-        onSave={updateSupplier}
-        supplier={supplier}
-        isLoading={isUpdating}
-      />
+      {/* SupplierEditDialog removido - agora usando edição inline */}
     </div>
   );
 };
