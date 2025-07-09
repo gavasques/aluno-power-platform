@@ -1,4 +1,7 @@
 // Utility functions for Informal Import Simulation
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { SimulacaoCompleta, ValidationResult, ValidationError, CalculatedResults } from './types';
 
 /**
  * Brazilian number formatting utilities
@@ -36,20 +39,54 @@ export const parseBrazilianNumber = (value: string): number => {
 export const generateProductId = (): string => Date.now().toString();
 
 /**
- * Validation utilities
+ * Enhanced validation utilities
  */
-export const validateSimulation = (simulation: { nomeSimulacao: string; produtos: any[] }): string[] => {
-  const errors: string[] = [];
+
+export const validateSimulation = (simulation: SimulacaoCompleta): ValidationResult => {
+  const errors: ValidationError[] = [];
   
   if (!simulation.nomeSimulacao?.trim()) {
-    errors.push('Nome da simulação é obrigatório');
+    errors.push({
+      field: 'nomeSimulacao',
+      message: 'Nome da simulação é obrigatório',
+      type: 'required'
+    });
   }
   
   if (!simulation.produtos?.length) {
-    errors.push('Pelo menos um produto deve ser adicionado');
+    errors.push({
+      field: 'produtos',
+      message: 'Pelo menos um produto deve ser adicionado',
+      type: 'required'
+    });
   }
   
-  return errors;
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings: []
+  };
+};
+
+/**
+ * Deep clone utility for immutable updates
+ */
+export const deepClone = <T>(obj: T): T => {
+  return JSON.parse(JSON.stringify(obj));
+};
+
+/**
+ * Debounce utility for performance optimization
+ */
+export const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): ((...args: Parameters<T>) => void) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(null, args), wait);
+  };
 };
 
 /**
@@ -117,4 +154,166 @@ export const formatWeight = (value: number): string => {
 
 export const formatPercentage = (value: number): string => {
   return `${formatBrazilianNumber(value * 100, 2)}%`;
+};
+
+/**
+ * Enhanced PDF generation with professional formatting
+ */
+export const generatePDF = (simulation: SimulacaoCompleta, calculatedResults: CalculatedResults): void => {
+  try {
+    const doc = new jsPDF();
+    let yPosition = 20;
+
+    // Title
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Relatório de Simulação de Importação', 105, yPosition, { align: 'center' });
+    yPosition += 20;
+
+    // Simulation info
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Simulação: ${simulation.nomeSimulacao}`, 20, yPosition);
+    yPosition += 8;
+    
+    if (simulation.nomeFornecedor) {
+      doc.text(`Fornecedor: ${simulation.nomeFornecedor}`, 20, yPosition);
+      yPosition += 8;
+    }
+
+    if (simulation.observacoes) {
+      doc.text(`Observações: ${simulation.observacoes}`, 20, yPosition);
+      yPosition += 8;
+    }
+
+    yPosition += 10;
+
+    // Configuration summary
+    doc.setFont('helvetica', 'bold');
+    doc.text('Configurações:', 20, yPosition);
+    yPosition += 8;
+
+    doc.setFont('helvetica', 'normal');
+    const config = simulation.configuracoesGerais;
+    doc.text(`Taxa USD/BRL: ${formatBrazilianNumber(config.taxa_cambio_usd_brl)}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Alíquota II: ${formatPercentage(config.aliquota_ii_percentual)}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Alíquota ICMS: ${formatPercentage(config.aliquota_icms_percentual)}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Frete: ${formatCurrency(config.custo_frete_internacional_total_moeda_original)} ${config.moeda_frete_internacional}`, 20, yPosition);
+    yPosition += 10;
+
+    // Products table
+    if (calculatedResults.produtos.length > 0) {
+      const tableData = calculatedResults.produtos.map(produto => [
+        produto.descricao_produto,
+        produto.quantidade.toString(),
+        formatCurrency(produto.custo_unitario_com_imposto_brl || 0),
+        formatCurrency(produto.valor_total_produto_impostos_brl || 0)
+      ]);
+
+      autoTable(doc, {
+        head: [['Produto', 'Qtd', 'Custo Unit. c/ Imp.', 'Total c/ Impostos']],
+        body: tableData,
+        startY: yPosition,
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [66, 139, 202] },
+        alternateRowStyles: { fillColor: [245, 245, 245] }
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 15;
+    }
+
+    // Totals summary
+    if (yPosition > 250) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumo Financeiro:', 20, yPosition);
+    yPosition += 10;
+
+    doc.setFont('helvetica', 'normal');
+    const totals = calculatedResults.totals;
+    doc.text(`Valor FOB Total: ${formatCurrency(totals.valor_fob_total_usd)} USD`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Custo Total Importação: ${formatCurrency(totals.custo_total_importacao_brl)}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Peso Total: ${formatWeight(totals.peso_total_kg)}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Multiplicador: ${formatBrazilianNumber(totals.multiplicador_importacao, 2)}x`, 20, yPosition);
+
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(
+        `Gerado em ${new Date().toLocaleDateString('pt-BR')} - Página ${i} de ${pageCount}`,
+        105,
+        290,
+        { align: 'center' }
+      );
+    }
+
+    // Save file
+    const fileName = `simulacao-importacao-${simulation.nomeSimulacao?.replace(/[^a-zA-Z0-9]/g, '-') || 'simulacao'}-${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
+  } catch (error) {
+    console.error('Erro ao gerar PDF:', error);
+    throw error;
+  }
+};
+
+/**
+ * Enhanced CSV export with better formatting
+ */
+export const exportToCSVEnhanced = (produtos: any[], simulationName: string, totals?: any): void => {
+  try {
+    const headers = [
+      "Descrição", "Quantidade", "Valor Unit. USD", "Peso Unit. kg", 
+      "Custo Produto BRL", "Frete BRL", "Produto+Frete BRL", "II BRL", 
+      "ICMS BRL", "Total c/ Impostos BRL", "Custo Unit. s/ Imposto BRL", "Custo Unit. c/ Imposto BRL"
+    ];
+
+    const rows = produtos.map(convertProductToCSVRow);
+
+    // Add totals row if provided
+    if (totals) {
+      rows.push([
+        "TOTAL",
+        totals.total_sim_quantidade_itens.toString(),
+        "",
+        formatBrazilianNumber(totals.peso_total_kg, 3),
+        formatBrazilianNumber(totals.total_sim_custo_produto_brl),
+        "",
+        formatBrazilianNumber(totals.total_sim_produto_mais_frete_brl),
+        formatBrazilianNumber(totals.total_sim_valor_ii_brl),
+        formatBrazilianNumber(totals.total_sim_valor_icms_brl),
+        formatBrazilianNumber(totals.custo_total_importacao_brl),
+        "",
+        ""
+      ]);
+    }
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${simulationName}-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Erro ao exportar CSV:', error);
+    throw error;
+  }
 };

@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 
-// Modular imports
-import { SimulacaoCompleta, ConfiguracoesGerais, ProdutoSimulacao, DEFAULT_CONFIG, DEFAULT_PRODUCT } from './types';
+// Enhanced modular imports with specialized hooks
+import { 
+  SimulacaoCompleta, 
+  DEFAULT_SIMULATION,
+  SimulationEventHandlers
+} from './types';
 import { useCalculations } from './hooks/useCalculations';
 import { useSimulationAPI } from './hooks/useSimulationAPI';
-import { generateProductId, exportToCSV, validateSimulation } from './utils';
+import { useSimulationHandlers } from './hooks/useSimulationHandlers';
+import { useUIState } from './hooks/useUIState';
+import { useValidation } from './hooks/useValidation';
 
 // UI Components
 import { SimulationHeader } from './components/SimulationHeader';
@@ -17,222 +21,140 @@ import { ProductTable } from './components/ProductTable';
 import { SummaryPanel } from './components/SummaryPanel';
 
 /**
- * Refactored Informal Import Simulation Component
- * Following SOLID principles with modular architecture
+ * Enhanced Refactored Informal Import Simulation Component
+ * Following SOLID principles with deep modular architecture
+ * Phase 3 - Complete separation of concerns with specialized hooks
  */
 export default function ImportacaoSimplificadaRefactored() {
-  // API hooks
+  // Core state management
+  const [activeSimulation, setActiveSimulation] = useState<SimulacaoCompleta>(DEFAULT_SIMULATION);
+  const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
+
+  // Specialized hooks for different concerns
+  const { uiState, setUIState, actions: uiActions } = useUIState();
   const { useSimulations, useSaveSimulation, useDeleteSimulation } = useSimulationAPI();
   const { data: simulations = [], isLoading } = useSimulations();
   const saveMutation = useSaveSimulation();
   const deleteMutation = useDeleteSimulation();
 
-  // State management
-  const [activeSimulation, setActiveSimulation] = useState<SimulacaoCompleta>({
-    nomeSimulacao: "Nova Simulação",
-    nomeFornecedor: "",
-    observacoes: "",
-    configuracoesGerais: DEFAULT_CONFIG,
-    produtos: []
-  });
-  
-  const [selectedSimulationId, setSelectedSimulationId] = useState<number | null>(null);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [showLoadDialog, setShowLoadDialog] = useState(false);
-
-  // Business logic hook
+  // Business logic hooks
   const calculatedResults = useCalculations(activeSimulation);
+  const validation = useValidation(activeSimulation);
 
-  // Event handlers
-  const handleSimulationChange = (updates: Partial<SimulacaoCompleta>) => {
-    setActiveSimulation(prev => ({ ...prev, ...updates }));
-  };
+  // Enhanced event handlers using specialized hook
+  const eventHandlers: SimulationEventHandlers = useSimulationHandlers(
+    activeSimulation,
+    setActiveSimulation,
+    setUIState,
+    uiActions.setSelectedSimulationId,
+    saveMutation,
+    calculatedResults
+  );
 
-  const handleConfigChange = (field: keyof ConfiguracoesGerais, value: any) => {
-    setActiveSimulation(prev => ({
-      ...prev,
-      configuracoesGerais: { ...prev.configuracoesGerais, [field]: value }
-    }));
-  };
-
-  const handleAddProduct = () => {
-    const newProduct: ProdutoSimulacao = {
-      ...DEFAULT_PRODUCT,
-      id_produto_interno: generateProductId(),
-    };
-    setActiveSimulation(prev => ({
-      ...prev,
-      produtos: [...prev.produtos, newProduct]
-    }));
-  };
-
-  const handleUpdateProduct = (index: number, field: keyof ProdutoSimulacao, value: any) => {
-    setActiveSimulation(prev => ({
-      ...prev,
-      produtos: prev.produtos.map((p, i) => 
-        i === index ? { ...p, [field]: value } : p
-      )
-    }));
-  };
-
-  const handleRemoveProduct = (index: number) => {
-    setActiveSimulation(prev => ({
-      ...prev,
-      produtos: prev.produtos.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleSave = () => {
-    const errors = validateSimulation(activeSimulation);
-    if (errors.length > 0) {
-      // Show validation errors
-      return;
-    }
-    setShowSaveDialog(true);
-  };
-
-  const handleConfirmSave = () => {
-    saveMutation.mutate(activeSimulation, {
-      onSuccess: (savedSimulation) => {
-        if (savedSimulation) {
-          setActiveSimulation({
-            ...savedSimulation,
-            nomeFornecedor: savedSimulation.nomeFornecedor || "",
-            observacoes: savedSimulation.observacoes || "",
-          });
-          setSelectedSimulationId(savedSimulation.id);
+  // Enhanced save confirmation with validation
+  const handleConfirmSave = useMemo(() => {
+    return () => {
+      saveMutation.mutate(activeSimulation, {
+        onSuccess: (savedSimulation) => {
+          if (savedSimulation) {
+            setActiveSimulation({
+              ...savedSimulation,
+              nomeFornecedor: savedSimulation.nomeFornecedor || "",
+              observacoes: savedSimulation.observacoes || "",
+            });
+            uiActions.setSelectedSimulationId(savedSimulation.id);
+          }
+          uiActions.closeSaveDialog();
+        },
+        onError: () => {
+          // Error handling is managed by the API hook
         }
-        setShowSaveDialog(false);
-      }
-    });
-  };
-
-  const handleLoadSimulation = (simulation: any) => {
-    setActiveSimulation({
-      ...simulation,
-      id: simulation.id,
-      nomeSimulacao: simulation.nomeSimulacao || "Nova Simulação",
-      nomeFornecedor: simulation.nomeFornecedor || "",
-      observacoes: simulation.observacoes || "",
-      configuracoesGerais: simulation.configuracoesGerais || DEFAULT_CONFIG,
-      produtos: simulation.produtos || []
-    });
-    setSelectedSimulationId(simulation.id);
-    setShowLoadDialog(false);
-  };
-
-  const handleNewSimulation = () => {
-    setActiveSimulation({
-      nomeSimulacao: "Nova Simulação",
-      nomeFornecedor: "",
-      observacoes: "",
-      configuracoesGerais: DEFAULT_CONFIG,
-      produtos: [],
-      id: undefined
-    });
-    setSelectedSimulationId(null);
-  };
-
-  const handleExportCSV = () => {
-    exportToCSV(calculatedResults.produtos, activeSimulation.nomeSimulacao);
-  };
-
-  const handleExportPDF = () => {
-    try {
-      const doc = new jsPDF();
-      
-      // Title
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Relatório de Simulação de Importação', 105, 30, { align: 'center' });
-      
-      // Simulation info
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Simulação: ${activeSimulation.nomeSimulacao}`, 20, 50);
-      
-      if (activeSimulation.nomeFornecedor) {
-        doc.text(`Fornecedor: ${activeSimulation.nomeFornecedor}`, 20, 60);
-      }
-
-      // Add products table
-      const tableData = calculatedResults.produtos.map(p => [
-        p.descricao_produto,
-        p.quantidade.toString(),
-        `$${p.valor_unitario_usd.toFixed(2)}`,
-        `${p.peso_bruto_unitario_kg.toFixed(3)} kg`,
-        `R$ ${(p.custo_unitario_com_imposto_brl || 0).toFixed(2)}`,
-      ]);
-
-      autoTable(doc, {
-        head: [['Produto', 'Qtd', 'Valor Unit. USD', 'Peso Unit.', 'Custo Unit. Final']],
-        body: tableData,
-        startY: 80,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [66, 139, 202] }
       });
+    };
+  }, [activeSimulation, saveMutation, setActiveSimulation, uiActions]);
 
-      // Add totals
-      const finalY = (doc as any).lastAutoTable?.finalY || 100;
-      doc.text(`Total Geral: R$ ${calculatedResults.totals.custo_total_importacao_brl.toFixed(2)}`, 20, finalY + 20);
-
-      // Save file
-      const fileName = `simulacao-importacao-${activeSimulation.nomeSimulacao?.replace(/[^a-zA-Z0-9]/g, '-') || 'simulacao'}-${new Date().toISOString().split('T')[0]}.pdf`;
-      doc.save(fileName);
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-    }
-  };
+  // Performance optimization with memoized component props
+  const componentProps = useMemo(() => ({
+    simulation: activeSimulation,
+    calculatedResults,
+    validation,
+    isLoading: isLoading || saveMutation.isPending || deleteMutation.isPending,
+    simulations,
+    selectedSimulationId
+  }), [
+    activeSimulation, 
+    calculatedResults, 
+    validation, 
+    isLoading, 
+    saveMutation.isPending, 
+    deleteMutation.isPending, 
+    simulations, 
+    selectedSimulationId
+  ]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <SimulationHeader
-        simulation={activeSimulation}
-        selectedSimulationId={selectedSimulationId}
-        onSimulationChange={handleSimulationChange}
-        onSave={handleSave}
-        onLoad={() => setShowLoadDialog(true)}
-        onNewSimulation={handleNewSimulation}
-        onExportPDF={handleExportPDF}
-        onExportCSV={handleExportCSV}
+        simulation={componentProps.simulation}
+        selectedSimulationId={componentProps.selectedSimulationId}
+        onSimulationChange={eventHandlers.onSimulationChange}
+        onSave={eventHandlers.onSave}
+        onLoad={uiActions.openLoadDialog}
+        onNewSimulation={eventHandlers.onNew}
+        onExportPDF={eventHandlers.onExportPDF}
+        onExportCSV={eventHandlers.onExportCSV}
+        validation={validation}
       />
 
       <ConfigurationPanel
-        config={activeSimulation.configuracoesGerais}
-        onConfigChange={handleConfigChange}
+        config={componentProps.simulation.configuracoesGerais}
+        onConfigChange={eventHandlers.onConfigChange}
+        validation={validation}
       />
 
       <ProductTable
-        produtos={calculatedResults.produtos}
-        onAddProduct={handleAddProduct}
-        onUpdateProduct={handleUpdateProduct}
-        onRemoveProduct={handleRemoveProduct}
+        produtos={componentProps.calculatedResults.produtos}
+        onAddProduct={eventHandlers.onProductAdd}
+        onUpdateProduct={eventHandlers.onProductUpdate}
+        onRemoveProduct={eventHandlers.onProductRemove}
+        validation={validation}
       />
 
-      <SummaryPanel totals={calculatedResults.totals} />
+      <SummaryPanel 
+        totals={componentProps.calculatedResults.totals} 
+        validation={validation}
+      />
 
-      {/* Save Dialog */}
-      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+      {/* Enhanced Save Dialog with validation feedback */}
+      <Dialog open={uiState.showSaveDialog} onOpenChange={uiActions.closeSaveDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Salvar Simulação</DialogTitle>
             <DialogDescription>
-              Deseja salvar a simulação "{activeSimulation.nomeSimulacao}"?
+              Deseja salvar a simulação "{componentProps.simulation.nomeSimulacao}"?
+              {!validation.isValid && (
+                <div className="mt-2 text-red-600 text-sm">
+                  Atenção: Existem {validation.errors.length} erro(s) de validação.
+                </div>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+            <Button variant="outline" onClick={uiActions.closeSaveDialog}>
               Cancelar
             </Button>
-            <Button onClick={handleConfirmSave} disabled={saveMutation.isPending}>
+            <Button 
+              onClick={handleConfirmSave} 
+              disabled={saveMutation.isPending || !validation.isValid}
+            >
               {saveMutation.isPending ? "Salvando..." : "Salvar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Load Dialog */}
-      <Dialog open={showLoadDialog} onOpenChange={setShowLoadDialog}>
+      {/* Enhanced Load Dialog */}
+      <Dialog open={uiState.showLoadDialog} onOpenChange={uiActions.closeLoadDialog}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Carregar Simulação</DialogTitle>
@@ -241,38 +163,69 @@ export default function ImportacaoSimplificadaRefactored() {
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-96 overflow-y-auto">
-            {isLoading ? (
-              <div className="text-center py-4">Carregando simulações...</div>
-            ) : simulations.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                Nenhuma simulação salva encontrada
+            {componentProps.isLoading ? (
+              <div className="flex justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>
             ) : (
               <div className="space-y-2">
-                {simulations.map((sim: any) => (
+                {componentProps.simulations.map((sim: any) => (
                   <div
                     key={sim.id}
-                    className="p-3 border rounded cursor-pointer hover:bg-muted"
-                    onClick={() => handleLoadSimulation(sim)}
+                    className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => eventHandlers.onLoad(sim)}
                   >
                     <div className="font-medium">{sim.nomeSimulacao}</div>
-                    {sim.nomeFornecedor && (
-                      <div className="text-sm text-muted-foreground">
-                        Fornecedor: {sim.nomeFornecedor}
-                      </div>
-                    )}
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-sm text-gray-500">
                       {sim.produtos?.length || 0} produtos • 
-                      Modificado: {new Date(sim.dataLastModified).toLocaleDateString()}
+                      {sim.nomeFornecedor ? ` Fornecedor: ${sim.nomeFornecedor}` : ' Sem fornecedor'}
                     </div>
                   </div>
                 ))}
+                {componentProps.simulations.length === 0 && (
+                  <div className="text-center text-gray-500 py-8">
+                    Nenhuma simulação salva encontrada.
+                  </div>
+                )}
               </div>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowLoadDialog(false)}>
+            <Button variant="outline" onClick={uiActions.closeLoadDialog}>
               Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enhanced Delete Confirmation Dialog */}
+      <Dialog open={uiState.showDeleteConfirm} onOpenChange={uiActions.closeDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Esta ação não pode ser desfeita. A simulação será permanentemente removida.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={uiActions.closeDeleteConfirm}>
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => {
+                if (selectedSimulationId) {
+                  deleteMutation.mutate(selectedSimulationId, {
+                    onSuccess: () => {
+                      uiActions.closeDeleteConfirm();
+                      uiActions.setSelectedSimulationId(null);
+                    }
+                  });
+                }
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
             </Button>
           </DialogFooter>
         </DialogContent>
