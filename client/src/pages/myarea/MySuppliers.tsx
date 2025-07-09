@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Link } from 'wouter';
-import { SearchIcon, Building2, Globe, Star, Plus, Eye, Trash2, MapPin, Building } from 'lucide-react';
+import { SearchIcon, Building2, Globe, Star, Plus, Eye, Trash2, MapPin, Building, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { Supplier, Department } from '@shared/schema';
@@ -16,6 +17,12 @@ import { Supplier, Department } from '@shared/schema';
 const MySuppliers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [countryFilter, setCountryFilter] = useState('');
+  const [stateFilter, setStateFilter] = useState('');
+  const [contactFilter, setContactFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -98,13 +105,42 @@ const MySuppliers = () => {
 
 
 
-  // Filtros simplificados
-  const filteredSuppliers = suppliers.filter(supplier => {
-    const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesSearch;
-  });
+  // Filtros avançados
+  const filteredSuppliers = useMemo(() => {
+    return suppliers.filter(supplier => {
+      const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesCategory = !categoryFilter || supplier.categoryId === parseInt(categoryFilter);
+      const matchesCountry = !countryFilter || supplier.country?.toLowerCase().includes(countryFilter.toLowerCase());
+      const matchesState = !stateFilter || supplier.state?.toLowerCase().includes(stateFilter.toLowerCase());
+      const matchesContact = !contactFilter || 
+        supplier.commercialEmail?.toLowerCase().includes(contactFilter.toLowerCase()) ||
+        supplier.supportEmail?.toLowerCase().includes(contactFilter.toLowerCase()) ||
+        supplier.phone0800Sales?.includes(contactFilter) ||
+        supplier.phone0800Support?.includes(contactFilter);
+      
+      return matchesSearch && matchesCategory && matchesCountry && matchesState && matchesContact;
+    });
+  }, [suppliers, searchTerm, categoryFilter, countryFilter, stateFilter, contactFilter]);
+
+  // Paginação
+  const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
+  const paginatedSuppliers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredSuppliers.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredSuppliers, currentPage, itemsPerPage]);
+
+  // Opções únicas para filtros
+  const uniqueCountries = useMemo(() => {
+    const countries = suppliers.map(s => s.country).filter(Boolean);
+    return [...new Set(countries)].sort();
+  }, [suppliers]);
+
+  const uniqueStates = useMemo(() => {
+    const states = suppliers.map(s => s.state).filter(Boolean);
+    return [...new Set(states)].sort();
+  }, [suppliers]);
 
   if (isLoading) {
     return (
@@ -137,8 +173,9 @@ const MySuppliers = () => {
         </div>
 
         {/* Filtros */}
-        <div className="mb-6 flex gap-4 flex-wrap">
-          <div className="relative flex-1 min-w-80">
+        <div className="mb-6 space-y-4">
+          {/* Busca */}
+          <div className="relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Buscar por nome da empresa..."
@@ -147,14 +184,116 @@ const MySuppliers = () => {
               className="pl-10"
             />
           </div>
+
+          {/* Filtros Avançados */}
+          <div className="flex gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Filtros:</span>
+            </div>
+            
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Todas as categorias" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todas as categorias</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept.id} value={String(dept.id)}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Todos os países" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos os países</SelectItem>
+                {uniqueCountries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={stateFilter} onValueChange={setStateFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Todos os estados" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos os estados</SelectItem>
+                {uniqueStates.map((state) => (
+                  <SelectItem key={state} value={state}>
+                    {state}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Input
+              placeholder="Filtrar por contato (email/telefone)"
+              value={contactFilter}
+              onChange={(e) => setContactFilter(e.target.value)}
+              className="w-64"
+            />
+
+            {(categoryFilter || countryFilter || stateFilter || contactFilter) && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setCategoryFilter('');
+                  setCountryFilter('');
+                  setStateFilter('');
+                  setContactFilter('');
+                  setCurrentPage(1);
+                }}
+              >
+                Limpar Filtros
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* Estatísticas Simples */}
-        <div className="mb-6 flex gap-4 text-sm text-gray-600">
-          <span>{suppliers.length} fornecedores</span>
-          <span>•</span>
-          <span>{filteredSuppliers.length} resultados</span>
-
+        {/* Estatísticas e Paginação */}
+        <div className="mb-6 flex justify-between items-center">
+          <div className="flex gap-4 text-sm text-gray-600">
+            <span>{suppliers.length} fornecedores</span>
+            <span>•</span>
+            <span>{filteredSuppliers.length} resultados</span>
+            <span>•</span>
+            <span>Página {currentPage} de {totalPages}</span>
+          </div>
+          
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Anterior
+              </Button>
+              <span className="text-sm text-gray-500">
+                {currentPage} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Próxima
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Lista de Fornecedores */}
@@ -169,7 +308,7 @@ const MySuppliers = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredSuppliers.map((supplier) => (
+              {paginatedSuppliers.map((supplier) => (
                 <TableRow key={supplier.id} className="hover:bg-gray-50">
                   <TableCell>
                     <div className="space-y-1">
@@ -269,6 +408,59 @@ const MySuppliers = () => {
           </Table>
         </Card>
 
+        {/* Paginação inferior */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex justify-center">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Anterior
+              </Button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNumber = i + 1;
+                  return (
+                    <Button
+                      key={pageNumber}
+                      variant={currentPage === pageNumber ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNumber)}
+                    >
+                      {pageNumber}
+                    </Button>
+                  );
+                })}
+                {totalPages > 5 && (
+                  <>
+                    <span className="px-2">...</span>
+                    <Button
+                      variant={currentPage === totalPages ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(totalPages)}
+                    >
+                      {totalPages}
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Próxima
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Mensagem quando não há resultados */}
         {filteredSuppliers.length === 0 && (
           <div className="text-center py-12">
@@ -277,7 +469,9 @@ const MySuppliers = () => {
               Nenhum fornecedor encontrado
             </h3>
             <p className="text-gray-600 mb-4">
-              {searchTerm ? 'Tente ajustar seus filtros de busca.' : 'Você ainda não possui fornecedores cadastrados.'}
+              {searchTerm || categoryFilter || countryFilter || stateFilter || contactFilter
+                ? 'Tente ajustar seus filtros de busca.' 
+                : 'Você ainda não possui fornecedores cadastrados.'}
             </p>
             <Button>
               <Building2 className="h-4 w-4 mr-2" />
