@@ -27,7 +27,7 @@ const MySuppliers = () => {
   const queryClient = useQueryClient();
 
   // Buscar fornecedores
-  const { data: suppliers = [], isLoading } = useQuery<Supplier[]>({
+  const { data: suppliersResponse, isLoading } = useQuery({
     queryKey: ['/api/suppliers'],
     queryFn: async () => {
       const response = await fetch('/api/suppliers', {
@@ -36,10 +36,16 @@ const MySuppliers = () => {
         },
       });
       if (!response.ok) throw new Error('Failed to fetch suppliers');
-      const data = await response.json();
-      return data.data || data; // Extract data field if it exists, otherwise return whole response
+      return response.json();
     },
   });
+
+  // Extract suppliers array from API response
+  const suppliers: Supplier[] = Array.isArray(suppliersResponse) 
+    ? suppliersResponse 
+    : (suppliersResponse?.data && Array.isArray(suppliersResponse.data) 
+        ? suppliersResponse.data 
+        : []);
 
   // Buscar departamentos para mostrar categoria
   const { data: departments = [] } = useQuery<Department[]>({
@@ -117,6 +123,10 @@ const MySuppliers = () => {
 
   // Filtros avançados
   const filteredSuppliers = useMemo(() => {
+    if (!Array.isArray(suppliers)) {
+      console.warn('Suppliers is not an array:', suppliers);
+      return [];
+    }
     return suppliers.filter(supplier => {
       const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -143,11 +153,13 @@ const MySuppliers = () => {
 
   // Opções únicas para filtros
   const uniqueCountries = useMemo(() => {
+    if (!Array.isArray(suppliers)) return [];
     const countries = suppliers.map(s => s.country).filter(Boolean);
     return [...new Set(countries)].sort();
   }, [suppliers]);
 
   const uniqueStates = useMemo(() => {
+    if (!Array.isArray(suppliers)) return [];
     const states = suppliers.map(s => s.state).filter(Boolean);
     return [...new Set(states)].sort();
   }, [suppliers]);
