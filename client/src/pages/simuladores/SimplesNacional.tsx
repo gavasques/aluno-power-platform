@@ -25,6 +25,24 @@ const formatCurrency = (value: number): string => {
   })}`;
 };
 
+// Formatação para campos de entrada de moeda
+const formatCurrencyInput = (value: number): string => {
+  if (value === 0) return '';
+  return `R$ ${value.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+};
+
+// Converte string de moeda para número
+const parseCurrencyInput = (value: string): number => {
+  if (!value) return 0;
+  // Remove R$, espaços e pontos (separadores de milhar), troca vírgula por ponto
+  const cleanValue = value.replace(/R\$\s?/g, '').replace(/\./g, '').replace(/,/g, '.');
+  const numValue = parseFloat(cleanValue);
+  return isNaN(numValue) ? 0 : numValue;
+};
+
 const formatPercent = (value: number): string => {
   return (value * 100).toLocaleString('pt-BR', {
     minimumFractionDigits: 2,
@@ -276,12 +294,10 @@ export default function SimplesNacional() {
               <Label htmlFor="faturamento12meses">Faturamento dos últimos 12 meses (R$)</Label>
               <Input
                 id="faturamento12meses"
-                type="number"
-                placeholder="0,00"
-                value={activeSimulation.faturamento12Meses || ''}
-                onChange={(e) => updateSimulation('faturamento12Meses', parseFloat(e.target.value) || 0)}
-                min="0"
-                step="0.01"
+                type="text"
+                placeholder="R$ 0,00"
+                value={formatCurrencyInput(activeSimulation.faturamento12Meses)}
+                onChange={(e) => updateSimulation('faturamento12Meses', parseCurrencyInput(e.target.value))}
               />
               <p className="text-xs text-muted-foreground">
                 Valor que determina a faixa de alíquota
@@ -292,12 +308,10 @@ export default function SimplesNacional() {
               <Label htmlFor="faturamentoSemST">Faturamento do mês sem ST (R$)</Label>
               <Input
                 id="faturamentoSemST"
-                type="number"
-                placeholder="0,00"
-                value={activeSimulation.faturamentoSemST || ''}
-                onChange={(e) => updateSimulation('faturamentoSemST', parseFloat(e.target.value) || 0)}
-                min="0"
-                step="0.01"
+                type="text"
+                placeholder="R$ 0,00"
+                value={formatCurrencyInput(activeSimulation.faturamentoSemST)}
+                onChange={(e) => updateSimulation('faturamentoSemST', parseCurrencyInput(e.target.value))}
               />
               <p className="text-xs text-muted-foreground">
                 Faturamento mensal sem Substituição Tributária
@@ -308,12 +322,10 @@ export default function SimplesNacional() {
               <Label htmlFor="faturamentoComST">Faturamento do mês com ST (R$)</Label>
               <Input
                 id="faturamentoComST"
-                type="number"
-                placeholder="0,00"
-                value={activeSimulation.faturamentoComST || ''}
-                onChange={(e) => updateSimulation('faturamentoComST', parseFloat(e.target.value) || 0)}
-                min="0"
-                step="0.01"
+                type="text"
+                placeholder="R$ 0,00"
+                value={formatCurrencyInput(activeSimulation.faturamentoComST)}
+                onChange={(e) => updateSimulation('faturamentoComST', parseCurrencyInput(e.target.value))}
               />
               <p className="text-xs text-muted-foreground">
                 Faturamento mensal com Substituição Tributária
