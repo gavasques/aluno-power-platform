@@ -14,6 +14,7 @@ import materialRoutes from './materialRoutes';
 import materialCategoryRoutes from './materialCategoryRoutes';
 import materialTypeRoutes from './materialTypeRoutes';
 import productRoutes from './productRoutes';
+import { optimizedProductRoutes } from './optimizedProductRoutes';
 import dashboardRoutes from './dashboard';
 import stripeRoutes from './stripe';
 import { permissionRoutes } from './permissions';
@@ -41,6 +42,9 @@ export function registerModularRoutes(app: Express): void {
   
   // PHASE 4: Products Domain Modularization - SOLID/DRY/KISS
   app.use('/api/products', productRoutes);
+  
+  // Optimized Products Routes - Enterprise-level performance for 800,000+ records
+  app.use('/api/products', optimizedProductRoutes);
   
   // User Dashboard Routes - Complete Dashboard System
   app.use('/api/dashboard', dashboardRoutes);
@@ -79,5 +83,6 @@ export {
   materialRoutes,
   materialCategoryRoutes,
   materialTypeRoutes,
-  productRoutes
+  productRoutes,
+  optimizedProductRoutes
 };
