@@ -166,7 +166,7 @@ export default function SimuladoresIndex() {
           const IconComponent = item.icon;
           
           return (
-            <Card key={item.id} className="hover:shadow-lg transition-shadow">
+            <Card key={item.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
@@ -187,12 +187,12 @@ export default function SimuladoresIndex() {
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <CardDescription className="text-sm leading-relaxed">
+              <CardContent className="flex flex-col flex-1 space-y-4">
+                <CardDescription className="text-sm leading-relaxed flex-1">
                   {item.description}
                 </CardDescription>
                 
-                <Button asChild className="w-full" disabled={!item.isAvailable}>
+                <Button asChild className="w-full mt-auto" disabled={!item.isAvailable}>
                   <Link to={item.href}>
                     <Calculator className="w-4 h-4 mr-2" />
                     {item.isAvailable ? 'Simular' : 'Em breve'}
