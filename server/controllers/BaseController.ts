@@ -222,4 +222,49 @@ export abstract class BaseController {
       console.log(message, details || '');
     }
   }
+
+  /**
+   * Handle error with standardized response
+   */
+  protected handleError(error: any, res: Response, operation: string): void {
+    this.logError(error, operation);
+    
+    // Handle validation errors
+    if (error.name === 'ZodError') {
+      res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: error.errors,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+    
+    // Handle specific application errors
+    if (error.message && error.message.includes('not found')) {
+      res.status(404).json({
+        success: false,
+        error: error.message || 'Resource not found',
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+    
+    // Handle authentication errors
+    if (error.message && error.message.includes('authentication')) {
+      res.status(401).json({
+        success: false,
+        error: 'Authentication required',
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+    
+    // Generic server error
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      timestamp: new Date().toISOString(),
+    });
+  }
 }

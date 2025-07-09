@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { BaseController } from './BaseController';
 import { storage } from '../storage';
 import { insertSupplierSchema } from '@shared/schema';
+import { ValidationHelper } from '../utils/ValidationHelper';
+import { ResponseHandler } from '../utils/ResponseHandler';
 
 /**
  * Supplier Controller - Single Responsibility Principle (SRP)
@@ -41,7 +43,7 @@ export class SupplierController extends BaseController {
       const limit = parseInt(req.query.limit as string) || 10;
 
       this.logOperation('GET_PAGINATED_SUPPLIERS', { page, limit });
-      const result = await storage.getPaginatedSuppliers(page, limit);
+      const result = await storage.getSuppliersWithPagination({ page, limit });
       ResponseHandler.success(res, result);
     } catch (error) {
       this.handleError(error, res, 'GET_PAGINATED_SUPPLIERS');

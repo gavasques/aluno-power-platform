@@ -41,11 +41,25 @@ const MySuppliers = () => {
   });
 
   // Extract suppliers array from API response
-  const suppliers: Supplier[] = Array.isArray(suppliersResponse) 
-    ? suppliersResponse 
-    : (suppliersResponse?.data && Array.isArray(suppliersResponse.data) 
-        ? suppliersResponse.data 
-        : []);
+  const suppliers: Supplier[] = useMemo(() => {
+    if (!suppliersResponse) return [];
+    
+    if (Array.isArray(suppliersResponse)) {
+      return suppliersResponse;
+    }
+    
+    if (suppliersResponse?.data && Array.isArray(suppliersResponse.data)) {
+      return suppliersResponse.data;
+    }
+    
+    // Handle case where response is wrapped with success flag
+    if (suppliersResponse?.success && suppliersResponse?.data) {
+      return Array.isArray(suppliersResponse.data) ? suppliersResponse.data : [];
+    }
+    
+    console.warn('Unexpected suppliers response structure:', suppliersResponse);
+    return [];
+  }, [suppliersResponse]);
 
   // Buscar departamentos para mostrar categoria
   const { data: departments = [] } = useQuery<Department[]>({
