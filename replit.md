@@ -111,23 +111,32 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 09, 2025 - 08:55 PM**: ✅ PRODUCT FORM DATA SOURCE CORRECTIONS - CATEGORY AND BRAND FIELDS FIXED
+- **January 09, 2025 - 09:09 PM**: ✅ PRODUCT FORM DATA SOURCE CORRECTIONS - CATEGORY AND BRAND FIELDS FIXED
   - **Category Field Correction**:
     - ✅ **ProductForm.tsx**: Changed from `/api/categories` to `/api/departments` for product categories
     - ✅ **AmazonListingOptimizerForm.tsx**: Updated to use `/api/departments` for product categorization
     - ✅ **Consistent data sourcing**: All product category fields now pull from Departments table as requested
-  - **Brand Field Enhancement**:
-    - ✅ **Data prioritization**: Modified mapping to prioritize brandId over legacy brand field
-    - ✅ **Brand display improvement**: Enhanced styling in product listing with font-weight and proper formatting
-    - ✅ **Brand name resolution**: Improved getBrandName() function to handle both brandId and legacy brand fields
-  - **Frontend Integration**:
-    - Both category and brand fields now correctly pull from "Departamentos" and "Minhas Marcas" tables respectively
-    - Proper data mapping ensures backward compatibility with existing products
-    - Enhanced visual feedback in product listing with consistent brand name display
+  - **Brand Field Complete Overhaul**:
+    - ✅ **BasicProductForm.tsx**: Changed from text input to Select dropdown component
+    - ✅ **ProductForm.tsx**: Added brands query to fetch user's personal brands from `/api/brands`
+    - ✅ **Data mapping improvement**: Modified brand mapping to prioritize brandId over legacy brand field
+    - ✅ **User guidance**: Added message directing users to "Minha Área → Marcas" when no brands are available
+    - ✅ **Backward compatibility**: Proper handling of legacy brand data for existing products
+  - **Frontend Integration Complete**:
+    - Brand dropdown now pulls exclusively from user's personal brands table
+    - Category dropdown shows department names from correct Departamentos table
+    - Proper data mapping ensures smooth transition for existing products
+    - Enhanced user experience with clear guidance for brand management
+  - **Technical Implementation**:
+    - Added Authorization header to brands API request
+    - Updated BasicProductForm interface to accept mockBrands prop
+    - Improved data mapping logic to handle brandId vs legacy brand field
+    - Enhanced user guidance with clear instructions for brand setup
   - **Benefits Delivered**:
-    - Category dropdown now shows department names from correct table
-    - Brand field correctly displays brand names from user's brand management
+    - Brand field now correctly pulls from user's personal brands (/minha-area/marcas)
+    - Category dropdown shows department names from correct table
     - Consistent data architecture across all product-related components
+    - Clear user guidance for setting up brands when none exist
     - Improved data integrity and user experience
 
 - **January 09, 2025 - 07:45 PM**: ✅ COMPLETE INLINE EDITING SYSTEM IMPLEMENTED - MODAL-FREE SUPPLIER MANAGEMENT

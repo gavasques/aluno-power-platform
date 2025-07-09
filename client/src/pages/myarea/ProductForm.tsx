@@ -42,7 +42,7 @@ const ProductForm = () => {
     ean: productDetails.ean || '',
     dimensions: productDetails.dimensions || { length: 0, width: 0, height: 0 },
     weight: parseFloat(productDetails.weight) || 0,
-    brand: productDetails.brandId?.toString() || productDetails.brand || '',
+    brand: productDetails.brandId ? productDetails.brandId.toString() : (productDetails.brand || ''),
     category: productDetails.category || '',
     supplierId: productDetails.supplierId?.toString() || '',
     ncm: productDetails.ncm || '',
@@ -120,7 +120,7 @@ const ProductForm = () => {
     handleInputChange('imageUrl', imageUrl);
   };
 
-  // Fetch suppliers and categories
+  // Fetch suppliers, categories and brands
   const { data: suppliersData } = useQuery({
     queryKey: ['/api/suppliers'],
     queryFn: async () => {
@@ -139,8 +139,35 @@ const ProductForm = () => {
     },
   });
 
+  const { data: brandsData } = useQuery({
+    queryKey: ['/api/brands'],
+    queryFn: async () => {
+      const response = await fetch('/api/brands', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch brands');
+      return response.json();
+    },
+  });
+
+  const { data: brandsData } = useQuery({
+    queryKey: ['/api/brands'],
+    queryFn: async () => {
+      const response = await fetch('/api/brands', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch brands');
+      return response.json();
+    },
+  });
+
   const suppliers = suppliersData?.data || [];
   const categories = categoriesData || [];
+  const brands = brandsData || [];
   
   // Show loading state while fetching product data in edit mode
   if (isEditMode && isLoadingProduct) {
@@ -212,6 +239,7 @@ const ProductForm = () => {
                   }}
                   mockSuppliers={suppliers}
                   mockCategories={categories}
+                  mockBrands={brands}
                 />
               </div>
             </div>

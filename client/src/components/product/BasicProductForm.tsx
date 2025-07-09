@@ -30,6 +30,7 @@ interface BasicProductFormProps {
   onPhotoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   mockSuppliers: Array<{ id: string; tradeName: string }>;
   mockCategories: Array<{ id: string; name: string }>;
+  mockBrands?: Array<{ id: string; tradeName: string }>;
   onOpenDescriptions?: () => void;
 }
 
@@ -39,6 +40,7 @@ export const BasicProductForm = ({
   onPhotoUpload, 
   mockSuppliers = [], 
   mockCategories = [],
+  mockBrands = [],
   onOpenDescriptions
 }: BasicProductFormProps) => {
   // Ensure productData has all required fields with defaults
@@ -135,15 +137,25 @@ export const BasicProductForm = ({
 
             <div>
               <Label className="text-sm font-medium">Marca</Label>
-              <div className="relative mt-1">
-                <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={safeProductData.brand}
-                  onChange={(e) => onInputChange('brand', e.target.value)}
-                  placeholder="Marca do produto"
-                  className="pl-10"
-                />
-              </div>
+              <Select value={safeProductData.brand} onValueChange={(value) => onInputChange('brand', value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Selecione uma marca" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockBrands?.length > 0 ? (
+                    mockBrands.map(brand => (
+                      <SelectItem key={brand.id} value={brand.id.toString()}>{brand.tradeName}</SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-brand" disabled>Nenhuma marca cadastrada</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              {mockBrands?.length === 0 && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Cadastre suas marcas em <strong>Minha Área → Marcas</strong>
+                </p>
+              )}
             </div>
 
             <div>
