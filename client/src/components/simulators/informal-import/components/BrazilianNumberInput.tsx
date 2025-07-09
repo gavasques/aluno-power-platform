@@ -65,12 +65,13 @@ export const BrazilianNumberInput = ({
   return (
     <Input
       id={id}
-      className={className}
+      className={`${className} [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]`}
       value={displayValue}
       onChange={handleChange}
       onFocus={handleFocus}
       onBlur={handleBlur}
       placeholder={placeholder}
+      inputMode="decimal"
     />
   );
 };

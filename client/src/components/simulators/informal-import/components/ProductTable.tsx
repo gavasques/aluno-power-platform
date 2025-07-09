@@ -102,16 +102,24 @@ const ProductRow = ({
   };
 
   const handleUnitValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-    if (!isNaN(value) && value >= 0) {
-      onUpdate(index, 'valor_unitario_usd', value);
+    const value = e.target.value;
+    // Allow empty string, numbers, and decimal points
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      const numValue = value === '' ? 0 : parseFloat(value);
+      if (!isNaN(numValue) && numValue >= 0) {
+        onUpdate(index, 'valor_unitario_usd', numValue);
+      }
     }
   };
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-    if (!isNaN(value) && value >= 0) {
-      onUpdate(index, 'peso_bruto_unitario_kg', value);
+    const value = e.target.value;
+    // Allow empty string, numbers, and decimal points
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      const numValue = value === '' ? 0 : parseFloat(value);
+      if (!isNaN(numValue) && numValue >= 0) {
+        onUpdate(index, 'peso_bruto_unitario_kg', numValue);
+      }
     }
   };
 
@@ -130,27 +138,27 @@ const ProductRow = ({
           min="1"
           value={produto.quantidade.toString()}
           onChange={handleQuantityChange}
-          className="w-20"
+          className="w-20 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
         />
       </td>
       <td className="p-2">
         <Input
-          type="number"
-          min="0"
-          step="0.01"
+          type="text"
+          inputMode="decimal"
           value={produto.valor_unitario_usd.toString()}
           onChange={handleUnitValueChange}
           className="w-28"
+          placeholder="0.00"
         />
       </td>
       <td className="p-2">
         <Input
-          type="number"
-          min="0"
-          step="0.001"
+          type="text"
+          inputMode="decimal"
           value={produto.peso_bruto_unitario_kg.toString()}
           onChange={handleWeightChange}
           className="w-28"
+          placeholder="0.000"
         />
       </td>
       <td className="p-2 text-sm">
