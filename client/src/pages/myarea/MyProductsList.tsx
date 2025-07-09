@@ -32,8 +32,7 @@ import {
   ChevronUp,
   TrendingUp,
   TrendingDown,
-  ShoppingBag,
-  Store
+  Eye
 } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
@@ -43,8 +42,6 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { SalesChannel, PricingCalculation } from "@/types/pricing";
 import { Product } from "@shared/schema";
-import BasicInfoEditor from "@/components/product/BasicInfoEditor";
-import { ChannelsEditor } from "@/components/product/ChannelsEditor";
 import { useQueryClient } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 50;
@@ -76,8 +73,6 @@ export default function MyProductsList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-  const [channelsEditorOpen, setChannelsEditorOpen] = useState(false);
-  const [channelsEditorProductId, setChannelsEditorProductId] = useState<number | null>(null);
   const [expandedCosts, setExpandedCosts] = useState<Record<string, boolean>>({});
   const { products, isLoading, error, deleteProduct } = useProducts();
   const { brands } = useBrands();
@@ -398,55 +393,43 @@ export default function MyProductsList() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="grid grid-cols-2 gap-1 w-20">
-                            <BasicInfoEditor 
-                              productId={product.id.toString()}
-                              trigger={
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="p-2 h-8 w-8"
-                                  onClick={(e) => e.stopPropagation()}
-                                  title="Editar Informações Básicas"
-                                >
-                                  <ShoppingBag className="h-4 w-4" />
-                                </Button>
-                              }
-                            />
+                          <div className="flex gap-1">
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="p-2 h-8 w-8"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setChannelsEditorProductId(product.id);
-                                setChannelsEditorOpen(true);
-                              }}
-                              title="Editar Canais de Venda"
-                            >
-                              <Store className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-2 h-8 w-8"
+                              className="p-2 h-8"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEdit(product.id);
                               }}
-                              title="Editar Produto Completo"
+                              title="Editar informações"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="h-4 w-4 mr-1" />
+                              <span className="text-xs">Editar informações</span>
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="p-2 h-8 w-8 text-red-600 hover:text-red-700"
+                              className="p-2 h-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Preview product - open in new tab
+                                window.open(`/minha-area/produtos/${product.id}/preview`, '_blank');
+                              }}
+                              title="Visualizar página"
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              <span className="text-xs">Visualizar página</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-2 h-8 text-red-600 hover:text-red-700"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(product.id, product.name);
                               }}
-                              title="Excluir Produto"
+                              title="Excluir"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -633,17 +616,7 @@ export default function MyProductsList() {
         )}
       </div>
 
-      {/* Channels Editor Modal */}
-      {channelsEditorProductId && (
-        <ChannelsEditor
-          productId={channelsEditorProductId}
-          isOpen={channelsEditorOpen}
-          onClose={() => {
-            setChannelsEditorOpen(false);
-            setChannelsEditorProductId(null);
-          }}
-        />
-      )}
+
     </div>
   );
 }
