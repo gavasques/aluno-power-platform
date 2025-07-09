@@ -62,6 +62,24 @@ const ProductForm = () => {
     initialData: mappedProductData,
     onSubmit: async (data) => {
       console.log('Submitting product data:', data);
+      console.log('🔥 Submitting channels:', channels);
+      
+      // Converter canais para formato do banco de dados
+      const channelsForDB = Object.entries(channels).map(([type, channelData]) => ({
+        type,
+        isActive: channelData.enabled,
+        data: {
+          ...channelData,
+          enabled: undefined // Remover o campo enabled do data
+        }
+      })).filter(channel => {
+        // Remover o campo enabled do objeto data
+        const { enabled, ...dataWithoutEnabled } = channel.data;
+        channel.data = dataWithoutEnabled;
+        return true;
+      });
+      
+      console.log('🔥 Channels formatted for DB:', channelsForDB);
       
       const url = isEditMode ? `/api/products/${productId}` : '/api/products';
       const method = isEditMode ? 'PUT' : 'POST';
@@ -77,7 +95,7 @@ const ProductForm = () => {
           categoryId: data.category ? parseInt(data.category) : null,
           brandId: data.brand ? parseInt(data.brand) : null,
           supplierId: data.supplierId ? parseInt(data.supplierId) : null,
-          channels,
+          channels: channelsForDB,
           productSuppliers
         })
       });
@@ -113,13 +131,16 @@ const ProductForm = () => {
         productDetails.channels.forEach((channel: any) => {
           console.log('🔥 Processing channel:', channel);
           if (updatedChannels[channel.type]) {
+            // Mesclar dados do banco com configuração padrão
             updatedChannels[channel.type] = {
+              ...updatedChannels[channel.type], // Manter estrutura padrão
               enabled: channel.isActive,
-              ...channel.data
+              ...channel.data // Aplicar dados salvos do banco
             };
             console.log('🔥 Updated channel:', channel.type, updatedChannels[channel.type]);
           } else {
             console.log('🔥 Channel type not found in updatedChannels:', channel.type);
+            console.log('🔥 Available channels:', Object.keys(updatedChannels));
           }
         });
         
@@ -329,16 +350,15 @@ const ProductForm = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {Object.keys(channelNames).map((channelKey) => {
-                    const key = channelKey as keyof typeof channelNames;
-                    const channelData = channels[key];
+                    const channelData = channels[channelKey];
                     if (!channelData) return null;
 
                     return (
                       <ChannelForm
-                        key={key}
-                        channelType={key}
+                        key={channelKey}
+                        channelType={channelKey}
                         channelData={channelData}
-                        title={channelNames[key]}
+                        title={channelNames[channelKey]}
                         productTaxPercent={productData.taxPercent}
                         onChannelToggle={handleChannelToggle}
                         onChannelInputChange={handleChannelInputChange}
