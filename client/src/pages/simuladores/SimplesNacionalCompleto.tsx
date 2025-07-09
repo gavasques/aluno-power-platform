@@ -281,16 +281,6 @@ export default function SimplesNacionalCompleto() {
     });
   };
 
-  // Limpar todos os dados
-  const limparTodos = () => {
-    setMeses([]);
-    localStorage.removeItem('simplesnacional-completo-dados');
-    toast({
-      title: "Dados limpos",
-      description: "Todos os dados foram removidos"
-    });
-  };
-
   // Exportar para CSV
   const exportarCSV = () => {
     if (mesesCalculados.length === 0) {
@@ -505,10 +495,7 @@ export default function SimplesNacionalCompleto() {
                   <FileDown className="w-4 h-4 mr-2" />
                   Exportar CSV
                 </Button>
-                <Button onClick={limparTodos} variant="outline" size="sm">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Limpar Tudo
-                </Button>
+
               </div>
             </div>
           </CardHeader>
