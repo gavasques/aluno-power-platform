@@ -279,24 +279,24 @@ export default function MyProductsList() {
         </div>
 
         {/* Products Table */}
-        <div className="bg-white rounded-lg border shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-lg border-2 border-gray-100 shadow-md overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[40px]"></TableHead>
-                <TableHead className="w-[50px]">Foto</TableHead>
-                <TableHead>Nome</TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>Marca</TableHead>
-                <TableHead className="text-right">Custo</TableHead>
-                <TableHead className="text-center">Canais Ativos</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+              <TableRow className="border-b-2 border-gray-200 bg-gray-50/50">
+                <TableHead className="w-[40px] py-4"></TableHead>
+                <TableHead className="w-[60px] py-4 font-semibold text-gray-700">Foto</TableHead>
+                <TableHead className="py-4 font-semibold text-gray-700">Nome do Produto</TableHead>
+                <TableHead className="w-[120px] py-4 font-semibold text-gray-700">SKU</TableHead>
+                <TableHead className="w-[140px] py-4 font-semibold text-gray-700">Marca</TableHead>
+                <TableHead className="w-[120px] text-right py-4 font-semibold text-gray-700">Custo</TableHead>
+                <TableHead className="min-w-[320px] py-4 font-semibold text-gray-700">Canais Ativos</TableHead>
+                <TableHead className="w-[180px] text-center py-4 font-semibold text-gray-700">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {currentProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     <p className="text-muted-foreground mb-4">
                       {searchTerm ? 'Nenhum produto encontrado' : 'Nenhum produto cadastrado'}
                     </p>
@@ -316,14 +316,14 @@ export default function MyProductsList() {
                   return (
                     <React.Fragment key={product.id}>
                       <TableRow 
-                        className="cursor-pointer hover:bg-gray-50"
+                        className="cursor-pointer hover:bg-blue-50/30 transition-colors border-b border-gray-100"
                         onClick={() => toggleRowExpansion(product.id)}
                       >
-                        <TableCell>
+                        <TableCell className="py-4">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="p-0 h-6 w-6"
+                            className="p-0 h-6 w-6 hover:bg-gray-100"
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleRowExpansion(product.id);
@@ -332,97 +332,124 @@ export default function MyProductsList() {
                             {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                           </Button>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-4">
                           {product.photo ? (
                             <img
                               src={product.photo}
                               alt={product.name}
-                              className="w-10 h-10 object-cover rounded"
+                              className="w-12 h-12 object-cover rounded-lg border border-gray-200"
                             />
                           ) : (
-                            <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">
-                              N/A
+                            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border border-gray-200 flex items-center justify-center text-xs text-gray-500 font-medium">
+                              SEM FOTO
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-medium py-4">
                           <div>
-                            <div>{product.name}</div>
-                            <div className="mt-1">
-                              <Badge variant={product.active ? "default" : "secondary"} className="text-xs">
+                            <div className="text-gray-900 font-semibold">{product.name}</div>
+                            <div className="mt-2">
+                              <Badge 
+                                variant={product.active ? "default" : "secondary"} 
+                                className={cn(
+                                  "text-xs px-2 py-1",
+                                  product.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                                )}
+                              >
                                 {product.active ? "Ativo" : "Inativo"}
                               </Badge>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>{product.internalCode || product.sku || '-'}</TableCell>
-                        <TableCell>{getBrandName(product)}</TableCell>
-                        <TableCell className="text-right">
-                          {product.costItem ? formatBRL(product.costItem) : '-'}
+                        <TableCell className="py-4 text-gray-700 font-mono text-sm">
+                          {product.internalCode || product.sku || <span className="text-gray-400 italic">-</span>}
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="py-4 text-gray-700">
+                          {getBrandName(product) || <span className="text-gray-400 italic">Sem marca</span>}
+                        </TableCell>
+                        <TableCell className="text-right py-4">
+                          {product.costItem ? (
+                            <span className="font-semibold text-gray-900">{formatBRL(product.costItem)}</span>
+                          ) : (
+                            <span className="text-gray-400 italic">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="min-w-[320px] py-4">
                           {activeChannels.length > 0 ? (
-                            <div className="space-y-1 text-left text-[15px]">
+                            <div className="space-y-3">
                               {activeChannels.slice(0, 3).map(({ channel, calculation }, index) => (
-                                <div key={`${product.id}-${channel.id || channel.type}-${index}`} className="text-xs">
-                                  <div className="flex items-center justify-center gap-2">
-                                    <span className="font-medium">{CHANNEL_NAMES[channel.type] || channel.name}</span>
-                                    <span className="text-gray-600">{formatBRL(channel.data?.price || 0)}</span>
-                                    <span 
+                                <div key={`${product.id}-${channel.id || channel.type}-${index}`} 
+                                     className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-3 border border-gray-200 shadow-sm">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                      <span className="font-semibold text-sm text-gray-900">
+                                        {CHANNEL_NAMES[channel.type] || channel.name}
+                                      </span>
+                                      <span className="text-xs text-gray-600 font-medium">
+                                        {formatBRL(channel.data?.price || 0)}
+                                      </span>
+                                    </div>
+                                    <Badge 
+                                      variant="outline"
                                       className={cn(
-                                        "font-semibold",
-                                        calculation.marginPercent >= 30 ? "text-green-600" :
-                                        calculation.marginPercent >= 20 ? "text-blue-600" :
-                                        calculation.marginPercent >= 10 ? "text-yellow-600" :
-                                        "text-red-600"
+                                        "text-xs px-3 py-1 font-bold border-0 rounded-full shadow-sm",
+                                        calculation.marginPercent >= 30 ? "bg-green-100 text-green-800" :
+                                        calculation.marginPercent >= 20 ? "bg-blue-100 text-blue-800" :
+                                        calculation.marginPercent >= 10 ? "bg-yellow-100 text-yellow-800" :
+                                        "bg-red-100 text-red-800"
                                       )}
                                     >
                                       {calculation.marginPercent.toFixed(1)}%
-                                    </span>
+                                    </Badge>
                                   </div>
                                 </div>
                               ))}
                               {activeChannels.length > 3 && (
-                                <div className="text-xs text-gray-500">
-                                  +{activeChannels.length - 3} canais
+                                <div className="text-center">
+                                  <Badge variant="secondary" className="text-xs px-3 py-1 bg-gray-200 text-gray-700">
+                                    +{activeChannels.length - 3} outros canais
+                                  </Badge>
                                 </div>
                               )}
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400">Nenhum canal ativo</span>
+                            <div className="text-center py-6">
+                              <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
+                                <span className="text-sm text-gray-500 italic">Nenhum canal ativo</span>
+                              </div>
+                            </div>
                           )}
                         </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
+                        <TableCell className="text-center py-4">
+                          <div className="flex gap-2 justify-center">
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
-                              className="p-2 h-8"
+                              className="h-9 px-3 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEdit(product.id);
                               }}
                               title="Editar informações"
                             >
-                              <Edit className="h-4 w-4 mr-1" />
+                              <Edit className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
-                              className="p-2 h-8"
+                              className="h-9 px-3 text-green-600 border-green-200 hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setLocation(`/minha-area/produtos/${product.id}`);
                               }}
                               title="Visualizar página"
                             >
-                              <Eye className="h-4 w-4 mr-1" />
-                              <span className="text-xs">Visualizar página</span>
+                              <Eye className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
-                              className="p-2 h-8 text-red-600 hover:text-red-700"
+                              className="h-9 px-3 text-red-600 border-red-200 hover:text-red-700 hover:bg-red-50 hover:border-red-400 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(product.id, product.name);
