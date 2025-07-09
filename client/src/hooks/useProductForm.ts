@@ -39,6 +39,18 @@ export function useProductForm({
     isActive: true,
     userId: 0,
     sku: '',
+    photo: '',
+    brand: '',
+    internalCode: '',
+    ean: '',
+    ncm: '',
+    observations: '',
+    supplierId: '',
+    weight: 0,
+    costItem: 0,
+    packCost: 0,
+    taxPercent: 0,
+    dimensions: { length: 0, width: 0, height: 0 },
     ...initialData
   });
 
@@ -149,6 +161,19 @@ export function useProductForm({
       tags: [],
       isActive: true,
       userId: 0,
+      sku: '',
+      photo: '',
+      brand: '',
+      internalCode: '',
+      ean: '',
+      ncm: '',
+      observations: '',
+      supplierId: '',
+      weight: 0,
+      costItem: 0,
+      packCost: 0,
+      taxPercent: 0,
+      dimensions: { length: 0, width: 0, height: 0 },
       ...initialData
     });
     setErrors({});

@@ -23,7 +23,7 @@ const ProductForm = () => {
     queryFn: async () => {
       const response = await fetch(`/api/products/${productId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       if (!response.ok) throw new Error('Failed to fetch product');
@@ -43,7 +43,7 @@ const ProductForm = () => {
     dimensions: productDetails.dimensions || { length: 0, width: 0, height: 0 },
     weight: parseFloat(productDetails.weight) || 0,
     brand: productDetails.brandId ? productDetails.brandId.toString() : (productDetails.brand || ''),
-    category: productDetails.categoryId ? productDetails.categoryId.toString() : (productDetails.category || ''),
+    category: productDetails.categoryId ? productDetails.categoryId.toString() : '',
     supplierId: productDetails.supplierId?.toString() || '',
     ncm: productDetails.ncm || '',
     costItem: parseFloat(productDetails.costItem) || 0,
@@ -142,7 +142,7 @@ const ProductForm = () => {
   const { data: brandsData } = useQuery({
     queryKey: ['/api/brands'],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       if (!token) {
         console.warn('No token found for brands request');
         return { data: [] };
