@@ -150,6 +150,17 @@ Preferred communication style: Simple, everyday language.
     - ✅ **Standardization**: Consistent patterns and TypeScript implementation
     - ✅ **Performance Optimization**: Memoized calculations, optimized re-renders, debounced operations
 
+- **January 09, 2025 - 01:10 AM**: ✅ CRITICAL BUG FIXED - SIMPLIFIED IMPORT SIMULATOR COST CALCULATION CORRECTED
+  - **Problem Identified**: "Outras despesas aduaneiras" were not being included in final product cost calculation
+  - **Solution Implemented**: Modified useCalculations hook to include proportional distribution of customs expenses
+  - **Fix Applied**: Added `outras_despesas_rateadas_brl` to both `valor_total_produto_impostos_brl` and `custo_unitario_sem_imposto_brl`
+  - **Business Impact**: Now correctly distributes customs expenses proportionally among products (by weight, value, or quantity)
+  - **Technical Details**: 
+    - Other customs expenses are now properly allocated per product based on selected distribution method
+    - Final unit cost now includes all import costs: product + freight + taxes + customs expenses
+    - Calculation follows same proportional logic as freight distribution (peso/valor_fob/quantidade)
+  - **Testing Required**: Verify that unit costs increase appropriately when customs expenses are added to simulation
+
 - **January 09, 2025 - 12:50 AM**: ✅ PHASE 2 COMPLETED - INVESTMENT & ROI SIMULATOR COMPLETELY REFACTORED - SOLID/DRY/KISS PRINCIPLES FULLY IMPLEMENTED
   - **Complete Modular Architecture Established**:
     - ✅ **10 Focused Modules Created**: types.ts, utils.ts, useCalculations.ts, useSimulationAPI.ts, and 6 UI components

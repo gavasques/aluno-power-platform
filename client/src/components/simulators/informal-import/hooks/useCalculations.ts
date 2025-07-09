@@ -93,8 +93,9 @@ const calculateProductCosts = (
   const base_calculo_icms_planilha_brl = (produto_mais_frete_brl + valor_ii_brl) / (1 - cfg.aliquota_icms_percentual);
   const valor_icms_brl = base_calculo_icms_planilha_brl * cfg.aliquota_icms_percentual;
 
-  const valor_total_produto_impostos_brl = produto_mais_frete_brl + valor_ii_brl + valor_icms_brl;
-  const custo_unitario_sem_imposto_brl = safeDiv(produto_mais_frete_brl, produto.quantidade);
+  // Include outras despesas aduaneiras rateadas in final cost calculation
+  const valor_total_produto_impostos_brl = produto_mais_frete_brl + valor_ii_brl + valor_icms_brl + outras_despesas_rateadas_brl;
+  const custo_unitario_sem_imposto_brl = safeDiv(produto_mais_frete_brl + outras_despesas_rateadas_brl, produto.quantidade);
   const custo_unitario_com_imposto_brl = safeDiv(valor_total_produto_impostos_brl, produto.quantidade);
 
   return {
