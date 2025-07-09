@@ -9,7 +9,7 @@ import {
   SimulationEventHandlers,
   UIState
 } from '../types';
-import { generateProductId, validateSimulation } from '../utils';
+import { generateProductId, validateSimulation, generatePDF } from '../utils';
 
 /**
  * Custom hook for simulation event handlers
@@ -114,7 +114,6 @@ export const useSimulationHandlers = (
         throw new Error('Resultados calculados não encontrados');
       }
 
-      const { generatePDF } = require('../utils');
       generatePDF(activeSimulation, calculatedResults);
       toast({
         title: "PDF exportado",
