@@ -111,6 +111,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 09, 2025 - 03:45 PM**: ✅ UI ENHANCEMENT - DUPLICAR OPTION REMOVED FROM FORMAL IMPORT SIMULATIONS
+  - **Menu Simplification**: Removed "Duplicar" (Duplicate) option from actions dropdown in FormalImportSimulationsList.tsx
+  - **Code Cleanup**: Removed all related duplicate functionality including:
+    - ✅ **DropdownMenuItem removed**: "Duplicar" option removed from actions menu
+    - ✅ **Copy icon removed**: Removed unused Copy icon from lucide-react imports
+    - ✅ **duplicateMutation removed**: Eliminated entire mutation handler for duplication
+    - ✅ **handleDuplicate function removed**: Cleaned up handler function and related code
+  - **Benefits**: 
+    - Simplified user interface with only Edit and Delete actions available
+    - Cleaner codebase without unused functionality
+    - Focused workflow preventing accidental duplications
+
 - **January 09, 2025 - 03:30 PM**: ✅ CACHE INVALIDATION ISSUE FIXED - FORMAL IMPORT SIMULATIONS LISTING PROBLEM RESOLVED
   - **Root Cause Identified**: React Query cache with 5-minute staleTime was preventing simulations from updating in listing after status changes
   - **Solutions Implemented**:

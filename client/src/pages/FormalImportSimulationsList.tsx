@@ -34,7 +34,6 @@ import {
 import { 
   Plus, 
   MoreHorizontal, 
-  Copy, 
   Edit, 
   Trash2,
   Calendar,
@@ -132,29 +131,6 @@ const FormalImportSimulationsList: React.FC = () => {
     },
   });
 
-  // Duplicate simulation mutation
-  const duplicateMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return await apiRequest(`/api/simulators/formal-import/${id}/duplicate`, {
-        method: 'POST',
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Simulação duplicada",
-        description: "A simulação foi duplicada com sucesso",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro ao duplicar",
-        description: error.message || "Erro ao duplicar a simulação",
-        variant: "destructive",
-      });
-    },
-  });
-
   // Filter simulations
   const filteredSimulations = simulations.filter(simulation => {
     const matchesSearch = simulation.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -195,10 +171,6 @@ const FormalImportSimulationsList: React.FC = () => {
 
   const handleDelete = (id: number) => {
     deleteMutation.mutate(id);
-  };
-
-  const handleDuplicate = (id: number) => {
-    duplicateMutation.mutate(id);
   };
 
   const handleNewSimulation = () => {
@@ -412,10 +384,6 @@ const FormalImportSimulationsList: React.FC = () => {
                           <DropdownMenuItem onClick={() => handleEdit(simulation)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDuplicate(simulation.id)}>
-                            <Copy className="mr-2 h-4 w-4" />
-                            Duplicar
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <AlertDialog>
