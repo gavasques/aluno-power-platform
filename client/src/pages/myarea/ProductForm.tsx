@@ -59,7 +59,39 @@ const ProductForm = () => {
     isSubmitting,
     errors
   } = useProductForm({
-    initialData: mappedProductData
+    initialData: mappedProductData,
+    onSubmit: async (data) => {
+      console.log('Submitting product data:', data);
+      
+      const url = isEditMode ? `/api/products/${productId}` : '/api/products';
+      const method = isEditMode ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          ...data,
+          categoryId: data.category ? parseInt(data.category) : null,
+          brandId: data.brand ? parseInt(data.brand) : null,
+          supplierId: data.supplierId ? parseInt(data.supplierId) : null,
+          channels,
+          productSuppliers
+        })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save product');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      setLocation('/minha-area/produtos');
+    }
   });
 
   // Channel management state
@@ -163,7 +195,12 @@ const ProductForm = () => {
 
   const suppliers = suppliersData?.data || [];
   const categories = categoriesData || [];
-  const brands = brandsData?.data || [];
+  const brands = brandsData || [];
+  
+  console.log('Brands data:', brandsData);
+  console.log('Categories data:', categoriesData);
+  console.log('Product details:', productDetails);
+  console.log('Current product data form:', productData);
   
   // Show loading state while fetching product data in edit mode
   if (isEditMode && isLoadingProduct) {
@@ -228,7 +265,10 @@ const ProductForm = () => {
               <div className="p-8">
                 <BasicProductForm
                   productData={productData}
-                  onInputChange={handleInputChange}
+                  onInputChange={(field, value) => {
+                    console.log('Field change:', field, value);
+                    handleInputChange(field, value);
+                  }}
                   onPhotoUpload={(e) => {
                     const file = e.target.files?.[0];
                     if (file) handlePhotoUpload(file);
@@ -299,11 +339,23 @@ const ProductForm = () => {
               Cancelar
             </Button>
             <Button 
-              onClick={handleSubmit} 
+              onClick={() => {
+                console.log('Save button clicked');
+                console.log('Current product data:', productData);
+                handleSubmit();
+              }} 
               size="lg"
-              className="min-w-32 bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isSubmitting}
+              className="min-w-32 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
             >
-              Salvar Produto
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar Produto'
+              )}
             </Button>
           </div>
         </div>
