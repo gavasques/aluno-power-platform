@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Edit, Plus, Search, Copy, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, Edit, Plus, Search, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -81,29 +81,6 @@ const InformalImportSimulationsList: React.FC = () => {
     }
   });
 
-  // Duplicate simulation mutation
-  const duplicateMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return await apiRequest(`/api/simulations/import/${id}/duplicate`, {
-        method: 'POST',
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Simulação duplicada",
-        description: "A simulação foi duplicada com sucesso",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/simulations/import'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro ao duplicar",
-        description: error.message || "Erro ao duplicar a simulação",
-        variant: "destructive",
-      });
-    }
-  });
-
   // Filter simulations based on search term
   const filteredSimulations = simulations.filter(sim => 
     sim.nomeSimulacao.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -133,10 +110,6 @@ const InformalImportSimulationsList: React.FC = () => {
     if (window.confirm('Tem certeza que deseja excluir esta simulação?')) {
       deleteMutation.mutate(id);
     }
-  };
-
-  const handleDuplicate = (id: number) => {
-    duplicateMutation.mutate(id);
   };
 
   const handleNewSimulation = () => {
@@ -334,17 +307,6 @@ const InformalImportSimulationsList: React.FC = () => {
                     >
                       <Edit className="w-4 h-4" />
                       Editar
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDuplicate(simulation.id)}
-                      disabled={duplicateMutation.isPending}
-                      className="flex items-center gap-1"
-                    >
-                      <Copy className="w-4 h-4" />
-                      Duplicar
                     </Button>
                     
                     <Button
