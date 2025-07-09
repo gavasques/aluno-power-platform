@@ -7,12 +7,12 @@ import { FormattedInput } from "@/components/ui/formatted-input";
 import { ProductChannels } from "@/types/product";
 
 interface ChannelFormProps {
-  channelType: keyof ProductChannels;
+  channelType: string;
   channelData: any;
   title: string;
   productTaxPercent?: number;
-  onChannelToggle: (channelType: keyof ProductChannels) => void;
-  onChannelInputChange: (channelType: keyof ProductChannels, field: string, value: number | string) => void;
+  onChannelToggle: (channelType: string) => void;
+  onChannelInputChange: (channelType: string, field: string, value: number | string) => void;
 }
 
 export const ChannelForm = ({ 
@@ -22,7 +22,19 @@ export const ChannelForm = ({
   productTaxPercent = 0,
   onChannelToggle, 
   onChannelInputChange 
-}: ChannelFormProps) => (
+}: ChannelFormProps) => {
+  console.log(`🔥 ChannelForm - ${channelType}:`, {
+    enabled: channelData?.enabled,
+    price: channelData?.price,
+    commissionPercent: channelData?.commissionPercent,
+    shippingCost: channelData?.shippingCost,
+    otherCostValue: channelData?.otherCostValue,
+    fixedCostPercent: channelData?.fixedCostPercent,
+    otherCostPercent: channelData?.otherCostPercent,
+    allData: channelData
+  });
+
+  return (
   <Card>
     <CardHeader>
       <div className="flex items-center justify-between">
@@ -59,54 +71,53 @@ export const ChannelForm = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label>Comissão (%)</Label>
-            <FormattedInput
-              type="percentage"
-              value={channelData.commissionPct || 0}
-              onChange={(value) => onChannelInputChange(channelType, 'commissionPct', value)}
-            />
-          </div>
-          <div>
-            <Label>Taxa Fixa (R$)</Label>
-            <FormattedInput
-              type="currency"
-              value={channelData.fixedFee || 0}
-              onChange={(value) => onChannelInputChange(channelType, 'fixedFee', value)}
-            />
-          </div>
-          <div>
-            <Label>Outro Custo (%)</Label>
-            <FormattedInput
-              type="percentage"
-              value={channelData.otherPct || 0}
-              onChange={(value) => onChannelInputChange(channelType, 'otherPct', value)}
-            />
-          </div>
-          <div>
-            <Label>Outro Custo (R$)</Label>
-            <FormattedInput
-              type="currency"
-              value={channelData.otherValue || 0}
-              onChange={(value) => onChannelInputChange(channelType, 'otherValue', value)}
-            />
-          </div>
-          <div>
-            <Label>Custo com Ads (%)</Label>
-            <FormattedInput
-              type="percentage"
-              value={channelData.adsPct || 0}
-              onChange={(value) => onChannelInputChange(channelType, 'adsPct', value)}
-            />
-          </div>
-          <div>
             <Label>Preço de Venda (R$)</Label>
             <FormattedInput
               type="currency"
-              value={channelData.salePrice || 0}
-              onChange={(value) => onChannelInputChange(channelType, 'salePrice', value)}
+              value={channelData.price || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'price', value)}
             />
           </div>
-
+          <div>
+            <Label>Comissão (%)</Label>
+            <FormattedInput
+              type="percentage"
+              value={channelData.commissionPercent || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'commissionPercent', value)}
+            />
+          </div>
+          <div>
+            <Label>Custo de Envio (R$)</Label>
+            <FormattedInput
+              type="currency"
+              value={channelData.shippingCost || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'shippingCost', value)}
+            />
+          </div>
+          <div>
+            <Label>Outros Custos (R$)</Label>
+            <FormattedInput
+              type="currency"
+              value={channelData.otherCostValue || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'otherCostValue', value)}
+            />
+          </div>
+          <div>
+            <Label>Custo Fixo (%)</Label>
+            <FormattedInput
+              type="percentage"
+              value={channelData.fixedCostPercent || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'fixedCostPercent', value)}
+            />
+          </div>
+          <div>
+            <Label>Outros Custos (%)</Label>
+            <FormattedInput
+              type="percentage"
+              value={channelData.otherCostPercent || 0}
+              onChange={(value) => onChannelInputChange(channelType, 'otherCostPercent', value)}
+            />
+          </div>
           {/* Campo de Impostos Global (Somente Leitura) */}
           <div>
             <Label>Impostos (%) - Global do Produto</Label>
@@ -117,96 +128,119 @@ export const ChannelForm = ({
             />
           </div>
           
-          {/* Campo específico para Site Próprio */}
-          {channelType === 'sitePropio' && (
-            <div>
-              <Label>Gateway de Pagamento (%)</Label>
-              <FormattedInput
-                type="percentage"
-                value={channelData.gatewayPct || 0}
-                onChange={(value) => onChannelInputChange(channelType, 'gatewayPct', value)}
-              />
-            </div>
-          )}
-          
-          {/* Campos específicos por canal */}
-          {(channelType === 'amazonFBM' || channelType === 'amazonFBAOnSite' || channelType === 'amazonDBA' || channelType === 'mlFlex' || channelType === 'mlEnvios') && (
-            <div>
-              <Label>Frete Outbound (R$)</Label>
-              <FormattedInput
-                type="currency"
-                value={channelData.outboundFreight || 0}
-                onChange={(value) => onChannelInputChange(channelType, 'outboundFreight', value)}
-              />
-            </div>
-          )}
-
-          {/* Campo específico para Amazon FBM, Amazon FBA On Site, Amazon DBA e ML ME1 - Frete Médio (Se Frete Grátis) */}
-          {(channelType === 'amazonFBM' || channelType === 'amazonFBAOnSite' || channelType === 'amazonDBA' || channelType === 'mlME1') && (
-            <div>
-              <Label>Frete Médio (Se Frete Grátis) (R$)</Label>
-              <FormattedInput
-                type="currency"
-                value={channelData.averageFreightIfFree || 0}
-                onChange={(value) => onChannelInputChange(channelType, 'averageFreightIfFree', value)}
-              />
-            </div>
-          )}
-          
-          {(channelType === 'amazonFBA' || channelType === 'mlFull') && (
+          {/* Campos específicos para Site Próprio */}
+          {channelType === 'SITE_PROPRIO' && (
             <>
               <div>
-                <Label>Frete Inbound (R$)</Label>
+                <Label>Embalagem (R$)</Label>
                 <FormattedInput
                   type="currency"
-                  value={channelData.inboundFreight || 0}
-                  onChange={(value) => onChannelInputChange(channelType, 'inboundFreight', value)}
+                  value={channelData.packagingCostValue || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'packagingCostValue', value)}
                 />
               </div>
-              {/* Frete Outbound específico para Amazon FBA */}
-              {channelType === 'amazonFBA' && (
-                <div>
-                  <Label>Frete Outbound (R$)</Label>
-                  <FormattedInput
-                    type="currency"
-                    value={channelData.outboundFreight || 0}
-                    onChange={(value) => onChannelInputChange(channelType, 'outboundFreight', value)}
-                  />
-                </div>
-              )}
-              {channelType === 'mlFull' && (
-                <div>
-                  <Label>Frete Outbound (R$)</Label>
-                  <FormattedInput
-                    type="currency"
-                    value={channelData.outboundFreight || 0}
-                    onChange={(value) => onChannelInputChange(channelType, 'outboundFreight', value)}
-                  />
-                </div>
-              )}
               <div>
-                <Label>Prep Center (R$)</Label>
+                <Label>Custo Financeiro (%)</Label>
                 <FormattedInput
-                  type="currency"
-                  value={channelData.prepCenter || 0}
-                  onChange={(value) => onChannelInputChange(channelType, 'prepCenter', value)}
+                  type="percentage"
+                  value={channelData.financialCostPercent || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'financialCostPercent', value)}
+                />
+              </div>
+              <div>
+                <Label>Marketing (%)</Label>
+                <FormattedInput
+                  type="percentage"
+                  value={channelData.marketingCostPercent || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'marketingCostPercent', value)}
                 />
               </div>
             </>
           )}
           
-          {channelType === 'mlFlex' && (
+          {/* Campos específicos para Amazon FBA On Site */}
+          {channelType === 'AMAZON_FBA_ONSITE' && (
+            <>
+              <div>
+                <Label>Valor de Desconto (R$)</Label>
+                <FormattedInput
+                  type="currency"
+                  value={channelData.rebateValue || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'rebateValue', value)}
+                />
+              </div>
+              <div>
+                <Label>Desconto (%)</Label>
+                <FormattedInput
+                  type="percentage"
+                  value={channelData.rebatePercent || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'rebatePercent', value)}
+                />
+              </div>
+              <div>
+                <Label>Tacos (%)</Label>
+                <FormattedInput
+                  type="percentage"
+                  value={channelData.tacosCostPercent || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'tacosCostPercent', value)}
+                />
+              </div>
+              <div>
+                <Label>Parcelamento (%)</Label>
+                <FormattedInput
+                  type="percentage"
+                  value={channelData.installmentPercent || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'installmentPercent', value)}
+                />
+              </div>
+              <div>
+                <Label>Embalagem (R$)</Label>
+                <FormattedInput
+                  type="currency"
+                  value={channelData.packagingCostValue || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'packagingCostValue', value)}
+                />
+              </div>
+            </>
+          )}
+
+          {/* Campos específicos para Amazon FBA */}
+          {channelType === 'AMAZON_FBA' && (
             <div>
-              <Label>Receita ML Flex (R$)</Label>
+              <Label>Custo do Produto FBA (R$)</Label>
               <FormattedInput
                 type="currency"
-                value={channelData.flexRevenue || 0}
-                onChange={(value) => onChannelInputChange(channelType, 'flexRevenue', value)}
+                value={channelData.productCostFBA || 0}
+                onChange={(value) => onChannelInputChange(channelType, 'productCostFBA', value)}
               />
             </div>
           )}
+
+          {/* Campos específicos para Mercado Livre Full */}
+          {channelType === 'MERCADO_LIVRE_FULL' && (
+            <>
+              <div>
+                <Label>Tacos (%)</Label>
+                <FormattedInput
+                  type="percentage"
+                  value={channelData.tacosCostPercent || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'tacosCostPercent', value)}
+                />
+              </div>
+              <div>
+                <Label>Custo do Produto ML Full (R$)</Label>
+                <FormattedInput
+                  type="currency"
+                  value={channelData.productCostMLFull || 0}
+                  onChange={(value) => onChannelInputChange(channelType, 'productCostMLFull', value)}
+                />
+              </div>
+            </>
+          )}
+
         </div>
       </CardContent>
     )}
   </Card>
-);
+  );
+};
