@@ -42,7 +42,7 @@ const ProductForm = () => {
     ean: productDetails.ean || '',
     dimensions: productDetails.dimensions || { length: 0, width: 0, height: 0 },
     weight: parseFloat(productDetails.weight) || 0,
-    brand: productDetails.brand || productDetails.brandId?.toString() || '',
+    brand: productDetails.brandId?.toString() || productDetails.brand || '',
     category: productDetails.category || '',
     supplierId: productDetails.supplierId?.toString() || '',
     ncm: productDetails.ncm || '',
@@ -131,10 +131,10 @@ const ProductForm = () => {
   });
 
   const { data: categoriesData } = useQuery({
-    queryKey: ['/api/categories'],
+    queryKey: ['/api/departments'],
     queryFn: async () => {
-      const response = await fetch('/api/categories');
-      if (!response.ok) throw new Error('Failed to fetch categories');
+      const response = await fetch('/api/departments');
+      if (!response.ok) throw new Error('Failed to fetch departments');
       return response.json();
     },
   });

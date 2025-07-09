@@ -90,10 +90,9 @@ export function AmazonListingOptimizerForm() {
     },
   });
 
-  // Busca categorias disponíveis
+  // Busca departamentos disponíveis para categorias de produto
   const { data: categoriesData } = useQuery({
-    queryKey: ['/api/categories'],
-    select: (data: any) => data.filter((cat: any) => cat.type !== 'partner')
+    queryKey: ['/api/departments'],
   });
 
   // Cria nova sessão ao abrir o componente

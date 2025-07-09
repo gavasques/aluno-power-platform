@@ -111,6 +111,25 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 09, 2025 - 08:55 PM**: ✅ PRODUCT FORM DATA SOURCE CORRECTIONS - CATEGORY AND BRAND FIELDS FIXED
+  - **Category Field Correction**:
+    - ✅ **ProductForm.tsx**: Changed from `/api/categories` to `/api/departments` for product categories
+    - ✅ **AmazonListingOptimizerForm.tsx**: Updated to use `/api/departments` for product categorization
+    - ✅ **Consistent data sourcing**: All product category fields now pull from Departments table as requested
+  - **Brand Field Enhancement**:
+    - ✅ **Data prioritization**: Modified mapping to prioritize brandId over legacy brand field
+    - ✅ **Brand display improvement**: Enhanced styling in product listing with font-weight and proper formatting
+    - ✅ **Brand name resolution**: Improved getBrandName() function to handle both brandId and legacy brand fields
+  - **Frontend Integration**:
+    - Both category and brand fields now correctly pull from "Departamentos" and "Minhas Marcas" tables respectively
+    - Proper data mapping ensures backward compatibility with existing products
+    - Enhanced visual feedback in product listing with consistent brand name display
+  - **Benefits Delivered**:
+    - Category dropdown now shows department names from correct table
+    - Brand field correctly displays brand names from user's brand management
+    - Consistent data architecture across all product-related components
+    - Improved data integrity and user experience
+
 - **January 09, 2025 - 07:45 PM**: ✅ COMPLETE INLINE EDITING SYSTEM IMPLEMENTED - MODAL-FREE SUPPLIER MANAGEMENT
   - **Modal System Completely Removed**:
     - ✅ **SupplierEditDialog eliminated**: Removed modal-based editing system entirely

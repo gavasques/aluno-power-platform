@@ -373,8 +373,10 @@ export default function MyProductsList() {
                         <TableCell className="py-3 text-gray-700 font-mono text-sm">
                           {product.internalCode || product.sku || <span className="text-gray-400 italic">-</span>}
                         </TableCell>
-                        <TableCell className="py-3 text-gray-700">
-                          {getBrandName(product) || <span className="text-gray-400 italic">Sem marca</span>}
+                        <TableCell className="py-3">
+                          <span className="text-gray-900 font-medium">
+                            {getBrandName(product) || <span className="text-gray-400 italic">Sem marca</span>}
+                          </span>
                         </TableCell>
                         <TableCell className="text-right py-3">
                           {product.costItem ? (
