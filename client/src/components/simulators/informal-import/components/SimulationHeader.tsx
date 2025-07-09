@@ -16,7 +16,6 @@ interface SimulationHeaderProps {
   onLoad: () => void;
   onNewSimulation: () => void;
   onExportPDF: () => void;
-  onExportCSV: () => void;
 }
 
 /**
@@ -30,8 +29,7 @@ export const SimulationHeader = ({
   onSave,
   onLoad,
   onNewSimulation,
-  onExportPDF,
-  onExportCSV
+  onExportPDF
 }: SimulationHeaderProps) => {
   const [isEditingName, setIsEditingName] = useState(false);
 
@@ -92,10 +90,6 @@ export const SimulationHeader = ({
               <Badge variant="secondary">
                 {selectedSimulationId ? "Salva" : "Não Salva"}
               </Badge>
-              <Button onClick={onExportCSV} variant="outline" size="sm">
-                <FileDown className="w-4 h-4 mr-2" />
-                CSV
-              </Button>
               <Button onClick={onExportPDF} variant="outline" size="sm">
                 <FileDown className="w-4 h-4 mr-2" />
                 PDF

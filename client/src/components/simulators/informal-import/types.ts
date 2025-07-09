@@ -110,7 +110,6 @@ export interface SimulationEventHandlers {
   onSave: () => void;
   onLoad: (simulation: SimulacaoCompleta) => void;
   onNew: () => void;
-  onExportCSV: () => void;
   onExportPDF: () => void;
 }
 

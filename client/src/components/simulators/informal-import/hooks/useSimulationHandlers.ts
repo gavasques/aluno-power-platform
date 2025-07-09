@@ -103,26 +103,17 @@ export const useSimulationHandlers = (
   }, [setActiveSimulation, setSelectedSimulationId, setUIState]);
 
   // Export handlers
-  const handleExportCSV = useCallback(() => {
-    try {
-      const { exportToCSV } = require('../utils');
-      exportToCSV(calculatedResults.produtos, activeSimulation.nomeSimulacao);
-      toast({
-        title: "CSV exportado",
-        description: "Arquivo CSV gerado com sucesso!"
-      });
-    } catch (error) {
-      console.error('Erro ao exportar CSV:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível exportar o CSV.",
-        variant: "destructive"
-      });
-    }
-  }, [calculatedResults.produtos, activeSimulation.nomeSimulacao, toast]);
-
   const handleExportPDF = useCallback(() => {
     try {
+      // Safety checks
+      if (!activeSimulation) {
+        throw new Error('Simulação não encontrada');
+      }
+
+      if (!calculatedResults) {
+        throw new Error('Resultados calculados não encontrados');
+      }
+
       const { generatePDF } = require('../utils');
       generatePDF(activeSimulation, calculatedResults);
       toast({
@@ -148,7 +139,6 @@ export const useSimulationHandlers = (
     onSave: handleSave,
     onLoad: handleLoad,
     onNew: handleNew,
-    onExportCSV: handleExportCSV,
     onExportPDF: handleExportPDF,
   };
 };

@@ -102,7 +102,6 @@ export default function ImportacaoSimplificadaRefactored() {
         onLoad={uiActions.openLoadDialog}
         onNewSimulation={eventHandlers.onNew}
         onExportPDF={eventHandlers.onExportPDF}
-        onExportCSV={eventHandlers.onExportCSV}
         validation={validation}
       />
 

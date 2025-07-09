@@ -14,6 +14,22 @@ interface ConfigurationPanelProps {
  * Handles general simulation settings
  */
 export const ConfigurationPanel = ({ config, onConfigChange }: ConfigurationPanelProps) => {
+  // Safety check for config object
+  if (!config) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Configurações Gerais</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -24,7 +40,7 @@ export const ConfigurationPanel = ({ config, onConfigChange }: ConfigurationPane
           <Label htmlFor="taxa_cambio">Taxa de Câmbio USD/BRL</Label>
           <BrazilianNumberInput
             id="taxa_cambio"
-            value={config.taxa_cambio_usd_brl}
+            value={config.taxa_cambio_usd_brl || 0}
             onChange={(value) => onConfigChange('taxa_cambio_usd_brl', value)}
             decimals={4}
             min={0}
@@ -36,7 +52,7 @@ export const ConfigurationPanel = ({ config, onConfigChange }: ConfigurationPane
           <Label htmlFor="aliquota_ii">Alíquota II (%)</Label>
           <BrazilianNumberInput
             id="aliquota_ii"
-            value={config.aliquota_ii_percentual * 100}
+            value={(config.aliquota_ii_percentual || 0) * 100}
             onChange={(value) => onConfigChange('aliquota_ii_percentual', value / 100)}
             decimals={2}
             min={0}
@@ -49,7 +65,7 @@ export const ConfigurationPanel = ({ config, onConfigChange }: ConfigurationPane
           <Label htmlFor="aliquota_icms">Alíquota ICMS (%)</Label>
           <BrazilianNumberInput
             id="aliquota_icms"
-            value={config.aliquota_icms_percentual * 100}
+            value={(config.aliquota_icms_percentual || 0) * 100}
             onChange={(value) => onConfigChange('aliquota_icms_percentual', value / 100)}
             decimals={2}
             min={0}
@@ -62,7 +78,7 @@ export const ConfigurationPanel = ({ config, onConfigChange }: ConfigurationPane
           <Label htmlFor="frete_total">Custo Frete Internacional Total</Label>
           <BrazilianNumberInput
             id="frete_total"
-            value={config.custo_frete_internacional_total_moeda_original}
+            value={config.custo_frete_internacional_total_moeda_original || 0}
             onChange={(value) => onConfigChange('custo_frete_internacional_total_moeda_original', value)}
             decimals={2}
             min={0}
@@ -73,7 +89,7 @@ export const ConfigurationPanel = ({ config, onConfigChange }: ConfigurationPane
         <div>
           <Label htmlFor="moeda_frete">Moeda do Frete</Label>
           <Select 
-            value={config.moeda_frete_internacional}
+            value={config.moeda_frete_internacional || "USD"}
             onValueChange={(value: "USD" | "BRL") => onConfigChange('moeda_frete_internacional', value)}
           >
             <SelectTrigger>
@@ -90,7 +106,7 @@ export const ConfigurationPanel = ({ config, onConfigChange }: ConfigurationPane
           <Label htmlFor="outras_despesas">Outras Despesas Aduaneiras (BRL)</Label>
           <BrazilianNumberInput
             id="outras_despesas"
-            value={config.outras_despesas_aduaneiras_total_brl}
+            value={config.outras_despesas_aduaneiras_total_brl || 0}
             onChange={(value) => onConfigChange('outras_despesas_aduaneiras_total_brl', value)}
             decimals={2}
             min={0}
@@ -101,7 +117,7 @@ export const ConfigurationPanel = ({ config, onConfigChange }: ConfigurationPane
         <div>
           <Label htmlFor="metodo_frete">Método Rateio Frete</Label>
           <Select 
-            value={config.metodo_rateio_frete}
+            value={config.metodo_rateio_frete || "peso"}
             onValueChange={(value: "peso" | "valor_fob" | "quantidade") => onConfigChange('metodo_rateio_frete', value)}
           >
             <SelectTrigger>
@@ -118,7 +134,7 @@ export const ConfigurationPanel = ({ config, onConfigChange }: ConfigurationPane
         <div>
           <Label htmlFor="metodo_outras">Método Rateio Outras Despesas</Label>
           <Select 
-            value={config.metodo_rateio_outras_despesas}
+            value={config.metodo_rateio_outras_despesas || "peso"}
             onValueChange={(value: "peso" | "valor_fob" | "quantidade") => onConfigChange('metodo_rateio_outras_despesas', value)}
           >
             <SelectTrigger>
