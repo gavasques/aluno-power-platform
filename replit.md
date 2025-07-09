@@ -111,6 +111,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 09, 2025 - 03:00 PM**: ✅ SUPPLIER MANAGEMENT ENHANCEMENT COMPLETED - ALL FIELDS NOW VISIBLE IN VISUALIZATION AND EDITING
+  - **Complete Field Visibility**: All supplier fields (Categoria Principal, Estado, Cidade, Informações Adicionais) now appear in both view and edit modes
+  - **Enhanced SupplierInfoDisplay**: Modified to always show all fields, even when empty with "Não informado" placeholder
+  - **Updated SupplierEditDialog**: Added category dropdown with departments API integration and additional info textarea
+  - **Database Integration**: Additional_info column successfully added to suppliers table
+  - **Consistent UI**: Category properly displays department name from lookup, all address fields shown in 3-column grid
+  - **Benefits**: Complete data visibility for users, consistent experience between view/edit modes, proper data organization
+
 - **January 09, 2025 - 03:50 PM**: ✅ CLEANUP - VIABILIDADE DE PRODUTO SIMULATOR REMOVED FROM ALL REFERENCES
   - **Complete Removal**: Removed non-implemented "Viabilidade de Produto" simulator from all interface files
   - **Files Updated**: Cleaned up references in:

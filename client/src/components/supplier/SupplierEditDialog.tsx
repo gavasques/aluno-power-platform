@@ -5,7 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import type { Department } from '@shared/schema';
 
 interface SupplierEditDialogProps {
   open: boolean;
@@ -23,19 +25,31 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
   isLoading = false
 }) => {
   const { toast } = useToast();
+  
+  // Carregar departamentos para o dropdown
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery<Department[]>({
+    queryKey: ['/api/departments'],
+    queryFn: async () => {
+      const response = await fetch('/api/departments');
+      if (!response.ok) throw new Error('Failed to fetch departments');
+      return response.json();
+    },
+  });
   const [formData, setFormData] = useState({
     tradeName: '',
     corporateName: '',
     cnpj: '',
+    categoryId: null as number | null,
     country: '',
     state: '',
     city: '',
-    zipCode: '',
+    cep: '',
     address: '',
     stateRegistration: '',
     municipalRegistration: '',
     supplierType: '',
-    description: ''
+    description: '',
+    additionalInfo: ''
   });
 
   const COUNTRIES = [
@@ -54,15 +68,17 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
         tradeName: supplier.tradeName || '',
         corporateName: supplier.corporateName || '',
         cnpj: supplier.cnpj || '',
+        categoryId: supplier.categoryId || null,
         country: supplier.country || '',
         state: supplier.state || '',
         city: supplier.city || '',
-        zipCode: supplier.zipCode || '',
+        cep: supplier.cep || '',
         address: supplier.address || '',
         stateRegistration: supplier.stateRegistration || '',
         municipalRegistration: supplier.municipalRegistration || '',
         supplierType: supplier.supplierType || '',
-        description: supplier.description || ''
+        description: supplier.description || '',
+        additionalInfo: supplier.additionalInfo || ''
       });
     }
   }, [supplier, open]);
@@ -127,6 +143,42 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
               />
             </div>
             <div>
+              <Label htmlFor="categoryId">Categoria Principal</Label>
+              <Select 
+                value={formData.categoryId ? String(formData.categoryId) : ""} 
+                onValueChange={(value) => setFormData({ ...formData, categoryId: value ? Number(value) : null })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={departmentsLoading ? "Carregando..." : "Selecionar categoria"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={String(dept.id)}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="supplierType">Tipo de Fornecedor</Label>
+              <Select value={formData.supplierType} onValueChange={(value) => setFormData({ ...formData, supplierType: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPLIER_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label htmlFor="country">País</Label>
               <Select value={formData.country} onValueChange={(value) => setFormData({ ...formData, country: value })}>
                 <SelectTrigger>
@@ -161,11 +213,11 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
               />
             </div>
             <div>
-              <Label htmlFor="zipCode">CEP</Label>
+              <Label htmlFor="cep">CEP</Label>
               <Input
-                id="zipCode"
-                value={formData.zipCode}
-                onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                id="cep"
+                value={formData.cep}
+                onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
                 placeholder="00000-000"
               />
             </div>
@@ -200,27 +252,23 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="supplierType">Tipo de Fornecedor</Label>
-            <Select value={formData.supplierType} onValueChange={(value) => setFormData({ ...formData, supplierType: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {SUPPLIER_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
             <Label htmlFor="description">Descrição</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Descrição detalhada do fornecedor, produtos e serviços"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="additionalInfo">Informações Adicionais</Label>
+            <Textarea
+              id="additionalInfo"
+              value={formData.additionalInfo}
+              onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
+              placeholder="Informações adicionais livres sobre o fornecedor (observações, histórico, notas especiais, etc.)"
               rows={3}
             />
           </div>
