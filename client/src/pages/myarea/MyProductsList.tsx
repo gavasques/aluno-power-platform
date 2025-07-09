@@ -362,7 +362,7 @@ export default function MyProductsList() {
                         </TableCell>
                         <TableCell className="text-center">
                           {activeChannels.length > 0 ? (
-                            <div className="space-y-1">
+                            <div className="space-y-1 text-left text-[15px]">
                               {activeChannels.slice(0, 3).map(({ channel, calculation }, index) => (
                                 <div key={`${product.id}-${channel.id || channel.type}-${index}`} className="text-xs">
                                   <div className="flex items-center justify-center gap-2">
@@ -435,7 +435,6 @@ export default function MyProductsList() {
                           </div>
                         </TableCell>
                       </TableRow>
-
                       {/* Expanded calculation details */}
                       {isExpanded && activeChannels.length > 0 && (
                         <TableRow key={`${product.id}-details`}>
@@ -614,8 +613,6 @@ export default function MyProductsList() {
           </div>
         )}
       </div>
-
-
     </div>
   );
 }
