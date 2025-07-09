@@ -16,6 +16,7 @@ export const useSimulationAPI = () => {
     return useQuery({
       queryKey: ['/api/simulations/import'],
       enabled: true,
+      select: (data: any) => data?.data || [] // Extract data from paginated response
     });
   };
 
