@@ -22,19 +22,7 @@ export const ChannelForm = ({
   productTaxPercent = 0,
   onChannelToggle, 
   onChannelInputChange 
-}: ChannelFormProps) => {
-  console.log(`🔥 ChannelForm - ${channelType}:`, {
-    enabled: channelData?.enabled,
-    price: channelData?.price,
-    commissionPercent: channelData?.commissionPercent,
-    shippingCost: channelData?.shippingCost,
-    otherCostValue: channelData?.otherCostValue,
-    fixedCostPercent: channelData?.fixedCostPercent,
-    otherCostPercent: channelData?.otherCostPercent,
-    allData: channelData
-  });
-
-  return (
+}: ChannelFormProps) => (
   <Card>
     <CardHeader>
       <div className="flex items-center justify-between">
@@ -242,5 +230,4 @@ export const ChannelForm = ({
       </CardContent>
     )}
   </Card>
-  );
-};
+);

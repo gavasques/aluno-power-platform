@@ -8,7 +8,7 @@ import { ChannelForm } from "@/components/product/ChannelForm";
 import { useProductForm } from "@/hooks/useProductForm";
 import { channelNames, defaultChannels } from "@/config/channels";
 import { useLocation, useParams } from "wouter";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 const ProductForm = () => {
@@ -61,9 +61,6 @@ const ProductForm = () => {
   } = useProductForm({
     initialData: mappedProductData,
     onSubmit: async (data) => {
-      console.log('Submitting product data:', data);
-      console.log('🔥 Submitting channels:', channels);
-      
       // Converter canais para formato do banco de dados
       const channelsForDB = Object.entries(channels).map(([type, channelData]) => ({
         type,
@@ -78,8 +75,6 @@ const ProductForm = () => {
         channel.data = dataWithoutEnabled;
         return true;
       });
-      
-      console.log('🔥 Channels formatted for DB:', channelsForDB);
       
       const url = isEditMode ? `/api/products/${productId}` : '/api/products';
       const method = isEditMode ? 'PUT' : 'POST';
@@ -116,50 +111,36 @@ const ProductForm = () => {
   const [channels, setChannels] = useState(defaultChannels);
   const [productSuppliers, setProductSuppliers] = useState([]);
   
-  // Update form data when product details are loaded
-  useEffect(() => {
-    console.log('🔥 useEffect channels triggered:', { productDetails, isEditMode });
-    
-    if (productDetails && isEditMode) {
-      console.log('🔥 Processing product details for channels...');
+  // Memoize channels processing for better performance
+  const processedChannels = useMemo(() => {
+    if (productDetails && isEditMode && productDetails.channels) {
+      const updatedChannels = { ...defaultChannels };
       
-      // Update channels if they exist in product data
-      if (productDetails.channels) {
-        console.log('🔥 Product has channels:', productDetails.channels);
-        const updatedChannels = { ...defaultChannels };
-        
-        productDetails.channels.forEach((channel: any) => {
-          console.log('🔥 Processing channel:', channel);
-          if (updatedChannels[channel.type]) {
-            // Mesclar dados do banco com configuração padrão
-            updatedChannels[channel.type] = {
-              ...updatedChannels[channel.type], // Manter estrutura padrão
-              enabled: channel.isActive,
-              ...channel.data // Aplicar dados salvos do banco
-            };
-            console.log('🔥 Updated channel:', channel.type, updatedChannels[channel.type]);
-          } else {
-            console.log('🔥 Channel type not found in updatedChannels:', channel.type);
-            console.log('🔥 Available channels:', Object.keys(updatedChannels));
-          }
-        });
-        
-        console.log('🔥 Final updated channels:', updatedChannels);
-        setChannels(updatedChannels);
-      } else {
-        console.log('🔥 No channels found in product details');
-      }
+      productDetails.channels.forEach((channel: any) => {
+        if (updatedChannels[channel.type]) {
+          updatedChannels[channel.type] = {
+            ...updatedChannels[channel.type],
+            enabled: channel.isActive,
+            ...channel.data
+          };
+        }
+      });
       
-      // Update suppliers if they exist
-      if (productDetails.suppliers) {
-        setProductSuppliers(productDetails.suppliers);
-      }
-    } else {
-      console.log('🔥 Conditions not met for channel processing');
+      return updatedChannels;
     }
+    return defaultChannels;
   }, [productDetails, isEditMode]);
   
-  const handleChannelToggle = (channelKey: string) => {
+  // Update form data when product details are loaded
+  useEffect(() => {
+    setChannels(processedChannels);
+    
+    if (productDetails && isEditMode && productDetails.suppliers) {
+      setProductSuppliers(productDetails.suppliers);
+    }
+  }, [processedChannels, productDetails, isEditMode]);
+  
+  const handleChannelToggle = useCallback((channelKey: string) => {
     setChannels(prev => ({
       ...prev,
       [channelKey]: {
@@ -167,9 +148,9 @@ const ProductForm = () => {
         enabled: !prev[channelKey as keyof typeof prev]?.enabled
       }
     }));
-  };
+  }, []);
   
-  const handleChannelInputChange = (channelKey: string, field: string, value: any) => {
+  const handleChannelInputChange = useCallback((channelKey: string, field: string, value: any) => {
     setChannels(prev => ({
       ...prev,
       [channelKey]: {
@@ -177,11 +158,11 @@ const ProductForm = () => {
         [field]: value
       }
     }));
-  };
+  }, []);
   
-  const handleSuppliersChange = (suppliers: any[]) => {
+  const handleSuppliersChange = useCallback((suppliers: any[]) => {
     setProductSuppliers(suppliers);
-  };
+  }, []);
   
   const handlePhotoUpload = (file: File) => {
     // For now, just create a URL for the file
@@ -213,7 +194,6 @@ const ProductForm = () => {
     queryFn: async () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        console.warn('No token found for brands request');
         return { data: [] };
       }
       
@@ -223,7 +203,6 @@ const ProductForm = () => {
         }
       });
       if (!response.ok) {
-        console.error('Failed to fetch brands:', response.status, response.statusText);
         return { data: [] };
       }
       return response.json();
