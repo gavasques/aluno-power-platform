@@ -135,10 +135,7 @@ export default function ImportacaoSimplificadaRefactored() {
         selectedSimulationId={componentProps.selectedSimulationId}
         onSimulationChange={eventHandlers.onSimulationChange}
         onSave={eventHandlers.onSave}
-        onLoad={uiActions.openLoadDialog}
-        onNewSimulation={eventHandlers.onNew}
         onExportPDF={eventHandlers.onExportPDF}
-        validation={validation}
       />
 
       <ConfigurationPanel
@@ -188,50 +185,7 @@ export default function ImportacaoSimplificadaRefactored() {
         </DialogContent>
       </Dialog>
 
-      {/* Enhanced Load Dialog */}
-      <Dialog open={uiState.showLoadDialog} onOpenChange={uiActions.closeLoadDialog}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Carregar Simulação</DialogTitle>
-            <DialogDescription>
-              Selecione uma simulação salva para carregar:
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-96 overflow-y-auto">
-            {componentProps.isLoading ? (
-              <div className="flex justify-center p-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {componentProps.simulations.map((sim: any) => (
-                  <div
-                    key={sim.id}
-                    className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                    onClick={() => eventHandlers.onLoad(sim)}
-                  >
-                    <div className="font-medium">{sim.nomeSimulacao}</div>
-                    <div className="text-sm text-gray-500">
-                      {sim.produtos?.length || 0} produtos • 
-                      {sim.nomeFornecedor ? ` Fornecedor: ${sim.nomeFornecedor}` : ' Sem fornecedor'}
-                    </div>
-                  </div>
-                ))}
-                {componentProps.simulations.length === 0 && (
-                  <div className="text-center text-gray-500 py-8">
-                    Nenhuma simulação salva encontrada.
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={uiActions.closeLoadDialog}>
-              Cancelar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
 
       {/* Enhanced Delete Confirmation Dialog */}
       <Dialog open={uiState.showDeleteConfirm} onOpenChange={uiActions.closeDeleteConfirm}>

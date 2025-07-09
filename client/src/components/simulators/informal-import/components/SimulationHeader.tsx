@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Save, FileDown, FolderOpen } from "lucide-react";
+import { Save, FileDown } from "lucide-react";
 import { SimulacaoCompleta } from '../types';
 
 interface SimulationHeaderProps {
@@ -13,8 +13,6 @@ interface SimulationHeaderProps {
   selectedSimulationId: number | null;
   onSimulationChange: (updates: Partial<SimulacaoCompleta>) => void;
   onSave: () => void;
-  onLoad: () => void;
-  onNewSimulation: () => void;
   onExportPDF: () => void;
 }
 
@@ -27,8 +25,6 @@ export const SimulationHeader = ({
   selectedSimulationId,
   onSimulationChange,
   onSave,
-  onLoad,
-  onNewSimulation,
   onExportPDF
 }: SimulationHeaderProps) => {
   const [isEditingName, setIsEditingName] = useState(false);
@@ -44,13 +40,6 @@ export const SimulationHeader = ({
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={onNewSimulation} variant="outline">
-            Nova Simulação
-          </Button>
-          <Button onClick={onLoad} variant="outline">
-            <FolderOpen className="w-4 h-4 mr-2" />
-            Carregar
-          </Button>
           <Button onClick={onSave}>
             <Save className="w-4 h-4 mr-2" />
             Salvar
