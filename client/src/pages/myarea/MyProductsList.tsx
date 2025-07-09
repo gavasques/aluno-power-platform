@@ -173,8 +173,13 @@ export default function MyProductsList() {
 
   // Filter products based on debounced search
   const filteredProducts = useMemo(() => {
-    if (!Array.isArray(products)) return [];
-    return (products as Product[]).filter((product: Product) =>
+    // Ensure we have a valid array before processing
+    if (!products || !Array.isArray(products)) {
+      console.warn('Products data is not an array:', products);
+      return [];
+    }
+    
+    return products.filter((product: Product) =>
       product.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       product.sku?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       product.brand?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||

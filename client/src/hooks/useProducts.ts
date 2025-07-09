@@ -13,16 +13,25 @@ export function useProducts(options: UseProductsOptions = {}) {
   const { enabled = true } = options;
 
   const {
-    data: products = [],
+    data: apiResponse,
     isLoading,
     error,
     refetch
-  } = useQuery<Product[], Error>({
+  } = useQuery<{success: boolean, data: Product[]}, Error>({
     queryKey: ["/api/products"],
     enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
+
+  // Extract products array from API response
+  const products = useMemo(() => {
+    if (!apiResponse) return [];
+    if (apiResponse.success && Array.isArray(apiResponse.data)) {
+      return apiResponse.data;
+    }
+    return [];
+  }, [apiResponse]);
 
   const createMutation = useMutation<Product, Error, InsertProduct>({
     mutationFn: (data: InsertProduct) => 
