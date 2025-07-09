@@ -29,6 +29,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
   } = useQuery({
     queryKey: ['/api/products'],
     queryFn: () => apiRequest<DbProduct[]>('/api/products'),
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 
   const addProductMutation = useMutation({

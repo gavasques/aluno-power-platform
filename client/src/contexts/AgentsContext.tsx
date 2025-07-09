@@ -22,6 +22,8 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
 
   const { data: agents = [], isLoading, error, refetch } = useQuery<Agent[]>({
     queryKey: ["/api/agents"],
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour (formerly cacheTime)
   });
 
   const createAgentMutation = useMutation({

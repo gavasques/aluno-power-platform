@@ -39,6 +39,8 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/youtube-videos'],
     queryFn: () => apiRequest<YoutubeVideo[]>('/api/youtube-videos'),
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 
   const {

@@ -40,6 +40,8 @@ export function MaterialsProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/materials'],
     queryFn: () => apiRequest<DbMaterial[]>('/api/materials'),
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 
   // Mock material types for now - should come from API

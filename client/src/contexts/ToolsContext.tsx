@@ -34,6 +34,8 @@ export function ToolsProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/tools'],
     queryFn: () => apiRequest<DbTool[]>('/api/tools'),
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 
   // Fetch tool types from database
@@ -42,6 +44,8 @@ export function ToolsProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/tool-types'],
     queryFn: () => apiRequest<any[]>('/api/tool-types'),
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 
   const addToolMutation = useMutation({
