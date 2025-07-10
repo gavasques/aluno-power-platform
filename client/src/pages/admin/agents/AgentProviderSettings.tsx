@@ -20,7 +20,8 @@ import {
   FileJson,
   Sliders,
   Wrench,
-  Settings2
+  Settings2,
+  Database
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +36,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { KnowledgeBaseManager } from "./KnowledgeBaseManager";
 
 interface Agent {
   id: string;
@@ -86,6 +88,8 @@ export default function AgentProviderSettings() {
   const queryClient = useQueryClient();
 
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [activeTab, setActiveTab] = useState<'providers' | 'knowledge-base'>('providers');
+  
   const [formData, setFormData] = useState<any>({
     provider: 'openai' as Agent['provider'],
     model: '',
@@ -431,15 +435,45 @@ export default function AgentProviderSettings() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Status dos Provedores */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="w-5 h-5" />
-                Status dos Provedores
-              </CardTitle>
-            </CardHeader>
+        {/* Navigation Tabs */}
+      <div className="mb-6">
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setActiveTab('providers')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'providers'
+                ? 'bg-blue-100 text-blue-800 border-2 border-blue-200'
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Settings className="w-4 h-4 inline mr-2" />
+            Configurações de Provedores
+          </button>
+          <button
+            onClick={() => setActiveTab('knowledge-base')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'knowledge-base'
+                ? 'bg-blue-100 text-blue-800 border-2 border-blue-200'
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Database className="w-4 h-4 inline mr-2" />
+            Base de Conhecimento
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'providers' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Status dos Provedores */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-5 h-5" />
+                  Status dos Provedores
+                </CardTitle>
+              </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {PROVIDERS.map((provider) => {
@@ -1428,8 +1462,39 @@ export default function AgentProviderSettings() {
               </CardContent>
             </Card>
           )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === 'knowledge-base' && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5" />
+                Gerenciamento de Base de Conhecimento
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 className="font-medium text-blue-800 mb-2">
+                  📚 Sistema de Recuperação OpenAI (Retrieval)
+                </h3>
+                <p className="text-blue-700 text-sm mb-3">
+                  Faça upload de documentos para que os agentes OpenAI possam usar informações específicas 
+                  da sua empresa em suas respostas. Ideal para manuais, políticas, catálogos de produtos e conhecimento especializado.
+                </p>
+                <div className="text-xs text-blue-600 space-y-1">
+                  <div><strong>Tipos suportados:</strong> PDF, TXT, MD, DOCX (até 10MB cada)</div>
+                  <div><strong>Como usar:</strong> Ative "Recuperação de Informações" nas configurações do agente OpenAI</div>
+                  <div><strong>Funcionamento:</strong> O agente busca automaticamente nos documentos quando relevante para a pergunta</div>
+                </div>
+              </div>
+              <KnowledgeBaseManager />
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

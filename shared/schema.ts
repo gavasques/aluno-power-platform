@@ -1150,6 +1150,51 @@ export const upscaledImages = pgTable("upscaled_images", {
   createdIdx: index("upscaled_images_created_idx").on(table.createdAt),
 }));
 
+// Knowledge Base Documents table
+export const knowledgeBaseDocs = pgTable("knowledge_base_docs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  filename: text("filename").notNull(),
+  originalFilename: text("original_filename").notNull(),
+  fileType: text("file_type").notNull(), // pdf, txt, md, docx
+  fileSize: integer("file_size").notNull(), // in bytes
+  filePath: text("file_path").notNull(), // path to uploaded file
+  content: text("content").notNull(), // extracted text content
+  summary: text("summary"), // AI-generated summary
+  tags: jsonb("tags").default([]), // user-defined tags
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdIdx: index("knowledge_base_docs_user_id_idx").on(table.userId),
+  titleIdx: index("knowledge_base_docs_title_idx").on(table.title),
+  contentIdx: index("knowledge_base_docs_content_idx").on(table.content),
+}));
+
+// Knowledge Base Collections table (organize docs into collections)
+export const knowledgeBaseCollections = pgTable("knowledge_base_collections", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  isDefault: boolean("is_default").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdIdx: index("knowledge_base_collections_user_id_idx").on(table.userId),
+}));
+
+// Junction table for docs and collections
+export const knowledgeBaseDocCollections = pgTable("knowledge_base_doc_collections", {
+  id: serial("id").primaryKey(),
+  docId: integer("doc_id").notNull().references(() => knowledgeBaseDocs.id),
+  collectionId: integer("collection_id").notNull().references(() => knowledgeBaseCollections.id),
+  addedAt: timestamp("added_at").notNull().defaultNow(),
+}, (table) => ({
+  uniqueDocCollection: unique().on(table.docId, table.collectionId),
+}));
+
 // AI Image Generation Logs - Specialized table for AI image generation tracking
 export const aiImgGenerationLogs = pgTable("ai_img_generation_logs", {
   id: serial("id").primaryKey(),
@@ -1511,6 +1556,33 @@ export const insertProductSupplierSchema = createInsertSchema(productSuppliers).
 });
 export type InsertProductSupplier = z.infer<typeof insertProductSupplierSchema>;
 export type ProductSupplier = typeof productSuppliers.$inferSelect;
+
+// Knowledge Base schemas
+export const insertKnowledgeBaseDocSchema = createInsertSchema(knowledgeBaseDocs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertKnowledgeBaseCollectionSchema = createInsertSchema(knowledgeBaseCollections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertKnowledgeBaseDocCollectionSchema = createInsertSchema(knowledgeBaseDocCollections).omit({
+  id: true,
+  addedAt: true,
+});
+
+export type InsertKnowledgeBaseDoc = z.infer<typeof insertKnowledgeBaseDocSchema>;
+export type KnowledgeBaseDoc = typeof knowledgeBaseDocs.$inferSelect;
+
+export type InsertKnowledgeBaseCollection = z.infer<typeof insertKnowledgeBaseCollectionSchema>;
+export type KnowledgeBaseCollection = typeof knowledgeBaseCollections.$inferSelect;
+
+export type InsertKnowledgeBaseDocCollection = z.infer<typeof insertKnowledgeBaseDocCollectionSchema>;
+export type KnowledgeBaseDocCollection = typeof knowledgeBaseDocCollections.$inferSelect;
 
 // Insert schemas for supplier conversations
 export const insertSupplierConversationSchema = createInsertSchema(supplierConversations).omit({

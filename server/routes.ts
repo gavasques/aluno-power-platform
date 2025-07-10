@@ -101,6 +101,7 @@ import materialRoutes from "./routes/materialRoutes";
 import aiProviderRoutes from "./routes/aiProviders";
 import materialCategoryRoutes from "./routes/materialCategoryRoutes";
 import materialTypeRoutes from "./routes/materialTypeRoutes";
+import knowledgeBaseRoutes from "./routes/knowledgeBase";
 import { aiProviderService } from "./services/aiProviderService";
 import { SessionService } from "./services/sessionService";
 import { amazonListingService as amazonService } from "./services/amazonListingService";
@@ -191,6 +192,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // User profile routes
   app.use('/api/user/profile', userProfileRoutes);
+  
+  // Knowledge base routes
+  app.use('/api/knowledge-base', knowledgeBaseRoutes);
   
   // Simulator routes
   const simulatorRoutes = await import('./routes/simulators');
