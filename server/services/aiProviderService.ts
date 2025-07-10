@@ -51,6 +51,10 @@ export class AIProviderService {
     return this.generateResponse({ ...request, provider: 'deepseek' });
   }
 
+  async generateXAI(request: AIRequest): Promise<AIResponse> {
+    return this.generateResponse({ ...request, provider: 'xai' });
+  }
+
   isProviderConfigured(provider: string): boolean {
     return this.providerManager.isProviderConfigured(provider as AIProvider);
   }

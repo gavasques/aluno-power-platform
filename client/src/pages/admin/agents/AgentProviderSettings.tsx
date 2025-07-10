@@ -13,7 +13,10 @@ import {
   DollarSign,
   ImageIcon,
   Upload,
-  Trash2
+  Trash2,
+  Brain,
+  Search,
+  Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -32,7 +36,7 @@ interface Agent {
   id: string;
   name: string;
   description: string;
-  provider: 'openai' | 'anthropic' | 'gemini';
+  provider: 'openai' | 'anthropic' | 'gemini' | 'deepseek' | 'xai';
   model: string;
   temperature: number;
   maxTokens: number;
@@ -53,6 +57,7 @@ interface ProviderStatus {
   anthropic: boolean;
   gemini: boolean;
   deepseek: boolean;
+  xai: boolean;
 }
 
 interface ProviderInfo {
@@ -66,7 +71,8 @@ const PROVIDERS: ProviderInfo[] = [
   { value: 'openai', label: 'OpenAI (ChatGPT)', icon: '🤖', color: 'bg-green-100 text-green-800' },
   { value: 'anthropic', label: 'Anthropic (Claude)', icon: '🧠', color: 'bg-purple-100 text-purple-800' },
   { value: 'gemini', label: 'Google Gemini', icon: '⭐', color: 'bg-blue-100 text-blue-800' },
-  { value: 'deepseek', label: 'DeepSeek AI', icon: '🔍', color: 'bg-orange-100 text-orange-800' }
+  { value: 'deepseek', label: 'DeepSeek AI', icon: '🔍', color: 'bg-orange-100 text-orange-800' },
+  { value: 'xai', label: 'xAI (Grok)', icon: '🧪', color: 'bg-indigo-100 text-indigo-800' }
 ];
 
 export default function AgentProviderSettings() {
@@ -80,7 +86,11 @@ export default function AgentProviderSettings() {
     provider: 'openai' as Agent['provider'],
     model: '',
     temperature: 0.7,
-    maxTokens: 2000
+    maxTokens: 2000,
+    // Grok specific features
+    reasoningLevel: 'low' as 'low' | 'high',
+    enableSearch: false,
+    enableImageUnderstanding: false
   });
 
   const [testPrompt, setTestPrompt] = useState('Olá! Como você está hoje?');
@@ -164,7 +174,18 @@ export default function AgentProviderSettings() {
 
   // Test connection mutation
   const testConnectionMutation = useMutation({
-    mutationFn: async (data: { provider: string; model: string; prompt: string; temperature: number; maxTokens: number; imageData?: string }) => {
+    mutationFn: async (data: { 
+      provider: string; 
+      model: string; 
+      prompt: string; 
+      temperature: number; 
+      maxTokens: number; 
+      imageData?: string;
+      reasoningLevel?: 'low' | 'high';
+      enableSearch?: boolean;
+      enableImageUnderstanding?: boolean;
+      referenceImages?: Array<{ data: string; filename: string }>;
+    }) => {
       const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -213,7 +234,11 @@ export default function AgentProviderSettings() {
         provider: selectedAgent.provider,
         model: selectedAgent.model,
         temperature: typeof selectedAgent.temperature === 'string' ? parseFloat(selectedAgent.temperature) : selectedAgent.temperature,
-        maxTokens: selectedAgent.maxTokens
+        maxTokens: selectedAgent.maxTokens,
+        // Reset Grok features when changing agent
+        reasoningLevel: 'low',
+        enableSearch: false,
+        enableImageUnderstanding: false
       });
     }
   }, [selectedAgent]);
@@ -268,13 +293,20 @@ export default function AgentProviderSettings() {
       maxTokens: formData.maxTokens
     };
 
+    // Add Grok-specific features for xAI provider
+    if (formData.provider === 'xai') {
+      testData.reasoningLevel = formData.reasoningLevel;
+      testData.enableSearch = formData.enableSearch;
+      testData.enableImageUnderstanding = formData.enableImageUnderstanding;
+    }
+
     // Add image data for image models
     if (formData.model === 'gpt-image-edit' && uploadedImage) {
       testData.imageData = uploadedImage.split(',')[1]; // Remove data:image/...;base64, prefix
     }
 
-    // Add reference images for all image models (gpt-image-1, gpt-image-edit)
-    if (formData.model.includes('image') && referenceImages.length > 0) {
+    // Add reference images for image/vision models
+    if ((formData.model.includes('image') || formData.model.includes('vision')) && referenceImages.length > 0) {
       testData.referenceImages = referenceImages.map(img => ({
         data: img.preview.split(',')[1], // Remove data:image/...;base64, prefix
         filename: img.file.name
@@ -518,6 +550,107 @@ export default function AgentProviderSettings() {
                   />
                 </div>
 
+                {/* Grok-specific Features */}
+                {formData.provider === 'xai' && (
+                  <div className="space-y-6 p-4 border rounded-lg bg-indigo-50 border-indigo-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-xl">🧪</span>
+                      <h3 className="text-lg font-semibold text-indigo-800">Funcionalidades Especiais do Grok</h3>
+                    </div>
+
+                    {/* Reasoning Level */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Brain className="h-4 w-4 text-indigo-600" />
+                        <Label className="text-indigo-800 font-medium">
+                          Nível de Raciocínio (Think Level)
+                        </Label>
+                      </div>
+                      <p className="text-sm text-indigo-600">
+                        Controla a profundidade do raciocínio do modelo. "High" gera respostas mais detalhadas e reflexivas.
+                      </p>
+                      <Select 
+                        value={formData.reasoningLevel} 
+                        onValueChange={(value) => setFormData({ ...formData, reasoningLevel: value as 'low' | 'high' })}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione o nível" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">
+                            <div className="flex items-center gap-2">
+                              <span>🔸 Low (Rápido)</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="high">
+                            <div className="flex items-center gap-2">
+                              <span>🔹 High (Profundo)</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Live Search */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Search className="h-4 w-4 text-indigo-600" />
+                        <Label className="text-indigo-800 font-medium">
+                          Busca em Tempo Real
+                        </Label>
+                      </div>
+                      <p className="text-sm text-indigo-600">
+                        Permite que o modelo busque informações atuais na web durante a geração de respostas.
+                      </p>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="enableSearch"
+                          checked={formData.enableSearch}
+                          onCheckedChange={(checked) => setFormData({ ...formData, enableSearch: checked })}
+                        />
+                        <Label htmlFor="enableSearch" className="text-sm">
+                          Habilitar busca ao vivo
+                        </Label>
+                      </div>
+                    </div>
+
+                    {/* Image Understanding */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-indigo-600" />
+                        <Label className="text-indigo-800 font-medium">
+                          Compreensão de Imagens
+                        </Label>
+                      </div>
+                      <p className="text-sm text-indigo-600">
+                        Habilita análise e descrição detalhada de imagens (disponível para modelos vision).
+                      </p>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="enableImageUnderstanding"
+                          checked={formData.enableImageUnderstanding}
+                          onCheckedChange={(checked) => setFormData({ ...formData, enableImageUnderstanding: checked })}
+                          disabled={!formData.model.includes('vision')}
+                        />
+                        <Label htmlFor="enableImageUnderstanding" className="text-sm">
+                          Habilitar análise de imagens
+                          {formData.model && !formData.model.includes('vision') && (
+                            <span className="text-gray-500 ml-2">(requer modelo vision)</span>
+                          )}
+                        </Label>
+                      </div>
+                    </div>
+
+                    <Alert>
+                      <Brain className="h-4 w-4" />
+                      <AlertDescription className="text-sm">
+                        <strong>Dica:</strong> As funcionalidades especiais do Grok aumentam a qualidade das respostas, 
+                        mas podem resultar em maior consumo de tokens e custo.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+
                 {/* Test Connection Section */}
                 <div className="space-y-4 border-t pt-6">
                   
@@ -534,8 +667,8 @@ export default function AgentProviderSettings() {
               />
             </div>
 
-            {/* Upload de Imagens de Referência - Só aparece para modelos de imagem */}
-            {selectedModel && selectedModel.model && selectedModel.model.toLowerCase().includes('image') && (
+            {/* Upload de Imagens de Referência - Só aparece para modelos de imagem ou vision do Grok */}
+            {selectedModel && selectedModel.model && (selectedModel.model.toLowerCase().includes('image') || selectedModel.model.toLowerCase().includes('vision')) && (
               <div className="space-y-4 p-4 border rounded-lg bg-blue-50 border-blue-200">
                 <div className="flex items-center gap-2">
                   <ImageIcon className="h-5 w-5 text-blue-600" />
@@ -544,7 +677,10 @@ export default function AgentProviderSettings() {
                   </Label>
                 </div>
                 <p className="text-sm text-blue-600">
-                  Para modelos de geração de imagem, você pode fornecer imagens de referência que serão usadas como base para edição ou inspiração.
+                  {selectedModel.model.includes('vision') 
+                    ? "Para modelos vision, você pode fornecer imagens para análise e descrição detalhada."
+                    : "Para modelos de geração de imagem, você pode fornecer imagens de referência que serão usadas como base para edição ou inspiração."
+                  }
                 </p>
 
                 <div className="space-y-3">

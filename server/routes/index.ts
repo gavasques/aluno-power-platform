@@ -24,6 +24,7 @@ import stripeWebhookTestRoutes from './stripe/webhook-test';
 import featureCostsRoutes from './featureCosts';
 import investmentSimulationsRoutes from './investment-simulations';
 import simulatorsRoutes from './simulators';
+import aiProviderRoutes from './aiProviders';
 
 /**
  * Register all modular routes
@@ -73,6 +74,9 @@ export function registerModularRoutes(app: Express): void {
   
   // Simulators Routes - Import/Export/ROI etc.
   app.use('/api/simulations', simulatorsRoutes);
+  
+  // AI Provider Routes - xAI/Grok Integration & Provider Testing
+  app.use('/api/ai-providers', aiProviderRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

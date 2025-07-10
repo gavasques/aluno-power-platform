@@ -98,6 +98,7 @@ import { openaiService } from "./services/openaiService";
 // 🏗️  [PHASE_3] MATERIAL DOMAIN MODULAR INTEGRATION
 import { MaterialController } from "./controllers/MaterialController";
 import materialRoutes from "./routes/materialRoutes";
+import aiProviderRoutes from "./routes/aiProviders";
 import materialCategoryRoutes from "./routes/materialCategoryRoutes";
 import materialTypeRoutes from "./routes/materialTypeRoutes";
 import { aiProviderService } from "./services/aiProviderService";

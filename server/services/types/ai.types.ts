@@ -1,4 +1,4 @@
-export type AIProvider = 'openai' | 'anthropic' | 'gemini' | 'deepseek';
+export type AIProvider = 'openai' | 'anthropic' | 'gemini' | 'deepseek' | 'xai';
 
 export interface AIRequest {
   provider: AIProvider;
@@ -14,6 +14,9 @@ export interface AIRequest {
     data: string;
     filename: string;
   }>;
+  // Grok-specific features
+  reasoningLevel?: 'low' | 'high';
+  enableSearch?: boolean;
 }
 
 export interface AIResponse {
@@ -32,6 +35,7 @@ export interface ModelConfig {
   inputCostPer1M: number;
   outputCostPer1M: number;
   maxTokens: number;
+  capabilities?: string[];
 }
 
 export interface ProviderStatus {
@@ -39,4 +43,5 @@ export interface ProviderStatus {
   anthropic: boolean;
   gemini: boolean;
   deepseek: boolean;
+  xai: boolean;
 }

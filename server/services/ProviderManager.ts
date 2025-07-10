@@ -2,6 +2,7 @@ import { OpenAIProvider } from './providers/OpenAIProvider';
 import { AnthropicProvider } from './providers/AnthropicProvider';
 import { GeminiProvider } from './providers/GeminiProvider';
 import { DeepSeekProvider } from './providers/DeepSeekProvider';
+import { XAIProvider } from './providers/XAIProvider';
 import { BaseProvider } from './providers/BaseProvider';
 import { AIRequest, AIResponse, ModelConfig, ProviderStatus, AIProvider } from './types/ai.types';
 
@@ -14,6 +15,7 @@ export class ProviderManager {
     this.providers.set('anthropic', new AnthropicProvider());
     this.providers.set('gemini', new GeminiProvider());
     this.providers.set('deepseek', new DeepSeekProvider());
+    this.providers.set('xai', new XAIProvider());
   }
 
   getProviderStatus(): ProviderStatus {
@@ -21,7 +23,8 @@ export class ProviderManager {
       openai: this.providers.get('openai')?.isConfigured() ?? false,
       anthropic: this.providers.get('anthropic')?.isConfigured() ?? false,
       gemini: this.providers.get('gemini')?.isConfigured() ?? false,
-      deepseek: this.providers.get('deepseek')?.isConfigured() ?? false
+      deepseek: this.providers.get('deepseek')?.isConfigured() ?? false,
+      xai: this.providers.get('xai')?.isConfigured() ?? false
     };
   }
 
