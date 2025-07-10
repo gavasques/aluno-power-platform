@@ -3,12 +3,21 @@ import { db } from '../db';
 import { featureCosts } from '../../shared/schema';
 import { eq, desc } from 'drizzle-orm';
 import { requireAuth } from '../security';
+import { cache } from '../cache';
 
 const router = Router();
 
 // Buscar todos os custos de features ativas
 router.get('/', async (req: Request, res: Response) => {
   try {
+    const cacheKey = 'feature-costs-all';
+    
+    // Tentar buscar do cache primeiro
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const costs = await db.select()
       .from(featureCosts)
       .where(eq(featureCosts.isActive, true))
@@ -34,14 +43,19 @@ router.get('/', async (req: Request, res: Response) => {
       return acc;
     }, {});
 
-    res.json({
+    const result = {
       success: true,
       data: {
         byCategory: costsByCategory,
         costsMap: costsMap,
         totalFeatures: costs.length
       }
-    });
+    };
+
+    // Cache por 5 minutos (300 segundos)
+    await cache.set(cacheKey, result, 300);
+
+    res.json(result);
   } catch (error) {
     console.error('Error fetching feature costs:', error);
     res.status(500).json({
@@ -120,6 +134,9 @@ router.put('/:featureName', async (req: Request, res: Response) => {
         error: 'Ferramenta não encontrada'
       });
     }
+
+    // Invalidar cache quando custos são atualizados
+    await cache.delete('feature-costs-all');
 
     res.json({
       success: true,
