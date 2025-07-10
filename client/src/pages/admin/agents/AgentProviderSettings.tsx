@@ -88,7 +88,7 @@ export default function AgentProviderSettings() {
     temperature: 0.7,
     maxTokens: 2000,
     // Grok specific features
-    reasoningLevel: 'low' as 'low' | 'high',
+    reasoningLevel: 'disabled' as 'disabled' | 'low' | 'high',
     enableSearch: false,
     enableImageUnderstanding: false
   });
@@ -185,7 +185,7 @@ export default function AgentProviderSettings() {
       temperature: number; 
       maxTokens: number; 
       imageData?: string;
-      reasoningLevel?: 'low' | 'high';
+      reasoningLevel?: 'disabled' | 'low' | 'high';
       enableSearch?: boolean;
       enableImageUnderstanding?: boolean;
       referenceImages?: Array<{ data: string; filename: string }>;
@@ -244,7 +244,7 @@ export default function AgentProviderSettings() {
         temperature: typeof selectedAgent.temperature === 'string' ? parseFloat(selectedAgent.temperature) : selectedAgent.temperature,
         maxTokens: selectedAgent.maxTokens,
         // Reset Grok features when changing agent
-        reasoningLevel: 'low',
+        reasoningLevel: 'disabled',
         enableSearch: false,
         enableImageUnderstanding: false
       });
@@ -303,7 +303,10 @@ export default function AgentProviderSettings() {
 
     // Add Grok-specific features for xAI provider
     if (formData.provider === 'xai') {
-      testData.reasoningLevel = formData.reasoningLevel;
+      // Only include reasoningLevel if not disabled
+      if (formData.reasoningLevel !== 'disabled') {
+        testData.reasoningLevel = formData.reasoningLevel;
+      }
       testData.enableSearch = formData.enableSearch;
       testData.enableImageUnderstanding = formData.enableImageUnderstanding;
     }
@@ -599,6 +602,11 @@ export default function AgentProviderSettings() {
                           <SelectValue placeholder="Selecione o nível" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="disabled">
+                            <div className="flex items-center gap-2">
+                              <span>⚪ Desabilitado</span>
+                            </div>
+                          </SelectItem>
                           <SelectItem value="low">
                             <div className="flex items-center gap-2">
                               <span>🔸 Low (Rápido)</span>

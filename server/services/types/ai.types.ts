@@ -15,7 +15,7 @@ export interface AIRequest {
     filename: string;
   }>;
   // Grok-specific features
-  reasoningLevel?: 'low' | 'high';
+  reasoningLevel?: 'disabled' | 'low' | 'high';
   enableSearch?: boolean;
 }
 

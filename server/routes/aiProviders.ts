@@ -18,7 +18,7 @@ const testRequestSchema = z.object({
     filename: z.string()
   })).optional(),
   // Grok-specific features
-  reasoningLevel: z.enum(['low', 'high']).optional(),
+  reasoningLevel: z.enum(['disabled', 'low', 'high']).optional(),
   enableSearch: z.boolean().optional(),
   enableImageUnderstanding: z.boolean().optional()
 });
