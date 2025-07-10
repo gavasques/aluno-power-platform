@@ -324,7 +324,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 10, 2025 - 9:51 PM**: ✅ OPENROUTER DYNAMIC MODEL INTEGRATION COMPLETE - 318+ MODELS AVAILABLE IN REAL-TIME
+- **January 10, 2025 - 9:58 PM**: ✅ OPENROUTER DYNAMIC MODEL INTEGRATION COMPLETE - 318+ MODELS AVAILABLE IN REAL-TIME
   - **OpenRouter Dynamic API Integration**:
     - ✅ **API Key Configured**: OpenRouter API key successfully set in Replit Secrets
     - ✅ **Dynamic Model Fetching**: OpenRouter now fetches 318+ models directly from https://openrouter.ai/api/v1/models
@@ -347,6 +347,12 @@ Preferred communication style: Simple, everyday language.
     - 400+ AI models through OpenRouter's unified interface
     - Auto-routing capabilities for optimal model selection
     - Free and premium model options with real-time pricing
+  - **Critical Bug Fix Applied**:
+    - ✅ **Schema Validation Error Fixed**: Added "openrouter" to testRequestSchema enum in aiProviders.ts
+    - ✅ **Full System Restart**: Applied changes with workflow restart to ensure proper initialization
+    - ✅ **Production Testing**: Claude 3 Haiku and GPT-4o-mini models tested successfully with Portuguese responses
+    - ✅ **Error Resolution**: Eliminated "Invalid enum value" error for OpenRouter provider
+    - ✅ **Complete Functionality**: All OpenRouter models now accessible through the test interface
 
 - **January 10, 2025 - 9:00 PM**: ✅ CLAUDE EXTENDED THINKING FEATURE FULLY IMPLEMENTED - COMPLETE FRONTEND & BACKEND INTEGRATION
   - **Complete Claude Extended Thinking System**:

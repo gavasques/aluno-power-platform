@@ -7,7 +7,7 @@ const router = Router();
 
 // Test AI Provider Connection
 const testRequestSchema = z.object({
-  provider: z.enum(['openai', 'anthropic', 'gemini', 'deepseek', 'xai']),
+  provider: z.enum(['openai', 'anthropic', 'gemini', 'deepseek', 'xai', 'openrouter']),
   model: z.string(),
   prompt: z.string(),
   temperature: z.number().min(0).max(2).optional(),
