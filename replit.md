@@ -105,6 +105,219 @@ The system uses PostgreSQL with the following core tables:
 - Image optimization and CDN integration
 - WebSocket connection management
 
+## AI Providers - Guia Completo de Uso
+
+### Como Usar Cada Provider de IA
+
+#### OpenAI Provider 🤖
+
+**Configuração Necessária:**
+- Variável de ambiente: `OPENAI_API_KEY`
+- Status deve aparecer como "Configurado" na interface
+
+**Modelos Disponíveis e Suas Capacidades:**
+
+1. **GPT-4.1** (RECOMENDADO) - $2.50/$10.00 por 1M tokens
+   - ✅ Chat tradicional
+   - ✅ Análise de imagens (vision)
+   - ✅ Busca na web em tempo real
+   - ✅ Ferramentas e function calling
+   - ✅ JSON estruturado
+   - ✅ Todos os parâmetros avançados
+
+2. **GPT-4o** - $2.50/$10.00 por 1M tokens
+   - ✅ Chat tradicional
+   - ✅ Análise de imagens (vision)
+   - ✅ Busca na web em tempo real
+   - ✅ Ferramentas e function calling
+   - ✅ JSON estruturado
+   - ✅ Todos os parâmetros avançados
+
+3. **GPT-4o-mini** - $0.15/$0.60 por 1M tokens
+   - ✅ Chat tradicional
+   - ✅ Análise de imagens (vision)
+   - ✅ Busca na web em tempo real
+   - ✅ Ferramentas e function calling
+   - ✅ JSON estruturado
+   - ✅ Todos os parâmetros avançados
+
+4. **o4-mini** (RECOMENDADO REASONING) - $1.00/$4.00 por 1M tokens
+   - ✅ Raciocínio avançado
+   - ✅ Análise de imagens (vision)
+   - ✅ Processamento de arquivos
+   - ✅ JSON estruturado
+   - ✅ Controle de reasoning_effort (baixo/médio/alto)
+   - ❌ Não suporta parâmetros tradicionais (temperature, top_p, etc.)
+   - ❌ Não suporta busca na web
+
+5. **o3** - $20.00/$80.00 por 1M tokens
+   - ✅ Raciocínio premium
+   - ✅ Análise de imagens (vision)
+   - ✅ Processamento de arquivos
+   - ✅ JSON estruturado
+   - ❌ Não suporta reasoning_effort
+   - ❌ Não suporta parâmetros tradicionais
+   - ❌ Não suporta busca na web
+
+6. **o3-mini** - $0.15/$0.60 por 1M tokens
+   - ✅ Raciocínio focado em STEM
+   - ✅ JSON estruturado
+   - ✅ Controle de reasoning_effort (baixo/médio/alto)
+   - ❌ Não suporta visão
+   - ❌ Não suporta parâmetros tradicionais
+   - ❌ Não suporta busca na web
+
+7. **GPT-Image-1** - $5.00/$0.167 por 1M tokens
+   - ✅ Geração de imagens
+   - ✅ Edição de imagens
+   - ❌ Não suporta chat tradicional
+
+**Funcionalidades Avançadas da OpenAI:**
+
+1. **Web Search** (apenas modelos GPT tradicionais):
+   - Busca em tempo real na web
+   - Informações atualizadas
+   - Resultados integrados na resposta
+
+2. **Reasoning Mode** (modelos o3/o4-mini/o3-mini):
+   - Raciocínio profundo e sistemático
+   - Análise step-by-step complexa
+   - reasoning_effort para o3-mini e o4-mini
+
+3. **Response Format**:
+   - Texto normal
+   - JSON Object (estruturado)
+   - JSON Schema (com validação)
+
+4. **Parâmetros Avançados** (apenas modelos não-reasoning):
+   - Seed: Para resultados determinísticos
+   - Top P: Controle de criatividade
+   - Frequency Penalty: Reduz repetições
+   - Presence Penalty: Encoraja novos tópicos
+
+5. **Tools/Functions**:
+   - Code Interpreter: Execução de código
+   - Retrieval: Busca em documentos
+
+**Como Testar:**
+1. Vá em Agentes → Configurações de Provedores
+2. Selecione OpenAI como provider
+3. Escolha o modelo desejado
+4. Configure as funcionalidades específicas do modelo
+5. Clique em "Testar Conexão"
+
+---
+
+#### xAI (Grok) Provider 🚀
+
+**Configuração Necessária:**
+- Variável de ambiente: `XAI_API_KEY`
+- Status deve aparecer como "Configurado" na interface
+
+**Modelos Disponíveis e Suas Capacidades:**
+
+1. **grok-4-0709** (RECOMENDADO) - $3.00 por 1M tokens
+   - ✅ Modelo mais recente
+   - ✅ Contexto de 256K tokens
+   - ✅ Busca na web nativa
+   - ✅ Raciocínio avançado
+   - ✅ Análise de imagens
+
+2. **grok-3** - $3.00 por 1M tokens
+   - ✅ Modelo robusto
+   - ✅ Busca na web nativa
+   - ✅ Raciocínio avançado
+
+3. **grok-3-mini** - $0.60 por 1M tokens
+   - ✅ Versão econômica
+   - ✅ Busca na web nativa
+   - ✅ Boa para tarefas simples
+
+4. **grok-3-fast** - $1.50 por 1M tokens
+   - ✅ Resposta rápida
+   - ✅ Busca na web nativa
+   - ✅ Balanceado
+
+5. **grok-3-mini-fast** - $0.30 por 1M tokens
+   - ✅ Mais econômico e rápido
+   - ✅ Busca na web nativa
+
+6. **grok-2-vision-1212** - $2.00 por 1M tokens
+   - ✅ Análise de imagens
+   - ✅ Contexto de 32K tokens
+   - ✅ Busca na web nativa
+
+7. **grok-2-image-1212** - $0.07 por imagem
+   - ✅ Geração de imagens
+   - ✅ Qualidade profissional
+
+**Funcionalidades Exclusivas do Grok:**
+
+1. **Live Search** (todos os modelos):
+   - Busca na web em tempo real durante a resposta
+   - Informações sempre atualizadas
+   - Integração automática dos resultados
+
+2. **Reasoning Level**:
+   - Think Low: Resposta rápida
+   - Think High: Raciocínio profundo
+
+3. **Image Understanding** (modelos vision):
+   - Análise detalhada de imagens
+   - Compreensão de contexto visual
+   - Descrições profissionais
+
+**Como Testar:**
+1. Vá em Agentes → Configurações de Provedores
+2. Selecione xAI como provider
+3. Escolha grok-4-0709 (recomendado)
+4. Ative "Live Search" para informações atualizadas
+5. Configure "Reasoning Level" conforme necessário
+6. Clique em "Testar Conexão"
+
+---
+
+#### Outros Providers
+
+**Anthropic (Claude)**
+- Provider: anthropic
+- Necessita: `ANTHROPIC_API_KEY`
+- Status: Configurado e funcional
+
+**Google (Gemini)**
+- Provider: gemini  
+- Necessita: `GOOGLE_API_KEY`
+- Status: Configurado e funcional
+
+**DeepSeek**
+- Provider: deepseek
+- Necessita: `DEEPSEEK_API_KEY` 
+- Status: Configurado e funcional
+
+---
+
+### Dicas de Uso por Caso:
+
+**Para Análise de Imagens:**
+- Use: gpt-4.1, gpt-4o, o4-mini, o3, grok-2-vision-1212
+
+**Para Busca na Web:**
+- Use: gpt-4.1, gpt-4o, gpt-4o-mini (OpenAI) ou qualquer Grok
+
+**Para Raciocínio Complexo:**
+- Use: o3, o4-mini, o3-mini (OpenAI) ou grok-4-0709 (xAI)
+
+**Para Economia:**
+- Use: gpt-4o-mini, o3-mini (OpenAI) ou grok-3-mini (xAI)
+
+**Para Geração de Imagens:**
+- Use: gpt-image-1 (OpenAI) ou grok-2-image-1212 (xAI)
+
+**Para Respostas Estruturadas:**
+- Use: Qualquer modelo OpenAI com Response Format: JSON Object
+
+---
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

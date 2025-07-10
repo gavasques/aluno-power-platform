@@ -20,7 +20,21 @@ const testRequestSchema = z.object({
   // Grok-specific features
   reasoningLevel: z.enum(['disabled', 'low', 'high']).optional(),
   enableSearch: z.boolean().optional(),
-  enableImageUnderstanding: z.boolean().optional()
+  enableImageUnderstanding: z.boolean().optional(),
+  // OpenAI-specific features
+  enableReasoning: z.boolean().optional(),
+  reasoning_effort: z.enum(['low', 'medium', 'high']).optional(),
+  response_format: z.object({
+    type: z.enum(['text', 'json_object', 'json_schema'])
+  }).optional(),
+  seed: z.number().optional(),
+  top_p: z.number().optional(),
+  frequency_penalty: z.number().optional(),
+  presence_penalty: z.number().optional(),
+  tools: z.array(z.object({
+    type: z.string()
+  })).optional(),
+  fineTuneModel: z.string().optional()
 });
 
 router.post('/test', requireAuth, async (req, res) => {
@@ -36,7 +50,7 @@ router.post('/test', requireAuth, async (req, res) => {
       });
     }
 
-    // Prepare AI request with Grok features
+    // Prepare AI request with all provider features
     const aiRequest = {
       provider: validatedData.provider,
       model: validatedData.model,
@@ -52,6 +66,16 @@ router.post('/test', requireAuth, async (req, res) => {
       // Grok-specific features
       reasoningLevel: validatedData.reasoningLevel,
       enableSearch: validatedData.enableSearch,
+      // OpenAI-specific features
+      enableReasoning: validatedData.enableReasoning,
+      reasoning_effort: validatedData.reasoning_effort,
+      response_format: validatedData.response_format,
+      seed: validatedData.seed,
+      top_p: validatedData.top_p,
+      frequency_penalty: validatedData.frequency_penalty,
+      presence_penalty: validatedData.presence_penalty,
+      tools: validatedData.tools,
+      fineTuneModel: validatedData.fineTuneModel,
     };
 
     console.log('🚀 [AI_PROVIDER_TEST] Request prepared:', {

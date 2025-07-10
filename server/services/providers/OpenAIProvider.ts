@@ -28,7 +28,7 @@ export class OpenAIProvider extends BaseProvider {
         inputCostPer1M: 2.50, 
         outputCostPer1M: 10.00, 
         maxTokens: 128000,
-        capabilities: ['chat', 'vision', 'tools', 'json', 'structured_output'],
+        capabilities: ['chat', 'vision', 'tools', 'json', 'structured_output', 'web_search'],
         recommended: true
       },
       { 
@@ -37,7 +37,7 @@ export class OpenAIProvider extends BaseProvider {
         inputCostPer1M: 2.50, 
         outputCostPer1M: 10.00, 
         maxTokens: 128000,
-        capabilities: ['chat', 'vision', 'tools', 'json', 'structured_output'] 
+        capabilities: ['chat', 'vision', 'tools', 'json', 'structured_output', 'web_search'] 
       },
       { 
         provider: 'openai', 
@@ -45,7 +45,7 @@ export class OpenAIProvider extends BaseProvider {
         inputCostPer1M: 0.15, 
         outputCostPer1M: 0.60, 
         maxTokens: 128000,
-        capabilities: ['chat', 'vision', 'tools', 'json', 'structured_output'] 
+        capabilities: ['chat', 'vision', 'tools', 'json', 'structured_output', 'web_search'] 
       },
       { 
         provider: 'openai', 

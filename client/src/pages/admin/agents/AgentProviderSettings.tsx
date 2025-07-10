@@ -758,6 +758,31 @@ export default function AgentProviderSettings() {
                       <h3 className="text-lg font-semibold text-green-800">Funcionalidades Avançadas da OpenAI</h3>
                     </div>
 
+                    {/* Web Search (for GPT models only) */}
+                    {['gpt-4.1', 'gpt-4o', 'gpt-4o-mini'].includes(formData.model) && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Search className="h-4 w-4 text-green-600" />
+                          <Label className="text-green-800 font-medium">
+                            Busca na Web
+                          </Label>
+                        </div>
+                        <p className="text-sm text-green-600">
+                          Permite que o modelo realize buscas na web em tempo real para informações atualizadas.
+                        </p>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="enableSearch"
+                            checked={formData.enableSearch || false}
+                            onCheckedChange={(checked) => setFormData({ ...formData, enableSearch: checked })}
+                          />
+                          <Label htmlFor="enableSearch" className="text-sm">
+                            Habilitar busca na web
+                          </Label>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Reasoning Mode (for o3, o4-mini, o3-mini) */}
                     {['o3', 'o4-mini', 'o3-mini'].includes(formData.model) && (
                       <div className="space-y-3">
