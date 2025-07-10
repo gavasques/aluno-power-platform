@@ -122,7 +122,7 @@ export default function AgentProviderSettings() {
   // Update agent mutation
   const updateAgentMutation = useMutation({
     mutationFn: async (agentData: Agent) => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(`/api/agents/${agentData.id}`, {
         method: 'PUT',
         headers: { 
@@ -190,7 +190,7 @@ export default function AgentProviderSettings() {
       enableImageUnderstanding?: boolean;
       referenceImages?: Array<{ data: string; filename: string }>;
     }) => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
         headers: { 
