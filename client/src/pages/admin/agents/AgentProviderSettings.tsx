@@ -340,22 +340,31 @@ export default function AgentProviderSettings() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <Link href="/admin">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
-        </Link>
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Settings className="w-6 h-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Configurações de Provedores IA</h1>
-            <p className="text-gray-600">Configure os provedores de IA e modelos para cada agente</p>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Link href="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Settings className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Configurações de Provedores IA</h1>
+              <p className="text-gray-600">Configure os provedores de IA e modelos para cada agente</p>
+            </div>
           </div>
         </div>
+        
+        <Link href="/admin/agents/config">
+          <Button variant="outline">
+            <Settings className="h-4 w-4 mr-2" />
+            Gerenciar Provedores
+          </Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

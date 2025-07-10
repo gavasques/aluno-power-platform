@@ -605,6 +605,51 @@ export const toolVideos = pgTable("tool_videos", {
 
 
 // Agents table
+// Provider configurations
+export const providerConfigs = pgTable("provider_configs", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull().unique(), // 'openai', 'anthropic', 'gemini', 'deepseek', 'xai'
+  name: text("name").notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  defaultTemperature: decimal("default_temperature", { precision: 3, scale: 2 }).notNull().default("0.7"),
+  defaultMaxTokens: integer("default_max_tokens").notNull().default(2000),
+  supportsStreaming: boolean("supports_streaming").notNull().default(true),
+  supportsVision: boolean("supports_vision").notNull().default(false),
+  supportsFunctionCalling: boolean("supports_function_calling").notNull().default(false),
+  customSettings: jsonb("custom_settings"), // Provider-specific settings
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Model configurations
+export const modelConfigs = pgTable("model_configs", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull(),
+  model: text("model").notNull(),
+  displayName: text("display_name").notNull(),
+  description: text("description"),
+  inputCostPer1M: decimal("input_cost_per_1m", { precision: 10, scale: 4 }).notNull(),
+  outputCostPer1M: decimal("output_cost_per_1m", { precision: 10, scale: 4 }).notNull(),
+  maxTokens: integer("max_tokens").notNull(),
+  contextWindow: integer("context_window").notNull(),
+  temperature: decimal("temperature", { precision: 3, scale: 2 }).notNull().default("0.7"),
+  temperatureMin: decimal("temperature_min", { precision: 3, scale: 2 }).notNull().default("0"),
+  temperatureMax: decimal("temperature_max", { precision: 3, scale: 2 }).notNull().default("2"),
+  supportsTemperature: boolean("supports_temperature").notNull().default(true),
+  supportsImages: boolean("supports_images").notNull().default(false),
+  supportsSystemMessage: boolean("supports_system_message").notNull().default(true),
+  capabilities: text("capabilities").array(),
+  customSettings: jsonb("custom_settings"), // Model-specific settings (e.g., reasoningLevel for Grok)
+  isRecommended: boolean("is_recommended").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  providerModelIdx: index("model_configs_provider_model_idx").on(table.provider, table.model),
+  activeIdx: index("model_configs_active_idx").on(table.isActive),
+}));
+
 export const agents = pgTable("agents", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -612,11 +657,12 @@ export const agents = pgTable("agents", {
   category: text("category"),
   icon: text("icon"),
   isActive: boolean("is_active").notNull().default(true),
-  provider: text("provider").notNull().default("openai"), // 'openai', 'anthropic', 'gemini', 'deepseek'
+  provider: text("provider").notNull().default("openai"), // 'openai', 'anthropic', 'gemini', 'deepseek', 'xai'
   model: text("model").notNull(),
   temperature: decimal("temperature", { precision: 3, scale: 2 }).notNull().default("0.7"),
   maxTokens: integer("max_tokens").notNull().default(2000),
   costPer1kTokens: decimal("cost_per_1k_tokens", { precision: 8, scale: 6 }).notNull(),
+  customSettings: jsonb("custom_settings"), // Agent-specific settings override
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => ({

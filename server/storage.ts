@@ -138,6 +138,7 @@ import {
 
 } from "@shared/schema";
 import { db } from "./db";
+import { ProviderConfigService } from "./services/ProviderConfigService";
 
 // Define SupplierReview types
 export type SupplierReview = {
@@ -2147,27 +2148,67 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAgent(agent: InsertAgent): Promise<Agent> {
-    const [created] = await db
-      .insert(agents)
-      .values({
+    // Use ProviderConfigService to inherit configurations
+    const providerConfigService = ProviderConfigService.getInstance();
+    
+    try {
+      const result = await providerConfigService.createAgentWithInheritedConfig({
         ...agent,
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
-      .returning();
-    return created;
+      });
+      return result[0];
+    } catch (error) {
+      // Fallback to direct creation if service fails
+      console.error('Error using ProviderConfigService, falling back to direct creation:', error);
+      const [created] = await db
+        .insert(agents)
+        .values({
+          ...agent,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+      return created;
+    }
   }
 
   async updateAgent(id: string, agent: Partial<InsertAgent>): Promise<Agent> {
-    const [updated] = await db
-      .update(agents)
-      .set({
-        ...agent,
-        updatedAt: new Date(),
-      })
-      .where(eq(agents.id, id))
-      .returning();
-    return updated;
+    // Use ProviderConfigService to update with inherited configurations
+    const providerConfigService = ProviderConfigService.getInstance();
+    
+    try {
+      // If provider or model changed, inherit new configurations
+      if (agent.provider || agent.model) {
+        return await providerConfigService.updateAgentWithInheritedConfig(id, {
+          ...agent,
+          updatedAt: new Date(),
+        });
+      }
+      
+      // Otherwise, just update normally
+      const [updated] = await db
+        .update(agents)
+        .set({
+          ...agent,
+          updatedAt: new Date(),
+        })
+        .where(eq(agents.id, id))
+        .returning();
+      return updated;
+    } catch (error) {
+      // Fallback to direct update if service fails
+      console.error('Error using ProviderConfigService, falling back to direct update:', error);
+      const [updated] = await db
+        .update(agents)
+        .set({
+          ...agent,
+          updatedAt: new Date(),
+        })
+        .where(eq(agents.id, id))
+        .returning();
+      return updated;
+    }
   }
 
   async deleteAgent(id: string): Promise<void> {
