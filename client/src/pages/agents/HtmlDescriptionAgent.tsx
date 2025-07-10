@@ -39,7 +39,7 @@ const HtmlDescriptionAgent: React.FC = () => {
     provider: 'openai',
     model: 'gpt-4o-mini',
     temperature: 0.7,
-    maxTokens: 1000
+    maxTokens: 2000
   });
   const { toast } = useToast();
   const { user } = useAuth();
@@ -61,7 +61,7 @@ const HtmlDescriptionAgent: React.FC = () => {
         provider: agentData?.provider || 'openai',
         model: agentData?.model || 'gpt-4o-mini',
         temperature: parseFloat(agentData?.temperature || '0.7'),
-        maxTokens: agentData?.maxTokens || 1000
+        maxTokens: agentData?.maxTokens || 2000
       });
     }
   }, [agent]);
