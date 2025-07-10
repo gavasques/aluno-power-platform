@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { useGetFeatureCost } from '@/hooks/useFeatureCosts';
+import { useGetFeatureCost, useCanProcessFeature } from '@/hooks/useFeatureCosts';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +46,13 @@ const HtmlDescriptionAgent: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { getFeatureCost } = useGetFeatureCost();
+  const { canProcess } = useCanProcessFeature();
+
+  // Buscar saldo de créditos do usuário
+  const { data: creditsData } = useQuery({
+    queryKey: ['/api/credits/balance'],
+    enabled: !!user?.id
+  });
 
   const MAX_CHARS = 2000;
   const WARNING_THRESHOLD = 1800;
@@ -198,6 +205,19 @@ Garantia de 12 meses`;
         variant: "destructive",
         title: "❌ Erro",
         description: "Usuário não autenticado"
+      });
+      return;
+    }
+
+    // Validar se usuário tem créditos suficientes
+    const userBalance = creditsData?.data?.balance || 0;
+    const creditValidation = canProcess(FEATURE_CODE, userBalance);
+    
+    if (!creditValidation.canProcess) {
+      toast({
+        variant: "destructive",
+        title: "❌ Créditos Insuficientes",
+        description: `Você precisa de ${creditValidation.requiredCredits} créditos para usar este agente. Saldo atual: ${userBalance} créditos.`
       });
       return;
     }
@@ -369,7 +389,8 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
         showMessage={true}
         message="Você não tem permissão para usar o Gerador de Descrições HTML."
       >
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
         {/* Header do Agente */}
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border">
           <div className="flex items-center justify-between mb-3">
@@ -507,6 +528,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
               </div>
             </div>
           </details>
+        </div>
         </div>
       </div>
 

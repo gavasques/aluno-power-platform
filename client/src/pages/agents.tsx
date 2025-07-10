@@ -289,7 +289,8 @@ export default function AgentsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold text-foreground">Agentes de IA</h1>
         <p className="text-muted-foreground">
@@ -403,6 +404,7 @@ export default function AgentsPage() {
         </div>
       )}
 
+      </div>
     </div>
   );
 }
