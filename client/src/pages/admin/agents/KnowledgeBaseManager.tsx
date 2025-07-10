@@ -508,7 +508,8 @@ export function KnowledgeBaseManager() {
                 </div>
               </div>
             </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       {/* Collections and Search */}
