@@ -185,11 +185,11 @@ export default function AmazonListingsOptimizerNew() {
       
       // 7. Deduzir créditos
       try {
-        await apiRequest('/api/credits/deduct', {
+        await fetch('/api/credits/deduct', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-            'Content-Type': 'application/json'
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           },
           body: JSON.stringify({
             amount: 10,
@@ -271,282 +271,279 @@ export default function AmazonListingsOptimizerNew() {
           </AlertDescription>
         </Alert>
 
-      <PermissionGuard 
-        featureCode="agents.amazon_listing"
-        showMessage={true}
-        message="Você não tem permissão para usar o Amazon Listings Optimizer."
-      >
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Form */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações do Produto</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Product Name and Brand */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="productName">Nome do Produto *</Label>
-                  <Input
-                    id="productName"
-                    value={formData.productName}
-                    onChange={(e) => handleInputChange("productName", e.target.value)}
-                    placeholder="Ex: Fone de Ouvido Bluetooth"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="brand">Marca *</Label>
-                  <Input
-                    id="brand"
-                    value={formData.brand}
-                    onChange={(e) => handleInputChange("brand", e.target.value)}
-                    placeholder="Ex: Sony"
-                  />
-                </div>
-              </div>
-
-              {/* Category */}
-              <div>
-                <Label htmlFor="category">Categoria *</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => handleInputChange("category", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {isDepartmentsLoading ? (
-                      <SelectItem value="loading" disabled>Carregando categorias...</SelectItem>
-                    ) : departments?.length > 0 ? (
-                      departments.map((dept: any) => (
-                        <SelectItem key={dept.id} value={dept.name}>
-                          {dept.name}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="empty" disabled>Nenhuma categoria encontrada</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Keywords */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="keywords">Palavras-chave Principais</Label>
-                  <Input
-                    id="keywords"
-                    value={formData.keywords}
-                    onChange={(e) => handleInputChange("keywords", e.target.value)}
-                    placeholder="Ex: fone bluetooth, sem fio"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="longTailKeywords">Palavras-chave de Cauda Longa</Label>
-                  <Input
-                    id="longTailKeywords"
-                    value={formData.longTailKeywords}
-                    onChange={(e) => handleInputChange("longTailKeywords", e.target.value)}
-                    placeholder="Ex: fone bluetooth com cancelamento de ruído"
-                  />
-                </div>
-              </div>
-
-              {/* Features and Target Audience */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="features">Características Principais</Label>
-                  <Textarea
-                    id="features"
-                    value={formData.features}
-                    onChange={(e) => handleInputChange("features", e.target.value)}
-                    placeholder="Ex: 30h de bateria, resistente à água"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="targetAudience">Público-Alvo</Label>
-                  <Textarea
-                    id="targetAudience"
-                    value={formData.targetAudience}
-                    onChange={(e) => handleInputChange("targetAudience", e.target.value)}
-                    placeholder="Ex: Jovens, profissionais, esportistas"
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              {/* Reviews Data */}
-              <div>
-                <Label>Dados das Avaliações dos Concorrentes *</Label>
-                <Tabs value={reviewsTab} onValueChange={(value) => setReviewsTab(value as "upload" | "text")}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="upload">Upload de Arquivos</TabsTrigger>
-                    <TabsTrigger value="text">Texto Manual</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="upload" className="space-y-4">
+        <PermissionGuard 
+          featureCode="agents.amazon_listing"
+          showMessage={true}
+          message="Você não tem permissão para usar o Amazon Listings Optimizer."
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Form */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Informações do Produto</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Product Name and Brand */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
+                      <Label htmlFor="productName">Nome do Produto *</Label>
                       <Input
-                        type="file"
-                        accept=".csv,.txt"
-                        multiple
-                        onChange={handleFileUpload}
-                        className="mb-2"
+                        id="productName"
+                        value={formData.productName}
+                        onChange={(e) => handleInputChange("productName", e.target.value)}
+                        placeholder="Ex: Fone de Ouvido Bluetooth"
                       />
+                    </div>
+                    <div>
+                      <Label htmlFor="brand">Marca *</Label>
+                      <Input
+                        id="brand"
+                        value={formData.brand}
+                        onChange={(e) => handleInputChange("brand", e.target.value)}
+                        placeholder="Ex: Sony"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <Label htmlFor="category">Categoria *</Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) => handleInputChange("category", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {isDepartmentsLoading ? (
+                          <SelectItem value="loading" disabled>Carregando categorias...</SelectItem>
+                        ) : departments?.length > 0 ? (
+                          departments.map((dept: any) => (
+                            <SelectItem key={dept.id} value={dept.name}>
+                              {dept.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="empty" disabled>Nenhuma categoria encontrada</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Keywords */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="keywords">Palavras-chave Principais</Label>
+                      <Input
+                        id="keywords"
+                        value={formData.keywords}
+                        onChange={(e) => handleInputChange("keywords", e.target.value)}
+                        placeholder="Ex: fone bluetooth, sem fio"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="longTailKeywords">Long Tail Keywords</Label>
+                      <Input
+                        id="longTailKeywords"
+                        value={formData.longTailKeywords}
+                        onChange={(e) => handleInputChange("longTailKeywords", e.target.value)}
+                        placeholder="Ex: fone bluetooth com cancelamento ruído"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Features and Target Audience */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="features">Características Principais</Label>
+                      <Textarea
+                        id="features"
+                        value={formData.features}
+                        onChange={(e) => handleInputChange("features", e.target.value)}
+                        placeholder="Ex: 30h de bateria, resistente à água"
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="targetAudience">Público-Alvo</Label>
+                      <Textarea
+                        id="targetAudience"
+                        value={formData.targetAudience}
+                        onChange={(e) => handleInputChange("targetAudience", e.target.value)}
+                        placeholder="Ex: Jovens, profissionais, esportistas"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Reviews Data */}
+                  <div>
+                    <Label>Dados das Avaliações dos Concorrentes *</Label>
+                    <Tabs value={reviewsTab} onValueChange={(value) => setReviewsTab(value as "upload" | "text")}>
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="upload">Upload de Arquivos</TabsTrigger>
+                        <TabsTrigger value="text">Texto Manual</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="upload" className="space-y-4">
+                        <div>
+                          <Input
+                            type="file"
+                            accept=".csv,.txt"
+                            multiple
+                            onChange={handleFileUpload}
+                            className="mb-2"
+                          />
+                          <p className="text-sm text-muted-foreground">
+                            Aceita arquivos CSV ou TXT (máximo 10 arquivos)
+                          </p>
+                        </div>
+                        
+                        {uploadedFiles.length > 0 && (
+                          <div className="space-y-2">
+                            <Label>Arquivos carregados:</Label>
+                            {uploadedFiles.map((file, index) => (
+                              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <div className="flex items-center space-x-2">
+                                  <FileText className="h-4 w-4 text-blue-500" />
+                                  <span className="text-sm">{file.name}</span>
+                                  <Badge variant="outline" className="text-xs">
+                                    {(file.size / 1024).toFixed(1)} KB
+                                  </Badge>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeFile(index)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </TabsContent>
+                      
+                      <TabsContent value="text">
+                        <Textarea
+                          value={formData.reviewsData}
+                          onChange={(e) => handleInputChange("reviewsData", e.target.value)}
+                          placeholder="Cole aqui as avaliações dos concorrentes (formato Helium10 ou texto livre)"
+                          rows={8}
+                          className="w-full"
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="flex justify-end">
+                    <Button 
+                      onClick={handleSubmit} 
+                      disabled={!isFormValid || isProcessing}
+                      size="lg"
+                      className="w-full md:w-auto"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Processando...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Otimizar Listagem (10 créditos)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Info className="h-5 w-5" />
+                    Como Funciona
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline">1</Badge>
+                    <div>
+                      <h4 className="font-medium">Análise de Avaliações</h4>
                       <p className="text-sm text-muted-foreground">
-                        Aceita arquivos CSV ou TXT (máximo 10 arquivos)
+                        Analisamos as avaliações dos concorrentes para identificar pontos fortes e fracos
                       </p>
                     </div>
-                    
-                    {uploadedFiles.length > 0 && (
-                      <div className="space-y-2">
-                        {uploadedFiles.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
-                            <span className="text-sm">{file.name}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeFile(index)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </TabsContent>
+                  </div>
                   
-                  <TabsContent value="text">
-                    <Textarea
-                      value={formData.reviewsData}
-                      onChange={(e) => handleInputChange("reviewsData", e.target.value)}
-                      placeholder="Cole aqui as avaliações dos concorrentes..."
-                      rows={8}
-                    />
-                  </TabsContent>
-                </Tabs>
-              </div>
+                  <Separator />
+                  
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline">2</Badge>
+                    <div>
+                      <h4 className="font-medium">Geração de Títulos</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Criamos títulos otimizados baseados na análise e suas palavras-chave
+                      </p>
+                    </div>
+                  </div>
 
-              {/* Submit Button */}
-              {/* Credit warning before button */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <div className="flex items-center space-x-2 text-blue-800">
-                  <AlertCircle className="h-4 w-4" />
-                  <span className="font-medium">Antes de processar:</span>
-                </div>
-                <p className="text-blue-700 text-sm mt-1">
-                  • Serão descontados <strong>10 créditos</strong> do seu saldo
-                  • Verifique se todos os campos obrigatórios estão preenchidos
-                  • O processamento não pode ser interrompido após iniciar
-                </p>
-              </div>
+                  <Separator />
+                  
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline">3</Badge>
+                    <div>
+                      <h4 className="font-medium">Geração de Bullet Points</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Desenvolvemos bullet points persuasivos usando dados da análise e títulos gerados
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline">4</Badge>
+                    <div>
+                      <h4 className="font-medium">Descrição Completa</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Criamos uma descrição otimizada integrando todas as etapas anteriores
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-              <Button
-                onClick={handleSubmit}
-                disabled={!isFormValid || isProcessing}
-                className="w-full"
-                size="lg"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Otimizar Listagem (10 créditos)
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Info className="h-5 w-5" />
-                Como Funciona
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Badge variant="outline">1</Badge>
-                <div>
-                  <h4 className="font-medium">Análise de Avaliações</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Analisamos as avaliações dos concorrentes para identificar pontos fortes e fracos
-                  </p>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="flex items-start gap-3">
-                <Badge variant="outline">2</Badge>
-                <div>
-                  <h4 className="font-medium">Geração de Títulos</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Criamos títulos otimizados baseados na análise e suas palavras-chave
-                  </p>
-                </div>
-              </div>
-
-              <Separator />
-              
-              <div className="flex items-start gap-3">
-                <Badge variant="outline">3</Badge>
-                <div>
-                  <h4 className="font-medium">Geração de Bullet Points</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Desenvolvemos bullet points persuasivos usando dados da análise e títulos gerados
-                  </p>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="flex items-start gap-3">
-                <Badge variant="outline">4</Badge>
-                <div>
-                  <h4 className="font-medium">Descrição Completa</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Criamos uma descrição otimizada integrando todas as etapas anteriores
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Dicas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Use dados reais do Helium10</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Inclua palavras-chave relevantes</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Defina seu público-alvo</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Dicas</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">Use dados reais do Helium10</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">Inclua palavras-chave relevantes</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">Defina seu público-alvo</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </PermissionGuard>
       </div>
-      </PermissionGuard>
     </div>
   );
 }
