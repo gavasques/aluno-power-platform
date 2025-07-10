@@ -58,11 +58,21 @@ export function useProductForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (initialData) {
-      setFormData(prev => ({
-        ...prev,
-        ...initialData
-      }));
+    if (initialData && Object.keys(initialData).length > 0) {
+      setFormData(prev => {
+        // Only update if data actually changed to prevent loops
+        const hasChanges = Object.keys(initialData).some(key => 
+          JSON.stringify(prev[key]) !== JSON.stringify(initialData[key])
+        );
+        
+        if (hasChanges) {
+          return {
+            ...prev,
+            ...initialData
+          };
+        }
+        return prev;
+      });
     }
   }, [initialData]);
 
@@ -83,16 +93,10 @@ export function useProductForm({
   };
 
   const updateField = (field: string, value: any) => {
-    console.log('🔧 updateField called:', { field, value, currentFormData: formData });
-    
-    setFormData(prev => {
-      const updated = {
-        ...prev,
-        [field]: value
-      };
-      console.log('🔧 Updated formData:', updated);
-      return updated;
-    });
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
 
     // Clear field error when user starts typing
     if (errors[field]) {

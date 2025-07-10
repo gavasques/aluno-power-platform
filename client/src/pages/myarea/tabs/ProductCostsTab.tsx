@@ -38,9 +38,8 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
   const formProductId = form.watch("id");
   const [costHistory, setCostHistory] = React.useState<any[]>([]);
   
-  console.log('🔍 [PRODUCT COSTS TAB] productId:', productId);
-  console.log('🔍 [PRODUCT COSTS TAB] formProductId:', formProductId);
-  console.log('🔍 [PRODUCT COSTS TAB] isEditing:', isEditing);
+
+
 
   // Save costs function
   const saveCosts = async () => {
@@ -82,7 +81,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
           fetch(`/api/products/${productId}/cost-history?limit=6`)
             .then(res => res.json())
             .then(data => {
-              console.log('📊 [COST HISTORY] Reloaded after save:', data);
+
               setCostHistory(data);
             })
             .catch(err => console.error('Error reloading cost history:', err));

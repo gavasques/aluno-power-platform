@@ -43,14 +43,6 @@ export const BasicProductForm = ({
   mockBrands = [],
   onOpenDescriptions
 }: BasicProductFormProps) => {
-  // Debug logs
-  console.log('BasicProductForm received:', {
-    productData,
-    mockSuppliers: mockSuppliers.length,
-    mockCategories: mockCategories.length,
-    mockBrands: mockBrands.length
-  });
-
   // Ensure productData has all required fields with defaults
   const safeProductData = {
     name: '',
@@ -70,8 +62,6 @@ export const BasicProductForm = ({
     observations: '',
     ...productData
   };
-
-  console.log('SafeProductData:', safeProductData);
   return (
     <div className="space-y-8">
       {/* Photo Upload Section */}
@@ -91,11 +81,7 @@ export const BasicProductForm = ({
                   alt="Preview" 
                   className="w-32 h-32 object-cover mx-auto rounded-lg border-2 border-muted"
                   onError={(e) => {
-                    console.error('Erro ao carregar imagem:', safeProductData.photo);
                     e.currentTarget.style.display = 'none';
-                  }}
-                  onLoad={() => {
-                    console.log('Imagem carregada com sucesso:', safeProductData.photo);
                   }}
                 />
                 <p className="text-sm text-muted-foreground">Clique para alterar a foto</p>
@@ -151,7 +137,6 @@ export const BasicProductForm = ({
                 key={`brand-${safeProductData.brand}`}
                 value={safeProductData.brand || ""} 
                 onValueChange={(value) => {
-                  console.log('🔥 Brand selection:', value);
                   onInputChange('brand', value);
                 }}
               >
@@ -184,7 +169,6 @@ export const BasicProductForm = ({
                 key={`category-${safeProductData.category}`}
                 value={safeProductData.category || ""} 
                 onValueChange={(value) => {
-                  console.log('🔥 Category selection:', value);
                   onInputChange('category', value);
                 }}
               >

@@ -33,24 +33,28 @@ const ProductForm = () => {
     enabled: isEditMode
   });
   
-  // Map API data to form data structure
-  const mappedProductData = productDetails ? {
-    name: productDetails.name || '',
-    photo: productDetails.photo || '',
-    sku: productDetails.sku || '',
-    internalCode: productDetails.internalCode || '',
-    ean: productDetails.ean || '',
-    dimensions: productDetails.dimensions || { length: 0, width: 0, height: 0 },
-    weight: parseFloat(productDetails.weight) || 0,
-    brand: productDetails.brandId ? productDetails.brandId.toString() : (productDetails.brand || ''),
-    category: productDetails.categoryId ? productDetails.categoryId.toString() : '',
-    supplierId: productDetails.supplierId?.toString() || '',
-    ncm: productDetails.ncm || '',
-    costItem: parseFloat(productDetails.costItem) || 0,
-    packCost: parseFloat(productDetails.packCost) || 0,
-    taxPercent: parseFloat(productDetails.taxPercent) || 0,
-    observations: productDetails.observations || ''
-  } : undefined;
+  // Memoize API data mapping to prevent infinite re-renders
+  const mappedProductData = useMemo(() => {
+    if (!productDetails) return undefined;
+    
+    return {
+      name: productDetails.name || '',
+      photo: productDetails.photo || '',
+      sku: productDetails.sku || '',
+      internalCode: productDetails.internalCode || '',
+      ean: productDetails.ean || '',
+      dimensions: productDetails.dimensions || { length: 0, width: 0, height: 0 },
+      weight: parseFloat(productDetails.weight) || 0,
+      brand: productDetails.brandId ? productDetails.brandId.toString() : (productDetails.brand || ''),
+      category: productDetails.categoryId ? productDetails.categoryId.toString() : '',
+      supplierId: productDetails.supplierId?.toString() || '',
+      ncm: productDetails.ncm || '',
+      costItem: parseFloat(productDetails.costItem) || 0,
+      packCost: parseFloat(productDetails.packCost) || 0,
+      taxPercent: parseFloat(productDetails.taxPercent) || 0,
+      observations: productDetails.observations || ''
+    };
+  }, [productDetails]);
   
   const {
     formData: productData,
@@ -209,20 +213,12 @@ const ProductForm = () => {
     },
   });
 
-  const suppliers = suppliersData?.data || [];
-  const categories = categoriesData || [];
-  const brands = brandsData || [];
+  // Memoize processed data to prevent unnecessary re-renders
+  const suppliers = useMemo(() => suppliersData?.data || [], [suppliersData]);
+  const categories = useMemo(() => categoriesData || [], [categoriesData]);
+  const brands = useMemo(() => brandsData || [], [brandsData]);
   
-  console.log('Brands data:', brandsData);
-  console.log('Categories data:', categoriesData);
-  console.log('Product details:', productDetails);
-  console.log('Current product data form:', productData);
-  console.log('🔥 CHANNELS DEBUG:', {
-    productDetailsChannels: productDetails?.channels,
-    currentChannelsState: channels,
-    defaultChannels,
-    isEditMode
-  });
+
   
   // Show loading state while fetching product data in edit mode
   if (isEditMode && isLoadingProduct) {
@@ -287,12 +283,7 @@ const ProductForm = () => {
               <div className="p-8">
                 <BasicProductForm
                   productData={productData}
-                  onInputChange={(field, value) => {
-                    console.log('🔥 Field change in ProductForm:', field, value);
-                    console.log('🔥 Current productData before change:', productData);
-                    handleInputChange(field, value);
-                    console.log('🔥 Current productData after change:', productData);
-                  }}
+                  onInputChange={handleInputChange}
                   onPhotoUpload={(e) => {
                     const file = e.target.files?.[0];
                     if (file) handlePhotoUpload(file);

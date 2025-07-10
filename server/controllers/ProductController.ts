@@ -91,10 +91,7 @@ export class ProductController extends BaseController {
    */
   async create(req: Request, res: Response): Promise<void> {
     try {
-      console.log("📝 [POST /api/products] Recebendo dados:", {
-        body: req.body,
-        file: req.file ? req.file.filename : 'Nenhum arquivo'
-      });
+
       
       // Parse FormData fields
       const productData: any = {
@@ -118,13 +115,13 @@ export class ProductController extends BaseController {
         active: true,
       };
 
-      console.log("📋 [POST /api/products] Dados processados:", productData);
+
       
       const validatedData = insertProductSchema.parse(productData);
-      console.log("✅ [POST /api/products] Dados validados:", validatedData);
+
       
       const product = await storage.createProduct(validatedData);
-      console.log("💾 [POST /api/products] Produto criado:", product);
+
       
       ResponseHandler.created(res, product);
     } catch (error) {
@@ -141,9 +138,7 @@ export class ProductController extends BaseController {
       const { id } = req.params;
       const productId = ValidationHelper.parseId(id);
       
-      console.log("🔍 [PUT PRODUCT] ProductId:", productId);
-      console.log("🔍 [PUT PRODUCT] All form fields:", Object.keys(req.body));
-      console.log("🔍 [PUT PRODUCT] Raw body content:", req.body);
+
       
       // Parse FormData fields - only include fields that were actually sent
       const productData: any = {
@@ -185,13 +180,13 @@ export class ProductController extends BaseController {
         productData.photo = req.body.photo || null;
       }
 
-      console.log("💾 [PUT PRODUCT] Final productData:", productData);
+
       
       const validatedData = insertProductSchema.partial().parse(productData);
-      console.log("✅ [PUT PRODUCT] Validated data:", validatedData);
+
       
       const product = await storage.updateProduct(productId, validatedData);
-      console.log("🎯 [PUT PRODUCT] Updated product:", product);
+
       
       ResponseHandler.success(res, product);
     } catch (error) {

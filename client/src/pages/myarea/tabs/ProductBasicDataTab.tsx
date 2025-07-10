@@ -66,10 +66,6 @@ export default function ProductBasicDataTab({
 
   // Debug form values
   const currentFormValues = form.watch();
-  console.log("🔍 [PRODUCT_BASIC_TAB] Current form values:", currentFormValues);
-  console.log("🔍 [PRODUCT_BASIC_TAB] BrandId value:", currentFormValues.brandId);
-  console.log("🔍 [PRODUCT_BASIC_TAB] CategoryId value:", currentFormValues.categoryId);
-  console.log("🔍 [PRODUCT_BASIC_TAB] Available brands:", brands);
 
   // Force field update when data is available but fields are empty
   useEffect(() => {
@@ -82,17 +78,17 @@ export default function ProductBasicDataTab({
         // Small delay to ensure data is loaded
         setTimeout(() => {
           const currentFormData = form.getValues();
-          console.log("🔍 [PRODUCT_BASIC_TAB] Force update check - current form data:", currentFormData);
+
           
           // Get the raw form values that should have been set
           if (currentFormData.id === parseInt(productId) || currentFormData.id === productId) {
             if (!brandId && currentFormData.brandId) {
               form.setValue("brandId", currentFormData.brandId);
-              console.log("🔍 [PRODUCT_BASIC_TAB] Force set brandId:", currentFormData.brandId);
+
             }
             if (!categoryId && currentFormData.categoryId) {
               form.setValue("categoryId", currentFormData.categoryId);
-              console.log("🔍 [PRODUCT_BASIC_TAB] Force set categoryId:", currentFormData.categoryId);
+
             }
           }
         }, 200);
@@ -149,10 +145,8 @@ export default function ProductBasicDataTab({
       const values = form.getValues();
       const token = localStorage.getItem("auth_token");
       
-      console.log("🔍 [BASIC_INFO_FRONTEND] Form values:", values);
-      console.log("🔍 [BASIC_INFO_FRONTEND] SKU:", values.sku);
-      console.log("🔍 [BASIC_INFO_FRONTEND] Category:", values.categoryId);
-      console.log("🔍 [BASIC_INFO_FRONTEND] Brand:", values.brandId);
+
+
       
       const formData = new FormData();
       
@@ -356,13 +350,8 @@ export default function ProductBasicDataTab({
               control={form.control}
               name="brandId"
               render={({ field }) => {
-                console.log("🔍 [BRAND_SELECT] Field value:", field.value);
-                console.log("🔍 [BRAND_SELECT] Available brands:", brands);
-                console.log("🔍 [BRAND_SELECT] Loading brands:", loadingBrands);
-                
                 // Get the current brand name for display
                 const selectedBrand = (brands as Array<{id: number; name: string}>)?.find((brand) => brand.id.toString() === field.value);
-                console.log("🔍 [BRAND_SELECT] Selected brand:", selectedBrand);
                 
                 return (
                 <FormItem>
@@ -452,13 +441,8 @@ export default function ProductBasicDataTab({
               control={form.control}
               name="categoryId"
               render={({ field }) => {
-                console.log("🔍 [CATEGORY_SELECT] Field value:", field.value);
-                console.log("🔍 [CATEGORY_SELECT] Available categories:", categories);
-                console.log("🔍 [CATEGORY_SELECT] Loading categories:", loadingCategories);
-                
                 // Get the current category name for display
                 const selectedCategory = (categories as Array<{id: number; name: string}>)?.find((category) => category.id.toString() === field.value);
-                console.log("🔍 [CATEGORY_SELECT] Selected category:", selectedCategory);
                 
                 return (
                 <FormItem>
