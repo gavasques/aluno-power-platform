@@ -46,6 +46,7 @@ interface FileUploadData {
   title: string;
   tags: string[];
   file: File;
+  collectionId?: number | null;
 }
 
 export function KnowledgeBaseManager() {
@@ -62,6 +63,10 @@ export function KnowledgeBaseManager() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<KnowledgeBaseDoc | null>(null);
+  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null);
+  const [isCreateCollectionOpen, setIsCreateCollectionOpen] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [newCollectionDescription, setNewCollectionDescription] = useState('');
 
   // Fetch documents
   const { data: documents = [], isLoading: docsLoading, refetch: refetchDocs } = useQuery({
@@ -82,6 +87,9 @@ export function KnowledgeBaseManager() {
       formData.append('file', data.file);
       formData.append('title', data.title);
       formData.append('tags', JSON.stringify(data.tags));
+      if (data.collectionId) {
+        formData.append('collectionId', data.collectionId.toString());
+      }
 
       const response = await fetch('/api/knowledge-base/documents/upload', {
         method: 'POST',
@@ -167,6 +175,59 @@ export function KnowledgeBaseManager() {
     },
   });
 
+  // Create collection mutation
+  const createCollectionMutation = useMutation({
+    mutationFn: async (data: { name: string; description: string }) => {
+      return apiRequest('/api/knowledge-base/collections', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Coleção criada',
+        description: 'Nova base de conhecimento criada com sucesso.',
+      });
+      setIsCreateCollectionOpen(false);
+      setNewCollectionName('');
+      setNewCollectionDescription('');
+      queryClient.invalidateQueries({ queryKey: ['/api/knowledge-base/collections'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao criar coleção',
+        description: error.message || 'Falha ao criar nova base de conhecimento',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Delete collection mutation
+  const deleteCollectionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/knowledge-base/collections/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Coleção excluída',
+        description: 'Base de conhecimento removida com sucesso.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/knowledge-base/collections'] });
+      if (selectedCollectionId) {
+        setSelectedCollectionId(null);
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao excluir coleção',
+        description: error.message || 'Falha ao excluir base de conhecimento',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -208,6 +269,7 @@ export function KnowledgeBaseManager() {
       file: selectedFile,
       title: uploadData.title,
       tags: uploadData.tags || [],
+      collectionId: uploadData.collectionId,
     });
   };
 
@@ -232,11 +294,18 @@ export function KnowledgeBaseManager() {
     deleteMutation.mutate(id);
   };
 
-  const filteredDocuments = documents.filter(doc =>
-    doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.summary?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredDocuments = documents.filter(doc => {
+    // Search filter
+    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.summary?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Collection filter
+    const matchesCollection = selectedCollectionId === null || 
+      doc.collectionIds?.includes(selectedCollectionId);
+    
+    return matchesSearch && matchesCollection;
+  });
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -264,13 +333,66 @@ export function KnowledgeBaseManager() {
           </p>
         </div>
         
-        <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Upload className="mr-2 h-4 w-4" />
-              Adicionar Documento
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Dialog open={isCreateCollectionOpen} onOpenChange={setIsCreateCollectionOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Coleção
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Criar Nova Coleção</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="collection-name">Nome da Coleção</Label>
+                  <Input
+                    id="collection-name"
+                    value={newCollectionName}
+                    onChange={e => setNewCollectionName(e.target.value)}
+                    placeholder="Ex: Base de Produtos, Base de Clientes..."
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="collection-description">Descrição</Label>
+                  <Input
+                    id="collection-description"
+                    value={newCollectionDescription}
+                    onChange={e => setNewCollectionDescription(e.target.value)}
+                    placeholder="Descrição da base de conhecimento..."
+                  />
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={() => createCollectionMutation.mutate({
+                      name: newCollectionName,
+                      description: newCollectionDescription
+                    })}
+                    disabled={createCollectionMutation.isPending || !newCollectionName}
+                    className="flex-1"
+                  >
+                    {createCollectionMutation.isPending ? 'Criando...' : 'Criar'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCreateCollectionOpen(false)}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                <Upload className="mr-2 h-4 w-4" />
+                Adicionar Documento
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Upload de Documento</DialogTitle>
@@ -299,6 +421,31 @@ export function KnowledgeBaseManager() {
                   onChange={e => setUploadData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Nome do documento"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="collection">Base de Conhecimento</Label>
+                <Select 
+                  value={uploadData.collectionId?.toString() || ''} 
+                  onValueChange={(value) => setUploadData(prev => ({ 
+                    ...prev, 
+                    collectionId: value ? parseInt(value) : null 
+                  }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma base de conhecimento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {collections.map(collection => (
+                      <SelectItem key={collection.id} value={collection.id.toString()}>
+                        {collection.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Defina em qual base o documento será armazenado
+                </p>
               </div>
 
               <div>
@@ -357,21 +504,89 @@ export function KnowledgeBaseManager() {
         </Dialog>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Buscar documentos..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+      {/* Collections and Search */}
+      <div className="space-y-4">
+        {/* Collections Filter */}
+        <div className="bg-slate-50 border rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-medium text-sm">Bases de Conhecimento</h3>
+            <Badge variant="secondary">{collections.length} coleções</Badge>
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={selectedCollectionId === null ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCollectionId(null)}
+            >
+              Todas as Bases ({documents.length})
+            </Button>
+            {collections.map(collection => (
+              <div key={collection.id} className="flex items-center gap-1">
+                <Button
+                  variant={selectedCollectionId === collection.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCollectionId(collection.id)}
+                >
+                  {collection.name} ({documents.filter(doc => doc.collectionIds?.includes(collection.id)).length})
+                </Button>
+                {!collection.isDefault && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir Coleção</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja excluir a coleção "{collection.name}"? 
+                          Os documentos não serão excluídos, apenas desassociados desta coleção.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteCollectionMutation.mutate(collection.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Excluir Coleção
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-        
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Database className="h-4 w-4" />
-          {documents.length} documento{documents.length !== 1 ? 's' : ''}
+
+        {/* Search */}
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Buscar documentos..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Database className="h-4 w-4" />
+            {filteredDocuments.length} documento{filteredDocuments.length !== 1 ? 's' : ''}
+            {selectedCollectionId && (
+              <>
+                {' '}na coleção "{collections.find(c => c.id === selectedCollectionId)?.name}"
+              </>
+            )}
+          </div>
         </div>
       </div>
 
