@@ -225,6 +225,12 @@ export class XAIProvider extends BaseProvider {
           ];
           
           console.log(`🔄 [XAI_PROVIDER] Getting final response with search results`);
+          console.log(`📋 [XAI_PROVIDER] Final messages structure:`, finalMessages.map(m => ({
+            role: m.role,
+            content: m.content ? (typeof m.content === 'string' ? m.content.substring(0, 50) + '...' : 'object') : 'empty',
+            tool_calls: m.tool_calls ? m.tool_calls.length + ' calls' : undefined,
+            tool_call_id: m.tool_call_id
+          })));
           
           completion = await this.client.chat.completions.create({
             ...requestParams,
@@ -232,7 +238,11 @@ export class XAIProvider extends BaseProvider {
             tools: undefined, // Remove tools for final response
             tool_choice: undefined
           });
+          
+          console.log(`📝 [XAI_PROVIDER] Final response content:`, completion.choices[0]?.message?.content?.substring(0, 200) || 'EMPTY');
         }
+      } else {
+        console.log(`❌ [XAI_PROVIDER] No tool_calls found in response`);
       }
 
       const endTime = Date.now();
