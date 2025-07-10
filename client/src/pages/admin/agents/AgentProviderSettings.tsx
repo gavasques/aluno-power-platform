@@ -758,18 +758,76 @@ export default function AgentProviderSettings() {
                       <h3 className="text-lg font-semibold text-green-800">Funcionalidades Avançadas da OpenAI</h3>
                     </div>
 
+                    {/* Model Capabilities Info */}
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-medium text-blue-800 mb-2">Capacidades do {formData.model}:</h4>
+                      <div className="text-sm text-blue-700 space-y-1">
+                        {formData.model === 'gpt-4.1' && (
+                          <>
+                            <div>✅ Chat tradicional • ✅ Análise de imagens • ✅ Busca na web • ✅ Ferramentas • ✅ JSON estruturado</div>
+                            <div>💡 <strong>Ideal para:</strong> Tarefas complexas com análise de imagem e busca de informações atuais</div>
+                          </>
+                        )}
+                        {formData.model === 'gpt-4o' && (
+                          <>
+                            <div>✅ Chat tradicional • ✅ Análise de imagens • ✅ Busca na web • ✅ Ferramentas • ✅ JSON estruturado</div>
+                            <div>💡 <strong>Ideal para:</strong> Aplicações multimodais com alta qualidade de resposta</div>
+                          </>
+                        )}
+                        {formData.model === 'gpt-4o-mini' && (
+                          <>
+                            <div>✅ Chat tradicional • ✅ Análise de imagens • ✅ Busca na web • ✅ Ferramentas • ✅ JSON estruturado</div>
+                            <div>💡 <strong>Ideal para:</strong> Tarefas econômicas com boa qualidade e recursos completos</div>
+                          </>
+                        )}
+                        {formData.model === 'o4-mini' && (
+                          <>
+                            <div>✅ Raciocínio avançado • ✅ Análise de imagens • ✅ Controle de esforço • ✅ JSON estruturado</div>
+                            <div>❌ Sem busca na web • ❌ Sem parâmetros tradicionais (temperature, top_p)</div>
+                            <div>💡 <strong>Ideal para:</strong> Problemas complexos que requerem raciocínio profundo com visão</div>
+                          </>
+                        )}
+                        {formData.model === 'o3' && (
+                          <>
+                            <div>✅ Raciocínio premium • ✅ Análise de imagens • ✅ Sempre nível máximo • ✅ JSON estruturado</div>
+                            <div>❌ Sem busca na web • ❌ Sem controle de esforço • ❌ Sem parâmetros tradicionais</div>
+                            <div>💡 <strong>Ideal para:</strong> Problemas extremamente complexos que exigem o melhor raciocínio</div>
+                          </>
+                        )}
+                        {formData.model === 'o3-mini' && (
+                          <>
+                            <div>✅ Raciocínio STEM • ✅ Controle de esforço • ✅ JSON estruturado • ✅ Econômico</div>
+                            <div>❌ Sem análise de imagens • ❌ Sem busca na web • ❌ Sem parâmetros tradicionais</div>
+                            <div>💡 <strong>Ideal para:</strong> Matemática, ciência, programação e análise lógica</div>
+                          </>
+                        )}
+                        {formData.model === 'gpt-image-1' && (
+                          <>
+                            <div>✅ Geração de imagens • ✅ Edição de imagens • ✅ Alta qualidade</div>
+                            <div>❌ Sem chat tradicional • ❌ Sem análise de texto</div>
+                            <div>💡 <strong>Ideal para:</strong> Criação e edição profissional de imagens</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Web Search (for GPT models only) */}
                     {['gpt-4.1', 'gpt-4o', 'gpt-4o-mini'].includes(formData.model) && (
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
                           <Search className="h-4 w-4 text-green-600" />
                           <Label className="text-green-800 font-medium">
-                            Busca na Web
+                            Busca na Web em Tempo Real
                           </Label>
                         </div>
-                        <p className="text-sm text-green-600">
-                          Permite que o modelo realize buscas na web em tempo real para informações atualizadas.
-                        </p>
+                        <div className="p-3 bg-green-100 rounded border border-green-200">
+                          <p className="text-sm text-green-700 mb-2">
+                            <strong>O que faz:</strong> Permite ao modelo buscar informações atualizadas na internet durante a conversa.
+                          </p>
+                          <p className="text-sm text-green-600">
+                            <strong>Quando usar:</strong> Para consultas sobre notícias recentes, preços atuais, eventos, clima, ou qualquer informação que mude frequentemente.
+                          </p>
+                        </div>
                         <div className="flex items-center space-x-2">
                           <Switch
                             id="enableSearch"
@@ -777,7 +835,7 @@ export default function AgentProviderSettings() {
                             onCheckedChange={(checked) => setFormData({ ...formData, enableSearch: checked })}
                           />
                           <Label htmlFor="enableSearch" className="text-sm">
-                            Habilitar busca na web
+                            Habilitar busca na web (recomendado para informações atuais)
                           </Label>
                         </div>
                       </div>
@@ -792,9 +850,14 @@ export default function AgentProviderSettings() {
                             Modo de Raciocínio Avançado
                           </Label>
                         </div>
-                        <p className="text-sm text-green-600">
-                          Ativa o modo de raciocínio profundo para modelos o3, o4-mini e o3-mini.
-                        </p>
+                        <div className="p-3 bg-purple-50 rounded border border-purple-200">
+                          <p className="text-sm text-purple-700 mb-2">
+                            <strong>O que faz:</strong> Ativa raciocínio step-by-step profundo, ideal para problemas complexos de matemática, ciência, programação e lógica.
+                          </p>
+                          <p className="text-sm text-purple-600">
+                            <strong>Quando usar:</strong> Para resolver problemas que requerem múltiplas etapas de análise, cálculos complexos, ou raciocínio dedutivo.
+                          </p>
+                        </div>
                         <div className="flex items-center space-x-2">
                           <Switch
                             id="enableReasoning"
@@ -802,7 +865,7 @@ export default function AgentProviderSettings() {
                             onCheckedChange={(checked) => setFormData({ ...formData, enableReasoning: checked })}
                           />
                           <Label htmlFor="enableReasoning" className="text-sm">
-                            Habilitar raciocínio avançado
+                            Habilitar raciocínio avançado (recomendado para este modelo)
                           </Label>
                         </div>
                       </div>
@@ -817,9 +880,16 @@ export default function AgentProviderSettings() {
                             Nível de Esforço de Raciocínio
                           </Label>
                         </div>
-                        <p className="text-sm text-green-600">
-                          Controla a profundidade do raciocínio para modelos o3-mini e o4-mini.
-                        </p>
+                        <div className="p-3 bg-amber-50 rounded border border-amber-200">
+                          <p className="text-sm text-amber-700 mb-2">
+                            <strong>O que controla:</strong> A profundidade e tempo gasto no raciocínio - níveis mais altos = respostas mais precisas mas mais lentas.
+                          </p>
+                          <div className="text-xs text-amber-600 space-y-1">
+                            <div><strong>Baixo:</strong> Raciocínio rápido para problemas simples (mais econômico)</div>
+                            <div><strong>Médio:</strong> Balanceado entre velocidade e precisão (recomendado)</div>
+                            <div><strong>Alto:</strong> Raciocínio máximo para problemas extremamente complexos</div>
+                          </div>
+                        </div>
                         <Select 
                           value={formData.reasoning_effort || 'medium'} 
                           onValueChange={(value) => setFormData({ ...formData, reasoning_effort: value as 'low' | 'medium' | 'high' })}
@@ -830,7 +900,7 @@ export default function AgentProviderSettings() {
                           <SelectContent>
                             <SelectItem value="low">
                               <div className="flex items-center gap-2">
-                                <span>🚀 Baixo - Respostas rápidas</span>
+                                <span>🚀 Baixo - Rápido e econômico</span>
                               </div>
                             </SelectItem>
                             <SelectItem value="medium">
@@ -840,7 +910,7 @@ export default function AgentProviderSettings() {
                             </SelectItem>
                             <SelectItem value="high">
                               <div className="flex items-center gap-2">
-                                <span>🧠 Alto - Raciocínio profundo</span>
+                                <span>🧠 Alto - Raciocínio máximo</span>
                               </div>
                             </SelectItem>
                           </SelectContent>
@@ -848,17 +918,35 @@ export default function AgentProviderSettings() {
                       </div>
                     )}
 
+                    {/* Special note for o3 */}
+                    {formData.model === 'o3' && (
+                      <Alert>
+                        <Brain className="h-4 w-4" />
+                        <AlertDescription className="text-sm">
+                          <strong>Modelo o3:</strong> Opera sempre no nível máximo de raciocínio automaticamente. 
+                          Não há controle de esforço - foi otimizado para sempre dar a melhor resposta possível.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
                     {/* Response Format */}
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <FileJson className="h-4 w-4 text-green-600" />
                         <Label className="text-green-800 font-medium">
-                          Formato de Resposta
+                          Formato de Resposta Estruturada
                         </Label>
                       </div>
-                      <p className="text-sm text-green-600">
-                        Força o modelo a retornar respostas em formatos estruturados.
-                      </p>
+                      <div className="p-3 bg-cyan-50 rounded border border-cyan-200">
+                        <p className="text-sm text-cyan-700 mb-2">
+                          <strong>O que faz:</strong> Força o modelo a retornar dados em formatos específicos para integração com sistemas.
+                        </p>
+                        <div className="text-xs text-cyan-600 space-y-1">
+                          <div><strong>Texto Normal:</strong> Resposta livre em linguagem natural</div>
+                          <div><strong>JSON Object:</strong> Dados estruturados em formato JSON válido</div>
+                          <div><strong>JSON Schema:</strong> JSON que segue um schema específico definido</div>
+                        </div>
+                      </div>
                       <Select 
                         value={formData.responseFormat || 'text'} 
                         onValueChange={(value) => setFormData({ ...formData, responseFormat: value })}
@@ -869,17 +957,17 @@ export default function AgentProviderSettings() {
                         <SelectContent>
                           <SelectItem value="text">
                             <div className="flex items-center gap-2">
-                              <span>📝 Texto Normal</span>
+                              <span>📝 Texto Normal - Para conversas naturais</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="json_object">
                             <div className="flex items-center gap-2">
-                              <span>📊 JSON Object</span>
+                              <span>📊 JSON Object - Para extração de dados</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="json_schema">
                             <div className="flex items-center gap-2">
-                              <span>📋 JSON Schema</span>
+                              <span>📋 JSON Schema - Para formato específico</span>
                             </div>
                           </SelectItem>
                         </SelectContent>
@@ -896,25 +984,38 @@ export default function AgentProviderSettings() {
                           </Label>
                         </div>
                         
+                        <div className="p-3 bg-gray-50 rounded border border-gray-200 mb-4">
+                          <p className="text-sm text-gray-700 mb-2">
+                            <strong>Parâmetros Avançados:</strong> Controles finos para ajustar o comportamento do modelo tradicional.
+                          </p>
+                          <div className="text-xs text-gray-600 space-y-1">
+                            <div><strong>Seed:</strong> Torna as respostas determinísticas - mesmo prompt sempre gera mesma resposta</div>
+                            <div><strong>Top P:</strong> Controla diversidade das palavras escolhidas (baixo = mais focado, alto = mais criativo)</div>
+                            <div><strong>Frequency Penalty:</strong> Reduz repetição de palavras já usadas (positivo = menos repetição)</div>
+                            <div><strong>Presence Penalty:</strong> Encoraja exploração de novos tópicos (positivo = mais inovador)</div>
+                          </div>
+                        </div>
+                        
                         {/* Seed */}
                         <div className="space-y-2">
-                          <Label htmlFor="seed" className="text-sm">
-                            Seed (para resultados determinísticos)
+                          <Label htmlFor="seed" className="text-sm font-medium">
+                            🎲 Seed - Para resultados determinísticos
                           </Label>
                           <Input
                             id="seed"
                             type="number"
-                            placeholder="Ex: 12345"
+                            placeholder="Ex: 12345 (deixe vazio para aleatoriedade)"
                             value={formData.seed || ''}
                             onChange={(e) => setFormData({ ...formData, seed: parseInt(e.target.value) || undefined })}
                             className="w-full"
                           />
+                          <p className="text-xs text-gray-500">Use quando precisar de respostas consistentes para o mesmo prompt</p>
                         </div>
 
                         {/* Top P */}
                         <div className="space-y-2">
-                          <Label htmlFor="top_p" className="text-sm">
-                            Top P (0.0 - 1.0)
+                          <Label htmlFor="top_p" className="text-sm font-medium">
+                            🎯 Top P - Controle de criatividade (0.0 - 1.0)
                           </Label>
                           <Input
                             id="top_p"
@@ -922,17 +1023,18 @@ export default function AgentProviderSettings() {
                             step="0.1"
                             min="0"
                             max="1"
-                            placeholder="Ex: 0.9"
+                            placeholder="Ex: 0.9 (padrão) - 0.1 = focado, 1.0 = criativo"
                             value={formData.top_p || ''}
                             onChange={(e) => setFormData({ ...formData, top_p: parseFloat(e.target.value) || undefined })}
                             className="w-full"
                           />
+                          <p className="text-xs text-gray-500">Alternativa à temperatura: 0.1 = respostas focadas, 0.9 = mais variação</p>
                         </div>
 
                         {/* Frequency Penalty */}
                         <div className="space-y-2">
-                          <Label htmlFor="frequency_penalty" className="text-sm">
-                            Frequency Penalty (-2.0 a 2.0)
+                          <Label htmlFor="frequency_penalty" className="text-sm font-medium">
+                            🔄 Frequency Penalty - Reduzir repetições (-2.0 a 2.0)
                           </Label>
                           <Input
                             id="frequency_penalty"
@@ -940,17 +1042,18 @@ export default function AgentProviderSettings() {
                             step="0.1"
                             min="-2"
                             max="2"
-                            placeholder="Ex: 0.5"
+                            placeholder="Ex: 0.5 - positivo reduz repetições"
                             value={formData.frequency_penalty || ''}
                             onChange={(e) => setFormData({ ...formData, frequency_penalty: parseFloat(e.target.value) || undefined })}
                             className="w-full"
                           />
+                          <p className="text-xs text-gray-500">Valores positivos reduzem repetição de palavras já usadas na resposta</p>
                         </div>
 
                         {/* Presence Penalty */}
                         <div className="space-y-2">
-                          <Label htmlFor="presence_penalty" className="text-sm">
-                            Presence Penalty (-2.0 a 2.0)
+                          <Label htmlFor="presence_penalty" className="text-sm font-medium">
+                            💡 Presence Penalty - Explorar novos tópicos (-2.0 a 2.0)
                           </Label>
                           <Input
                             id="presence_penalty"
@@ -958,11 +1061,12 @@ export default function AgentProviderSettings() {
                             step="0.1"
                             min="-2"
                             max="2"
-                            placeholder="Ex: 0.5"
+                            placeholder="Ex: 0.5 - positivo incentiva novos tópicos"
                             value={formData.presence_penalty || ''}
                             onChange={(e) => setFormData({ ...formData, presence_penalty: parseFloat(e.target.value) || undefined })}
                             className="w-full"
                           />
+                          <p className="text-xs text-gray-500">Valores positivos encorajam o modelo a explorar novos tópicos</p>
                         </div>
                       </div>
                     )}
@@ -984,13 +1088,19 @@ export default function AgentProviderSettings() {
                       <div className="flex items-center gap-2">
                         <Wrench className="h-4 w-4 text-green-600" />
                         <Label className="text-green-800 font-medium">
-                          Ferramentas e Funções
+                          Ferramentas e Funções Avançadas
                         </Label>
                       </div>
-                      <p className="text-sm text-green-600">
-                        Habilita o uso de ferramentas como interpretador de código e recuperação de informações.
-                      </p>
-                      <div className="space-y-2">
+                      <div className="p-3 bg-orange-50 rounded border border-orange-200">
+                        <p className="text-sm text-orange-700 mb-2">
+                          <strong>O que são:</strong> Extensões que permitem ao modelo executar código, analisar documentos e realizar tarefas específicas.
+                        </p>
+                        <div className="text-xs text-orange-600 space-y-1">
+                          <div><strong>Code Interpreter:</strong> Executa código Python, faz cálculos, gera gráficos e processa dados</div>
+                          <div><strong>Retrieval:</strong> Busca e analisa informações em documentos ou bases de conhecimento específicas</div>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
                         <div className="flex items-center space-x-2">
                           <Switch
                             id="enableCodeInterpreter"
@@ -998,7 +1108,7 @@ export default function AgentProviderSettings() {
                             onCheckedChange={(checked) => setFormData({ ...formData, enableCodeInterpreter: checked })}
                           />
                           <Label htmlFor="enableCodeInterpreter" className="text-sm">
-                            Interpretador de Código
+                            🐍 Interpretador de Código - Para cálculos e análise de dados
                           </Label>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -1008,7 +1118,7 @@ export default function AgentProviderSettings() {
                             onCheckedChange={(checked) => setFormData({ ...formData, enableRetrieval: checked })}
                           />
                           <Label htmlFor="enableRetrieval" className="text-sm">
-                            Recuperação de Informações
+                            📚 Recuperação de Informações - Para busca em documentos
                           </Label>
                         </div>
                       </div>
@@ -1019,18 +1129,27 @@ export default function AgentProviderSettings() {
                       <div className="flex items-center gap-2">
                         <Settings2 className="h-4 w-4 text-green-600" />
                         <Label className="text-green-800 font-medium">
-                          Modelo Fine-tuned
+                          Modelo Personalizado (Fine-tuned)
                         </Label>
                       </div>
-                      <p className="text-sm text-green-600">
-                        Use um modelo personalizado treinado com seus dados.
-                      </p>
+                      <div className="p-3 bg-purple-50 rounded border border-purple-200">
+                        <p className="text-sm text-purple-700 mb-2">
+                          <strong>O que é:</strong> Um modelo OpenAI treinado especificamente com seus dados para comportamentos e respostas personalizadas.
+                        </p>
+                        <div className="text-xs text-purple-600 space-y-1">
+                          <div><strong>Quando usar:</strong> Para casos específicos da sua empresa, estilo de escrita particular, ou domínio técnico especializado</div>
+                          <div><strong>Como obter:</strong> Através do processo de fine-tuning da OpenAI com seus dados de treinamento</div>
+                        </div>
+                      </div>
                       <Input
                         placeholder="ID do modelo fine-tuned (ex: ft:gpt-3.5-turbo:my-org:custom:abc123)"
                         value={formData.fineTuneModel || ''}
                         onChange={(e) => setFormData({ ...formData, fineTuneModel: e.target.value })}
                         className="w-full"
                       />
+                      <p className="text-xs text-gray-500">
+                        💡 Se especificado, este modelo personalizado será usado no lugar do modelo base selecionado
+                      </p>
                     </div>
 
                     <Alert>

@@ -85,8 +85,38 @@ router.post('/test', requireAuth, async (req, res) => {
       grokFeatures: {
         reasoningLevel: aiRequest.reasoningLevel,
         enableSearch: aiRequest.enableSearch
+      },
+      openaiAdvanced: {
+        enableReasoning: aiRequest.enableReasoning,
+        reasoning_effort: aiRequest.reasoning_effort,
+        response_format: aiRequest.response_format?.type,
+        seed: aiRequest.seed,
+        top_p: aiRequest.top_p,
+        frequency_penalty: aiRequest.frequency_penalty,
+        presence_penalty: aiRequest.presence_penalty,
+        tools: aiRequest.tools?.length || 0,
+        fineTuneModel: aiRequest.fineTuneModel
       }
     });
+
+    // Log detailed parameters being sent to the AI provider
+    console.log('📋 [PARAMETER_VERIFICATION] Complete AI request parameters:', JSON.stringify({
+      provider: aiRequest.provider,
+      model: aiRequest.model,
+      temperature: aiRequest.temperature,
+      maxTokens: aiRequest.maxTokens,
+      reasoning_effort: aiRequest.reasoning_effort,
+      response_format: aiRequest.response_format,
+      seed: aiRequest.seed,
+      top_p: aiRequest.top_p,
+      frequency_penalty: aiRequest.frequency_penalty,
+      presence_penalty: aiRequest.presence_penalty,
+      enableReasoning: aiRequest.enableReasoning,
+      reasoningLevel: aiRequest.reasoningLevel,
+      enableSearch: aiRequest.enableSearch,
+      tools: aiRequest.tools,
+      fineTuneModel: aiRequest.fineTuneModel
+    }, null, 2));
 
     // Generate response
     const response = await aiProviderService.generateResponse(aiRequest);
