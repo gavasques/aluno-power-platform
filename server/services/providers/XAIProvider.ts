@@ -146,19 +146,30 @@ export class XAIProvider extends BaseProvider {
 
       let completion = await this.client.chat.completions.create(requestParams);
       
-      // Debug the full completion object
-      console.log(`🔍 [XAI_PROVIDER] RAW COMPLETION:`, JSON.stringify(completion, null, 2));
-      
-      console.log(`🔍 [XAI_PROVIDER] First completion result:`, {
-        hasChoices: !!completion.choices,
-        choicesLength: completion.choices?.length || 0,
-        hasMessage: !!completion.choices?.[0]?.message,
-        hasToolCalls: !!completion.choices?.[0]?.message?.tool_calls,
-        toolCallsCount: completion.choices?.[0]?.message?.tool_calls?.length || 0,
-        content: completion.choices?.[0]?.message?.content || 'empty',
-        role: completion.choices?.[0]?.message?.role,
-        finishReason: completion.choices?.[0]?.finish_reason
-      });
+      // Safe debug logging
+      try {
+        console.log(`🔍 [XAI_PROVIDER] COMPLETION STRUCTURE:`, {
+          hasChoices: !!completion.choices,
+          choicesLength: completion.choices?.length || 0,
+          choice0: completion.choices?.[0] ? {
+            hasMessage: !!completion.choices[0].message,
+            messageKeys: completion.choices[0].message ? Object.keys(completion.choices[0].message) : [],
+            role: completion.choices[0].message?.role,
+            content: completion.choices[0].message?.content || 'EMPTY',
+            hasToolCalls: !!completion.choices[0].message?.tool_calls,
+            toolCallsType: typeof completion.choices[0].message?.tool_calls,
+            toolCallsLength: completion.choices[0].message?.tool_calls?.length || 0,
+            finishReason: completion.choices[0].finish_reason
+          } : 'NO_CHOICE_0'
+        });
+        
+        // If tool_calls exist, log them separately
+        if (completion.choices?.[0]?.message?.tool_calls) {
+          console.log(`🔧 [XAI_PROVIDER] TOOL_CALLS FOUND:`, completion.choices[0].message.tool_calls);
+        }
+      } catch (debugError) {
+        console.error(`❌ [XAI_PROVIDER] Debug logging error:`, debugError);
+      }
       
       // Handle function calls (web search)
       if (completion.choices[0]?.message?.tool_calls) {
