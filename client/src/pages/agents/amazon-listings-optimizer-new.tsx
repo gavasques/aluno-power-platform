@@ -13,6 +13,8 @@ import {
   Info,
   X
 } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -64,8 +66,35 @@ export default function AmazonListingsOptimizerNew() {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const { toast } = useToast();
+
   const handleSubmit = async () => {
     if (!isFormValid) return;
+    
+    // Verificar créditos primeiro
+    try {
+      const dashboardResponse = await apiRequest('/api/dashboard/summary', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      
+      if (dashboardResponse.user.creditBalance < 10) {
+        toast({
+          title: "Créditos insuficientes",
+          description: "Você precisa de pelo menos 10 créditos para usar este agente.",
+          variant: "destructive"
+        });
+        return;
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao verificar créditos",
+        description: "Não foi possível verificar seu saldo de créditos.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsProcessing(true);
     
@@ -154,12 +183,54 @@ export default function AmazonListingsOptimizerNew() {
         throw new Error('Erro na geração de descrição');
       }
       
-      // 7. Navegar para resultados
+      // 7. Deduzir créditos
+      try {
+        await apiRequest('/api/credits/deduct', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            amount: 10,
+            reason: 'Amazon Listings Optimizer - Otimização de listagem'
+          })
+        });
+      } catch (creditError) {
+        console.error('Erro ao deduzir créditos:', creditError);
+      }
+
+      // 8. Registrar log de uso
+      try {
+        await apiRequest('/api/ai-generation-logs', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            feature: 'agents.amazon_listing',
+            creditsUsed: 10,
+            prompt: `Produto: ${formData.productName}`,
+            response: 'Listagem otimizada gerada',
+            provider: 'openai',
+            model: 'gpt-4o-mini'
+          })
+        });
+      } catch (logError) {
+        console.error('Erro ao registrar log:', logError);
+      }
+      
+      // 9. Navegar para resultados
       navigate(`/agents/amazon-listings-optimizer/result?session=${sessionId}`);
       
     } catch (error) {
       console.error("Error processing:", error);
-      alert(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      toast({
+        title: "Erro no processamento",
+        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        variant: "destructive"
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -169,26 +240,36 @@ export default function AmazonListingsOptimizerNew() {
     (reviewsTab === "text" ? formData.reviewsData : uploadedFiles.length > 0);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-6">
-        <Link href="/agentes">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar aos Agentes
-          </Button>
-        </Link>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center space-x-4 mb-6">
+          <Link href="/agentes">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar aos Agentes
+            </Button>
+          </Link>
+          <div className="flex items-center space-x-3">
+            <ShoppingCart className="h-8 w-8 text-orange-500" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Amazon Listings Optimizer
+              </h1>
+              <p className="text-gray-600">
+                Otimize suas listagens da Amazon com análise de avaliações dos concorrentes
+              </p>
+            </div>
+          </div>
+        </div>
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <ShoppingCart className="h-8 w-8" />
-          Amazon Listings Optimizer
-        </h1>
-        <p className="text-muted-foreground">
-          Otimize suas listagens da Amazon com análise de avaliações dos concorrentes
-        </p>
-      </div>
+        {/* Credit Cost Warning */}
+        <Alert className="border-orange-200 bg-orange-50">
+          <AlertCircle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
+            <strong>Custo:</strong> Este agente consome <strong>10 créditos</strong> por otimização. Verifique seu saldo antes de prosseguir.
+          </AlertDescription>
+        </Alert>
 
       <PermissionGuard 
         featureCode="agents.amazon_listing"
@@ -351,6 +432,19 @@ export default function AmazonListingsOptimizerNew() {
               </div>
 
               {/* Submit Button */}
+              {/* Credit warning before button */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="flex items-center space-x-2 text-blue-800">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="font-medium">Antes de processar:</span>
+                </div>
+                <p className="text-blue-700 text-sm mt-1">
+                  • Serão descontados <strong>10 créditos</strong> do seu saldo
+                  • Verifique se todos os campos obrigatórios estão preenchidos
+                  • O processamento não pode ser interrompido após iniciar
+                </p>
+              </div>
+
               <Button
                 onClick={handleSubmit}
                 disabled={!isFormValid || isProcessing}
@@ -365,7 +459,7 @@ export default function AmazonListingsOptimizerNew() {
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Otimizar Listagem
+                    Otimizar Listagem (10 créditos)
                   </>
                 )}
               </Button>
