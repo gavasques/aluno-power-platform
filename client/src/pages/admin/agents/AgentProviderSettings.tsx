@@ -608,7 +608,17 @@ export default function AgentProviderSettings() {
                   <Label htmlFor="model">Modelo</Label>
                   <Select 
                     value={formData.model} 
-                    onValueChange={(value) => setFormData({ ...formData, model: value })}
+                    onValueChange={(value) => {
+                      const isReasoningModel = ['o3', 'o4-mini', 'o3-mini'].includes(value);
+                      setFormData({ 
+                        ...formData, 
+                        model: value,
+                        // Clear tools if switching to reasoning model
+                        enableCodeInterpreter: isReasoningModel ? false : formData.enableCodeInterpreter,
+                        enableRetrieval: isReasoningModel ? false : formData.enableRetrieval,
+                        selectedCollections: isReasoningModel ? [] : formData.selectedCollections
+                      });
+                    }}
                     disabled={!formData.provider || availableModels.length === 0}
                   >
                     <SelectTrigger>
@@ -1127,44 +1137,45 @@ export default function AgentProviderSettings() {
                       </Alert>
                     )}
 
-                    {/* Tools/Functions */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Wrench className="h-4 w-4 text-green-600" />
-                        <Label className="text-green-800 font-medium">
-                          Ferramentas e Funções Avançadas
-                        </Label>
-                      </div>
-                      <div className="p-3 bg-orange-50 rounded border border-orange-200">
-                        <p className="text-sm text-orange-700 mb-2">
-                          <strong>O que são:</strong> Extensões que permitem ao modelo executar código, analisar documentos e realizar tarefas específicas.
-                        </p>
-                        <div className="text-xs text-orange-600 space-y-1">
-                          <div><strong>Code Interpreter:</strong> Executa código Python, faz cálculos, gera gráficos e processa dados</div>
-                          <div><strong>Retrieval:</strong> Busca e analisa informações em documentos ou bases de conhecimento específicas</div>
-                        </div>
-                      </div>
+                    {/* Tools/Functions - Only for non-reasoning models */}
+                    {!['o3', 'o4-mini', 'o3-mini'].includes(formData.model) && (
                       <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="enableCodeInterpreter"
-                            checked={formData.enableCodeInterpreter || false}
-                            onCheckedChange={(checked) => setFormData({ ...formData, enableCodeInterpreter: checked })}
-                          />
-                          <Label htmlFor="enableCodeInterpreter" className="text-sm">
-                            🐍 Interpretador de Código - Para cálculos e análise de dados
+                        <div className="flex items-center gap-2">
+                          <Wrench className="h-4 w-4 text-green-600" />
+                          <Label className="text-green-800 font-medium">
+                            Ferramentas e Funções Avançadas
                           </Label>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="enableRetrieval"
-                            checked={formData.enableRetrieval || false}
-                            onCheckedChange={(checked) => setFormData({ ...formData, enableRetrieval: checked })}
-                          />
-                          <Label htmlFor="enableRetrieval" className="text-sm">
-                            📚 Recuperação de Informações - Para busca em documentos
-                          </Label>
+                        <div className="p-3 bg-orange-50 rounded border border-orange-200">
+                          <p className="text-sm text-orange-700 mb-2">
+                            <strong>O que são:</strong> Extensões que permitem ao modelo executar código, analisar documentos e realizar tarefas específicas.
+                          </p>
+                          <div className="text-xs text-orange-600 space-y-1">
+                            <div><strong>Code Interpreter:</strong> Executa código Python, faz cálculos, gera gráficos e processa dados</div>
+                            <div><strong>Retrieval:</strong> Busca e analisa informações em documentos ou bases de conhecimento específicas</div>
+                          </div>
                         </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              id="enableCodeInterpreter"
+                              checked={formData.enableCodeInterpreter || false}
+                              onCheckedChange={(checked) => setFormData({ ...formData, enableCodeInterpreter: checked })}
+                            />
+                            <Label htmlFor="enableCodeInterpreter" className="text-sm">
+                              🐍 Interpretador de Código - Para cálculos e análise de dados
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              id="enableRetrieval"
+                              checked={formData.enableRetrieval || false}
+                              onCheckedChange={(checked) => setFormData({ ...formData, enableRetrieval: checked })}
+                            />
+                            <Label htmlFor="enableRetrieval" className="text-sm">
+                              📚 Recuperação de Informações - Para busca em documentos
+                            </Label>
+                          </div>
                         
                         {/* Collection selector when retrieval is enabled */}
                         {formData.enableRetrieval && (

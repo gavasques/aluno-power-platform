@@ -234,11 +234,13 @@ export class OpenAIProvider extends BaseProvider {
       console.log(`📋 [OPENAI] Response format: ${request.response_format.type}`);
     }
 
-    // Tools/Functions
-    if (request.tools && request.tools.length > 0) {
+    // Tools/Functions - only for non-reasoning models
+    if (request.tools && request.tools.length > 0 && !isReasoningModel) {
       params.tools = request.tools;
       params.tool_choice = 'auto';
       console.log(`🔧 [OPENAI] Tools enabled: ${request.tools.map(t => t.type).join(', ')}`);
+    } else if (request.tools && request.tools.length > 0 && isReasoningModel) {
+      console.log(`🚫 [OPENAI] Tools requested but not supported for reasoning model ${request.model}`);
     }
 
     // Fine-tuned model override

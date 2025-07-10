@@ -324,6 +324,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 10, 2025 - 8:21 PM**: ✅ OPENAI REASONING MODELS TOOLS COMPATIBILITY FIX - COMPLETE FRONTEND & BACKEND IMPLEMENTATION
+  - **Critical Bug Fix for Reasoning Models (o3, o3-mini, o4-mini)**:
+    - ✅ **Backend filtering**: OpenAIProvider now filters out tools for reasoning models before API call
+    - ✅ **Frontend UI hiding**: Tools/Functions section automatically hidden for reasoning models
+    - ✅ **Auto-cleanup on model switch**: Clears tool flags when switching to reasoning models
+    - ✅ **SelectItem value fix**: Changed empty string to "none" to prevent React errors
+  - **Technical Implementation Details**:
+    - Backend: `isReasoningModel` check filters tools in `generateResponse()` method
+    - Frontend: Conditional rendering hides entire Tools/Functions section for reasoning models
+    - Model change handler clears `enableCodeInterpreter`, `enableRetrieval`, and `selectedCollections`
+    - Prevents "Missing required parameter: 'tools[0].function'" error for o3/o3-mini/o4-mini models
+  - **User Experience Improvements**:
+    - Seamless model switching without tool conflicts
+    - Clear UI that only shows relevant features per model type
+    - Automatic cleanup prevents lingering invalid configurations
+    - Error-free operation with all OpenAI model types
+
 - **January 10, 2025 - 5:07 PM**: ✅ AI PROVIDER KNOWLEDGE BASE INTEGRATION - COLLECTION SELECTION FOR RETRIEVAL
   - **Knowledge Base Integration with AI Models**:
     - ✅ **Collection selector added**: Dropdown appears when retrieval is enabled in AI settings
