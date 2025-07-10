@@ -70,7 +70,6 @@ const AmazonCustomerServiceResult = lazy(() => import("./pages/agents/amazon-cus
 const AmazonNegativeReviews = lazy(() => import("./pages/agents/amazon-negative-reviews"));
 const AmazonNegativeReviewsResult = lazy(() => import("./pages/agents/amazon-negative-reviews-result"));
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
-const ProviderConfigManager = lazy(() => import("./pages/admin/agents/ProviderConfigManager"));
 
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
@@ -776,16 +775,6 @@ function App() {
                               <AdminLayout>
                                 <Suspense fallback={<PageLoader />}>
                                   <AgentProviderSettings />
-                                </Suspense>
-                              </AdminLayout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/admin/agents/config">
-                            <ProtectedRoute requireAdmin>
-                              <AdminLayout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <ProviderConfigManager />
                                 </Suspense>
                               </AdminLayout>
                             </ProtectedRoute>

@@ -25,7 +25,6 @@ import featureCostsRoutes from './featureCosts';
 import investmentSimulationsRoutes from './investment-simulations';
 import simulatorsRoutes from './simulators';
 import aiProviderRoutes from './aiProviders';
-import providerConfigRoutes from './providers/config';
 
 /**
  * Register all modular routes
@@ -78,9 +77,6 @@ export function registerModularRoutes(app: Express): void {
   
   // AI Provider Routes - xAI/Grok Integration & Provider Testing
   app.use('/api/ai-providers', aiProviderRoutes);
-  
-  // Provider Configuration Routes - Advanced Provider & Model Management
-  app.use('/api/provider-configs', providerConfigRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

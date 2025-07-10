@@ -52,8 +52,8 @@ const adminMenuItems = [
   {
     title: "Agentes de IA",
     items: [
-      { title: "Configurações dos Agentes", href: "/admin/agents/providers", icon: Settings },
-      { title: "Configurações de Provedores", href: "/admin/agents/config", icon: Settings },
+      { title: "Configurações de Provedores", href: "/admin/agents/providers", icon: Settings },
+
     ],
   },
 
