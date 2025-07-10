@@ -515,90 +515,90 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
                     
                     {isActive && isExpanded && (
                       <CardContent className="space-y-3 pt-0">
-                            <div className="text-sm text-muted-foreground mb-3">
-                              Custo do produto: R$ {(product as any)?.costItem || '0,00'} | 
-                              Impostos: {(product as any)?.taxPercent || '0,00'}%
-                            </div>
+                        <div className="text-sm text-muted-foreground mb-3">
+                          Custo do produto: R$ {(product as any)?.costItem || '0,00'} | 
+                          Impostos: {(product as any)?.taxPercent || '0,00'}%
+                        </div>
                         
-                            <div className="grid grid-cols-2 gap-3">
-                              {channelConfig.fields.map((fieldConfig) => (
-                                <FormField
-                                  key={fieldConfig.key}
-                                  control={form.control}
-                                  name={`channels.${index}.data.${fieldConfig.key}`}
-                                  render={({ field }) => (
-                                    <FormItem className={fieldConfig.key === 'price' ? 'col-span-2' : ''}>
-                                      <FormLabel className={fieldConfig.key === 'price' ? 'font-semibold' : ''}>
-                                        {fieldConfig.label}
-                                      </FormLabel>
-                                      <FormControl>
-                                        {fieldConfig.type === 'currency' ? (
-                                          <CurrencyInput
-                                            value={parseFloat(field.value?.toString() || '0') || 0}
-                                            onChange={field.onChange}
-                                            placeholder="R$ 0,00"
-                                          />
-                                        ) : (
-                                          <PercentInput
-                                            value={parseFloat(field.value?.toString() || '0') || 0}
-                                            onChange={field.onChange}
-                                            placeholder="0,00%"
-                                          />
-                                        )}
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              ))}
-                            </div>
-                        
-                            {/* Financial Summary */}
-                            {channelCalculations[channelType] && (
-                              <div className="border-t pt-3 mt-3">
-                                <div className="bg-muted/30 rounded-lg p-3">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    {channelCalculations[channelType].isProfit ? (
-                                      <TrendingUp className="h-4 w-4 text-green-600" />
+                        <div className="grid grid-cols-2 gap-3">
+                          {channelConfig.fields.map((fieldConfig) => (
+                            <FormField
+                              key={fieldConfig.key}
+                              control={form.control}
+                              name={`channels.${index}.data.${fieldConfig.key}`}
+                              render={({ field }) => (
+                                <FormItem className={fieldConfig.key === 'price' ? 'col-span-2' : ''}>
+                                  <FormLabel className={fieldConfig.key === 'price' ? 'font-semibold' : ''}>
+                                    {fieldConfig.label}
+                                  </FormLabel>
+                                  <FormControl>
+                                    {fieldConfig.type === 'currency' ? (
+                                      <CurrencyInput
+                                        value={parseFloat(field.value?.toString() || '0') || 0}
+                                        onChange={field.onChange}
+                                        placeholder="R$ 0,00"
+                                      />
                                     ) : (
-                                      <TrendingDown className="h-4 w-4 text-red-600" />
+                                      <PercentInput
+                                        value={parseFloat(field.value?.toString() || '0') || 0}
+                                        onChange={field.onChange}
+                                        placeholder="0,00%"
+                                      />
                                     )}
-                                    <span className="font-medium text-sm">Resumo Financeiro</span>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                      <span className="text-muted-foreground">Custos Totais:</span>
-                                      <br />
-                                      <span className="font-medium">
-                                        {formatCurrency(channelCalculations[channelType].totalCosts)}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Lucro Líquido:</span>
-                                      <br />
-                                      <span className={`font-medium ${channelCalculations[channelType].isProfit ? 'text-green-600' : 'text-red-600'}`}>
-                                        {formatCurrency(channelCalculations[channelType].netProfit)}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Margem:</span>
-                                      <br />
-                                      <span className={`font-medium ${channelCalculations[channelType].isProfit ? 'text-green-600' : 'text-red-600'}`}>
-                                        {formatPercent(channelCalculations[channelType].marginPercent)}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-muted-foreground">ROI:</span>
-                                      <br />
-                                      <span className={`font-medium ${channelCalculations[channelType].isProfit ? 'text-green-600' : 'text-red-600'}`}>
-                                        {formatPercent(channelCalculations[channelType].roi)}
-                                      </span>
-                                    </div>
-                                  </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          ))}
+                        </div>
+                        
+                        {/* Financial Summary */}
+                        {channelCalculations[channelType] && (
+                          <div className="border-t pt-3 mt-3">
+                            <div className="bg-muted/30 rounded-lg p-3">
+                              <div className="flex items-center gap-2 mb-2">
+                                {channelCalculations[channelType].isProfit ? (
+                                  <TrendingUp className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4 text-red-600" />
+                                )}
+                                <span className="font-medium text-sm">Resumo Financeiro</span>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                  <span className="text-muted-foreground">Custos Totais:</span>
+                                  <br />
+                                  <span className="font-medium">
+                                    {formatCurrency(channelCalculations[channelType].totalCosts)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Lucro Líquido:</span>
+                                  <br />
+                                  <span className={`font-medium ${channelCalculations[channelType].isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatCurrency(channelCalculations[channelType].netProfit)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Margem:</span>
+                                  <br />
+                                  <span className={`font-medium ${channelCalculations[channelType].isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatPercent(channelCalculations[channelType].marginPercent)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">ROI:</span>
+                                  <br />
+                                  <span className={`font-medium ${channelCalculations[channelType].isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatPercent(channelCalculations[channelType].roi)}
+                                  </span>
                                 </div>
                               </div>
-                            )}
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     )}
                   </Card>
