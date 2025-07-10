@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { requireRole } from '../../security';
+import { requireAuth, requireRole } from '../../security';
 import { ProviderConfigService } from '../../services/ProviderConfigService';
 
 const router = Router();
 const providerConfigService = ProviderConfigService.getInstance();
 
 // Initialize provider and model configurations
-router.post('/initialize', requireRole(['admin']), async (req: Request, res: Response) => {
+router.post('/initialize', requireAuth, requireRole(['admin']), async (req: Request, res: Response) => {
   try {
     await providerConfigService.initializeProviderConfigs();
     await providerConfigService.initializeModelConfigs();
@@ -19,7 +19,7 @@ router.post('/initialize', requireRole(['admin']), async (req: Request, res: Res
 });
 
 // Get all provider configurations
-router.get('/providers', requireRole(['admin']), async (req: Request, res: Response) => {
+router.get('/providers', requireAuth, requireRole(['admin']), async (req: Request, res: Response) => {
   try {
     const providers = await providerConfigService.getProviderConfigs();
     res.json(providers);
@@ -30,7 +30,7 @@ router.get('/providers', requireRole(['admin']), async (req: Request, res: Respo
 });
 
 // Get specific provider configuration
-router.get('/providers/:provider', requireRole(['admin']), async (req: Request, res: Response) => {
+router.get('/providers/:provider', requireAuth, requireRole(['admin']), async (req: Request, res: Response) => {
   try {
     const { provider } = req.params;
     const config = await providerConfigService.getProviderConfig(provider);
@@ -47,7 +47,7 @@ router.get('/providers/:provider', requireRole(['admin']), async (req: Request, 
 });
 
 // Update provider configuration
-router.put('/providers/:provider', requireRole(['admin']), async (req: Request, res: Response) => {
+router.put('/providers/:provider', requireAuth, requireRole(['admin']), async (req: Request, res: Response) => {
   try {
     const { provider } = req.params;
     const result = await providerConfigService.updateProviderConfig(provider, req.body);
@@ -64,7 +64,7 @@ router.put('/providers/:provider', requireRole(['admin']), async (req: Request, 
 });
 
 // Get all model configurations
-router.get('/models', requireRole(['admin']), async (req: Request, res: Response) => {
+router.get('/models', requireAuth, requireRole(['admin']), async (req: Request, res: Response) => {
   try {
     const { provider } = req.query;
     const models = await providerConfigService.getModelConfigs(provider as string);
@@ -76,7 +76,7 @@ router.get('/models', requireRole(['admin']), async (req: Request, res: Response
 });
 
 // Get specific model configuration
-router.get('/models/:provider/:model', requireRole(['admin']), async (req: Request, res: Response) => {
+router.get('/models/:provider/:model', requireAuth, requireRole(['admin']), async (req: Request, res: Response) => {
   try {
     const { provider, model } = req.params;
     const config = await providerConfigService.getModelConfig(provider, model);
@@ -93,7 +93,7 @@ router.get('/models/:provider/:model', requireRole(['admin']), async (req: Reque
 });
 
 // Update model configuration
-router.put('/models/:provider/:model', requireRole(['admin']), async (req: Request, res: Response) => {
+router.put('/models/:provider/:model', requireAuth, requireRole(['admin']), async (req: Request, res: Response) => {
   try {
     const { provider, model } = req.params;
     const result = await providerConfigService.updateModelConfig(provider, model, req.body);
