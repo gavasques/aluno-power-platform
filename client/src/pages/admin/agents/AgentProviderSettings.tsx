@@ -1344,12 +1344,26 @@ export default function AgentProviderSettings() {
                                 type="number"
                                 min="1000"
                                 max="50000"
-                                step="1000"
-                                value={formData.thinkingBudgetTokens}
-                                onChange={(e) => setFormData({ 
-                                  ...formData, 
-                                  thinkingBudgetTokens: Math.max(1000, parseInt(e.target.value) || 10000)
-                                })}
+                                step="100"
+                                placeholder="Digite entre 1.000 e 50.000"
+                                value={formData.thinkingBudgetTokens || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  // Permite edição livre - validação apenas no onBlur
+                                  setFormData({ 
+                                    ...formData, 
+                                    thinkingBudgetTokens: value === '' ? '' : parseInt(value) || ''
+                                  });
+                                }}
+                                onBlur={(e) => {
+                                  const value = parseInt(e.target.value);
+                                  // Aplica limites apenas quando sair do campo
+                                  if (isNaN(value) || value < 1000) {
+                                    setFormData({ ...formData, thinkingBudgetTokens: 1000 });
+                                  } else if (value > 50000) {
+                                    setFormData({ ...formData, thinkingBudgetTokens: 50000 });
+                                  }
+                                }}
                                 className="w-full"
                               />
                               <div className="flex justify-between text-xs text-purple-600">
