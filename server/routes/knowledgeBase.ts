@@ -1,7 +1,7 @@
 import express from 'express';
 import { z } from 'zod';
-import { KnowledgeBaseService } from '../services/KnowledgeBaseService.js';
-import { requireAuth } from '../middleware/auth';
+import { KnowledgeBaseService } from '../services/KnowledgeBaseService';
+import { requireAuth } from '../security';
 
 const router = express.Router();
 const knowledgeBaseService = new KnowledgeBaseService();

@@ -13,8 +13,8 @@ import {
   KnowledgeBaseCollection,
   InsertKnowledgeBaseDoc,
   InsertKnowledgeBaseCollection
-} from '../../shared/schema.js';
-import { db } from '../db.js';
+} from '../../shared/schema';
+import { db } from '../db';
 import { eq, and, desc } from 'drizzle-orm';
 
 export class KnowledgeBaseService {
