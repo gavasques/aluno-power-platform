@@ -82,7 +82,7 @@ const Dashboard = memo(() => {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="flex flex-col gap-8 px-2 py-6">
+      <div className="layout-full-width flex flex-col gap-8 py-6">
 
 
         {/* Stats Cards */}

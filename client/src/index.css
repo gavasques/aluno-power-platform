@@ -309,6 +309,15 @@
     }
   }
 
+  /* Full Width Layout Override - Para páginas que precisam usar toda a largura */
+  .layout-full-width {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
   /* Flexbox Utilities Otimizados */
   .flex-center {
     display: flex;
