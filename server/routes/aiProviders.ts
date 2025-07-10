@@ -11,7 +11,7 @@ const testRequestSchema = z.object({
   model: z.string(),
   prompt: z.string(),
   temperature: z.number().min(0).max(2).optional(),
-  maxTokens: z.number().min(1).max(32000).optional(),
+  maxTokens: z.number().min(1).max(300000).optional(),
   imageData: z.string().optional(),
   referenceImages: z.array(z.object({
     data: z.string(),
