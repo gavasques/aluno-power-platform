@@ -105,7 +105,8 @@ export class KnowledgeBaseService {
     userId: number,
     file: Express.Multer.File,
     title: string,
-    tags: string[] = []
+    tags: string[] = [],
+    collectionId: number | null = null
   ): Promise<KnowledgeBaseDoc> {
     const content = await this.extractTextContent(file.path, file.mimetype);
     const summary = await this.generateSummary(content);
@@ -124,6 +125,12 @@ export class KnowledgeBaseService {
     };
 
     const [doc] = await db.insert(knowledgeBaseDocs).values(docData).returning();
+    
+    // If a collection was specified, add the document to it
+    if (collectionId) {
+      await this.addDocumentToCollection(userId, doc.id, collectionId);
+    }
+    
     return doc;
   }
 
@@ -133,6 +140,31 @@ export class KnowledgeBaseService {
       .from(knowledgeBaseDocs)
       .where(and(eq(knowledgeBaseDocs.userId, userId), eq(knowledgeBaseDocs.isActive, true)))
       .orderBy(desc(knowledgeBaseDocs.createdAt));
+  }
+
+  async getUserDocumentsWithCollections(userId: number): Promise<any[]> {
+    const docs = await db
+      .select()
+      .from(knowledgeBaseDocs)
+      .where(and(eq(knowledgeBaseDocs.userId, userId), eq(knowledgeBaseDocs.isActive, true)))
+      .orderBy(desc(knowledgeBaseDocs.createdAt));
+    
+    // Get collection associations for each document
+    const docsWithCollections = await Promise.all(docs.map(async (doc) => {
+      const collections = await db
+        .select({
+          collectionId: knowledgeBaseDocCollections.collectionId
+        })
+        .from(knowledgeBaseDocCollections)
+        .where(eq(knowledgeBaseDocCollections.docId, doc.id));
+      
+      return {
+        ...doc,
+        collectionIds: collections.map(c => c.collectionId)
+      };
+    }));
+    
+    return docsWithCollections;
   }
 
   async getDocument(userId: number, docId: number): Promise<KnowledgeBaseDoc | null> {

@@ -16,16 +16,18 @@ router.post('/documents/upload', knowledgeBaseService.getMulterConfig().single('
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const { title, tags } = req.body;
+    const { title, tags, collectionId } = req.body;
     const userId = req.user!.id;
 
     const parsedTags = tags ? JSON.parse(tags) : [];
+    const parsedCollectionId = collectionId ? parseInt(collectionId) : null;
     
     const doc = await knowledgeBaseService.uploadDocument(
       userId,
       req.file,
       title || req.file.originalname,
-      parsedTags
+      parsedTags,
+      parsedCollectionId
     );
 
     res.json(doc);
@@ -39,7 +41,7 @@ router.post('/documents/upload', knowledgeBaseService.getMulterConfig().single('
 router.get('/documents', async (req, res) => {
   try {
     const userId = req.user!.id;
-    const docs = await knowledgeBaseService.getUserDocuments(userId);
+    const docs = await knowledgeBaseService.getUserDocumentsWithCollections(userId);
     res.json(docs);
   } catch (error) {
     console.error('Error fetching documents:', error);
