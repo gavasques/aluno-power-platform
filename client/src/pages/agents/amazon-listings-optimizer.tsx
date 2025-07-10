@@ -27,8 +27,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAmazonListingSession } from "@/hooks/useAmazonListingSession";
 import { useFormValidation } from "@/hooks/useFormValidation";
 import { useFileProcessing } from "@/hooks/useFileProcessing";
+import { useGetFeatureCost } from "@/hooks/useFeatureCosts";
+import { AgentCostDisplay } from "@/components/AgentCostDisplay";
 import { amazonListingService } from "@/services/amazonListingService";
+import { apiRequest } from "@/lib/queryClient";
 import type { AmazonListingFormData, Department, ReviewsInputType } from "@/types/amazon-listing";
+
+// Código da feature para custo
+const FEATURE_CODE = "agents.amazon_listing";
 
 export default function AmazonListingsOptimizer() {
   // Form state
@@ -54,6 +60,7 @@ export default function AmazonListingsOptimizer() {
   const { session, isLoading: isSessionLoading, error: sessionError, updateSessionData } = useAmazonListingSession();
   const { errors, validateField, validateForm, clearError } = useFormValidation();
   const { uploadedFiles, isProcessing: isFilesProcessing, error: fileError, addFiles, removeFile, processFiles, clearFiles } = useFileProcessing();
+  const { getFeatureCost } = useGetFeatureCost();
 
   // Load departments on mount
   useEffect(() => {
@@ -102,6 +109,28 @@ export default function AmazonListingsOptimizer() {
 
   // Process listing main function
   const processListing = async () => {
+    // Validação de créditos primeiro
+    const featureCost = getFeatureCost(FEATURE_CODE);
+    const creditsRequired = featureCost?.costPerUse || 10;
+
+    try {
+      // Verificar saldo de créditos
+      const response = await apiRequest('/api/dashboard/summary', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      
+      if (response.user.creditBalance < creditsRequired) {
+        alert(`Créditos insuficientes. Você precisa de ${creditsRequired} créditos, mas tem apenas ${response.user.creditBalance}.`);
+        return;
+      }
+    } catch (error) {
+      console.error('Erro ao verificar créditos:', error);
+      alert('Erro ao verificar saldo de créditos. Tente novamente.');
+      return;
+    }
+
     // Get combined reviews data from files if any
     let combinedReviewsData = formData.reviewsData;
     
@@ -128,12 +157,40 @@ export default function AmazonListingsOptimizer() {
     setIsProcessing(true);
 
     try {
+      // Deduzir créditos antes de processar
+      await apiRequest('/api/credits/deduct', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({ 
+          amount: creditsRequired,
+          reason: `Amazon Listings Optimizer - ${formData.productName || 'Produto'}`
+        })
+      });
+
       // Update session with form data first
       await updateSessionData(finalFormData);
       
       // Then start the 2-step processing
       await amazonListingService.processStep1(session!.id);
       await amazonListingService.processStep2(session!.id);
+
+      // Log da geração para auditoria
+      await apiRequest('/api/ai-generation-logs', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          feature: FEATURE_CODE,
+          prompt: `Otimização Amazon Listing: ${formData.productName}`,
+          response: 'Otimização concluída com sucesso',
+          creditsUsed: creditsRequired,
+          model: 'amazon-optimizer',
+          tokensUsed: 0
+        })
+      });
       
       navigate('/agents/amazon-listings-optimizer/result');
     } catch (error) {
@@ -174,7 +231,7 @@ export default function AmazonListingsOptimizer() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="layout-full-width px-2">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <Link href="/agentes">
@@ -208,7 +265,7 @@ export default function AmazonListingsOptimizer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="layout-full-width px-2 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3">
@@ -458,6 +515,9 @@ export default function AmazonListingsOptimizer() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Agent Cost Display */}
+            <AgentCostDisplay featureCode={FEATURE_CODE} />
+
             {/* Available Tags */}
             <Card>
               <CardHeader>
