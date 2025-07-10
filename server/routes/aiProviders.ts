@@ -161,7 +161,7 @@ router.get('/status', requireAuth, async (req, res) => {
 // Get All Available Models
 router.get('/models', requireAuth, async (req, res) => {
   try {
-    const models = aiProviderService.getAllModels();
+    const models = await aiProviderService.getAllModels();
     res.json(models);
   } catch (error) {
     console.error('❌ [AI_PROVIDER_MODELS] Failed to get models:', error);

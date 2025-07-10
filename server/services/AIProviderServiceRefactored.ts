@@ -12,7 +12,7 @@ export class AIProviderService {
     return this.providerManager.getProviderStatus();
   }
 
-  getAllModels(): ModelConfig[] {
+  async getAllModels(): Promise<ModelConfig[]> {
     return this.providerManager.getAllModels();
   }
 

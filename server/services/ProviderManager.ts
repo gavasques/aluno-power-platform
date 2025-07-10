@@ -31,13 +31,34 @@ export class ProviderManager {
     };
   }
 
-  getAllModels(): ModelConfig[] {
+  async getAllModels(): Promise<ModelConfig[]> {
     const allModels: ModelConfig[] = [];
     const providerEntries = Array.from(this.providers.entries());
     
-    for (const [, provider] of providerEntries) {
+    for (const [providerName, provider] of providerEntries) {
       if (provider.isConfigured()) {
-        allModels.push(...provider.getAvailableModels());
+        try {
+          // For OpenRouter, use dynamic API call to get latest models
+          if (providerName === 'openrouter') {
+            console.log(`🔍 [PROVIDER_MANAGER] Attempting to fetch dynamic models for OpenRouter...`);
+            const openrouterProvider = provider as OpenRouterProvider;
+            if (typeof openrouterProvider.getModels === 'function') {
+              console.log(`✅ [PROVIDER_MANAGER] OpenRouter getModels function found, calling API...`);
+              const dynamicModels = await openrouterProvider.getModels();
+              console.log(`📊 [PROVIDER_MANAGER] OpenRouter returned ${dynamicModels.length} models`);
+              allModels.push(...dynamicModels);
+            } else {
+              console.log(`⚠️ [PROVIDER_MANAGER] OpenRouter getModels function not found, using static models`);
+              allModels.push(...provider.getAvailableModels());
+            }
+          } else {
+            allModels.push(...provider.getAvailableModels());
+          }
+        } catch (error) {
+          console.warn(`⚠️ [PROVIDER_MANAGER] Failed to get models for ${providerName}:`, error);
+          // Fallback to static models
+          allModels.push(...provider.getAvailableModels());
+        }
       }
     }
     
