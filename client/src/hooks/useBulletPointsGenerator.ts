@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGetFeatureCost } from '@/hooks/useFeatureCosts';
 import type { Agent } from '@shared/schema';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
 
@@ -171,6 +172,9 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
 
   const { toast } = useToast();
   const { user } = useAuth();
+  const { getFeatureCost } = useGetFeatureCost();
+  
+  const FEATURE_CODE = 'agents.bullet_points';
 
   const updateState = useCallback((updates: Partial<GenerationState>) => {
     setState(prev => ({ ...prev, ...updates }));
@@ -219,7 +223,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       // SEMPRE buscar as configurações mais recentes do agente antes de gerar
       const agentResponse = await fetch('/api/agents/bullet-points-generator', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
@@ -255,7 +259,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify({
           provider: currentConfig.provider,
@@ -278,6 +282,24 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       const endTime = Date.now();
       const duration = endTime - startTime;
       const responseText = data.response;
+      const creditsToDeduct = getFeatureCost(FEATURE_CODE);
+
+      // Descontar créditos dinamicamente do usuário
+      try {
+        await fetch('/api/credits/deduct', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          },
+          body: JSON.stringify({
+            amount: creditsToDeduct,
+            reason: 'Geração de Bullet Points com IA'
+          })
+        });
+      } catch (creditError) {
+        console.error('Erro ao descontar crédito:', creditError);
+      }
 
       // Salvar log da geração (somente se usuário estiver logado)
       if (user && user.id) {
@@ -285,7 +307,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           },
           body: JSON.stringify({
             userId: user.id,
@@ -299,10 +321,13 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
             outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
             totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
             cost: data.cost || 0,
+            creditsUsed: creditsToDeduct, // Crédito dinâmico consumido
             duration: duration,
             feature: 'bullet-points-generator'
           })
         });
+        
+        console.log(`💾 Log salvo - Usuário: ${user.id}, Créditos: ${creditsToDeduct}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
       }
 
       if (state.bulletPointsOutput && state.bulletPointsOutput.trim()) {

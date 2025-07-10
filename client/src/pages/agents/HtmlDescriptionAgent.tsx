@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
+import { useGetFeatureCost } from '@/hooks/useFeatureCosts';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +29,7 @@ import {
   Wand2
 } from 'lucide-react';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
+import { AgentCostDisplay } from '@/components/AgentCostDisplay';
 
 const HtmlDescriptionAgent: React.FC = () => {
   const [textInput, setTextInput] = useState('');
@@ -43,9 +45,11 @@ const HtmlDescriptionAgent: React.FC = () => {
   });
   const { toast } = useToast();
   const { user } = useAuth();
+  const { getFeatureCost } = useGetFeatureCost();
 
   const MAX_CHARS = 2000;
   const WARNING_THRESHOLD = 1800;
+  const FEATURE_CODE = 'agents.html_descriptions';
 
   // Buscar configurações do agente
   const { data: agent } = useQuery({
@@ -250,8 +254,9 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
 
       const responseText = data.response || '';
       const duration = Date.now() - startTime;
+      const creditsToDeduct = getFeatureCost(FEATURE_CODE);
 
-      // Descontar 1 crédito do usuário
+      // Descontar créditos dinamicamente do usuário
       try {
         await fetch('/api/credits/deduct', {
           method: 'POST',
@@ -260,7 +265,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           },
           body: JSON.stringify({
-            amount: 1,
+            amount: creditsToDeduct,
             reason: 'Geração de Descrição HTML com IA'
           })
         });
@@ -268,7 +273,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
         console.error('Erro ao descontar crédito:', creditError);
       }
 
-      // Salvar log da geração de IA com crédito fixo
+      // Salvar log da geração de IA com crédito dinâmico
       try {
         await fetch('/api/ai-generation-logs', {
           method: 'POST',
@@ -288,13 +293,13 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
             outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
             totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
             cost: data.cost || 0,
-            creditsUsed: 1, // Crédito fixo consumido
+            creditsUsed: creditsToDeduct, // Crédito dinâmico consumido
             duration: duration,
             feature: 'html-description-agent'
           })
         });
         
-        console.log(`💾 Log salvo - Usuário: ${user.id}, Créditos: 1, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
+        console.log(`💾 Log salvo - Usuário: ${user.id}, Créditos: ${creditsToDeduct}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
       } catch (logError) {
         console.error('Erro ao salvar log de IA:', logError);
       }
@@ -379,12 +384,10 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
             </div>
             
             {/* Custo do Agente */}
-            <div className="bg-white/70 px-4 py-2 rounded-lg border">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-600">Custo por uso:</span>
-                <span className="font-bold text-purple-600">1 crédito</span>
-              </div>
-            </div>
+            <AgentCostDisplay 
+              featureCode={FEATURE_CODE}
+              description="Custo por uso da IA:"
+            />
           </div>
         </div>
 

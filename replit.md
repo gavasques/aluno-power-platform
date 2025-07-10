@@ -324,6 +324,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 10, 2025 - 10:45 PM**: ✅ DYNAMIC COST SYSTEM FULLY IMPLEMENTED ACROSS ALL AGENTS
+  - **Complete Dynamic Cost Integration**: Applied unified dynamic cost system across all agents
+  - **BulletPointsAgent Updated**: Added AgentCostDisplay component showing dynamic cost from database
+  - **HtmlDescriptionAgent Updated**: Changed from hardcoded featureCode to dynamic FEATURE_CODE constant
+  - **useBulletPointsGenerator Enhanced**: 
+    - Added useGetFeatureCost hook for dynamic cost retrieval
+    - Implemented proper credit deduction with dynamic amount calculation
+    - Fixed all authentication tokens to use 'auth_token' localStorage key consistently
+    - Enhanced logging with creditsUsed field tracking actual dynamic costs
+  - **System Benefits**:
+    - No more hardcoded costs anywhere in the system
+    - All agents use dynamic costs from featureCosts database table
+    - Consistent credit deduction across all agent types
+    - Real-time cost updates when database values change
+    - Complete audit trail with dynamic cost logging
+  - **Technical Implementation**: useGetFeatureCost hook provides getFeatureCost function for real-time cost lookup by feature code
+
 - **January 10, 2025 - 10:30 PM**: ✅ HTML DESCRIPTION GENERATOR - UI SIMPLIFIED & FIXED CREDIT SYSTEM IMPLEMENTED
   - **UI Simplification**: Removed all provider configuration displays (OpenAI, temperature, etc.) from user interface
   - **Credit Display**: Shows "Custo por uso: 1 crédito" instead of technical configurations

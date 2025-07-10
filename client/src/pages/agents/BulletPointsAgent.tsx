@@ -10,6 +10,7 @@ import { BulletPointsOutput } from '@/components/agents/BulletPointsOutput';
 import { ReplaceDialog } from '@/components/agents/ReplaceDialog';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
+import { AgentCostDisplay } from '@/components/AgentCostDisplay';
 
 const BulletPointsAgent: React.FC = () => {
   const { data: agent } = useQuery<Agent>({
@@ -55,6 +56,12 @@ const BulletPointsAgent: React.FC = () => {
                 </p>
               </div>
             </div>
+            
+            {/* Custo do Agente */}
+            <AgentCostDisplay 
+              featureCode="agents.bullet_points"
+              description="Custo por uso da IA:"
+            />
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6 min-h-[calc(100vh-280px)]">
