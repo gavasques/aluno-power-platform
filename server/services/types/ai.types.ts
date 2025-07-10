@@ -16,7 +16,7 @@ export interface AIRequest {
   }>;
   // Grok-specific features
   reasoningLevel?: 'disabled' | 'low' | 'high';
-  enableSearch?: boolean;
+  enableSearch?: boolean; // Web search for both OpenAI and Grok
   // OpenAI-specific features
   enableReasoning?: boolean; // For o3, o4-mini models
   reasoning_effort?: 'low' | 'medium' | 'high'; // For o3-mini, o4-mini models
