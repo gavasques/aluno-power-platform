@@ -122,9 +122,13 @@ export default function AgentProviderSettings() {
   // Update agent mutation
   const updateAgentMutation = useMutation({
     mutationFn: async (agentData: Agent) => {
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/agents/${agentData.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
         body: JSON.stringify(agentData)
       });
       if (!response.ok) throw new Error('Failed to update agent');
@@ -186,9 +190,13 @@ export default function AgentProviderSettings() {
       enableImageUnderstanding?: boolean;
       referenceImages?: Array<{ data: string; filename: string }>;
     }) => {
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
         body: JSON.stringify(data)
       });
       if (!response.ok) {
@@ -545,12 +553,19 @@ export default function AgentProviderSettings() {
                 {/* Máximo de Tokens */}
                 <div>
                   <Label htmlFor="maxTokens">Máximo de Tokens</Label>
-                  <div className="text-sm text-gray-500 mb-2">Limite de tokens para resposta</div>
+                  <div className="text-sm text-gray-500 mb-2">
+                    Limite de tokens para resposta
+                    {selectedModel && (
+                      <span className="text-xs ml-2">
+                        (máximo: {selectedModel.maxTokens.toLocaleString()})
+                      </span>
+                    )}
+                  </div>
                   <Input
                     id="maxTokens"
                     type="number"
                     min="1"
-                    max="32000"
+                    max={selectedModel?.maxTokens || 256000}
                     value={formData.maxTokens}
                     onChange={(e) => setFormData({ ...formData, maxTokens: parseInt(e.target.value) || 1000 })}
                     className="w-full"
