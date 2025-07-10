@@ -1139,30 +1139,32 @@ export default function AgentProviderSettings() {
 
                     {/* Tools/Functions - Only for non-reasoning models */}
                     {!['o3', 'o4-mini', 'o3-mini'].includes(formData.model) && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Search className="h-4 w-4 text-green-600" />
-                          <Label className="text-green-800 font-medium">
-                            Busca na Web
-                          </Label>
+                      <>
+                        {/* Web Search Section */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Search className="h-4 w-4 text-green-600" />
+                            <Label className="text-green-800 font-medium">
+                              Busca na Web
+                            </Label>
+                          </div>
+                          <p className="text-sm text-green-600">
+                            Permite que o modelo busque informações atuais na web durante a geração de respostas.
+                          </p>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              id="enableWebSearch"
+                              checked={formData.enableSearch}
+                              onCheckedChange={(checked) => setFormData({ ...formData, enableSearch: checked })}
+                            />
+                            <Label htmlFor="enableWebSearch" className="text-sm">
+                              Habilitar busca na web
+                            </Label>
+                          </div>
                         </div>
-                        <p className="text-sm text-green-600">
-                          Permite que o modelo busque informações atuais na web durante a geração de respostas.
-                        </p>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="enableWebSearch"
-                            checked={formData.enableSearch}
-                            onCheckedChange={(checked) => setFormData({ ...formData, enableSearch: checked })}
-                          />
-                          <Label htmlFor="enableWebSearch" className="text-sm">
-                            Habilitar busca na web
-                          </Label>
-                        </div>
-                      </div>
 
-                      {/* Tools/Functions */}
-                      <div className="space-y-3">
+                        {/* Tools/Functions */}
+                        <div className="space-y-3">
                         <div className="flex items-center gap-2">
                           <Wrench className="h-4 w-4 text-green-600" />
                           <Label className="text-green-800 font-medium">
@@ -1232,8 +1234,8 @@ export default function AgentProviderSettings() {
                             </p>
                           </div>
                         )}
-                      </div>
-                    </div>
+                        </div>
+                      </>
                     )}
 
                     {/* Fine-tuned Model */}
