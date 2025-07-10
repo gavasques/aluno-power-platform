@@ -39,6 +39,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { apiRequest } from '@/lib/queryClient';
 import { KnowledgeBaseDoc, KnowledgeBaseCollection } from '../../../../shared/schema';
 
