@@ -110,7 +110,10 @@ export default function AgentProviderSettings() {
     enableCodeInterpreter: false,
     enableRetrieval: false,
     fineTuneModel: '',
-    selectedCollections: [] as number[]
+    selectedCollections: [] as number[],
+    // Claude specific features
+    enableExtendedThinking: false,
+    thinkingBudgetTokens: 10000
   });
 
   const [testPrompt, setTestPrompt] = useState('Olá! Como você está hoje?');
@@ -282,7 +285,10 @@ export default function AgentProviderSettings() {
         presence_penalty: undefined,
         enableCodeInterpreter: false,
         enableRetrieval: false,
-        fineTuneModel: ''
+        fineTuneModel: '',
+        // Reset Claude features when changing agent
+        enableExtendedThinking: false,
+        thinkingBudgetTokens: 10000
       });
     }
   }, [selectedAgent]);
@@ -392,6 +398,16 @@ export default function AgentProviderSettings() {
       // Fine-tuned model
       if (formData.fineTuneModel) {
         testData.fineTuneModel = formData.fineTuneModel;
+      }
+    }
+
+    // Add Claude-specific features for Anthropic provider
+    if (formData.provider === 'anthropic') {
+      if (formData.enableExtendedThinking) {
+        testData.claudeAdvanced = {
+          enableExtendedThinking: formData.enableExtendedThinking,
+          thinkingBudgetTokens: formData.thinkingBudgetTokens
+        };
       }
     }
 
@@ -1246,6 +1262,115 @@ export default function AgentProviderSettings() {
                       <AlertDescription className="text-sm">
                         <strong>Dica:</strong> As funcionalidades avançadas da OpenAI permitem controle preciso sobre as respostas. 
                         Use com moderação para otimizar custos e performance.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+
+                {/* Claude-specific Features */}
+                {formData.provider === 'anthropic' && (
+                  <div className="space-y-6 p-4 border rounded-lg bg-purple-50 border-purple-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-xl">🧠</span>
+                      <h3 className="text-lg font-semibold text-purple-800">Funcionalidades Avançadas da Claude</h3>
+                    </div>
+
+                    {/* Model Capabilities Info */}
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-medium text-blue-800 mb-2">Modelos Compatíveis com Extended Thinking:</h4>
+                      <div className="text-sm text-blue-700 space-y-1">
+                        {['claude-opus-4-20250514', 'claude-sonnet-4-20250514', 'claude-3-7-sonnet-20250219'].includes(formData.model) ? (
+                          <>
+                            <div>✅ <strong>{formData.model}</strong> suporta Extended Thinking</div>
+                            <div>💡 <strong>Ideal para:</strong> Análise profunda, raciocínio complexo e resolução de problemas que exigem reflexão detalhada</div>
+                          </>
+                        ) : (
+                          <>
+                            <div>❌ <strong>{formData.model}</strong> não suporta Extended Thinking</div>
+                            <div>💡 <strong>Modelos compatíveis:</strong> claude-opus-4-20250514, claude-sonnet-4-20250514, claude-3-7-sonnet-20250219</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Extended Thinking Controls */}
+                    {['claude-opus-4-20250514', 'claude-sonnet-4-20250514', 'claude-3-7-sonnet-20250219'].includes(formData.model) && (
+                      <div className="space-y-4">
+                        {/* Extended Thinking Toggle */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Brain className="h-4 w-4 text-purple-600" />
+                            <Label className="text-purple-800 font-medium">
+                              Extended Thinking (Raciocínio Estendido)
+                            </Label>
+                          </div>
+                          <div className="p-3 bg-purple-50 rounded border border-purple-200">
+                            <p className="text-sm text-purple-700 mb-2">
+                              <strong>O que é:</strong> Permite que o Claude faça um raciocínio mais profundo e detalhado antes de responder.
+                            </p>
+                            <div className="text-xs text-purple-600 space-y-1">
+                              <div><strong>Como funciona:</strong> O modelo "pensa" internamente antes de gerar a resposta final</div>
+                              <div><strong>Benefícios:</strong> Respostas mais precisas, análises mais detalhadas, melhor resolução de problemas complexos</div>
+                              <div><strong>Custo:</strong> Consome tokens adicionais para o processo de raciocínio interno</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              id="enableExtendedThinking"
+                              checked={formData.enableExtendedThinking}
+                              onCheckedChange={(checked) => setFormData({ ...formData, enableExtendedThinking: checked })}
+                            />
+                            <Label htmlFor="enableExtendedThinking" className="text-sm">
+                              Habilitar Extended Thinking
+                            </Label>
+                          </div>
+                        </div>
+
+                        {/* Budget Tokens */}
+                        {formData.enableExtendedThinking && (
+                          <div className="space-y-3 ml-6">
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="h-4 w-4 text-purple-600" />
+                              <Label className="text-purple-800 font-medium">
+                                Budget de Tokens para Raciocínio
+                              </Label>
+                            </div>
+                            <p className="text-sm text-purple-600">
+                              Controla quantos tokens podem ser usados para o processo de raciocínio interno.
+                              Mais tokens = raciocínio mais profundo, mas maior custo.
+                            </p>
+                            <div className="space-y-2">
+                              <Input
+                                type="number"
+                                min="1000"
+                                max="50000"
+                                step="1000"
+                                value={formData.thinkingBudgetTokens}
+                                onChange={(e) => setFormData({ 
+                                  ...formData, 
+                                  thinkingBudgetTokens: Math.max(1000, parseInt(e.target.value) || 10000)
+                                })}
+                                className="w-full"
+                              />
+                              <div className="flex justify-between text-xs text-purple-600">
+                                <span>1.000 = raciocínio básico</span>
+                                <span>25.000 = raciocínio profundo</span>
+                                <span>50.000 = raciocínio máximo</span>
+                              </div>
+                              <p className="text-xs text-purple-500">
+                                💡 Recomendado: 10.000 tokens para maioria dos casos
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <Alert>
+                      <Brain className="h-4 w-4" />
+                      <AlertDescription className="text-sm">
+                        <strong>Dica:</strong> O Extended Thinking da Claude é ideal para tarefas que requerem análise profunda, 
+                        mas resulta em maior consumo de tokens. Use quando precisar de raciocínio mais detalhado.
                       </AlertDescription>
                     </Alert>
                   </div>

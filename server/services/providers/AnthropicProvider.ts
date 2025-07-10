@@ -35,6 +35,10 @@ export class AnthropicProvider extends BaseProvider {
     this.validateRequest(request);
     const modelConfig = this.getModelConfig(request.model);
 
+    // Check if model supports Extended Thinking
+    const isExtendedThinkingModel = this.supportsExtendedThinking(request.model);
+    const enableExtendedThinking = request.claudeAdvanced?.enableExtendedThinking && isExtendedThinkingModel;
+    
     // Anthropic only accepts temperature 0-1, clamp it
     let temperature = request.temperature ?? 0.7;
     if (temperature > 1.0) {
@@ -49,23 +53,66 @@ export class AnthropicProvider extends BaseProvider {
       maxTokens = 8000;
     }
 
-    try {
-      const response = await this.client.messages.create({
-        model: request.model,
-        max_tokens: maxTokens,
-        temperature: temperature,
-        messages: request.messages.map(msg => ({
-          role: msg.role === 'system' ? 'user' : msg.role,
-          content: msg.role === 'system' ? `System: ${msg.content}` : msg.content
-        }))
-      });
+    // Prepare request parameters
+    const requestParams: any = {
+      model: request.model,
+      max_tokens: maxTokens,
+      temperature: temperature,
+      messages: request.messages.map(msg => ({
+        role: msg.role === 'system' ? 'user' : msg.role,
+        content: msg.role === 'system' ? `System: ${msg.content}` : msg.content
+      }))
+    };
 
-      const content = response.content[0]?.type === 'text' ? response.content[0].text : '';
+    // Add Extended Thinking configuration if enabled
+    if (enableExtendedThinking) {
+      const budgetTokens = request.claudeAdvanced?.thinkingBudgetTokens || 10000;
+      requestParams.thinking = {
+        type: "enabled",
+        budget_tokens: Math.min(budgetTokens, maxTokens - 1000) // Ensure budget doesn't exceed max_tokens
+      };
+      console.log(`🧠 [ANTHROPIC] Extended Thinking enabled for ${request.model} with ${budgetTokens} budget tokens`);
+    } else if (request.claudeAdvanced?.enableExtendedThinking && !isExtendedThinkingModel) {
+      console.log(`⚠️ [ANTHROPIC] Extended Thinking requested but not supported for model ${request.model}`);
+    }
+
+    console.log(`🔧 [ANTHROPIC] Request params for ${request.model}:`, JSON.stringify(requestParams, null, 2));
+
+    try {
+      const response = await this.client.messages.create(requestParams);
+
+      // Process response content - handle both thinking and text blocks
+      let finalContent = '';
+      let thinkingContent = '';
+      
+      if (Array.isArray(response.content)) {
+        // Separate thinking blocks from text blocks
+        const thinkingBlocks = response.content.filter(block => block.type === 'thinking');
+        const textBlocks = response.content.filter(block => block.type === 'text');
+        
+        // Extract thinking content
+        if (thinkingBlocks.length > 0) {
+          thinkingContent = thinkingBlocks.map(block => block.thinking || '').join('\n\n');
+          console.log(`🧠 [ANTHROPIC] Thinking blocks found: ${thinkingBlocks.length} blocks`);
+        }
+        
+        // Extract text content
+        finalContent = textBlocks.map(block => block.text || '').join('\n\n');
+        
+        // If Extended Thinking was enabled, prepend thinking content to response
+        if (enableExtendedThinking && thinkingContent) {
+          finalContent = `**Claude's Reasoning Process:**\n\n${thinkingContent}\n\n**Final Response:**\n\n${finalContent}`;
+        }
+      } else {
+        // Fallback for single content block
+        finalContent = response.content[0]?.type === 'text' ? response.content[0].text : '';
+      }
+
       const usage = response.usage || { input_tokens: 0, output_tokens: 0 };
       const cost = this.calculateCost(usage.input_tokens, usage.output_tokens, modelConfig);
 
       return {
-        content,
+        content: finalContent,
         usage: {
           inputTokens: usage.input_tokens,
           outputTokens: usage.output_tokens,
@@ -98,5 +145,15 @@ export class AnthropicProvider extends BaseProvider {
       throw new Error(`Model ${model} not found for Anthropic provider`);
     }
     return config;
+  }
+
+  private supportsExtendedThinking(model: string): boolean {
+    // Extended thinking is supported in Claude Opus 4, Claude Sonnet 4, and Claude Sonnet 3.7
+    const extendedThinkingModels = [
+      'claude-opus-4-20250514',
+      'claude-sonnet-4-20250514', 
+      'claude-3-7-sonnet-20250219'
+    ];
+    return extendedThinkingModels.includes(model);
   }
 }

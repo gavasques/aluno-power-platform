@@ -21,6 +21,11 @@ export interface AIRequest {
   enableReasoning?: boolean; // For o3, o4-mini models
   reasoning_effort?: 'low' | 'medium' | 'high'; // For o3-mini, o4-mini models
   fineTuneModel?: string; // Fine-tuned model ID
+  // Claude/Anthropic-specific features
+  claudeAdvanced?: {
+    enableExtendedThinking?: boolean; // For Extended Thinking feature
+    thinkingBudgetTokens?: number; // Token budget for thinking process
+  };
   attachments?: Array<{
     data: string;
     filename: string;
