@@ -100,6 +100,13 @@ export class XAIProvider extends BaseProvider {
 
     const startTime = Date.now();
     console.log(`🚀 [XAI_PROVIDER] Starting generation with ${request.model}`);
+    console.log(`🔍 [XAI_PROVIDER] enableSearch:`, request.enableSearch);
+    console.log(`🔍 [XAI_PROVIDER] Request params:`, {
+      model: request.model,
+      messageCount: request.messages?.length || 0,
+      enableSearch: !!request.enableSearch,
+      reasoningLevel: request.reasoningLevel || 'none'
+    });
 
     try {
       // Prepare messages with Grok-specific features
