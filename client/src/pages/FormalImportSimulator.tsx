@@ -1114,14 +1114,13 @@ export default function FormalImportSimulator() {
                             <Input
                               type="number"
                               step="0.01"
-                              className="no-spin"
+                              className="no-spin w-20"
                               value={tax.aliquota || 0}
                               onChange={(e) => {
                                 const newImpostos = [...(simulation.impostos || [])];
                                 newImpostos[index].aliquota = parseFloat(e.target.value) || 0;
                                 setSimulation(prev => ({ ...prev, impostos: newImpostos }));
                               }}
-                              className="w-20"
                             />
                           </TableCell>
                           <TableCell>
@@ -1202,14 +1201,13 @@ export default function FormalImportSimulator() {
                                 <Input
                                   type="number"
                                   step="0.01"
-                                  className="no-spin"
+                                  className="no-spin w-24"
                                   value={expense.valorReal === 0 ? "" : expense.valorReal}
                                   placeholder="0.00"
                                   onChange={(e) => {
                                     const value = parseFloat(e.target.value) || 0;
                                     handleExpenseRealChange(index, value);
                                   }}
-                                  className="w-24"
                                 />
                                 {defaultExpense && defaultExpense.valorReal && (
                                   <span className="text-xs text-muted-foreground">
