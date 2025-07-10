@@ -146,11 +146,18 @@ export class XAIProvider extends BaseProvider {
 
       let completion = await this.client.chat.completions.create(requestParams);
       
+      // Debug the full completion object
+      console.log(`🔍 [XAI_PROVIDER] RAW COMPLETION:`, JSON.stringify(completion, null, 2));
+      
       console.log(`🔍 [XAI_PROVIDER] First completion result:`, {
-        hasToolCalls: !!completion.choices[0]?.message?.tool_calls,
-        toolCallsCount: completion.choices[0]?.message?.tool_calls?.length || 0,
-        content: completion.choices[0]?.message?.content || 'empty',
-        role: completion.choices[0]?.message?.role
+        hasChoices: !!completion.choices,
+        choicesLength: completion.choices?.length || 0,
+        hasMessage: !!completion.choices?.[0]?.message,
+        hasToolCalls: !!completion.choices?.[0]?.message?.tool_calls,
+        toolCallsCount: completion.choices?.[0]?.message?.tool_calls?.length || 0,
+        content: completion.choices?.[0]?.message?.content || 'empty',
+        role: completion.choices?.[0]?.message?.role,
+        finishReason: completion.choices?.[0]?.finish_reason
       });
       
       // Handle function calls (web search)
