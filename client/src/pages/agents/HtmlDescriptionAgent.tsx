@@ -339,7 +339,7 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
   return (
     <Layout>
       <PermissionGuard 
-        featureCode="agents.html_description"
+        featureCode="agents.html_descriptions"
         showMessage={true}
         message="Você não tem permissão para usar o Gerador de Descrições HTML."
       >

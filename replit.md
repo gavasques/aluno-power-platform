@@ -324,6 +324,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 10, 2025 - 10:10 PM**: ✅ HTML DESCRIPTION GENERATOR PERMISSION BUG FIXED - ADMIN ACCESS RESTORED
+  - **Problem Identified**: HTML description generator was using incorrect feature code in PermissionGuard
+  - **Root Cause**: Code used "agents.html_description" but database feature was "agents.html_descriptions" (with "s")
+  - **Solution Applied**: Updated HtmlDescriptionAgent.tsx to use correct feature code "agents.html_descriptions"
+  - **Result**: Admin users now have proper access to HTML description generator
+  - **Technical Details**: 
+    - Permission system working correctly - admin role has access to all features
+    - Feature "agents.html_descriptions" exists and is active in database
+    - PermissionGuard now validates against correct feature code
+  - **User Impact**: HTML description generator is now accessible to admin users as intended
+
 - **January 10, 2025 - 9:58 PM**: ✅ OPENROUTER DYNAMIC MODEL INTEGRATION COMPLETE - 318+ MODELS AVAILABLE IN REAL-TIME
   - **OpenRouter Dynamic API Integration**:
     - ✅ **API Key Configured**: OpenRouter API key successfully set in Replit Secrets
