@@ -484,7 +484,7 @@ export default function AgentProviderSettings() {
                   Status dos Provedores
                 </CardTitle>
               </CardHeader>
-            <CardContent>
+              <CardContent>
               <div className="space-y-4">
                 {PROVIDERS.map((provider) => {
                   const isActive = status[provider.value as keyof ProviderStatus];
