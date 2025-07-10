@@ -4,6 +4,7 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Package, Store, Check, X, TrendingUp, TrendingDown } from 'lucide-react';
+import { Loader2, Package, Store, Check, X, TrendingUp, TrendingDown, ChevronDown, ChevronRight } from 'lucide-react';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { PercentInput } from '@/components/ui/percent-input';
 import { 
@@ -269,6 +270,22 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
   const { toast } = useToast();
   const [isSaving, setIsSaving] = React.useState(false);
   const [channelCalculations, setChannelCalculations] = React.useState<Record<string, ChannelCalculationResult>>({});
+  
+  // State to control which channels are expanded (all collapsed by default)
+  const [expandedChannels, setExpandedChannels] = React.useState<Set<string>>(new Set());
+  
+  // Function to toggle channel expansion
+  const toggleChannelExpansion = (channelType: string) => {
+    setExpandedChannels(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(channelType)) {
+        newSet.delete(channelType);
+      } else {
+        newSet.add(channelType);
+      }
+      return newSet;
+    });
+  };
 
   // Load product data
   const { data: product, isLoading: loadingProduct } = useQuery({
@@ -456,36 +473,52 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
               {Object.entries(CHANNEL_FIELDS).map(([channelType, channelConfig], index) => {
                 const isActive = form.watch(`channels.${index}.isActive`);
                 
+                const isExpanded = expandedChannels.has(channelType);
+                
                 return (
                   <Card key={channelType} className={isActive ? 'border-primary' : ''}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <span className="text-2xl">{channelConfig.icon}</span>
-                          {channelConfig.name}
-                        </CardTitle>
-                        <FormField
-                          control={form.control}
-                          name={`channels.${index}.isActive`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Switch
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </CardHeader>
-                    {isActive && (
-                      <CardContent className="space-y-3">
-                        <div className="text-sm text-muted-foreground mb-3">
-                          Custo do produto: R$ {(product as any)?.costItem || '0,00'} | 
-                          Impostos: {(product as any)?.taxPercent || '0,00'}%
+                    <Collapsible open={isExpanded} onOpenChange={() => toggleChannelExpansion(channelType)}>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <CollapsibleTrigger asChild>
+                            <div className="flex items-center gap-2 cursor-pointer flex-1">
+                              <span className="text-2xl">{channelConfig.icon}</span>
+                              <CardTitle className="text-lg">{channelConfig.name}</CardTitle>
+                              {isActive && (
+                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-2">
+                                  {isExpanded ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
+                            </div>
+                          </CollapsibleTrigger>
+                          <FormField
+                            control={form.control}
+                            name={`channels.${index}.isActive`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                         </div>
+                      </CardHeader>
+                      
+                      {isActive && (
+                        <CollapsibleContent>
+                          <CardContent className="space-y-3 pt-0">
+                            <div className="text-sm text-muted-foreground mb-3">
+                              Custo do produto: R$ {(product as any)?.costItem || '0,00'} | 
+                              Impostos: {(product as any)?.taxPercent || '0,00'}%
+                            </div>
                         
                         <div className="grid grid-cols-2 gap-3">
                           {channelConfig.fields.map((fieldConfig) => (
@@ -566,8 +599,10 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
                             </div>
                           </div>
                         )}
-                      </CardContent>
-                    )}
+                          </CardContent>
+                        </CollapsibleContent>
+                      )}
+                    </Collapsible>
                   </Card>
                 );
               })}
