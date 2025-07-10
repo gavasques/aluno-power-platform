@@ -22,8 +22,12 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
 
   const { data: agents = [], isLoading, error, refetch } = useQuery<Agent[]>({
     queryKey: ["/api/agents"],
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour (formerly cacheTime)
+    staleTime: 60 * 60 * 1000, // 1 hour - agents are static data
+    gcTime: 4 * 60 * 60 * 1000, // 4 hours - keep in cache longer
+    refetchOnWindowFocus: false, // Don't refetch on focus for static data
+    refetchOnMount: false, // Don't refetch on mount, use cache
+    refetchOnReconnect: false, // Agents don't change on reconnect
+    structuralSharing: true, // Enable for better re-render optimization
   });
 
   const createAgentMutation = useMutation({

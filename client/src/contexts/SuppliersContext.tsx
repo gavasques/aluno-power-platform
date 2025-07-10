@@ -28,6 +28,12 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/suppliers'],
     queryFn: () => apiRequest<DbSupplier[]>('/api/suppliers'),
+    staleTime: 5 * 60 * 1000, // 5 minutes - dynamic data
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnMount: false, // Use cache when available
+    refetchOnReconnect: true, // Refresh on reconnect for fresh data
+    structuralSharing: true, // Optimize re-renders
   });
 
   const addSupplierMutation = useMutation({

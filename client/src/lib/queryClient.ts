@@ -9,15 +9,18 @@ export const queryClient = new QueryClient({
       refetchOnReconnect: 'always',
       refetchOnMount: false, // Prevent duplicate requests on mount
       networkMode: 'online',
-      // Enable query deduplication
+      // Enable query deduplication and performance optimizations
       structuralSharing: true,
+      notifyOnChangeProps: 'all', // Fine-grained re-render control
+      // Optimize retry logic for better performance
       retry: (failureCount, error) => {
         // Don't retry 4xx errors (client errors)
         if (error instanceof Error && error.message.includes('HTTP 4')) {
           return false;
         }
-        return failureCount < 3;
+        return failureCount < 2; // Reduced retry count for faster failure handling
       },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Cap retry delay
       queryFn: async ({ queryKey, signal }) => {
         const url = queryKey[0] as string;
         const token = localStorage.getItem('auth_token');
@@ -46,8 +49,14 @@ export const queryClient = new QueryClient({
     },
     mutations: {
       retry: false,
+      // Optimize mutation performance
+      networkMode: 'online',
       onError: (error) => {
         console.error('Mutation error:', error);
+      },
+      // Add global mutation success handler for cache management
+      onSuccess: () => {
+        // Optional: Add global success tracking
       },
     },
   },

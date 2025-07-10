@@ -20,8 +20,13 @@ export function useProducts(options: UseProductsOptions = {}) {
   } = useQuery<{success: boolean, data: Product[]}, Error>({
     queryKey: ["/api/products"],
     enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes - dynamic data
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnMount: false, // Use cache when available
+    refetchOnReconnect: true, // Refresh on reconnect for fresh data
+    structuralSharing: true, // Optimize re-renders
+    retry: 2, // Reduced retry count for better performance
   });
 
   // Extract products array from API response

@@ -39,8 +39,12 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/youtube-videos'],
     queryFn: () => apiRequest<YoutubeVideo[]>('/api/youtube-videos'),
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
+    staleTime: 30 * 60 * 1000, // 30 minutes - semi-static data
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnMount: false, // Use cache when available
+    refetchOnReconnect: true, // Refresh on reconnect as videos can be updated
+    structuralSharing: true, // Optimize re-renders
   });
 
   const {
@@ -51,9 +55,12 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
     queryKey: ['/api/youtube-channel-info'],
     queryFn: () => apiRequest<ChannelInfo>('/api/youtube-channel-info'),
     retry: false, // Don't retry on 404 errors
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    staleTime: 30 * 60 * 1000, // 30 minutes - semi-static data
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
     throwOnError: false, // Don't throw errors to avoid component crashes
+    structuralSharing: true,
   });
 
   const syncMutation = useMutation({

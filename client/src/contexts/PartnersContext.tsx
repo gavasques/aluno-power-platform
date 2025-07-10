@@ -28,8 +28,12 @@ export function PartnersProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/partners'],
     queryFn: () => apiRequest<DbPartner[]>('/api/partners'),
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
+    staleTime: 60 * 60 * 1000, // 1 hour - partners are static data
+    gcTime: 4 * 60 * 60 * 1000, // 4 hours
+    refetchOnWindowFocus: false, // Don't refetch on focus for static data
+    refetchOnMount: false, // Use cache when available
+    refetchOnReconnect: false, // Partners don't change on reconnect
+    structuralSharing: true, // Optimize re-renders
   });
 
   const addPartnerMutation = useMutation({
