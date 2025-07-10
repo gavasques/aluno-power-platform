@@ -393,114 +393,114 @@ export function KnowledgeBaseManager() {
                 Adicionar Documento
               </Button>
             </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Upload de Documento</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="file">Arquivo</Label>
-                <Input
-                  id="file"
-                  type="file"
-                  ref={fileInputRef}
-                  accept=".pdf,.txt,.md,.docx"
-                  onChange={handleFileSelect}
-                  className="cursor-pointer"
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Formatos suportados: PDF, TXT, MD, DOCX (máx. 10MB)
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="title">Título</Label>
-                <Input
-                  id="title"
-                  value={uploadData.title || ''}
-                  onChange={e => setUploadData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Nome do documento"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="collection">Base de Conhecimento</Label>
-                <Select 
-                  value={uploadData.collectionId?.toString() || ''} 
-                  onValueChange={(value) => setUploadData(prev => ({ 
-                    ...prev, 
-                    collectionId: value ? parseInt(value) : null 
-                  }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma base de conhecimento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {collections.map(collection => (
-                      <SelectItem key={collection.id} value={collection.id.toString()}>
-                        {collection.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Defina em qual base o documento será armazenado
-                </p>
-              </div>
-
-              <div>
-                <Label>Tags</Label>
-                <div className="flex gap-2 mb-2">
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Upload de Documento</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="file">Arquivo</Label>
                   <Input
-                    value={tagInput}
-                    onChange={e => setTagInput(e.target.value)}
-                    placeholder="Adicionar tag"
-                    onKeyPress={e => e.key === 'Enter' && handleAddTag()}
+                    id="file"
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".pdf,.txt,.md,.docx"
+                    onChange={handleFileSelect}
+                    className="cursor-pointer"
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddTag}
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Formatos suportados: PDF, TXT, MD, DOCX (máx. 10MB)
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="title">Título</Label>
+                  <Input
+                    id="title"
+                    value={uploadData.title || ''}
+                    onChange={e => setUploadData(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="Nome do documento"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="collection">Base de Conhecimento</Label>
+                  <Select 
+                    value={uploadData.collectionId?.toString() || ''} 
+                    onValueChange={(value) => setUploadData(prev => ({ 
+                      ...prev, 
+                      collectionId: value ? parseInt(value) : null 
+                    }))}
                   >
-                    <Plus className="h-4 w-4" />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma base de conhecimento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {collections.map(collection => (
+                        <SelectItem key={collection.id} value={collection.id.toString()}>
+                          {collection.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Defina em qual base o documento será armazenado
+                  </p>
+                </div>
+
+                <div>
+                  <Label>Tags</Label>
+                  <div className="flex gap-2 mb-2">
+                    <Input
+                      value={tagInput}
+                      onChange={e => setTagInput(e.target.value)}
+                      placeholder="Adicionar tag"
+                      onKeyPress={e => e.key === 'Enter' && handleAddTag()}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddTag}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {uploadData.tags && uploadData.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {uploadData.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                          <button
+                            onClick={() => handleRemoveTag(tag)}
+                            className="ml-1 hover:text-red-500"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={handleUpload}
+                    disabled={uploadMutation.isPending || !selectedFile || !uploadData.title}
+                    className="flex-1"
+                  >
+                    {uploadMutation.isPending ? 'Enviando...' : 'Enviar'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsUploadDialogOpen(false)}
+                  >
+                    Cancelar
                   </Button>
                 </div>
-                
-                {uploadData.tags && uploadData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {uploadData.tags.map(tag => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                        <button
-                          onClick={() => handleRemoveTag(tag)}
-                          className="ml-1 hover:text-red-500"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
               </div>
-
-              <div className="flex gap-2 pt-4">
-                <Button
-                  onClick={handleUpload}
-                  disabled={uploadMutation.isPending || !selectedFile || !uploadData.title}
-                  className="flex-1"
-                >
-                  {uploadMutation.isPending ? 'Enviando...' : 'Enviar'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsUploadDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
+            </DialogContent>
         </Dialog>
       </div>
 
