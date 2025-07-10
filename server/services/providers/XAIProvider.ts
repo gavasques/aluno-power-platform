@@ -179,6 +179,9 @@ export class XAIProvider extends BaseProvider {
       }
       
       // Handle function calls (web search)
+      console.log(`🔍 [XAI_PROVIDER] Checking for tool_calls...`);
+      console.log(`🔍 [XAI_PROVIDER] completion.choices[0]?.message?.tool_calls:`, !!completion.choices[0]?.message?.tool_calls);
+      
       if (completion.choices[0]?.message?.tool_calls) {
         const toolCalls = completion.choices[0].message.tool_calls;
         console.log(`🔧 [XAI_PROVIDER] Processing ${toolCalls.length} tool calls`);
