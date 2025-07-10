@@ -109,7 +109,8 @@ export default function AgentProviderSettings() {
     presence_penalty: undefined,
     enableCodeInterpreter: false,
     enableRetrieval: false,
-    fineTuneModel: ''
+    fineTuneModel: '',
+    selectedCollections: [] as number[]
   });
 
   const [testPrompt, setTestPrompt] = useState('Olá! Como você está hoje?');
@@ -135,6 +136,12 @@ export default function AgentProviderSettings() {
   // Fetch agents
   const { data: agents = [] } = useQuery<Agent[]>({
     queryKey: ['/api/agents'],
+    enabled: user?.role === 'admin'
+  });
+
+  // Fetch knowledge base collections
+  const { data: collections = [] } = useQuery({
+    queryKey: ['/api/knowledge-base/collections'],
     enabled: user?.role === 'admin'
   });
 
@@ -373,6 +380,10 @@ export default function AgentProviderSettings() {
       }
       if (formData.enableRetrieval) {
         tools.push({ type: 'retrieval' });
+        // Add selected collections if any
+        if (formData.selectedCollections && formData.selectedCollections.length > 0) {
+          testData.selectedCollections = formData.selectedCollections;
+        }
       }
       if (tools.length > 0) {
         testData.tools = tools;
@@ -1154,6 +1165,39 @@ export default function AgentProviderSettings() {
                             📚 Recuperação de Informações - Para busca em documentos
                           </Label>
                         </div>
+                        
+                        {/* Collection selector when retrieval is enabled */}
+                        {formData.enableRetrieval && (
+                          <div className="mt-3 ml-6">
+                            <Label htmlFor="selectedCollections" className="text-sm text-gray-600 mb-2 block">
+                              Selecione as bases de conhecimento para utilizar:
+                            </Label>
+                            <Select 
+                              value={formData.selectedCollections?.length > 0 ? formData.selectedCollections[0].toString() : ''} 
+                              onValueChange={(value) => setFormData({ 
+                                ...formData, 
+                                selectedCollections: value ? [parseInt(value)] : [] 
+                              })}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecione uma base de conhecimento" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">
+                                  <span className="text-gray-500">Nenhuma coleção selecionada</span>
+                                </SelectItem>
+                                {collections.map(collection => (
+                                  <SelectItem key={collection.id} value={collection.id.toString()}>
+                                    {collection.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-gray-500 mt-1">
+                              A base de conhecimento selecionada será usada para enriquecer as respostas do modelo
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 

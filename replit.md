@@ -324,6 +324,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 10, 2025 - 5:07 PM**: ✅ AI PROVIDER KNOWLEDGE BASE INTEGRATION - COLLECTION SELECTION FOR RETRIEVAL
+  - **Knowledge Base Integration with AI Models**:
+    - ✅ **Collection selector added**: Dropdown appears when retrieval is enabled in AI settings
+    - ✅ **Dynamic collection loading**: Fetches user's knowledge base collections via API
+    - ✅ **Selected collections tracking**: Stores selected collection IDs in form state
+    - ✅ **API integration**: Selected collections passed to AI providers when retrieval is enabled
+  - **UI Enhancements**:
+    - Collection selector appears conditionally when retrieval toggle is activated
+    - "Nenhuma coleção selecionada" option for no collection selection
+    - Help text explaining how collections enhance AI responses
+    - Seamless integration with existing OpenAI advanced features UI
+  - **Benefits**:
+    - AI models can now access specific knowledge bases for enhanced responses
+    - Users can choose which collection to use per AI configuration
+    - Supports multiple knowledge base collections per user
+    - Foundation for context-aware AI responses using company documents
+
 - **January 10, 2025 - 11:30 PM**: ✅ KNOWLEDGE BASE SYSTEM FULLY OPERATIONAL - MULTIPLE KNOWLEDGE BASES SUPPORTED
   - **Database Schema Created**:
     - ✅ **knowledge_base_docs**: Complete document storage with text extraction, AI summaries, and tagging
