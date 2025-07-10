@@ -324,16 +324,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 10, 2025 - 10:10 PM**: ✅ HTML DESCRIPTION GENERATOR PERMISSION BUG FIXED - ADMIN ACCESS RESTORED
-  - **Problem Identified**: HTML description generator was using incorrect feature code in PermissionGuard
-  - **Root Cause**: Code used "agents.html_description" but database feature was "agents.html_descriptions" (with "s")
-  - **Solution Applied**: Updated HtmlDescriptionAgent.tsx to use correct feature code "agents.html_descriptions"
-  - **Result**: Admin users now have proper access to HTML description generator
+- **January 10, 2025 - 10:10 PM**: ✅ HTML DESCRIPTION GENERATOR AUTHENTICATION BUG FIXED - FULLY OPERATIONAL
+  - **Problem Identified**: HTML description generator was sending "Bearer null" instead of actual authentication token
+  - **Root Cause**: Agent was using `localStorage.getItem('token')` but auth system uses `localStorage.getItem('auth_token')`
+  - **Solution Applied**: 
+    - Updated both API calls in HtmlDescriptionAgent.tsx to use correct token key
+    - Fixed main AI generation call to `/api/ai-providers/test`
+    - Fixed logging call to `/api/ai-generation-logs`
+  - **Previous Permission Fix**: Also corrected feature code from "agents.html_description" to "agents.html_descriptions"
+  - **Result**: HTML description generator now fully functional with proper authentication
   - **Technical Details**: 
-    - Permission system working correctly - admin role has access to all features
-    - Feature "agents.html_descriptions" exists and is active in database
-    - PermissionGuard now validates against correct feature code
-  - **User Impact**: HTML description generator is now accessible to admin users as intended
+    - Authentication system uses 'auth_token' as localStorage key, not 'token'
+    - Both permission system and authentication working correctly
+    - Admin users have complete access to HTML description generator
+  - **User Impact**: HTML description generator is now completely operational for admin users
 
 - **January 10, 2025 - 9:58 PM**: ✅ OPENROUTER DYNAMIC MODEL INTEGRATION COMPLETE - 318+ MODELS AVAILABLE IN REAL-TIME
   - **OpenRouter Dynamic API Integration**:
