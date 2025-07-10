@@ -190,15 +190,33 @@ export class OpenAIProvider extends BaseProvider {
     // Reasoning models use max_completion_tokens, others use max_tokens
     if (isReasoningModel) {
       params.max_completion_tokens = safeMaxTokens;
-      // Reasoning models don't support temperature
+      // Reasoning models don't support temperature but support some other parameters
       if (request.enableReasoning) {
         console.log(`🧠 [OPENAI] Reasoning mode enabled for ${request.model}`);
+      }
+      
+      // Add supported parameters for reasoning models
+      if (request.frequency_penalty !== undefined) {
+        params.frequency_penalty = request.frequency_penalty;
+        console.log(`🎛️ [OPENAI] Frequency penalty: ${request.frequency_penalty}`);
+      }
+      if (request.presence_penalty !== undefined) {
+        params.presence_penalty = request.presence_penalty;
+        console.log(`🎛️ [OPENAI] Presence penalty: ${request.presence_penalty}`);
+      }
+      if (request.seed !== undefined) {
+        params.seed = request.seed;
+        console.log(`🎲 [OPENAI] Seed: ${request.seed}`);
+      }
+      if (request.stop !== undefined) {
+        params.stop = request.stop;
+        console.log(`🛑 [OPENAI] Stop sequences: ${JSON.stringify(request.stop)}`);
       }
     } else {
       params.max_tokens = safeMaxTokens;
       params.temperature = request.temperature ?? 0.7;
       
-      // Advanced parameters
+      // Advanced parameters for non-reasoning models
       if (request.top_p !== undefined) params.top_p = request.top_p;
       if (request.frequency_penalty !== undefined) params.frequency_penalty = request.frequency_penalty;
       if (request.presence_penalty !== undefined) params.presence_penalty = request.presence_penalty;
