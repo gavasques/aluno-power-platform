@@ -1211,6 +1211,7 @@ export default function AgentProviderSettings() {
                         )}
                       </div>
                     </div>
+                    )}
 
                     {/* Fine-tuned Model */}
                     <div className="space-y-3">
