@@ -74,6 +74,7 @@ router.put('/documents/:id', async (req, res) => {
       title: z.string().optional(),
       summary: z.string().optional(),
       tags: z.array(z.string()).optional(),
+      collectionIds: z.array(z.number()).optional(),
     });
 
     const updates = updateSchema.parse(req.body);

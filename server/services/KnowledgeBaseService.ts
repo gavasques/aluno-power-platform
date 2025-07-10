@@ -183,18 +183,43 @@ export class KnowledgeBaseService {
   async updateDocument(
     userId: number,
     docId: number,
-    updates: Partial<Pick<KnowledgeBaseDoc, 'title' | 'summary' | 'tags'>>
+    updates: Partial<Pick<KnowledgeBaseDoc, 'title' | 'summary' | 'tags'>> & { collectionIds?: number[] }
   ): Promise<KnowledgeBaseDoc | null> {
+    // First update the document details
+    const { collectionIds, ...docUpdates } = updates;
+    
     const [doc] = await db
       .update(knowledgeBaseDocs)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...docUpdates, updatedAt: new Date() })
       .where(and(
         eq(knowledgeBaseDocs.id, docId),
         eq(knowledgeBaseDocs.userId, userId)
       ))
       .returning();
     
-    return doc || null;
+    if (!doc) return null;
+    
+    // If collectionIds is provided, update the document-collection associations
+    if (collectionIds !== undefined) {
+      // Remove all existing associations
+      await db
+        .delete(knowledgeBaseDocCollections)
+        .where(eq(knowledgeBaseDocCollections.docId, docId));
+      
+      // Add new associations
+      if (collectionIds.length > 0) {
+        const associations = collectionIds.map(collectionId => ({
+          docId,
+          collectionId,
+        }));
+        
+        await db.insert(knowledgeBaseDocCollections).values(associations);
+      }
+    }
+    
+    // Return the updated document with its collections
+    const docsWithCollections = await this.getUserDocumentsWithCollections(userId);
+    return docsWithCollections.find(d => d.id === docId) || null;
   }
 
   async deleteDocument(userId: number, docId: number): Promise<boolean> {

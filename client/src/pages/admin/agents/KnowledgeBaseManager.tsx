@@ -281,7 +281,10 @@ export function KnowledgeBaseManager() {
   };
 
   const handleEdit = (doc: KnowledgeBaseDoc) => {
-    setEditingDoc(doc);
+    setEditingDoc({
+      ...doc,
+      collectionIds: doc.collectionIds || []
+    });
   };
 
   const handleSaveEdit = () => {
@@ -293,6 +296,7 @@ export function KnowledgeBaseManager() {
         title: editingDoc.title,
         summary: editingDoc.summary,
         tags: editingDoc.tags,
+        collectionIds: editingDoc.collectionIds,
       },
     });
   };
@@ -749,6 +753,33 @@ export function KnowledgeBaseManager() {
                   onChange={e => setEditingDoc(prev => prev ? { ...prev, summary: e.target.value } : null)}
                   rows={3}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-collections">Coleções</Label>
+                <Select
+                  value={editingDoc.collectionIds?.[0]?.toString() || ''}
+                  onValueChange={(value) => {
+                    setEditingDoc(prev => prev ? {
+                      ...prev,
+                      collectionIds: value ? [parseInt(value)] : []
+                    } : null);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma coleção" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">
+                      <span className="text-muted-foreground">Nenhuma coleção</span>
+                    </SelectItem>
+                    {collections.map(collection => (
+                      <SelectItem key={collection.id} value={collection.id.toString()}>
+                        {collection.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
