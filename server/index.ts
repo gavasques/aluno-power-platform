@@ -3,9 +3,16 @@ import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { scheduler } from "./services/scheduler";
+import { compressionMiddleware, cacheHeaders, performanceMetrics, memoryMonitor } from "./middleware/performanceMiddleware";
+import { optimizedProductService } from "./services/OptimizedProductService";
 
 const app = express();
-app.use(compression()); // Enable gzip compression
+
+// PHASE 1 PERFORMANCE OPTIMIZATIONS
+app.use(compressionMiddleware); // Enhanced compression
+app.use(performanceMetrics); // Performance tracking
+app.use(cacheHeaders); // Intelligent caching
+app.use(memoryMonitor); // Memory monitoring
 
 // Conditional middleware for JSON parsing - skip for upload routes
 app.use((req, res, next) => {
@@ -174,8 +181,17 @@ app.use((req, res, next) => {
     port,
     host: "0.0.0.0",
     reusePort: true,
-  }, () => {
+  }, async () => {
     log(`serving on port ${port}`);
+    
+    // PHASE 1 PERFORMANCE: Initialize database optimizations
+    console.log('🚀 [PERFORMANCE] Initializing Phase 1 optimizations...');
+    try {
+      await optimizedProductService.initialize();
+      console.log('✅ [PERFORMANCE] Phase 1 optimizations ready - Target: 70-80% speed improvement');
+    } catch (error) {
+      console.error('❌ [PERFORMANCE] Failed to initialize optimizations:', error);
+    }
     
     // Start the YouTube video scheduler
     scheduler.start();

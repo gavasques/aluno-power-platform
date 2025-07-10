@@ -15,6 +15,7 @@ import { ResponseHandler } from '../utils/ResponseHandler';
 import { ValidationHelper } from '../utils/ValidationHelper';
 import { insertProductSchema } from '../../shared/schema';
 import { storage } from '../storage';
+import { optimizedProductService, type ProductSearchOptions } from '../services/OptimizedProductService';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -53,36 +54,82 @@ const upload = multer({
 export class ProductController extends BaseController {
   
   /**
-   * GET /api/products - List all products with pagination and search
+   * GET /api/products - Optimized product list with performance metrics
    */
   async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const products = await storage.getProducts();
-      ResponseHandler.success(res, products);
+      const user = (req as any).user;
+      const userId = user?.id;
+
+      // Parse query parameters for optimized filtering
+      const options: ProductSearchOptions = {
+        search: req.query.search as string,
+        brandId: req.query.brandId ? parseInt(req.query.brandId as string) : undefined,
+        category: req.query.category as string,
+        supplierId: req.query.supplierId ? parseInt(req.query.supplierId as string) : undefined,
+        active: req.query.active !== 'false', // Default to true unless explicitly false
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+        sortBy: (req.query.sortBy as any) || 'updatedAt',
+        sortOrder: (req.query.sortOrder as any) || 'desc'
+      };
+
+      // Use optimized service if user is authenticated, fallback to storage for public access
+      if (userId) {
+        try {
+          const result = await optimizedProductService.getOptimizedProductList(userId, options);
+          if (!res.headersSent) {
+            res.set('X-Performance-Metrics', JSON.stringify(result.performance));
+          }
+          ResponseHandler.success(res, result);
+        } catch (optimizationError) {
+          console.warn('⚠️ [PRODUCTS] Optimization failed, falling back to storage:', optimizationError.message);
+          // Fallback to original storage method
+          const products = await storage.getProducts();
+          ResponseHandler.success(res, { success: true, data: products });
+        }
+      } else {
+        // Fallback for unauthenticated requests
+        const products = await storage.getProducts();
+        ResponseHandler.success(res, { success: true, data: products });
+      }
     } catch (error) {
       this.handleError(res, error, 'Failed to fetch products');
     }
   }
 
   /**
-   * GET /api/products/:id - Get product by ID
+   * GET /api/products/:id - Get product by ID with optimization
    */
   async getById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      const user = (req as any).user;
+      const userId = user?.id;
+      
       ValidationHelper.validateParams(req.params, ['id']);
       
       const productId = ValidationHelper.parseId(id);
-      const product = await storage.getProduct(productId);
       
-      if (!product) {
-        ResponseHandler.notFound(res, 'Product not found');
-        return;
+      // Use optimized service if user is authenticated
+      if (userId) {
+        const product = await optimizedProductService.getOptimizedProduct(productId, userId);
+        if (!product) {
+          ResponseHandler.notFound(res, 'Product not found or access denied');
+          return;
+        }
+        ResponseHandler.success(res, product);
+      } else {
+        // Fallback for unauthenticated requests
+        const product = await storage.getProduct(productId);
+        if (!product) {
+          ResponseHandler.notFound(res, 'Product not found');
+          return;
+        }
+        ResponseHandler.success(res, product);
       }
-      
-      ResponseHandler.success(res, product);
     } catch (error) {
-      this.handleError(error, res, 'Failed to fetch product');
+      this.handleError(res, error, 'Failed to fetch product');
     }
   }
 
