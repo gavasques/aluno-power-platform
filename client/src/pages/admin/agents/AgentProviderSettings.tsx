@@ -21,7 +21,8 @@ import {
   Sliders,
   Wrench,
   Settings2,
-  Database
+  Database,
+  Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +43,7 @@ interface Agent {
   id: string;
   name: string;
   description: string;
-  provider: 'openai' | 'anthropic' | 'gemini' | 'deepseek' | 'xai';
+  provider: 'openai' | 'anthropic' | 'gemini' | 'deepseek' | 'xai' | 'openrouter';
   model: string;
   temperature: number;
   maxTokens: number;
@@ -64,6 +65,7 @@ interface ProviderStatus {
   gemini: boolean;
   deepseek: boolean;
   xai: boolean;
+  openrouter: boolean;
 }
 
 interface ProviderInfo {
@@ -78,7 +80,8 @@ const PROVIDERS: ProviderInfo[] = [
   { value: 'anthropic', label: 'Anthropic (Claude)', icon: '🧠', color: 'bg-purple-100 text-purple-800' },
   { value: 'gemini', label: 'Google Gemini', icon: '⭐', color: 'bg-blue-100 text-blue-800' },
   { value: 'deepseek', label: 'DeepSeek AI', icon: '🔍', color: 'bg-orange-100 text-orange-800' },
-  { value: 'xai', label: 'xAI (Grok)', icon: '🧪', color: 'bg-indigo-100 text-indigo-800' }
+  { value: 'xai', label: 'xAI (Grok)', icon: '🧪', color: 'bg-indigo-100 text-indigo-800' },
+  { value: 'openrouter', label: 'OpenRouter (400+ Models)', icon: '🌐', color: 'bg-teal-100 text-teal-800' }
 ];
 
 export default function AgentProviderSettings() {
@@ -113,7 +116,8 @@ export default function AgentProviderSettings() {
     selectedCollections: [] as number[],
     // Claude specific features
     enableExtendedThinking: false,
-    thinkingBudgetTokens: 10000
+    thinkingBudgetTokens: 10000,
+    // OpenRouter specific features - no special features needed, uses OpenAI-compatible parameters
   });
 
   const [testPrompt, setTestPrompt] = useState('Olá! Como você está hoje?');
@@ -125,7 +129,7 @@ export default function AgentProviderSettings() {
   const [referenceImages, setReferenceImages] = useState<Array<{file: File, preview: string}>>([]);
 
   // Fetch provider status
-  const { data: status = { openai: false, anthropic: false, gemini: false, deepseek: false } } = useQuery<ProviderStatus>({
+  const { data: status = { openai: false, anthropic: false, gemini: false, deepseek: false, xai: false, openrouter: false } } = useQuery<ProviderStatus>({
     queryKey: ['/api/ai-providers/status'],
     enabled: user?.role === 'admin'
   });
@@ -1262,6 +1266,157 @@ export default function AgentProviderSettings() {
                       <AlertDescription className="text-sm">
                         <strong>Dica:</strong> As funcionalidades avançadas da OpenAI permitem controle preciso sobre as respostas. 
                         Use com moderação para otimizar custos e performance.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+
+                {/* OpenRouter-specific Features */}
+                {formData.provider === 'openrouter' && (
+                  <div className="space-y-6 p-4 border rounded-lg bg-orange-50 border-orange-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-xl">🌐</span>
+                      <h3 className="text-lg font-semibold text-orange-800">Funcionalidades Avançadas do OpenRouter</h3>
+                    </div>
+
+                    {/* OpenRouter Introduction */}
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-medium text-blue-800 mb-2">OpenRouter - Portal de IA Unificado:</h4>
+                      <div className="text-sm text-blue-700 space-y-1">
+                        <div>🎯 <strong>Acesso a 400+ modelos</strong> de OpenAI, Anthropic, Google, Meta, Mistral e mais</div>
+                        <div>💰 <strong>Modelos gratuitos disponíveis</strong> para experimentação e uso básico</div>
+                        <div>🔀 <strong>Auto-routing</strong> - seleciona automaticamente o melhor modelo para sua tarefa</div>
+                        <div>⚡ <strong>API unificada</strong> - acesse todos os modelos com uma única integração</div>
+                      </div>
+                    </div>
+
+                    {/* Current Model Info */}
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <h4 className="font-medium text-green-800 mb-2">Modelo Selecionado: {formData.model}</h4>
+                      <div className="text-sm text-green-700 space-y-1">
+                        {formData.model === 'auto' && (
+                          <>
+                            <div>🤖 <strong>Auto-routing</strong> - OpenRouter escolhe o melhor modelo automaticamente</div>
+                            <div>💡 <strong>Ideal para:</strong> Quando você quer a melhor resposta sem se preocupar com qual modelo usar</div>
+                            <div>💰 <strong>Custo:</strong> Variável baseado no modelo selecionado automaticamente</div>
+                          </>
+                        )}
+                        {formData.model.includes('gpt-4o') && (
+                          <>
+                            <div>✅ Chat avançado • ✅ Análise de imagens • ✅ Qualidade premium</div>
+                            <div>💡 <strong>Ideal para:</strong> Tarefas complexas que exigem raciocínio avançado e análise visual</div>
+                          </>
+                        )}
+                        {formData.model.includes('claude') && (
+                          <>
+                            <div>✅ Análise profunda • ✅ Raciocínio lógico • ✅ Respostas detalhadas</div>
+                            <div>💡 <strong>Ideal para:</strong> Análise de documentos, pesquisa e tarefas que requerem reflexão</div>
+                          </>
+                        )}
+                        {formData.model.includes('llama') && (
+                          <>
+                            <div>✅ Open source • ✅ Rápido • ✅ Eficiente</div>
+                            <div>💡 <strong>Ideal para:</strong> Tarefas gerais com boa qualidade e velocidade</div>
+                          </>
+                        )}
+                        {formData.model.includes('free') && (
+                          <>
+                            <div>🆓 <strong>Modelo gratuito</strong> - sem custos de uso</div>
+                            <div>💡 <strong>Ideal para:</strong> Experimentação, prototipagem e uso casual</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Model Categories */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Settings className="h-4 w-4 text-orange-600" />
+                        <Label className="text-orange-800 font-medium">
+                          Categorias de Modelos Disponíveis
+                        </Label>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="p-3 bg-green-50 border border-green-200 rounded">
+                          <h5 className="font-medium text-green-800">🆓 Modelos Gratuitos</h5>
+                          <p className="text-xs text-green-600 mt-1">
+                            Llama 3.2, Phi-3 Mini, Gemma 2 - ideais para experimentação
+                          </p>
+                        </div>
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+                          <h5 className="font-medium text-blue-800">🔥 Modelos Premium</h5>
+                          <p className="text-xs text-blue-600 mt-1">
+                            GPT-4o, Claude 3.5, Gemini Pro - máxima qualidade
+                          </p>
+                        </div>
+                        <div className="p-3 bg-purple-50 border border-purple-200 rounded">
+                          <h5 className="font-medium text-purple-800">👁️ Modelos Vision</h5>
+                          <p className="text-xs text-purple-600 mt-1">
+                            Análise e compreensão de imagens
+                          </p>
+                        </div>
+                        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+                          <h5 className="font-medium text-yellow-800">🔍 Modelos com Busca</h5>
+                          <p className="text-xs text-yellow-600 mt-1">
+                            Perplexity Sonar - com acesso à web
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Auto-routing Feature */}
+                    {formData.model === 'auto' && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Bot className="h-4 w-4 text-orange-600" />
+                          <Label className="text-orange-800 font-medium">
+                            Auto-routing Inteligente
+                          </Label>
+                        </div>
+                        <div className="p-3 bg-orange-100 rounded border border-orange-200">
+                          <p className="text-sm text-orange-700 mb-2">
+                            <strong>Como funciona:</strong> O OpenRouter analisa seu prompt e automaticamente seleciona o modelo mais adequado.
+                          </p>
+                          <div className="text-xs text-orange-600 space-y-1">
+                            <div><strong>Para código:</strong> Pode usar CodeLlama, Deepseek Coder ou GPT-4</div>
+                            <div><strong>Para imagens:</strong> Seleciona modelos vision como GPT-4o ou Claude</div>
+                            <div><strong>Para análise:</strong> Usa Claude 3.5 Sonnet ou GPT-4</div>
+                            <div><strong>Para velocidade:</strong> Prefere modelos mais rápidos como Llama ou Mistral</div>
+                          </div>
+                        </div>
+                        <Alert>
+                          <Bot className="h-4 w-4" />
+                          <AlertDescription className="text-sm">
+                            <strong>Recomendado:</strong> Use auto-routing quando não tiver certeza de qual modelo escolher. 
+                            O OpenRouter otimiza automaticamente para qualidade, velocidade e custo.
+                          </AlertDescription>
+                        </Alert>
+                      </div>
+                    )}
+
+                    {/* Cost Information */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-orange-600" />
+                        <Label className="text-orange-800 font-medium">
+                          Informações de Custo
+                        </Label>
+                      </div>
+                      <div className="p-3 bg-gray-50 border border-gray-200 rounded">
+                        <div className="text-sm text-gray-700 space-y-1">
+                          <div>💰 <strong>Modelos gratuitos:</strong> $0.00 por token - sem limitações de uso básico</div>
+                          <div>⚡ <strong>Modelos rápidos:</strong> $0.20-$1.00 por 1M tokens - boa qualidade, baixo custo</div>
+                          <div>🔥 <strong>Modelos premium:</strong> $2.00-$15.00 por 1M tokens - máxima qualidade</div>
+                          <div>🔀 <strong>Auto-routing:</strong> Custo variável baseado no modelo selecionado</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Alert>
+                      <Globe className="h-4 w-4" />
+                      <AlertDescription className="text-sm">
+                        <strong>Vantagem do OpenRouter:</strong> Acesse os melhores modelos de IA do mundo através de uma única API. 
+                        Experimente modelos gratuitos ou use premium conforme sua necessidade.
                       </AlertDescription>
                     </Alert>
                   </div>

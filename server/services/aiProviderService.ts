@@ -55,6 +55,10 @@ export class AIProviderService {
     return this.generateResponse({ ...request, provider: 'xai' });
   }
 
+  async generateOpenRouter(request: AIRequest): Promise<AIResponse> {
+    return this.generateResponse({ ...request, provider: 'openrouter' });
+  }
+
   isProviderConfigured(provider: string): boolean {
     return this.providerManager.isProviderConfigured(provider as AIProvider);
   }

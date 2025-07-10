@@ -1,4 +1,4 @@
-export type AIProvider = 'openai' | 'anthropic' | 'gemini' | 'deepseek' | 'xai';
+export type AIProvider = 'openai' | 'anthropic' | 'gemini' | 'deepseek' | 'xai' | 'openrouter';
 
 export interface AIRequest {
   provider: AIProvider;
@@ -79,4 +79,5 @@ export interface ProviderStatus {
   gemini: boolean;
   deepseek: boolean;
   xai: boolean;
+  openrouter: boolean;
 }
