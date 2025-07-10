@@ -236,9 +236,22 @@ export class OpenAIProvider extends BaseProvider {
 
     // Tools/Functions - only for non-reasoning models
     if (request.tools && request.tools.length > 0 && !isReasoningModel) {
-      params.tools = request.tools;
-      params.tool_choice = 'auto';
-      console.log(`🔧 [OPENAI] Tools enabled: ${request.tools.map(t => t.type).join(', ')}`);
+      // Filter out unsupported tools and convert to proper function format
+      const supportedTools = request.tools.filter(tool => {
+        if (tool.type === 'retrieval') {
+          console.log(`⚠️ [OPENAI] Retrieval tool is deprecated, skipping...`);
+          return false;
+        }
+        return tool.type === 'code_interpreter';
+      });
+
+      if (supportedTools.length > 0) {
+        params.tools = supportedTools;
+        params.tool_choice = 'auto';
+        console.log(`🔧 [OPENAI] Tools enabled: ${supportedTools.map(t => t.type).join(', ')}`);
+      } else {
+        console.log(`⚠️ [OPENAI] No supported tools found after filtering`);
+      }
     } else if (request.tools && request.tools.length > 0 && isReasoningModel) {
       console.log(`🚫 [OPENAI] Tools requested but not supported for reasoning model ${request.model}`);
     }

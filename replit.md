@@ -324,6 +324,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 10, 2025 - 8:30 PM**: ✅ OPENAI RETRIEVAL TOOL COMPATIBILITY FIX - API BREAKING CHANGE RESOLVED
+  - **Critical OpenAI API Compatibility Issue Fixed**:
+    - ✅ **Root cause identified**: OpenAI deprecated the simple "retrieval" tool type, now requires function definitions
+    - ✅ **Error resolved**: "Missing required parameter: 'tools[0].function'" error eliminated
+    - ✅ **Tool filtering implemented**: OpenAIProvider now filters out unsupported "retrieval" tools
+    - ✅ **Code Interpreter maintained**: Only supported tools (code_interpreter) are passed to OpenAI API
+    - ✅ **Graceful degradation**: System logs warning and continues without unsupported tools
+  - **Technical Implementation**:
+    - Modified OpenAIProvider.ts to filter tools before sending to OpenAI API
+    - Added proper error handling and logging for deprecated tool types
+    - Maintains backward compatibility while preventing API errors
+    - Code Interpreter functionality remains fully operational
+  - **User Experience**:
+    - AI provider test connection now works correctly with all OpenAI models
+    - No breaking changes to existing agent configurations
+    - Clear logging shows when retrieval tools are skipped
+    - System continues to function with supported tools only
+
 - **January 10, 2025 - 8:21 PM**: ✅ OPENAI REASONING MODELS TOOLS COMPATIBILITY FIX - COMPLETE FRONTEND & BACKEND IMPLEMENTATION
   - **Critical Bug Fix for Reasoning Models (o3, o3-mini, o4-mini)**:
     - ✅ **Backend filtering**: OpenAIProvider now filters out tools for reasoning models before API call
