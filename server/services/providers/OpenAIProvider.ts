@@ -22,12 +22,55 @@ export class OpenAIProvider extends BaseProvider {
 
   getAvailableModels(): ModelConfig[] {
     return [
-      { provider: 'openai', model: 'gpt-4.1', inputCostPer1M: 2.50, outputCostPer1M: 10.00, maxTokens: 128000 },
-      { provider: 'openai', model: 'gpt-4o', inputCostPer1M: 2.50, outputCostPer1M: 10.00, maxTokens: 128000 },
-      { provider: 'openai', model: 'gpt-4o-mini', inputCostPer1M: 0.15, outputCostPer1M: 0.60, maxTokens: 128000 },
-      { provider: 'openai', model: 'o4-mini', inputCostPer1M: 1.00, outputCostPer1M: 4.00, maxTokens: 128000 },
-      { provider: 'openai', model: 'o3', inputCostPer1M: 20.00, outputCostPer1M: 80.00, maxTokens: 200000 },
-      { provider: 'openai', model: 'gpt-image-1', inputCostPer1M: 5.00, outputCostPer1M: 0.167025, maxTokens: 32000 }
+      { 
+        provider: 'openai', 
+        model: 'gpt-4.1', 
+        inputCostPer1M: 2.50, 
+        outputCostPer1M: 10.00, 
+        maxTokens: 128000,
+        capabilities: ['chat', 'vision', 'tools', 'json', 'structured_output'],
+        recommended: true
+      },
+      { 
+        provider: 'openai', 
+        model: 'gpt-4o', 
+        inputCostPer1M: 2.50, 
+        outputCostPer1M: 10.00, 
+        maxTokens: 128000,
+        capabilities: ['chat', 'vision', 'tools', 'json', 'structured_output'] 
+      },
+      { 
+        provider: 'openai', 
+        model: 'gpt-4o-mini', 
+        inputCostPer1M: 0.15, 
+        outputCostPer1M: 0.60, 
+        maxTokens: 128000,
+        capabilities: ['chat', 'vision', 'tools', 'json', 'structured_output'] 
+      },
+      { 
+        provider: 'openai', 
+        model: 'o4-mini', 
+        inputCostPer1M: 1.00, 
+        outputCostPer1M: 4.00, 
+        maxTokens: 128000,
+        capabilities: ['chat', 'reasoning', 'structured_output'] 
+      },
+      { 
+        provider: 'openai', 
+        model: 'o3', 
+        inputCostPer1M: 20.00, 
+        outputCostPer1M: 80.00, 
+        maxTokens: 200000,
+        capabilities: ['chat', 'reasoning', 'structured_output'] 
+      },
+      { 
+        provider: 'openai', 
+        model: 'gpt-image-1', 
+        inputCostPer1M: 5.00, 
+        outputCostPer1M: 0.167025, 
+        maxTokens: 32000,
+        capabilities: ['image_generation', 'image_edit'] 
+      }
     ];
   }
 
@@ -133,10 +176,11 @@ export class OpenAIProvider extends BaseProvider {
 
   private async handleTextGeneration(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
     const isReasoningModel = ['o4-mini', 'o3'].includes(request.model);
+    const isVisionModel = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini'].includes(request.model);
     
     const params: any = {
       model: request.model,
-      messages: request.messages
+      messages: this.prepareMessages(request, isVisionModel)
     };
 
     // Calculate safe max tokens - never exceed model's actual limit
@@ -147,9 +191,39 @@ export class OpenAIProvider extends BaseProvider {
     if (isReasoningModel) {
       params.max_completion_tokens = safeMaxTokens;
       // Reasoning models don't support temperature
+      if (request.enableReasoning) {
+        console.log(`🧠 [OPENAI] Reasoning mode enabled for ${request.model}`);
+      }
     } else {
       params.max_tokens = safeMaxTokens;
       params.temperature = request.temperature ?? 0.7;
+      
+      // Advanced parameters
+      if (request.top_p !== undefined) params.top_p = request.top_p;
+      if (request.frequency_penalty !== undefined) params.frequency_penalty = request.frequency_penalty;
+      if (request.presence_penalty !== undefined) params.presence_penalty = request.presence_penalty;
+      if (request.logit_bias !== undefined) params.logit_bias = request.logit_bias;
+      if (request.stop !== undefined) params.stop = request.stop;
+      if (request.seed !== undefined) params.seed = request.seed;
+    }
+
+    // Response format
+    if (request.response_format) {
+      params.response_format = request.response_format;
+      console.log(`📋 [OPENAI] Response format: ${request.response_format.type}`);
+    }
+
+    // Tools/Functions
+    if (request.tools && request.tools.length > 0) {
+      params.tools = request.tools;
+      params.tool_choice = 'auto';
+      console.log(`🔧 [OPENAI] Tools enabled: ${request.tools.map(t => t.type).join(', ')}`);
+    }
+
+    // Fine-tuned model override
+    if (request.fineTuneModel) {
+      params.model = request.fineTuneModel;
+      console.log(`🎯 [OPENAI] Using fine-tuned model: ${request.fineTuneModel}`);
     }
 
     // Log if we had to reduce the token limit
@@ -165,6 +239,12 @@ export class OpenAIProvider extends BaseProvider {
     const usage = response.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
     const cost = this.calculateCost(usage.prompt_tokens, usage.completion_tokens, modelConfig);
 
+    // Handle tool calls if present
+    if (response.choices[0]?.message?.tool_calls) {
+      console.log(`🔧 [OPENAI] Tool calls detected: ${response.choices[0].message.tool_calls.length}`);
+      // In a real implementation, you would process tool calls here
+    }
+
     return {
       content,
       usage: {
@@ -174,6 +254,74 @@ export class OpenAIProvider extends BaseProvider {
       },
       cost
     };
+  }
+
+  private prepareMessages(request: AIRequest, isVisionModel: boolean): any[] {
+    const messages = [...request.messages];
+
+    // Handle image inputs for vision models
+    if (isVisionModel && (request.referenceImages?.length || request.attachments?.some(a => a.type === 'image'))) {
+      const lastMessage = messages[messages.length - 1];
+      
+      if (typeof lastMessage.content === 'string') {
+        const content: any[] = [
+          {
+            type: "text",
+            text: lastMessage.content
+          }
+        ];
+
+        // Add reference images
+        if (request.referenceImages?.length) {
+          request.referenceImages.forEach(image => {
+            content.push({
+              type: "image_url",
+              image_url: {
+                url: image.data.startsWith('data:') ? image.data : `data:image/jpeg;base64,${image.data}`
+              }
+            });
+          });
+        }
+
+        // Add image attachments
+        if (request.attachments?.length) {
+          request.attachments
+            .filter(a => a.type === 'image')
+            .forEach(attachment => {
+              content.push({
+                type: "image_url",
+                image_url: {
+                  url: attachment.data.startsWith('data:') ? attachment.data : `data:image/jpeg;base64,${attachment.data}`
+                }
+              });
+            });
+        }
+
+        lastMessage.content = content;
+        console.log(`📸 [OPENAI] Added ${content.length - 1} images for vision analysis`);
+      }
+    }
+
+    // Handle text/code attachments
+    if (request.attachments?.some(a => ['text', 'code', 'pdf'].includes(a.type))) {
+      const textAttachments = request.attachments.filter(a => ['text', 'code', 'pdf'].includes(a.type));
+      if (textAttachments.length > 0) {
+        const attachmentText = textAttachments.map(a => {
+          const content = a.data; // In real implementation, decode base64 for text files
+          return `\n--- ${a.filename} (${a.type}) ---\n${content}\n---\n`;
+        }).join('\n');
+        
+        // Prepend attachments to the last user message
+        const lastMessage = messages[messages.length - 1];
+        if (typeof lastMessage.content === 'string') {
+          lastMessage.content = attachmentText + '\n' + lastMessage.content;
+        }
+        
+        console.log(`📎 [OPENAI] Added ${textAttachments.length} text attachments`);
+      }
+    }
+
+    return messages;
   }
 
   private getModelConfig(model: string): ModelConfig {

@@ -17,6 +17,33 @@ export interface AIRequest {
   // Grok-specific features
   reasoningLevel?: 'disabled' | 'low' | 'high';
   enableSearch?: boolean;
+  // OpenAI-specific features
+  enableReasoning?: boolean; // For o3, o4-mini models
+  fineTuneModel?: string; // Fine-tuned model ID
+  attachments?: Array<{
+    data: string;
+    filename: string;
+    type: 'code' | 'text' | 'pdf' | 'image';
+  }>;
+  tools?: Array<{
+    type: 'function' | 'code_interpreter' | 'retrieval';
+    function?: {
+      name: string;
+      description: string;
+      parameters: any;
+    };
+  }>;
+  response_format?: {
+    type: 'text' | 'json_object' | 'json_schema';
+    json_schema?: any;
+  };
+  seed?: number; // For deterministic outputs
+  top_p?: number; // Alternative to temperature
+  frequency_penalty?: number; // -2.0 to 2.0
+  presence_penalty?: number; // -2.0 to 2.0
+  logit_bias?: Record<string, number>; // Token biases
+  stop?: string[]; // Stop sequences
+  stream?: boolean; // Enable streaming
 }
 
 export interface AIResponse {

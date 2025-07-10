@@ -16,7 +16,11 @@ import {
   Trash2,
   Brain,
   Search,
-  Eye
+  Eye,
+  FileJson,
+  Sliders,
+  Wrench,
+  Settings2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,7 +86,7 @@ export default function AgentProviderSettings() {
   const queryClient = useQueryClient();
 
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     provider: 'openai' as Agent['provider'],
     model: '',
     temperature: 0.7,
@@ -90,7 +94,17 @@ export default function AgentProviderSettings() {
     // Grok specific features
     reasoningLevel: 'disabled' as 'disabled' | 'low' | 'high',
     enableSearch: false,
-    enableImageUnderstanding: false
+    enableImageUnderstanding: false,
+    // OpenAI specific features
+    enableReasoning: false,
+    responseFormat: 'text',
+    seed: undefined,
+    top_p: undefined,
+    frequency_penalty: undefined,
+    presence_penalty: undefined,
+    enableCodeInterpreter: false,
+    enableRetrieval: false,
+    fineTuneModel: ''
   });
 
   const [testPrompt, setTestPrompt] = useState('Olá! Como você está hoje?');
@@ -246,7 +260,17 @@ export default function AgentProviderSettings() {
         // Reset Grok features when changing agent
         reasoningLevel: 'disabled',
         enableSearch: false,
-        enableImageUnderstanding: false
+        enableImageUnderstanding: false,
+        // Reset OpenAI features when changing agent
+        enableReasoning: false,
+        responseFormat: 'text',
+        seed: undefined,
+        top_p: undefined,
+        frequency_penalty: undefined,
+        presence_penalty: undefined,
+        enableCodeInterpreter: false,
+        enableRetrieval: false,
+        fineTuneModel: ''
       });
     }
   }, [selectedAgent]);
@@ -309,6 +333,42 @@ export default function AgentProviderSettings() {
       }
       testData.enableSearch = formData.enableSearch;
       testData.enableImageUnderstanding = formData.enableImageUnderstanding;
+    }
+
+    // Add OpenAI-specific features
+    if (formData.provider === 'openai') {
+      // Reasoning for o3/o4-mini models
+      if (['o3', 'o4-mini'].includes(formData.model) && formData.enableReasoning) {
+        testData.enableReasoning = formData.enableReasoning;
+      }
+
+      // Response format
+      if (formData.responseFormat && formData.responseFormat !== 'text') {
+        testData.response_format = { type: formData.responseFormat };
+      }
+
+      // Advanced parameters
+      if (formData.seed) testData.seed = formData.seed;
+      if (formData.top_p) testData.top_p = formData.top_p;
+      if (formData.frequency_penalty) testData.frequency_penalty = formData.frequency_penalty;
+      if (formData.presence_penalty) testData.presence_penalty = formData.presence_penalty;
+
+      // Tools
+      const tools = [];
+      if (formData.enableCodeInterpreter) {
+        tools.push({ type: 'code_interpreter' });
+      }
+      if (formData.enableRetrieval) {
+        tools.push({ type: 'retrieval' });
+      }
+      if (tools.length > 0) {
+        testData.tools = tools;
+      }
+
+      // Fine-tuned model
+      if (formData.fineTuneModel) {
+        testData.fineTuneModel = formData.fineTuneModel;
+      }
     }
 
     // Add image data for image models
@@ -676,6 +736,220 @@ export default function AgentProviderSettings() {
                       <AlertDescription className="text-sm">
                         <strong>Dica:</strong> As funcionalidades especiais do Grok aumentam a qualidade das respostas, 
                         mas podem resultar em maior consumo de tokens e custo.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+
+                {/* OpenAI-specific Features */}
+                {formData.provider === 'openai' && (
+                  <div className="space-y-6 p-4 border rounded-lg bg-green-50 border-green-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-xl">🚀</span>
+                      <h3 className="text-lg font-semibold text-green-800">Funcionalidades Avançadas da OpenAI</h3>
+                    </div>
+
+                    {/* Reasoning Mode (for o3, o4-mini) */}
+                    {['o3', 'o4-mini'].includes(formData.model) && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Brain className="h-4 w-4 text-green-600" />
+                          <Label className="text-green-800 font-medium">
+                            Modo de Raciocínio Avançado
+                          </Label>
+                        </div>
+                        <p className="text-sm text-green-600">
+                          Ativa o modo de raciocínio profundo para modelos o3 e o4-mini.
+                        </p>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="enableReasoning"
+                            checked={formData.enableReasoning || false}
+                            onCheckedChange={(checked) => setFormData({ ...formData, enableReasoning: checked })}
+                          />
+                          <Label htmlFor="enableReasoning" className="text-sm">
+                            Habilitar raciocínio avançado
+                          </Label>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Response Format */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <FileJson className="h-4 w-4 text-green-600" />
+                        <Label className="text-green-800 font-medium">
+                          Formato de Resposta
+                        </Label>
+                      </div>
+                      <p className="text-sm text-green-600">
+                        Força o modelo a retornar respostas em formatos estruturados.
+                      </p>
+                      <Select 
+                        value={formData.responseFormat || 'text'} 
+                        onValueChange={(value) => setFormData({ ...formData, responseFormat: value })}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione o formato" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text">
+                            <div className="flex items-center gap-2">
+                              <span>📝 Texto Normal</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="json_object">
+                            <div className="flex items-center gap-2">
+                              <span>📊 JSON Object</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="json_schema">
+                            <div className="flex items-center gap-2">
+                              <span>📋 JSON Schema</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Advanced Parameters */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Sliders className="h-4 w-4 text-green-600" />
+                        <Label className="text-green-800 font-medium">
+                          Parâmetros Avançados
+                        </Label>
+                      </div>
+                      
+                      {/* Seed */}
+                      <div className="space-y-2">
+                        <Label htmlFor="seed" className="text-sm">
+                          Seed (para resultados determinísticos)
+                        </Label>
+                        <Input
+                          id="seed"
+                          type="number"
+                          placeholder="Ex: 12345"
+                          value={formData.seed || ''}
+                          onChange={(e) => setFormData({ ...formData, seed: parseInt(e.target.value) || undefined })}
+                          className="w-full"
+                        />
+                      </div>
+
+                      {/* Top P */}
+                      <div className="space-y-2">
+                        <Label htmlFor="top_p" className="text-sm">
+                          Top P (0.0 - 1.0)
+                        </Label>
+                        <Input
+                          id="top_p"
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="1"
+                          placeholder="Ex: 0.9"
+                          value={formData.top_p || ''}
+                          onChange={(e) => setFormData({ ...formData, top_p: parseFloat(e.target.value) || undefined })}
+                          className="w-full"
+                        />
+                      </div>
+
+                      {/* Frequency Penalty */}
+                      <div className="space-y-2">
+                        <Label htmlFor="frequency_penalty" className="text-sm">
+                          Frequency Penalty (-2.0 a 2.0)
+                        </Label>
+                        <Input
+                          id="frequency_penalty"
+                          type="number"
+                          step="0.1"
+                          min="-2"
+                          max="2"
+                          placeholder="Ex: 0.5"
+                          value={formData.frequency_penalty || ''}
+                          onChange={(e) => setFormData({ ...formData, frequency_penalty: parseFloat(e.target.value) || undefined })}
+                          className="w-full"
+                        />
+                      </div>
+
+                      {/* Presence Penalty */}
+                      <div className="space-y-2">
+                        <Label htmlFor="presence_penalty" className="text-sm">
+                          Presence Penalty (-2.0 a 2.0)
+                        </Label>
+                        <Input
+                          id="presence_penalty"
+                          type="number"
+                          step="0.1"
+                          min="-2"
+                          max="2"
+                          placeholder="Ex: 0.5"
+                          value={formData.presence_penalty || ''}
+                          onChange={(e) => setFormData({ ...formData, presence_penalty: parseFloat(e.target.value) || undefined })}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Tools/Functions */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Wrench className="h-4 w-4 text-green-600" />
+                        <Label className="text-green-800 font-medium">
+                          Ferramentas e Funções
+                        </Label>
+                      </div>
+                      <p className="text-sm text-green-600">
+                        Habilita o uso de ferramentas como interpretador de código e recuperação de informações.
+                      </p>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="enableCodeInterpreter"
+                            checked={formData.enableCodeInterpreter || false}
+                            onCheckedChange={(checked) => setFormData({ ...formData, enableCodeInterpreter: checked })}
+                          />
+                          <Label htmlFor="enableCodeInterpreter" className="text-sm">
+                            Interpretador de Código
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="enableRetrieval"
+                            checked={formData.enableRetrieval || false}
+                            onCheckedChange={(checked) => setFormData({ ...formData, enableRetrieval: checked })}
+                          />
+                          <Label htmlFor="enableRetrieval" className="text-sm">
+                            Recuperação de Informações
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Fine-tuned Model */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Settings2 className="h-4 w-4 text-green-600" />
+                        <Label className="text-green-800 font-medium">
+                          Modelo Fine-tuned
+                        </Label>
+                      </div>
+                      <p className="text-sm text-green-600">
+                        Use um modelo personalizado treinado com seus dados.
+                      </p>
+                      <Input
+                        placeholder="ID do modelo fine-tuned (ex: ft:gpt-3.5-turbo:my-org:custom:abc123)"
+                        value={formData.fineTuneModel || ''}
+                        onChange={(e) => setFormData({ ...formData, fineTuneModel: e.target.value })}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <Alert>
+                      <Zap className="h-4 w-4" />
+                      <AlertDescription className="text-sm">
+                        <strong>Dica:</strong> As funcionalidades avançadas da OpenAI permitem controle preciso sobre as respostas. 
+                        Use com moderação para otimizar custos e performance.
                       </AlertDescription>
                     </Alert>
                   </div>
