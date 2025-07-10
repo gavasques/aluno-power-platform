@@ -45,6 +45,7 @@ export interface AIRequest {
   logit_bias?: Record<string, number>; // Token biases
   stop?: string[]; // Stop sequences
   stream?: boolean; // Enable streaming
+  selectedCollections?: number[]; // Knowledge base collection IDs for retrieval
 }
 
 export interface AIResponse {

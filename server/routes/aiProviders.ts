@@ -34,7 +34,8 @@ const testRequestSchema = z.object({
   tools: z.array(z.object({
     type: z.string()
   })).optional(),
-  fineTuneModel: z.string().optional()
+  fineTuneModel: z.string().optional(),
+  selectedCollections: z.array(z.number()).optional()
 });
 
 router.post('/test', requireAuth, async (req, res) => {
@@ -76,6 +77,7 @@ router.post('/test', requireAuth, async (req, res) => {
       presence_penalty: validatedData.presence_penalty,
       tools: validatedData.tools,
       fineTuneModel: validatedData.fineTuneModel,
+      selectedCollections: validatedData.selectedCollections,
     };
 
     console.log('🚀 [AI_PROVIDER_TEST] Request prepared:', {
@@ -115,7 +117,8 @@ router.post('/test', requireAuth, async (req, res) => {
       reasoningLevel: aiRequest.reasoningLevel,
       enableSearch: aiRequest.enableSearch,
       tools: aiRequest.tools,
-      fineTuneModel: aiRequest.fineTuneModel
+      fineTuneModel: aiRequest.fineTuneModel,
+      selectedCollections: aiRequest.selectedCollections
     }, null, 2));
 
     // Generate response
