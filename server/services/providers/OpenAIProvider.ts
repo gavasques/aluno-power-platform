@@ -234,12 +234,6 @@ export class OpenAIProvider extends BaseProvider {
       console.log(`📋 [OPENAI] Response format: ${request.response_format.type}`);
     }
 
-    // Handle web search using Responses API
-    if (request.enableSearch && !isReasoningModel) {
-      console.log(`🔍 [OPENAI] Web search enabled, using Responses API`);
-      return this.handleWebSearchGeneration(request, modelConfig);
-    }
-
     // Tools/Functions - only for non-reasoning models
     if (request.tools && request.tools.length > 0 && !isReasoningModel) {
       // Filter out unsupported tools and convert to proper function format
@@ -364,92 +358,6 @@ export class OpenAIProvider extends BaseProvider {
     }
 
     return messages;
-  }
-
-  private async handleWebSearchGeneration(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
-    console.log(`🔍 [OPENAI] Using Responses API with web search for ${request.model}`);
-    
-    // Convert messages to input string (use last user message)
-    const lastUserMessage = request.messages.filter(m => m.role === 'user').pop();
-    const input = lastUserMessage?.content || '';
-    
-    const requestParams: any = {
-      model: request.model,
-      input: input,
-      tools: [{
-        type: "web_search_preview",
-        search_context_size: "medium" // medium, high, low
-      }]
-    };
-
-    // Add user location for better search results (Brazil)
-    requestParams.tools[0].user_location = {
-      type: "approximate",
-      country: "BR",
-      city: "São Paulo",
-      region: "São Paulo",
-      timezone: "America/Sao_Paulo"
-    };
-
-    console.log(`🔍 [OPENAI] Responses API params:`, JSON.stringify(requestParams, null, 2));
-
-    try {
-      // Use the official OpenAI responses API
-      const response = await (this.client as any).responses.create(requestParams);
-      
-      const data = response;
-      
-      // Extract content from response
-      let content = '';
-      let citations = [];
-      
-      if (data && Array.isArray(data)) {
-        for (const item of data) {
-          if (item.type === 'message' && item.content) {
-            for (const contentItem of item.content) {
-              if (contentItem.type === 'output_text') {
-                content += contentItem.text;
-                if (contentItem.annotations) {
-                  citations.push(...contentItem.annotations);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Add citations to content if present
-      if (citations.length > 0) {
-        content += '\n\n**Fontes consultadas:**\n';
-        citations.forEach((citation, index) => {
-          if (citation.type === 'url_citation') {
-            content += `${index + 1}. [${citation.title}](${citation.url})\n`;
-          }
-        });
-      }
-
-      const inputTokens = this.countTokens(input);
-      const outputTokens = this.countTokens(content);
-      const cost = this.calculateCost(inputTokens, outputTokens, modelConfig);
-
-      console.log(`✅ [OPENAI] Web search response generated with ${citations.length} citations`);
-
-      return {
-        content,
-        usage: {
-          inputTokens,
-          outputTokens,
-          totalTokens: inputTokens + outputTokens
-        },
-        cost
-      };
-    } catch (error) {
-      console.error('❌ [OPENAI] Responses API error:', error);
-      
-      // Fallback to regular chat completion without web search
-      console.log(`🔄 [OPENAI] Falling back to regular chat completion`);
-      return this.handleTextGeneration(request, modelConfig);
-    }
   }
 
   private getModelConfig(model: string): ModelConfig {
