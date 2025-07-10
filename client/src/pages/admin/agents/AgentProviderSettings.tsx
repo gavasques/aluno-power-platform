@@ -1173,17 +1173,17 @@ export default function AgentProviderSettings() {
                               Selecione as bases de conhecimento para utilizar:
                             </Label>
                             <Select 
-                              value={formData.selectedCollections?.length > 0 ? formData.selectedCollections[0].toString() : ''} 
+                              value={formData.selectedCollections?.length > 0 ? formData.selectedCollections[0].toString() : 'none'} 
                               onValueChange={(value) => setFormData({ 
                                 ...formData, 
-                                selectedCollections: value ? [parseInt(value)] : [] 
+                                selectedCollections: value === 'none' ? [] : [parseInt(value)] 
                               })}
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Selecione uma base de conhecimento" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">
+                                <SelectItem value="none">
                                   <span className="text-gray-500">Nenhuma coleção selecionada</span>
                                 </SelectItem>
                                 {collections.map(collection => (
