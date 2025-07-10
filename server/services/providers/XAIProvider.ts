@@ -29,38 +29,66 @@ export class XAIProvider extends BaseProvider {
 
   getAvailableModels(): ModelConfig[] {
     return [
-      // Current Grok models as shown in user's image
+      // Grok 4 - Latest and most powerful model (RECOMMENDED)
+      { 
+        provider: 'xai', 
+        model: 'grok-4-0709', 
+        inputCostPer1M: 3.00, 
+        outputCostPer1M: 3.00, 
+        maxTokens: 256000,
+        capabilities: ['text', 'reasoning', 'search'],
+        recommended: true // This is the recommended model
+      },
+      // Grok 3 models
+      { 
+        provider: 'xai', 
+        model: 'grok-3', 
+        inputCostPer1M: 3.00, 
+        outputCostPer1M: 3.00, 
+        maxTokens: 131072,
+        capabilities: ['text', 'reasoning', 'search']
+      },
+      { 
+        provider: 'xai', 
+        model: 'grok-3-mini', 
+        inputCostPer1M: 0.30, 
+        outputCostPer1M: 0.30, 
+        maxTokens: 131072,
+        capabilities: ['text', 'reasoning']
+      },
+      { 
+        provider: 'xai', 
+        model: 'grok-3-fast', 
+        inputCostPer1M: 5.00, 
+        outputCostPer1M: 5.00, 
+        maxTokens: 131072,
+        capabilities: ['text', 'reasoning', 'search']
+      },
+      { 
+        provider: 'xai', 
+        model: 'grok-3-mini-fast', 
+        inputCostPer1M: 0.60, 
+        outputCostPer1M: 0.60, 
+        maxTokens: 131072,
+        capabilities: ['text', 'reasoning']
+      },
+      // Grok 2 vision models
       { 
         provider: 'xai', 
         model: 'grok-2-vision-1212', 
         inputCostPer1M: 2.00, 
-        outputCostPer1M: 10.00, 
-        maxTokens: 8192,
+        outputCostPer1M: 2.00, 
+        maxTokens: 32768,
         capabilities: ['text', 'vision', 'reasoning']
       },
+      // Grok 2 image generation
       { 
         provider: 'xai', 
-        model: 'grok-2-1212', 
-        inputCostPer1M: 2.00, 
-        outputCostPer1M: 10.00, 
-        maxTokens: 131072,
-        capabilities: ['text', 'reasoning', 'search']
-      },
-      { 
-        provider: 'xai', 
-        model: 'grok-vision-beta', 
-        inputCostPer1M: 5.00, 
-        outputCostPer1M: 15.00, 
-        maxTokens: 8192,
-        capabilities: ['text', 'vision', 'reasoning']
-      },
-      { 
-        provider: 'xai', 
-        model: 'grok-beta', 
-        inputCostPer1M: 5.00, 
-        outputCostPer1M: 15.00, 
-        maxTokens: 131072,
-        capabilities: ['text', 'reasoning', 'search']
+        model: 'grok-2-image-1212', 
+        inputCostPer1M: 70.00, // $0.07 per image = $70 per 1000 images
+        outputCostPer1M: 70.00, 
+        maxTokens: 1024, // For prompt length
+        capabilities: ['image-generation']
       }
     ];
   }

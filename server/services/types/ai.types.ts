@@ -36,6 +36,7 @@ export interface ModelConfig {
   outputCostPer1M: number;
   maxTokens: number;
   capabilities?: string[];
+  recommended?: boolean;
 }
 
 export interface ProviderStatus {

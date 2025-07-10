@@ -494,7 +494,14 @@ export default function AgentProviderSettings() {
                       {availableModels.map((model) => (
                         <SelectItem key={model.model} value={model.model}>
                           <div className="flex items-center justify-between w-full">
-                            <span>{model.model}</span>
+                            <div className="flex items-center gap-2">
+                              <span>{model.model}</span>
+                              {model.recommended && (
+                                <Badge className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                                  Recomendado
+                                </Badge>
+                              )}
+                            </div>
                             <div className="flex items-center gap-2 ml-4">
                               <span className="text-xs text-gray-500">
                                 {model.maxTokens.toLocaleString()} tokens
