@@ -97,6 +97,7 @@ export default function AgentProviderSettings() {
     enableImageUnderstanding: false,
     // OpenAI specific features
     enableReasoning: false,
+    reasoning_effort: 'medium' as 'low' | 'medium' | 'high',
     responseFormat: 'text',
     seed: undefined,
     top_p: undefined,
@@ -337,9 +338,15 @@ export default function AgentProviderSettings() {
 
     // Add OpenAI-specific features
     if (formData.provider === 'openai') {
-      // Reasoning for o3/o4-mini models
-      if (['o3', 'o4-mini'].includes(formData.model) && formData.enableReasoning) {
-        testData.enableReasoning = formData.enableReasoning;
+      // Reasoning for o3/o4-mini/o3-mini models
+      if (['o3', 'o4-mini', 'o3-mini'].includes(formData.model)) {
+        if (formData.enableReasoning) {
+          testData.enableReasoning = formData.enableReasoning;
+        }
+        // Reasoning effort for o3-mini and o4-mini
+        if (['o3-mini', 'o4-mini'].includes(formData.model) && formData.reasoning_effort) {
+          testData.reasoning_effort = formData.reasoning_effort;
+        }
       }
 
       // Response format
@@ -347,11 +354,13 @@ export default function AgentProviderSettings() {
         testData.response_format = { type: formData.responseFormat };
       }
 
-      // Advanced parameters
-      if (formData.seed) testData.seed = formData.seed;
-      if (formData.top_p) testData.top_p = formData.top_p;
-      if (formData.frequency_penalty) testData.frequency_penalty = formData.frequency_penalty;
-      if (formData.presence_penalty) testData.presence_penalty = formData.presence_penalty;
+      // Advanced parameters (NOT for reasoning models)
+      if (!['o3', 'o4-mini', 'o3-mini'].includes(formData.model)) {
+        if (formData.seed) testData.seed = formData.seed;
+        if (formData.top_p) testData.top_p = formData.top_p;
+        if (formData.frequency_penalty) testData.frequency_penalty = formData.frequency_penalty;
+        if (formData.presence_penalty) testData.presence_penalty = formData.presence_penalty;
+      }
 
       // Tools
       const tools = [];
@@ -749,8 +758,8 @@ export default function AgentProviderSettings() {
                       <h3 className="text-lg font-semibold text-green-800">Funcionalidades Avançadas da OpenAI</h3>
                     </div>
 
-                    {/* Reasoning Mode (for o3, o4-mini) */}
-                    {['o3', 'o4-mini'].includes(formData.model) && (
+                    {/* Reasoning Mode (for o3, o4-mini, o3-mini) */}
+                    {['o3', 'o4-mini', 'o3-mini'].includes(formData.model) && (
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
                           <Brain className="h-4 w-4 text-green-600" />
@@ -759,7 +768,7 @@ export default function AgentProviderSettings() {
                           </Label>
                         </div>
                         <p className="text-sm text-green-600">
-                          Ativa o modo de raciocínio profundo para modelos o3 e o4-mini.
+                          Ativa o modo de raciocínio profundo para modelos o3, o4-mini e o3-mini.
                         </p>
                         <div className="flex items-center space-x-2">
                           <Switch
@@ -771,6 +780,46 @@ export default function AgentProviderSettings() {
                             Habilitar raciocínio avançado
                           </Label>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Reasoning Effort (for o3-mini, o4-mini) */}
+                    {['o3-mini', 'o4-mini'].includes(formData.model) && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Settings2 className="h-4 w-4 text-green-600" />
+                          <Label className="text-green-800 font-medium">
+                            Nível de Esforço de Raciocínio
+                          </Label>
+                        </div>
+                        <p className="text-sm text-green-600">
+                          Controla a profundidade do raciocínio para modelos o3-mini e o4-mini.
+                        </p>
+                        <Select 
+                          value={formData.reasoning_effort || 'medium'} 
+                          onValueChange={(value) => setFormData({ ...formData, reasoning_effort: value as 'low' | 'medium' | 'high' })}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione o nível" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">
+                              <div className="flex items-center gap-2">
+                                <span>🚀 Baixo - Respostas rápidas</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="medium">
+                              <div className="flex items-center gap-2">
+                                <span>⚖️ Médio - Balanceado (padrão)</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="high">
+                              <div className="flex items-center gap-2">
+                                <span>🧠 Alto - Raciocínio profundo</span>
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     )}
 
@@ -812,84 +861,98 @@ export default function AgentProviderSettings() {
                       </Select>
                     </div>
 
-                    {/* Advanced Parameters */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Sliders className="h-4 w-4 text-green-600" />
-                        <Label className="text-green-800 font-medium">
-                          Parâmetros Avançados
-                        </Label>
-                      </div>
-                      
-                      {/* Seed */}
-                      <div className="space-y-2">
-                        <Label htmlFor="seed" className="text-sm">
-                          Seed (para resultados determinísticos)
-                        </Label>
-                        <Input
-                          id="seed"
-                          type="number"
-                          placeholder="Ex: 12345"
-                          value={formData.seed || ''}
-                          onChange={(e) => setFormData({ ...formData, seed: parseInt(e.target.value) || undefined })}
-                          className="w-full"
-                        />
-                      </div>
+                    {/* Advanced Parameters - Only for non-reasoning models */}
+                    {!['o3', 'o4-mini', 'o3-mini'].includes(formData.model) && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Sliders className="h-4 w-4 text-green-600" />
+                          <Label className="text-green-800 font-medium">
+                            Parâmetros Avançados
+                          </Label>
+                        </div>
+                        
+                        {/* Seed */}
+                        <div className="space-y-2">
+                          <Label htmlFor="seed" className="text-sm">
+                            Seed (para resultados determinísticos)
+                          </Label>
+                          <Input
+                            id="seed"
+                            type="number"
+                            placeholder="Ex: 12345"
+                            value={formData.seed || ''}
+                            onChange={(e) => setFormData({ ...formData, seed: parseInt(e.target.value) || undefined })}
+                            className="w-full"
+                          />
+                        </div>
 
-                      {/* Top P */}
-                      <div className="space-y-2">
-                        <Label htmlFor="top_p" className="text-sm">
-                          Top P (0.0 - 1.0)
-                        </Label>
-                        <Input
-                          id="top_p"
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          max="1"
-                          placeholder="Ex: 0.9"
-                          value={formData.top_p || ''}
-                          onChange={(e) => setFormData({ ...formData, top_p: parseFloat(e.target.value) || undefined })}
-                          className="w-full"
-                        />
-                      </div>
+                        {/* Top P */}
+                        <div className="space-y-2">
+                          <Label htmlFor="top_p" className="text-sm">
+                            Top P (0.0 - 1.0)
+                          </Label>
+                          <Input
+                            id="top_p"
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="1"
+                            placeholder="Ex: 0.9"
+                            value={formData.top_p || ''}
+                            onChange={(e) => setFormData({ ...formData, top_p: parseFloat(e.target.value) || undefined })}
+                            className="w-full"
+                          />
+                        </div>
 
-                      {/* Frequency Penalty */}
-                      <div className="space-y-2">
-                        <Label htmlFor="frequency_penalty" className="text-sm">
-                          Frequency Penalty (-2.0 a 2.0)
-                        </Label>
-                        <Input
-                          id="frequency_penalty"
-                          type="number"
-                          step="0.1"
-                          min="-2"
-                          max="2"
-                          placeholder="Ex: 0.5"
-                          value={formData.frequency_penalty || ''}
-                          onChange={(e) => setFormData({ ...formData, frequency_penalty: parseFloat(e.target.value) || undefined })}
-                          className="w-full"
-                        />
-                      </div>
+                        {/* Frequency Penalty */}
+                        <div className="space-y-2">
+                          <Label htmlFor="frequency_penalty" className="text-sm">
+                            Frequency Penalty (-2.0 a 2.0)
+                          </Label>
+                          <Input
+                            id="frequency_penalty"
+                            type="number"
+                            step="0.1"
+                            min="-2"
+                            max="2"
+                            placeholder="Ex: 0.5"
+                            value={formData.frequency_penalty || ''}
+                            onChange={(e) => setFormData({ ...formData, frequency_penalty: parseFloat(e.target.value) || undefined })}
+                            className="w-full"
+                          />
+                        </div>
 
-                      {/* Presence Penalty */}
-                      <div className="space-y-2">
-                        <Label htmlFor="presence_penalty" className="text-sm">
-                          Presence Penalty (-2.0 a 2.0)
-                        </Label>
-                        <Input
-                          id="presence_penalty"
-                          type="number"
-                          step="0.1"
-                          min="-2"
-                          max="2"
-                          placeholder="Ex: 0.5"
-                          value={formData.presence_penalty || ''}
-                          onChange={(e) => setFormData({ ...formData, presence_penalty: parseFloat(e.target.value) || undefined })}
-                          className="w-full"
-                        />
+                        {/* Presence Penalty */}
+                        <div className="space-y-2">
+                          <Label htmlFor="presence_penalty" className="text-sm">
+                            Presence Penalty (-2.0 a 2.0)
+                          </Label>
+                          <Input
+                            id="presence_penalty"
+                            type="number"
+                            step="0.1"
+                            min="-2"
+                            max="2"
+                            placeholder="Ex: 0.5"
+                            value={formData.presence_penalty || ''}
+                            onChange={(e) => setFormData({ ...formData, presence_penalty: parseFloat(e.target.value) || undefined })}
+                            className="w-full"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {/* Warning for reasoning models */}
+                    {['o3', 'o4-mini', 'o3-mini'].includes(formData.model) && (
+                      <Alert>
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription className="text-sm">
+                          <strong>Modelos de Reasoning:</strong> Os modelos o3, o4-mini e o3-mini não suportam 
+                          parâmetros avançados como temperature, top_p, frequency_penalty, presence_penalty. 
+                          Use apenas os controles de raciocínio específicos acima.
+                        </AlertDescription>
+                      </Alert>
+                    )}
 
                     {/* Tools/Functions */}
                     <div className="space-y-3">

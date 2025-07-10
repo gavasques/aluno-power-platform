@@ -52,8 +52,9 @@ export class OpenAIProvider extends BaseProvider {
         model: 'o4-mini', 
         inputCostPer1M: 1.00, 
         outputCostPer1M: 4.00, 
-        maxTokens: 128000,
-        capabilities: ['chat', 'reasoning', 'structured_output'] 
+        maxTokens: 200000,
+        capabilities: ['chat', 'reasoning', 'vision', 'files', 'structured_output'],
+        recommended: true
       },
       { 
         provider: 'openai', 
@@ -61,6 +62,14 @@ export class OpenAIProvider extends BaseProvider {
         inputCostPer1M: 20.00, 
         outputCostPer1M: 80.00, 
         maxTokens: 200000,
+        capabilities: ['chat', 'reasoning', 'vision', 'files', 'structured_output'] 
+      },
+      { 
+        provider: 'openai', 
+        model: 'o3-mini', 
+        inputCostPer1M: 0.15, 
+        outputCostPer1M: 0.60, 
+        maxTokens: 128000,
         capabilities: ['chat', 'reasoning', 'structured_output'] 
       },
       { 
@@ -175,8 +184,8 @@ export class OpenAIProvider extends BaseProvider {
   }
 
   private async handleTextGeneration(request: AIRequest, modelConfig: ModelConfig): Promise<AIResponse> {
-    const isReasoningModel = ['o4-mini', 'o3'].includes(request.model);
-    const isVisionModel = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini'].includes(request.model);
+    const isReasoningModel = ['o4-mini', 'o3', 'o3-mini'].includes(request.model);
+    const isVisionModel = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini', 'o4-mini', 'o3'].includes(request.model);
     
     const params: any = {
       model: request.model,
@@ -187,31 +196,25 @@ export class OpenAIProvider extends BaseProvider {
     const requestedTokens = request.maxTokens || modelConfig.maxTokens;
     const safeMaxTokens = Math.min(requestedTokens, modelConfig.maxTokens);
 
-    // Reasoning models use max_completion_tokens, others use max_tokens
+    // Reasoning models use max_completion_tokens and have different parameter support
     if (isReasoningModel) {
       params.max_completion_tokens = safeMaxTokens;
-      // Reasoning models don't support temperature but support some other parameters
+      
+      // Reasoning effort level (new parameter for o3-mini and o4-mini)
+      if (request.reasoning_effort && ['o3-mini', 'o4-mini'].includes(request.model)) {
+        params.reasoning_effort = request.reasoning_effort;
+        console.log(`🧠 [OPENAI] Reasoning effort: ${request.reasoning_effort}`);
+      }
+      
       if (request.enableReasoning) {
         console.log(`🧠 [OPENAI] Reasoning mode enabled for ${request.model}`);
       }
       
-      // Add supported parameters for reasoning models
-      if (request.frequency_penalty !== undefined) {
-        params.frequency_penalty = request.frequency_penalty;
-        console.log(`🎛️ [OPENAI] Frequency penalty: ${request.frequency_penalty}`);
-      }
-      if (request.presence_penalty !== undefined) {
-        params.presence_penalty = request.presence_penalty;
-        console.log(`🎛️ [OPENAI] Presence penalty: ${request.presence_penalty}`);
-      }
-      if (request.seed !== undefined) {
-        params.seed = request.seed;
-        console.log(`🎲 [OPENAI] Seed: ${request.seed}`);
-      }
-      if (request.stop !== undefined) {
-        params.stop = request.stop;
-        console.log(`🛑 [OPENAI] Stop sequences: ${JSON.stringify(request.stop)}`);
-      }
+      // IMPORTANT: Reasoning models DO NOT support these parameters:
+      // - temperature, top_p, presence_penalty, frequency_penalty
+      // - logprobs, logit_bias, max_tokens
+      // Only basic parameters are supported
+      console.log(`🚫 [OPENAI] Reasoning model - advanced parameters disabled for ${request.model}`);
     } else {
       params.max_tokens = safeMaxTokens;
       params.temperature = request.temperature ?? 0.7;

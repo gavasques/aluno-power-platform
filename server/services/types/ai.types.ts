@@ -19,6 +19,7 @@ export interface AIRequest {
   enableSearch?: boolean;
   // OpenAI-specific features
   enableReasoning?: boolean; // For o3, o4-mini models
+  reasoning_effort?: 'low' | 'medium' | 'high'; // For o3-mini, o4-mini models
   fineTuneModel?: string; // Fine-tuned model ID
   attachments?: Array<{
     data: string;
