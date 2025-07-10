@@ -324,6 +324,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 10, 2025 - 10:24 PM**: ✅ HTML DESCRIPTION GENERATOR PROMPT ENHANCED - TOKEN LIMIT BUG FIXED - FULLY OPERATIONAL
+  - **Token Limit Issue Resolved**: Fixed critical "max_tokens too large" error by adjusting from 50,000 to 2,000 tokens (compatible with GPT-4o-mini's 16,384 limit)
+  - **Database Configuration Updated**: Agent in database now properly configured with 2,000 token limit
+  - **Enhanced Prompt Template**: Updated prompt with stricter character limits and problem-solving focus:
+    - Added "NUNCA EXCEDA 1900 Caracteres" rule for maximum clarity
+    - Repeated "Com espaços símbolos e tudo mais" 3 times to ensure AI understands complete character counting
+    - Added focus on problem-solving: describe what the product solves and why (example: chair reduces back pain due to NR 17 compliance)
+    - Maintained 1400-1800 character range for Amazon optimization
+  - **System Status**: HTML description generator now 100% operational with proper authentication and optimized prompting
+
 - **January 10, 2025 - 10:10 PM**: ✅ HTML DESCRIPTION GENERATOR AUTHENTICATION BUG FIXED - FULLY OPERATIONAL
   - **Problem Identified**: HTML description generator was sending "Bearer null" instead of actual authentication token
   - **Root Cause**: Agent was using `localStorage.getItem('token')` but auth system uses `localStorage.getItem('auth_token')`

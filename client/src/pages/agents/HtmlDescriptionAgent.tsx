@@ -204,12 +204,13 @@ Garantia de 12 meses`;
     try {
       const prompt = `${textInput}
 
+# Regra 1: NUNCA EXCEDA 1900 Caracteres. Com espaços símbolos e tudo mais
 Baseando-se na breve descrição que te dei do meu produto, por favor escreva uma descrição de produto PODEROSA e PERSUASIVA para Amazon. A descrição deve captar a atenção dos compradores e convencê-los de que meu produto é a melhor opção disponível na Amazon.
 
 Comprimento da descrição:
-a. Deve ter entre 1400 a 1800 Caracteres
-b. Não pode ter menos de 1400 caracteres no total
-c. Não pode ter mais de 1800 caracteres.
+a. Deve ter entre 1400 a 1800 Caracteres. Com espaços símbolos e tudo mais
+b. Não pode ter menos de 1400 caracteres no total. Com espaços símbolos e tudo mais
+c. Não pode ter mais de 1800 caracteres. Com espaços símbolos e tudo mais
 
 Tom da Descrição:
 A descrição deve ser envolvente, divertida e atraente, NUNCA entediante ou corporativa. O texto deve brilhar e se destacar da concorrência, transmitindo confiança e emoção ao comprador.
@@ -219,7 +220,9 @@ Objetivo:
 A descrição deve gerar urgência e levar o cliente a querer comprar o produto imediatamente. Deve soar natural, mas também ser incrivelmente persuasiva, destacando porque meu produto é o melhor que qualquer outra opção.
 
 Fechamento Persuasivo:
-Termine a descrição com uma chamada para ação direta e convincente, motivando o cliente a adicionar o produto ao carrinho imediatamente.`;
+Termine a descrição com uma chamada para ação direta e convincente, motivando o cliente a adicionar o produto ao carrinho imediatamente.
+
+A descrição deve usar sempre que possível o que esse produto resolve, o porquê desse produto. Ex. Essa cadeira diminui a dor nas costas, devido a seguir a NR 17.`;
 
       const response = await fetch('/api/ai-providers/test', {
         method: 'POST',
