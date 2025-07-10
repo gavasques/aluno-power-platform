@@ -229,43 +229,35 @@ export default function AmazonListingsOptimizer() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="layout-full-width px-2">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/agentes">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Voltar
-                </Button>
-              </Link>
-              <div className="flex items-center space-x-2">
-                <ShoppingCart className="h-6 w-6 text-orange-500" />
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Amazon Listings Optimizer
-                </h1>
-              </div>
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center space-x-4 mb-6">
+          <Link href="/agentes">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar aos Agentes
+            </Button>
+          </Link>
+          <div className="flex items-center space-x-3">
+            <ShoppingCart className="h-8 w-8 text-orange-500" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Amazon Listings Optimizer
+              </h1>
+              <p className="text-gray-600">
+                Otimize suas listagens da Amazon com análise de avaliações dos concorrentes
+              </p>
             </div>
-
-            {/* Session Info */}
-            {session && (
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                <div className="flex items-center space-x-2">
-                  <span className="font-medium">Sessão:</span>
-                  <Badge variant="outline">{session.sessionHash}</Badge>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-medium">Usuário:</span>
-                  <Badge variant="outline">{session.userId}</Badge>
-                </div>
-              </div>
-            )}
           </div>
         </div>
-      </div>
 
-      <div className="layout-full-width px-2 py-8">
+        {/* Credit Cost Warning */}
+        <Alert className="border-orange-200 bg-orange-50">
+          <AlertCircle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
+            <strong>Custo:</strong> Este agente consome <strong>10 créditos</strong> por otimização. Verifique seu saldo antes de prosseguir.
+          </AlertDescription>
+        </Alert>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3">
@@ -489,7 +481,19 @@ export default function AmazonListingsOptimizer() {
                 </div>
 
                 {/* Process Button */}
-                <div className="pt-6">
+                <div className="pt-6 space-y-3">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 text-blue-800">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="font-medium">Antes de processar:</span>
+                    </div>
+                    <p className="text-blue-700 text-sm mt-1">
+                      • Serão descontados <strong>10 créditos</strong> do seu saldo
+                      • Verifique se todos os campos obrigatórios estão preenchidos
+                      • O processamento não pode ser interrompido após iniciar
+                    </p>
+                  </div>
+                  
                   <Button
                     onClick={processListing}
                     disabled={isProcessing || isFilesProcessing}
@@ -504,7 +508,7 @@ export default function AmazonListingsOptimizer() {
                     ) : (
                       <>
                         <Sparkles className="mr-2 h-4 w-4" />
-                        Gerar Listagem Otimizada
+                        Otimizar Listagem (10 créditos)
                       </>
                     )}
                   </Button>
