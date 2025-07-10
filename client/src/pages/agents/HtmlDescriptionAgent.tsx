@@ -251,7 +251,24 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
       const responseText = data.response || '';
       const duration = Date.now() - startTime;
 
-      // Salvar log da geração de IA
+      // Descontar 1 crédito do usuário
+      try {
+        await fetch('/api/credits/deduct', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          },
+          body: JSON.stringify({
+            amount: 1,
+            reason: 'Geração de Descrição HTML com IA'
+          })
+        });
+      } catch (creditError) {
+        console.error('Erro ao descontar crédito:', creditError);
+      }
+
+      // Salvar log da geração de IA com crédito fixo
       try {
         await fetch('/api/ai-generation-logs', {
           method: 'POST',
@@ -271,12 +288,13 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
             outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
             totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
             cost: data.cost || 0,
+            creditsUsed: 1, // Crédito fixo consumido
             duration: duration,
             feature: 'html-description-agent'
           })
         });
         
-        console.log(`💾 Log salvo - Usuário: ${user.id}, Custo: $${data.cost}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
+        console.log(`💾 Log salvo - Usuário: ${user.id}, Créditos: 1, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
       } catch (logError) {
         console.error('Erro ao salvar log de IA:', logError);
       }
@@ -349,24 +367,24 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header do Agente */}
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Code2 className="h-6 w-6 text-purple-600" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Code2 className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Gerador de Descrições HTML</h1>
+                <p className="text-gray-600">Agente especializado em criar descrições persuasivas para Amazon</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Gerador de Descrições HTML</h1>
-              <p className="text-gray-600">Agente especializado em criar descrições persuasivas para Amazon</p>
+            
+            {/* Custo do Agente */}
+            <div className="bg-white/70 px-4 py-2 rounded-lg border">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600">Custo por uso:</span>
+                <span className="font-bold text-purple-600">1 crédito</span>
+              </div>
             </div>
-          </div>
-          
-          {/* Configurações do Agente */}
-          <div className="flex items-center gap-4 text-sm text-gray-600 bg-white/50 p-3 rounded-lg">
-            <span className="flex items-center gap-1">
-              <Settings className="h-4 w-4" />
-              {agentConfig.provider} • {agentConfig.model}
-            </span>
-            <span>Temperatura: {agentConfig.temperature}</span>
-            <span>Max Tokens: {agentConfig.maxTokens}</span>
           </div>
         </div>
 

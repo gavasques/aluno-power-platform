@@ -22,6 +22,7 @@ import { permissionRoutes } from './permissions';
 import userGroupsRoutes from './admin/userGroups';
 import stripeWebhookTestRoutes from './stripe/webhook-test';
 import featureCostsRoutes from './featureCosts';
+import creditsRoutes from './credits';
 import investmentSimulationsRoutes from './investment-simulations';
 import simulatorsRoutes from './simulators';
 import aiProviderRoutes from './aiProviders';
@@ -62,6 +63,9 @@ export function registerModularRoutes(app: Express): void {
   
   // Feature Costs Management - Credit System
   app.use('/api/feature-costs', featureCostsRoutes);
+  
+  // Credits Management - Credit Deduction and Balance
+  app.use('/api/credits', creditsRoutes);
   
   // Admin User Groups Management Routes
   app.use('/api/admin/user-groups', userGroupsRoutes);

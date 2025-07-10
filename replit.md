@@ -324,6 +324,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 10, 2025 - 10:30 PM**: ✅ HTML DESCRIPTION GENERATOR - UI SIMPLIFIED & FIXED CREDIT SYSTEM IMPLEMENTED
+  - **UI Simplification**: Removed all provider configuration displays (OpenAI, temperature, etc.) from user interface
+  - **Credit Display**: Shows "Custo por uso: 1 crédito" instead of technical configurations
+  - **Fixed Credit System**: Implemented proper 1-credit deduction per "Gerar com IA" usage
+  - **Credit API**: Created /api/credits/deduct endpoint for credit deduction and balance management
+  - **Logging Enhancement**: Updated AI generation logs to track creditsUsed field correctly
+  - **System Status**: HTML description generator now fully operational with clean UI and proper credit tracking
+
 - **January 10, 2025 - 10:24 PM**: ✅ HTML DESCRIPTION GENERATOR PROMPT ENHANCED - TOKEN LIMIT BUG FIXED - FULLY OPERATIONAL
   - **Token Limit Issue Resolved**: Fixed critical "max_tokens too large" error by adjusting from 50,000 to 2,000 tokens (compatible with GPT-4o-mini's 16,384 limit)
   - **Database Configuration Updated**: Agent in database now properly configured with 2,000 token limit
