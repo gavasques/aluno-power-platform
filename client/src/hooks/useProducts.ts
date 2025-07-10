@@ -27,9 +27,18 @@ export function useProducts(options: UseProductsOptions = {}) {
   // Extract products array from API response
   const products = useMemo(() => {
     if (!apiResponse) return [];
-    if (apiResponse.success && Array.isArray(apiResponse.data)) {
-      return apiResponse.data;
+    
+    // Handle nested data structure: {success: true, data: {success: true, data: Product[]}}
+    if (apiResponse.success && apiResponse.data) {
+      if (Array.isArray(apiResponse.data)) {
+        return apiResponse.data;
+      }
+      // Handle nested structure
+      if (apiResponse.data.success && Array.isArray(apiResponse.data.data)) {
+        return apiResponse.data.data;
+      }
     }
+    
     return [];
   }, [apiResponse]);
 
