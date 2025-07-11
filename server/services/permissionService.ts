@@ -234,11 +234,12 @@ export class PermissionService {
       // Ferramentas (consolidadas de IA e Hub de Recursos)
       { code: 'tools.image_upscale', name: 'Upscale de Imagem', category: 'Ferramentas', sortOrder: 1 },
       { code: 'tools.background_removal', name: 'Remover Background', category: 'Ferramentas', sortOrder: 2 },
-      { code: 'tools.amazon_reviews', name: 'Amazon Reviews', category: 'Ferramentas', sortOrder: 3 },
-      { code: 'tools.keyword_report', name: 'Relatório de Keywords', category: 'Ferramentas', sortOrder: 4 },
-      { code: 'tools.product_details', name: 'Detalhes do Produto', category: 'Ferramentas', sortOrder: 5 },
-      { code: 'tools.cnpj_lookup', name: 'Consulta CNPJ', category: 'Ferramentas', sortOrder: 6 },
-      { code: 'tools.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Ferramentas', sortOrder: 7 },
+      { code: 'tools.picsart_background_removal', name: 'Remover de Fundo PRO', category: 'Ferramentas', sortOrder: 3 },
+      { code: 'tools.amazon_reviews', name: 'Amazon Reviews', category: 'Ferramentas', sortOrder: 4 },
+      { code: 'tools.keyword_report', name: 'Relatório de Keywords', category: 'Ferramentas', sortOrder: 5 },
+      { code: 'tools.product_details', name: 'Detalhes do Produto', category: 'Ferramentas', sortOrder: 6 },
+      { code: 'tools.cnpj_lookup', name: 'Consulta CNPJ', category: 'Ferramentas', sortOrder: 7 },
+      { code: 'tools.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Ferramentas', sortOrder: 8 },
       
       // Agentes IA
       { code: 'agents.amazon_listing', name: 'Amazon Listing Optimizer', category: 'Agentes', sortOrder: 1 },
