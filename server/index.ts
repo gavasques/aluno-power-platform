@@ -5,6 +5,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { scheduler } from "./services/scheduler";
 import { compressionMiddleware, cacheHeaders, performanceMetrics, memoryMonitor } from "./middleware/performanceMiddleware";
 import { optimizedProductService } from "./services/OptimizedProductService";
+import path from "path";
 
 const app = express();
 
@@ -13,6 +14,9 @@ app.use(compressionMiddleware); // Enhanced compression
 app.use(performanceMetrics); // Performance tracking
 app.use(cacheHeaders); // Intelligent caching
 app.use(memoryMonitor); // Memory monitoring
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Conditional middleware for JSON parsing - skip for upload routes
 app.use((req, res, next) => {

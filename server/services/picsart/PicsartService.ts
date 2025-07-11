@@ -15,6 +15,8 @@ import { picsartSessions, picsartToolConfigs } from '@shared/schema';
 import type { InsertPicsartSession, PicsartSession, PicsartToolConfig } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import crypto from 'crypto';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 interface PicsartAPIResponse {
   data: {
@@ -254,27 +256,36 @@ export class PicsartService {
     userId: number
   ): Promise<string> {
     try {
+      console.log(`📤 [PICSART] Starting image upload for user ${userId}, file: ${fileName}`);
+      
       // Remove data URL prefix if present
       const base64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+      console.log(`📤 [PICSART] Base64 data length: ${base64.length}`);
+      
       const buffer = Buffer.from(base64, 'base64');
+      console.log(`📤 [PICSART] Buffer size: ${buffer.length} bytes`);
 
       // Generate unique filename
       const timestamp = Date.now();
       const randomId = crypto.randomBytes(8).toString('hex');
       const extension = fileName.split('.').pop() || 'png';
       const uniqueFileName = `picsart_${userId}_${timestamp}_${randomId}.${extension}`;
+      console.log(`📤 [PICSART] Generated filename: ${uniqueFileName}`);
 
       // In a real implementation, you would upload to cloud storage (S3, Cloudinary, etc.)
       // For now, we'll save to the uploads directory
-      const fs = require('fs').promises;
-      const path = require('path');
       const uploadsDir = path.join(process.cwd(), 'uploads', 'picsart');
+      console.log(`📤 [PICSART] Uploads directory: ${uploadsDir}`);
       
       // Ensure uploads directory exists
       await fs.mkdir(uploadsDir, { recursive: true });
+      console.log(`📤 [PICSART] Directory created/verified`);
       
       const filePath = path.join(uploadsDir, uniqueFileName);
+      console.log(`📤 [PICSART] File path: ${filePath}`);
+      
       await fs.writeFile(filePath, buffer);
+      console.log(`📤 [PICSART] File written successfully`);
 
       // Return URL that can be accessed by Picsart
       const fileUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/uploads/picsart/${uniqueFileName}`;
@@ -283,7 +294,12 @@ export class PicsartService {
       return fileUrl;
     } catch (error) {
       console.error('❌ [PICSART] Image upload failed:', error);
-      throw new Error('Failed to upload image');
+      console.error('❌ [PICSART] Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      throw new Error(`Failed to upload image: ${error.message}`);
     }
   }
 
