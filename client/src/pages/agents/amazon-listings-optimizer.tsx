@@ -276,13 +276,15 @@ export default function AmazonListingsOptimizer() {
                     <Input
                       id="productName"
                       value={formData.productName}
-                      onChange={(e) => updateField('productName', e.target.value)}
+                      onChange={(e) => updateField('productName', e.target.value.slice(0, 150))}
                       placeholder="Ex: Fone de Ouvido Bluetooth Premium"
                       className={errors.productName ? "border-red-500" : ""}
+                      maxLength={150}
                     />
-                    {errors.productName && (
-                      <p className="text-sm text-red-600">{errors.productName}</p>
-                    )}
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{errors.productName && <span className="text-red-600">{errors.productName}</span>}</span>
+                      <span>{formData.productName.length}/150</span>
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
@@ -290,13 +292,15 @@ export default function AmazonListingsOptimizer() {
                     <Input
                       id="brand"
                       value={formData.brand}
-                      onChange={(e) => updateField('brand', e.target.value)}
+                      onChange={(e) => updateField('brand', e.target.value.slice(0, 40))}
                       placeholder="Ex: TechAudio"
                       className={errors.brand ? "border-red-500" : ""}
+                      maxLength={40}
                     />
-                    {errors.brand && (
-                      <p className="text-sm text-red-600">{errors.brand}</p>
-                    )}
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{errors.brand && <span className="text-red-600">{errors.brand}</span>}</span>
+                      <span>{formData.brand.length}/40</span>
+                    </div>
                   </div>
                 </div>
 
@@ -321,54 +325,73 @@ export default function AmazonListingsOptimizer() {
                 </div>
 
                 {/* Keywords */}
-                <div className="space-y-2">
-                  <Label htmlFor="keywords">Palavras-chave principais *</Label>
-                  <Input
-                    id="keywords"
-                    value={formData.keywords}
-                    onChange={(e) => updateField('keywords', e.target.value)}
-                    placeholder="Ex: fone bluetooth, headphone sem fio, áudio premium"
-                    className={errors.keywords ? "border-red-500" : ""}
-                  />
-                  {errors.keywords && (
-                    <p className="text-sm text-red-600">{errors.keywords}</p>
-                  )}
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="keywords">Palavras-chave Principais *</Label>
+                    <Input
+                      id="keywords"
+                      value={formData.keywords}
+                      onChange={(e) => updateField('keywords', e.target.value.slice(0, 300))}
+                      placeholder="Ex: fone bluetooth, headphone sem fio, áudio premium"
+                      className={errors.keywords ? "border-red-500" : ""}
+                      maxLength={300}
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{errors.keywords && <span className="text-red-600">{errors.keywords}</span>}</span>
+                      <span>{formData.keywords.length}/300</span>
+                    </div>
+                  </div>
 
-                {/* Long Tail Keywords */}
-                <div className="space-y-2">
-                  <Label htmlFor="longTailKeywords">Palavras-chave de cauda longa</Label>
-                  <Textarea
-                    id="longTailKeywords"
-                    value={formData.longTailKeywords}
-                    onChange={(e) => updateField('longTailKeywords', e.target.value)}
-                    placeholder="Ex: fone de ouvido bluetooth com cancelamento de ruído para exercícios"
-                    rows={3}
-                  />
+                  {/* Long Tail Keywords */}
+                  <div className="space-y-2">
+                    <Label htmlFor="longTailKeywords">Long Tail Keywords</Label>
+                    <Textarea
+                      id="longTailKeywords"
+                      value={formData.longTailKeywords}
+                      onChange={(e) => updateField('longTailKeywords', e.target.value.slice(0, 300))}
+                      placeholder="Ex: fone de ouvido bluetooth com cancelamento de ruído para exercícios"
+                      rows={3}
+                      maxLength={300}
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span></span>
+                      <span>{formData.longTailKeywords.length}/300</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Features */}
                 <div className="space-y-2">
-                  <Label htmlFor="features">Características principais</Label>
+                  <Label htmlFor="features">Características</Label>
                   <Textarea
                     id="features"
                     value={formData.features}
-                    onChange={(e) => updateField('features', e.target.value)}
-                    placeholder="Ex: Bluetooth 5.0, 30h de bateria, resistente à água IPX7"
-                    rows={3}
+                    onChange={(e) => updateField('features', e.target.value.slice(0, 8000))}
+                    placeholder="Ex: Bluetooth 5.0, 30h de bateria, resistente à água IPX7, design ergonômico..."
+                    rows={6}
+                    maxLength={8000}
                   />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span></span>
+                    <span>{formData.features.length}/8000</span>
+                  </div>
                 </div>
 
                 {/* Target Audience */}
                 <div className="space-y-2">
-                  <Label htmlFor="targetAudience">Público-alvo</Label>
+                  <Label htmlFor="targetAudience">Público Alvo</Label>
                   <Textarea
                     id="targetAudience"
                     value={formData.targetAudience}
-                    onChange={(e) => updateField('targetAudience', e.target.value)}
+                    onChange={(e) => updateField('targetAudience', e.target.value.slice(0, 150))}
                     placeholder="Ex: Atletas, profissionais, estudantes que buscam qualidade de áudio"
                     rows={3}
+                    maxLength={150}
                   />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span></span>
+                    <span>{formData.targetAudience.length}/150</span>
+                  </div>
                 </div>
 
                 {/* Reviews Section */}
@@ -466,14 +489,16 @@ export default function AmazonListingsOptimizer() {
                           <Textarea
                             id="reviewsData"
                             value={formData.reviewsData}
-                            onChange={(e) => updateField('reviewsData', e.target.value)}
+                            onChange={(e) => updateField('reviewsData', e.target.value.slice(0, 8000))}
                             placeholder="Cole aqui os dados de avaliações dos concorrentes..."
                             rows={8}
                             className={errors.reviewsData ? "border-red-500" : ""}
+                            maxLength={8000}
                           />
-                          {errors.reviewsData && (
-                            <p className="text-sm text-red-600">{errors.reviewsData}</p>
-                          )}
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>{errors.reviewsData && <span className="text-red-600">{errors.reviewsData}</span>}</span>
+                            <span>{formData.reviewsData.length}/8000</span>
+                          </div>
                         </div>
                       </TabsContent>
                     </Tabs>

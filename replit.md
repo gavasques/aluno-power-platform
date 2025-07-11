@@ -324,6 +324,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 11, 2025 - 12:30 AM**: ✅ AMAZON LISTING OPTIMIZER CHARACTER LIMITS IMPLEMENTED - ALL FORM FIELDS NOW HAVE PROPER VALIDATION
+  - **Character Limits Applied**: Nome do produto (150), Marca (40), Palavras-chave principais (300), Long Tail Keywords (300), Características (8000), Público Alvo (150), Avaliações manuais (8000)
+  - **Field Rename**: "Características principais" renamed to "Características" as requested
+  - **Real-time Counter**: Added character count display (current/maximum) for all fields
+  - **Input Validation**: Applied maxLength attribute and slice() method to prevent exceeding limits
+  - **User Experience**: Visual feedback with character counters positioned at bottom-right of each field
+  - **Grid Layout**: Reorganized keywords and long tail keywords in side-by-side layout for better space usage
+  - **Error Integration**: Character counters integrate seamlessly with existing error message display
+
 - **January 11, 2025 - 12:12 AM**: ✅ AMAZON LISTING OPTIMIZER COMPLETELY RESTORED - FULL END-TO-END FUNCTIONALITY OPERATIONAL
   - **Complete Backend API Implementation**: All 8 missing `/api/amazon-sessions` endpoints successfully implemented with dynamic imports
   - **Database Integration Fixed**: Updated agent configuration from non-existent "claude-opus-4-20250514" to working "gpt-4o-mini" model
