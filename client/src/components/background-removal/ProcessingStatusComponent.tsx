@@ -1,5 +1,5 @@
 /**
- * Reusable Processing Status Component for Picsart Integration
+ * Reusable Processing Status Component for Background Removal
  * 
  * Features:
  * - Real-time processing status

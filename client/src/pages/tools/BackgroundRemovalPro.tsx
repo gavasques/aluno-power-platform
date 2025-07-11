@@ -1,16 +1,16 @@
 /**
- * Picsart Background Removal Page
+ * Background Removal PRO Page
  * 
- * Complete implementation using reusable Picsart components
+ * Professional background removal tool with AI-powered processing
  */
 
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
-import BackgroundRemovalTool from '@/components/picsart/BackgroundRemovalTool';
+import BackgroundRemovalTool from '@/components/background-removal/BackgroundRemovalTool';
 
-const PicsartBackgroundRemoval: React.FC = () => {
+const BackgroundRemovalPro: React.FC = () => {
   const [, setLocation] = useLocation();
 
   return (
@@ -31,7 +31,7 @@ const PicsartBackgroundRemoval: React.FC = () => {
               </Button>
               <div className="h-6 w-px bg-gray-300" />
               <h1 className="text-xl font-semibold text-gray-900">
-                Picsart - Remoção de Fundo
+                Remover de Fundo PRO
               </h1>
               <div className="ml-4 flex items-center gap-2 text-sm text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
                 <span className="font-medium">2 créditos por uso</span>
@@ -49,4 +49,4 @@ const PicsartBackgroundRemoval: React.FC = () => {
   );
 };
 
-export default PicsartBackgroundRemoval;
+export default BackgroundRemovalPro;

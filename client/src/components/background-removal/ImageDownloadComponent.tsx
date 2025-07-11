@@ -1,5 +1,5 @@
 /**
- * Reusable Image Download Component for Picsart Integration
+ * Reusable Image Download Component for Background Removal
  * 
  * Features:
  * - Download processed images
@@ -60,7 +60,7 @@ const ImageDownloadComponent: React.FC<ImageDownloadComponentProps> = ({
   const generateFileName = useCallback((extension: string = 'png'): string => {
     const baseName = originalFileName.replace(/\.[^/.]+$/, ''); // Remove original extension
     const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-    return `${baseName}_picsart_${timestamp}.${extension}`;
+    return `${baseName}_background_removed_${timestamp}.${extension}`;
   }, [originalFileName]);
 
   // Download image

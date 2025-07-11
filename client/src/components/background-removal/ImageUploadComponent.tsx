@@ -1,5 +1,5 @@
 /**
- * Reusable Image Upload Component for Picsart Integration
+ * Reusable Image Upload Component for Background Removal
  * 
  * Features:
  * - Drag & drop upload

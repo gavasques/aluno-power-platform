@@ -36,7 +36,7 @@ const ferramentas = [
   {
     title: "Remover de Fundo PRO",
     description: "Remova backgrounds de imagens com precisão de IA profissional",
-    href: "/ferramentas/picsart-background-removal",
+    href: "/ferramentas/background-removal-pro",
     icon: Sparkles,
     category: "Imagem",
     credits: 2,

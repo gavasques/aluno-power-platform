@@ -73,7 +73,7 @@ const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProvi
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
-const PicsartBackgroundRemoval = lazy(() => import("./pages/tools/PicsartBackgroundRemoval"));
+const BackgroundRemovalPro = lazy(() => import("./pages/tools/BackgroundRemovalPro"));
 const UserDashboard = lazy(() => import("./pages/user/Dashboard"));
 const UserUsage = lazy(() => import("./pages/user/Usage"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
@@ -447,11 +447,11 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/ferramentas/picsart-background-removal">
+                          <Route path="/ferramentas/background-removal-pro">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <PicsartBackgroundRemoval />
+                                  <BackgroundRemovalPro />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -510,6 +510,13 @@ function App() {
                           <Route path="/hub/relatorio-keywords">
                             {() => {
                               window.location.href = '/ferramentas/relatorio-keywords';
+                              return null;
+                            }}
+                          </Route>
+                          
+                          <Route path="/ferramentas/picsart-background-removal">
+                            {() => {
+                              window.location.href = '/ferramentas/background-removal-pro';
                               return null;
                             }}
                           </Route>
