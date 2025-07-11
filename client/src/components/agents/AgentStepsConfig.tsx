@@ -13,6 +13,7 @@ import { AlertCircle, Plus, Trash2, ArrowUp, ArrowDown, Zap, Settings, Eye } fro
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import ProviderConfiguration from "./ProviderConfiguration";
 
 interface AgentStep {
   id?: string;
@@ -52,9 +53,11 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch available AI providers and models
+  // Fetch available AI providers and models with caching
   const { data: providers } = useQuery({
     queryKey: ['/api/ai-providers/models'],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Fetch existing steps for this agent
@@ -100,7 +103,7 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
   });
 
   const addStep = () => {
-    const newStep: AgentStep = {
+    const newStep: any = {
       agentId,
       stepNumber: steps.length + 1,
       stepName: `Etapa ${steps.length + 1}`,
@@ -112,6 +115,23 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
       promptTemplate: "{{input}}",
       outputFormat: "text",
       isActive: true,
+      // Additional fields for ProviderConfiguration
+      reasoningLevel: 'disabled',
+      enableSearch: false,
+      enableImageUnderstanding: false,
+      enableReasoning: false,
+      reasoning_effort: 'medium',
+      responseFormat: 'text',
+      seed: undefined,
+      top_p: undefined,
+      frequency_penalty: undefined,
+      presence_penalty: undefined,
+      enableCodeInterpreter: false,
+      enableRetrieval: false,
+      fineTuneModel: '',
+      selectedCollections: [],
+      enableExtendedThinking: false,
+      thinkingBudgetTokens: 10000,
     };
     setSteps([...steps, newStep]);
   };
@@ -153,10 +173,7 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
     }
   };
 
-  const getAvailableModels = (provider: string) => {
-    if (!providers) return [];
-    return providers.filter((p: any) => p.provider === provider);
-  };
+
 
   // Test individual step
   const testStep = async (stepIndex: number) => {
@@ -321,86 +338,37 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor={`provider-${index}`}>Provider AI</Label>
-                <Select
-                  value={step.provider}
-                  onValueChange={(value) => updateStep(index, 'provider', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="openai">OpenAI</SelectItem>
-                    <SelectItem value="anthropic">Claude (Anthropic)</SelectItem>
-                    <SelectItem value="xai">xAI (Grok)</SelectItem>
-                    <SelectItem value="gemini">Google Gemini</SelectItem>
-                    <SelectItem value="deepseek">DeepSeek</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor={`model-${index}`}>Modelo</Label>
-                <Select
-                  value={step.model}
-                  onValueChange={(value) => updateStep(index, 'model', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getAvailableModels(step.provider).map((model: any) => (
-                      <SelectItem key={model.model} value={model.model}>
-                        {model.model}
-                        {model.recommended && <Badge className="ml-2" variant="secondary">Recomendado</Badge>}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor={`outputFormat-${index}`}>Formato de Saída</Label>
-                <Select
-                  value={step.outputFormat}
-                  onValueChange={(value) => updateStep(index, 'outputFormat', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">Texto</SelectItem>
-                    <SelectItem value="json">JSON</SelectItem>
-                    <SelectItem value="structured">Estruturado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            <Separator className="my-4" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor={`temperature-${index}`}>Temperature ({step.temperature})</Label>
-                <Input
-                  id={`temperature-${index}`}
-                  type="number"
-                  min="0"
-                  max="2"
-                  step="0.1"
-                  value={step.temperature}
-                  onChange={(e) => updateStep(index, 'temperature', parseFloat(e.target.value))}
-                />
-              </div>
-              <div>
-                <Label htmlFor={`maxTokens-${index}`}>Max Tokens</Label>
-                <Input
-                  id={`maxTokens-${index}`}
-                  type="number"
-                  min="100"
-                  max="10000"
-                  value={step.maxTokens}
-                  onChange={(e) => updateStep(index, 'maxTokens', parseInt(e.target.value))}
-                />
-              </div>
+            {/* Use ProviderConfiguration for all provider/model settings */}
+            <ProviderConfiguration
+              formData={step}
+              setFormData={(updatedData) => {
+                // Update the step with the new data from ProviderConfiguration
+                const updatedSteps = [...steps];
+                updatedSteps[index] = { ...updatedSteps[index], ...updatedData };
+                setSteps(updatedSteps);
+              }}
+              compact={true}
+            />
+
+            <Separator className="my-4" />
+
+            <div>
+              <Label htmlFor={`outputFormat-${index}`}>Formato de Saída</Label>
+              <Select
+                value={step.outputFormat}
+                onValueChange={(value) => updateStep(index, 'outputFormat', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="text">Texto</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="structured">Estruturado</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
