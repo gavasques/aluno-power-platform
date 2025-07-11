@@ -2332,6 +2332,93 @@ export const infographicConceptsRelations = relations(infographicConcepts, ({ on
 }));
 
 // ========================================
+// PICSART INTEGRATION SYSTEM TABLES
+// ========================================
+
+// Picsart Processing Sessions - Sistema de processamento de imagens
+export const picsartSessions = pgTable("picsart_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  tool: text("tool").notNull(), // 'background_removal', 'image_enhance', 'ai_art', etc.
+  status: text("status").notNull().default("processing"), // 'processing', 'completed', 'failed'
+  originalImageUrl: text("original_image_url").notNull(),
+  originalFileName: text("original_file_name").notNull(),
+  processedImageUrl: text("processed_image_url"),
+  picsartJobId: text("picsart_job_id"),
+  parameters: jsonb("parameters").notNull().default({}), // Tool-specific parameters
+  cost: decimal("cost", { precision: 10, scale: 6 }).notNull().default("0"),
+  creditsUsed: decimal("credits_used", { precision: 10, scale: 2 }).notNull().default("0"),
+  duration: integer("duration").default(0), // Processing time in milliseconds
+  errorMessage: text("error_message"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => ({
+  userIdx: index("picsart_sessions_user_idx").on(table.userId),
+  toolIdx: index("picsart_sessions_tool_idx").on(table.tool),
+  statusIdx: index("picsart_sessions_status_idx").on(table.status),
+  createdIdx: index("picsart_sessions_created_idx").on(table.createdAt),
+}));
+
+// Picsart Tool Configurations - Configurações dos diferentes tools
+export const picsartToolConfigs = pgTable("picsart_tool_configs", {
+  id: serial("id").primaryKey(),
+  toolName: text("tool_name").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  description: text("description").notNull(),
+  endpoint: text("endpoint").notNull(),
+  defaultParameters: jsonb("default_parameters").notNull().default({}),
+  costPerUse: decimal("cost_per_use", { precision: 10, scale: 2 }).notNull().default("0"),
+  isActive: boolean("is_active").notNull().default(true),
+  category: text("category").notNull().default("image_editing"), // 'image_editing', 'ai_art', 'enhancement'
+  supportedFormats: text("supported_formats").array().default(["PNG", "JPG", "JPEG"]),
+  maxFileSize: integer("max_file_size").notNull().default(10485760), // 10MB in bytes
+  processingTime: integer("avg_processing_time").default(5000), // Average time in milliseconds
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  toolNameIdx: index("picsart_tool_configs_tool_name_idx").on(table.toolName),
+  categoryIdx: index("picsart_tool_configs_category_idx").on(table.category),
+  activeIdx: index("picsart_tool_configs_active_idx").on(table.isActive),
+}));
+
+// Relations for Picsart tables
+export const picsartSessionsRelations = relations(picsartSessions, ({ one }) => ({
+  user: one(users, {
+    fields: [picsartSessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const picsartToolConfigsRelations = relations(picsartToolConfigs, ({ many }) => ({
+  sessions: many(picsartSessions),
+}));
+
+// Picsart schemas
+export const insertPicsartSessionSchema = createInsertSchema(picsartSessions).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true,
+});
+
+export const insertPicsartToolConfigSchema = createInsertSchema(picsartToolConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Picsart types
+export type InsertPicsartSession = z.infer<typeof insertPicsartSessionSchema>;
+export type PicsartSession = typeof picsartSessions.$inferSelect;
+
+export type InsertPicsartToolConfig = z.infer<typeof insertPicsartToolConfigSchema>;
+export type PicsartToolConfig = typeof picsartToolConfigs.$inferSelect;
+
+export type PicsartSessionWithUser = PicsartSession & {
+  user: User;
+};
+
+// ========================================
 // ADVANCED FUNCTIONALITIES TABLES
 // ========================================
 

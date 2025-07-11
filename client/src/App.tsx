@@ -73,6 +73,7 @@ const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProvi
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
+const PicsartBackgroundRemoval = lazy(() => import("./pages/tools/PicsartBackgroundRemoval"));
 const UserDashboard = lazy(() => import("./pages/user/Dashboard"));
 const UserUsage = lazy(() => import("./pages/user/Usage"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
@@ -441,6 +442,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <AmazonKeywordSuggestions />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/ferramentas/picsart-background-removal">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <PicsartBackgroundRemoval />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

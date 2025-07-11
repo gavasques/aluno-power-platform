@@ -16,6 +16,7 @@ import { aiGenerationLogs } from "../shared/schema";
 import dashboardRoutes from "./routes/dashboard-fixed";
 import { LoggingService } from "./services/loggingService";
 import userProfileRoutes from "./routes/user/profile";
+import picsartRoutes from "./routes/picsart";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -7074,6 +7075,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   } catch (error) {
     console.error('❌ Error registering optimized supplier routes:', error);
   }
+
+  // Register Picsart integration routes
+  app.use('/api/picsart', picsartRoutes);
+  console.log('✅ [PICSART] Routes registered successfully');
 
   return httpServer;
 }
