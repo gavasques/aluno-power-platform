@@ -1990,5 +1990,3 @@ export default function AgentProviderSettings() {
     </div>
   );
 }
-
-export default AgentProviderSettings;
