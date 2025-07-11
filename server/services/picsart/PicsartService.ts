@@ -205,20 +205,36 @@ export class PicsartService {
   }
 
   /**
-   * Process background removal
+   * Process background removal with direct file upload
    */
   async processBackgroundRemoval(
-    imageUrl: string,
+    imagePath: string,
     params: BackgroundRemovalParams = {}
   ): Promise<PicsartAPIResponse> {
     const startTime = Date.now();
 
     try {
-      console.log(`🎨 [PICSART] Starting background removal for: ${imageUrl}`);
+      console.log(`🎨 [PICSART] Starting background removal for file: ${imagePath}`);
 
-      // Create FormData for multipart/form-data
+      // Read the image file
+      const fs = await import('fs');
+      const path = await import('path');
+      
+      if (!fs.existsSync(imagePath)) {
+        throw new Error(`Image file not found: ${imagePath}`);
+      }
+
+      const imageBuffer = fs.readFileSync(imagePath);
+      const fileName = path.basename(imagePath);
+      
+      console.log(`📤 [PICSART] Uploading image file: ${fileName} (${imageBuffer.length} bytes)`);
+
+      // Create FormData for multipart/form-data with direct file upload
       const formData = new FormData();
-      formData.append('image_url', imageUrl);
+      
+      // Create a Blob from the buffer for FormData
+      const blob = new Blob([imageBuffer], { type: 'image/jpeg' });
+      formData.append('image', blob, fileName);
       formData.append('output_type', 'cutout');
       formData.append('format', 'PNG');
       
@@ -358,11 +374,21 @@ export class PicsartService {
     let sessionId: string | null = null;
 
     try {
-      // Step 1: Upload image if it's base64
+      // Step 1: Upload image if it's base64 and get file path
       let imageUrl = imageData;
+      let imagePath = '';
+      
       if (imageData.startsWith('data:')) {
         imageUrl = await this.uploadBase64Image(imageData, fileName, userId);
+        // Convert URL to file path for direct file upload
+        const urlParts = imageUrl.split('/');
+        imagePath = `uploads/picsart/${urlParts[urlParts.length - 1]}`;
+      } else {
+        // If imageData is already a path or URL, handle accordingly
+        imagePath = imageData;
       }
+
+      console.log(`📁 [PICSART] Using image path: ${imagePath}`);
 
       // Step 2: Create processing session
       sessionId = await this.createSession({
@@ -373,11 +399,11 @@ export class PicsartService {
         parameters
       });
 
-      // Step 3: Process with Picsart API
+      // Step 3: Process with Picsart API using direct file upload
       const toolConfig = await this.getToolConfig('background_removal');
       const finalParams = { ...toolConfig?.defaultParameters, ...parameters };
       
-      const result = await this.processBackgroundRemoval(imageUrl, finalParams);
+      const result = await this.processBackgroundRemoval(imagePath, finalParams);
 
       // Step 4: Download processed image as base64
       const processedBase64 = await this.downloadImageAsBase64(result.data.url);
