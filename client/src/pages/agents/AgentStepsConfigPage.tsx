@@ -16,6 +16,8 @@ export default function AgentStepsConfigPage() {
     queryKey: ['/api/agents'],
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false
   });
 
   const selectedAgent = agents?.find((agent: any) => agent.id === selectedAgentId);
@@ -26,6 +28,8 @@ export default function AgentStepsConfigPage() {
     enabled: !!selectedAgentId,
     staleTime: 2 * 60 * 1000, // Cache for 2 minutes
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false
   });
 
   const getStepStatus = (agentId: string) => {
@@ -117,6 +121,7 @@ export default function AgentStepsConfigPage() {
             <AgentStepsConfig
               agentId={selectedAgentId}
               agentName={selectedAgent?.name || "Agente"}
+              existingSteps={agentSteps}
             />
           ) : (
             <Card className="h-96">

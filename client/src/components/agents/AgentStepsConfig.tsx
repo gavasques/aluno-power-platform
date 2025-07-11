@@ -43,6 +43,7 @@ interface AgentStep {
 interface AgentStepsConfigProps {
   agentId: string;
   agentName: string;
+  existingSteps?: any;
 }
 
 interface TestStepState {
@@ -51,7 +52,7 @@ interface TestStepState {
   testError: string;
 }
 
-export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfigProps) {
+export default function AgentStepsConfig({ agentId, agentName, existingSteps: existingStepsProp }: AgentStepsConfigProps) {
   const [steps, setSteps] = useState<AgentStep[]>([]);
   const [isMultiStep, setIsMultiStep] = useState(false);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
@@ -70,13 +71,17 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
-  // Fetch existing steps for this agent
-  const { data: existingSteps, isLoading } = useQuery({
+  // Use existing steps from prop or fetch them if not provided
+  const { data: fetchedSteps, isLoading } = useQuery({
     queryKey: ['/api/agent-steps', agentId],
-    enabled: !!agentId,
+    enabled: !!agentId && !existingStepsProp,
     staleTime: 2 * 60 * 1000, // Cache for 2 minutes
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false
   });
+  
+  const existingSteps = existingStepsProp || fetchedSteps;
 
   // Add step function
   const addStep = () => {

@@ -93,28 +93,19 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
   // Status dos provedores
   const { data: status = {} } = useQuery({
     queryKey: ['/api/ai-providers/status'],
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false
+    staleTime: 60000,
   });
 
   // Modelos disponíveis
   const { data: allModels = [] } = useQuery({
     queryKey: ['/api/ai-providers/models'],
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false
+    staleTime: 5 * 60 * 1000,
   });
 
   // Coleções da base de conhecimento
   const { data: collections = [] } = useQuery({
     queryKey: ['/api/knowledge-base/collections'],
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: false,
-    enabled: formData.enableRetrieval
+    staleTime: 60000,
   });
 
   const availableModels = allModels.filter((m: any) => m.provider === formData.provider);
@@ -276,7 +267,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
             </p>
             <Select 
               value={formData.reasoningLevel} 
-              onValueChange={(value) => updateAdvancedSettings({ reasoningLevel: value })}
+              onValueChange={(value) => setFormData({ ...formData, reasoningLevel: value })}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione o nível" />
@@ -316,7 +307,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
               <Switch
                 id="enableSearch"
                 checked={formData.enableSearch}
-                onCheckedChange={(checked) => updateAdvancedSettings({ enableSearch: checked })}
+                onCheckedChange={(checked) => setFormData({ ...formData, enableSearch: checked })}
               />
               <Label htmlFor="enableSearch" className="text-sm">
                 Habilitar busca ao vivo
@@ -339,7 +330,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
               <Switch
                 id="enableImageUnderstanding"
                 checked={formData.enableImageUnderstanding}
-                onCheckedChange={(checked) => updateAdvancedSettings({ enableImageUnderstanding: checked })}
+                onCheckedChange={(checked) => setFormData({ ...formData, enableImageUnderstanding: checked })}
               />
               <Label htmlFor="enableImageUnderstanding" className="text-sm">
                 Habilitar compreensão de imagens
@@ -374,7 +365,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
               </p>
               <Select 
                 value={formData.reasoning_effort || 'medium'} 
-                onValueChange={(value) => updateAdvancedSettings({ reasoning_effort: value })}
+                onValueChange={(value) => setFormData({ ...formData, reasoning_effort: value })}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o esforço de raciocínio" />
@@ -408,7 +399,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
             </p>
             <Select 
               value={formData.responseFormat || 'text'} 
-              onValueChange={(value) => updateAdvancedSettings({ responseFormat: value })}
+              onValueChange={(value) => setFormData({ ...formData, responseFormat: value })}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione o formato" />
@@ -433,7 +424,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
                   <Switch
                     id="enableCodeInterpreter"
                     checked={formData.enableCodeInterpreter}
-                    onCheckedChange={(checked) => updateAdvancedSettings({ enableCodeInterpreter: checked })}
+                    onCheckedChange={(checked) => setFormData({ ...formData, enableCodeInterpreter: checked })}
                   />
                   <Label htmlFor="enableCodeInterpreter" className="text-sm">
                     Code Interpreter (execução de Python)
@@ -443,7 +434,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
                   <Switch
                     id="enableRetrieval"
                     checked={formData.enableRetrieval}
-                    onCheckedChange={(checked) => updateAdvancedSettings({ enableRetrieval: checked })}
+                    onCheckedChange={(checked) => setFormData({ ...formData, enableRetrieval: checked })}
                   />
                   <Label htmlFor="enableRetrieval" className="text-sm">
                     Retrieval (busca em documentos)
@@ -460,7 +451,8 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
                   <Select
                     value={formData.selectedCollections?.[0]?.toString() || "none"}
                     onValueChange={(value) => {
-                      updateAdvancedSettings({
+                      setFormData({
+                        ...formData,
                         selectedCollections: value === "none" ? [] : [parseInt(value)]
                       });
                     }}
@@ -496,7 +488,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
                   type="number"
                   placeholder="Opcional"
                   value={formData.seed || ''}
-                  onChange={(e) => updateAdvancedSettings({ seed: e.target.value ? parseInt(e.target.value) : undefined })}
+                  onChange={(e) => setFormData({ ...formData, seed: e.target.value ? parseInt(e.target.value) : undefined })}
                 />
                 <p className="text-xs text-gray-500 mt-1">Resultados determinísticos</p>
               </div>
@@ -510,7 +502,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
                   max="1"
                   placeholder="Opcional"
                   value={formData.top_p || ''}
-                  onChange={(e) => updateAdvancedSettings({ top_p: e.target.value ? parseFloat(e.target.value) : undefined })}
+                  onChange={(e) => setFormData({ ...formData, top_p: e.target.value ? parseFloat(e.target.value) : undefined })}
                 />
                 <p className="text-xs text-gray-500 mt-1">Controle de criatividade</p>
               </div>
@@ -524,7 +516,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
                   max="2"
                   placeholder="Opcional"
                   value={formData.frequency_penalty || ''}
-                  onChange={(e) => updateAdvancedSettings({ frequency_penalty: e.target.value ? parseFloat(e.target.value) : undefined })}
+                  onChange={(e) => setFormData({ ...formData, frequency_penalty: e.target.value ? parseFloat(e.target.value) : undefined })}
                 />
                 <p className="text-xs text-gray-500 mt-1">Reduz repetições</p>
               </div>
@@ -538,7 +530,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
                   max="2"
                   placeholder="Opcional"
                   value={formData.presence_penalty || ''}
-                  onChange={(e) => updateAdvancedSettings({ presence_penalty: e.target.value ? parseFloat(e.target.value) : undefined })}
+                  onChange={(e) => setFormData({ ...formData, presence_penalty: e.target.value ? parseFloat(e.target.value) : undefined })}
                 />
                 <p className="text-xs text-gray-500 mt-1">Encoraja novos tópicos</p>
               </div>
@@ -554,7 +546,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
             <Input
               placeholder="Ex: ft:gpt-4o-mini:my-org:custom:id"
               value={formData.fineTuneModel || ''}
-              onChange={(e) => updateAdvancedSettings({ fineTuneModel: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, fineTuneModel: e.target.value })}
             />
           </div>
         </div>
@@ -587,7 +579,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
                   <Switch
                     id="enableExtendedThinking"
                     checked={formData.enableExtendedThinking}
-                    onCheckedChange={(checked) => updateAdvancedSettings({ enableExtendedThinking: checked })}
+                    onCheckedChange={(checked) => setFormData({ ...formData, enableExtendedThinking: checked })}
                   />
                   <Label htmlFor="enableExtendedThinking" className="text-sm">
                     Habilitar Extended Thinking
@@ -607,7 +599,7 @@ export default function ProviderConfiguration(props: ProviderConfigurationProps)
                         step={1000}
                         value={[formData.thinkingBudgetTokens || 10000]}
                         onValueChange={(value) => 
-                          updateAdvancedSettings({ thinkingBudgetTokens: value[0] })
+                          setFormData({ ...formData, thinkingBudgetTokens: value[0] })
                         }
                         className="w-full"
                       />
