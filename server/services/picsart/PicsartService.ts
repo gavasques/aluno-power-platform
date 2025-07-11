@@ -216,18 +216,26 @@ export class PicsartService {
     try {
       console.log(`🎨 [PICSART] Starting background removal for: ${imageUrl}`);
 
+      // Create FormData for multipart/form-data
+      const formData = new FormData();
+      formData.append('image_url', imageUrl);
+      formData.append('output_type', 'cutout');
+      formData.append('format', 'PNG');
+      
+      // Add additional parameters
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+
       const response = await fetch(`${this.baseUrl}/tools/1.0/removebg`, {
         method: 'POST',
         headers: {
           'X-Picsart-API-Key': this.apiKey,
-          'Content-Type': 'application/json',
+          // Don't set Content-Type - let fetch set it automatically for FormData
         },
-        body: JSON.stringify({
-          image_url: imageUrl,
-          output_type: 'cutout',
-          format: 'PNG',
-          ...params
-        })
+        body: formData
       });
 
       if (!response.ok) {
