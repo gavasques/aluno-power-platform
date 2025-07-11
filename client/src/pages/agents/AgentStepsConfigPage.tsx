@@ -16,16 +16,21 @@ export default function AgentStepsConfigPage() {
     queryKey: ['/api/agents'],
   });
 
-  // Fetch step configuration status for all agents
-  const { data: stepStatuses } = useQuery({
-    queryKey: ['/api/agent-steps/statuses'],
-    enabled: !!agents?.length,
-  });
-
   const selectedAgent = agents?.find((agent: any) => agent.id === selectedAgentId);
 
+  // Fetch step configuration for selected agent
+  const { data: agentSteps } = useQuery({
+    queryKey: ['/api/agent-steps', selectedAgentId],
+    enabled: !!selectedAgentId,
+  });
+
   const getStepStatus = (agentId: string) => {
-    return stepStatuses?.find((status: any) => status.agentId === agentId);
+    // For now, return basic status - could be enhanced later
+    return {
+      agentId,
+      isMultiStep: false,
+      stepCount: 0
+    };
   };
 
   return (

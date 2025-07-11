@@ -22,8 +22,10 @@ import {
   Wrench,
   Settings2,
   Database,
-  Globe
+  Globe,
+  Layers
 } from "lucide-react";
+import AgentStepsConfig from "@/components/agents/AgentStepsConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -91,7 +93,7 @@ export default function AgentProviderSettings() {
   const queryClient = useQueryClient();
 
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const [activeTab, setActiveTab] = useState<'providers' | 'knowledge-base'>('providers');
+  const [activeTab, setActiveTab] = useState<'providers' | 'knowledge-base' | 'multi-steps'>('providers');
   
   const [formData, setFormData] = useState<any>({
     provider: 'openai' as Agent['provider'],
@@ -489,6 +491,17 @@ export default function AgentProviderSettings() {
           >
             <Database className="w-4 h-4 inline mr-2" />
             Base de Conhecimento
+          </button>
+          <button
+            onClick={() => setActiveTab('multi-steps')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'multi-steps'
+                ? 'bg-blue-100 text-blue-800 border-2 border-blue-200'
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Layers className="w-4 h-4 inline mr-2" />
+            Configuração de Etapas
           </button>
         </div>
       </div>
@@ -1842,6 +1855,104 @@ export default function AgentProviderSettings() {
               <KnowledgeBaseManager />
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {activeTab === 'multi-steps' && (
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Layers className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Sistema Multi-Etapas</h2>
+                <p className="text-gray-600">Configure processamento sequencial com diferentes providers AI para cada agente</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div className="text-center p-3 bg-white rounded border">
+                <div className="text-blue-600 font-bold text-lg">Até 5 Etapas</div>
+                <div className="text-sm text-gray-600">Por agente</div>
+              </div>
+              <div className="text-center p-3 bg-white rounded border">
+                <div className="text-green-600 font-bold text-lg">Providers Diferentes</div>
+                <div className="text-sm text-gray-600">Claude → GPT → Grok</div>
+              </div>
+              <div className="text-center p-3 bg-white rounded border">
+                <div className="text-purple-600 font-bold text-lg">Processamento</div>
+                <div className="text-sm text-gray-600">Sequencial</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Agent Selection Sidebar */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bot className="w-5 h-5" />
+                    Agentes Disponíveis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {agents?.map((agent: any) => (
+                    <div
+                      key={agent.id}
+                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedAgent?.id === agent.id
+                          ? 'bg-blue-50 border-blue-200'
+                          : 'hover:bg-gray-50'
+                      }`}
+                      onClick={() => setSelectedAgent(agent)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-sm">{agent.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {agent.category}
+                          </p>
+                        </div>
+                        <Badge 
+                          variant={agent.is_active ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {agent.is_active ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Configuration Area */}
+            <div className="lg:col-span-3">
+              {selectedAgent ? (
+                <AgentStepsConfig
+                  agentId={selectedAgent.id}
+                  agentName={selectedAgent.name}
+                />
+              ) : (
+                <Card className="h-96">
+                  <CardContent className="flex items-center justify-center h-full">
+                    <div className="text-center space-y-4">
+                      <div className="bg-gray-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                        <Settings className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Selecione um Agente</h3>
+                        <p className="text-muted-foreground">
+                          Escolha um agente AI para configurar as etapas de processamento
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
