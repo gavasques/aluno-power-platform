@@ -9,7 +9,7 @@ const MySuppliers = lazy(() => import("./myarea/MySuppliers"));
 const MyProductsList = lazy(() => import("./myarea/MyProductsList"));
 const MyMaterials = lazy(() => import("./myarea/MyMaterials"));
 const MyBrands = lazy(() => import("./myarea/MyBrands"));
-const ProductFormNew = lazy(() => import("../components/product/ProductFormNew"));
+const ProductFormNew = lazy(() => import("./myarea/ProductFormNew"));
 const ProductEditForm = lazy(() => import("../components/product/ProductEditForm"));
 const ProductDetail = lazy(() => import("./myarea/ProductDetail"));
 const ProductPricing = lazy(() => import("./myarea/ProductPricing"));
