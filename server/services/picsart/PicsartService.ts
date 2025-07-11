@@ -521,7 +521,7 @@ export class PicsartService {
       const response = await fetch('https://genai-api.picsart.io/v1/logo', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'X-Picsart-API-Key': this.apiKey,
           'Accept': 'application/json',
         },
         body: formData
@@ -561,7 +561,7 @@ export class PicsartService {
       const response = await fetch(`https://genai-api.picsart.io/v1/logo/inferences/${inferenceId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'X-Picsart-API-Key': this.apiKey,
           'Accept': 'application/json',
         }
       });
