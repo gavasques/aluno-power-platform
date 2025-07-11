@@ -216,7 +216,7 @@ export class PicsartService {
     try {
       console.log(`🎨 [PICSART] Starting background removal for: ${imageUrl}`);
 
-      const response = await fetch(`${this.baseUrl}/v1/remove-background`, {
+      const response = await fetch(`${this.baseUrl}/tools/1.0/removebg`, {
         method: 'POST',
         headers: {
           'X-Picsart-API-Key': this.apiKey,
@@ -224,6 +224,8 @@ export class PicsartService {
         },
         body: JSON.stringify({
           image_url: imageUrl,
+          output_type: 'cutout',
+          format: 'PNG',
           ...params
         })
       });
