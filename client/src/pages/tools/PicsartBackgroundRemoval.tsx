@@ -33,6 +33,9 @@ const PicsartBackgroundRemoval: React.FC = () => {
               <h1 className="text-xl font-semibold text-gray-900">
                 Picsart - Remoção de Fundo
               </h1>
+              <div className="ml-4 flex items-center gap-2 text-sm text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+                <span className="font-medium">2 créditos por uso</span>
+              </div>
             </div>
           </div>
         </div>

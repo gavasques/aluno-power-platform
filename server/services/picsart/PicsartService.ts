@@ -73,7 +73,7 @@ export class PicsartService {
           output_type: 'cutout',
           format: 'PNG'
         },
-        costPerUse: '5.00',
+        costPerUse: '2.00',
         category: 'image_editing',
         supportedFormats: ['PNG', 'JPG', 'JPEG'],
         maxFileSize: 10485760 // 10MB

@@ -14,6 +14,9 @@ import { z } from 'zod';
 import multer from 'multer';
 import { picsartService } from '../services/picsart/PicsartService';
 import { requireAuth } from '../security';
+import { db } from '../db';
+import { users, aiImgGenerationLogs } from '../../shared/schema';
+import { eq } from 'drizzle-orm';
 // Credit deduction will be handled by storage service for now
 // import { deductCreditsWithValidation } from '../services/CreditService';
 
@@ -150,9 +153,42 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
 
     // Get tool configuration for cost
     const creditsNeeded = parseFloat(toolConfig.costPerUse);
-    
-    // Simple credit check - in production you would implement proper credit deduction
     console.log(`💰 [PICSART] Credits needed: ${creditsNeeded} for user ${userId}`);
+
+    // Check user credits first
+    const userCredits = await db.select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!userCredits.length) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const currentCredits = parseFloat(userCredits[0].credits || '0');
+    
+    if (currentCredits < creditsNeeded) {
+      return res.status(400).json({
+        success: false,
+        error: 'Insufficient credits',
+        details: `You need ${creditsNeeded} credits but only have ${currentCredits}`,
+        creditsNeeded,
+        currentCredits
+      });
+    }
+
+    // Deduct credits before processing
+    await db.update(users)
+      .set({ 
+        credits: (currentCredits - creditsNeeded).toString(),
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+
+    console.log(`💰 [PICSART] Credits deducted: ${creditsNeeded} (${currentCredits} → ${currentCredits - creditsNeeded})`);
 
     // Process the image
     console.log(`🎨 [PICSART] Starting background removal for user ${userId}`);
@@ -165,6 +201,34 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
     );
 
     const totalDuration = Date.now() - startTime;
+
+    // Log the usage in ai_img_generation_logs table
+    try {
+      await db.insert(aiImgGenerationLogs).values({
+        userId,
+        provider: 'picsart',
+        model: 'removebg',
+        feature: 'background_removal',
+        originalImageName: fileName,
+        generatedImageUrl: result.processedImageUrl,
+        prompt: 'Background removal processing',
+        status: 'success',
+        cost: creditsNeeded.toString(),
+        creditsUsed: creditsNeeded.toString(),
+        duration: totalDuration,
+        sessionId: result.sessionId,
+        metadata: JSON.stringify({
+          parameters,
+          originalFileName: fileName,
+          processingTime: result.duration,
+          totalTime: totalDuration
+        })
+      });
+      
+      console.log(`📋 [PICSART] Usage logged for user ${userId}`);
+    } catch (logError) {
+      console.error(`❌ [PICSART] Failed to log usage:`, logError);
+    }
 
     res.json({
       success: true,
@@ -186,6 +250,55 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
   } catch (error) {
     const totalDuration = Date.now() - startTime;
     console.error(`❌ [PICSART] Background removal failed after ${totalDuration}ms:`, error);
+    
+    // Refund credits if processing failed
+    try {
+      const toolConfig = await picsartService.getToolConfig('background_removal');
+      if (toolConfig) {
+        const creditsNeeded = parseFloat(toolConfig.costPerUse);
+        const userCredits = await db.select({ credits: users.credits })
+          .from(users)
+          .where(eq(users.id, userId))
+          .limit(1);
+        
+        if (userCredits.length) {
+          const currentCredits = parseFloat(userCredits[0].credits || '0');
+          await db.update(users)
+            .set({ 
+              credits: (currentCredits + creditsNeeded).toString(),
+              updatedAt: new Date()
+            })
+            .where(eq(users.id, userId));
+          
+          console.log(`💰 [PICSART] Credits refunded: ${creditsNeeded} (${currentCredits} → ${currentCredits + creditsNeeded})`);
+        }
+      }
+    } catch (refundError) {
+      console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
+    }
+
+    // Log the failed usage
+    try {
+      await db.insert(aiImgGenerationLogs).values({
+        userId,
+        provider: 'picsart',
+        model: 'removebg',
+        feature: 'background_removal',
+        originalImageName: fileName,
+        prompt: 'Background removal processing',
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        cost: '0',
+        creditsUsed: '0',
+        duration: totalDuration,
+        metadata: JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+          processingTime: totalDuration
+        })
+      });
+    } catch (logError) {
+      console.error(`❌ [PICSART] Failed to log failed usage:`, logError);
+    }
     
     res.status(500).json({
       success: false,

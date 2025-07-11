@@ -324,17 +324,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 11, 2025 - 07:30 PM**: ✅ PICSART INTEGRATION SYSTEM COMPLETED - BACKGROUND REMOVAL FULLY OPERATIONAL
-  - **Project Goal**: ✅ COMPLETED - Modular Picsart integration system with reusable components for multiple image processing tools
-  - **Background Removal Tool**: ✅ FUNCTIONAL - "Remover de Fundo PRO" using direct file upload to Picsart API
-  - **Technical Challenges Resolved**:
-    - ✅ **Database Schema**: Fixed UUID primary keys and nullable session_id columns
-    - ✅ **API Endpoint**: Corrected to `/tools/1.0/removebg` with proper parameters
-    - ✅ **Request Format**: Changed from JSON to multipart/form-data using FormData
-    - ✅ **Direct File Upload**: Resolved localhost URL issue by uploading files directly instead of image_url
-    - ✅ **Parameter Optimization**: Simplified to essential parameters (output_type: 'cutout', format: 'PNG') to avoid API conflicts
-  - **Reusable Architecture**: Complete system with photo upload, base64 handling, image downloads, and session tracking
-  - **Production Status**: Background removal tool ready for 400+ users with proper credit deduction and error handling
+- **January 11, 2025 - 07:40 PM**: ✅ PICSART COMPLETE CREDIT SYSTEM IMPLEMENTED - ALL VALIDATIONS AND LOGGING OPERATIONAL
+  - **Project Goal**: ✅ COMPLETED - Complete credit management system with validation, deduction, and comprehensive logging
+  - **Credit System Implementation**: ✅ FUNCTIONAL - Full credit management with proper validation and deduction
+  - **Technical Achievements**:
+    - ✅ **Cost Configuration**: Updated from 5 to 2 credits per use in PicsartService configuration
+    - ✅ **UI Credit Display**: Shows "2 créditos por uso" both outside (page header) and inside the tool
+    - ✅ **Credit Validation**: Checks user credit balance before processing, prevents usage if insufficient funds
+    - ✅ **Credit Deduction**: Properly deducts 2 credits from user balance before processing starts
+    - ✅ **Comprehensive Logging**: Saves all usage data to ai_img_generation_logs table with complete metadata
+    - ✅ **Error Handling**: Refunds credits if processing fails, logs failed attempts with proper error messages
+    - ✅ **Database Integration**: Complete integration with users table for credit balance management
+  - **User Experience Features**:
+    - Credit cost prominently displayed in purple badge in page header
+    - Clear cost indication inside tool with sparkles icon
+    - Proper error messages for insufficient credits with specific details
+    - Real-time credit deduction and balance updates
+  - **Production Status**: Complete credit system ready for 400+ users with full validation, deduction, and logging capabilities
 
 - **January 11, 2025 - 04:25 AM**: ✅ COMPLETE DASHBOARD REDESIGN - MODERN, FULL-WIDTH LAYOUT IMPLEMENTED
   - **Full-Width Modern Layout**: Removed tab-based system, implemented modern grid-based layout using entire screen width

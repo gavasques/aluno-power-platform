@@ -234,6 +234,12 @@ const BackgroundRemovalTool: React.FC = () => {
             <p className="text-gray-600">
               Remova backgrounds de imagens com precisão de IA
             </p>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <div className="flex items-center gap-2 text-sm text-purple-600 font-medium">
+                <Sparkles className="h-4 w-4" />
+                <span>Custo por uso: 2 créditos</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
