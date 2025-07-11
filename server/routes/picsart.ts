@@ -57,6 +57,17 @@ const backgroundRemovalSchema = z.object({
   }).default({})
 });
 
+// Logo generation validation schema
+const logoGenerationSchema = z.object({
+  brandName: z.string().min(1, 'Brand name is required'),
+  businessDescription: z.string().min(1, 'Business description is required'),
+  colorTone: z.enum(['Auto', 'Gray', 'Blue', 'Pink', 'Orange', 'Brown', 'Yellow', 'Green', 'Purple', 'Red']).default('Auto'),
+  logoDescription: z.string().optional(),
+  referenceImage: z.string().optional(), // base64 encoded image
+  referenceImageUrl: z.string().optional(),
+  count: z.number().int().min(1).max(10).default(2)
+});
+
 // Initialize Picsart configurations
 (async () => {
   try {
@@ -376,6 +387,201 @@ router.get('/sessions/:id', requireAuth, async (req, res) => {
       success: false,
       error: 'Failed to retrieve session',
       details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * POST /api/picsart/logo-generation
+ * Generate logos with AI-powered design
+ */
+router.post('/logo-generation', requireAuth, async (req, res) => {
+  const startTime = Date.now();
+  
+  try {
+    const userId = req.user.id;
+    console.log(`🎨 [PICSART] Logo generation request from user ${userId}`);
+    
+    // Validate request body
+    const validation = logoGenerationSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid parameters',
+        details: validation.error.errors
+      });
+    }
+    
+    const { brandName, businessDescription, colorTone, logoDescription, referenceImage, referenceImageUrl, count } = validation.data;
+    
+    // Get tool configuration for cost
+    const toolConfig = await picsartService.getToolConfig('logo_generation');
+    if (!toolConfig) {
+      return res.status(500).json({
+        success: false,
+        error: 'Tool configuration not found'
+      });
+    }
+    
+    const creditsNeeded = parseFloat(toolConfig.costPerUse);
+    console.log(`💰 [PICSART] Credits needed: ${creditsNeeded} for user ${userId}`);
+    
+    // Check user credits
+    const userCredits = await db.select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    
+    if (!userCredits.length) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+    
+    const currentCredits = parseFloat(userCredits[0].credits || '0');
+    
+    if (currentCredits < creditsNeeded) {
+      return res.status(400).json({
+        success: false,
+        error: 'Insufficient credits',
+        details: `You need ${creditsNeeded} credits but only have ${currentCredits}`,
+        creditsNeeded,
+        currentCredits
+      });
+    }
+    
+    // Deduct credits before processing
+    await db.update(users)
+      .set({ 
+        credits: (currentCredits - creditsNeeded).toString(),
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+    
+    console.log(`💰 [PICSART] Credits deducted: ${creditsNeeded} (${currentCredits} → ${currentCredits - creditsNeeded})`);
+    
+    // Prepare parameters for logo generation
+    const parameters = {
+      brand_name: brandName,
+      business_description: businessDescription,
+      color_tone: colorTone,
+      logo_description: logoDescription,
+      reference_image: referenceImage,
+      reference_image_url: referenceImageUrl,
+      count
+    };
+    
+    // Process logo generation
+    console.log(`🎨 [PICSART] Starting logo generation for user ${userId}`);
+    const result = await picsartService.processLogoGeneration(userId, parameters);
+    
+    const totalDuration = Date.now() - startTime;
+    
+    // Log the usage
+    try {
+      await db.insert(aiImgGenerationLogs).values({
+        userId,
+        provider: 'picsart',
+        model: 'logo-gen-v1',
+        feature: 'logo_generation',
+        originalImageName: `logo_${brandName}_${Date.now()}`,
+        generatedImageUrl: result.logos[0]?.url || '',
+        prompt: `Brand: ${brandName}, Business: ${businessDescription}`,
+        status: 'success',
+        cost: creditsNeeded.toString(),
+        creditsUsed: creditsNeeded.toString(),
+        duration: totalDuration,
+        sessionId: result.sessionId,
+        metadata: JSON.stringify({
+          parameters,
+          logosGenerated: result.logos.length,
+          logoUrls: result.logos.map(l => l.url),
+          processingTime: result.duration,
+          totalTime: totalDuration
+        })
+      });
+      
+      console.log(`📋 [PICSART] Usage logged for user ${userId}`);
+    } catch (logError) {
+      console.error(`❌ [PICSART] Failed to log usage:`, logError);
+    }
+    
+    res.json({
+      success: true,
+      message: 'Logo generation completed successfully',
+      data: {
+        sessionId: result.sessionId,
+        logos: result.logos,
+        brandName,
+        businessDescription,
+        parameters,
+        creditsUsed: creditsNeeded,
+        processingTime: result.duration,
+        totalTime: totalDuration
+      }
+    });
+    
+    console.log(`✅ [PICSART] Logo generation completed for user ${userId} in ${totalDuration}ms`);
+    
+  } catch (error) {
+    const totalDuration = Date.now() - startTime;
+    console.error(`❌ [PICSART] Logo generation failed after ${totalDuration}ms:`, error);
+    
+    // Refund credits if processing failed
+    try {
+      const toolConfig = await picsartService.getToolConfig('logo_generation');
+      if (toolConfig) {
+        const creditsNeeded = parseFloat(toolConfig.costPerUse);
+        const userCredits = await db.select({ credits: users.credits })
+          .from(users)
+          .where(eq(users.id, userId))
+          .limit(1);
+        
+        if (userCredits.length) {
+          const currentCredits = parseFloat(userCredits[0].credits || '0');
+          await db.update(users)
+            .set({ 
+              credits: (currentCredits + creditsNeeded).toString(),
+              updatedAt: new Date()
+            })
+            .where(eq(users.id, userId));
+          
+          console.log(`💰 [PICSART] Credits refunded: ${creditsNeeded} (${currentCredits} → ${currentCredits + creditsNeeded})`);
+        }
+      }
+    } catch (refundError) {
+      console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
+    }
+    
+    // Log the failed usage
+    try {
+      await db.insert(aiImgGenerationLogs).values({
+        userId,
+        provider: 'picsart',
+        model: 'logo-gen-v1',
+        feature: 'logo_generation',
+        originalImageName: `logo_${req.body.brandName}_${Date.now()}`,
+        prompt: `Brand: ${req.body.brandName}, Business: ${req.body.businessDescription}`,
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        cost: '0',
+        creditsUsed: '0',
+        duration: totalDuration,
+        metadata: JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+          processingTime: totalDuration
+        })
+      });
+    } catch (logError) {
+      console.error(`❌ [PICSART] Failed to log failed usage:`, logError);
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Logo generation failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      processingTime: totalDuration
     });
   }
 });

@@ -7,7 +7,8 @@ import {
   Building, 
   Tag,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Palette
 } from "lucide-react";
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +42,15 @@ const ferramentas = [
     category: "Imagem",
     credits: 2,
     permission: "tools.picsart_background_removal"
+  },
+  {
+    title: "Gerador de Logomarcas PRO",
+    description: "Crie logomarcas profissionais com inteligência artificial",
+    href: "/ferramentas/logo-generator-pro",
+    icon: Palette,
+    category: "Design",
+    credits: 3,
+    permission: "tools.logo_generation"
   },
   {
     title: "Amazon Reviews",
@@ -89,7 +99,7 @@ const ferramentas = [
   }
 ];
 
-const categories = ["Todos", "Imagem", "Amazon", "Empresas"];
+const categories = ["Todos", "Imagem", "Design", "Amazon", "Empresas"];
 
 export default function Ferramentas() {
   return (

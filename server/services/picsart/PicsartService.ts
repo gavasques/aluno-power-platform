@@ -40,6 +40,17 @@ interface BackgroundRemovalParams {
   format?: 'PNG' | 'JPG' | 'WEBP';
 }
 
+interface LogoGenerationParams {
+  brand_name: string;
+  business_description: string;
+  color_tone?: 'Auto' | 'Gray' | 'Blue' | 'Pink' | 'Orange' | 'Brown' | 'Yellow' | 'Green' | 'Purple' | 'Red';
+  logo_description?: string;
+  reference_image?: string; // base64 encoded image
+  reference_image_url?: string;
+  reference_image_id?: string;
+  count?: number; // 1-10, defaults to 2
+}
+
 interface ProcessingOptions {
   userId: number;
   tool: string;
@@ -77,6 +88,20 @@ export class PicsartService {
         category: 'image_editing',
         supportedFormats: ['PNG', 'JPG', 'JPEG'],
         maxFileSize: 10485760 // 10MB
+      },
+      {
+        toolName: 'logo_generation',
+        displayName: 'Gerador de Logomarcas PRO',
+        description: 'Generate professional logos with AI-powered design',
+        endpoint: '/v1/logo',
+        defaultParameters: {
+          color_tone: 'Auto',
+          count: 2
+        },
+        costPerUse: '3.00',
+        category: 'ai_design',
+        supportedFormats: ['PNG', 'JPG'],
+        maxFileSize: 5242880 // 5MB for reference images
       }
     ];
 
@@ -432,6 +457,216 @@ export class PicsartService {
       }
 
       console.error(`💥 [PICSART] Process failed after ${duration}ms:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate logos using Picsart GenAI API
+   */
+  async generateLogo(parameters: LogoGenerationParams): Promise<{ inference_id: string }> {
+    const startTime = Date.now();
+    
+    try {
+      console.log(`🎨 [PICSART] Starting logo generation with parameters:`, parameters);
+      
+      const formData = new FormData();
+      formData.append('brand_name', parameters.brand_name);
+      formData.append('business_description', parameters.business_description);
+      formData.append('color_tone', parameters.color_tone || 'Auto');
+      formData.append('count', (parameters.count || 2).toString());
+      
+      if (parameters.logo_description) {
+        formData.append('logo_description', parameters.logo_description);
+      }
+      
+      if (parameters.reference_image) {
+        // Convert base64 to blob and append
+        const base64Data = parameters.reference_image.replace(/^data:image\/[a-z]+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        formData.append('reference_image', buffer, 'reference.png');
+      }
+      
+      if (parameters.reference_image_url) {
+        formData.append('reference_image_url', parameters.reference_image_url);
+      }
+      
+      if (parameters.reference_image_id) {
+        formData.append('reference_image_id', parameters.reference_image_id);
+      }
+
+      const response = await fetch('https://genai-api.picsart.io/v1/logo', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Accept': 'application/json',
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Picsart GenAI API error: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      const duration = Date.now() - startTime;
+
+      console.log(`✅ [PICSART] Logo generation started in ${duration}ms`);
+      console.log(`🎨 [PICSART] Inference ID: ${result.inference_id}`);
+
+      return result;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error(`❌ [PICSART] Logo generation failed after ${duration}ms:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get logo generation result
+   */
+  async getLogoResult(inferenceId: string): Promise<{
+    status: string;
+    data?: Array<{ url: string; id: string }>;
+  }> {
+    const startTime = Date.now();
+    
+    try {
+      console.log(`🔍 [PICSART] Checking logo generation result for inference: ${inferenceId}`);
+
+      const response = await fetch(`https://genai-api.picsart.io/v1/logo/inferences/${inferenceId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Accept': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Picsart GenAI API error: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      const duration = Date.now() - startTime;
+
+      console.log(`✅ [PICSART] Logo result check completed in ${duration}ms`);
+      console.log(`🎨 [PICSART] Status: ${result.status}`);
+
+      return result;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error(`❌ [PICSART] Logo result check failed after ${duration}ms:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Complete logo generation process end-to-end
+   */
+  async processLogoGeneration(
+    userId: number,
+    parameters: LogoGenerationParams
+  ): Promise<{
+    sessionId: string;
+    logos: Array<{ url: string; id: string; base64: string }>;
+    duration: number;
+  }> {
+    const startTime = Date.now();
+    let sessionId: string | null = null;
+
+    try {
+      // Step 1: Create processing session
+      sessionId = await this.createSession({
+        userId,
+        tool: 'logo_generation',
+        originalImageUrl: parameters.reference_image_url || '',
+        originalFileName: `logo_${parameters.brand_name}_${Date.now()}.png`,
+        parameters
+      });
+
+      // Step 2: Start logo generation
+      const generationResult = await this.generateLogo(parameters);
+      const inferenceId = generationResult.inference_id;
+
+      // Step 3: Poll for results (with timeout)
+      let attempts = 0;
+      const maxAttempts = 30; // 30 attempts * 2 seconds = 60 seconds max
+      let logoResult: any = null;
+
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        
+        logoResult = await this.getLogoResult(inferenceId);
+        
+        if (logoResult.status === 'completed' && logoResult.data) {
+          break;
+        }
+        
+        if (logoResult.status === 'failed') {
+          throw new Error('Logo generation failed');
+        }
+        
+        attempts++;
+        console.log(`⏳ [PICSART] Logo generation in progress... (${attempts}/${maxAttempts})`);
+      }
+
+      if (!logoResult || logoResult.status !== 'completed' || !logoResult.data) {
+        throw new Error('Logo generation timed out or failed');
+      }
+
+      // Step 4: Download all logos as base64
+      const logos = await Promise.all(
+        logoResult.data.map(async (logo: { url: string; id: string }) => {
+          const base64 = await this.downloadImageAsBase64(logo.url);
+          return {
+            url: logo.url,
+            id: logo.id,
+            base64
+          };
+        })
+      );
+
+      // Step 5: Update session with results
+      const duration = Date.now() - startTime;
+      const toolConfig = await this.getToolConfig('logo_generation');
+      
+      await this.updateSession(sessionId, {
+        status: 'completed',
+        processedImageUrl: logos[0]?.url || '',
+        picsartJobId: inferenceId,
+        duration,
+        creditsUsed: toolConfig?.costPerUse || '3.00',
+        metadata: {
+          ...((await this.getSession(sessionId))?.metadata || {}),
+          logosGenerated: logos.length,
+          logoUrls: logos.map(l => l.url)
+        }
+      });
+
+      console.log(`🎉 [PICSART] Logo generation process finished in ${duration}ms`);
+      console.log(`🎨 [PICSART] Generated ${logos.length} logos`);
+
+      return {
+        sessionId,
+        logos,
+        duration
+      };
+
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      
+      // Update session with error if session was created
+      if (sessionId) {
+        await this.updateSession(sessionId, {
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          duration
+        });
+      }
+
+      console.error(`💥 [PICSART] Logo generation failed after ${duration}ms:`, error);
       throw error;
     }
   }
