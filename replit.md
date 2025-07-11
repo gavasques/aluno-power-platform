@@ -324,6 +324,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 11, 2025 - 04:12 AM**: ✅ DUPLICATE DASHBOARD CLEANUP & NEWS/UPDATES INTEGRATION COMPLETE
+  - **Duplicate Dashboards Removed**: Eliminated FastDashboard.tsx and UserDashboard.tsx duplicate files completely
+  - **Simplified App.tsx Imports**: Consolidated to single UserDashboard import pointing to pages/user/Dashboard.tsx
+  - **News Integration Added**: Added complete news section with API integration (/api/news/published/preview)
+  - **Updates Integration Added**: Added complete updates section with API integration (/api/updates/published/preview)
+  - **Professional UI Design**: News and updates cards with gradient headers (blue for news, emerald for updates)
+  - **Content Display Features**: Shows title, summary/content preview, category/version badges, timestamps, and priority indicators
+  - **Interactive Navigation**: Click handlers redirect to /noticias and /novidades pages respectively
+  - **Loading States**: Proper skeleton loading for both news and updates sections
+  - **Empty States**: User-friendly messages when no content is available
+  - **Performance Optimized**: 5-minute cache for both news and updates API calls
+  - **Responsive Layout**: Side-by-side grid on large screens, stacked on mobile
+  - **System Integration**: Admin-managed content now properly displays in user dashboard
+
 - **January 11, 2025 - 01:00 AM**: ✅ AMAZON LISTING OPTIMIZER UI IMPROVEMENTS - LAYOUT OPTIMIZED & DUPLICATE FILES CLEANED
   - **File Cleanup**: Removed amazon-listings-optimizer.tsx (old version) and 9 other duplicate/test files
   - **Layout Optimization**: Público Alvo moved next to Categoria for better space utilization

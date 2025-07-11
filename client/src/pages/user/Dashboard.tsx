@@ -17,9 +17,13 @@ import {
   Youtube,
   ExternalLink,
   AlertTriangle,
-  Play
+  Play,
+  Rss,
+  Users,
+  Clock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { News, Update } from '@shared/schema';
 
 interface DashboardData {
   user: {
@@ -100,6 +104,34 @@ const UserDashboard = () => {
     gcTime: 30 * 60 * 1000, // 30 minutos
   });
 
+  // Fetch published news preview (lightweight)
+  const { data: newsData = [], isLoading: newsLoading } = useQuery<Partial<News>[]>({
+    queryKey: ['/api/news/published/preview'],
+    queryFn: async () => {
+      const response = await fetch('/api/news/published/preview');
+      if (!response.ok) {
+        throw new Error('Failed to fetch news');
+      }
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    gcTime: 15 * 60 * 1000,
+  });
+
+  // Fetch published updates preview (lightweight)
+  const { data: updatesData = [], isLoading: updatesLoading } = useQuery<Partial<Update>[]>({
+    queryKey: ['/api/updates/published/preview'],
+    queryFn: async () => {
+      const response = await fetch('/api/updates/published/preview');
+      if (!response.ok) {
+        throw new Error('Failed to fetch updates');
+      }
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    gcTime: 15 * 60 * 1000,
+  });
+
   const handleQuickAction = async (action: string) => {
     try {
       // Implementar ações rápidas
@@ -149,6 +181,20 @@ const UserDashboard = () => {
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
+    if (diffDays === 1) return 'Ontem';
+    if (diffDays < 7) return `${diffDays} dias atrás`;
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} semana${Math.ceil(diffDays / 7) > 1 ? 's' : ''} atrás`;
+    if (diffDays < 365) return `${Math.ceil(diffDays / 30)} mês${Math.ceil(diffDays / 30) > 1 ? 'es' : ''} atrás`;
+    return `${Math.ceil(diffDays / 365)} ano${Math.ceil(diffDays / 365) > 1 ? 's' : ''} atrás`;
+  };
+
+  const formatCreatedDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Hoje';
     if (diffDays === 1) return 'Ontem';
     if (diffDays < 7) return `${diffDays} dias atrás`;
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} semana${Math.ceil(diffDays / 7) > 1 ? 's' : ''} atrás`;
@@ -460,6 +506,180 @@ const UserDashboard = () => {
                         >
                           Ver Todos os Vídeos do Canal
                           <ArrowUpRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* News and Updates Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                {/* News Card */}
+                <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                        <Rss className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">Central de Notícias</CardTitle>
+                        <p className="text-blue-100 text-xs mt-1">
+                          Últimas notícias do e-commerce
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {newsLoading ? (
+                      <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : newsData && newsData.length > 0 ? (
+                      <div className="space-y-4">
+                        {newsData.slice(0, 3).map((news, index) => (
+                          <div 
+                            key={news.id || index} 
+                            className="border-b border-gray-100 last:border-b-0 pb-4 last:pb-0 cursor-pointer hover:bg-gray-50 rounded p-2 transition-colors"
+                            onClick={() => window.location.href = '/noticias'}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900 line-clamp-2 text-sm leading-5 mb-1">
+                                  {news.title}
+                                </h4>
+                                {news.summary && (
+                                  <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                                    {news.summary}
+                                  </p>
+                                )}
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  <Badge variant="outline" className="px-2 py-0.5 text-xs">
+                                    {news.category || 'Geral'}
+                                  </Badge>
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {formatCreatedDate(news.createdAt || '')}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Rss className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                        <p className="text-sm font-medium">Nenhuma notícia disponível</p>
+                        <p className="text-xs">As últimas notícias aparecerão aqui</p>
+                      </div>
+                    )}
+                    
+                    {newsData && newsData.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => window.location.href = '/noticias'}
+                        >
+                          Ver Todas as Notícias
+                          <ArrowUpRight className="h-3 w-3 ml-2" />
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Updates Card */}
+                <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-t-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                        <Users className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">Central de Novidades</CardTitle>
+                        <p className="text-emerald-100 text-xs mt-1">
+                          Novidades da plataforma
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {updatesLoading ? (
+                      <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : updatesData && updatesData.length > 0 ? (
+                      <div className="space-y-4">
+                        {updatesData.slice(0, 3).map((update, index) => (
+                          <div 
+                            key={update.id || index} 
+                            className="border-b border-gray-100 last:border-b-0 pb-4 last:pb-0 cursor-pointer hover:bg-gray-50 rounded p-2 transition-colors"
+                            onClick={() => window.location.href = '/novidades'}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900 line-clamp-2 text-sm leading-5 mb-1">
+                                  {update.title}
+                                </h4>
+                                {update.content && (
+                                  <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                                    {update.content.substring(0, 100)}...
+                                  </p>
+                                )}
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  <Badge variant="outline" className="px-2 py-0.5 text-xs">
+                                    v{update.version || '1.0'}
+                                  </Badge>
+                                  <Badge 
+                                    variant={update.priority === 'high' ? 'destructive' : 
+                                           update.priority === 'medium' ? 'default' : 'secondary'} 
+                                    className="px-2 py-0.5 text-xs"
+                                  >
+                                    {update.type || 'Feature'}
+                                  </Badge>
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {formatCreatedDate(update.createdAt || '')}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                        <p className="text-sm font-medium">Nenhuma novidade disponível</p>
+                        <p className="text-xs">As últimas atualizações aparecerão aqui</p>
+                      </div>
+                    )}
+                    
+                    {updatesData && updatesData.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => window.location.href = '/novidades'}
+                        >
+                          Ver Todas as Novidades
+                          <ArrowUpRight className="h-3 w-3 ml-2" />
                         </Button>
                       </div>
                     )}
