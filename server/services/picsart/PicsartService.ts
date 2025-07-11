@@ -64,10 +64,9 @@ export class PicsartService {
     const defaultConfigs = [
       {
         toolName: 'background_removal',
-        displayName: 'Remover de Fundo PRO',
         description: 'Remove backgrounds from images with AI precision',
         endpoint: '/v1/remove-background',
-        defaultParameters: {
+        parametersSchema: {
           output_type: 'cutout',
           bg_blur: '0',
           scale: 'fit',
@@ -81,10 +80,8 @@ export class PicsartService {
           format: 'PNG'
         },
         costPerUse: '5.00',
-        category: 'image_editing',
-        supportedFormats: ['PNG', 'JPG', 'JPEG'],
         maxFileSize: 10485760, // 10MB
-        processingTime: 5000
+        allowedFormats: ['PNG', 'JPG', 'JPEG']
       }
     ];
 
@@ -97,7 +94,7 @@ export class PicsartService {
 
       if (exists.length === 0) {
         await db.insert(picsartToolConfigs).values(config);
-        console.log(`✅ [PICSART] Initialized tool config: ${config.displayName}`);
+        console.log(`✅ [PICSART] Initialized tool config: ${config.toolName}`);
       }
     }
   }
