@@ -25,6 +25,39 @@ export function ProviderSelector({
 }: ProviderSelectorProps) {
   const selectedProviderInfo = PROVIDERS.find(p => p.value === selectedProvider);
 
+  if (compact) {
+    return (
+      <div className="space-y-2">
+        <Select value={selectedProvider} onValueChange={onProviderChange}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione um provedor" />
+          </SelectTrigger>
+          <SelectContent>
+            {PROVIDERS.map((provider: ProviderInfo) => (
+              <SelectItem key={provider.value} value={provider.value}>
+                <div className="flex items-center gap-2">
+                  <span className="text-base">{provider.icon}</span>
+                  <span className="font-medium">{provider.label}</span>
+                  {providerStatus[provider.value] ? (
+                    <Badge className="bg-green-100 text-green-800 ml-2">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Ativo
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-red-100 text-red-800 ml-2">
+                      <AlertTriangle className="w-3 h-3 mr-1" />
+                      Inativo
+                    </Badge>
+                  )}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div>
@@ -51,27 +84,23 @@ export function ProviderSelector({
                         )}
                       </Badge>
                     </div>
-                    {!compact && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {provider.description}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {provider.description}
+                    </p>
                   </div>
                 </div>
-                {!compact && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {provider.features.slice(0, 3).map((feature) => (
-                      <Badge key={feature} variant="outline" className="text-xs">
-                        {feature}
-                      </Badge>
-                    ))}
-                    {provider.features.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{provider.features.length - 3} mais
-                      </Badge>
-                    )}
-                  </div>
-                )}
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {provider.features.slice(0, 3).map((feature) => (
+                    <Badge key={feature} variant="outline" className="text-xs">
+                      {feature}
+                    </Badge>
+                  ))}
+                  {provider.features.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{provider.features.length - 3} mais
+                    </Badge>
+                  )}
+                </div>
               </SelectItem>
             ))}
           </SelectContent>

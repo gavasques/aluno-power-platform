@@ -36,6 +36,33 @@ export function ModelSelector({
     }
   };
 
+  if (compact) {
+    return (
+      <div className="space-y-2">
+        <Select value={selectedModel} onValueChange={onModelChange}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione um modelo" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableModels.map((model: ModelInfo) => (
+              <SelectItem key={model.model} value={model.model}>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{model.model}</span>
+                  {model.recommended && (
+                    <Badge className="bg-blue-100 text-blue-800 ml-2">Recomendado</Badge>
+                  )}
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {formatCost((model.inputCostPer1M + model.outputCostPer1M) / 2)}/1M
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div>
@@ -57,22 +84,20 @@ export function ModelSelector({
                         <Badge className="bg-blue-100 text-blue-800">Recomendado</Badge>
                       )}
                     </div>
-                    {!compact && (
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="w-3 h-3" />
-                          In: {formatCost(model.inputCostPer1M)}/1M
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="w-3 h-3" />
-                          Out: {formatCost(model.outputCostPer1M)}/1M
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Zap className="w-3 h-3" />
-                          {model.maxTokens.toLocaleString()} tokens
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="w-3 h-3" />
+                        In: {formatCost(model.inputCostPer1M)}/1M
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="w-3 h-3" />
+                        Out: {formatCost(model.outputCostPer1M)}/1M
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Zap className="w-3 h-3" />
+                        {model.maxTokens.toLocaleString()} tokens
+                      </span>
+                    </div>
                   </div>
                 </div>
                 {!compact && model.capabilities && model.capabilities.length > 0 && (
