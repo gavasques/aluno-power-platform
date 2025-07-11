@@ -6,7 +6,8 @@ import {
   Package, 
   Building, 
   Tag,
-  ArrowRight
+  ArrowRight,
+  Sparkles
 } from "lucide-react";
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,15 @@ const ferramentas = [
     category: "Imagem", 
     credits: 1,
     permission: "tools.background_removal"
+  },
+  {
+    title: "Remover de Fundo PRO",
+    description: "Remova backgrounds de imagens com precisão de IA profissional",
+    href: "/ferramentas/picsart-background-removal",
+    icon: Sparkles,
+    category: "Imagem",
+    credits: 2,
+    permission: "tools.picsart_background_removal"
   },
   {
     title: "Amazon Reviews",
