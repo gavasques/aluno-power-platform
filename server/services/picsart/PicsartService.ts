@@ -107,7 +107,7 @@ export class PicsartService {
       .select()
       .from(picsartToolConfigs)
       .where(eq(picsartToolConfigs.isActive, true))
-      .orderBy(picsartToolConfigs.displayName);
+      .orderBy(picsartToolConfigs.toolName);
   }
 
   /**
