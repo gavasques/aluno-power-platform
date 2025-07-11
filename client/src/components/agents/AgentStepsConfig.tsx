@@ -98,7 +98,7 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
       model: "gpt-4o-mini",
       temperature: 0.7,
       maxTokens: 2000,
-      promptTemplate: "{{input}}",
+      promptTemplate: "\{\{input\}\}",
       outputFormat: "text",
       isActive: true,
     };
