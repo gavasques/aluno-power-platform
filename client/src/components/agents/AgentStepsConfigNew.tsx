@@ -20,7 +20,6 @@ import {
   Play, 
   Save, 
   ChevronRight, 
-  ChevronDown as ChevronDownIcon,
   Layers,
   Settings,
   Bot,
@@ -35,9 +34,9 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { UnifiedProviderManager } from "@/components/providers/UnifiedProviderManager";
-import { ProviderConfiguration, WorkflowConfiguration, StepConfiguration } from "@/components/providers/types";
+import { ProviderConfiguration, ProviderWorkflow, ProviderStep } from "@/components/providers/types";
 
-interface AgentStepAdvanced extends StepConfiguration {
+interface AgentStepAdvanced {
   id?: number;
   agentId: string;
   stepNumber: number;
@@ -57,6 +56,7 @@ interface AgentStepAdvanced extends StepConfiguration {
   isActive: boolean;
   passOutputToNext: boolean;
   outputKey: string; // Key to use when passing to next step
+  configuration: ProviderConfiguration;
 }
 
 interface AgentStepsConfigProps {
@@ -68,7 +68,9 @@ export default function AgentStepsConfigNew({ agentId, agentName }: AgentStepsCo
   const [steps, setSteps] = useState<AgentStepAdvanced[]>([]);
   const [isMultiStep, setIsMultiStep] = useState(false);
   const [expandedStep, setExpandedStep] = useState<number | null>(0);
-  const [workflow, setWorkflow] = useState<WorkflowConfiguration>({
+  const [workflow, setWorkflow] = useState<ProviderWorkflow>({
+    name: agentName,
+    description: '',
     isMultiStep: false,
     steps: []
   });
@@ -781,8 +783,8 @@ export default function AgentStepsConfigNew({ agentId, agentName }: AgentStepsCo
                   </div>
                 )}
               </CardContent>
-            </Card>
-          </div>
+            )}
+          </Card>
 
           <Separator />
 
