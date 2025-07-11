@@ -637,27 +637,6 @@ export const agentPrompts = pgTable("agent_prompts", {
   agentTypeIdx: index("agent_prompts_agent_type_idx").on(table.agentId, table.promptType, table.isActive),
 }));
 
-// Agent Steps Configuration table - For multi-step agent processing
-export const agentSteps = pgTable("agent_steps", {
-  id: text("id").primaryKey(),
-  agentId: text("agent_id").references(() => agents.id, { onDelete: "cascade" }).notNull(),
-  stepNumber: integer("step_number").notNull(), // 1, 2, 3, 4, 5
-  stepName: text("step_name").notNull(), // Ex: "CSV Analysis", "Evaluation", "Image Generation"
-  stepDescription: text("step_description"), // Description of what this step does
-  provider: text("provider").notNull(), // 'openai', 'anthropic', 'gemini', 'deepseek', 'xai'
-  model: text("model").notNull(), // Model to use for this step
-  temperature: decimal("temperature", { precision: 3, scale: 2 }).notNull().default("0.7"),
-  maxTokens: integer("max_tokens").notNull().default(2000),
-  promptTemplate: text("prompt_template").notNull(), // Template for this step's prompt
-  outputFormat: text("output_format").default("text"), // 'text', 'json', 'image', 'structured'
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  agentStepIdx: index("agent_steps_agent_step_idx").on(table.agentId, table.stepNumber),
-  activeIdx: index("agent_steps_active_idx").on(table.isActive),
-}));
-
 // Agent Usage table
 export const agentUsage = pgTable("agent_usage", {
   id: text("id").primaryKey(),
@@ -2095,16 +2074,6 @@ export type AgentUsage = typeof agentUsage.$inferSelect;
 
 export type InsertAgentGeneration = z.infer<typeof insertAgentGenerationSchema>;
 export type AgentGeneration = typeof agentGenerations.$inferSelect;
-
-// Agent Steps schema types
-export const insertAgentStepSchema = createInsertSchema(agentSteps).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertAgentStep = z.infer<typeof insertAgentStepSchema>;
-export type AgentStep = typeof agentSteps.$inferSelect;
 
 // Amazon Listing Session schemas
 export const insertAmazonListingSessionSchema = createInsertSchema(amazonListingSessions).omit({
