@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 import { backgroundPrefetch } from '@/lib/prefetch';
 import { useFontLoader } from '@/lib/fontLoader';
 import { useOptimizedIcons } from '@/components/IconLoader';
+import { HelmetProvider } from 'react-helmet-async';
 
 // Lazy load pages for better performance
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -120,8 +121,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <AuthProvider>
-            <CombinedProvider>
+          <HelmetProvider>
+            <AuthProvider>
+              <CombinedProvider>
                             <Switch>
                           <Route path="/login" component={Login} />
                           <Route path="/auth" component={Login} />
@@ -1016,8 +1018,9 @@ function App() {
 
                             </Switch>
                             <Toaster />
-            </CombinedProvider>
-          </AuthProvider>
+              </CombinedProvider>
+            </AuthProvider>
+          </HelmetProvider>
         </ThemeProvider>
       </Router>
     </QueryClientProvider>
