@@ -406,7 +406,7 @@ export class PicsartService {
       const result = await this.processBackgroundRemoval(imagePath, finalParams);
 
       // Step 4: Download processed image as base64
-      const processedBase64 = await this.downloadImageAsBase64(result.data.url);
+      const processedImageBase64 = await this.downloadImageAsBase64(result.data.url);
 
       // Step 5: Update session with results
       const duration = Date.now() - startTime;
