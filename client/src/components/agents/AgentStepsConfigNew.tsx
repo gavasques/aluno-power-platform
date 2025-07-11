@@ -784,7 +784,7 @@ export default function AgentStepsConfigNew({ agentId, agentName }: AgentStepsCo
             </Card>
           </div>
 
-                <Separator />
+          <Separator />
 
                 {/* Unified Provider Configuration */}
                 <div>
