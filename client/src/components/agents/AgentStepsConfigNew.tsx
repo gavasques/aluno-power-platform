@@ -780,7 +780,9 @@ export default function AgentStepsConfigNew({ agentId, agentName }: AgentStepsCo
                     ))}
                   </div>
                 )}
-                </div>
+              </CardContent>
+            </Card>
+          </div>
 
                 <Separator />
 
