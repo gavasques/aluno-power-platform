@@ -316,30 +316,47 @@ export default function AmazonListingsOptimizerNew() {
                     </div>
                   </div>
 
-                  {/* Category */}
-                  <div>
-                    <Label htmlFor="category">Categoria *</Label>
-                    <Select
-                      value={formData.category}
-                      onValueChange={(value) => handleInputChange("category", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma categoria" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {isDepartmentsLoading ? (
-                          <SelectItem value="loading" disabled>Carregando categorias...</SelectItem>
-                        ) : departments?.length > 0 ? (
-                          departments.map((dept: any) => (
-                            <SelectItem key={dept.id} value={dept.name}>
-                              {dept.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="empty" disabled>Nenhuma categoria encontrada</SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                  {/* Category and Target Audience */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="category">Categoria *</Label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(value) => handleInputChange("category", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isDepartmentsLoading ? (
+                            <SelectItem value="loading" disabled>Carregando categorias...</SelectItem>
+                          ) : departments?.length > 0 ? (
+                            departments.map((dept: any) => (
+                              <SelectItem key={dept.id} value={dept.name}>
+                                {dept.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="empty" disabled>Nenhuma categoria encontrada</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="targetAudience">Público Alvo</Label>
+                      <Textarea
+                        id="targetAudience"
+                        value={formData.targetAudience}
+                        onChange={(e) => handleInputChange("targetAudience", e.target.value.slice(0, 150))}
+                        placeholder="Ex: Jovens, profissionais, esportistas"
+                        rows={3}
+                        maxLength={150}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span></span>
+                        <span>{formData.targetAudience.length}/150</span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Keywords */}
@@ -374,37 +391,20 @@ export default function AmazonListingsOptimizerNew() {
                     </div>
                   </div>
 
-                  {/* Features and Target Audience */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="features">Características</Label>
-                      <Textarea
-                        id="features"
-                        value={formData.features}
-                        onChange={(e) => handleInputChange("features", e.target.value.slice(0, 8000))}
-                        placeholder="Ex: 30h de bateria, resistente à água, design ergonômico..."
-                        rows={6}
-                        maxLength={8000}
-                      />
-                      <div className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span></span>
-                        <span>{formData.features.length}/8000</span>
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="targetAudience">Público Alvo</Label>
-                      <Textarea
-                        id="targetAudience"
-                        value={formData.targetAudience}
-                        onChange={(e) => handleInputChange("targetAudience", e.target.value.slice(0, 150))}
-                        placeholder="Ex: Jovens, profissionais, esportistas"
-                        rows={3}
-                        maxLength={150}
-                      />
-                      <div className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span></span>
-                        <span>{formData.targetAudience.length}/150</span>
-                      </div>
+                  {/* Features */}
+                  <div>
+                    <Label htmlFor="features">Características</Label>
+                    <Textarea
+                      id="features"
+                      value={formData.features}
+                      onChange={(e) => handleInputChange("features", e.target.value.slice(0, 8000))}
+                      placeholder="Ex: 30h de bateria, resistente à água, design ergonômico, conexão Bluetooth 5.0, cancelamento ativo de ruído..."
+                      rows={6}
+                      maxLength={8000}
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span></span>
+                      <span>{formData.features.length}/8000</span>
                     </div>
                   </div>
 
@@ -418,17 +418,26 @@ export default function AmazonListingsOptimizerNew() {
                       </TabsList>
                       
                       <TabsContent value="upload" className="space-y-4">
-                        <div>
-                          <Input
-                            type="file"
-                            accept=".csv,.txt"
-                            multiple
-                            onChange={handleFileUpload}
-                            className="mb-2"
-                          />
-                          <p className="text-sm text-muted-foreground">
-                            Aceita arquivos CSV ou TXT (máximo 10 arquivos)
-                          </p>
+                        <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 bg-blue-50">
+                          <div className="text-center">
+                            <Upload className="mx-auto h-12 w-12 text-blue-500 mb-4" />
+                            <div className="relative">
+                              <Input
+                                type="file"
+                                accept=".csv,.txt"
+                                multiple
+                                onChange={handleFileUpload}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              />
+                              <Button variant="default" className="mb-2">
+                                <Upload className="h-4 w-4 mr-2" />
+                                Escolher Arquivos
+                              </Button>
+                            </div>
+                            <p className="text-sm text-blue-600">
+                              Aceita arquivos CSV ou TXT (máximo 10 arquivos)
+                            </p>
+                          </div>
                         </div>
                         
                         {uploadedFiles.length > 0 && (

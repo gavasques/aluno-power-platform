@@ -324,6 +324,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 11, 2025 - 01:00 AM**: ✅ AMAZON LISTING OPTIMIZER UI IMPROVEMENTS - LAYOUT OPTIMIZED & DUPLICATE FILES CLEANED
+  - **File Cleanup**: Removed amazon-listings-optimizer.tsx (old version) and 9 other duplicate/test files
+  - **Layout Optimization**: Público Alvo moved next to Categoria for better space utilization
+  - **Características Field**: Now uses full width instead of 2 columns for larger text area
+  - **Upload Button Enhancement**: Redesigned with blue background, upload icon, and clear call-to-action styling
+  - **Code Organization**: Cleaned duplicate files including backup services, test pages, and unused components
+  - **User Experience**: Improved visual hierarchy and form usability with proper field arrangement
+
 - **January 11, 2025 - 12:30 AM**: ✅ AMAZON LISTING OPTIMIZER CHARACTER LIMITS IMPLEMENTED - ALL FORM FIELDS NOW HAVE PROPER VALIDATION
   - **Character Limits Applied**: Nome do produto (150), Marca (40), Palavras-chave principais (300), Long Tail Keywords (300), Características (8000), Público Alvo (150), Avaliações manuais (8000)
   - **Field Rename**: "Características principais" renamed to "Características" as requested

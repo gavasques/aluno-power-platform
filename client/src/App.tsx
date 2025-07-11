@@ -62,9 +62,8 @@ const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNa
 const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
 const AgentsPage = lazy(() => import("./pages/agents"));
 const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
-const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer"));
+const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
 const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
-const AmazonListingsOptimizerNew = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
 const AmazonCustomerService = lazy(() => import("./pages/agents/amazon-customer-service"));
 const AmazonCustomerServiceResult = lazy(() => import("./pages/agents/amazon-customer-service-result"));
 const AmazonNegativeReviews = lazy(() => import("./pages/agents/amazon-negative-reviews"));
@@ -214,7 +213,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <AmazonListingsOptimizerNew />
+                                  <AmazonListingsOptimizer />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -234,7 +233,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <AmazonListingsOptimizerNew />
+                                  <AmazonListingsOptimizer />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
