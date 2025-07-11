@@ -11,17 +11,21 @@ import AgentStepsConfig from "@/components/agents/AgentStepsConfig";
 export default function AgentStepsConfigPage() {
   const [selectedAgentId, setSelectedAgentId] = useState<string>("");
 
-  // Fetch available agents
-  const { data: agents } = useQuery({
+  // Fetch available agents with caching
+  const { data: agents, isLoading: agentsLoading } = useQuery({
     queryKey: ['/api/agents'],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const selectedAgent = agents?.find((agent: any) => agent.id === selectedAgentId);
 
-  // Fetch step configuration for selected agent
+  // Fetch step configuration for selected agent with caching
   const { data: agentSteps } = useQuery({
     queryKey: ['/api/agent-steps', selectedAgentId],
     enabled: !!selectedAgentId,
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   const getStepStatus = (agentId: string) => {
@@ -58,7 +62,12 @@ export default function AgentStepsConfigPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {agents?.map((agent: any) => {
+            {agentsLoading ? (
+              <div className="flex items-center justify-center p-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              agents?.map((agent: any) => {
               const status = getStepStatus(agent.id);
               return (
                 <div
@@ -97,7 +106,8 @@ export default function AgentStepsConfigPage() {
                   </div>
                 </div>
               );
-            })}
+            })
+            )}
           </CardContent>
         </Card>
 
