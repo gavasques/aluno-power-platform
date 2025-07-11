@@ -34,10 +34,21 @@ interface AgentStepsConfigProps {
   agentName: string;
 }
 
+interface TestStepState {
+  isTestingStep: number | null;
+  testResponse: string;
+  testError: string;
+}
+
 export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfigProps) {
   const [steps, setSteps] = useState<AgentStep[]>([]);
   const [isMultiStep, setIsMultiStep] = useState(false);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
+  const [testState, setTestState] = useState<TestStepState>({
+    isTestingStep: null,
+    testResponse: '',
+    testError: ''
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -98,7 +109,7 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
       model: "gpt-4o-mini",
       temperature: 0.7,
       maxTokens: 2000,
-      promptTemplate: "\{\{input\}\}",
+      promptTemplate: "{{input}}",
       outputFormat: "text",
       isActive: true,
     };
@@ -147,6 +158,71 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
     return providers.filter((p: any) => p.provider === provider);
   };
 
+  // Test individual step
+  const testStep = async (stepIndex: number) => {
+    const step = steps[stepIndex];
+    setTestState({
+      isTestingStep: stepIndex,
+      testResponse: '',
+      testError: ''
+    });
+
+    try {
+      const testData = {
+        provider: step.provider,
+        model: step.model,
+        prompt: step.promptTemplate.includes('{{input}}') 
+          ? step.promptTemplate.replace('{{input}}', 'Dados de teste para validação') 
+          : step.promptTemplate,
+        temperature: step.temperature,
+        maxTokens: step.maxTokens,
+        messages: [
+          {
+            role: "system",
+            content: "Você está sendo testado como parte de uma etapa de processamento multi-step."
+          },
+          {
+            role: "user",
+            content: step.promptTemplate.includes('{{input}}') 
+              ? step.promptTemplate.replace('{{input}}', 'Dados de teste para validação')
+              : step.promptTemplate
+          }
+        ]
+      };
+
+      const response = await apiRequest('/api/ai-providers/test', {
+        method: 'POST',
+        body: JSON.stringify(testData),
+      });
+
+      setTestState(prev => ({
+        ...prev,
+        isTestingStep: null,
+        testResponse: response.content || response.response || 'Teste executado com sucesso',
+        testError: ''
+      }));
+
+      toast({
+        title: "Teste Executado",
+        description: `Etapa ${step.stepNumber} testada com sucesso usando ${step.provider}/${step.model}`,
+      });
+
+    } catch (error: any) {
+      setTestState(prev => ({
+        ...prev,
+        isTestingStep: null,
+        testResponse: '',
+        testError: error.message || 'Erro no teste da etapa'
+      }));
+
+      toast({
+        title: "Erro no Teste",
+        description: `Falha ao testar etapa ${step.stepNumber}: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderStepCard = (step: AgentStep, index: number) => {
     const isExpanded = expandedStep === index;
     
@@ -162,6 +238,11 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
               <Badge variant="secondary">
                 {step.provider}/{step.model}
               </Badge>
+              {testState.isTestingStep === index && (
+                <Badge variant="outline" className="bg-yellow-50 text-yellow-600">
+                  Testando...
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-2">
               {isMultiStep && steps.length > 1 && (
@@ -184,6 +265,15 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
                   </Button>
                 </>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => testStep(index)}
+                disabled={testState.isTestingStep === index}
+                className="text-green-600 hover:text-green-700"
+              >
+                <Zap className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -323,9 +413,24 @@ export default function AgentStepsConfig({ agentId, agentName }: AgentStepsConfi
                 rows={6}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Variáveis disponíveis: {{input}}, {{previousOutput}}, {{productName}}, {{category}}, etc.
+                Variáveis disponíveis: input, previousOutput, productName, category, etc.
               </p>
             </div>
+            
+            {/* Test Results Section */}
+            {testState.testResponse && (
+              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <h4 className="font-semibold text-green-800 mb-2">Resultado do Teste:</h4>
+                <pre className="text-sm text-green-700 whitespace-pre-wrap">{testState.testResponse}</pre>
+              </div>
+            )}
+            
+            {testState.testError && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <h4 className="font-semibold text-red-800 mb-2">Erro no Teste:</h4>
+                <pre className="text-sm text-red-700 whitespace-pre-wrap">{testState.testError}</pre>
+              </div>
+            )}
           </CardContent>
         )}
       </Card>
