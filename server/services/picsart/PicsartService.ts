@@ -71,15 +71,6 @@ export class PicsartService {
         endpoint: '/v1/remove-background',
         defaultParameters: {
           output_type: 'cutout',
-          bg_blur: '0',
-          scale: 'fit',
-          auto_center: 'false',
-          stroke_size: '0',
-          stroke_color: 'FFFFFF',
-          stroke_opacity: '100',
-          shadow: 'disabled',
-          shadow_opacity: '20',
-          shadow_blur: '50',
           format: 'PNG'
         },
         costPerUse: '5.00',
@@ -238,9 +229,10 @@ export class PicsartService {
       formData.append('output_type', 'cutout');
       formData.append('format', 'PNG');
       
-      // Add additional parameters
+      // Only add safe, validated parameters
+      const safeParams = ['output_type', 'format'];
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
+        if (value !== undefined && value !== null && safeParams.includes(key)) {
           formData.append(key, String(value));
         }
       });
