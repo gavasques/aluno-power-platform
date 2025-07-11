@@ -291,18 +291,28 @@ export default function AmazonListingsOptimizerNew() {
                       <Input
                         id="productName"
                         value={formData.productName}
-                        onChange={(e) => handleInputChange("productName", e.target.value)}
+                        onChange={(e) => handleInputChange("productName", e.target.value.slice(0, 150))}
                         placeholder="Ex: Fone de Ouvido Bluetooth"
+                        maxLength={150}
                       />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span></span>
+                        <span>{formData.productName.length}/150</span>
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="brand">Marca *</Label>
                       <Input
                         id="brand"
                         value={formData.brand}
-                        onChange={(e) => handleInputChange("brand", e.target.value)}
+                        onChange={(e) => handleInputChange("brand", e.target.value.slice(0, 40))}
                         placeholder="Ex: Sony"
+                        maxLength={40}
                       />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span></span>
+                        <span>{formData.brand.length}/40</span>
+                      </div>
                     </div>
                   </div>
 
@@ -339,42 +349,62 @@ export default function AmazonListingsOptimizerNew() {
                       <Input
                         id="keywords"
                         value={formData.keywords}
-                        onChange={(e) => handleInputChange("keywords", e.target.value)}
+                        onChange={(e) => handleInputChange("keywords", e.target.value.slice(0, 300))}
                         placeholder="Ex: fone bluetooth, sem fio"
+                        maxLength={300}
                       />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span></span>
+                        <span>{formData.keywords.length}/300</span>
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="longTailKeywords">Long Tail Keywords</Label>
                       <Input
                         id="longTailKeywords"
                         value={formData.longTailKeywords}
-                        onChange={(e) => handleInputChange("longTailKeywords", e.target.value)}
+                        onChange={(e) => handleInputChange("longTailKeywords", e.target.value.slice(0, 300))}
                         placeholder="Ex: fone bluetooth com cancelamento ruído"
+                        maxLength={300}
                       />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span></span>
+                        <span>{formData.longTailKeywords.length}/300</span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Features and Target Audience */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="features">Características Principais</Label>
+                      <Label htmlFor="features">Características</Label>
                       <Textarea
                         id="features"
                         value={formData.features}
-                        onChange={(e) => handleInputChange("features", e.target.value)}
-                        placeholder="Ex: 30h de bateria, resistente à água"
-                        rows={3}
+                        onChange={(e) => handleInputChange("features", e.target.value.slice(0, 8000))}
+                        placeholder="Ex: 30h de bateria, resistente à água, design ergonômico..."
+                        rows={6}
+                        maxLength={8000}
                       />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span></span>
+                        <span>{formData.features.length}/8000</span>
+                      </div>
                     </div>
                     <div>
-                      <Label htmlFor="targetAudience">Público-Alvo</Label>
+                      <Label htmlFor="targetAudience">Público Alvo</Label>
                       <Textarea
                         id="targetAudience"
                         value={formData.targetAudience}
-                        onChange={(e) => handleInputChange("targetAudience", e.target.value)}
+                        onChange={(e) => handleInputChange("targetAudience", e.target.value.slice(0, 150))}
                         placeholder="Ex: Jovens, profissionais, esportistas"
                         rows={3}
+                        maxLength={150}
                       />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span></span>
+                        <span>{formData.targetAudience.length}/150</span>
+                      </div>
                     </div>
                   </div>
 
@@ -429,11 +459,16 @@ export default function AmazonListingsOptimizerNew() {
                       <TabsContent value="text">
                         <Textarea
                           value={formData.reviewsData}
-                          onChange={(e) => handleInputChange("reviewsData", e.target.value)}
+                          onChange={(e) => handleInputChange("reviewsData", e.target.value.slice(0, 8000))}
                           placeholder="Cole aqui as avaliações dos concorrentes (formato Helium10 ou texto livre)"
                           rows={8}
                           className="w-full"
+                          maxLength={8000}
                         />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span></span>
+                          <span>{formData.reviewsData.length}/8000</span>
+                        </div>
                       </TabsContent>
                     </Tabs>
                   </div>
