@@ -25,7 +25,7 @@ import {
   Globe,
   Layers
 } from "lucide-react";
-import AgentStepsConfig from "@/components/agents/AgentStepsConfig";
+import AgentStepsConfigNew from "@/components/agents/AgentStepsConfigNew";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -1962,7 +1962,7 @@ export default function AgentProviderSettings() {
             {/* Configuration Area */}
             <div className="lg:col-span-3">
               {selectedAgent ? (
-                <AgentStepsConfig
+                <AgentStepsConfigNew
                   agentId={selectedAgent.id}
                   agentName={selectedAgent.name}
                 />
