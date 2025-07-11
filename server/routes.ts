@@ -1211,6 +1211,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Amazon Listing Optimizer Routes
+
+  // CREATE: Create a new Amazon listing session
+  app.post('/api/amazon-sessions', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.id;
+      const { idUsuario } = req.body;
+      
+      if (!userId || !idUsuario) {
+        return res.status(400).json({ error: 'User ID required' });
+      }
+
+      // Import here to avoid module loading issues
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      const session = await amazonListingService.createSession(userId);
+      res.status(201).json({ session });
+    } catch (error) {
+      console.error('Error creating Amazon listing session:', error);
+      res.status(500).json({ error: 'Failed to create session' });
+    }
+  });
+
+  // READ: Get Amazon listing session by ID
+  app.get('/api/amazon-sessions/:sessionId', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      const session = await amazonListingService.getSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+      
+      res.json(session);
+    } catch (error) {
+      console.error('Error fetching Amazon listing session:', error);
+      res.status(500).json({ error: 'Failed to fetch session' });
+    }
+  });
+
+  // UPDATE: Update session data
+  app.put('/api/amazon-sessions/:sessionId/data', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const sessionData = req.body;
+      
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      await amazonListingService.updateSessionData(sessionId, sessionData);
+      res.json({ message: 'Session data updated successfully' });
+    } catch (error) {
+      console.error('Error updating Amazon listing session data:', error);
+      res.status(500).json({ error: 'Failed to update session data' });
+    }
+  });
+
+  // PROCESS: Files processing endpoint
+  app.post('/api/amazon-sessions/:sessionId/files/process', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const { files } = req.body;
+      
+      console.log('📁 Processing files for session:', sessionId, 'files count:', files.length);
+      
+      // Combinar conteúdo de todos os arquivos
+      let combinedContent = '';
+      
+      for (const file of files) {
+        console.log('📄 Processing file:', file.name);
+        
+        // Adicionar cabeçalho do arquivo
+        combinedContent += `\n\n=== ARQUIVO: ${file.name} ===\n`;
+        combinedContent += file.content || '';
+      }
+      
+      console.log('📊 Combined content length:', combinedContent.length);
+      
+      // Atualizar sessão com dados das avaliações
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      await amazonListingService.updateSessionData(sessionId, {
+        reviewsData: combinedContent,
+        status: 'files_processed'
+      });
+      
+      res.json({ combinedContent });
+    } catch (error) {
+      console.error('Error processing files:', error);
+      res.status(500).json({ error: 'Failed to process files' });
+    }
+  });
+
+  // STEP 1: Analysis of Reviews
+  app.post('/api/amazon-sessions/:sessionId/step1', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      const result = await amazonListingService.processStep1_AnalysisReviews(sessionId);
+      res.json(result);
+    } catch (error) {
+      console.error('Error processing step 1 (Analysis):', error);
+      res.status(500).json({ error: error.message || 'Failed to process analysis step' });
+    }
+  });
+
+  // STEP 2: Generate Titles
+  app.post('/api/amazon-sessions/:sessionId/step2', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      const result = await amazonListingService.processStep2_GenerateTitles(sessionId);
+      res.json(result);
+    } catch (error) {
+      console.error('Error processing step 2 (Titles):', error);
+      res.status(500).json({ error: error.message || 'Failed to generate titles' });
+    }
+  });
+
+  // STEP 3: Generate Bullet Points
+  app.post('/api/amazon-sessions/:sessionId/step3', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      const result = await amazonListingService.processStep3_BulletPoints(sessionId);
+      res.json(result);
+    } catch (error) {
+      console.error('Error processing step 3 (Bullet Points):', error);
+      res.status(500).json({ error: error.message || 'Failed to generate bullet points' });
+    }
+  });
+
+  // STEP 4: Generate Description
+  app.post('/api/amazon-sessions/:sessionId/step4', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      const result = await amazonListingService.processStep4_Description(sessionId);
+      res.json(result);
+    } catch (error) {
+      console.error('Error processing step 4 (Description):', error);
+      res.status(500).json({ error: error.message || 'Failed to generate description' });
+    }
+  });
+
+  // ABORT: Abort processing
+  app.post('/api/amazon-sessions/:sessionId/abort', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      await amazonListingService.abortProcessing(sessionId);
+      res.json({ message: 'Processing aborted successfully' });
+    } catch (error) {
+      console.error('Error aborting processing:', error);
+      res.status(500).json({ error: 'Failed to abort processing' });
+    }
+  });
+
+  // DOWNLOAD: Download results
+  app.get('/api/amazon-sessions/:sessionId/download', requireAuth, async (req: any, res: any) => {
+    try {
+      const { sessionId } = req.params;
+      const { AmazonListingService } = await import('./services/amazonListingService');
+      const amazonListingService = new AmazonListingService();
+      const session = await amazonListingService.getSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      // Generate downloadable content
+      const content = amazonListingService.generateDownloadContent(session);
+      
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Disposition', `attachment; filename="amazon-listing-${sessionId}.txt"`);
+      res.send(content);
+    } catch (error) {
+      console.error('Error downloading results:', error);
+      res.status(500).json({ error: 'Failed to download results' });
+    }
+  });
+
   app.delete('/api/youtube-videos/:id', async (req, res) => {
     try {
       await storage.deleteYoutubeVideo(parseInt(req.params.id));

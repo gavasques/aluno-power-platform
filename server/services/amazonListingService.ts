@@ -113,6 +113,37 @@ export class AmazonListingService {
     return session || null;
   }
 
+  // Processar arquivos de avaliações
+  async processFiles(sessionId: string, files: any[]): Promise<string> {
+    try {
+      console.log('📁 Processing files for session:', sessionId, 'files count:', files.length);
+      
+      // Combinar conteúdo de todos os arquivos
+      let combinedContent = '';
+      
+      for (const file of files) {
+        console.log('📄 Processing file:', file.name);
+        
+        // Adicionar cabeçalho do arquivo
+        combinedContent += `\n\n=== ARQUIVO: ${file.name} ===\n`;
+        combinedContent += file.content || '';
+      }
+      
+      console.log('📊 Combined content length:', combinedContent.length);
+      
+      // Atualizar sessão com dados das avaliações
+      await this.updateSessionData(sessionId, {
+        reviewsData: combinedContent,
+        status: 'files_processed'
+      });
+      
+      return combinedContent;
+    } catch (error) {
+      console.error('❌ Error processing files:', error);
+      throw new Error('Falha ao processar arquivos');
+    }
+  }
+
   // Processar Etapa 1: Análise de Avaliações
   async processStep1_AnalysisReviews(sessionId: string): Promise<string> {
     const startTime = Date.now();
