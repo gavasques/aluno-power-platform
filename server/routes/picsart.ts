@@ -526,6 +526,7 @@ router.post('/logo-generation', requireAuth, async (req, res) => {
     
   } catch (error) {
     const totalDuration = Date.now() - startTime;
+    const userId = req.user.id; // Re-declare userId for error handling scope
     console.error(`❌ [PICSART] Logo generation failed after ${totalDuration}ms:`, error);
     
     // Refund credits if processing failed

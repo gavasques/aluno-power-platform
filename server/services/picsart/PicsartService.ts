@@ -134,16 +134,39 @@ export class PicsartService {
    * Get tool configuration by name
    */
   async getToolConfig(toolName: string): Promise<PicsartToolConfig | null> {
-    const result = await db
-      .select()
-      .from(picsartToolConfigs)
-      .where(and(
-        eq(picsartToolConfigs.toolName, toolName),
-        eq(picsartToolConfigs.isActive, true)
-      ))
-      .limit(1);
+    try {
+      console.log(`🔍 [PICSART] Getting tool config for: ${toolName}`);
+      
+      const result = await db
+        .select({
+          id: picsartToolConfigs.id,
+          toolName: picsartToolConfigs.toolName,
+          displayName: picsartToolConfigs.displayName,
+          description: picsartToolConfigs.description,
+          endpoint: picsartToolConfigs.endpoint,
+          defaultParameters: picsartToolConfigs.defaultParameters,
+          costPerUse: picsartToolConfigs.costPerUse,
+          isActive: picsartToolConfigs.isActive,
+          category: picsartToolConfigs.category,
+          supportedFormats: picsartToolConfigs.supportedFormats,
+          maxFileSize: picsartToolConfigs.maxFileSize,
+          processingTime: picsartToolConfigs.processingTime,
+          createdAt: picsartToolConfigs.createdAt,
+          updatedAt: picsartToolConfigs.updatedAt,
+        })
+        .from(picsartToolConfigs)
+        .where(and(
+          eq(picsartToolConfigs.toolName, toolName),
+          eq(picsartToolConfigs.isActive, true)
+        ))
+        .limit(1);
 
-    return result[0] || null;
+      console.log(`✅ [PICSART] Tool config query result:`, result);
+      return result[0] || null;
+    } catch (error) {
+      console.error(`❌ [PICSART] Error getting tool config for ${toolName}:`, error);
+      return null;
+    }
   }
 
   /**

@@ -20,6 +20,7 @@ export const users = pgTable("users", {
   magicLinkExpiresAt: timestamp("magic_link_expires_at"),
   emailVerified: boolean("email_verified").notNull().default(false),
   stripeCustomerId: text("stripe_customer_id"),
+  credits: decimal("credits", { precision: 10, scale: 2 }).notNull().default("0.00"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
