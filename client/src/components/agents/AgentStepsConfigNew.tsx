@@ -786,10 +786,11 @@ export default function AgentStepsConfigNew({ agentId, agentName }: AgentStepsCo
             )}
           </Card>
 
-          <div className="space-y-6">
-            <Separator />
+          <>
+            <div className="space-y-6">
+              <Separator />
 
-            {/* Unified Provider Configuration */}
+              {/* Unified Provider Configuration */}
             <div>
               <Label className="text-base font-medium mb-4 block">
                 Configuração do Provedor IA {isMultiStep && `- Etapa ${index + 1}`}
@@ -838,7 +839,8 @@ export default function AgentStepsConfigNew({ agentId, agentName }: AgentStepsCo
                 </CardContent>
               </Card>
             )}
-          </div>
+            </div>
+          </>
         </div>
       ))}
     </div>
