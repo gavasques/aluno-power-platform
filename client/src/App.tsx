@@ -61,6 +61,7 @@ const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional")
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
 const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
 const AgentsPage = lazy(() => import("./pages/agents"));
+const AgentStepsConfigPage = lazy(() => import("./pages/agents/AgentStepsConfigPage"));
 const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
 const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
 const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
@@ -311,6 +312,16 @@ function App() {
                               window.location.href = '/agentes';
                               return null;
                             }}
+                          </Route>
+                          
+                          <Route path="/agentes/configuracao-etapas">
+                            <ProtectedRoute requiredRole="admin">
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AgentStepsConfigPage />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
                           </Route>
                           
                           <Route path="/agentes">

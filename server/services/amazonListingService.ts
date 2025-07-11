@@ -3,7 +3,7 @@ import { db } from "../db";
 import { amazonListingSessions, agents, agentUsage, agentGenerations, aiGenerationLogs } from "@shared/schema";
 import type { InsertAmazonListingSession, AmazonListingSession } from "@shared/schema";
 import { aiProviderService } from "./aiProviderService";
-
+import { agentStepService } from "./AgentStepService";
 import { storage } from "../storage";
 import crypto from "crypto";
 
@@ -113,7 +113,7 @@ export class AmazonListingService {
     return session || null;
   }
 
-  // Processar arquivos de avaliações
+  // Processar arquivos de avaliações (com suporte multi-step)
   async processFiles(sessionId: string, files: any[]): Promise<string> {
     try {
       console.log('📁 Processing files for session:', sessionId, 'files count:', files.length);
@@ -131,11 +131,49 @@ export class AmazonListingService {
       
       console.log('📊 Combined content length:', combinedContent.length);
       
-      // Atualizar sessão com dados das avaliações
-      await this.updateSessionData(sessionId, {
-        reviewsData: combinedContent,
-        status: 'files_processed'
-      });
+      // Check if agent has multi-step configuration
+      const agentId = 'amazon-listings-optimizer';
+      const isMultiStep = await agentStepService.isMultiStepAgent(agentId);
+      
+      if (isMultiStep) {
+        console.log('🎯 [MULTI_STEP] Detected multi-step configuration for Amazon Listing Optimizer');
+        
+        try {
+          // Execute multi-step process with file content as input
+          const multiStepResult = await agentStepService.executeMultiStepProcess(agentId, {
+            reviewsData: combinedContent,
+            sessionId
+          });
+          
+          // Update session with multi-step results
+          await this.updateSessionData(sessionId, {
+            reviewsData: combinedContent,
+            multiStepResults: multiStepResult,
+            analysisResult: multiStepResult.finalOutput,
+            status: 'multi_step_completed',
+            currentStep: multiStepResult.steps.length
+          });
+          
+          console.log(`✅ Multi-step process completed for session ${sessionId} with ${multiStepResult.steps.length} steps`);
+          
+        } catch (error) {
+          console.error('❌ Multi-step process failed, falling back to traditional processing:', error);
+          // Fall back to traditional processing
+          await this.updateSessionData(sessionId, {
+            reviewsData: combinedContent,
+            status: 'files_processed'
+          });
+        }
+        
+      } else {
+        // Traditional single-step processing
+        await this.updateSessionData(sessionId, {
+          reviewsData: combinedContent,
+          status: 'files_processed'
+        });
+        
+        console.log('✅ Traditional file processing completed for session:', sessionId);
+      }
       
       return combinedContent;
     } catch (error) {

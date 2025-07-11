@@ -7075,5 +7075,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     console.error('❌ Error registering optimized supplier routes:', error);
   }
 
+  // Import and register agent steps routes
+  try {
+    const { agentStepsRouter } = await import('./routes/agentSteps');
+    app.use('/api/agent-steps', agentStepsRouter);
+    console.log('✅ Agent steps routes registered successfully');
+  } catch (error) {
+    console.error('❌ Error registering agent steps routes:', error);
+  }
+
   return httpServer;
 }
