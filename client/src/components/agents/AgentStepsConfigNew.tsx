@@ -786,90 +786,87 @@ export default function AgentStepsConfigNew({ agentId, agentName }: AgentStepsCo
 
           <Separator />
 
-                {/* Unified Provider Configuration */}
-                <div>
-                  <Label className="text-base font-medium mb-4 block">
-                    Configuração do Provedor IA {isMultiStep && `- Etapa ${index + 1}`}
-                  </Label>
-                  <UnifiedProviderManager
-                    mode={showAdvancedMode ? "full-configuration" : "step-configuration"}
-                    workflow={{
-                      isMultiStep: isMultiStep,
-                      steps: [{ configuration: step.configuration }]
-                    }}
-                    onConfigurationChange={(config) => updateStepConfiguration(index, config)}
-                    showTesting={true}
-                    showPromptConfiguration={false}
-                    compact={!showAdvancedMode}
-                  />
-                </div>
+          {/* Unified Provider Configuration */}
+          <div>
+            <Label className="text-base font-medium mb-4 block">
+              Configuração do Provedor IA {isMultiStep && `- Etapa ${index + 1}`}
+            </Label>
+            <UnifiedProviderManager
+              mode={showAdvancedMode ? "full-configuration" : "step-configuration"}
+              workflow={{
+                isMultiStep: isMultiStep,
+                steps: [{ configuration: step.configuration }]
+              }}
+              onConfigurationChange={(config) => updateStepConfiguration(index, config)}
+              showTesting={true}
+              showPromptConfiguration={false}
+              compact={!showAdvancedMode}
+            />
+          </div>
 
-                {/* Test results */}
-                {testResults[index] && (
-                  <Card className="border-blue-200">
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Eye className="w-4 h-4" />
-                        Resultado do Teste
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {testResults[index].loading ? (
-                        <div className="text-center py-4">
-                          <TestTube className="w-6 h-6 animate-spin mx-auto mb-2" />
-                          <p>Testando etapa...</p>
-                        </div>
-                      ) : testResults[index].success ? (
-                        <div className="space-y-2">
-                          <Badge className="bg-green-100 text-green-800">Teste bem-sucedido</Badge>
-                          <pre className="bg-gray-50 p-3 rounded text-sm overflow-auto max-h-40">
-                            {JSON.stringify(testResults[index].data, null, 2)}
-                          </pre>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <Badge className="bg-red-100 text-red-800">Erro no teste</Badge>
-                          <p className="text-red-600 text-sm">{testResults[index].error}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+          {/* Test results */}
+          {testResults[index] && (
+            <Card className="border-blue-200">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  Resultado do Teste
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {testResults[index].loading ? (
+                  <div className="text-center py-4">
+                    <TestTube className="w-6 h-6 animate-spin mx-auto mb-2" />
+                    <p>Testando etapa...</p>
+                  </div>
+                ) : testResults[index].success ? (
+                  <div className="space-y-2">
+                    <Badge className="bg-green-100 text-green-800">Teste bem-sucedido</Badge>
+                    <pre className="bg-gray-50 p-3 rounded text-sm overflow-auto max-h-40">
+                      {JSON.stringify(testResults[index].data, null, 2)}
+                    </pre>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Badge className="bg-red-100 text-red-800">Erro no teste</Badge>
+                    <p className="text-red-600 text-sm">{testResults[index].error}</p>
+                  </div>
                 )}
               </CardContent>
-            )}
-          </Card>
-        ))}
-      </div>
-
-      {/* Global actions */}
-      <div className="flex justify-between items-center pt-4 border-t">
-        <div className="text-sm text-gray-600">
-          {steps.length} etapa{steps.length !== 1 ? 's' : ''} configurada{steps.length !== 1 ? 's' : ''}
-        </div>
-        <div className="flex gap-2">
-          {isMultiStep && (
-            <Button onClick={addStep} variant="outline">
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Etapa
-            </Button>
+            </Card>
           )}
-          <Button
-            onClick={() => saveConfiguration.mutate()}
-            disabled={saveConfiguration.isPending}
-          >
-            {saveConfiguration.isPending ? (
-              <>
-                <Save className="w-4 h-4 mr-2 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Salvar Configuração
-              </>
-            )}
-          </Button>
         </div>
+      ))}
+    </div>
+
+    {/* Global actions */}
+    <div className="flex justify-between items-center pt-4 border-t">
+      <div className="text-sm text-gray-600">
+        {steps.length} etapa{steps.length !== 1 ? 's' : ''} configurada{steps.length !== 1 ? 's' : ''}
+      </div>
+      <div className="flex gap-2">
+        {isMultiStep && (
+          <Button onClick={addStep} variant="outline">
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar Etapa
+          </Button>
+        )}
+        <Button
+          onClick={() => saveConfiguration.mutate()}
+          disabled={saveConfiguration.isPending}
+        >
+          {saveConfiguration.isPending ? (
+            <>
+              <Save className="w-4 h-4 mr-2 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Salvar Configuração
+            </>
+          )}
+        </Button>
       </div>
     </div>
   );
