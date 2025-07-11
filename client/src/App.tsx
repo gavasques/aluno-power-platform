@@ -73,8 +73,6 @@ const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProvi
 const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
-const UserDashboard = lazy(() => import("./pages/user/UserDashboard"));
-const UserDashboardNew = lazy(() => import("./pages/user/Dashboard"));
 const FastDashboard = lazy(() => import("./pages/user/FastDashboard"));
 const UserUsage = lazy(() => import("./pages/user/Usage"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
@@ -546,14 +544,7 @@ function App() {
                             )}
                           </Route>
 
-                          {/* User Dashboard - Protected */}
-                          <Route path="/user/dashboard">
-                            <ProtectedRoute>
-                              <Suspense fallback={<PageLoader />}>
-                                <FastDashboard />
-                              </Suspense>
-                            </ProtectedRoute>
-                          </Route>
+
 
                           {/* User Usage - Protected */}
                           <Route path="/user/usage">
@@ -917,11 +908,9 @@ function App() {
                           {/* Home route - Protected */}
                           <Route path="/">
                             <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <UserDashboardNew />
-                                </Suspense>
-                              </Layout>
+                              <Suspense fallback={<PageLoader />}>
+                                <FastDashboard />
+                              </Suspense>
                             </ProtectedRoute>
                           </Route>
 
