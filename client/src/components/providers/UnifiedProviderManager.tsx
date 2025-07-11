@@ -266,21 +266,11 @@ export function UnifiedProviderManager({
 
       {/* Testing Section */}
       {activeSection === 'test' && showTesting && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <TestTube className="w-4 h-4" />
-              Teste de Configuração
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProviderTesting
-              configuration={currentConfig}
-              onTest={testConfiguration}
-              isLoading={isLoading}
-            />
-          </CardContent>
-        </Card>
+        <ProviderTesting
+          configuration={currentConfig}
+          onTest={testConfiguration}
+          isLoading={isLoading}
+        />
       )}
 
       {/* Save Button */}
