@@ -786,57 +786,59 @@ export default function AgentStepsConfigNew({ agentId, agentName }: AgentStepsCo
             )}
           </Card>
 
-          <Separator />
+          <div className="space-y-6">
+            <Separator />
 
-          {/* Unified Provider Configuration */}
-          <div>
-            <Label className="text-base font-medium mb-4 block">
-              Configuração do Provedor IA {isMultiStep && `- Etapa ${index + 1}`}
-            </Label>
-            <UnifiedProviderManager
-              mode={showAdvancedMode ? "full-configuration" : "step-configuration"}
-              workflow={{
-                isMultiStep: isMultiStep,
-                steps: [{ configuration: step.configuration }]
-              }}
-              onConfigurationChange={(config) => updateStepConfiguration(index, config)}
-              showTesting={true}
-              showPromptConfiguration={false}
-              compact={!showAdvancedMode}
-            />
+            {/* Unified Provider Configuration */}
+            <div>
+              <Label className="text-base font-medium mb-4 block">
+                Configuração do Provedor IA {isMultiStep && `- Etapa ${index + 1}`}
+              </Label>
+              <UnifiedProviderManager
+                mode={showAdvancedMode ? "full-configuration" : "step-configuration"}
+                workflow={{
+                  isMultiStep: isMultiStep,
+                  steps: [{ configuration: step.configuration }]
+                }}
+                onConfigurationChange={(config) => updateStepConfiguration(index, config)}
+                showTesting={true}
+                showPromptConfiguration={false}
+                compact={!showAdvancedMode}
+              />
+            </div>
+
+            {/* Test results */}
+            {testResults[index] && (
+              <Card className="border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    Resultado do Teste
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {testResults[index].loading ? (
+                    <div className="text-center py-4">
+                      <TestTube className="w-6 h-6 animate-spin mx-auto mb-2" />
+                      <p>Testando etapa...</p>
+                    </div>
+                  ) : testResults[index].success ? (
+                    <div className="space-y-2">
+                      <Badge className="bg-green-100 text-green-800">Teste bem-sucedido</Badge>
+                      <pre className="bg-gray-50 p-3 rounded text-sm overflow-auto max-h-40">
+                        {JSON.stringify(testResults[index].data, null, 2)}
+                      </pre>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Badge className="bg-red-100 text-red-800">Erro no teste</Badge>
+                      <p className="text-red-600 text-sm">{testResults[index].error}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
-
-          {/* Test results */}
-          {testResults[index] && (
-            <Card className="border-blue-200">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
-                  Resultado do Teste
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {testResults[index].loading ? (
-                  <div className="text-center py-4">
-                    <TestTube className="w-6 h-6 animate-spin mx-auto mb-2" />
-                    <p>Testando etapa...</p>
-                  </div>
-                ) : testResults[index].success ? (
-                  <div className="space-y-2">
-                    <Badge className="bg-green-100 text-green-800">Teste bem-sucedido</Badge>
-                    <pre className="bg-gray-50 p-3 rounded text-sm overflow-auto max-h-40">
-                      {JSON.stringify(testResults[index].data, null, 2)}
-                    </pre>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Badge className="bg-red-100 text-red-800">Erro no teste</Badge>
-                    <p className="text-red-600 text-sm">{testResults[index].error}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
         </div>
       ))}
     </div>
