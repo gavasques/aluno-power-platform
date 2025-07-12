@@ -3,13 +3,14 @@ import { db } from "../db";
 import { amazonListingSessions, agents, agentUsage, agentGenerations, aiGenerationLogs } from "@shared/schema";
 import type { InsertAmazonListingSession, AmazonListingSession } from "@shared/schema";
 import { aiProviderService } from "./aiProviderService";
+import { CreditService } from "./creditService";
 
 import { storage } from "../storage";
 import crypto from "crypto";
 
 export class AmazonListingService {
   
-  // Função auxiliar para salvar logs de IA
+  // Função auxiliar para salvar logs de IA e descontar créditos
   async saveAiGenerationLog(
     userId: number,
     feature: string,
@@ -24,6 +25,15 @@ export class AmazonListingService {
     duration: number = 0
   ): Promise<void> {
     try {
+      // 1. DESCONTAR CRÉDITOS PRIMEIRO
+      let creditsUsed = 0;
+      try {
+        creditsUsed = await CreditService.deductCredits(userId, feature);
+      } catch (creditError) {
+        console.error(`❌ [CREDIT] Failed to deduct credits for ${feature}:`, creditError);
+        // Continue sem descontar créditos se der erro na configuração
+      }
+
       const logData = {
         userId,
         provider,
@@ -36,6 +46,7 @@ export class AmazonListingService {
         outputTokens,
         totalTokens,
         cost: cost.toString(),
+        creditsUsed: creditsUsed.toString(),
         duration,
         feature
       };
@@ -221,10 +232,10 @@ export class AmazonListingService {
 
       const duration = Date.now() - startTime;
       
-      // Salvar log da Etapa 1 - Análise de Avaliações
+      // Salvar log da Etapa 1 - Análise de Avaliações (com desconto de créditos)
       await this.saveAiGenerationLog(
         parseInt(session.idUsuario),
-        "amazon-listing-step1-analysis",
+        "agents.amazon_listing",
         prompt,
         analysisResult,
         "openai",
@@ -428,10 +439,10 @@ export class AmazonListingService {
 
       const duration = Date.now() - startTime;
       
-      // Salvar log da Etapa 2 - Geração de Títulos
+      // Salvar log da Etapa 2 - Geração de Títulos (com desconto de créditos)
       await this.saveAiGenerationLog(
         parseInt(session.idUsuario),
-        "amazon-listing-step2-titles",
+        "agents.amazon_listing",
         prompt,
         titlesResult,
         "openai",

@@ -144,6 +144,16 @@ class InfographicService {
       const responseText = (response.content[0] as any)?.text || '';
       const conceptsData = this.parseClaudeResponse(responseText, productData);
 
+      // 1. DESCONTAR CRÉDITOS ANTES DE SALVAR
+      const { CreditService } = await import('./creditService');
+      try {
+        await CreditService.deductCredits(userId, 'agents.infographic_step1');
+        console.log(`💰 [CREDIT] Deducted credits for infographic step 1 - User: ${userId}`);
+      } catch (creditError) {
+        console.error('❌ [CREDIT] Failed to deduct credits for infographic step 1:', creditError);
+        throw new Error('Créditos insuficientes para gerar infográfico');
+      }
+
       // Salvar no banco usando Drizzle
       const insertData: InsertInfographic = {
         userId,
@@ -263,6 +273,16 @@ class InfographicService {
 
       const responseText = (response.content[0] as any)?.text || '';
       const promptData = this.parsePromptResponse(responseText);
+
+      // 1. DESCONTAR CRÉDITOS PARA STEP 2 ANTES DE ATUALIZAR
+      const { CreditService } = await import('./creditService');
+      try {
+        await CreditService.deductCredits(userId, 'agents.infographic_step2');
+        console.log(`💰 [CREDIT] Deducted credits for infographic step 2 - User: ${userId}`);
+      } catch (creditError) {
+        console.error('❌ [CREDIT] Failed to deduct credits for infographic step 2:', creditError);
+        throw new Error('Créditos insuficientes para otimizar prompt');
+      }
 
       // Atualizar análise com dados da geração
       await db.update(infographics)

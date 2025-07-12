@@ -1,9 +1,10 @@
 import { db } from "../db";
 import { aiGenerationLogs, aiImgGenerationLogs } from "@shared/schema";
+import { CreditService } from "./creditService";
 
 export class LoggingService {
   /**
-   * Salva logs para ferramentas de IA (texto)
+   * Salva logs para ferramentas de IA (texto) COM desconto automático de créditos
    */
   static async saveAiLog(
     userId: number,
@@ -20,6 +21,16 @@ export class LoggingService {
     duration: number = 0
   ): Promise<void> {
     try {
+      // 1. DESCONTAR CRÉDITOS AUTOMATICAMENTE (se creditsUsed for 0)
+      if (creditsUsed === 0) {
+        try {
+          creditsUsed = await CreditService.deductCredits(userId, feature);
+        } catch (creditError) {
+          console.error(`❌ [CREDIT] Failed to deduct credits for ${feature}:`, creditError);
+          // Continue sem descontar créditos se der erro na configuração
+        }
+      }
+
       const logData = {
         userId,
         provider,

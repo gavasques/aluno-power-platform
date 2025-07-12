@@ -284,22 +284,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       const responseText = data.response;
       const creditsToDeduct = getFeatureCost(FEATURE_CODE);
 
-      // Descontar créditos dinamicamente do usuário
-      try {
-        await fetch('/api/credits/deduct', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          },
-          body: JSON.stringify({
-            amount: creditsToDeduct,
-            reason: 'Geração de Bullet Points com IA'
-          })
-        });
-      } catch (creditError) {
-        console.error('Erro ao descontar crédito:', creditError);
-      }
+      // Créditos já foram deduzidos automaticamente pelo backend
 
       // Salvar log da geração (somente se usuário estiver logado)
       if (user && user.id) {

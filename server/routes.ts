@@ -2185,7 +2185,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       global.customerServiceSessions.set(sessionId, sessionData);
 
-      // Save to AI Generation Logs table
+      // Descontar créditos e salvar no AI Generation Logs
+      let creditsUsed = 0;
+      try {
+        // Importar CreditService
+        const { CreditService } = await import('./services/creditService');
+        creditsUsed = await CreditService.deductCredits(user.id, 'agents.amazon_customer_service');
+      } catch (creditError) {
+        console.error('❌ [CREDIT] Failed to deduct credits:', creditError);
+      }
+
       try {
         const fullPrompt = `${systemPrompt}\n\n${processedPrompt}`;
         
@@ -2201,11 +2210,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           outputTokens,
           totalTokens,
           cost: totalCost.toString(),
+          creditsUsed: creditsUsed.toString(),
           duration: processingTime,
           feature: 'amazon-customer-service'
         });
         
-        console.log(`💾 [AI_LOG] Saved generation log - User: ${user.id}, Model: ${agent.model}, Cost: $${totalCost.toFixed(6)}, Tokens: ${totalTokens}`);
+        console.log(`💾 [AI_LOG] Saved generation log - User: ${user.id}, Model: ${agent.model}, Cost: $${totalCost.toFixed(6)}, Credits: ${creditsUsed}, Tokens: ${totalTokens}`);
       } catch (logError) {
         console.error('❌ [AI_LOG] Error saving generation log:', logError);
       }
