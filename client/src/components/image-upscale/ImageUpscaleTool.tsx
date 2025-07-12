@@ -5,9 +5,9 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Sparkles, ZoomIn, Upload, Clock, Download, Coins } from 'lucide-react';
-import { ImageUploadComponent } from '../background-removal/ImageUploadComponent';
-import { ProcessingStatusComponent } from '../background-removal/ProcessingStatusComponent';
-import { ImageDownloadComponent } from '../background-removal/ImageDownloadComponent';
+import ImageUploadComponent from '../background-removal/ImageUploadComponent';
+import ProcessingStatusComponent from '../background-removal/ProcessingStatusComponent';
+import ImageDownloadComponent from '../background-removal/ImageDownloadComponent';
 
 interface ImageUpscaleParams {
   scale: '2' | '4' | '6' | '8' | '16';
