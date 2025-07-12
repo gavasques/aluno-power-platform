@@ -76,7 +76,7 @@ const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
 const BackgroundRemovalPro = lazy(() => import("./pages/tools/BackgroundRemovalPro"));
 const LogoGeneratorPro = lazy(() => import("./pages/tools/LogoGeneratorPro"));
-const ImageUpscaleTool = lazy(() => import("./components/image-upscale/ImageUpscaleTool"));
+const ImageUpscalePro = lazy(() => import("./pages/tools/ImageUpscalePro"));
 const UserDashboard = lazy(() => import("./pages/user/Dashboard"));
 const UserUsage = lazy(() => import("./pages/user/Usage"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
@@ -473,11 +473,9 @@ function App() {
                           
                           <Route path="/ferramentas/upscale-pro">
                             <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <ImageUpscaleTool />
-                                </Suspense>
-                              </Layout>
+                              <Suspense fallback={<PageLoader />}>
+                                <ImageUpscalePro />
+                              </Suspense>
                             </ProtectedRoute>
                           </Route>
                           
