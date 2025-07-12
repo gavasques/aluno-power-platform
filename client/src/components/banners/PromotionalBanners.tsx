@@ -3,7 +3,7 @@ import { ExternalLink, ShoppingBag, Sparkles, ArrowRight } from "lucide-react";
 export function PromotionalBanners() {
   const banners = [
     {
-      title: "Aproveite e venda Moda na Amazon sem Pagar Comissão!",
+      title: "Venda Moda na Amazon com 0% de Comissão !!!",
       description: "Cadastre-se na Amazon pelo Link abaixo, e participe dessa promoção. Válido apenas para as categorias relacionadas a Moda, Relógios, Bolsas e Mochilas.",
       link: "http://bit.ly/4kyfzew",
       note: "Válido para novas contas",
@@ -33,7 +33,7 @@ export function PromotionalBanners() {
       {banners.map((banner, index) => (
         <div
           key={index}
-          className={`relative overflow-hidden rounded-2xl ${banner.bgColor} p-8 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group`}
+          className={`relative overflow-hidden rounded-2xl ${banner.bgColor} p-8 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group min-h-[320px] flex flex-col`}
           onClick={() => window.open(banner.link, '_blank')}
         >
           {/* Background Pattern */}
@@ -47,7 +47,7 @@ export function PromotionalBanners() {
           <div className={`absolute inset-0 bg-gradient-to-br ${banner.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
           
           {/* Content */}
-          <div className="relative z-10">
+          <div className="relative z-10 flex flex-col h-full">
             {/* Icon */}
             <div className={`${banner.iconBg} w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
               <banner.icon className="h-8 w-8 text-white" />
@@ -59,12 +59,12 @@ export function PromotionalBanners() {
             </h3>
 
             {/* Description */}
-            <p className="text-gray-600 mb-6 leading-relaxed">
+            <p className="text-gray-600 mb-6 leading-relaxed flex-grow">
               {banner.description}
             </p>
 
-            {/* CTA Button */}
-            <div className="flex items-center justify-between">
+            {/* CTA Button - Always at bottom */}
+            <div className="flex items-center justify-between mt-auto">
               <div className={`${banner.buttonBg} text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-md transform group-hover:translate-x-1 transition-all duration-300`}>
                 <span>Cadastre-se</span>
                 <ArrowRight className="h-5 w-5" />
