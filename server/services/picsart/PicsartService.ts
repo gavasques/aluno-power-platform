@@ -17,6 +17,7 @@ import { eq, and, desc } from 'drizzle-orm';
 import crypto from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
+import FormData from 'form-data';
 
 interface PicsartAPIResponse {
   data: {
@@ -49,6 +50,11 @@ interface LogoGenerationParams {
   reference_image_url?: string;
   reference_image_id?: string;
   count?: number; // 1-10, defaults to 2
+}
+
+interface ImageUpscaleParams {
+  scale?: '2' | '4' | '6' | '8' | '16';
+  format?: 'PNG' | 'JPG' | 'WEBP';
 }
 
 interface ProcessingOptions {
@@ -98,10 +104,23 @@ export class PicsartService {
           color_tone: 'Auto',
           count: 2
         },
-        costPerUse: '3.00',
+        costPerUse: '10.00',
         category: 'ai_design',
         supportedFormats: ['PNG', 'JPG'],
         maxFileSize: 5242880 // 5MB for reference images
+      },
+      {
+        toolName: 'image_upscale',
+        displayName: 'Upscale PRO',
+        description: 'Ultra upscale images up to 16x with AI enhancement',
+        endpoint: '/v1/upscale-ultra',
+        defaultParameters: {
+          scale: '2'
+        },
+        costPerUse: '4.00',
+        category: 'ai_enhancement', 
+        supportedFormats: ['PNG', 'JPG', 'JPEG', 'WEBP'],
+        maxFileSize: 10485760 // 10MB
       }
     ];
 
@@ -718,6 +737,220 @@ export class PicsartService {
       }
 
       console.error(`💥 [PICSART] Logo generation failed after ${duration}ms:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Process image upscaling with Picsart Ultra Upscale API
+   */
+  async processImageUpscale(
+    imageData: string,
+    fileName: string,
+    parameters: ImageUpscaleParams = {}
+  ): Promise<PicsartAPIResponse> {
+    console.log(`🔍 [PICSART] Starting image upscale for: ${fileName}`);
+    const startTime = Date.now();
+
+    try {
+      // Upload image to temporary storage first
+      const imagePath = await this.uploadBase64Image(imageData, fileName);
+      
+      // Create FormData for the API request
+      const formData = new FormData();
+      formData.append('image', fs.createReadStream(imagePath));
+      formData.append('scale', parameters.scale || '2');
+      
+      if (parameters.format) {
+        formData.append('format', parameters.format);
+      }
+
+      // Make API request to Picsart
+      const response = await fetch(`${this.baseUrl}/v1/upscale-ultra`, {
+        method: 'POST',
+        headers: {
+          'X-Picsart-API-Key': this.apiKey,
+        },
+        body: formData
+      });
+
+      const result: PicsartAPIResponse = await response.json();
+      const duration = Date.now() - startTime;
+
+      if (!response.ok) {
+        console.error(`❌ [PICSART] Upscale API error (${response.status}):`, result);
+        throw new Error(`Picsart Upscale API error: ${response.status} - ${JSON.stringify(result)}`);
+      }
+
+      console.log(`✅ [PICSART] Image upscale started in ${duration}ms`);
+      return result;
+
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error(`❌ [PICSART] Image upscale failed after ${duration}ms:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get upscale result
+   */
+  async getUpscaleResult(jobId: string): Promise<{
+    status: string;
+    data?: {
+      url: string;
+      id: string;
+    };
+  }> {
+    console.log(`🔍 [PICSART] Checking upscale result for job: ${jobId}`);
+    const startTime = Date.now();
+
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/upscale-ultra/getresult`, {
+        method: 'GET',
+        headers: {
+          'X-Picsart-API-Key': this.apiKey,
+          'X-Picsart-Job-Id': jobId
+        }
+      });
+
+      const result = await response.json();
+      const duration = Date.now() - startTime;
+
+      if (!response.ok) {
+        console.error(`❌ [PICSART] Upscale result check failed (${response.status}):`, result);
+        throw new Error(`Picsart Upscale API error: ${response.status} - ${JSON.stringify(result)}`);
+      }
+
+      console.log(`✅ [PICSART] Upscale result checked in ${duration}ms`);
+      return result;
+
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error(`❌ [PICSART] Upscale result check failed after ${duration}ms:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Complete image upscale process end-to-end
+   */
+  async processImageWithUpscale(
+    userId: number,
+    imageData: string,
+    fileName: string,
+    parameters: ImageUpscaleParams = {}
+  ): Promise<{
+    sessionId: string;
+    processedImageUrl: string;
+    processedImageBase64: string;
+    originalFileName: string;
+    parameters: ImageUpscaleParams;
+    creditsUsed: number;
+    processingTime: number;
+    totalTime: number;
+  }> {
+    console.log(`🚀 [PICSART] Starting complete upscale process for user ${userId}`);
+    const startTime = Date.now();
+    let sessionId = '';
+
+    try {
+      // Step 1: Create session
+      sessionId = await this.createSession({
+        userId,
+        tool: 'image_upscale',
+        originalImageUrl: `data:image/png;base64,${imageData}`,
+        originalFileName: fileName,
+        parameters
+      });
+
+      console.log(`🎨 [PICSART] Created session: ${sessionId} for tool: image_upscale`);
+
+      // Step 2: Process upscale
+      console.log(`🎨 [PICSART] Starting image upscale with parameters:`, parameters);
+      const upscaleResult = await this.processImageUpscale(imageData, fileName, parameters);
+      
+      if (!upscaleResult.data?.id) {
+        throw new Error('Invalid upscale response: missing job ID');
+      }
+
+      const jobId = upscaleResult.data.id;
+      console.log(`🎨 [PICSART] Job ID: ${jobId}`);
+
+      // Step 3: Poll for result (Picsart uses polling for job status)
+      let upscaleImage: any = null;
+      const maxAttempts = 30; // 60 seconds max
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        
+        upscaleImage = await this.getUpscaleResult(jobId);
+        
+        // Check if upscale is complete
+        if ((upscaleImage.status === 'completed' || upscaleImage.status === 'success') && upscaleImage.data) {
+          console.log(`🎉 [PICSART] Image upscale completed!`);
+          break;
+        }
+        
+        if (upscaleImage.status === 'failed' || upscaleImage.status === 'error') {
+          throw new Error(`Image upscale failed with status: ${upscaleImage.status}`);
+        }
+        
+        attempts++;
+        console.log(`⏳ [PICSART] Image upscale in progress... (${attempts}/${maxAttempts})`);
+      }
+
+      if (!upscaleImage || (upscaleImage.status !== 'completed' && upscaleImage.status !== 'success') || !upscaleImage.data) {
+        throw new Error(`Image upscale timed out or failed. Status: ${upscaleImage?.status}, Has data: ${!!upscaleImage?.data}`);
+      }
+
+      // Step 4: Download processed image as base64
+      const processedImageBase64 = await this.downloadImageAsBase64(upscaleImage.data.url);
+
+      // Step 5: Update session with results
+      const duration = Date.now() - startTime;
+      const toolConfig = await this.getToolConfig('image_upscale');
+      
+      await this.updateSession(sessionId, {
+        status: 'completed',
+        processedImageUrl: upscaleImage.data.url,
+        picsartJobId: jobId,
+        duration,
+        creditsUsed: toolConfig?.costPerUse || '4.00',
+        metadata: {
+          ...((await this.getSession(sessionId))?.metadata || {}),
+          scale: parameters.scale || '2',
+          format: parameters.format || 'PNG'
+        }
+      });
+
+      console.log(`🎉 [PICSART] Image upscale process finished in ${duration}ms`);
+
+      return {
+        sessionId,
+        processedImageUrl: upscaleImage.data.url,
+        processedImageBase64,
+        originalFileName: fileName,
+        parameters,
+        creditsUsed: parseFloat(toolConfig?.costPerUse || '4.00'),
+        processingTime: duration,
+        totalTime: duration
+      };
+
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      
+      // Update session with error if session was created
+      if (sessionId) {
+        await this.updateSession(sessionId, {
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          duration
+        });
+      }
+
+      console.error(`💥 [PICSART] Image upscale failed after ${duration}ms:`, error);
       throw error;
     }
   }
