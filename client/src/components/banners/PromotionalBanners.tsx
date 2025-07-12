@@ -5,7 +5,7 @@ export function PromotionalBanners() {
     {
       title: "Venda Moda na Amazon com 0% de Comissão !!!",
       description: "Cadastre-se na Amazon pelo Link abaixo, e participe dessa promoção. Válido apenas para as categorias relacionadas a Moda, Relógios, Bolsas e Mochilas.",
-      link: "http://bit.ly/4kyfzew",
+      link: "https://venda.amazon.com.br/?ld=elbrsoa_atesliberdade_virtualsoftsrp2025na",
       note: "Válido para novas contas",
       icon: ShoppingBag,
       gradient: "from-purple-600 via-pink-600 to-rose-600",
@@ -16,8 +16,8 @@ export function PromotionalBanners() {
       size: "large",
     },
     {
-      title: "Venda na Amazon com nossa ajuda + Curso Grátis!",
-      description: "Tenha nossa ajuda nos passos iniciais, e ainda receba nosso curso \"Amazon Start\" de graça!",
+      title: "Venda na Amazon e tenha nossos Benefícios",
+      description: "Cadastre-se com nosso link, e recebe o curso básico de R$ 297 por R$ 0, tenha acesso a lista de fornecedores, e algumas ferramentas de nosso portal. E conte com nossa ajuda no cadastro de sua loja na Amazon.",
       link: "https://amzn.to/3RTu5Sk",
       note: "Válido para novas contas",
       icon: Sparkles,
@@ -122,7 +122,7 @@ export function PromotionalBanners() {
             <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
               {/* Icon */}
               <div className={`${banners[2].iconBg} w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
-                <banners[2].icon className="h-7 w-7 text-white" />
+                <Search className="h-7 w-7 text-white" />
               </div>
 
               {/* Text Content */}
