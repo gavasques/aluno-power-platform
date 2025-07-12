@@ -181,20 +181,25 @@ export default function ImageUpscaleTool() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="space-y-6">
-        {/* Tool Description */}
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-              <ZoomIn className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">Aumente a qualidade das suas imagens com IA</h2>
-              <p className="text-muted-foreground">Melhore a resolução e nitidez das suas imagens usando inteligência artificial avançada</p>
-            </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+            <ZoomIn className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Upscale PRO</h1>
+            <p className="text-muted-foreground">Aumente a qualidade das suas imagens com IA</p>
           </div>
         </div>
+        <Badge variant="secondary" className="flex items-center gap-2 px-3 py-1">
+          <Coins className="h-4 w-4" />
+          4 créditos por uso
+        </Badge>
+      </div>
+
+      <Separator />
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -349,7 +354,6 @@ export default function ImageUpscaleTool() {
           )}
         </div>
       </div>
-    </div>
     </div>
   );
 }
