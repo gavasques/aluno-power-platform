@@ -77,12 +77,16 @@ const logoHistorySchema = z.object({
 
 // Ultra enhance validation schema - handle FormData string conversion properly
 const ultraEnhanceSchema = z.object({
-  upscale_factor: z.union([
-    z.number(),
-    z.string().transform(val => parseInt(val, 10))
-  ]).refine(val => val >= 2 && val <= 16, {
-    message: "Upscale factor must be between 2 and 16"
-  }).default(2),
+  upscale_factor: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') {
+        const parsed = parseInt(val, 10);
+        return isNaN(parsed) ? val : parsed;
+      }
+      return val;
+    },
+    z.number().int().min(2).max(16)
+  ).default(2),
   format: z.enum(['JPG', 'PNG', 'WEBP']).default('JPG')
 });
 
