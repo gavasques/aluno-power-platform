@@ -206,7 +206,7 @@ export default function ImageUpscaleTool() {
         {/* Left Column - Upload & Parameters */}
         <div className="lg:col-span-1 space-y-6">
           {/* Image Upload */}
-          <Card>
+          <Card className="border border-border shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
@@ -230,7 +230,7 @@ export default function ImageUpscaleTool() {
           </Card>
 
           {/* Parameters */}
-          <Card>
+          <Card className="border border-border shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
@@ -291,7 +291,7 @@ export default function ImageUpscaleTool() {
         <div className="lg:col-span-2 space-y-6">
           {/* Processing Status */}
           {(isProcessing || result) && (
-            <Card>
+            <Card className="border border-border shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {isProcessing ? (
@@ -333,7 +333,7 @@ export default function ImageUpscaleTool() {
 
           {/* Action Button */}
           {!result && !isProcessing && (
-            <Card>
+            <Card className="border border-border shadow-sm">
               <CardContent className="pt-6">
                 <button
                   onClick={processImage}
