@@ -18,10 +18,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Download, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Sparkles, Download, Loader2, AlertCircle, CheckCircle, History } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import LogoHistoryModal from './LogoHistoryModal';
 
 interface LogoGeneratorToolProps {
   onLogoGenerated?: (results: any) => void;
@@ -62,6 +63,7 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
   const [logos, setLogos] = useState<LogoResult[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const { toast } = useToast();
 
   // Get feature cost for dynamic pricing
@@ -208,11 +210,20 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
           <CardDescription>
             Crie logomarcas profissionais com inteligência artificial
           </CardDescription>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between">
             <Badge variant="outline" className="bg-purple-50 text-purple-700">
               <Sparkles className="w-3 h-3 mr-1" />
               {logoGenerationCost} créditos por uso
             </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHistoryModal(true)}
+              className="flex items-center gap-2"
+            >
+              <History className="w-4 h-4" />
+              Ver Histórico
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -410,6 +421,12 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
           </CardContent>
         </Card>
       )}
+
+      {/* Logo History Modal */}
+      <LogoHistoryModal 
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+      />
     </div>
   );
 };

@@ -16,7 +16,7 @@ import { picsartService } from '../services/picsart/PicsartService';
 import { requireAuth } from '../security';
 import { db } from '../db';
 import { users, aiImgGenerationLogs } from '../../shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql, and, ilike, desc } from 'drizzle-orm';
 // Credit deduction will be handled by storage service for now
 // import { deductCreditsWithValidation } from '../services/CreditService';
 
@@ -66,6 +66,13 @@ const logoGenerationSchema = z.object({
   referenceImage: z.string().optional(), // base64 encoded image
   referenceImageUrl: z.string().optional(),
   count: z.number().int().min(1).max(10).default(2)
+});
+
+// Logo history query schema
+const logoHistorySchema = z.object({
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(50).default(20),
+  search: z.string().optional()
 });
 
 // Initialize Picsart configurations
@@ -583,6 +590,121 @@ router.post('/logo-generation', requireAuth, async (req, res) => {
       error: 'Logo generation failed',
       details: error instanceof Error ? error.message : 'Unknown error',
       processingTime: totalDuration
+    });
+  }
+});
+
+/**
+ * GET /api/picsart/logo-history
+ * Get user's logo generation history with pagination and search
+ */
+router.get('/logo-history', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+    const search = req.query.search as string;
+    const offset = (page - 1) * limit;
+
+    console.log(`📋 [PICSART] Getting logo history for user ${userId} (page ${page}, limit ${limit})`);
+
+    // Base query conditions
+    let whereConditions = and(
+      eq(aiImgGenerationLogs.userId, userId),
+      eq(aiImgGenerationLogs.feature, 'logo_generation')
+    );
+
+    // Add search condition if provided
+    if (search && search.trim()) {
+      whereConditions = and(
+        whereConditions,
+        sql`(${aiImgGenerationLogs.prompt} ILIKE ${`%${search}%`} OR ${aiImgGenerationLogs.originalImageName} ILIKE ${`%${search}%`})`
+      );
+    }
+
+    const logoHistory = await db.select({
+      id: aiImgGenerationLogs.id,
+      originalImageName: aiImgGenerationLogs.originalImageName,
+      generatedImageUrl: aiImgGenerationLogs.generatedImageUrl,
+      prompt: aiImgGenerationLogs.prompt,
+      status: aiImgGenerationLogs.status,
+      cost: aiImgGenerationLogs.cost,
+      creditsUsed: aiImgGenerationLogs.creditsUsed,
+      duration: aiImgGenerationLogs.duration,
+      sessionId: aiImgGenerationLogs.sessionId,
+      metadata: aiImgGenerationLogs.metadata,
+      createdAt: aiImgGenerationLogs.createdAt
+    })
+    .from(aiImgGenerationLogs)
+    .where(whereConditions)
+    .orderBy(desc(aiImgGenerationLogs.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+    // Get total count for pagination
+    const totalResult = await db.select({ count: sql<number>`count(*)` })
+      .from(aiImgGenerationLogs)
+      .where(whereConditions);
+
+    const totalCount = totalResult[0]?.count || 0;
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasMore = page < totalPages;
+
+    // Process metadata to extract additional info
+    const processedHistory = logoHistory.map(item => {
+      let parsedMetadata = {};
+      let logoUrls: string[] = [];
+      
+      try {
+        parsedMetadata = JSON.parse(item.metadata || '{}');
+        logoUrls = (parsedMetadata as any).logoUrls || [];
+      } catch (e) {
+        console.warn('Failed to parse metadata:', e);
+      }
+
+      // Extract brand name from prompt
+      const brandMatch = item.prompt?.match(/Brand: ([^,]+)/);
+      const brandName = brandMatch ? brandMatch[1] : 'Unknown Brand';
+
+      // Extract business description from prompt
+      const businessMatch = item.prompt?.match(/Business: (.+)$/);
+      const businessDescription = businessMatch ? businessMatch[1] : '';
+
+      return {
+        ...item,
+        brandName,
+        businessDescription,
+        logoUrls,
+        parsedMetadata,
+        formattedDate: new Date(item.createdAt).toLocaleString('pt-BR'),
+        formattedCost: parseFloat(item.cost || '0').toFixed(2)
+      };
+    });
+
+    res.json({
+      success: true,
+      message: 'Logo history retrieved successfully',
+      data: {
+        logos: processedHistory,
+        pagination: {
+          page,
+          limit,
+          totalCount,
+          totalPages,
+          hasMore,
+          hasPrevious: page > 1
+        }
+      }
+    });
+
+    console.log(`✅ [PICSART] Logo history retrieved: ${logoHistory.length} items for user ${userId}`);
+
+  } catch (error) {
+    console.error('❌ [PICSART] Get logo history failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve logo history',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
