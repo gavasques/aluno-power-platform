@@ -77,7 +77,7 @@ const logoHistorySchema = z.object({
 
 // Ultra enhance validation schema
 const ultraEnhanceSchema = z.object({
-  upscale_factor: z.string().transform(val => parseInt(val, 10)).pipe(z.number().int().min(2).max(16)).default('2'),
+  upscale_factor: z.coerce.number().int().min(2).max(16).default(2),
   format: z.enum(['JPG', 'PNG', 'WEBP']).default('JPG')
 });
 
