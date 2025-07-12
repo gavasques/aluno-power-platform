@@ -66,6 +66,17 @@ export default function ImageUpscaleTool() {
     });
   };
 
+  const handleImageSelect = (imageData: string, fileName: string) => {
+    setImageData(imageData);
+    setFileName(fileName);
+  };
+
+  const handleImageRemove = () => {
+    setImageData('');
+    setFileName('');
+    setResult(null);
+  };
+
   const handleScaleChange = (value: string) => {
     setParameters(prev => ({
       ...prev,
@@ -207,9 +218,12 @@ export default function ImageUpscaleTool() {
             </CardHeader>
             <CardContent>
               <ImageUploadComponent
-                onImageUpload={handleImageUpload}
-                maxSizeMB={10}
-                acceptedFormats={['PNG', 'JPG', 'JPEG', 'WEBP']}
+                onImageSelect={handleImageSelect}
+                onImageRemove={handleImageRemove}
+                selectedImage={imageData}
+                fileName={fileName}
+                maxFileSize={10 * 1024 * 1024}
+                supportedFormats={['PNG', 'JPG', 'JPEG', 'WEBP']}
                 disabled={isProcessing}
               />
             </CardContent>
