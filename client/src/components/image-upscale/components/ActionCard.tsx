@@ -3,7 +3,7 @@
  */
 
 import { Sparkles } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ActionCardProps {
   onProcess: () => void;

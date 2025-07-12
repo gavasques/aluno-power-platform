@@ -8,13 +8,15 @@ import {
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle,
+  CardTitle
+} from '@/components/ui/card';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui';
+} from '@/components/ui/select';
 import { SCALE_OPTIONS, FORMAT_OPTIONS } from '../constants';
 import type { ImageUpscaleParams } from '../types';
 

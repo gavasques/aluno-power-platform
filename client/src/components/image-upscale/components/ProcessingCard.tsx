@@ -3,7 +3,7 @@
  */
 
 import { Clock, Download } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ProcessingStatusComponent from '@/components/background-removal/ProcessingStatusComponent';
 import ImageDownloadComponent from '@/components/background-removal/ImageDownloadComponent';
 import type { ProcessingState, UpscaleResult, ImageUpscaleParams } from '../types';

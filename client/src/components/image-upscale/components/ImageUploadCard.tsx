@@ -3,7 +3,7 @@
  */
 
 import { Upload } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import ImageUploadComponent from '@/components/background-removal/ImageUploadComponent';
 import { UPSCALE_CONFIG } from '../constants';
 
