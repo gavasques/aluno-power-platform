@@ -430,8 +430,9 @@ router.post('/logo-generation', requireAuth, async (req, res) => {
       });
     }
     
-    const creditsNeeded = parseFloat(toolConfig.costPerUse);
-    console.log(`💰 [PICSART] Credits needed: ${creditsNeeded} for user ${userId}`);
+    const creditsPerLogo = parseFloat(toolConfig.costPerUse);
+    const creditsNeeded = creditsPerLogo * count;
+    console.log(`💰 [PICSART] Credits needed: ${creditsPerLogo} × ${count} logos = ${creditsNeeded} for user ${userId}`);
     
     // Check user credits
     const userCredits = await db.select({ credits: users.credits })

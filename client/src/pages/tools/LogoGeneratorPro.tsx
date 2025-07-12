@@ -26,7 +26,7 @@ const LogoGeneratorPro: React.FC = () => {
 
   const logoGenerationCost = featureCosts?.data?.byCategory?.['Ferramentas']?.find(
     (item: any) => item.featureName === 'tools.logo_generation'
-  )?.costPerUse || 3;
+  )?.costPerUse || 10;
 
   return (
     <>
@@ -62,7 +62,7 @@ const LogoGeneratorPro: React.FC = () => {
           <div className="flex items-center justify-center gap-2 mb-6">
             <Badge variant="outline" className="bg-purple-50 text-purple-700 px-4 py-2">
               <Sparkles className="w-4 h-4 mr-2" />
-              {logoGenerationCost} créditos por uso
+              {logoGenerationCost} créditos por logo
             </Badge>
           </div>
 

@@ -72,9 +72,11 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const logoGenerationCost = featureCosts?.data?.byCategory?.['Ferramentas']?.find(
+  const logoGenerationCostPerLogo = featureCosts?.data?.byCategory?.['Ferramentas']?.find(
     (item: any) => item.featureName === 'tools.logo_generation'
-  )?.costPerUse || 3;
+  )?.costPerUse || 10;
+  
+  const totalCost = logoGenerationCostPerLogo * formData.count;
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -213,7 +215,7 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
           <div className="flex items-center justify-between">
             <Badge variant="outline" className="bg-purple-50 text-purple-700">
               <Sparkles className="w-3 h-3 mr-1" />
-              {logoGenerationCost} créditos por uso
+              {totalCost} créditos ({logoGenerationCostPerLogo} por logo × {formData.count})
             </Badge>
             <Button
               variant="outline"
