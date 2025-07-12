@@ -324,6 +324,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 12, 2025 - 12:42 AM**: ✅ LOGO GENERATOR CREDIT SYSTEM FULLY CORRECTED AND VERIFIED - 10 CREDITS PER LOGO WITH QUANTITY SCALING
+  - **Frontend Fixed**: Updated Ferramentas.tsx to show "10 créditos" instead of hardcoded "3 créditos"
+  - **Credit Calculation Working**: Backend correctly calculates 10 × quantity (e.g., 2 logos = 20 credits)
+  - **Database Updated**: Both picsart_tool_configs and feature_costs tables set to 10.00 cost per use
+  - **Dynamic Pricing Display**: UI shows "X créditos (10 por logo × quantidade)" in real-time
+  - **Credit Deduction Verified**: System properly deducts credits before processing (100 → 80 for 2 logos)
+  - **Refund System Working**: Credits refunded in case of API failure (partial refund for partial failures)
+  - **Testing Confirmed**: Full credit workflow tested with actual API calls and verified in logs
+
 - **January 12, 2025 - 12:10 AM**: ✅ PICSART LOGO GENERATION SYSTEM FULLY OPERATIONAL - COMPLETE END-TO-END FUNCTIONALITY CONFIRMED
   - **System Status**: ✅ FULLY FUNCTIONAL - Logo generation working end-to-end
   - **Authentication Working**: Correct 'X-Picsart-API-Key' header implementation verified

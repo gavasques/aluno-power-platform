@@ -49,7 +49,7 @@ const ferramentas = [
     href: "/ferramentas/logo-generator-pro",
     icon: Palette,
     category: "Design",
-    credits: 3,
+    credits: 10,
     permission: "tools.logo_generation"
   },
   {
