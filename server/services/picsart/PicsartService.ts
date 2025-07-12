@@ -558,6 +558,7 @@ export class PicsartService {
     try {
       console.log(`🔍 [PICSART] Checking logo generation result for inference: ${inferenceId}`);
 
+      // Use the correct endpoint for status check
       const response = await fetch(`https://genai-api.picsart.io/v1/logo/inferences/${inferenceId}`, {
         method: 'GET',
         headers: {
@@ -576,6 +577,7 @@ export class PicsartService {
 
       console.log(`✅ [PICSART] Logo result check completed in ${duration}ms`);
       console.log(`🎨 [PICSART] Status: ${result.status}`);
+      console.log(`🎨 [PICSART] Response data:`, JSON.stringify(result, null, 2));
 
       return result;
     } catch (error) {
@@ -623,20 +625,22 @@ export class PicsartService {
         
         logoResult = await this.getLogoResult(inferenceId);
         
-        if (logoResult.status === 'completed' && logoResult.data) {
+        // Check if generation is complete (Picsart uses 'success' status)
+        if ((logoResult.status === 'completed' || logoResult.status === 'success') && logoResult.data) {
+          console.log(`🎉 [PICSART] Logo generation completed! Found ${logoResult.data.length} logos`);
           break;
         }
         
-        if (logoResult.status === 'failed') {
-          throw new Error('Logo generation failed');
+        if (logoResult.status === 'failed' || logoResult.status === 'error') {
+          throw new Error(`Logo generation failed with status: ${logoResult.status}`);
         }
         
         attempts++;
         console.log(`⏳ [PICSART] Logo generation in progress... (${attempts}/${maxAttempts})`);
       }
 
-      if (!logoResult || logoResult.status !== 'completed' || !logoResult.data) {
-        throw new Error('Logo generation timed out or failed');
+      if (!logoResult || (logoResult.status !== 'completed' && logoResult.status !== 'success') || !logoResult.data) {
+        throw new Error(`Logo generation timed out or failed. Status: ${logoResult?.status}, Has data: ${!!logoResult?.data}`);
       }
 
       // Step 4: Download all logos as base64
