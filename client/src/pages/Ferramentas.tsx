@@ -53,6 +53,15 @@ const ferramentas = [
     permission: "tools.ultra_enhance"
   },
   {
+    title: "Upscale PRO",
+    description: "Ampliação profissional de imagens com IA (2x-8x)",
+    href: "/ferramentas/upscale-pro",
+    icon: ImageIcon,
+    category: "Imagem",
+    credits: 4,
+    permission: "tools.upscale_pro"
+  },
+  {
     title: "Gerador de Logomarcas PRO",
     description: "Crie logomarcas profissionais com inteligência artificial",
     href: "/ferramentas/logo-generator-pro",

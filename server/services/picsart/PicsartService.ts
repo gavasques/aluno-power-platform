@@ -121,6 +121,20 @@ export class PicsartService {
         category: 'ai_enhancement',
         supportedFormats: ['PNG', 'JPG', 'WEBP'],
         maxFileSize: 10485760 // 10MB for upscaling
+      },
+      {
+        toolName: 'upscale_pro',
+        displayName: 'Upscale PRO',
+        description: 'Professional image upscaling with AI-powered enhancement (up to 8x)',
+        endpoint: '/tools/1.0/upscale',
+        defaultParameters: {
+          upscale_factor: 2,
+          format: 'PNG'
+        },
+        costPerUse: '4.00',
+        category: 'ai_enhancement',
+        supportedFormats: ['PNG', 'JPG', 'WEBP'],
+        maxFileSize: 10485760 // 10MB for upscaling
       }
     ];
 
@@ -711,6 +725,99 @@ export class PicsartService {
       
     } catch (error) {
       console.error(`❌ [PICSART] Ultra enhance failed after ${Date.now() - startTime}ms:`, error);
+      
+      // Update session status
+      await this.updateSession(sessionId, {
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Process standard upscale (Upscale PRO tool) with image buffer
+   */
+  async processUpscalePro(userId: number, imageBuffer: Buffer, fileName: string, parameters: UltraEnhanceParams): Promise<{
+    success: boolean;
+    processedImageUrl: string;
+    processedImageData: string;
+    sessionId: string;
+    duration: number;
+  }> {
+    const startTime = Date.now();
+    const sessionId = await this.createSession({
+      userId,
+      tool: 'upscale_pro',
+      originalImageUrl: `uploaded://${fileName}`,
+      originalFileName: fileName,
+      parameters
+    });
+    
+    try {
+      console.log(`🎨 [PICSART] Starting standard upscale processing for user ${userId}`);
+      console.log(`🎨 [PICSART] Parameters:`, JSON.stringify(parameters, null, 2));
+      
+      // Prepare form data for the API
+      const formData = new FormData();
+      
+      // Add image file
+      const blob = new Blob([imageBuffer], { 
+        type: fileName.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg' 
+      });
+      formData.append('image', blob, fileName);
+      
+      // Add parameters for standard upscale (max 8x)
+      const upscaleFactor = Math.min(parameters.upscale_factor || 2, 8); // Limit to 8x max for standard upscale
+      formData.append('upscale_factor', String(upscaleFactor));
+      formData.append('format', parameters.format || 'PNG');
+      
+      // Make API request to standard upscale endpoint
+      const response = await fetch(`${this.baseUrl}/tools/1.0/upscale`, {
+        method: 'POST',
+        headers: {
+          'X-Picsart-API-Key': this.apiKey,
+          'accept': 'application/json'
+        },
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Picsart API error: ${response.status} - ${errorText}`);
+      }
+      
+      const result: PicsartAPIResponse = await response.json();
+      console.log(`✅ [PICSART] Standard upscale completed in ${Date.now() - startTime}ms`);
+      
+      // Download processed image
+      const processedImageResponse = await fetch(result.data.url);
+      if (!processedImageResponse.ok) {
+        throw new Error(`Failed to download processed image: ${processedImageResponse.status}`);
+      }
+      
+      const processedImageBuffer = await processedImageResponse.arrayBuffer();
+      const processedImageData = Buffer.from(processedImageBuffer).toString('base64');
+      
+      // Update session status
+      await this.updateSession(sessionId, {
+        status: 'completed',
+        processedImageUrl: result.data.url,
+        picsartJobId: result.data.id,
+        duration: Date.now() - startTime
+      });
+      
+      return {
+        success: true,
+        processedImageUrl: result.data.url,
+        processedImageData,
+        sessionId,
+        duration: Date.now() - startTime
+      };
+      
+    } catch (error) {
+      console.error(`❌ [PICSART] Standard upscale failed after ${Date.now() - startTime}ms:`, error);
       
       // Update session status
       await this.updateSession(sessionId, {

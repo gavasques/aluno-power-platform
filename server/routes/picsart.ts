@@ -90,6 +90,21 @@ const ultraEnhanceSchema = z.object({
   format: z.enum(['JPG', 'PNG', 'WEBP']).default('JPG')
 });
 
+// Upscale Pro validation schema - standard upscale with 8x max
+const upscaleProSchema = z.object({
+  upscale_factor: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') {
+        const parsed = parseInt(val, 10);
+        return isNaN(parsed) ? val : parsed;
+      }
+      return val;
+    },
+    z.number().int().min(2).max(8)
+  ).default(2),
+  format: z.enum(['JPG', 'PNG', 'WEBP']).default('PNG')
+});
+
 // Initialize Picsart configurations
 (async () => {
   try {
@@ -920,6 +935,183 @@ router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, r
     return res.status(500).json({
       success: false,
       error: 'Ultra enhance processing failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      processingTime: totalDuration
+    });
+  }
+});
+
+/**
+ * POST /api/picsart/upscale-pro/process
+ * Process standard upscale (Upscale PRO tool) for images
+ */
+router.post('/upscale-pro/process', requireAuth, upload.single('image'), async (req, res) => {
+  const startTime = Date.now();
+  
+  try {
+    const userId = req.user.id;
+    console.log(`🎨 [PICSART] Upscale PRO request from user ${userId}`);
+    
+    // Check if image was uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No image file provided',
+        details: 'Please upload an image file to upscale'
+      });
+    }
+    
+    // Debug what we're receiving
+    console.log(`🔍 [PICSART] Request body:`, req.body);
+    console.log(`🔍 [PICSART] upscale_factor type:`, typeof req.body.upscale_factor);
+    console.log(`🔍 [PICSART] upscale_factor value:`, req.body.upscale_factor);
+    
+    // Validate parameters
+    const validation = upscaleProSchema.safeParse(req.body);
+    if (!validation.success) {
+      console.log(`❌ [PICSART] Validation failed:`, validation.error.errors);
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid parameters',
+        details: validation.error.errors
+      });
+    }
+    
+    const { upscale_factor, format } = validation.data;
+    
+    // Get tool configuration for cost
+    const toolConfig = await picsartService.getToolConfig('upscale_pro');
+    if (!toolConfig) {
+      return res.status(500).json({
+        success: false,
+        error: 'Tool configuration not found'
+      });
+    }
+    
+    const creditsNeeded = parseFloat(toolConfig.costPerUse);
+    console.log(`💰 [PICSART] Credits needed: ${creditsNeeded} for upscale pro`);
+    
+    // Check user credits
+    const userCredits = await db.select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    
+    if (!userCredits.length) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+    
+    const currentCredits = parseFloat(userCredits[0].credits || '0');
+    
+    if (currentCredits < creditsNeeded) {
+      return res.status(400).json({
+        success: false,
+        error: 'Insufficient credits',
+        details: `You need ${creditsNeeded} credits but only have ${currentCredits}`,
+        creditsNeeded,
+        currentCredits
+      });
+    }
+    
+    // Deduct credits before processing
+    await db.update(users)
+      .set({ 
+        credits: (currentCredits - creditsNeeded).toString(),
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+    
+    console.log(`💰 [PICSART] Credits deducted: ${creditsNeeded} (${currentCredits} → ${currentCredits - creditsNeeded})`);
+    
+    // Process upscale pro
+    const result = await picsartService.processUpscalePro(
+      userId,
+      req.file.buffer,
+      req.file.originalname,
+      { upscale_factor, format }
+    );
+    
+    const totalDuration = Date.now() - startTime;
+    
+    // Log the usage
+    try {
+      await db.insert(aiImgGenerationLogs).values({
+        userId,
+        provider: 'picsart',
+        model: 'upscale-pro-v1',
+        feature: 'upscale_pro',
+        originalImageName: req.file.originalname,
+        generatedImageUrl: result.processedImageUrl,
+        prompt: `Upscale PRO - upscale factor: ${upscale_factor}, format: ${format}`,
+        status: 'success',
+        cost: creditsNeeded.toString(),
+        creditsUsed: creditsNeeded.toString(),
+        duration: totalDuration,
+        sessionId: result.sessionId,
+        metadata: JSON.stringify({
+          upscale_factor,
+          format,
+          originalFileName: req.file.originalname,
+          originalFileSize: req.file.size,
+          processingTime: result.duration,
+          totalTime: totalDuration
+        })
+      });
+      
+      console.log(`📋 [PICSART] Usage logged for user ${userId}`);
+    } catch (logError) {
+      console.error(`❌ [PICSART] Failed to log usage:`, logError);
+    }
+    
+    return res.json({
+      success: true,
+      data: {
+        processedImageUrl: result.processedImageUrl,
+        processedImageData: result.processedImageData,
+        sessionId: result.sessionId,
+        duration: result.duration
+      },
+      processingTime: totalDuration
+    });
+    
+  } catch (error) {
+    const totalDuration = Date.now() - startTime;
+    console.error(`❌ [PICSART] Upscale PRO error after ${totalDuration}ms:`, error);
+    
+    // Refund credits on failure
+    try {
+      const toolConfig = await picsartService.getToolConfig('upscale_pro');
+      if (toolConfig) {
+        const creditsToRefund = parseFloat(toolConfig.costPerUse);
+        
+        const userCredits = await db.select({ credits: users.credits })
+          .from(users)
+          .where(eq(users.id, req.user.id))
+          .limit(1);
+        
+        if (userCredits.length) {
+          const currentCredits = parseFloat(userCredits[0].credits || '0');
+          
+          await db.update(users)
+            .set({ 
+              credits: (currentCredits + creditsToRefund).toString(),
+              updatedAt: new Date()
+            })
+            .where(eq(users.id, req.user.id));
+          
+          console.log(`💰 [PICSART] Credits refunded: ${creditsToRefund} (${currentCredits} → ${currentCredits + creditsToRefund})`);
+        }
+      }
+    } catch (refundError) {
+      console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
+    }
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Upscale PRO processing failed',
       details: error instanceof Error ? error.message : 'Unknown error',
       processingTime: totalDuration
     });
