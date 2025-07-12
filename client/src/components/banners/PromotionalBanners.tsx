@@ -46,15 +46,14 @@ export function PromotionalBanners() {
   ];
 
   return (
-    <div className="space-y-6 mb-8">
-      {/* First two large banners */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {banners.slice(0, 2).map((banner, index) => (
-          <div
-            key={index}
-            className={`relative overflow-hidden rounded-2xl ${banner.bgColor} p-8 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group min-h-[320px] flex flex-col`}
-            onClick={() => window.open(banner.link, '_blank')}
-          >
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+      {/* First two banners - 5 columns each */}
+      {banners.slice(0, 2).map((banner, index) => (
+        <div
+          key={index}
+          className={`lg:col-span-5 relative overflow-hidden rounded-2xl ${banner.bgColor} p-6 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group min-h-[280px] flex flex-col`}
+          onClick={() => window.open(banner.link, '_blank')}
+        >
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0" style={{
@@ -68,28 +67,28 @@ export function PromotionalBanners() {
           {/* Content */}
           <div className="relative z-10 flex flex-col h-full">
             {/* Icon */}
-            <div className={`${banner.iconBg} w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-              <banner.icon className="h-8 w-8 text-white" />
+            <div className={`${banner.iconBg} w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
+              <banner.icon className="h-6 w-6 text-white" />
             </div>
 
             {/* Title */}
-            <h3 className={`text-2xl font-bold mb-4 ${banner.textColor} leading-tight`}>
+            <h3 className={`text-lg font-bold mb-3 ${banner.textColor} leading-tight`}>
               {banner.title}
             </h3>
 
             {/* Description */}
-            <p className="text-gray-600 mb-6 leading-relaxed flex-grow">
+            <p className="text-sm text-gray-600 mb-4 leading-relaxed flex-grow">
               {banner.description}
             </p>
 
             {/* CTA Button - Always at bottom */}
             <div className="flex items-center justify-between mt-auto">
-              <div className={`${banner.buttonBg} text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-md transform group-hover:translate-x-1 transition-all duration-300`}>
+              <div className={`${banner.buttonBg} text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 shadow-md transform group-hover:translate-x-1 transition-all duration-300 text-sm`}>
                 <span>Cadastre-se</span>
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-4 w-4" />
               </div>
               
-              <span className="text-sm text-gray-500 italic flex items-center gap-1">
+              <span className="text-xs text-gray-500 italic flex items-center gap-1">
                 <ExternalLink className="h-3 w-3" />
                 {banner.note}
               </span>
@@ -100,14 +99,13 @@ export function PromotionalBanners() {
           <div className={`absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br ${banner.gradient} opacity-10 rounded-full blur-3xl group-hover:opacity-20 transition-opacity duration-500`} />
         </div>
       ))}
-      </div>
 
-      {/* Third smaller banner */}
+      {/* Third smaller banner - 2 columns */}
       {banners[2] && (
-        <div className="w-full">
-          <div
-            className={`relative overflow-hidden rounded-2xl ${banners[2].bgColor} p-6 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group flex flex-col`}
-          >
+        <div
+          className={`lg:col-span-2 relative overflow-hidden rounded-2xl ${banners[2].bgColor} p-4 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group flex flex-col min-h-[280px]`}
+          onClick={() => window.open(banners[2].offers?.[0]?.link || '#', '_blank')}
+        >
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
               <div className="absolute inset-0" style={{
@@ -119,50 +117,48 @@ export function PromotionalBanners() {
             <div className={`absolute inset-0 bg-gradient-to-br ${banners[2].gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
             
             {/* Content */}
-            <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
+            <div className="relative z-10 flex flex-col h-full">
               {/* Icon */}
-              <div className={`${banners[2].iconBg} w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
-                <Search className="h-7 w-7 text-white" />
+              <div className={`${banners[2].iconBg} w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
+                <Search className="h-6 w-6 text-white" />
               </div>
 
-              {/* Text Content */}
-              <div className="flex-1 text-center lg:text-left">
-                <h3 className={`text-xl font-bold mb-2 ${banners[2].textColor} leading-tight`}>
-                  {banners[2].title}
-                </h3>
-                <p className="text-gray-600 mb-3 text-base">
-                  {banners[2].description}
-                </p>
-                
-                {/* Offers */}
-                {banners[2].offers && (
-                  <div className="space-y-2">
-                    {banners[2].offers.map((offer, idx) => (
-                      <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
-                        <span className="text-gray-700">
-                          {offer.text} {offer.subtext && <span className="text-gray-500">{offer.subtext}</span>}
-                        </span>
-                        <a
-                          href={offer.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`${banners[2].buttonBg} text-white px-4 py-1.5 rounded-md font-medium inline-flex items-center gap-1 text-sm hover:shadow-md transition-all duration-300`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span>{offer.linkText}</span>
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
+              {/* Title */}
+              <h3 className={`text-base font-bold mb-2 ${banners[2].textColor} leading-tight`}>
+                {banners[2].title}
+              </h3>
+              
+              <p className="text-xs text-gray-600 mb-3">
+                {banners[2].description}
+              </p>
+              
+              {/* Offers */}
+              {banners[2].offers && (
+                <div className="space-y-2 mt-auto">
+                  {banners[2].offers.map((offer, idx) => (
+                    <div key={idx} className="text-xs">
+                      <div className="text-gray-700 mb-1">
+                        {offer.text} {offer.subtext && <span className="text-gray-500">{offer.subtext}</span>}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      <a
+                        href={offer.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`${banners[2].buttonBg} text-white px-3 py-1 rounded-md font-medium inline-flex items-center gap-1 text-xs hover:shadow-md transition-all duration-300`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <span>{offer.linkText}</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Corner Decoration */}
             <div className={`absolute -top-10 -right-10 w-20 h-20 bg-gradient-to-br ${banners[2].gradient} opacity-10 rounded-full blur-3xl group-hover:opacity-20 transition-opacity duration-500`} />
           </div>
-        </div>
       )}
     </div>
   );

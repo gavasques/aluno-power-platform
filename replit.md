@@ -324,18 +324,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 12, 2025 - 11:08 PM**: ✅ PROMOTIONAL BANNERS IMPLEMENTED - AMAZON AFFILIATE MARKETING INTEGRATION
-  - **Component Created**: PromotionalBanners.tsx with 2 side-by-side promotional cards
-  - **Banner 1 (Left)**: Amazon Fashion promotion - sell without commission on fashion categories
-  - **Banner 2 (Right)**: Amazon Start course offer - free course with Amazon registration
-  - **Design Features**: 
-    - Responsive grid layout (1 column mobile, 2 columns desktop)
-    - Gradient backgrounds (purple for fashion, blue for course)
-    - Hover effects with scale transformation
-    - External link icons and clear call-to-action buttons
-  - **Links**: http://bit.ly/4kyfzew (Fashion) and https://amzn.to/3RTu5Sk (Course)
-  - **Integration**: Added before YouTube videos section in user Dashboard
-  - **User Experience**: Clean, professional design with clear messaging for new Amazon sellers
+- **January 12, 2025 - 11:30 PM**: ✅ PROMOTIONAL BANNERS FULLY OPTIMIZED - 3 BANNERS IN SINGLE ROW LAYOUT
+  - **Layout Enhancement**: All 3 banners now display in single row with responsive grid (12-column system)
+  - **Banner 1 (5 columns)**: Amazon Fashion - "Venda Moda na Amazon com 0% de Comissão !!!"
+    - Link updated to: https://venda.amazon.com.br/?ld=elbrsoa_atesliberdade_virtualsoftsrp2025na
+    - Fashion categories: Moda, Relógios, Bolsas e Mochilas
+  - **Banner 2 (5 columns)**: "Venda na Amazon e tenha nossos Benefícios"
+    - Complete benefits package: Free R$297 course, supplier list access, portal tools, registration help
+    - Link: https://amzn.to/3RTu5Sk
+  - **Banner 3 (2 columns - smaller)**: Helium10 Software promotion
+    - "Melhor Software Para Encontrar Produtos"
+    - Two separate offers with individual CTA buttons (60% annual, 20%/10% discounts)
+  - **Design Optimization**: 
+    - Proportional sizing: Two large banners + one smaller Helium10 banner
+    - Reduced padding and font sizes for space efficiency
+    - Consistent 280px height across all banners
+    - Professional gradients and hover animations maintained
+  - **User Experience**: All promotional content visible in single view before YouTube section
 
 - **January 12, 2025 - 10:52 PM**: ✅ CRITICAL PERMISSION SYSTEM GAPS FIXED - ALL CATEGORIES NOW PROPERLY CONFIGURED IN ADMIN INTERFACE
   - **Root Cause Identified**: Admin interface was missing 3 major categories (HUB, Minha Área, Simuladores) with 18 total features
