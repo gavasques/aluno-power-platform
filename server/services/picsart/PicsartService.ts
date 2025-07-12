@@ -504,10 +504,34 @@ export class PicsartService {
       }
       
       if (parameters.reference_image) {
-        // Convert base64 to blob and append
-        const base64Data = parameters.reference_image.replace(/^data:image\/[a-z]+;base64,/, '');
-        const buffer = Buffer.from(base64Data, 'base64');
-        formData.append('reference_image', buffer, 'reference.png');
+        try {
+          // Extract MIME type from base64 string
+          const mimeMatch = parameters.reference_image.match(/^data:image\/([a-z]+);base64,/);
+          const mimeType = mimeMatch ? `image/${mimeMatch[1]}` : 'image/png';
+          const extension = mimeMatch ? mimeMatch[1] : 'png';
+          
+          // Convert base64 to buffer
+          const base64Data = parameters.reference_image.replace(/^data:image\/[a-z]+;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+          
+          // Create a file-like object for FormData
+          const fileObject = {
+            buffer,
+            name: `reference.${extension}`,
+            type: mimeType
+          };
+          
+          // Append as stream with proper options
+          formData.append('reference_image', buffer, {
+            filename: `reference.${extension}`,
+            contentType: mimeType
+          });
+          
+          console.log(`📎 [PICSART] Reference image attached: ${mimeType}, ${buffer.length} bytes`);
+        } catch (imageError) {
+          console.warn(`⚠️ [PICSART] Failed to process reference image:`, imageError);
+          // Continue without reference image if processing fails
+        }
       }
       
       if (parameters.reference_image_url) {
