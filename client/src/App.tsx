@@ -76,6 +76,7 @@ const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
 const BackgroundRemovalPro = lazy(() => import("./pages/tools/BackgroundRemovalPro"));
 const LogoGeneratorPro = lazy(() => import("./pages/tools/LogoGeneratorPro"));
+const UltraMelhoradorPro = lazy(() => import("./pages/tools/UltraMelhoradorPro"));
 const UserDashboard = lazy(() => import("./pages/user/Dashboard"));
 const UserUsage = lazy(() => import("./pages/user/Usage"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
@@ -465,6 +466,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <LogoGeneratorPro />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/ferramentas/ultra-melhorador-pro">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <UltraMelhoradorPro />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

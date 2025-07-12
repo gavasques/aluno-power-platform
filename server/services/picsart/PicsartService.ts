@@ -51,6 +51,11 @@ interface LogoGenerationParams {
   count?: number; // 1-10, defaults to 2
 }
 
+interface UltraEnhanceParams {
+  upscale_factor?: number; // 2-16, defaults to 2
+  format?: 'JPG' | 'PNG' | 'WEBP'; // defaults to JPG
+}
+
 interface ProcessingOptions {
   userId: number;
   tool: string;
@@ -102,6 +107,20 @@ export class PicsartService {
         category: 'ai_design',
         supportedFormats: ['PNG', 'JPG'],
         maxFileSize: 5242880 // 5MB for reference images
+      },
+      {
+        toolName: 'ultra_enhance',
+        displayName: 'Ultra Melhorador PRO',
+        description: 'Enhance and upscale images with AI-powered ultra enhancement',
+        endpoint: '/tools/1.0/upscale/enhance',
+        defaultParameters: {
+          upscale_factor: 2,
+          format: 'JPG'
+        },
+        costPerUse: '4.00',
+        category: 'ai_enhancement',
+        supportedFormats: ['PNG', 'JPG', 'WEBP'],
+        maxFileSize: 10485760 // 10MB for upscaling
       }
     ];
 
@@ -607,6 +626,98 @@ export class PicsartService {
     } catch (error) {
       const duration = Date.now() - startTime;
       console.error(`❌ [PICSART] Logo result check failed after ${duration}ms:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Process ultra enhance (upscale) for an image
+   */
+  async processUltraEnhance(userId: number, imageBuffer: Buffer, fileName: string, parameters: UltraEnhanceParams): Promise<{
+    success: boolean;
+    processedImageUrl: string;
+    processedImageData: string;
+    sessionId: string;
+    duration: number;
+  }> {
+    const startTime = Date.now();
+    const sessionId = await this.createSession({
+      userId,
+      tool: 'ultra_enhance',
+      originalImageUrl: `uploaded://${fileName}`,
+      originalFileName: fileName,
+      parameters
+    });
+    
+    try {
+      console.log(`🎨 [PICSART] Starting ultra enhance processing for user ${userId}`);
+      console.log(`🎨 [PICSART] Parameters:`, JSON.stringify(parameters, null, 2));
+      
+      // Prepare form data for the API
+      const formData = new FormData();
+      
+      // Add image file
+      const blob = new Blob([imageBuffer], { 
+        type: fileName.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg' 
+      });
+      formData.append('image', blob, fileName);
+      
+      // Add parameters
+      formData.append('upscale_factor', String(parameters.upscale_factor || 2));
+      formData.append('format', parameters.format || 'JPG');
+      
+      // Make API request
+      const response = await fetch(`${this.baseUrl}/tools/1.0/upscale/enhance`, {
+        method: 'POST',
+        headers: {
+          'X-Picsart-API-Key': this.apiKey,
+          'accept': 'application/json'
+        },
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Picsart API error: ${response.status} - ${errorText}`);
+      }
+      
+      const result: PicsartAPIResponse = await response.json();
+      console.log(`✅ [PICSART] Ultra enhance completed in ${Date.now() - startTime}ms`);
+      
+      // Download processed image
+      const processedImageResponse = await fetch(result.data.url);
+      if (!processedImageResponse.ok) {
+        throw new Error(`Failed to download processed image: ${processedImageResponse.status}`);
+      }
+      
+      const processedImageBuffer = await processedImageResponse.arrayBuffer();
+      const processedImageData = Buffer.from(processedImageBuffer).toString('base64');
+      
+      // Update session status
+      await this.updateSession(sessionId, {
+        status: 'completed',
+        processedImageUrl: result.data.url,
+        picsartJobId: result.data.id,
+        duration: Date.now() - startTime
+      });
+      
+      return {
+        success: true,
+        processedImageUrl: result.data.url,
+        processedImageData,
+        sessionId,
+        duration: Date.now() - startTime
+      };
+      
+    } catch (error) {
+      console.error(`❌ [PICSART] Ultra enhance failed after ${Date.now() - startTime}ms:`, error);
+      
+      // Update session status
+      await this.updateSession(sessionId, {
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
       throw error;
     }
   }

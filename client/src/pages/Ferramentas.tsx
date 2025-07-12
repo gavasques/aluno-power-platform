@@ -44,6 +44,15 @@ const ferramentas = [
     permission: "tools.picsart_background_removal"
   },
   {
+    title: "Ultra Melhorador PRO",
+    description: "Melhore e amplie imagens com IA de última geração (2x-16x)",
+    href: "/ferramentas/ultra-melhorador-pro",
+    icon: Zap,
+    category: "Imagem",
+    credits: 4,
+    permission: "tools.ultra_enhance"
+  },
+  {
     title: "Gerador de Logomarcas PRO",
     description: "Crie logomarcas profissionais com inteligência artificial",
     href: "/ferramentas/logo-generator-pro",
