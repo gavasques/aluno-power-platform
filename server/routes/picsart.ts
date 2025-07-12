@@ -75,9 +75,14 @@ const logoHistorySchema = z.object({
   search: z.string().optional()
 });
 
-// Ultra enhance validation schema
+// Ultra enhance validation schema - handle FormData string conversion properly
 const ultraEnhanceSchema = z.object({
-  upscale_factor: z.coerce.number().int().min(2).max(16).default(2),
+  upscale_factor: z.union([
+    z.number(),
+    z.string().transform(val => parseInt(val, 10))
+  ]).refine(val => val >= 2 && val <= 16, {
+    message: "Upscale factor must be between 2 and 16"
+  }).default(2),
   format: z.enum(['JPG', 'PNG', 'WEBP']).default('JPG')
 });
 
@@ -760,9 +765,15 @@ router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, r
       });
     }
     
+    // Debug what we're receiving
+    console.log(`🔍 [PICSART] Request body:`, req.body);
+    console.log(`🔍 [PICSART] upscale_factor type:`, typeof req.body.upscale_factor);
+    console.log(`🔍 [PICSART] upscale_factor value:`, req.body.upscale_factor);
+    
     // Validate parameters
     const validation = ultraEnhanceSchema.safeParse(req.body);
     if (!validation.success) {
+      console.log(`❌ [PICSART] Validation failed:`, validation.error.errors);
       return res.status(400).json({
         success: false,
         error: 'Invalid parameters',
