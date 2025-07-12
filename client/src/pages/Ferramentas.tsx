@@ -26,15 +26,6 @@ const ferramentas = [
     permission: "tools.image_upscale"
   },
   {
-    title: "Upscale PRO",
-    description: "Aumente a qualidade das suas imagens até 16x com IA avançada",
-    href: "/ferramentas/upscale-pro",
-    icon: ImageIcon,
-    category: "Imagem",
-    credits: 4,
-    permission: "tools.image_upscale"
-  },
-  {
     title: "Remover Background",
     description: "Remova o fundo das suas imagens automaticamente",
     href: "/ferramentas/background-removal",

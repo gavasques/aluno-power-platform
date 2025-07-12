@@ -287,6 +287,3 @@ const ImageDownloadComponent: React.FC<ImageDownloadComponentProps> = ({
 };
 
 export default ImageDownloadComponent;
-
-// Named export for backward compatibility
-export { ImageDownloadComponent };
