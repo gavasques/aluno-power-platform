@@ -47,11 +47,11 @@ export function PromotionalBanners() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-      {/* First two banners - 5 columns each */}
+      {/* First two banners - 4 columns each */}
       {banners.slice(0, 2).map((banner, index) => (
         <div
           key={index}
-          className={`lg:col-span-5 relative overflow-hidden rounded-2xl ${banner.bgColor} p-6 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group min-h-[280px] flex flex-col`}
+          className={`lg:col-span-4 relative overflow-hidden rounded-2xl ${banner.bgColor} p-6 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group min-h-[280px] flex flex-col`}
           onClick={() => window.open(banner.link, '_blank')}
         >
           {/* Background Pattern */}
@@ -100,10 +100,10 @@ export function PromotionalBanners() {
         </div>
       ))}
 
-      {/* Third smaller banner - 2 columns */}
+      {/* Third banner - 4 columns */}
       {banners[2] && (
         <div
-          className={`lg:col-span-2 relative overflow-hidden rounded-2xl ${banners[2].bgColor} p-4 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group flex flex-col min-h-[280px]`}
+          className={`lg:col-span-4 relative overflow-hidden rounded-2xl ${banners[2].bgColor} p-6 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group flex flex-col min-h-[280px]`}
           onClick={() => window.open(banners[2].offers?.[0]?.link || '#', '_blank')}
         >
             {/* Background Pattern */}
@@ -124,31 +124,31 @@ export function PromotionalBanners() {
               </div>
 
               {/* Title */}
-              <h3 className={`text-base font-bold mb-2 ${banners[2].textColor} leading-tight`}>
+              <h3 className={`text-lg font-bold mb-3 ${banners[2].textColor} leading-tight`}>
                 {banners[2].title}
               </h3>
               
-              <p className="text-xs text-gray-600 mb-3">
+              <p className="text-sm text-gray-600 mb-4">
                 {banners[2].description}
               </p>
               
               {/* Offers */}
               {banners[2].offers && (
-                <div className="space-y-2 mt-auto">
+                <div className="space-y-3 mt-auto">
                   {banners[2].offers.map((offer, idx) => (
-                    <div key={idx} className="text-xs">
-                      <div className="text-gray-700 mb-1">
+                    <div key={idx} className="text-sm">
+                      <div className="text-gray-700 mb-2">
                         {offer.text} {offer.subtext && <span className="text-gray-500">{offer.subtext}</span>}
                       </div>
                       <a
                         href={offer.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`${banners[2].buttonBg} text-white px-3 py-1 rounded-md font-medium inline-flex items-center gap-1 text-xs hover:shadow-md transition-all duration-300`}
+                        className={`${banners[2].buttonBg} text-white px-4 py-2 rounded-lg font-semibold inline-flex items-center gap-2 text-sm hover:shadow-md transition-all duration-300`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <span>{offer.linkText}</span>
-                        <ArrowRight className="h-3 w-3" />
+                        <ArrowRight className="h-4 w-4" />
                       </a>
                     </div>
                   ))}
