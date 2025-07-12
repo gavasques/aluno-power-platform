@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { News, Update } from '@shared/schema';
+import { PromotionalBanners } from '@/components/banners/PromotionalBanners';
 
 interface DashboardData {
   user: {
@@ -366,6 +367,9 @@ const UserDashboard = () => {
             </Button>
           </div>
         </div>
+
+        {/* Promotional Banners */}
+        <PromotionalBanners />
 
         {/* Modern Full-Width Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
