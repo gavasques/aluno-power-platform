@@ -34,6 +34,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   const [availableSheets, setAvailableSheets] = useState<SheetInfo[]>([]);
   const [selectedSheet, setSelectedSheet] = useState<string>('');
   const [workbookData, setWorkbookData] = useState<XLSX.WorkBook | null>(null);
+  const [processingError, setProcessingError] = useState<string | null>(null);
 
   // Mapeamento expandido de campos do Amazon Ads (em português e inglês)
   const fieldMappings = {
@@ -235,32 +236,54 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   };
 
   const processSelectedSheet = async () => {
-    if (!workbookData || !selectedSheet) return;
+    if (!workbookData || !selectedSheet) {
+      console.error('workbookData ou selectedSheet está vazio', { workbookData: !!workbookData, selectedSheet });
+      return;
+    }
 
     try {
       setIsUploading(true);
+      console.log('🔄 Iniciando processamento da aba:', selectedSheet);
       
       const worksheet = workbookData.Sheets[selectedSheet];
+      if (!worksheet) {
+        throw new Error(`Aba "${selectedSheet}" não encontrada no arquivo`);
+      }
+      
       const rawData = XLSX.utils.sheet_to_json(worksheet);
+      console.log(`📊 Dados brutos carregados: ${rawData.length} linhas`);
       
       if (rawData.length === 0) {
         throw new Error('Aba selecionada está vazia');
       }
 
       const columns = Object.keys(rawData[0] as any);
+      console.log('📋 Colunas encontradas:', columns);
+      
       const normalizedData = normalizeData(rawData, columns);
+      console.log(`🔄 Dados normalizados: ${normalizedData.length} linhas`);
+      
+      // Log primeiro registro para debug
+      if (normalizedData.length > 0) {
+        console.log('🔍 Primeiro registro normalizado:', normalizedData[0]);
+      }
+      
       const validation = validateData(normalizedData);
+      console.log('✔️ Resultado da validação:', validation);
       
       if (!validation.valid) {
         throw new Error(validation.message || 'Dados inválidos');
       }
 
       console.log(`✅ Processando ${normalizedData.length} linhas da aba "${selectedSheet}"`);
+      setProcessingError(null); // Limpar erro anterior
       onFileUpload(normalizedData);
       
     } catch (error) {
-      console.error('Erro ao processar aba:', error);
-      onError(error instanceof Error ? error.message : 'Erro ao processar dados');
+      console.error('❌ Erro detalhado ao processar aba:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao processar dados';
+      setProcessingError(`Erro ao processar aba "${selectedSheet}": ${errorMessage}`);
+      onError(`Erro ao processar aba "${selectedSheet}": ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
@@ -449,25 +472,35 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
       {/* Process Button */}
       {selectedSheet && (
-        <div className="flex justify-center">
-          <Button 
-            onClick={processSelectedSheet}
-            disabled={isUploading}
-            size="lg"
-            className="px-8"
-          >
-            {isUploading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Processando...
-              </>
-            ) : (
-              <>
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Processar Aba Selecionada
-              </>
-            )}
-          </Button>
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <Button 
+              onClick={processSelectedSheet}
+              disabled={isUploading}
+              size="lg"
+              className="px-8"
+            >
+              {isUploading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Processando...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Processar Aba Selecionada
+                </>
+              )}
+            </Button>
+          </div>
+          
+          {/* Error Alert */}
+          {processingError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{processingError}</AlertDescription>
+            </Alert>
+          )}
         </div>
       )}
 
