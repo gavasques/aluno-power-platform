@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -22,7 +23,8 @@ import {
   Rss,
   Users,
   Clock,
-  Eye
+  Eye,
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { News, Update } from '@shared/schema';
@@ -91,6 +93,64 @@ const UserDashboard = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState('overview');
+  
+  // Estados para modais
+  const [selectedNews, setSelectedNews] = useState<any>(null);
+  const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
+  const [newsModalOpen, setNewsModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+
+  // Função para buscar dados completos de uma notícia
+  const fetchFullNews = async (newsId: number) => {
+    try {
+      const response = await fetch(`/api/news/${newsId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.error('Erro ao buscar notícia completa:', error);
+    }
+    return null;
+  };
+
+  // Função para buscar dados completos de uma novidade
+  const fetchFullUpdate = async (updateId: number) => {
+    try {
+      const response = await fetch(`/api/updates/${updateId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.error('Erro ao buscar novidade completa:', error);
+    }
+    return null;
+  };
+
+  // Função para abrir modal de notícia
+  const openNewsModal = async (news: any) => {
+    const fullNews = await fetchFullNews(news.id);
+    if (fullNews) {
+      setSelectedNews(fullNews);
+      setNewsModalOpen(true);
+    }
+  };
+
+  // Função para abrir modal de novidade
+  const openUpdateModal = async (update: any) => {
+    const fullUpdate = await fetchFullUpdate(update.id);
+    if (fullUpdate) {
+      setSelectedUpdate(fullUpdate);
+      setUpdateModalOpen(true);
+    }
+  };
 
   // Simplificar carregamento - apenas dados essenciais
   const { data: userSummary, isLoading } = useQuery({
@@ -545,7 +605,11 @@ const UserDashboard = () => {
                 ) : newsData && newsData.length > 0 ? (
                   <div className="space-y-4">
                     {newsData.slice(0, 5).map((news) => (
-                      <div key={news.id} className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer">
+                      <div 
+                        key={news.id} 
+                        className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
+                        onClick={() => openNewsModal(news)}
+                      >
                         <h3 className="font-semibold text-white text-lg mb-2 line-clamp-2">
                           {news.title}
                         </h3>
@@ -624,7 +688,11 @@ const UserDashboard = () => {
                 ) : updatesData && updatesData.length > 0 ? (
                   <div className="space-y-4">
                     {updatesData.slice(0, 5).map((update) => (
-                      <div key={update.id} className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer">
+                      <div 
+                        key={update.id} 
+                        className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
+                        onClick={() => openUpdateModal(update)}
+                      >
                         <h3 className="font-semibold text-white text-lg mb-2 line-clamp-2">
                           {update.title}
                         </h3>
@@ -670,6 +738,138 @@ const UserDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal para Notícias */}
+      <Dialog open={newsModalOpen} onOpenChange={setNewsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          {selectedNews && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <DialogTitle className="text-xl font-bold text-gray-900 mb-2 pr-4">
+                      {selectedNews.title}
+                    </DialogTitle>
+                    <div className="flex items-center gap-2 mb-4">
+                      {selectedNews.category && (
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                          {selectedNews.category}
+                        </Badge>
+                      )}
+                      {selectedNews.isFeatured && (
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                          Destaque
+                        </Badge>
+                      )}
+                      <span className="text-sm text-gray-500">
+                        {formatCreatedDate(selectedNews.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              {selectedNews.imageUrl && (
+                <div className="mb-6">
+                  <img 
+                    src={selectedNews.imageUrl} 
+                    alt={selectedNews.title}
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+
+              <div className="prose max-w-none">
+                {selectedNews.summary && (
+                  <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                    <p className="text-gray-700 font-medium">{selectedNews.summary}</p>
+                  </div>
+                )}
+                
+                <div className="text-gray-700 whitespace-pre-wrap">
+                  {selectedNews.content}
+                </div>
+              </div>
+
+              {selectedNews.tags && selectedNews.tags.length > 0 && (
+                <div className="mt-6 pt-4 border-t">
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">Tags:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedNews.tags.map((tag: string, index: number) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para Novidades */}
+      <Dialog open={updateModalOpen} onOpenChange={setUpdateModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          {selectedUpdate && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <DialogTitle className="text-xl font-bold text-gray-900 mb-2 pr-4">
+                      {selectedUpdate.title}
+                    </DialogTitle>
+                    <div className="flex items-center gap-2 mb-4">
+                      {selectedUpdate.version && (
+                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                          {selectedUpdate.version}
+                        </Badge>
+                      )}
+                      <Badge 
+                        variant="secondary" 
+                        className={`${
+                          selectedUpdate.type === 'feature' ? 'bg-blue-100 text-blue-800' :
+                          selectedUpdate.type === 'bugfix' ? 'bg-red-100 text-red-800' :
+                          selectedUpdate.type === 'improvement' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {selectedUpdate.type || 'Feature'}
+                      </Badge>
+                      <Badge 
+                        variant="secondary"
+                        className={`${
+                          selectedUpdate.priority === 'critical' ? 'bg-red-100 text-red-800' :
+                          selectedUpdate.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                          selectedUpdate.priority === 'normal' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {selectedUpdate.priority || 'Normal'}
+                      </Badge>
+                      <span className="text-sm text-gray-500">
+                        {formatCreatedDate(selectedUpdate.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <div className="prose max-w-none">
+                {selectedUpdate.summary && (
+                  <div className="bg-emerald-50 p-4 rounded-lg mb-6">
+                    <p className="text-gray-700 font-medium">{selectedUpdate.summary}</p>
+                  </div>
+                )}
+                
+                <div className="text-gray-700 whitespace-pre-wrap">
+                  {selectedUpdate.content}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
