@@ -8,8 +8,7 @@ import {
   Tag,
   ArrowRight,
   Sparkles,
-  Palette,
-  Target
+  Palette
 } from "lucide-react";
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -115,15 +114,6 @@ const ferramentas = [
     category: "Amazon",
     credits: 3,
     permission: "tools.keyword_suggestions"
-  },
-  {
-    title: "Análise SOP Amazon Ads",
-    description: "Análise automatizada de campanhas com regras SOP e recomendações otimizadas",
-    href: "/ferramentas/amazon-ads-sop",
-    icon: Target,
-    category: "Amazon",
-    credits: 1,
-    permission: "tools.amazon_ads_sop"
   }
 ];
 
