@@ -429,17 +429,19 @@ const UserDashboard = () => {
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Canal
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => {
-                        console.log('Refreshing videos...');
-                        refetchVideos();
-                      }}
-                      className="text-gray-400 hover:text-white"
-                    >
-                      🔄 Atualizar
-                    </Button>
+                    {userSummary?.user?.role === 'admin' && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          console.log('Refreshing videos...');
+                          refetchVideos();
+                        }}
+                        className="text-gray-400 hover:text-white"
+                      >
+                        🔄 Atualizar
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
