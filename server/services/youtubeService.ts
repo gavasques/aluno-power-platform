@@ -1,6 +1,5 @@
 import { storage } from "../storage";
 import { InsertYoutubeVideo } from "@shared/schema";
-import https from 'https';
 
 interface RapidAPIVideoThumbnail {
   url: string;
@@ -41,69 +40,40 @@ class YouTubeService {
   }
 
   private async makeRapidAPIRequest(): Promise<RapidAPIVideo[]> {
-    return new Promise((resolve, reject) => {
-      if (!this.rapidApiKey) {
-        console.warn('RapidAPI key not available');
-        resolve([]);
-        return;
+    if (!process.env.RAPIDAPI_KEY) {
+      console.warn('🎬 [RAPIDAPI] RapidAPI key not available');
+      return [];
+    }
+
+    console.log('🎬 [RAPIDAPI] Fetching videos from Guilherme Vasques channel...');
+    console.log('🎬 [RAPIDAPI] URL:', `https://youtube-v2.p.rapidapi.com/channel/videos?channel_id=${this.channelId}`);
+
+    const response = await fetch(`https://youtube-v2.p.rapidapi.com/channel/videos?channel_id=${this.channelId}`, {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
+        'X-RapidAPI-Host': 'youtube-v2.p.rapidapi.com'
       }
-
-      const options = {
-        method: 'GET',
-        hostname: 'youtube-v2.p.rapidapi.com',
-        port: null,
-        path: `/channel/videos?channel_id=${this.channelId}`,
-        headers: {
-          'x-rapidapi-key': this.rapidApiKey,
-          'x-rapidapi-host': 'youtube-v2.p.rapidapi.com'
-        }
-      };
-
-      const req = https.request(options, (res) => {
-        const chunks: Buffer[] = [];
-
-        res.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-
-        res.on('end', () => {
-          try {
-            const body = Buffer.concat(chunks);
-            console.log(`🎬 [RAPIDAPI DEBUG] Response status: ${res.statusCode}`);
-            console.log(`🎬 [RAPIDAPI DEBUG] Response headers:`, res.headers);
-            console.log(`🎬 [RAPIDAPI DEBUG] Raw response body:`, body.toString().substring(0, 500));
-            
-            if (res.statusCode !== 200) {
-              console.error(`🎬 [RAPIDAPI ERROR] Bad status code: ${res.statusCode}`);
-              reject(new Error(`RapidAPI returned status ${res.statusCode}`));
-              return;
-            }
-
-            const response: RapidAPIResponse = JSON.parse(body.toString());
-            console.log(`🎬 [RAPIDAPI DEBUG] Parsed response:`, JSON.stringify(response, null, 2).substring(0, 1000));
-            
-            if (response.videos && Array.isArray(response.videos)) {
-              console.log(`🎬 [RAPIDAPI] Successfully fetched ${response.videos.length} videos from RapidAPI`);
-              resolve(response.videos);
-            } else {
-              console.warn('🎬 [RAPIDAPI] No videos found in response - response structure:', Object.keys(response));
-              resolve([]);
-            }
-          } catch (error) {
-            console.error('🎬 [RAPIDAPI] Error parsing response:', error);
-            console.error('🎬 [RAPIDAPI] Raw body for debugging:', body.toString().substring(0, 1000));
-            reject(error);
-          }
-        });
-      });
-
-      req.on('error', (error) => {
-        console.error('🎬 [RAPIDAPI] Request error:', error);
-        reject(error);
-      });
-
-      req.end();
     });
+
+    console.log('🎬 [RAPIDAPI] Response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ [RAPIDAPI] Error ${response.status}: ${errorText}`);
+      throw new Error(`RapidAPI error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('🎬 [RAPIDAPI] Response received:', JSON.stringify(data, null, 2));
+
+    if (data.videos && Array.isArray(data.videos)) {
+      console.log(`🎬 [RAPIDAPI] Successfully fetched ${data.videos.length} videos from RapidAPI`);
+      return data.videos;
+    } else {
+      console.warn('🎬 [RAPIDAPI] No videos found in response');
+      return [];
+    }
   }
 
   async fetchChannelVideos(): Promise<RapidAPIVideo[]> {
