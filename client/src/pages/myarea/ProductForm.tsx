@@ -4,18 +4,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Package, Zap, Loader2 } from "lucide-react";
 import { BasicProductForm } from "@/components/product/BasicProductForm";
 import { ProductSuppliersManager } from "@/components/product/ProductSuppliersManager";
-import { ChannelForm } from "@/components/product/ChannelForm";
+import { ChannelsEditor } from "@/components/product/ChannelsEditor";
 import { useProductForm } from "@/hooks/useProductForm";
 import { channelNames, defaultChannels } from "@/config/channels";
 import { useLocation, useParams } from "wouter";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Package, Store } from "lucide-react";
 
 const ProductForm = () => {
   const [, setLocation] = useLocation();
   const params = useParams();
   const productId = params.id;
   const isEditMode = !!productId;
+  const [showChannelsEditor, setShowChannelsEditor] = useState(false);
   
   // Fetch product data if in edit mode
   const { data: productDetails, isLoading: isLoadingProduct } = useQuery({
@@ -318,24 +320,34 @@ const ProductForm = () => {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {Object.keys(channelNames).map((channelKey) => {
-                    const channelData = channels[channelKey];
-                    if (!channelData) return null;
-
-                    return (
-                      <ChannelForm
-                        key={channelKey}
-                        channelType={channelKey}
-                        channelData={channelData}
-                        title={channelNames[channelKey]}
-                        productTaxPercent={productData.taxPercent}
-                        onChannelToggle={handleChannelToggle}
-                        onChannelInputChange={handleChannelInputChange}
-                      />
-                    );
-                  })}
+                <div className="flex justify-center">
+                  <Button
+                    onClick={() => setShowChannelsEditor(true)}
+                    size="lg"
+                    className="gap-2"
+                  >
+                    <Package className="h-5 w-5" />
+                    Configurar Canais de Venda com Códigos Específicos
+                  </Button>
                 </div>
+
+                {/* Use o ChannelsEditor com campos específicos */}
+                {showChannelsEditor && productId && (
+                  <ChannelsEditor
+                    productId={productId.toString()}
+                    isOpen={showChannelsEditor}
+                    onClose={() => setShowChannelsEditor(false)}
+                  />
+                )}
+                
+                {/* Fallback para produtos novos (sem ID) */}
+                {!productId && (
+                  <div className="mt-6 text-center">
+                    <p className="text-slate-600 dark:text-slate-400">
+                      Salve o produto primeiro para configurar os canais com códigos específicos
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
