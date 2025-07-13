@@ -45,14 +45,7 @@ const hubItems = [
     category: "Ferramentas",
     permission: "hub.tools"
   },
-  {
-    title: "Templates",
-    description: "Templates prontos para usar em seus projetos",
-    href: "/hub/templates",
-    icon: FileText,
-    category: "Recursos",
-    permission: "hub.templates"
-  },
+
   {
     title: "Materiais",
     description: "Biblioteca de materiais educativos e guias",

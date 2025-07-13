@@ -34,7 +34,7 @@ const PartnerDetail = lazy(() => import("./pages/hub/PartnerDetailSimple"));
 const ToolDetail = lazy(() => import("./pages/hub/ToolDetail"));
 const MaterialDetailPage = lazy(() => import("./pages/hub/MaterialDetailPage"));
 const SupplierDetail = lazy(() => import("./pages/hub/SupplierDetail"));
-const TemplateDetail = lazy(() => import("./pages/hub/TemplateDetail"));
+
 const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
 
 const HtmlDescriptionAgent = lazy(() => import("./pages/agents/HtmlDescriptionAgent"));
@@ -49,7 +49,6 @@ const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails
 const CNPJConsulta = lazy(() => import("./pages/hub/CNPJConsulta"));
 const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSuggestions"));
 const Tools = lazy(() => import("./pages/hub/Tools"));
-const Templates = lazy(() => import("./pages/hub/Templates"));
 const Materials = lazy(() => import("./pages/hub/Materials"));
 const Hub = lazy(() => import("./pages/Hub"));
 const Ferramentas = lazy(() => import("./pages/Ferramentas"));
@@ -392,17 +391,7 @@ function App() {
                             )}
                           </Route>
                           
-                          <Route path="/hub/templates/:id">
-                            {(params) => (
-                              <ProtectedRoute>
-                                <Layout>
-                                  <Suspense fallback={<PageLoader />}>
-                                    <TemplateDetail />
-                                  </Suspense>
-                                </Layout>
-                              </ProtectedRoute>
-                            )}
-                          </Route>
+
                           
                           <Route path="/hub/prompts-ia/:id">
                             {(params) => (
@@ -536,15 +525,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/hub/templates">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <Templates />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
+
                           
                           <Route path="/hub/materiais">
                             <ProtectedRoute>

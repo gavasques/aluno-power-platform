@@ -4,7 +4,7 @@ import { SuppliersProvider } from "./SuppliersContext";
 import { MaterialsProvider } from "./MaterialsContext";
 import { ProductProvider } from "./ProductContext";
 import { ToolsProvider } from "./ToolsContext";
-import { TemplatesProvider } from "./TemplatesContext";
+
 import { PromptsProvider } from "./PromptsContext";
 import { YoutubeProvider } from "./YoutubeContext";
 import { AgentsProvider } from "./AgentsContext";
@@ -33,13 +33,11 @@ export function CombinedProvider({ children }: CombinedProviderProps) {
             <MaterialsProvider>
               <ProductProvider>
                 <ToolsProvider>
-                  <TemplatesProvider>
-                    <PromptsProvider>
-                      <AgentsProvider>
-                        {children}
-                      </AgentsProvider>
-                    </PromptsProvider>
-                  </TemplatesProvider>
+                  <PromptsProvider>
+                    <AgentsProvider>
+                      {children}
+                    </AgentsProvider>
+                  </PromptsProvider>
                 </ToolsProvider>
               </ProductProvider>
             </MaterialsProvider>

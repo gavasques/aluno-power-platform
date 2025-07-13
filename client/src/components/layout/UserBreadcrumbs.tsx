@@ -18,7 +18,7 @@ const breadcrumbMap: Record<string, string> = {
   "/hub/ferramentas": "Ferramentas",
   "/hub/materiais": "Materiais", 
   "/hub/fornecedores": "Fornecedores",
-  "/hub/templates": "Templates",
+
   "/hub/prompts-ia": "Prompts IA",
   "/hub/descricao-html": "Descrição em HTML",
   "/minha-area": "Minha Área",
@@ -85,14 +85,7 @@ export function UserBreadcrumbs() {
         isLast: i === pathSegments.length - 1
       });
     }
-    // Verifica se é uma rota de detalhes de template
-    else if (pathSegments[i-1] === "templates" && pathSegments[i-2] === "hub" && !breadcrumbMap[currentPath]) {
-      breadcrumbs.push({
-        path: currentPath,
-        label: "Detalhes do Template",
-        isLast: i === pathSegments.length - 1
-      });
-    }
+
     // Verifica se é uma rota de detalhes de prompt
     else if (pathSegments[i-1] === "prompts-ia" && pathSegments[i-2] === "hub" && !breadcrumbMap[currentPath]) {
       breadcrumbs.push({

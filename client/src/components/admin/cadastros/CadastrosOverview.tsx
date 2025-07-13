@@ -27,24 +27,7 @@ const CadastrosOverview = () => {
           </div>
         </CardContent>
       </Card>
-      <Card className="bg-white border-gray-200 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-        onClick={() => navigate('/admin/cadastros/tipos-templates')}>
-        <CardHeader>
-          <div className="flex items-center space-x-2">
-            <FolderPen className="h-5 w-5 text-primary" />
-            <CardTitle className="text-foreground">Tipos de Templates</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-sm mb-4">Gerencie tipos de templates e categorias</p>
-          <div className="flex justify-between items-center">
-            <Badge className="bg-green-100 text-green-700 border-green-200">4 tipos</Badge>
-            <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" variant="default">
-              Gerenciar
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+
       <Card className="bg-white border-gray-200 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
         onClick={() => navigate('/admin/cadastros/tipos-fornecedor')}>
         <CardHeader>

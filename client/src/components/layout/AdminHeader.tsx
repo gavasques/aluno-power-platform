@@ -27,7 +27,7 @@ const adminMenuItems = [
     title: "Cadastros",
     items: [
       { title: "Departamentos", href: "/admin/cadastros/departamentos", icon: Database },
-      { title: "Tipos de Templates", href: "/admin/cadastros/tipos-templates", icon: FileText },
+
       { title: "Tipos de Fornecedor", href: "/admin/cadastros/tipos-fornecedor", icon: Database },
       { title: "Tipos de Parceiro", href: "/admin/cadastros/tipos-parceiro", icon: Users },
       { title: "Tipos de Prompts IA", href: "/admin/cadastros/tipos-prompts-ia", icon: FileText },
@@ -41,7 +41,7 @@ const adminMenuItems = [
       { title: "Parceiros", href: "/admin/conteudo/parceiros", icon: Users },
       { title: "Fornecedores", href: "/admin/conteudo/fornecedores", icon: Users },
       { title: "Ferramentas", href: "/admin/conteudo/ferramentas", icon: Settings },
-      { title: "Templates", href: "/admin/conteudo/templates", icon: FileText },
+
       { title: "Materiais", href: "/admin/conteudo/materiais", icon: FileText },
       { title: "Prompts de IA", href: "/admin/conteudo/prompts-ia", icon: Bot },
       { title: "Central de Notícias", href: "/admin/conteudo/noticias", icon: FileText },

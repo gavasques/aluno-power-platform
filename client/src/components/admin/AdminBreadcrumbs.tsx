@@ -16,20 +16,20 @@ const breadcrumbMap: Record<string, string> = {
   "/admin/dashboard": "Dashboard",
   "/admin/cadastros": "Cadastros",
   "/admin/cadastros/departamentos": "Departamentos",
-  "/admin/cadastros/tipos-templates": "Tipos de Templates",
+
   "/admin/cadastros/tipos-fornecedor": "Tipos de Fornecedor",
   "/admin/cadastros/tipos-prompts-ia": "Tipos de Prompts IA",
   "/admin/cadastros/tipos-materiais": "Tipos de Materiais",
   "/admin/cadastros/tipos-ferramentas": "Tipos de Ferramentas",
   "/admin/cadastros/parceiros": "Parceiros",
-  "/admin/cadastros/templates": "Templates",
+
   "/admin/cadastros/prompts-ia": "Prompts IA",
   "/admin/usuarios": "Usuários",
   "/admin/conteudo": "Gestão de Conteúdo",
   "/admin/conteudo/parceiros": "Parceiros",
   "/admin/conteudo/fornecedores": "Fornecedores",
   "/admin/conteudo/ferramentas": "Ferramentas",
-  "/admin/conteudo/templates": "Templates",
+
   "/admin/conteudo/prompts-ia": "Prompts IA",
   "/admin/conteudo/materiais": "Materiais",
   "/admin/conteudo/selos": "Selos",
@@ -37,7 +37,7 @@ const breadcrumbMap: Record<string, string> = {
   "/admin/configuracoes": "Configurações",
   "/admin/configuracoes/plataforma": "Plataforma",
   "/admin/configuracoes/creditos-ia": "Créditos IA",
-  "/admin/configuracoes/templates-resposta": "Templates de Resposta",
+
   "/admin/configuracoes/feed-noticias": "Feed de Notícias",
 };
 
