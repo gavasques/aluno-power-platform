@@ -42,7 +42,7 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
     staleTime: 0, // Force fresh data for debugging, will revert to 6 hours after fix
     gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
     refetchOnWindowFocus: false, // Don't refetch on focus to save API calls
-    refetchOnMount: false, // Use cached data when available
+    refetchOnMount: true, // OVERRIDE global setting to force fresh YouTube data
     refetchOnReconnect: false, // Don't auto-refresh to save API quota
     structuralSharing: true, // Optimize re-renders
   });

@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { VideoCard } from "@/components/youtube/VideoCard";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { News, Update } from "@shared/schema";
 import { SystemAnalytics } from "@/components/analytics/SystemAnalytics";
 
@@ -42,6 +42,7 @@ StatCard.displayName = 'StatCard';
 const Dashboard = memo(() => {
   const { videos, loading, refetch } = useYoutube();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   // Debug: Log videos to console
   React.useEffect(() => {
@@ -55,11 +56,18 @@ const Dashboard = memo(() => {
     }
   }, [videos]);
 
-  // Force fresh fetch immediately
+  // Force fresh fetch immediately to bypass cache issues
   React.useEffect(() => {
     console.log('🔄 Forcing fresh YouTube data fetch...');
-    refetch();
-  }, [refetch]);
+    // Completely invalidate YouTube cache
+    queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
+    console.log('🗑️ Cache invalidated for YouTube videos');
+    // Force fresh fetch after cache invalidation
+    setTimeout(() => {
+      refetch();
+      console.log('🔄 Refetch triggered after cache invalidation');
+    }, 500);
+  }, [refetch, queryClient]);
   
   const recentVideos = React.useMemo(() => 
     videos
