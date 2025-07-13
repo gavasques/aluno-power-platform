@@ -92,7 +92,7 @@ export const AmazonAdsSOPTool: React.FC = () => {
     const estimatedPrice = estimateProductPrice(data);
     const tolerances = config.customTolerances || getTolerances(config.priceRange, config.analysisMode);
     
-    console.log('📏 Tolerâncias aplicadas:', {
+    console.log('🎯 Tolerâncias aplicadas:', {
       low: tolerances.low,
       medium: tolerances.medium,
       high: tolerances.high,
@@ -116,93 +116,147 @@ export const AmazonAdsSOPTool: React.FC = () => {
       const currentCpc = item.cpc || 0;
       const clicks = item.cliques || item.clicks || 0;
       const orders = item.pedidos || item.orders || 0;
+      const sales = item.vendas || item.sales || 0;
+      const spend = item.gastos || item.spend || 0;
       const acos = item.acos || 0;
       const impressions = item.impressoes || item.impressions || 0;
-      const spend = item.gastos || item.spend || 0;
-      const sales = item.vendas || item.sales || 0;
-
-      if (currentBid === 0 || !keyword || keyword === 'N/A') return;
-
+      
+      // Pular se dados insuficientes
+      if (currentBid === 0 || keyword === 'N/A') return;
+      
       let action = '';
       let newBid = currentBid;
       let priority: 'Alta' | 'Média' | 'Baixa' = 'Baixa';
       let ruleApplied = '';
       let justification = '';
       let estimatedImpact = 0;
-
-      // Regra 1: Keywords sem conversão com muitos cliques
+      
+      // REGRA 1: Keywords sem conversão com muitos cliques
       if (orders === 0 && clicks > 0) {
         if (clicks >= tolerances.high) {
           action = 'Desativar keyword';
           newBid = 0;
           priority = 'Alta';
           ruleApplied = 'SOP-001: Desativação por cliques sem conversão';
-          justification = `${clicks} cliques sem conversão (tolerância: ${tolerances.high}). Pausar para evitar gastos improdutivos.`;
-          estimatedImpact = spend * 0.8; // Economia de 80% do gasto atual
+          justification = `${clicks} cliques sem conversão (tolerância: ${tolerances.high}). Desperdício confirmado.`;
+          estimatedImpact = spend;
         } else if (clicks >= tolerances.medium) {
-          action = 'Reduzir lance em 20%';
-          newBid = currentBid * 0.8;
-          priority = 'Média';
-          ruleApplied = 'SOP-002: Redução por performance baixa';
-          justification = `${clicks} cliques sem conversão. Reduzir investimento para testar menor competitividade.`;
-          estimatedImpact = spend * 0.2; // Economia de 20%
+          action = 'Reduzir lance em 30%';
+          newBid = currentBid * 0.7;
+          priority = 'Alta';
+          ruleApplied = 'SOP-002: Redução agressiva por performance ruim';
+          justification = `${clicks} cliques sem conversão. Reduzir investimento significativamente.`;
+          estimatedImpact = spend * 0.3;
         } else if (clicks >= tolerances.low) {
-          action = 'Reduzir lance em 10%';
-          newBid = currentBid * 0.9;
+          action = 'Reduzir lance em 15%';
+          newBid = currentBid * 0.85;
           priority = 'Média';
-          ruleApplied = 'SOP-003: Ajuste preventivo';
-          justification = `${clicks} cliques sem conversão. Ajuste preventivo para melhorar eficiência.`;
-          estimatedImpact = spend * 0.1; // Economia de 10%
+          ruleApplied = 'SOP-003: Redução moderada por baixa conversão';
+          justification = `${clicks} cliques sem conversão. Otimização preventiva.`;
+          estimatedImpact = spend * 0.15;
+        } else {
+          action = 'Aumentar lance em 15%';
+          newBid = currentBid * 1.15;
+          priority = 'Baixa';
+          ruleApplied = 'SOP-004: Aumento para teste de volume';
+          justification = `Apenas ${clicks} cliques. Testar maior volume antes de desativar.`;
+          estimatedImpact = -spend * 0.15;
         }
       }
-
-      // Regra 2: ACoS muito alto
+      
+      // REGRA 2: ACoS muito alto
       if (acos >= 0.50) {
         action = 'Reduzir lance em 40%';
         newBid = currentBid * 0.6;
         priority = 'Alta';
-        ruleApplied = 'SOP-004: ACoS crítico';
-        justification = `ACoS de ${(acos * 100).toFixed(1)}% está muito alto. Redução drástica necessária.`;
-        estimatedImpact = spend * 0.4; // Economia de 40%
-      } else if (acos >= 0.30 && acos < 0.50) {
-        if (action === '') { // Não sobrescrever regras de cliques sem conversão
-          action = 'Reduzir lance em 20%';
-          newBid = currentBid * 0.8;
+        ruleApplied = 'SOP-005: ACoS crítico';
+        justification = `ACoS de ${(acos * 100).toFixed(1)}% está muito alto. Redução agressiva necessária.`;
+        estimatedImpact = spend * 0.4;
+      } else if (acos > 0.30 && acos < 0.50) {
+        if (priority !== 'Alta') {
+          action = 'Reduzir lance em 25%';
+          newBid = currentBid * 0.75;
+          priority = 'Alta';
+          ruleApplied = 'SOP-006: ACoS alto';
+          justification = `ACoS de ${(acos * 100).toFixed(1)}% precisa ser otimizado.`;
+          estimatedImpact = spend * 0.25;
+        }
+      } else if (acos > 0.15 && acos <= 0.30) {
+        if (priority === 'Baixa') {
+          action = 'Reduzir lance em 10%';
+          newBid = currentBid * 0.9;
           priority = 'Média';
-          ruleApplied = 'SOP-005: ACoS alto';
-          justification = `ACoS de ${(acos * 100).toFixed(1)}% precisa ser otimizado. Redução moderada recomendada.`;
-          estimatedImpact = spend * 0.2; // Economia de 20%
+          ruleApplied = 'SOP-007: Otimização de ACoS moderado';
+          justification = `ACoS de ${(acos * 100).toFixed(1)}% pode ser melhorado.`;
+          estimatedImpact = spend * 0.1;
         }
       }
-
-      // Regra 3: Performance excelente - aumentar investimento
-      if (acos > 0 && acos <= 0.05 && orders > 0 && action === '') {
+      
+      // REGRA 3: Performance excelente - SCALING
+      if (acos > 0 && acos <= 0.15 && orders > 0) {
+        if (acos <= 0.05) {
+          action = 'Aumentar lance em 25%';
+          newBid = currentBid * 1.25;
+          priority = 'Alta';
+          ruleApplied = 'SOP-008: Scaling agressivo de winner';
+          justification = `ACoS excelente de ${(acos * 100).toFixed(1)}% com ${orders} conversões. Scaling máximo.`;
+          estimatedImpact = -spend * 0.5;
+        } else if (acos <= 0.10) {
+          action = 'Aumentar lance em 20%';
+          newBid = currentBid * 1.20;
+          priority = 'Alta';
+          ruleApplied = 'SOP-009: Scaling forte de performer';
+          justification = `ACoS muito bom de ${(acos * 100).toFixed(1)}% com conversões. Scaling recomendado.`;
+          estimatedImpact = -spend * 0.4;
+        } else {
+          action = 'Aumentar lance em 15%';
+          newBid = currentBid * 1.15;
+          priority = 'Média';
+          ruleApplied = 'SOP-010: Scaling conservador';
+          justification = `ACoS bom de ${(acos * 100).toFixed(1)}% com conversões. Scaling gradual.`;
+          estimatedImpact = -spend * 0.3;
+        }
+      }
+      
+      // REGRA 4: CTR baixo
+      const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+      if (impressions > 1000 && ctr < 0.5 && priority === 'Baixa') {
+        action = 'Reduzir lance em 20%';
+        newBid = currentBid * 0.8;
+        priority = 'Média';
+        ruleApplied = 'SOP-011: CTR baixo';
+        justification = `CTR de ${ctr.toFixed(2)}% com ${impressions} impressões. Keyword irrelevante.`;
+        estimatedImpact = spend * 0.2;
+      }
+      
+      // REGRA 5: Sem impressões
+      if (impressions === 0 && priority === 'Baixa') {
+        action = 'Aumentar lance em 50%';
+        newBid = currentBid * 1.5;
+        priority = 'Média';
+        ruleApplied = 'SOP-012: Sem visibilidade';
+        justification = `Zero impressões. Lance muito baixo para competir.`;
+        estimatedImpact = -spend * 0.5;
+      }
+      
+      // REGRA 6: Conversões com ACoS aceitável
+      if (orders > 0 && acos > 0.15 && acos <= 0.25 && priority === 'Baixa') {
         action = 'Aumentar lance em 10%';
-        newBid = currentBid * 1.1;
+        newBid = currentBid * 1.10;
         priority = 'Baixa';
-        ruleApplied = 'SOP-006: Performance excelente';
-        justification = `ACoS baixo de ${(acos * 100).toFixed(1)}% com conversões. Aumentar investimento para expandir reach.`;
-        estimatedImpact = -spend * 0.1; // Investimento adicional
+        ruleApplied = 'SOP-013: Scaling conservador';
+        justification = `${orders} conversões com ACoS aceitável de ${(acos * 100).toFixed(1)}%.`;
+        estimatedImpact = -spend * 0.2;
       }
-
-      // Regra 4: Muitas impressões, poucos cliques
-      if (impressions >= 1000 && clicks <= 5 && action === '') {
-        action = 'Aumentar lance em 15%';
-        newBid = currentBid * 1.15;
-        priority = 'Baixa';
-        ruleApplied = 'SOP-007: Baixa visibilidade';
-        justification = `${impressions} impressões mas apenas ${clicks} cliques. Aumentar lance para melhor posicionamento.`;
-        estimatedImpact = -spend * 0.15; // Investimento adicional
-      }
-
-      // Somente adicionar se houver recomendação
-      if (action !== '') {
+      
+      // Adicionar recomendação se houver ação
+      if (action) {
         recommendations.push({
           keyword,
           campaign,
           currentBid,
           currentCpc,
-          newBid,
+          newBid: Math.max(0.02, newBid),
           clicks,
           orders,
           acos,
@@ -214,11 +268,21 @@ export const AmazonAdsSOPTool: React.FC = () => {
           priority,
           estimatedImpact,
           justification,
-          rowIndex: index
+          rowIndex: index,
+          ctr
         });
-
-        totalEstimatedSavings += Math.max(estimatedImpact, 0); // Apenas economias positivas
+        
+        totalEstimatedSavings += estimatedImpact;
       }
+    });
+    
+    // Ordenar por prioridade e impacto
+    recommendations.sort((a, b) => {
+      const priorityOrder = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
+      if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+        return priorityOrder[b.priority] - priorityOrder[a.priority];
+      }
+      return Math.abs(b.estimatedImpact) - Math.abs(a.estimatedImpact);
     });
 
     // Calcular resumo

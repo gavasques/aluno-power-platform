@@ -54,6 +54,7 @@ export interface SOPRecommendation {
   estimatedImpact: number;
   justification: string;
   rowIndex: number;
+  ctr?: number;
 }
 
 export interface AnalysisConfig {
