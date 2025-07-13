@@ -103,8 +103,9 @@ const UserDashboard = () => {
     queryKey: ['/api/youtube-videos'],
     enabled: true,
     retry: false,
-    staleTime: 10 * 60 * 1000, // 10 minutos
-    gcTime: 30 * 60 * 1000, // 30 minutos
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 15 * 60 * 1000, // 15 minutos
+    refetchOnWindowFocus: false, // Evita refetch desnecessário
   });
 
   // Fetch published news preview (lightweight)
@@ -430,7 +431,9 @@ const UserDashboard = () => {
                   </div>
                 ) : youtubeVideos && youtubeVideos.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {youtubeVideos.slice(0, 3).map((video) => (
+                    {youtubeVideos
+                      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+                      .slice(0, 3).map((video) => (
                       <div 
                         key={video.id} 
                         className="group cursor-pointer transform transition-all duration-300 hover:scale-105"

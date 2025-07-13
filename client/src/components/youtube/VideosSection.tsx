@@ -24,13 +24,18 @@ function useVideoData() {
       return { groupedVideos: {}, categories: [], latestVideos: [] };
     }
 
-    // Group videos by category
+    // Group videos by category and sort each category by date
     const grouped = videos.reduce((acc: Record<string, YoutubeVideo[]>, video) => {
       const category = video.category || 'Outros';
       if (!acc[category]) acc[category] = [];
       acc[category].push(video);
       return acc;
     }, {});
+    
+    // Sort videos within each category by publishedAt (newest first)
+    Object.keys(grouped).forEach(category => {
+      grouped[category].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    });
 
     // Get categories sorted alphabetically
     const categories = Object.keys(grouped).sort();
