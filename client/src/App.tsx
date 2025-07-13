@@ -78,6 +78,7 @@ const BackgroundRemovalPro = lazy(() => import("./pages/tools/BackgroundRemovalP
 const LogoGeneratorPro = lazy(() => import("./pages/tools/LogoGeneratorPro"));
 const UltraMelhoradorPro = lazy(() => import("./pages/tools/UltraMelhoradorPro"));
 const UpscalePro = lazy(() => import("./pages/tools/UpscalePro"));
+const AmazonAdsEditor = lazy(() => import("./pages/tools/AmazonAdsEditor"));
 const UserDashboard = lazy(() => import("./pages/user/Dashboard"));
 const UserUsage = lazy(() => import("./pages/user/Usage"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
@@ -167,6 +168,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <BackgroundRemoval />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/ferramentas/amazon-ads-editor">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonAdsEditor />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
