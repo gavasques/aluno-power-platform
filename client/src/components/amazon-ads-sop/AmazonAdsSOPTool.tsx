@@ -12,7 +12,6 @@ import { ResultsSummary } from './ResultsSummary';
 import { RecommendationsTable } from './RecommendationsTable';
 import { ChartsSection } from './ChartsSection';
 import { DownloadButtons } from './DownloadButtons';
-import { RecommendationManager, convertToRecommendationsWithId } from './RecommendationManager';
 import { filterRecommendationsWithHistory } from './SmartFilter';
 
 import { 
@@ -29,7 +28,6 @@ export const AmazonAdsSOPTool: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<'upload' | 'preview' | 'config' | 'results'>('upload');
   const [originalData, setOriginalData] = useState<AmazonKeyword[]>([]);
   const [recommendations, setRecommendations] = useState<SOPRecommendation[]>([]);
-  const [recommendationsWithId, setRecommendationsWithId] = useState<any[]>([]);
   const [analysisSummary, setAnalysisSummary] = useState<AnalysisSummary | null>(null);
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>({
     stage: 'idle',
@@ -575,31 +573,6 @@ export const AmazonAdsSOPTool: React.FC = () => {
           </div>
           
           <ResultsSummary summary={analysisSummary} />
-          
-          {/* Gerenciador de Recomendações */}
-          <RecommendationManager 
-            recommendations={recommendations}
-            onRecommendationsUpdate={(updatedRecs) => {
-              // Filtrar apenas as recomendações não ignoradas
-              const activeRecs = updatedRecs.filter(r => !r.isIgnored);
-              setRecommendations(activeRecs);
-              
-              // Atualizar resumo
-              const updatedSummary = {
-                ...analysisSummary,
-                totalRecommendations: activeRecs.length,
-                highPriority: activeRecs.filter(r => r.priority === 'Alta').length,
-                mediumPriority: activeRecs.filter(r => r.priority === 'Média').length,
-                lowPriority: activeRecs.filter(r => r.priority === 'Baixa').length,
-                deactivations: activeRecs.filter(r => r.action.includes('Desativar')).length,
-                bidReductions: activeRecs.filter(r => r.action.includes('Reduzir')).length,
-                bidIncreases: activeRecs.filter(r => r.action.includes('Aumentar')).length,
-                estimatedSavings: activeRecs.reduce((sum, r) => sum + r.estimatedImpact, 0)
-              };
-              setAnalysisSummary(updatedSummary);
-            }}
-          />
-          
           <RecommendationsTable recommendations={recommendations} />
           <ChartsSection recommendations={recommendations} summary={analysisSummary} />
           <DownloadButtons 
