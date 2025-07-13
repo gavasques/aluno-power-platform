@@ -107,6 +107,25 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     const data = XLSX.utils.sheet_to_json(worksheet);
     const columns = data.length > 0 ? Object.keys(data[0] as any) : [];
     
+    // Filtrar abas inúteis para análise SOP
+    const isResumoTab = columns.some(col => 
+      col.toLowerCase().includes('métrica') || col.toLowerCase().includes('metrica')
+    ) && columns.some(col => 
+      col.toLowerCase().includes('valor')
+    );
+    
+    // Se for aba de resumo, dar score 0 para não aparecer nas opções
+    if (isResumoTab) {
+      return {
+        name: sheetName,
+        rows: data.length,
+        columns,
+        hasKeywords: false,
+        hasPerformanceData: false,
+        score: 0
+      };
+    }
+    
     // Detectar se tem keywords
     const hasKeywords = columns.some(col => detectFieldType(col) === 'keyword');
     
@@ -332,13 +351,14 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
       // Analisar todas as abas
       const sheetsInfo = workbook.SheetNames.map(name => analyzeSheet(workbook, name));
       
-      // Ordenar por score (relevância)
-      sheetsInfo.sort((a, b) => b.score - a.score);
-      setAvailableSheets(sheetsInfo);
+      // Filtrar apenas abas relevantes (score > 0) e ordenar por score
+      const relevantSheets = sheetsInfo.filter(sheet => sheet.score > 0);
+      relevantSheets.sort((a, b) => b.score - a.score);
+      setAvailableSheets(relevantSheets);
       
       // Se só tem uma aba ou a melhor tem score alto, selecionar automaticamente
-      if (sheetsInfo.length === 1 || sheetsInfo[0].score >= 60) {
-        setSelectedSheet(sheetsInfo[0].name);
+      if (relevantSheets.length === 1 || (relevantSheets.length > 0 && relevantSheets[0].score >= 60)) {
+        setSelectedSheet(relevantSheets[0].name);
       }
       
     } catch (error) {

@@ -324,13 +324,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 13, 2025 - 01:10 PM**: ✅ AMAZON ADS SOP - RESUMO ANÁLISE TAB ERROR HANDLING FIXED
-  - **Problem Fixed**: "Resumo Análise" tab was causing crashes when processed as it contains summary metrics instead of keyword data
-  - **Root Cause**: System was trying to validate summary data (Métrica/Valor columns) as keyword performance data
-  - **Solution Applied**: Enhanced validateData function to detect summary tabs by checking for "Métrica" + "Valor" column patterns
-  - **User Experience**: Clear error message now explains tab incompatibility: "Esta é uma aba de resumo/métricas. Para análise SOP, selecione uma aba com dados detalhados de keywords como 'Dados Otimizados' ou 'Recomendações SOP'"
-  - **Technical Implementation**: Added isResumoTab detection logic before performance data validation
-  - **Result**: Users receive helpful guidance instead of generic error when selecting incompatible tabs
+- **January 13, 2025 - 01:12 PM**: ✅ AMAZON ADS SOP - RESUMED ANALYSIS TAB COMPLETELY REMOVED FROM OPTIONS  
+  - **User Request**: User identified "Resumo Análise" tab as useless for SOP analysis and requested its removal
+  - **Problem Context**: Tab contains only 11 rows of summary metrics (like dashboard totals) instead of actionable keyword data
+  - **Solution Implemented**: Modified analyzeSheet function to assign score=0 to resume tabs, then filtered them out from available options
+  - **Detection Logic**: Automatically detects tabs with "Métrica" + "Valor" column patterns as summary tabs
+  - **Result**: "Resumo Análise" and similar summary tabs no longer appear in the dropdown list for user selection
+  - **User Experience**: Cleaner interface showing only useful tabs ("Dados Otimizados", "Recomendações SOP") that can generate actual recommendations
+  - **Technical Benefits**: Prevents user confusion and processing errors by hiding incompatible tab formats
 
 - **January 13, 2025 - 01:04 AM**: ✅ AMAZON ADS SOP - ADVANCED RECOMMENDATION FILTERING SYSTEM IMPLEMENTED
   - **Smart Recommendation Manager**: Complete disregard functionality for intelligent recommendation management
