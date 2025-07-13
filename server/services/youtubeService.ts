@@ -213,8 +213,14 @@ class YouTubeService {
             
             const channelId = bestMatch.id.channelId;
             
-            // Get videos from the channel
-            const videosUrl = `${this.baseUrl}/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=${maxResults}&key=${this.apiKey}`;
+            // Get videos from the channel (last 30 days for optimization)
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const publishedAfter = thirtyDaysAgo.toISOString();
+            
+            const videosUrl = `${this.baseUrl}/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=${maxResults}&publishedAfter=${publishedAfter}&key=${this.apiKey}`;
+            
+            console.log(`🔍 [YOUTUBE API] Searching for videos after ${publishedAfter}`);
             const videosResponse = await fetch(videosUrl);
             
             if (!videosResponse.ok) {
@@ -267,28 +273,41 @@ class YouTubeService {
 
   async fetchAndCacheVideos(): Promise<void> {
     try {
-      console.log('Starting YouTube video fetch...');
+      console.log('🎬 [YOUTUBE SYNC] Starting YouTube video fetch...');
       
       if (!this.apiKey) {
-        console.log('No YouTube API key available - skipping video fetch');
+        console.log('❌ [YOUTUBE SYNC] No YouTube API key available - skipping video fetch');
         return;
       }
+      
+      // Get the date for filtering recent videos (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      console.log(`🔍 [YOUTUBE SYNC] Fetching videos published after: ${thirtyDaysAgo.toISOString()}`);
       
       // Fetch videos from Guilherme Vasques channel
       const channelHandle = '@guilhermeavasques';
       const videos = await this.fetchChannelVideos(channelHandle, 50);
       
+      console.log(`📺 [YOUTUBE SYNC] Found ${videos.length} videos from API`);
+      
       let totalFetched = 0;
+      let totalUpdated = 0;
+      let totalSkipped = 0;
 
       for (const video of videos) {
         try {
+          const publishedDate = new Date(video.snippet.publishedAt);
+          console.log(`🎥 [YOUTUBE SYNC] Processing video: ${video.snippet.title} (Published: ${publishedDate.toLocaleDateString()})`);
+          
           const videoData: InsertYoutubeVideo = {
             videoId: video.id.videoId,
             title: video.snippet.title,
             description: video.snippet.description || '',
             channelTitle: video.snippet.channelTitle,
             channelId: video.snippet.channelId,
-            publishedAt: new Date(video.snippet.publishedAt),
+            publishedAt: publishedDate,
             thumbnailUrl: video.snippet.thumbnails.high?.url || video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default?.url,
             duration: video.contentDetails ? this.parseDuration(video.contentDetails.duration) : null,
             viewCount: video.statistics && !isNaN(parseInt(video.statistics.viewCount)) ? parseInt(video.statistics.viewCount) : null,
@@ -305,18 +324,27 @@ class YouTubeService {
           if (!existingVideo) {
             await storage.createYoutubeVideo(videoData);
             totalFetched++;
-          } else if (!existingVideo.isActive) {
-            // Reactivate existing video
-            await storage.updateYoutubeVideo(existingVideo.id, { isActive: true });
+            console.log(`✅ [YOUTUBE SYNC] Added new video: ${video.snippet.title}`);
+          } else {
+            // Update existing video with latest stats
+            await storage.updateYoutubeVideo(existingVideo.id, {
+              viewCount: videoData.viewCount,
+              likeCount: videoData.likeCount,
+              isActive: true,
+              fetchedAt: new Date()
+            });
+            totalUpdated++;
+            console.log(`🔄 [YOUTUBE SYNC] Updated existing video: ${video.snippet.title}`);
           }
         } catch (error) {
-          console.error(`Error saving video ${video.id.videoId}:`, error);
+          console.error(`❌ [YOUTUBE SYNC] Error saving video ${video.id.videoId}:`, error);
+          totalSkipped++;
         }
       }
 
-      console.log(`YouTube fetch completed. ${totalFetched} new videos cached.`);
+      console.log(`✅ [YOUTUBE SYNC] Sync completed! New: ${totalFetched}, Updated: ${totalUpdated}, Skipped: ${totalSkipped}`);
     } catch (error) {
-      console.error('Error in fetchAndCacheVideos:', error);
+      console.error('❌ [YOUTUBE SYNC] Error in fetchAndCacheVideos:', error);
       throw error;
     }
   }

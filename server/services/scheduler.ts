@@ -6,16 +6,15 @@ class Scheduler {
 
   start() {
     if (this.isRunning) {
-      console.log('Scheduler already running');
+      console.log('📅 [SCHEDULER] Scheduler already running');
       return;
     }
 
     this.isRunning = true;
-    console.log('Starting YouTube video scheduler (2x daily)...');
+    console.log('📅 [SCHEDULER] Starting YouTube video scheduler (1x daily)...');
 
-    // Schedule for 8:00 AM and 8:00 PM daily
-    this.scheduleJob('08:00', () => this.runYouTubeSync());
-    this.scheduleJob('20:00', () => this.runYouTubeSync());
+    // Schedule for 9:00 AM daily - optimal time for new video detection
+    this.scheduleJob('09:00', () => this.runYouTubeSync());
 
     // Run immediately on startup (for testing/initial population)
     setTimeout(() => this.runYouTubeSync(), 5000);
@@ -51,11 +50,11 @@ class Scheduler {
 
   private async runYouTubeSync() {
     try {
-      console.log(`Starting scheduled YouTube video sync at ${new Date().toLocaleString()}`);
+      console.log(`🚀 [SCHEDULER] Starting scheduled YouTube video sync at ${new Date().toLocaleString()}`);
       await youtubeService.fetchAndCacheVideos();
-      console.log(`YouTube sync completed at ${new Date().toLocaleString()}`);
+      console.log(`✅ [SCHEDULER] YouTube sync completed at ${new Date().toLocaleString()}`);
     } catch (error) {
-      console.error('Error in scheduled YouTube sync:', error);
+      console.error('❌ [SCHEDULER] Error in scheduled YouTube sync:', error);
     }
   }
 

@@ -1173,10 +1173,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/youtube-videos/sync', async (req, res) => {
     try {
+      console.log('🎬 [MANUAL SYNC] Manual YouTube sync requested');
+      const startTime = Date.now();
+      
       await youtubeService.fetchAndCacheVideos();
-      res.json({ message: 'YouTube videos sync completed' });
+      
+      const duration = Date.now() - startTime;
+      console.log(`✅ [MANUAL SYNC] YouTube sync completed in ${duration}ms`);
+      
+      res.json({ 
+        message: 'YouTube videos sync completed',
+        timestamp: new Date().toISOString(),
+        duration: `${duration}ms`
+      });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to sync YouTube videos' });
+      console.error('❌ [MANUAL SYNC] Failed to sync YouTube videos:', error);
+      res.status(500).json({ 
+        error: 'Failed to sync YouTube videos',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
