@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle, Sheets, Database } from 'lucide-react';
+import { Upload, FileSpreadsheet, AlertCircle, CheckCircle, Sheet, Database } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -380,7 +380,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sheets className="w-5 h-5" />
+              <Sheet className="w-5 h-5" />
               Selecionar Aba da Planilha
             </CardTitle>
           </CardHeader>
