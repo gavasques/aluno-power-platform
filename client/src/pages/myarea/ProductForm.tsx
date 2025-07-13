@@ -10,7 +10,7 @@ import { channelNames, defaultChannels } from "@/config/channels";
 import { useLocation, useParams } from "wouter";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Package, Store } from "lucide-react";
+import { Store } from "lucide-react";
 
 const ProductForm = () => {
   const [, setLocation] = useLocation();
