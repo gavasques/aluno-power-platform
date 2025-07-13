@@ -40,8 +40,27 @@ const StatCard: React.FC<StatCardProps> = memo(({ title, value, icon: Icon, grad
 StatCard.displayName = 'StatCard';
 
 const Dashboard = memo(() => {
-  const { videos, loading } = useYoutube();
+  const { videos, loading, refetch } = useYoutube();
   const { user } = useAuth();
+  
+  // Debug: Log videos to console
+  React.useEffect(() => {
+    console.log('🎥 Dashboard videos loaded:', videos.length, 'videos');
+    if (videos.length > 0) {
+      console.log('🎥 First 3 videos:', videos.slice(0, 3).map(v => ({
+        title: v.title,
+        publishedAt: v.publishedAt,
+        isActive: v.isActive
+      })));
+    }
+  }, [videos]);
+
+  // Force fresh fetch immediately
+  React.useEffect(() => {
+    console.log('🔄 Forcing fresh YouTube data fetch...');
+    refetch();
+  }, [refetch]);
+  
   const recentVideos = React.useMemo(() => 
     videos
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())

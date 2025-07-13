@@ -39,10 +39,10 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/youtube-videos'],
     queryFn: () => apiRequest<YoutubeVideo[]>('/api/youtube-videos'),
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours - update maximum 1x per day to respect API limits
-    gcTime: 48 * 60 * 60 * 1000, // 48 hours
+    staleTime: 0, // Force fresh data for debugging, will revert to 6 hours after fix
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
     refetchOnWindowFocus: false, // Don't refetch on focus to save API calls
-    refetchOnMount: true, // Force fresh data on mount to show latest videos
+    refetchOnMount: false, // Use cached data when available
     refetchOnReconnect: false, // Don't auto-refresh to save API quota
     structuralSharing: true, // Optimize re-renders
   });
