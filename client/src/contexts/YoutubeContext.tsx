@@ -39,10 +39,10 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/youtube-videos'],
     queryFn: () => apiRequest<YoutubeVideo[]>('/api/youtube-videos'),
-    staleTime: 30 * 60 * 1000, // 30 minutes - semi-static data
-    gcTime: 2 * 60 * 60 * 1000, // 2 hours
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnMount: false, // Use cache when available
+    staleTime: 5 * 60 * 1000, // 5 minutes - refresh more frequently for new videos
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchOnMount: true, // Always fetch fresh data on component mount
     refetchOnReconnect: true, // Refresh on reconnect as videos can be updated
     structuralSharing: true, // Optimize re-renders
   });
