@@ -92,6 +92,13 @@ export const AmazonAdsSOPTool: React.FC = () => {
     const estimatedPrice = estimateProductPrice(data);
     const tolerances = config.customTolerances || getTolerances(config.priceRange, config.analysisMode);
     
+    console.log('📏 Tolerâncias aplicadas:', {
+      low: tolerances.low,
+      medium: tolerances.medium,
+      high: tolerances.high,
+      mode: config.analysisMode
+    });
+    
     // Filtrar keywords com performance
     const activeKeywords = data.filter(item => {
       const clicks = item.cliques || item.clicks || 0;
@@ -291,7 +298,17 @@ export const AmazonAdsSOPTool: React.FC = () => {
       }
 
       // Aplicar análise SOP
+      console.log('🚀 Iniciando análise SOP com configuração:', {
+        priceRange: analysisConfig.priceRange,
+        analysisMode: analysisConfig.analysisMode,
+        customTolerances: analysisConfig.customTolerances,
+        totalKeywords: originalData.length
+      });
+      
       const { recommendations: recs, summary } = applySOPRules(originalData, analysisConfig);
+      
+      console.log(`✅ Análise concluída - ${recs.length} recomendações geradas`);
+      console.log(`📊 Resumo: Alta: ${summary.highPriority}, Média: ${summary.mediumPriority}, Baixa: ${summary.lowPriority}`);
       
       setRecommendations(recs);
       setAnalysisSummary(summary);

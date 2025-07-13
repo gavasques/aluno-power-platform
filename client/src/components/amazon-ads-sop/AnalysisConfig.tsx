@@ -73,12 +73,9 @@ export const AnalysisConfig: React.FC<AnalysisConfigProps> = ({
   const updateConfig = (updates: Partial<AnalysisConfigType>) => {
     const newConfig = { ...config, ...updates };
     
-    // Recalcular tolerâncias se não for customizada
-    if (!config.customTolerances) {
-      newConfig.customTolerances = getTolerances(
-        newConfig.priceRange, 
-        newConfig.analysisMode
-      );
+    // Sempre recalcular tolerâncias quando mudar o modo ou faixa de preço
+    if ('analysisMode' in updates || 'priceRange' in updates) {
+      newConfig.customTolerances = undefined; // Limpar customizações para forçar recálculo
     }
     
     onConfigChange(newConfig);
@@ -260,6 +257,13 @@ export const AnalysisConfig: React.FC<AnalysisConfigProps> = ({
               <span className="ml-2 font-medium">≥{currentTolerances.high} cliques</span>
             </div>
           </div>
+          
+          {/* Indicador visual do modo agressivo */}
+          {config.analysisMode === 'aggressive' && (
+            <div className="mt-3 p-2 bg-orange-100 text-orange-800 rounded-md text-xs">
+              <strong>Modo Agressivo Ativo:</strong> As tolerâncias foram reduzidas em 30% para otimizações mais rápidas e drásticas
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
