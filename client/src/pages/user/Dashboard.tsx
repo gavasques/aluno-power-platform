@@ -99,14 +99,28 @@ const UserDashboard = () => {
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 
-  const { data: youtubeVideos, isLoading: videosLoading } = useQuery<YouTubeVideo[]>({
+  // Log para debug
+  const { data: youtubeVideos, isLoading: videosLoading, refetch: refetchVideos } = useQuery<YouTubeVideo[]>({
     queryKey: ['/api/youtube-videos'],
     enabled: true,
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 15 * 60 * 1000, // 15 minutos
-    refetchOnWindowFocus: false, // Evita refetch desnecessário
+    staleTime: 0, // Sem cache para garantir dados atualizados
+    gcTime: 5 * 60 * 1000, // 5 minutos
+    refetchOnWindowFocus: true, // Refetch ao focar na janela
+    refetchOnMount: 'always', // Sempre buscar dados novos
   });
+
+  // Debug: log dos vídeos recebidos
+  useEffect(() => {
+    if (youtubeVideos) {
+      console.log('Videos recebidos:', youtubeVideos.length);
+      console.log('Primeiros 3 vídeos:', youtubeVideos.slice(0, 3).map(v => ({
+        id: v.id,
+        title: v.title,
+        publishedAt: v.publishedAt
+      })));
+    }
+  }, [youtubeVideos]);
 
   // Fetch published news preview (lightweight)
   const { data: newsData = [], isLoading: newsLoading } = useQuery<Partial<News>[]>({
@@ -414,6 +428,17 @@ const UserDashboard = () => {
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Canal
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => {
+                        console.log('Refreshing videos...');
+                        refetchVideos();
+                      }}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      🔄 Atualizar
                     </Button>
                   </div>
                 </div>
