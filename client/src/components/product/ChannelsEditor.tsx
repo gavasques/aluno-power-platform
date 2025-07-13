@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 // import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
@@ -580,11 +581,17 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
                                         onChange={field.onChange}
                                         placeholder="R$ 0,00"
                                       />
-                                    ) : (
+                                    ) : fieldConfig.type === 'percent' ? (
                                       <PercentInput
                                         value={parseFloat(field.value?.toString() || '0') || 0}
                                         onChange={field.onChange}
                                         placeholder="0,00%"
+                                      />
+                                    ) : (
+                                      <Input
+                                        value={field.value?.toString() || ''}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                        placeholder={fieldConfig.label}
                                       />
                                     )}
                                   </FormControl>

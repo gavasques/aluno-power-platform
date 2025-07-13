@@ -35,28 +35,6 @@ export const ChannelForm = ({
     </CardHeader>
     {channelData?.enabled && (
       <CardContent className="space-y-4">
-        {/* Código do Produto no Canal */}
-        <div className="col-span-2">
-          <Label>Código do Produto no Canal</Label>
-          <Input
-            placeholder="Ex: PROD-001-AMZ"
-            value={channelData.productCode || ""}
-            onChange={(e) => onChannelInputChange(channelType, 'productCode', e.target.value)}
-          />
-        </div>
-
-        {/* Campo FNSKU específico para Amazon FBA */}
-        {channelType === 'amazonFBA' && (
-          <div className="col-span-2">
-            <Label>Código FNSKU</Label>
-            <Input
-              placeholder="Ex: X001ABC123DEF"
-              value={channelData.fnsku || ""}
-              onChange={(e) => onChannelInputChange(channelType, 'fnsku', e.target.value)}
-            />
-          </div>
-        )}
-
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Preço de Venda (R$)</Label>
