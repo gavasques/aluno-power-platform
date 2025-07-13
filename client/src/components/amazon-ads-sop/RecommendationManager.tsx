@@ -30,8 +30,16 @@ interface IgnoredRecommendation {
 
 // Funções auxiliares
 const generateRecommendationId = (rec: SOPRecommendation): string => {
-  const uniqueString = `${rec.keyword}-${rec.campaign}-${rec.ruleApplied}-${rec.currentBid}`;
-  return btoa(uniqueString).replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+  // Criar um hash simples baseado nas propriedades
+  const str = `${rec.keyword}-${rec.campaign}-${rec.ruleApplied}-${rec.currentBid}`;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  // Converter para hexadecimal e adicionar timestamp para garantir unicidade
+  return Math.abs(hash).toString(16) + Date.now().toString(36).substring(-4);
 };
 
 const generateIgnoreCriteria = (recommendation: RecommendationWithId) => {
