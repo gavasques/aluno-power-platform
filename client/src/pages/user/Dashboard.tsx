@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -89,6 +89,7 @@ interface YouTubeVideo {
 
 const UserDashboard = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState('overview');
 
   // Simplificar carregamento - apenas dados essenciais
@@ -104,21 +105,22 @@ const UserDashboard = () => {
     queryKey: ['/api/youtube-videos'],
     enabled: true,
     retry: false,
-    staleTime: 0, // Sem cache para garantir dados atualizados
-    gcTime: 5 * 60 * 1000, // 5 minutos
-    refetchOnWindowFocus: true, // Refetch ao focar na janela
-    refetchOnMount: 'always', // Sempre buscar dados novos
+    staleTime: 5 * 60 * 1000, // 5 minutos de cache normal
+    gcTime: 15 * 60 * 1000, // 15 minutos
+    refetchOnWindowFocus: false, // Sem refetch automático
+    refetchOnMount: false, // Cache normal
   });
 
   // Debug: log dos vídeos recebidos
   useEffect(() => {
     if (youtubeVideos) {
-      console.log('Videos recebidos:', youtubeVideos.length);
-      console.log('Primeiros 3 vídeos:', youtubeVideos.slice(0, 3).map(v => ({
+      console.log('✅ Videos recebidos:', youtubeVideos.length);
+      console.log('🎬 Primeiros 3 vídeos:', youtubeVideos.slice(0, 3).map(v => ({
         id: v.id,
-        title: v.title,
+        title: v.title.substring(0, 50) + '...',
         publishedAt: v.publishedAt
       })));
+      console.log('🔍 Video INMETRO encontrado?', youtubeVideos.find(v => v.title.includes('INMETRO')) ? 'SIM' : 'NÃO');
     }
   }, [youtubeVideos]);
 
@@ -433,9 +435,13 @@ const UserDashboard = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => {
-                          console.log('Refreshing videos...');
-                          refetchVideos();
+                        onClick={async () => {
+                          console.log('🔄 Invalidating cache and refreshing videos...');
+                          // Invalidar cache primeiro
+                          await queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
+                          // Depois refetch
+                          await refetchVideos();
+                          console.log('✅ Videos refreshed!');
                         }}
                         className="text-gray-400 hover:text-white"
                       >

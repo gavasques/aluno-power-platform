@@ -326,6 +326,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 13, 2025 - 10:45 PM**: ✅ BRANDING UPDATE & VIDEO API FIXES COMPLETED - FAVICON AND TITLE CHANGED
+  - **Favicon Updated**: Added new "Core Guilherme Vasques" favicon (ico_1752446510236.png) replacing default vite.svg
+  - **Title Changed**: Updated from "Aluno Power" to "Core Guilherme Vasques" in index.html
+  - **Admin-Only Refresh**: YouTube refresh button now only visible to administrators with proper role check
+  - **API Method Fixed**: Corrected YouTube endpoint to use getActiveYoutubeVideos() method ensuring proper video ordering
+  - **Cache Invalidation Enhanced**: Added proper query invalidation before refetch to resolve cache issues
+  - **Video Ordering Verified**: Backend correctly returns 55 videos with INMETRO (July 11, 2025) as most recent
+  - **Debug Logging Added**: Enhanced console logging to track video loading and help identify cache issues
+  - **Cache Strategy Optimized**: Restored normal 5-minute cache with manual invalidation for admins
+
 - **January 13, 2025 - 10:35 PM**: ✅ VIDEO SECTIONS OPTIMIZATION COMPLETED - DUPLICATIONS REMOVED
   - **Duplicate Video Sections Removed**: Eliminated duplicated video sections between Dashboard and Videos page
   - **Dashboard Simplified**: Dashboard now shows only 3 latest videos with "Ver Todos" button to full Videos page
