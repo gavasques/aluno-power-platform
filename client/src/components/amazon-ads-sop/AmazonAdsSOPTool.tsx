@@ -12,6 +12,8 @@ import { ResultsSummary } from './ResultsSummary';
 import { RecommendationsTable } from './RecommendationsTable';
 import { ChartsSection } from './ChartsSection';
 import { DownloadButtons } from './DownloadButtons';
+import { RecommendationManager, convertToRecommendationsWithId } from './RecommendationManager';
+import { filterRecommendationsWithHistory } from './SmartFilter';
 
 import { 
   AmazonKeyword, 
@@ -27,6 +29,7 @@ export const AmazonAdsSOPTool: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<'upload' | 'preview' | 'config' | 'results'>('upload');
   const [originalData, setOriginalData] = useState<AmazonKeyword[]>([]);
   const [recommendations, setRecommendations] = useState<SOPRecommendation[]>([]);
+  const [recommendationsWithId, setRecommendationsWithId] = useState<any[]>([]);
   const [analysisSummary, setAnalysisSummary] = useState<AnalysisSummary | null>(null);
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>({
     stage: 'idle',
@@ -372,15 +375,44 @@ export const AmazonAdsSOPTool: React.FC = () => {
       const { recommendations: recs, summary } = applySOPRules(originalData, analysisConfig);
       
       console.log(`✅ Análise concluída - ${recs.length} recomendações geradas`);
-      console.log(`📊 Resumo: Alta: ${summary.highPriority}, Média: ${summary.mediumPriority}, Baixa: ${summary.lowPriority}`);
       
-      setRecommendations(recs);
-      setAnalysisSummary(summary);
+      // Aplicar filtro inteligente de recomendações ignoradas
+      const STORAGE_KEY = 'amazon_ads_ignored_recommendations';
+      const storedIgnored = localStorage.getItem(STORAGE_KEY);
+      const ignoredList = storedIgnored ? JSON.parse(storedIgnored) : [];
+      
+      const filteredRecs = filterRecommendationsWithHistory(recs, ignoredList, {
+        enablePatternLearning: true,
+        enableSimilarKeywordFiltering: true,
+        enableCampaignLevelFiltering: true,
+        enablePerformanceBasedFiltering: true,
+        similarityThreshold: 0.8
+      });
+      
+      console.log(`🎯 Após filtro inteligente: ${filteredRecs.length} recomendações ativas (${recs.length - filteredRecs.length} ignoradas)`);
+      
+      // Atualizar resumo com as recomendações filtradas
+      const filteredSummary = {
+        ...summary,
+        totalRecommendations: filteredRecs.length,
+        highPriority: filteredRecs.filter(r => r.priority === 'Alta').length,
+        mediumPriority: filteredRecs.filter(r => r.priority === 'Média').length,
+        lowPriority: filteredRecs.filter(r => r.priority === 'Baixa').length,
+        deactivations: filteredRecs.filter(r => r.action.includes('Desativar')).length,
+        bidReductions: filteredRecs.filter(r => r.action.includes('Reduzir')).length,
+        bidIncreases: filteredRecs.filter(r => r.action.includes('Aumentar')).length,
+        estimatedSavings: filteredRecs.reduce((sum, r) => sum + r.estimatedImpact, 0)
+      };
+      
+      console.log(`📊 Resumo atualizado: Alta: ${filteredSummary.highPriority}, Média: ${filteredSummary.mediumPriority}, Baixa: ${filteredSummary.lowPriority}`);
+      
+      setRecommendations(filteredRecs);
+      setAnalysisSummary(filteredSummary);
       
       setProcessingStatus({
         stage: 'complete',
         progress: 100,
-        message: `Análise concluída! ${recs.length} recomendações geradas.`
+        message: `Análise concluída! ${filteredRecs.length} recomendações ativas.`
       });
 
       setCurrentStep('results');
@@ -543,6 +575,31 @@ export const AmazonAdsSOPTool: React.FC = () => {
           </div>
           
           <ResultsSummary summary={analysisSummary} />
+          
+          {/* Gerenciador de Recomendações */}
+          <RecommendationManager 
+            recommendations={recommendations}
+            onRecommendationsUpdate={(updatedRecs) => {
+              // Filtrar apenas as recomendações não ignoradas
+              const activeRecs = updatedRecs.filter(r => !r.isIgnored);
+              setRecommendations(activeRecs);
+              
+              // Atualizar resumo
+              const updatedSummary = {
+                ...analysisSummary,
+                totalRecommendations: activeRecs.length,
+                highPriority: activeRecs.filter(r => r.priority === 'Alta').length,
+                mediumPriority: activeRecs.filter(r => r.priority === 'Média').length,
+                lowPriority: activeRecs.filter(r => r.priority === 'Baixa').length,
+                deactivations: activeRecs.filter(r => r.action.includes('Desativar')).length,
+                bidReductions: activeRecs.filter(r => r.action.includes('Reduzir')).length,
+                bidIncreases: activeRecs.filter(r => r.action.includes('Aumentar')).length,
+                estimatedSavings: activeRecs.reduce((sum, r) => sum + r.estimatedImpact, 0)
+              };
+              setAnalysisSummary(updatedSummary);
+            }}
+          />
+          
           <RecommendationsTable recommendations={recommendations} />
           <ChartsSection recommendations={recommendations} summary={analysisSummary} />
           <DownloadButtons 

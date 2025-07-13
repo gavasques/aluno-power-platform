@@ -324,6 +324,31 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 13, 2025 - 01:04 AM**: ✅ AMAZON ADS SOP - ADVANCED RECOMMENDATION FILTERING SYSTEM IMPLEMENTED
+  - **Smart Recommendation Manager**: Complete disregard functionality for intelligent recommendation management
+  - **Core Features Implemented**:
+    - **RecommendationManager Component**: Full UI for viewing, selecting, and ignoring recommendations
+    - **Smart Filter System**: Intelligent pattern-based filtering with similarity detection
+    - **Persistent Storage**: LocalStorage-based system to remember ignored recommendations across sessions
+    - **Real-time Updates**: Dynamic summary recalculation when recommendations are ignored/restored
+  - **Advanced Filtering Capabilities**:
+    - **Exact Match Filtering**: Automatically filters identical recommendations previously ignored
+    - **Similar Keyword Detection**: Identifies and filters recommendations with similar keywords (80% threshold)
+    - **Campaign Pattern Recognition**: Learns from campaign-level patterns (3+ similar ignored = auto-filter)
+    - **Performance-based Filtering**: Filters based on similar performance metrics patterns
+  - **User Interface Enhancements**:
+    - Toggle between active/ignored recommendations view
+    - Bulk selection and ignore functionality with optional reason
+    - Individual recommendation restoration capability
+    - Clear all ignored recommendations option
+    - Visual status badges and counters for active vs ignored recommendations
+  - **Technical Implementation**:
+    - SmartRecommendationFilter class with configurable filtering strategies
+    - Unique ID generation for each recommendation based on multiple attributes
+    - Integration with existing SOP analysis workflow
+    - Automatic application of filters during analysis execution
+  - **User Benefits**: Streamlined workflow by automatically filtering out similar recommendations based on past decisions
+
 - **January 12, 2025 - 11:30 PM**: ✅ PROMOTIONAL BANNERS FULLY OPTIMIZED - 3 BANNERS IN SINGLE ROW LAYOUT
   - **Layout Enhancement**: All 3 banners now display in single row with responsive grid (12-column system)
   - **Banner 1 (5 columns)**: Amazon Fashion - "Venda Moda na Amazon com 0% de Comissão !!!"
