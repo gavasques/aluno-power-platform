@@ -206,12 +206,26 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     });
   };
 
-  const validateData = (data: AmazonKeyword[]): { valid: boolean; message?: string } => {
+  const validateData = (data: AmazonKeyword[], columns: string[]): { valid: boolean; message?: string } => {
     if (data.length === 0) {
       return { valid: false, message: 'Planilha vazia ou formato inválido' };
     }
 
-    // Verificar se tem dados básicos
+    // Verificar se é uma aba de resumo/métricas (detectar formato "Métrica" e "Valor")
+    const isResumoTab = columns.some(col => 
+      col.toLowerCase().includes('métrica') || col.toLowerCase().includes('metrica')
+    ) && columns.some(col => 
+      col.toLowerCase().includes('valor')
+    );
+
+    if (isResumoTab) {
+      return { 
+        valid: false, 
+        message: '❌ Esta é uma aba de resumo/métricas. Para análise SOP, selecione uma aba com dados detalhados de keywords como "Dados Otimizados" ou "Recomendações SOP".' 
+      };
+    }
+
+    // Verificar se tem dados básicos de performance
     const rowsWithData = data.filter(row => 
       (row.cliques || row.clicks || 0) > 0 || 
       (row.impressoes || row.impressions || 0) > 0 ||
@@ -268,7 +282,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         console.log('🔍 Primeiro registro normalizado:', normalizedData[0]);
       }
       
-      const validation = validateData(normalizedData);
+      const validation = validateData(normalizedData, columns);
       console.log('✔️ Resultado da validação:', validation);
       
       if (!validation.valid) {
