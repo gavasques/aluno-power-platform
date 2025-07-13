@@ -8,7 +8,6 @@ import { Plus, FileText, Users, Wrench, Package, BrainCircuit } from "lucide-rea
 import { useRoute, useLocation } from "wouter";
 import { usePartners } from "@/contexts/PartnersContext";
 import { useSuppliers } from "@/contexts/SuppliersContext";
-import { useTemplates } from "@/contexts/TemplatesContext";
 import { usePrompts } from "@/contexts/PromptsContext";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import ToolsManager from "@/components/admin/conteudo/ToolsManager";
@@ -18,8 +17,6 @@ import SupplierForm from "@/components/admin/conteudo/SupplierForm";
 import SupplierDetail from "@/components/admin/conteudo/SupplierDetail";
 import MaterialFormAdmin from "./conteudo/MaterialFormAdmin";
 import MaterialDetailAdmin from "./conteudo/MaterialDetailAdmin";
-import TemplatesManager from "@/components/admin/cadastros/TemplatesManager";
-import TemplateForm from "@/components/admin/cadastros/TemplateForm";
 import PromptsAIManager from "@/components/admin/cadastros/PromptsAIManager";
 import PromptForm from "@/components/admin/cadastros/PromptForm";
 import { NewsCenter } from "./content/NewsCenter";
@@ -31,7 +28,6 @@ const ContentManagement = () => {
   const [, setLocation] = useLocation();
   const { partners } = usePartners();
   const { suppliers } = useSuppliers();
-  const { templates } = useTemplates();
   const { prompts } = usePrompts();
   
   const subsection = params?.subsection;
@@ -68,11 +64,7 @@ const ContentManagement = () => {
     return <MaterialsManager />;
   }
 
-  if (subsection === 'templates') {
-    if (id === 'novo') return <TemplateForm />;
-    if (id && action === 'edit') return <TemplateForm />;
-    return <TemplatesManager />;
-  }
+
 
   if (subsection === 'prompts-ia') {
     if (id === 'novo') return <PromptForm />;
@@ -187,26 +179,7 @@ const ContentManagement = () => {
           </CardContent>
         </Card>
 
-        <Card 
-          className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => setLocation('/admin/conteudo/templates')}
-        >
-          <CardHeader>
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <CardTitle className="text-foreground">Templates</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm mb-4">Gerencie templates e modelos de comunicação</p>
-            <div className="flex justify-between items-center">
-              <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200">{templates.length} templates</Badge>
-              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Gerenciar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+
 
         <Card 
           className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
