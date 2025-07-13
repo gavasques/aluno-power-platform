@@ -326,16 +326,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 13, 2025 - 9:32 PM**: ✅ YOUTUBE INTEGRATION COMPLETELY OPTIMIZED - ENHANCED DAILY SYNC SYSTEM OPERATIONAL
-  - **Sync Schedule Optimized**: Changed from 2x daily to 1x daily sync at 9:00 AM for optimal video detection
-  - **Enhanced Video Filtering**: Added 30-day filter to fetch only recent videos, improving API efficiency
-  - **Advanced Logging System**: Implemented comprehensive logging with emoji indicators and detailed progress tracking
-  - **Statistics Updates**: System now updates view counts, like counts for existing videos during sync
-  - **Manual Sync Enhanced**: Improved /api/youtube-videos/sync endpoint with performance metrics and detailed error reporting
-  - **Performance Monitoring**: Added timing metrics and request duration tracking for sync operations
-  - **System Status Verified**: 55 videos cached, most recent from July 11, 2025 - system working perfectly
-  - **API Integration Working**: Successfully connecting to @guilhermeavasques channel with 50 videos per sync
-  - **Database Updates**: All videos receive fresh statistics (views, likes) during each sync operation
+- **January 13, 2025 - 9:40 PM**: ✅ YOUTUBE CACHE STRATEGY OPTIMIZED - CONSERVATIVE APPROACH FOR API LIMITS PROTECTION
+  - **Cache Strategy Updated**: Changed frontend cache from 5 minutes to 24 hours to respect YouTube API limits (maximum 1x daily update)
+  - **API Quota Protection**: Disabled automatic refetch on window focus, mount, and reconnect to prevent API quota exhaustion
+  - **Backend Sync Maintained**: Daily sync at 9:00 AM continues to fetch new videos, but frontend caches data for 24 hours
+  - **System Balance**: Backend updates database with fresh videos daily, frontend serves cached data to avoid excessive API calls
+  - **Database Status**: 55 videos including latest "INMETRO: O Segredo dos Vendedores..." from July 11, 2025
+  - **User Experience**: Videos update once daily maximum, ensuring sustainable API usage while maintaining fresh content
 
 - **January 13, 2025 - 4:21 PM**: ✅ PRODUCT CODE FIELDS IMPLEMENTATION COMPLETED - ALL 10 SALES CHANNELS NOW INCLUDE SPECIFIC PRODUCT CODE FIELDS
   - **Complete Implementation**: All sales channels now include dedicated product code fields for proper SKU/ID management
