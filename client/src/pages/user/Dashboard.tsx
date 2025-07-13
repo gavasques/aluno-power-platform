@@ -154,6 +154,9 @@ const UserDashboard = () => {
         case 'products':
           window.location.href = '/minha-area/produtos';
           break;
+        case 'videos':
+          window.location.href = '/videos';
+          break;
         default:
           toast({
             title: "Ação não implementada",
@@ -374,7 +377,7 @@ const UserDashboard = () => {
         {/* Modern Full-Width Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* YouTube Videos Section - Dark Modern Container */}
+          {/* YouTube Videos Preview - Simplified */}
           <div className="lg:col-span-2">
             <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-2xl shadow-2xl border-0 overflow-hidden">
               <CardHeader className="pb-4">
@@ -385,44 +388,55 @@ const UserDashboard = () => {
                     </div>
                     <div>
                       <CardTitle className="text-2xl font-bold text-white">
-                        Últimos Vídeos do YouTube
+                        Últimos Vídeos
                       </CardTitle>
                       <CardDescription className="text-gray-400">
-                        Conteúdo exclusivo sobre Amazon FBA e e-commerce
+                        Conteúdo sobre Amazon FBA e e-commerce
                       </CardDescription>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => window.open('https://youtube.com/@alunopowerplatform', '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Ver Canal
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                      onClick={() => handleQuickAction('videos')}
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      Ver Todos
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                      onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Canal
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
                 {videosLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(6)].map((_, i) => (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[...Array(3)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="bg-gray-700 rounded-xl h-48 mb-4"></div>
-                        <div className="bg-gray-700 h-4 rounded mb-2"></div>
-                        <div className="bg-gray-700 h-3 rounded w-2/3"></div>
+                        <div className="bg-gray-700 rounded-xl h-32 mb-3"></div>
+                        <div className="bg-gray-700 h-3 rounded mb-2"></div>
+                        <div className="bg-gray-700 h-2 rounded w-2/3"></div>
                       </div>
                     ))}
                   </div>
                 ) : youtubeVideos && youtubeVideos.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {youtubeVideos.slice(0, 6).map((video) => (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {youtubeVideos.slice(0, 3).map((video) => (
                       <div 
                         key={video.id} 
                         className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
                         onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
                       >
-                        <div className="relative bg-gray-700 rounded-xl overflow-hidden mb-4 aspect-video">
+                        <div className="relative bg-gray-700 rounded-xl overflow-hidden mb-3 aspect-video">
                           <img 
                             src={video.thumbnailUrl} 
                             alt={video.title}
