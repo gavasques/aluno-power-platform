@@ -324,6 +324,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 13, 2025 - 01:17 PM**: ✅ AMAZON ADS SOP - ENHANCED ANALYSIS LOGIC FOR RECOMMENDATION VARIETY
+  - **Problem Identified**: SOP analysis generating only Medium (3981) and High (45) priority, missing Low priority, deactivation, and bid reduction recommendations
+  - **Root Cause**: Cascading logic where later rules overrode priority levels + overly high thresholds preventing variety
+  - **Major Fixes Applied**:
+    - **Lower Deactivation Threshold**: Changed from 80+ clicks to 20+ clicks for "Desativar keyword" recommendations
+    - **More Bid Reduction Rules**: Added granular thresholds (10+, 5+, 2+ clicks) for different reduction percentages
+    - **Priority Preservation**: Added `if (!action)` conditions to prevent priority override conflicts
+    - **Enhanced Low Priority Generation**: Multiple new rules specifically create "Baixa" priority recommendations
+    - **Fallback Rule**: "Manter monitoramento" action ensures all keywords get classified
+  - **New SOP Rules Structure**:
+    - **SOP-001 to SOP-005**: No conversion rules (deactivation, reductions, monitoring)
+    - **SOP-006 to SOP-009**: ACoS-based rules (critical to fine adjustments)
+    - **SOP-010 to SOP-012**: Scaling rules for performers
+    - **SOP-013 to SOP-017**: Visibility and monitoring rules
+  - **Expected Results**: Should now generate 8-12 "Alta" priority + variety of "Média" and "Baixa" + deactivation/reduction actions
+
 - **January 13, 2025 - 01:12 PM**: ✅ AMAZON ADS SOP - RESUMED ANALYSIS TAB COMPLETELY REMOVED FROM OPTIONS  
   - **User Request**: User identified "Resumo Análise" tab as useless for SOP analysis and requested its removal
   - **Problem Context**: Tab contains only 11 rows of summary metrics (like dashboard totals) instead of actionable keyword data

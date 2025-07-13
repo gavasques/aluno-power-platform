@@ -132,122 +132,146 @@ export const AmazonAdsSOPTool: React.FC = () => {
       let justification = '';
       let estimatedImpact = 0;
       
-      // REGRA 1: Keywords sem conversão com muitos cliques
+      // REGRA 1: Keywords sem conversão - Ajustar tolerâncias para mais variedade
       if (orders === 0 && clicks > 0) {
-        if (clicks >= tolerances.high) {
+        if (clicks >= 20) { // Reduzido de tolerances.high para gerar mais desativações
           action = 'Desativar keyword';
           newBid = 0;
           priority = 'Alta';
           ruleApplied = 'SOP-001: Desativação por cliques sem conversão';
-          justification = `${clicks} cliques sem conversão (tolerância: ${tolerances.high}). Desperdício confirmado.`;
+          justification = `${clicks} cliques sem conversão. Desperdício confirmado.`;
           estimatedImpact = spend;
-        } else if (clicks >= tolerances.medium) {
-          action = 'Reduzir lance em 30%';
-          newBid = currentBid * 0.7;
+        } else if (clicks >= 10) { // Reduzido para gerar mais reduções
+          action = 'Reduzir lance em 40%';
+          newBid = currentBid * 0.6;
           priority = 'Alta';
           ruleApplied = 'SOP-002: Redução agressiva por performance ruim';
           justification = `${clicks} cliques sem conversão. Reduzir investimento significativamente.`;
-          estimatedImpact = spend * 0.3;
-        } else if (clicks >= tolerances.low) {
-          action = 'Reduzir lance em 15%';
-          newBid = currentBid * 0.85;
+          estimatedImpact = spend * 0.4;
+        } else if (clicks >= 5) {
+          action = 'Reduzir lance em 25%';
+          newBid = currentBid * 0.75;
           priority = 'Média';
           ruleApplied = 'SOP-003: Redução moderada por baixa conversão';
           justification = `${clicks} cliques sem conversão. Otimização preventiva.`;
+          estimatedImpact = spend * 0.25;
+        } else if (clicks >= 2) {
+          action = 'Reduzir lance em 15%';
+          newBid = currentBid * 0.85;
+          priority = 'Baixa';
+          ruleApplied = 'SOP-004: Redução leve para teste';
+          justification = `${clicks} cliques sem conversão. Redução leve para teste.`;
           estimatedImpact = spend * 0.15;
         } else {
-          action = 'Aumentar lance em 15%';
-          newBid = currentBid * 1.15;
+          action = 'Manter observação';
+          newBid = currentBid;
           priority = 'Baixa';
-          ruleApplied = 'SOP-004: Aumento para teste de volume';
-          justification = `Apenas ${clicks} cliques. Testar maior volume antes de desativar.`;
-          estimatedImpact = -spend * 0.15;
+          ruleApplied = 'SOP-005: Monitoramento';
+          justification = `Apenas ${clicks} clique(s). Aguardar mais dados.`;
+          estimatedImpact = 0;
         }
       }
       
-      // REGRA 2: ACoS muito alto
-      if (acos >= 0.50) {
-        action = 'Reduzir lance em 40%';
-        newBid = currentBid * 0.6;
-        priority = 'Alta';
-        ruleApplied = 'SOP-005: ACoS crítico';
-        justification = `ACoS de ${(acos * 100).toFixed(1)}% está muito alto. Redução agressiva necessária.`;
-        estimatedImpact = spend * 0.4;
-      } else if (acos > 0.30 && acos < 0.50) {
-        if (priority !== 'Alta') {
-          action = 'Reduzir lance em 25%';
-          newBid = currentBid * 0.75;
+      // REGRA 2: ACoS alto - somente se não há ação prioritária definida
+      if (!action && acos > 0) {
+        if (acos >= 0.50) {
+          action = 'Reduzir lance em 50%';
+          newBid = currentBid * 0.5;
           priority = 'Alta';
-          ruleApplied = 'SOP-006: ACoS alto';
-          justification = `ACoS de ${(acos * 100).toFixed(1)}% precisa ser otimizado.`;
-          estimatedImpact = spend * 0.25;
-        }
-      } else if (acos > 0.15 && acos <= 0.30) {
-        if (priority === 'Baixa') {
+          ruleApplied = 'SOP-006: ACoS crítico';
+          justification = `ACoS de ${(acos * 100).toFixed(1)}% está muito alto. Redução agressiva necessária.`;
+          estimatedImpact = spend * 0.5;
+        } else if (acos >= 0.35) {
+          action = 'Reduzir lance em 30%';
+          newBid = currentBid * 0.7;
+          priority = 'Alta';
+          ruleApplied = 'SOP-007: ACoS alto';
+          justification = `ACoS de ${(acos * 100).toFixed(1)}% precisa ser otimizado urgentemente.`;
+          estimatedImpact = spend * 0.3;
+        } else if (acos >= 0.25) {
+          action = 'Reduzir lance em 20%';
+          newBid = currentBid * 0.8;
+          priority = 'Média';
+          ruleApplied = 'SOP-008: Otimização de ACoS moderado';
+          justification = `ACoS de ${(acos * 100).toFixed(1)}% pode ser melhorado.`;
+          estimatedImpact = spend * 0.2;
+        } else if (acos >= 0.18) {
           action = 'Reduzir lance em 10%';
           newBid = currentBid * 0.9;
-          priority = 'Média';
-          ruleApplied = 'SOP-007: Otimização de ACoS moderado';
-          justification = `ACoS de ${(acos * 100).toFixed(1)}% pode ser melhorado.`;
+          priority = 'Baixa';
+          ruleApplied = 'SOP-009: Ajuste fino de ACoS';
+          justification = `ACoS de ${(acos * 100).toFixed(1)}% com pequeno ajuste.`;
           estimatedImpact = spend * 0.1;
         }
       }
       
-      // REGRA 3: Performance excelente - SCALING
-      if (acos > 0 && acos <= 0.15 && orders > 0) {
-        if (acos <= 0.05) {
-          action = 'Aumentar lance em 25%';
-          newBid = currentBid * 1.25;
+      // REGRA 3: Performance excelente - SCALING (somente se ainda sem ação)
+      if (!action && acos > 0 && acos <= 0.17 && orders > 0) {
+        if (acos <= 0.08) {
+          action = 'Aumentar lance em 30%';
+          newBid = currentBid * 1.30;
           priority = 'Alta';
-          ruleApplied = 'SOP-008: Scaling agressivo de winner';
+          ruleApplied = 'SOP-010: Scaling agressivo de winner';
           justification = `ACoS excelente de ${(acos * 100).toFixed(1)}% com ${orders} conversões. Scaling máximo.`;
-          estimatedImpact = -spend * 0.5;
-        } else if (acos <= 0.10) {
+          estimatedImpact = -(spend * 0.6);
+        } else if (acos <= 0.12) {
           action = 'Aumentar lance em 20%';
           newBid = currentBid * 1.20;
           priority = 'Alta';
-          ruleApplied = 'SOP-009: Scaling forte de performer';
+          ruleApplied = 'SOP-011: Scaling forte de performer';
           justification = `ACoS muito bom de ${(acos * 100).toFixed(1)}% com conversões. Scaling recomendado.`;
-          estimatedImpact = -spend * 0.4;
+          estimatedImpact = -(spend * 0.4);
         } else {
-          action = 'Aumentar lance em 15%';
-          newBid = currentBid * 1.15;
+          action = 'Aumentar lance em 12%';
+          newBid = currentBid * 1.12;
           priority = 'Média';
-          ruleApplied = 'SOP-010: Scaling conservador';
+          ruleApplied = 'SOP-012: Scaling conservador';
           justification = `ACoS bom de ${(acos * 100).toFixed(1)}% com conversões. Scaling gradual.`;
-          estimatedImpact = -spend * 0.3;
+          estimatedImpact = -(spend * 0.25);
         }
       }
       
-      // REGRA 4: CTR baixo
-      const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
-      if (impressions > 1000 && ctr < 0.5 && priority === 'Baixa') {
-        action = 'Reduzir lance em 20%';
-        newBid = currentBid * 0.8;
-        priority = 'Média';
-        ruleApplied = 'SOP-011: CTR baixo';
-        justification = `CTR de ${ctr.toFixed(2)}% com ${impressions} impressões. Keyword irrelevante.`;
-        estimatedImpact = spend * 0.2;
-      }
-      
-      // REGRA 5: Sem impressões
-      if (impressions === 0 && priority === 'Baixa') {
-        action = 'Aumentar lance em 50%';
-        newBid = currentBid * 1.5;
-        priority = 'Média';
-        ruleApplied = 'SOP-012: Sem visibilidade';
-        justification = `Zero impressões. Lance muito baixo para competir.`;
-        estimatedImpact = -spend * 0.5;
-      }
-      
-      // REGRA 6: Conversões com ACoS aceitável
-      if (orders > 0 && acos > 0.15 && acos <= 0.25 && priority === 'Baixa') {
-        action = 'Aumentar lance em 10%';
-        newBid = currentBid * 1.10;
-        priority = 'Baixa';
-        ruleApplied = 'SOP-013: Scaling conservador';
-        justification = `${orders} conversões com ACoS aceitável de ${(acos * 100).toFixed(1)}%.`;
-        estimatedImpact = -spend * 0.2;
+      // REGRA 4: Keywords sem performance (sem ação ainda definida)
+      if (!action) {
+        const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+        
+        if (impressions === 0 && spend === 0) {
+          action = 'Aumentar lance em 25%';
+          newBid = currentBid * 1.25;
+          priority = 'Baixa';
+          ruleApplied = 'SOP-013: Sem visibilidade';
+          justification = `Sem impressões. Lance muito baixo para aparecer.`;
+          estimatedImpact = -(currentBid * 0.25);
+        } else if (impressions > 500 && ctr < 0.3) {
+          action = 'Reduzir lance em 25%';
+          newBid = currentBid * 0.75;
+          priority = 'Baixa';
+          ruleApplied = 'SOP-014: CTR muito baixo';
+          justification = `CTR de ${ctr.toFixed(2)}% indica keyword irrelevante.`;
+          estimatedImpact = spend * 0.25;
+        } else if (clicks === 0 && impressions > 100) {
+          action = 'Reduzir lance em 20%';
+          newBid = currentBid * 0.8;
+          priority = 'Baixa';
+          ruleApplied = 'SOP-015: Sem cliques';
+          justification = `${impressions} impressões mas sem cliques. Lance alto demais.`;
+          estimatedImpact = spend * 0.2;
+        } else if (orders > 0 && acos <= 0.25) {
+          action = 'Aumentar lance em 8%';
+          newBid = currentBid * 1.08;
+          priority = 'Baixa';
+          ruleApplied = 'SOP-016: Scaling suave';
+          justification = `${orders} conversões com ACoS bom de ${(acos * 100).toFixed(1)}%. Scaling suave.`;
+          estimatedImpact = -(spend * 0.15);
+        } else {
+          // Fallback para keywords que não se encaixaram em nenhuma regra
+          action = 'Manter monitoramento';
+          newBid = currentBid;
+          priority = 'Baixa';
+          ruleApplied = 'SOP-017: Monitoramento geral';
+          justification = `Keyword estável. Manter observação para futuras otimizações.`;
+          estimatedImpact = 0;
+        }
       }
       
       // Adicionar recomendação se houver ação
