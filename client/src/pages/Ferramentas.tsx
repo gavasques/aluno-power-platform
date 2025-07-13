@@ -8,8 +8,7 @@ import {
   Tag,
   ArrowRight,
   Sparkles,
-  Palette,
-  FileSpreadsheet
+  Palette
 } from "lucide-react";
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -115,15 +114,6 @@ const ferramentas = [
     category: "Amazon",
     credits: 3,
     permission: "tools.keyword_suggestions"
-  },
-  {
-    title: "Editor Manual Amazon Ads",
-    description: "Carregue, edite e valide planilhas de campanhas Amazon Ads",
-    href: "/ferramentas/amazon-ads-editor",
-    icon: FileSpreadsheet,
-    category: "Amazon",
-    credits: 0,
-    permission: "tools.amazon_ads_editor"
   }
 ];
 
