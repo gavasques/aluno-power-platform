@@ -48,6 +48,9 @@ const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport")
 const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
 const CNPJConsulta = lazy(() => import("./pages/hub/CNPJConsulta"));
 const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSuggestions"));
+const Tools = lazy(() => import("./pages/hub/Tools"));
+const Templates = lazy(() => import("./pages/hub/Templates"));
+const Materials = lazy(() => import("./pages/hub/Materials"));
 const Hub = lazy(() => import("./pages/Hub"));
 const Ferramentas = lazy(() => import("./pages/Ferramentas"));
 const MyArea = lazy(() => import("./pages/MyArea"));
@@ -518,6 +521,36 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <Suppliers />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/hub/ferramentas">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Tools />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/hub/templates">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Templates />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/hub/materiais">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Materials />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
