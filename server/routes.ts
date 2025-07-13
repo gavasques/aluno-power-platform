@@ -1173,18 +1173,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/youtube-videos/sync', async (req, res) => {
     try {
-      console.log('🎬 [MANUAL SYNC] Manual YouTube sync requested');
+      console.log('🎬 [MANUAL SYNC] Manual RapidAPI sync requested');
       const startTime = Date.now();
       
-      await youtubeService.fetchAndCacheVideos();
+      const result = await youtubeService.syncVideosFromRapidAPI();
       
       const duration = Date.now() - startTime;
-      console.log(`✅ [MANUAL SYNC] YouTube sync completed in ${duration}ms`);
+      console.log(`✅ [MANUAL SYNC] RapidAPI sync completed in ${duration}ms`);
       
       res.json({ 
-        message: 'YouTube videos sync completed',
+        message: 'YouTube videos sync completed with RapidAPI',
         timestamp: new Date().toISOString(),
-        duration: `${duration}ms`
+        duration: `${duration}ms`,
+        newVideos: result.newVideos,
+        totalVideos: result.totalVideos
       });
     } catch (error) {
       console.error('❌ [MANUAL SYNC] Failed to sync YouTube videos:', error);

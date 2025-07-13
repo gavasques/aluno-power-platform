@@ -44,30 +44,7 @@ const Dashboard = memo(() => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  // Debug: Log videos to console
-  React.useEffect(() => {
-    console.log('🎥 Dashboard videos loaded:', videos.length, 'videos');
-    if (videos.length > 0) {
-      console.log('🎥 First 3 videos:', videos.slice(0, 3).map(v => ({
-        title: v.title,
-        publishedAt: v.publishedAt,
-        isActive: v.isActive
-      })));
-    }
-  }, [videos]);
-
-  // Force fresh fetch immediately to bypass cache issues
-  React.useEffect(() => {
-    console.log('🔄 Forcing fresh YouTube data fetch...');
-    // Completely invalidate YouTube cache
-    queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
-    console.log('🗑️ Cache invalidated for YouTube videos');
-    // Force fresh fetch after cache invalidation
-    setTimeout(() => {
-      refetch();
-      console.log('🔄 Refetch triggered after cache invalidation');
-    }, 500);
-  }, [refetch, queryClient]);
+  // No debug logs needed - using RapidAPI integration
   
   const recentVideos = React.useMemo(() => 
     videos

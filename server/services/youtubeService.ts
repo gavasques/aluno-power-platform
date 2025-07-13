@@ -1,351 +1,238 @@
 import { storage } from "../storage";
 import { InsertYoutubeVideo } from "@shared/schema";
+import https from 'https';
 
-interface YouTubeVideo {
-  id: { videoId: string };
-  snippet: {
-    publishedAt: string;
-    channelId: string;
-    title: string;
-    description: string;
-    thumbnails: {
-      high: { url: string };
-      medium: { url: string };
-      default: { url: string };
-    };
-    channelTitle: string;
-    tags?: string[];
-  };
-  statistics?: {
-    viewCount: string;
-    likeCount: string;
-  };
-  contentDetails?: {
-    duration: string;
-  };
+interface RapidAPIVideoThumbnail {
+  url: string;
+  width: number;
+  height: number;
 }
 
-interface YouTubeSearchResponse {
-  items: YouTubeVideo[];
-  nextPageToken?: string;
+interface RapidAPIVideo {
+  video_id: string;
+  title: string;
+  author: string;
+  number_of_views: number;
+  video_length: string;
+  description?: string;
+  is_live_content?: boolean;
+  published_time: string;
+  channel_id: string;
+  category?: string;
+  type: string;
+  keywords: string[];
+  thumbnails: RapidAPIVideoThumbnail[];
+}
+
+interface RapidAPIResponse {
+  continuation_token?: string;
+  videos: RapidAPIVideo[];
 }
 
 class YouTubeService {
-  private apiKey: string;
-  private baseUrl = 'https://www.googleapis.com/youtube/v3';
+  private rapidApiKey: string;
+  private channelId = 'UCccs9hxFuzq77stdELIU59w'; // Guilherme Vasques channel ID
 
   constructor() {
-    this.apiKey = process.env.YOUTUBE_API_KEY || '';
-    if (!this.apiKey) {
-      console.warn('YOUTUBE_API_KEY not found - YouTube features will be limited');
+    this.rapidApiKey = process.env.RAPIDAPI_KEY || '';
+    if (!this.rapidApiKey) {
+      console.warn('RAPIDAPI_KEY not found - YouTube features will be limited');
     }
   }
 
-  async searchVideos(query: string, maxResults: number = 20): Promise<YouTubeVideo[]> {
-    try {
-      if (!this.apiKey) {
-        console.warn('YouTube API key not available');
-        return [];
-      }
-
-      // Search for videos
-      const searchUrl = `${this.baseUrl}/search?part=snippet&type=video&q=${encodeURIComponent(query)}&maxResults=${maxResults}&key=${this.apiKey}&order=relevance&publishedAfter=${this.getDateWeekAgo()}`;
-      
-      const searchResponse = await fetch(searchUrl);
-      const searchData: YouTubeSearchResponse = await searchResponse.json();
-
-      if (!searchResponse.ok) {
-        throw new Error(`YouTube API error: ${JSON.stringify(searchData)}`);
-      }
-
-      if (!searchData.items || searchData.items.length === 0) {
-        return [];
-      }
-
-      // Get video IDs for additional details
-      const videoIds = searchData.items.map(item => item.id.videoId).join(',');
-      
-      // Get video statistics and content details
-      const detailsUrl = `${this.baseUrl}/videos?part=statistics,contentDetails&id=${videoIds}&key=${this.apiKey}`;
-      
-      const detailsResponse = await fetch(detailsUrl);
-      const detailsData = await detailsResponse.json();
-
-      // Merge search results with details
-      const videosWithDetails = searchData.items.map(video => {
-        const details = detailsData.items?.find((detail: any) => detail.id === video.id.videoId);
-        return {
-          ...video,
-          statistics: details?.statistics,
-          contentDetails: details?.contentDetails
-        };
-      });
-
-      return videosWithDetails;
-    } catch (error) {
-      console.error('Error fetching YouTube videos:', error);
-      throw error;
-    }
-  }
-
-  private getDateWeekAgo(): string {
-    const date = new Date();
-    date.setDate(date.getDate() - 7);
-    return date.toISOString();
-  }
-
-  private parseDuration(duration: string): string {
-    // Convert ISO 8601 duration (PT4M13S) to readable format (4:13)
-    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-    if (!match) return '';
-    
-    const hours = parseInt(match[1] || '0');
-    const minutes = parseInt(match[2] || '0');
-    const seconds = parseInt(match[3] || '0');
-    
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  }
-
-  async fetchChannelInfo(channelHandle: string): Promise<any> {
-    try {
-      if (!this.apiKey) {
-        console.warn('YouTube API key not available');
-        return null;
-      }
-
-      // Try multiple search approaches for better channel discovery
-      const searchQueries = [
-        channelHandle,
-        'Guilherme Vasques',
-        'Guilherme Vasques Amazon',
-        'Guilherme Vasques importação'
-      ];
-
-      for (const query of searchQueries) {
-        try {
-          const searchUrl = `${this.baseUrl}/search?part=snippet&type=channel&q=${encodeURIComponent(query)}&key=${this.apiKey}`;
-          const searchResponse = await fetch(searchUrl);
-          
-          if (!searchResponse.ok) {
-            continue;
-          }
-          
-          const searchData = await searchResponse.json();
-          
-          if (searchData.items && searchData.items.length > 0) {
-            // Look for exact match or best match
-            let bestMatch = searchData.items[0];
-            
-            // Try to find exact channel name match
-            for (const item of searchData.items) {
-              if (item.snippet.title.toLowerCase().includes('guilherme vasques')) {
-                bestMatch = item;
-                break;
-              }
-            }
-            
-            const channelId = bestMatch.id.channelId;
-            
-            // Get detailed channel info including subscriber count
-            const channelUrl = `${this.baseUrl}/channels?part=snippet,statistics&id=${channelId}&key=${this.apiKey}`;
-            const channelResponse = await fetch(channelUrl);
-            
-            if (channelResponse.ok) {
-              const channelData = await channelResponse.json();
-              if (channelData.items && channelData.items.length > 0) {
-                return channelData.items[0];
-              }
-            }
-          }
-        } catch (error) {
-          console.error(`Error searching for "${query}":`, error);
-          continue;
-        }
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Error fetching channel info:', error);
-      return null;
-    }
-  }
-
-  async fetchChannelVideos(channelHandle: string, maxResults: number = 20): Promise<YouTubeVideo[]> {
-    try {
-      if (!this.apiKey) {
-        console.warn('YouTube API key not available');
-        return [];
-      }
-
-      // Use the same search approach as fetchChannelInfo for consistency
-      const searchQueries = [
-        channelHandle,
-        'Guilherme Vasques',
-        'Guilherme Vasques Amazon',
-        'Guilherme Vasques importação'
-      ];
-
-      for (const query of searchQueries) {
-        try {
-          const searchUrl = `${this.baseUrl}/search?part=snippet&type=channel&q=${encodeURIComponent(query)}&key=${this.apiKey}`;
-          const searchResponse = await fetch(searchUrl);
-          
-          if (!searchResponse.ok) {
-            continue;
-          }
-          
-          const searchData = await searchResponse.json();
-          
-          if (searchData.items && searchData.items.length > 0) {
-            // Look for exact match or best match
-            let bestMatch = searchData.items[0];
-            
-            // Try to find exact channel name match
-            for (const item of searchData.items) {
-              if (item.snippet.title.toLowerCase().includes('guilherme vasques')) {
-                bestMatch = item;
-                break;
-              }
-            }
-            
-            const channelId = bestMatch.id.channelId;
-            
-            // Get videos from the channel (last 30 days for optimization)
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            const publishedAfter = thirtyDaysAgo.toISOString();
-            
-            const videosUrl = `${this.baseUrl}/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=${maxResults}&publishedAfter=${publishedAfter}&key=${this.apiKey}`;
-            
-            console.log(`🔍 [YOUTUBE API] Searching for videos after ${publishedAfter}`);
-            const videosResponse = await fetch(videosUrl);
-            
-            if (!videosResponse.ok) {
-              continue;
-            }
-            
-            const videosData: YouTubeSearchResponse = await videosResponse.json();
-            
-            if (!videosData.items || videosData.items.length === 0) {
-              continue;
-            }
-            
-            // Get additional details for videos
-            const videoIds = videosData.items.map(video => video.id.videoId).join(',');
-            const detailsUrl = `${this.baseUrl}/videos?part=contentDetails,statistics&id=${videoIds}&key=${this.apiKey}`;
-            const detailsResponse = await fetch(detailsUrl);
-            
-            if (detailsResponse.ok) {
-              const detailsData = await detailsResponse.json();
-              
-              // Merge video data with details
-              const videos = videosData.items.map(video => {
-                const details = detailsData.items?.find((detail: any) => detail.id === video.id.videoId);
-                return {
-                  ...video,
-                  contentDetails: details?.contentDetails,
-                  statistics: details?.statistics
-                };
-              });
-              
-              console.log(`Found ${videos.length} videos for channel: ${bestMatch.snippet.title}`);
-              return videos;
-            }
-            
-            return videosData.items;
-          }
-        } catch (error) {
-          console.error(`Error searching for "${query}":`, error);
-          continue;
-        }
-      }
-      
-      console.log(`No videos found for any search query`);
-      return [];
-    } catch (error) {
-      console.error('Error fetching channel videos:', error);
-      return [];
-    }
-  }
-
-  async fetchAndCacheVideos(): Promise<void> {
-    try {
-      console.log('🎬 [YOUTUBE SYNC] Starting YouTube video fetch...');
-      
-      if (!this.apiKey) {
-        console.log('❌ [YOUTUBE SYNC] No YouTube API key available - skipping video fetch');
+  private async makeRapidAPIRequest(): Promise<RapidAPIVideo[]> {
+    return new Promise((resolve, reject) => {
+      if (!this.rapidApiKey) {
+        console.warn('RapidAPI key not available');
+        resolve([]);
         return;
       }
-      
-      // Get the date for filtering recent videos (last 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      console.log(`🔍 [YOUTUBE SYNC] Fetching videos published after: ${thirtyDaysAgo.toISOString()}`);
-      
-      // Fetch videos from Guilherme Vasques channel
-      const channelHandle = '@guilhermeavasques';
-      const videos = await this.fetchChannelVideos(channelHandle, 50);
-      
-      console.log(`📺 [YOUTUBE SYNC] Found ${videos.length} videos from API`);
-      
-      let totalFetched = 0;
-      let totalUpdated = 0;
-      let totalSkipped = 0;
 
-      for (const video of videos) {
+      const options = {
+        method: 'GET',
+        hostname: 'youtube-v2.p.rapidapi.com',
+        port: null,
+        path: `/channel/videos?channel_id=${this.channelId}`,
+        headers: {
+          'x-rapidapi-key': this.rapidApiKey,
+          'x-rapidapi-host': 'youtube-v2.p.rapidapi.com'
+        }
+      };
+
+      const req = https.request(options, (res) => {
+        const chunks: Buffer[] = [];
+
+        res.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on('end', () => {
+          try {
+            const body = Buffer.concat(chunks);
+            console.log(`🎬 [RAPIDAPI DEBUG] Response status: ${res.statusCode}`);
+            console.log(`🎬 [RAPIDAPI DEBUG] Response headers:`, res.headers);
+            console.log(`🎬 [RAPIDAPI DEBUG] Raw response body:`, body.toString().substring(0, 500));
+            
+            if (res.statusCode !== 200) {
+              console.error(`🎬 [RAPIDAPI ERROR] Bad status code: ${res.statusCode}`);
+              reject(new Error(`RapidAPI returned status ${res.statusCode}`));
+              return;
+            }
+
+            const response: RapidAPIResponse = JSON.parse(body.toString());
+            console.log(`🎬 [RAPIDAPI DEBUG] Parsed response:`, JSON.stringify(response, null, 2).substring(0, 1000));
+            
+            if (response.videos && Array.isArray(response.videos)) {
+              console.log(`🎬 [RAPIDAPI] Successfully fetched ${response.videos.length} videos from RapidAPI`);
+              resolve(response.videos);
+            } else {
+              console.warn('🎬 [RAPIDAPI] No videos found in response - response structure:', Object.keys(response));
+              resolve([]);
+            }
+          } catch (error) {
+            console.error('🎬 [RAPIDAPI] Error parsing response:', error);
+            console.error('🎬 [RAPIDAPI] Raw body for debugging:', body.toString().substring(0, 1000));
+            reject(error);
+          }
+        });
+      });
+
+      req.on('error', (error) => {
+        console.error('🎬 [RAPIDAPI] Request error:', error);
+        reject(error);
+      });
+
+      req.end();
+    });
+  }
+
+  async fetchChannelVideos(): Promise<RapidAPIVideo[]> {
+    try {
+      console.log('🎬 [RAPIDAPI] Fetching videos from Guilherme Vasques channel...');
+      const videos = await this.makeRapidAPIRequest();
+      return videos;
+    } catch (error) {
+      console.error('🎬 [RAPIDAPI] Error fetching channel videos:', error);
+      return [];
+    }
+  }
+
+  private convertToInsertFormat(rapidApiVideo: RapidAPIVideo): InsertYoutubeVideo {
+    // Convert published_time from relative format to ISO date
+    const publishedAt = this.parsePublishedTime(rapidApiVideo.published_time);
+    
+    // Get best thumbnail (prefer larger ones)
+    const thumbnail = rapidApiVideo.thumbnails && rapidApiVideo.thumbnails.length > 0 
+      ? rapidApiVideo.thumbnails[rapidApiVideo.thumbnails.length - 1] // Get the largest thumbnail
+      : { url: '', width: 0, height: 0 };
+
+    // Parse view count
+    const viewCount = rapidApiVideo.number_of_views || 0;
+
+    return {
+      videoId: rapidApiVideo.video_id,
+      title: rapidApiVideo.title || 'Untitled',
+      description: rapidApiVideo.description || '',
+      channelTitle: rapidApiVideo.author || 'Guilherme Vasques',
+      channelId: rapidApiVideo.channel_id || this.channelId,
+      publishedAt,
+      thumbnailUrl: thumbnail.url || '',
+      duration: rapidApiVideo.video_length || '',
+      viewCount,
+      likeCount: null, // Not available in RapidAPI response
+      tags: rapidApiVideo.keywords || [],
+      category: rapidApiVideo.category || null,
+      isActive: rapidApiVideo.type === 'NORMAL', // Only normal videos are active
+    };
+  }
+
+  private parsePublishedTime(publishedTime: string): Date {
+    const now = new Date();
+    
+    // Handle relative time formats like "1 day ago", "3 weeks ago", "2 months ago"
+    const timeMatch = publishedTime.match(/(\d+)\s*(day|week|month|year)s?\s*ago/i);
+    
+    if (timeMatch) {
+      const amount = parseInt(timeMatch[1]);
+      const unit = timeMatch[2].toLowerCase();
+      
+      switch (unit) {
+        case 'day':
+          return new Date(now.getTime() - (amount * 24 * 60 * 60 * 1000));
+        case 'week':
+          return new Date(now.getTime() - (amount * 7 * 24 * 60 * 60 * 1000));
+        case 'month':
+          return new Date(now.getTime() - (amount * 30 * 24 * 60 * 60 * 1000));
+        case 'year':
+          return new Date(now.getTime() - (amount * 365 * 24 * 60 * 60 * 1000));
+        default:
+          return now;
+      }
+    }
+    
+    // Fallback: try to parse as ISO date or return current date
+    try {
+      return new Date(publishedTime);
+    } catch {
+      return now;
+    }
+  }
+
+  async syncVideosFromRapidAPI(): Promise<{ newVideos: number; totalVideos: number }> {
+    try {
+      console.log('🔄 [RAPIDAPI SYNC] Starting video synchronization...');
+      
+      // Fetch videos from RapidAPI
+      const rapidApiVideos = await this.fetchChannelVideos();
+      
+      if (rapidApiVideos.length === 0) {
+        console.log('🔄 [RAPIDAPI SYNC] No videos received from RapidAPI');
+        return { newVideos: 0, totalVideos: 0 };
+      }
+
+      // Get existing videos from database to avoid duplicates
+      const existingVideos = await storage.getAllYoutubeVideos();
+      const existingVideoIds = new Set(existingVideos.map(video => video.videoId));
+
+      let newVideosCount = 0;
+
+      // Process each video from RapidAPI
+      for (const rapidApiVideo of rapidApiVideos) {
         try {
-          const publishedDate = new Date(video.snippet.publishedAt);
-          console.log(`🎥 [YOUTUBE SYNC] Processing video: ${video.snippet.title} (Published: ${publishedDate.toLocaleDateString()})`);
+          const videoData = this.convertToInsertFormat(rapidApiVideo);
           
-          const videoData: InsertYoutubeVideo = {
-            videoId: video.id.videoId,
-            title: video.snippet.title,
-            description: video.snippet.description || '',
-            channelTitle: video.snippet.channelTitle,
-            channelId: video.snippet.channelId,
-            publishedAt: publishedDate,
-            thumbnailUrl: video.snippet.thumbnails.high?.url || video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default?.url,
-            duration: video.contentDetails ? this.parseDuration(video.contentDetails.duration) : null,
-            viewCount: video.statistics && !isNaN(parseInt(video.statistics.viewCount)) ? parseInt(video.statistics.viewCount) : null,
-            likeCount: video.statistics && !isNaN(parseInt(video.statistics.likeCount)) ? parseInt(video.statistics.likeCount) : null,
-            tags: video.snippet.tags || null,
-            category: 'Guilherme Vasques',
-            isActive: true,
-            fetchedAt: new Date()
-          };
-
-          // Check if video already exists
-          const existingVideo = await storage.getYoutubeVideoByVideoId(video.id.videoId);
-          
-          if (!existingVideo) {
+          if (!existingVideoIds.has(videoData.videoId)) {
+            // Add new video to database
             await storage.createYoutubeVideo(videoData);
-            totalFetched++;
-            console.log(`✅ [YOUTUBE SYNC] Added new video: ${video.snippet.title}`);
+            newVideosCount++;
+            console.log(`➕ [RAPIDAPI SYNC] Added new video: ${videoData.title}`);
           } else {
-            // Update existing video with latest stats
-            await storage.updateYoutubeVideo(existingVideo.id, {
+            // Update existing video data (view count, etc.)
+            await storage.updateYoutubeVideo(videoData.videoId, {
               viewCount: videoData.viewCount,
-              likeCount: videoData.likeCount,
-              isActive: true,
-              fetchedAt: new Date()
+              title: videoData.title,
+              description: videoData.description,
+              thumbnailUrl: videoData.thumbnailUrl,
+              duration: videoData.duration,
+              tags: videoData.tags,
+              category: videoData.category,
+              fetchedAt: new Date(),
             });
-            totalUpdated++;
-            console.log(`🔄 [YOUTUBE SYNC] Updated existing video: ${video.snippet.title}`);
           }
         } catch (error) {
-          console.error(`❌ [YOUTUBE SYNC] Error saving video ${video.id.videoId}:`, error);
-          totalSkipped++;
+          console.error('🔄 [RAPIDAPI SYNC] Error processing video:', rapidApiVideo.video_id, error);
         }
       }
 
-      console.log(`✅ [YOUTUBE SYNC] Sync completed! New: ${totalFetched}, Updated: ${totalUpdated}, Skipped: ${totalSkipped}`);
+      console.log(`✅ [RAPIDAPI SYNC] Sync completed: ${newVideosCount} new videos added, ${rapidApiVideos.length} total processed`);
+      
+      return {
+        newVideos: newVideosCount,
+        totalVideos: rapidApiVideos.length
+      };
     } catch (error) {
-      console.error('❌ [YOUTUBE SYNC] Error in fetchAndCacheVideos:', error);
-      throw error;
+      console.error('🔄 [RAPIDAPI SYNC] Error during video sync:', error);
+      return { newVideos: 0, totalVideos: 0 };
     }
   }
 }

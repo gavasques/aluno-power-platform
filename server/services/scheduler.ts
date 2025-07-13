@@ -11,7 +11,7 @@ class Scheduler {
     }
 
     this.isRunning = true;
-    console.log('📅 [SCHEDULER] Starting YouTube video scheduler (1x daily)...');
+    console.log('📅 [SCHEDULER] Starting RapidAPI video scheduler (1x daily)...');
 
     // Schedule for 9:00 AM daily - optimal time for new video detection
     this.scheduleJob('09:00', () => this.runYouTubeSync());
@@ -35,7 +35,7 @@ class Scheduler {
 
       const timeUntilNext = scheduledTime.getTime() - now.getTime();
       
-      console.log(`Next YouTube sync scheduled for: ${scheduledTime.toLocaleString()}`);
+      console.log(`Next RapidAPI sync scheduled for: ${scheduledTime.toLocaleString()}`);
 
       const timeout = setTimeout(() => {
         callback();
@@ -50,11 +50,11 @@ class Scheduler {
 
   private async runYouTubeSync() {
     try {
-      console.log(`🚀 [SCHEDULER] Starting scheduled YouTube video sync at ${new Date().toLocaleString()}`);
-      await youtubeService.fetchAndCacheVideos();
-      console.log(`✅ [SCHEDULER] YouTube sync completed at ${new Date().toLocaleString()}`);
+      console.log(`🚀 [SCHEDULER] Starting scheduled RapidAPI sync at ${new Date().toLocaleString()}`);
+      const result = await youtubeService.syncVideosFromRapidAPI();
+      console.log(`✅ [SCHEDULER] RapidAPI sync completed at ${new Date().toLocaleString()} - ${result.newVideos} new videos added, ${result.totalVideos} total processed`);
     } catch (error) {
-      console.error('❌ [SCHEDULER] Error in scheduled YouTube sync:', error);
+      console.error('❌ [SCHEDULER] Error in scheduled RapidAPI sync:', error);
     }
   }
 
@@ -67,7 +67,7 @@ class Scheduler {
 
   // Method to manually trigger sync (for testing)
   async triggerManualSync() {
-    console.log('Manual YouTube sync triggered');
+    console.log('Manual RapidAPI sync triggered');
     await this.runYouTubeSync();
   }
 }
