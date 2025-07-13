@@ -324,6 +324,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 13, 2025 - 4:21 PM**: ✅ PRODUCT CODE FIELDS IMPLEMENTATION COMPLETED - ALL 10 SALES CHANNELS NOW INCLUDE SPECIFIC PRODUCT CODE FIELDS
+  - **Complete Implementation**: All sales channels now include dedicated product code fields for proper SKU/ID management
+  - **Channel-Specific Fields**:
+    - **Site Próprio**: Código Site (1 field)
+    - **Amazon Channels (FBA, FBM, DBA, FBA OnSite)**: FNSKU + ASIN (2 fields each)
+    - **Shopee**: ID do Produto (1 field)
+    - **Mercado Livre (ME1, Flex, Envios, Full)**: MLB + MLB Catálogo + ID Produto (3 fields each)
+    - **Magalu (Full + Envios)**: SKU Mgl (1 field each)
+    - **TikTok Shop**: ID Produto (1 field)
+    - **Outro Marketplace**: ID Produto (1 field)
+  - **Technical Implementation**: Updated CHANNEL_FIELDS structure in ChannelsEditor.tsx with proper text input fields
+  - **Data Architecture**: All product codes stored in channels JSONB field with proper type validation
+  - **User Experience**: Fields appear at the top of each channel configuration for easy access
+  - **Total Fields Added**: 21 product code fields across all 10 sales channels
+
 - **January 12, 2025 - 11:30 PM**: ✅ PROMOTIONAL BANNERS FULLY OPTIMIZED - 3 BANNERS IN SINGLE ROW LAYOUT
   - **Layout Enhancement**: All 3 banners now display in single row with responsive grid (12-column system)
   - **Banner 1 (5 columns)**: Amazon Fashion - "Venda Moda na Amazon com 0% de Comissão !!!"
