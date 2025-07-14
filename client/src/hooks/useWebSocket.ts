@@ -27,7 +27,9 @@ export function useWebSocket() {
       return;
     }
     
-    const wsUrl = `${protocol}//${host}/ws`;
+    // Clean the host to remove any tokens or query parameters
+    const cleanHost = host.split('?')[0].split('#')[0];
+    const wsUrl = `${protocol}//${cleanHost}/ws`;
 
     if (process.env.NODE_ENV === 'development') {
       console.log(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
@@ -194,7 +196,9 @@ export function useWebSocket() {
     if (wsRef.current?.readyState !== WebSocket.OPEN) {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host;
-      const wsUrl = `${protocol}//${host}/ws`;
+      // Clean the host to remove any tokens or query parameters
+    const cleanHost = host.split('?')[0].split('#')[0];
+    const wsUrl = `${protocol}//${cleanHost}/ws`;
       
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;

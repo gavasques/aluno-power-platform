@@ -29,6 +29,8 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
     "img-src 'self' data: https: blob:; " +
     "connect-src 'self' wss: ws: https:; " +
     "frame-ancestors 'none'; " +
+    "frame-src 'none'; " +
+    "sandbox allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads; " +
     "base-uri 'self';"
   );
   
