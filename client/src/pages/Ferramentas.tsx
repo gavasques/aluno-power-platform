@@ -8,12 +8,14 @@ import {
   Tag,
   ArrowRight,
   Sparkles,
-  Palette
+  Palette,
+  Lock
 } from "lucide-react";
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PermissionGuard } from "@/components/guards";
+import { usePermissions } from "@/contexts/PermissionContext";
+import { useToast } from "@/hooks/use-toast";
 
 const ferramentas = [
   {
@@ -50,7 +52,7 @@ const ferramentas = [
     icon: Zap,
     category: "Imagem",
     credits: 4,
-    permission: "tools.ultra_enhance"
+    permission: "tools.ultra_enhance_pro"
   },
   {
     title: "Upscale PRO",
@@ -68,7 +70,7 @@ const ferramentas = [
     icon: Palette,
     category: "Design",
     credits: 10,
-    permission: "tools.logo_generation"
+    permission: "tools.logo_generation_pro"
   },
   {
     title: "Amazon Reviews",
@@ -120,6 +122,25 @@ const ferramentas = [
 const categories = ["Todos", "Imagem", "Design", "Amazon", "Empresas"];
 
 export default function Ferramentas() {
+  const { hasAccess, isLoading } = usePermissions();
+  const { toast } = useToast();
+
+  const handleAccessDenied = (toolName: string) => {
+    toast({
+      title: "Acesso Negado",
+      description: `Você não tem permissão para acessar ${toolName}. Este recurso é exclusivo de determinadas turmas do curso ou mentorias.`,
+      variant: "destructive",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="animate-pulse bg-gray-200 rounded h-32 w-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex flex-col space-y-2">
@@ -144,12 +165,14 @@ export default function Ferramentas() {
 
       {/* Grid de ferramentas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {ferramentas.map((ferramenta) => (
-          <PermissionGuard key={ferramenta.href} featureCode={ferramenta.permission}>
-            <Card className="group hover:shadow-lg transition-shadow cursor-pointer">
+        {ferramentas.map((ferramenta) => {
+          const hasPermission = hasAccess(ferramenta.permission);
+          
+          return (
+            <Card key={ferramenta.href} className={`${hasPermission ? 'group hover:shadow-lg transition-shadow cursor-pointer' : 'opacity-70'}`}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <ferramenta.icon className="h-8 w-8 text-primary" />
+                  <ferramenta.icon className={`h-8 w-8 ${hasPermission ? 'text-primary' : 'text-gray-400'}`} />
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
                       {ferramenta.credits} {ferramenta.credits === 1 ? 'crédito' : 'créditos'}
@@ -165,16 +188,26 @@ export default function Ferramentas() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
-                <Link href={ferramenta.href}>
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group-hover:bg-primary/10 transition-colors">
-                    <span className="text-sm font-medium">Acessar ferramenta</span>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                {hasPermission ? (
+                  <Link href={ferramenta.href}>
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group-hover:bg-primary/10 transition-colors">
+                      <span className="text-sm font-medium">Acessar ferramenta</span>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                  </Link>
+                ) : (
+                  <div 
+                    className="flex items-center justify-between p-3 bg-gray-100 rounded-lg cursor-not-allowed"
+                    onClick={() => handleAccessDenied(ferramenta.title)}
+                  >
+                    <span className="text-sm font-medium text-gray-500">sem acesso</span>
+                    <Lock className="h-4 w-4 text-gray-400" />
                   </div>
-                </Link>
+                )}
               </CardContent>
             </Card>
-          </PermissionGuard>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
