@@ -4,29 +4,61 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Search, CheckCircle, Wrench, ExternalLink, Globe, Heart, Users, Trophy, ArrowRight, Filter } from "lucide-react";
+import { Star, Search, CheckCircle, Wrench, ExternalLink, Globe, Heart, Users, Trophy, ArrowRight, Filter, Grid2X2, List, ChevronRight, TrendingUp, Award, Clock, Package } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useTools } from "@/contexts/ToolsContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 const Tools = () => {
   const { tools, toolTypes } = useTools();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [selectedBrazilSupport, setSelectedBrazilSupport] = useState<string[]>([]);
+  const [selectedRating, setSelectedRating] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
   const [, setLocation] = useLocation();
+
+  // Featured tools (you can customize which tools are featured)
+  const featuredToolIds = [1, 2, 3, 4]; // Example IDs - you can change these
+  const featuredTools = tools.filter(tool => featuredToolIds.includes(tool.id)).slice(0, 4);
 
   const filteredTools = tools.filter(tool => {
     const matchesSearch = tool.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tool.description?.toLowerCase().includes(searchTerm.toLowerCase());
+                         tool.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         tool.features?.some(f => f.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesType = selectedType === "all" || tool.typeId?.toString() === selectedType;
-    return matchesSearch && matchesType;
+    const matchesBrazilSupport = selectedBrazilSupport.length === 0 || 
+                                 (tool.brazilSupport && selectedBrazilSupport.includes(tool.brazilSupport));
+    const matchesRating = selectedRating === "all" || 
+                         (selectedRating === "4+" && Number(tool.averageRating) >= 4) ||
+                         (selectedRating === "3+" && Number(tool.averageRating) >= 3);
+    return matchesSearch && matchesType && matchesBrazilSupport && matchesRating;
+  });
+
+  // Sort tools
+  const sortedTools = [...filteredTools].sort((a, b) => {
+    switch(sortBy) {
+      case "name":
+        return (a.name || "").localeCompare(b.name || "");
+      case "rating":
+        return (Number(b.averageRating) || 0) - (Number(a.averageRating) || 0);
+      case "reviews":
+        return (b.totalReviews || 0) - (a.totalReviews || 0);
+      default:
+        return 0;
+    }
   });
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`h-4 w-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+        className={`h-3.5 w-3.5 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`}
       />
     ));
   };
@@ -36,205 +68,362 @@ const Tools = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8 space-y-10">
-        {/* Enhanced Header */}
-        <div className="text-center space-y-6">
-          <div className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-full text-white text-sm font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300">
-            <Wrench className="h-5 w-5 mr-3" />
-            Ferramentas Verificadas
-            <Trophy className="h-4 w-4 ml-3" />
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Minimalist Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+            <Wrench className="h-4 w-4" />
+            <span>Ferramentas Verificadas</span>
+            <Badge variant="secondary" className="text-xs">
+              {tools.length} disponíveis
+            </Badge>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Catálogo de Ferramentas
           </h1>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Descubra softwares para e-commerce com análises detalhadas e avaliações autênticas da nossa comunidade
+          <p className="text-gray-600">
+            Ferramentas selecionadas para e-commerce com análises detalhadas
           </p>
-          <div className="flex justify-center items-center gap-8 text-sm text-slate-500">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span>+1000 usuários</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              <span>Verificado</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              <span>Curadoria especializada</span>
-            </div>
-          </div>
         </div>
 
-        {/* Enhanced Filters */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl p-8">
-          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
-            <div className="relative flex-1 w-full max-w-md">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
-              <Input
-                placeholder="Buscar ferramentas, categorias ou funcionalidades..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 h-12 text-base border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/50"
-              />
-            </div>
-            <div className="w-full lg:w-80">
-              <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="h-12 text-base border-slate-200 rounded-xl bg-white/50">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filtrar por categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as categorias</SelectItem>
-                  {toolTypes.map(type => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          {filteredTools.length > 0 && (
-            <div className="mt-4 text-center text-sm text-slate-500">
-              Mostrando {filteredTools.length} ferramenta{filteredTools.length !== 1 ? 's' : ''} 
-              {selectedType !== "all" && " na categoria selecionada"}
-            </div>
-          )}
-        </div>
-
-        {/* Modern Tools Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {filteredTools.map(tool => (
-            <Card 
-              key={tool.id} 
-              className="group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer bg-white/90 backdrop-blur-sm border-0 shadow-lg overflow-hidden"
-              onClick={() => handleToolClick(tool.id)}
-            >
-              {/* Card Header with Enhanced Design */}
-              <CardHeader className="pb-4">
-                <div className="flex items-start gap-4">
-                  <div className="relative">
-                    <img
-                      src={tool.logo}
-                      alt={tool.name}
-                      className="w-20 h-20 rounded-2xl object-cover shadow-lg group-hover:scale-110 transition-transform duration-300"
-                    />
-                    {tool.verified && (
-                      <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1">
-                        <CheckCircle className="h-4 w-4 text-white" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                        {tool.name}
-                      </CardTitle>
-                      <ExternalLink className="h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                    </div>
-                    <Badge 
-                      variant="secondary" 
-                      className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-blue-200 font-medium"
-                    >
-                      {toolTypes.find(t => t.id === tool.typeId?.toString())?.name || 'Ferramenta'}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-
-              {/* Enhanced Card Content */}
-              <CardContent className="space-y-6">
-                <p className="text-slate-600 leading-relaxed line-clamp-3 text-sm">
-                  {tool.description}
-                </p>
-
-                {/* Enhanced Rating Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex">{renderStars(Number(tool.averageRating) || 0)}</div>
-                      <span className="text-sm font-semibold text-slate-700">
-                        {tool.averageRating || '0.0'}
-                      </span>
-                    </div>
-                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
-                      {tool.totalReviews || 0} avaliações
-                    </span>
-                  </div>
-
-                  {/* Features Preview */}
-                  {tool.features && tool.features.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Principais recursos</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {tool.features.slice(0, 3).map((feature, index) => (
-                          <Badge 
-                            key={index} 
-                            variant="outline" 
-                            className="text-xs bg-slate-50 text-slate-600 border-slate-200"
-                          >
-                            {feature}
-                          </Badge>
-                        ))}
-                        {tool.features.length > 3 && (
-                          <Badge variant="outline" className="text-xs bg-slate-50 text-slate-400 border-slate-200">
-                            +{tool.features.length - 3} mais
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Brazil Support Indicator */}
-                  {tool.brazilSupport && (
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                      <Globe className="h-4 w-4 text-green-500" />
-                      <span className="text-xs text-green-600 font-medium">
-                        {tool.brazilSupport === 'works' ? 'Funciona no Brasil' : 
-                         tool.brazilSupport === 'limited' ? 'Suporte limitado' : 'Suporte local'}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Enhanced Action Button */}
-                <Button 
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToolClick(tool.id);
-                  }}
+        {/* Featured Tools Banner Section */}
+        {featuredTools.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Ferramentas em Destaque
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {featuredTools.map(tool => (
+                <Card 
+                  key={tool.id}
+                  className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700 text-white border-0 cursor-pointer hover:shadow-xl transition-all duration-300"
+                  onClick={() => handleToolClick(tool.id)}
                 >
-                  <span>Ver Detalhes Completos</span>
-                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Enhanced Empty State */}
-        {filteredTools.length === 0 && (
-          <div className="text-center py-20">
-            <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center">
-              <Search className="h-16 w-16 text-slate-400" />
-            </div>
-            <h3 className="text-3xl font-bold text-slate-900 mb-4">Nenhuma ferramenta encontrada</h3>
-            <p className="text-lg text-slate-600 mb-8 max-w-md mx-auto">
-              Não encontramos ferramentas que correspondam aos seus critérios de busca.
-            </p>
-            <div className="space-y-4">
-              <p className="text-sm text-slate-500">Tente:</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                <Badge variant="outline" className="bg-white text-slate-600">Ajustar os filtros</Badge>
-                <Badge variant="outline" className="bg-white text-slate-600">Buscar termos diferentes</Badge>
-                <Badge variant="outline" className="bg-white text-slate-600">Verificar a categoria</Badge>
-              </div>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <img
+                        src={tool.logo}
+                        alt={tool.name}
+                        className="w-12 h-12 rounded-lg bg-white/20 p-2 object-contain"
+                      />
+                      <Badge className="bg-white/20 text-white border-0">
+                        Destaque
+                      </Badge>
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{tool.name}</h3>
+                    <p className="text-white/80 text-sm line-clamp-2 mb-3">
+                      {tool.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        {renderStars(Number(tool.averageRating) || 0)}
+                        <span className="text-white/90 ml-1">{tool.averageRating || '0.0'}</span>
+                      </div>
+                      {tool.verified && (
+                        <CheckCircle className="h-4 w-4" />
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         )}
+
+        <div className="flex gap-8">
+          {/* Advanced Filters Sidebar */}
+          <aside className="w-64 shrink-0 hidden lg:block">
+            <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-6">
+              <h3 className="font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Filtros Avançados
+              </h3>
+
+              {/* Category Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-gray-700 mb-3 block">
+                  Categoria
+                </Label>
+                <Select value={selectedType} onValueChange={setSelectedType}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Todas as categorias" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as categorias</SelectItem>
+                    {toolTypes.map(type => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Rating Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-gray-700 mb-3 block">
+                  Avaliação Mínima
+                </Label>
+                <Select value={selectedRating} onValueChange={setSelectedRating}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Qualquer avaliação" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Qualquer avaliação</SelectItem>
+                    <SelectItem value="4+">4+ estrelas</SelectItem>
+                    <SelectItem value="3+">3+ estrelas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Brazil Support Filter */}
+              <div className="mb-6">
+                <Label className="text-sm font-medium text-gray-700 mb-3 block">
+                  Suporte no Brasil
+                </Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="works"
+                      checked={selectedBrazilSupport.includes('works')}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedBrazilSupport([...selectedBrazilSupport, 'works']);
+                        } else {
+                          setSelectedBrazilSupport(selectedBrazilSupport.filter(s => s !== 'works'));
+                        }
+                      }}
+                    />
+                    <label htmlFor="works" className="text-sm text-gray-600 cursor-pointer">
+                      Funciona no Brasil
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="local"
+                      checked={selectedBrazilSupport.includes('local')}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedBrazilSupport([...selectedBrazilSupport, 'local']);
+                        } else {
+                          setSelectedBrazilSupport(selectedBrazilSupport.filter(s => s !== 'local'));
+                        }
+                      }}
+                    />
+                    <label htmlFor="local" className="text-sm text-gray-600 cursor-pointer">
+                      Suporte local
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sort By */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-3 block">
+                  Ordenar por
+                </Label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Nome (A-Z)</SelectItem>
+                    <SelectItem value="rating">Melhor avaliação</SelectItem>
+                    <SelectItem value="reviews">Mais avaliações</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Search and View Controls */}
+            <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+                <div className="relative flex-1 w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Buscar ferramentas..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-full"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">
+                    {sortedTools.length} resultados
+                  </span>
+                  <Separator orientation="vertical" className="h-4" />
+                  <div className="flex items-center gap-1 bg-gray-100 rounded-md p-1">
+                    <Button
+                      variant={viewMode === "list" ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("list")}
+                      className="px-2"
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === "grid" ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("grid")}
+                      className="px-2"
+                    >
+                      <Grid2X2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tools List/Grid */}
+            {viewMode === "list" ? (
+              <div className="space-y-3">
+                {sortedTools.map(tool => (
+                  <div
+                    key={tool.id}
+                    className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                    onClick={() => handleToolClick(tool.id)}
+                  >
+                    <div className="p-6 flex items-center gap-6">
+                      {/* Logo */}
+                      <img
+                        src={tool.logo}
+                        alt={tool.name}
+                        className="w-16 h-16 rounded-lg object-cover shadow-sm"
+                      />
+
+                      {/* Main Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-1">
+                              <h3 className="font-semibold text-gray-900 text-lg">
+                                {tool.name}
+                              </h3>
+                              {tool.verified && (
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              )}
+                              <Badge variant="secondary" className="text-xs">
+                                {toolTypes.find(t => t.id === tool.typeId?.toString())?.name || 'Ferramenta'}
+                              </Badge>
+                            </div>
+                            <p className="text-gray-600 text-sm line-clamp-2 mb-3">
+                              {tool.description}
+                            </p>
+                            <div className="flex items-center gap-6 text-sm">
+                              <div className="flex items-center gap-2">
+                                {renderStars(Number(tool.averageRating) || 0)}
+                                <span className="font-medium text-gray-700">
+                                  {tool.averageRating || '0.0'}
+                                </span>
+                                <span className="text-gray-500">
+                                  ({tool.totalReviews || 0} avaliações)
+                                </span>
+                              </div>
+                              {tool.brazilSupport && (
+                                <div className="flex items-center gap-1 text-green-600">
+                                  <Globe className="h-3.5 w-3.5" />
+                                  <span className="text-xs font-medium">
+                                    {tool.brazilSupport === 'works' ? 'Funciona no Brasil' : 'Suporte local'}
+                                  </span>
+                                </div>
+                              )}
+                              {tool.features && tool.features.length > 0 && (
+                                <div className="flex items-center gap-2">
+                                  <Package className="h-3.5 w-3.5 text-gray-400" />
+                                  <span className="text-gray-500">
+                                    {tool.features.length} recursos
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-gray-400 shrink-0" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {sortedTools.map(tool => (
+                  <Card 
+                    key={tool.id}
+                    className="hover:shadow-lg transition-all cursor-pointer"
+                    onClick={() => handleToolClick(tool.id)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4 mb-4">
+                        <img
+                          src={tool.logo}
+                          alt={tool.name}
+                          className="w-14 h-14 rounded-lg object-cover"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-900">
+                              {tool.name}
+                            </h3>
+                            {tool.verified && (
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            )}
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {toolTypes.find(t => t.id === tool.typeId?.toString())?.name || 'Ferramenta'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 text-sm line-clamp-2 mb-4">
+                        {tool.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {renderStars(Number(tool.averageRating) || 0)}
+                          <span className="text-sm font-medium text-gray-700">
+                            {tool.averageRating || '0.0'}
+                          </span>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          Ver mais
+                          <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {sortedTools.length === 0 && (
+              <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
+                <Search className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Nenhuma ferramenta encontrada
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Tente ajustar os filtros ou termos de busca
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedType("all");
+                    setSelectedBrazilSupport([]);
+                    setSelectedRating("all");
+                  }}
+                >
+                  Limpar filtros
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
