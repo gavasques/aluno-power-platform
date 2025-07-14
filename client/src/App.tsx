@@ -16,7 +16,6 @@ import { useOptimizedIcons } from '@/components/IconLoader';
 import { HelmetProvider } from 'react-helmet-async';
 
 // Lazy load pages for better performance
-const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Videos = lazy(() => import("./pages/Videos"));
 const News = lazy(() => import("./pages/News"));
 const Updates = lazy(() => import("./pages/Updates"));
