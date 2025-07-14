@@ -561,6 +561,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
   );
 };
 

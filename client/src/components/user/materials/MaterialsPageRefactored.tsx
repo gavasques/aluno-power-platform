@@ -36,14 +36,14 @@ const MaterialsPageRefactored = () => {
     queryFn: () => apiRequest<any[]>('/api/material-categories'),
   });
 
-  const filteredMaterials = materials.filter(material => {
+  const filteredMaterials = Array.isArray(materials) ? materials.filter(material => {
     const matchesSearch = material.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          material.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === "all" || material.typeId === parseInt(selectedType);
     const matchesCategory = selectedCategory === "all" || material.categoryId === parseInt(selectedCategory);
     const matchesAccess = selectedAccess === "all" || material.accessLevel === selectedAccess;
     return matchesSearch && matchesType && matchesCategory && matchesAccess;
-  });
+  }) : [];
 
   // Increment view count mutation
   const incrementViewMutation = useMutation({
