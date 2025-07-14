@@ -27,6 +27,161 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { useGetFeatureCost, useCanProcessFeature } from "@/hooks/useFeatureCosts";
+import jsPDF from 'jspdf';
+
+// Função para baixar conteúdo como TXT
+const downloadTXT = (results: any, formData: any) => {
+  if (!results) return;
+  
+  let content = `RELATÓRIO DE OTIMIZAÇÃO AMAZON LISTINGS\n`;
+  content += `===========================================\n\n`;
+  content += `Data de Geração: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+  
+  content += `DADOS DO PRODUTO:\n`;
+  content += `-----------------\n`;
+  content += `Nome do Produto: ${formData.productName}\n`;
+  content += `Marca: ${formData.brand}\n`;
+  content += `Categoria: ${formData.category}\n`;
+  content += `Público Alvo: ${formData.targetAudience}\n`;
+  content += `Palavras-chave: ${formData.keywords}\n`;
+  content += `Long Tail Keywords: ${formData.longTailKeywords}\n\n`;
+  
+  if (results.analysis) {
+    content += `ANÁLISE DE AVALIAÇÕES DOS CONCORRENTES:\n`;
+    content += `======================================\n`;
+    content += `${results.analysis}\n\n`;
+  }
+  
+  if (results.titles) {
+    content += `TÍTULOS OTIMIZADOS:\n`;
+    content += `==================\n`;
+    content += `${results.titles}\n\n`;
+  }
+  
+  if (results.bulletPoints) {
+    content += `BULLET POINTS:\n`;
+    content += `=============\n`;
+    content += `${results.bulletPoints}\n\n`;
+  }
+  
+  if (results.description) {
+    content += `DESCRIÇÃO COMPLETA:\n`;
+    content += `==================\n`;
+    content += `${results.description}\n\n`;
+  }
+  
+  content += `---\nRelatório gerado pelo Core Guilherme Vasques\n`;
+  
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `amazon-listing-${formData.productName.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// Função para baixar conteúdo como PDF
+const downloadPDF = (results: any, formData: any) => {
+  if (!results) return;
+  
+  const pdf = new jsPDF();
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const margin = 20;
+  const maxWidth = pageWidth - 2 * margin;
+  let yPosition = 30;
+  
+  // Função para adicionar texto com quebra de linha
+  const addTextWithWrap = (text: string, fontSize = 10) => {
+    pdf.setFontSize(fontSize);
+    const lines = pdf.splitTextToSize(text, maxWidth);
+    pdf.text(lines, margin, yPosition);
+    yPosition += lines.length * (fontSize * 0.5) + 5;
+    
+    // Verificar se precisa de nova página
+    if (yPosition > pdf.internal.pageSize.getHeight() - 30) {
+      pdf.addPage();
+      yPosition = 30;
+    }
+  };
+  
+  // Título principal
+  pdf.setFontSize(18);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('RELATÓRIO DE OTIMIZAÇÃO AMAZON LISTINGS', margin, yPosition);
+  yPosition += 20;
+  
+  // Data de geração
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(`Data de Geração: ${new Date().toLocaleDateString('pt-BR')}`, margin, yPosition);
+  yPosition += 15;
+  
+  // Dados do produto
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('DADOS DO PRODUTO:', margin, yPosition);
+  yPosition += 10;
+  
+  pdf.setFont('helvetica', 'normal');
+  addTextWithWrap(`Nome do Produto: ${formData.productName}`);
+  addTextWithWrap(`Marca: ${formData.brand}`);
+  addTextWithWrap(`Categoria: ${formData.category}`);
+  addTextWithWrap(`Público Alvo: ${formData.targetAudience}`);
+  addTextWithWrap(`Palavras-chave: ${formData.keywords}`);
+  addTextWithWrap(`Long Tail Keywords: ${formData.longTailKeywords}`);
+  yPosition += 10;
+  
+  // Análise
+  if (results.analysis) {
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('ANÁLISE DE AVALIAÇÕES DOS CONCORRENTES:', margin, yPosition);
+    yPosition += 10;
+    addTextWithWrap(results.analysis);
+    yPosition += 10;
+  }
+  
+  // Títulos
+  if (results.titles) {
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('TÍTULOS OTIMIZADOS:', margin, yPosition);
+    yPosition += 10;
+    addTextWithWrap(results.titles);
+    yPosition += 10;
+  }
+  
+  // Bullet Points
+  if (results.bulletPoints) {
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('BULLET POINTS:', margin, yPosition);
+    yPosition += 10;
+    addTextWithWrap(results.bulletPoints);
+    yPosition += 10;
+  }
+  
+  // Descrição
+  if (results.description) {
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('DESCRIÇÃO COMPLETA:', margin, yPosition);
+    yPosition += 10;
+    addTextWithWrap(results.description);
+  }
+  
+  // Rodapé
+  const totalPages = pdf.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    pdf.setPage(i);
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'italic');
+    pdf.text('Relatório gerado pelo Core Guilherme Vasques', margin, pdf.internal.pageSize.getHeight() - 10);
+  }
+  
+  pdf.save(`amazon-listing-${formData.productName.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.pdf`);
+};
 
 export default function AmazonListingsOptimizerNew() {
   const [location, navigate] = useLocation();
@@ -76,6 +231,59 @@ export default function AmazonListingsOptimizerNew() {
   };
 
   const { toast } = useToast();
+
+  // Funções de download
+  const handleDownloadPDF = () => {
+    if (!results) {
+      toast({
+        title: "Erro no download",
+        description: "Nenhum resultado disponível para download.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      downloadPDF(results, formData);
+      toast({
+        title: "Download iniciado",
+        description: "O relatório PDF está sendo baixado...",
+      });
+    } catch (error) {
+      console.error('Erro no download PDF:', error);
+      toast({
+        title: "Erro no download",
+        description: "Ocorreu um erro ao gerar o PDF.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDownloadTXT = () => {
+    if (!results) {
+      toast({
+        title: "Erro no download",
+        description: "Nenhum resultado disponível para download.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      downloadTXT(results, formData);
+      toast({
+        title: "Download iniciado",
+        description: "O arquivo TXT está sendo baixado...",
+      });
+    } catch (error) {
+      console.error('Erro no download TXT:', error);
+      toast({
+        title: "Erro no download",
+        description: "Ocorreu um erro ao gerar o arquivo TXT.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
@@ -251,14 +459,24 @@ export default function AmazonListingsOptimizerNew() {
         console.error('Erro ao registrar log:', logError);
       }
       
-      // 9. Store results and show success message
-      const sessionResults = await apiRequest(`/api/amazon-sessions/${sessionId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      });
+      // 9. Obter dados das respostas e exibir resultados
+      const step1Data = await step1Response.json();
+      const step2Data = await step2Response.json();
+      const step3Data = await step3Response.json();
+      const step4Data = await step4Response.json();
       
-      setResults(sessionResults);
+      console.log('Dados processados:', { step1Data, step2Data, step3Data, step4Data });
+      
+      // Extrair conteúdo real das respostas
+      const resultData = {
+        sessionId: sessionId,
+        analysis: step1Data?.result || step1Data?.analysis || "Análise concluída",
+        titles: step2Data?.result || step2Data?.titles || "Títulos gerados",
+        bulletPoints: step3Data?.result || step3Data?.bulletPoints || "Bullet points gerados",
+        description: step4Data?.result || step4Data?.description || "Descrição gerada"
+      };
+      
+      setResults(resultData);
       setShowResults(true);
       
       toast({
@@ -692,19 +910,23 @@ export default function AmazonListingsOptimizerNew() {
                     </div>
                   )}
 
-                  {/* Download Button */}
-                  <div className="flex justify-center pt-4">
+                  {/* Download Buttons */}
+                  <div className="flex justify-center gap-4 pt-4">
                     <Button
-                      onClick={() => {
-                        toast({
-                          title: "Download iniciado",
-                          description: "O relatório está sendo gerado...",
-                        });
-                      }}
+                      onClick={handleDownloadPDF}
                       size="lg"
+                      variant="default"
                     >
                       <FileText className="h-4 w-4 mr-2" />
-                      Baixar Relatório PDF
+                      Baixar PDF
+                    </Button>
+                    <Button
+                      onClick={handleDownloadTXT}
+                      size="lg"
+                      variant="outline"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Baixar TXT
                     </Button>
                   </div>
                 </CardContent>
