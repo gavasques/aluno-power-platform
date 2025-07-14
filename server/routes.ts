@@ -18,6 +18,7 @@ import { LoggingService } from "./services/loggingService";
 import userProfileRoutes from "./routes/user/profile";
 import picsartRoutes from "./routes/picsart";
 import { logger } from "./utils/logger";
+import { queryCache } from "./utils/queryCache";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -6724,6 +6725,78 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Register Picsart integration routes
   app.use('/api/picsart', picsartRoutes);
   console.log('✅ [PICSART] Routes registered successfully');
+
+  // Cache monitoring endpoints for admins
+  app.get('/api/admin/cache/stats', requireAuth, async (req, res) => {
+    try {
+      const user = req.user;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const stats = queryCache.getStats();
+      const health = queryCache.getHealthStatus();
+      
+      res.json({
+        stats,
+        health,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      logger.error('Error getting cache stats', { error: error.message }, 'CACHE');
+      res.status(500).json({ error: 'Failed to get cache statistics' });
+    }
+  });
+
+  app.post('/api/admin/cache/clear', requireAuth, async (req, res) => {
+    try {
+      const user = req.user;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      await queryCache.clear();
+      
+      logger.info('Cache cleared by admin', { userId: user.id }, 'CACHE');
+      res.json({ message: 'Cache cleared successfully' });
+    } catch (error) {
+      logger.error('Error clearing cache', { error: error.message }, 'CACHE');
+      res.status(500).json({ error: 'Failed to clear cache' });
+    }
+  });
+
+  app.post('/api/admin/cache/invalidate', requireAuth, async (req, res) => {
+    try {
+      const user = req.user;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { pattern } = req.body;
+      if (!pattern) {
+        return res.status(400).json({ error: 'Pattern is required' });
+      }
+
+      const deletedCount = await queryCache.invalidatePattern(pattern);
+      
+      logger.info('Cache pattern invalidated by admin', { 
+        userId: user.id, 
+        pattern, 
+        deletedCount 
+      }, 'CACHE');
+      
+      res.json({ 
+        message: 'Cache pattern invalidated successfully',
+        deletedCount
+      });
+    } catch (error) {
+      logger.error('Error invalidating cache pattern', { 
+        error: error.message,
+        pattern: req.body.pattern 
+      }, 'CACHE');
+      res.status(500).json({ error: 'Failed to invalidate cache pattern' });
+    }
+  });
 
   return httpServer;
 }
