@@ -51,6 +51,7 @@ const Tools = lazy(() => import("./pages/hub/Tools"));
 const Materials = lazy(() => import("./pages/hub/Materials"));
 const Hub = lazy(() => import("./pages/Hub"));
 const Ferramentas = lazy(() => import("./pages/Ferramentas"));
+const Agentes = lazy(() => import("./pages/Agentes"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
@@ -866,6 +867,15 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
+                          <Route path="/agentes">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Agentes />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
 
 
                           {/* Home route - Protected */}
