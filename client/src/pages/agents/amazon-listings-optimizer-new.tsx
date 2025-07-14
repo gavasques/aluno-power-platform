@@ -242,8 +242,25 @@ export default function AmazonListingsOptimizerNew() {
 
   const { toast } = useToast();
 
+  // Validação simplificada do formulário - apenas verificar se tem dados das avaliações
+  const isFormValid = (() => {
+    const hasProductName = !!formData.productName?.trim();
+    const hasReviewsData = reviewsTab === "text" ? !!formData.reviewsData?.trim() : uploadedFiles.length > 0;
+    
+    console.log('Form validation:', {
+      hasProductName,
+      hasReviewsData,
+      reviewsTab,
+      uploadedFilesCount: uploadedFiles.length,
+      reviewsDataLength: formData.reviewsData?.length || 0,
+      productName: formData.productName
+    });
+    
+    return hasProductName && hasReviewsData;
+  })();
+
   // Funções de download
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!results) {
       toast({
         title: "Erro no download",
@@ -520,23 +537,6 @@ export default function AmazonListingsOptimizerNew() {
       setIsProcessing(false);
     }
   };
-
-  // Validação simplificada do formulário - apenas verificar se tem dados das avaliações
-  const isFormValid = (() => {
-    const hasProductName = !!formData.productName?.trim();
-    const hasReviewsData = reviewsTab === "text" ? !!formData.reviewsData?.trim() : uploadedFiles.length > 0;
-    
-    console.log('Form validation:', {
-      hasProductName,
-      hasReviewsData,
-      reviewsTab,
-      uploadedFilesCount: uploadedFiles.length,
-      reviewsDataLength: formData.reviewsData?.length || 0,
-      productName: formData.productName
-    });
-    
-    return hasProductName && hasReviewsData;
-  })();
 
   return (
     <div className="min-h-screen bg-gray-50">
