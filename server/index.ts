@@ -1,19 +1,39 @@
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
+import helmet from "helmet";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { scheduler } from "./services/scheduler";
 import { compressionMiddleware, cacheHeaders, performanceMetrics, memoryMonitor } from "./middleware/performanceMiddleware";
 import { optimizedProductService } from "./services/OptimizedProductService";
+import { 
+  securityHeaders, 
+  apiLimiter, 
+  sanitizeQueryParams, 
+  sanitizeBody,
+  sanitizeError 
+} from "./security";
+import { enhancedAuth, enhancedCSRF, anonymousRateLimiter } from "./middleware/enhancedAuth";
 import path from "path";
 
 const app = express();
+
+// SECURITY MIDDLEWARE - Applied first for protection
+app.use(helmet({
+  contentSecurityPolicy: false, // We set custom CSP in securityHeaders
+  crossOriginEmbedderPolicy: false // Allow embedding for development
+}));
+app.use(securityHeaders); // Custom security headers including CSP
+app.use('/api', apiLimiter); // Rate limiting for API routes
 
 // PHASE 1 PERFORMANCE OPTIMIZATIONS
 app.use(compressionMiddleware); // Enhanced compression
 app.use(performanceMetrics); // Performance tracking
 app.use(cacheHeaders); // Intelligent caching
 app.use(memoryMonitor); // Memory monitoring
+
+// INPUT SANITIZATION - Applied before parsing
+app.use(sanitizeQueryParams); // Sanitize query parameters
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -36,6 +56,19 @@ app.use((req, res, next) => {
   // Apply URL encoding for all other routes
   express.urlencoded({ extended: false, limit: '50mb' })(req, res, next);
 });
+
+// Apply body sanitization after parsing but before route handlers
+app.use(sanitizeBody);
+
+// Apply enhanced authentication to all API routes
+app.use(enhancedAuth);
+
+// Apply CSRF protection to state-changing operations
+app.use(enhancedCSRF);
+
+// Apply anonymous rate limiting for public endpoints
+app.use('/api/auth/login', anonymousRateLimiter(5, 15)); // 5 attempts per 15 minutes
+app.use('/api/auth/register', anonymousRateLimiter(3, 60)); // 3 registrations per hour
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -154,12 +187,14 @@ app.use((req, res, next) => {
     
     console.error(`   🕐 Timestamp: ${new Date().toISOString()}\n`);
 
+    // Use sanitizeError to prevent information leakage
+    const sanitizedError = sanitizeError(err);
+
     res.status(status).json({ 
-      message,
+      ...sanitizedError,
       timestamp: new Date().toISOString(),
       path: req.path,
-      method: req.method,
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+      method: req.method
     });
     
     // Don't throw in production to avoid crashing the server

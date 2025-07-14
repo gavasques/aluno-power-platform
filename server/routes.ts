@@ -32,25 +32,14 @@ function generateTags(data: any): any {
   return tags;
 }
 
-// Configure multer for file uploads
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'uploads/') // Make sure this directory exists
-    },
-    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      cb(null, file.fieldname + '-' + uniqueSuffix + '.' + file.originalname.split('.').pop())
-    }
-  }),
-  fileFilter: function (req, file, cb) {
-    // Accept any file type for supplier files
-    cb(null, true);
-  },
-  limits: {
-    fileSize: 50 * 1024 * 1024 // 50MB limit
-  }
-});
+// Import secure upload configurations
+import { 
+  createSecureUpload, 
+  imageUpload, 
+  documentUpload, 
+  supplierFileUpload,
+  genericUpload 
+} from './middleware/secureUpload';
 import { 
   insertSupplierSchema, 
   insertPartnerSchema, 
