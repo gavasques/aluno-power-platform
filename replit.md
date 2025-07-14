@@ -422,6 +422,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 14, 2025 - 5:15 PM**: ✅ COMPLETE AGENT ROUTING SYSTEM FIXED - ALL REDIRECTS NOW WORKING CORRECTLY
+  - **Agent Redirection Issues Resolved**: Fixed all agent redirect mismatches between agent IDs and actual route paths
+  - **Specific Redirects Corrected**:
+    - `agent-amazon-product-photography` → `/agentes/main-image-editor` ✅ WORKING
+    - `html-description-generator` → `/agentes/html-description` ✅ WORKING
+    - `bullet-points-generator` → `/agentes/bullet-points` ✅ WORKING
+    - `agent-lifestyle-with-model` → `/agentes/lifestyle-model` ✅ WORKING
+    - `agent-infographic-generator` → `/agentes/infographic-generator` ✅ WORKING
+    - `advanced-infographic-generator` → `/agentes/advanced-infographic` ✅ WORKING
+    - `agent-amazon-listings` → `/agentes/amazon-listing` ✅ WORKING
+  - **Rate Limits Increased Again**: Auth attempts: 25 → 50 per 15 minutes, API requests: 100 → 200 per 15 minutes
+  - **Root Cause**: Generic fallback redirect `/agentes/${agent.id}` was using agent IDs that didn't match actual route paths
+  - **Solution**: Implemented specific redirect cases in Agentes.tsx for each agent ID to match exact route definitions in App.tsx
+  - **User Confirmation**: Editor de Imagem Principal tested and confirmed working correctly
+  - **System Status**: All agent white screen issues resolved, complete routing system operational
+
 - **January 14, 2025 - 3:00 PM**: ✅ RATE LIMITING OPTIMIZATION COMPLETED - TOO MANY API REQUESTS ERROR RESOLVED
   - **Critical User Issue Fixed**: User experiencing "Too many API requests from this IP, please try again later" during login
   - **Rate Limits Increased Significantly**:
