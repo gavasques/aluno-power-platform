@@ -252,13 +252,13 @@ export default function AmazonListingsOptimizerNew() {
       }
       
       // 9. Store results and show success message
-      const sessionResponse = await apiRequest(`/api/amazon-sessions/${sessionId}`, {
+      const sessionResults = await apiRequest(`/api/amazon-sessions/${sessionId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
-      setResults(sessionResponse);
+      setResults(sessionResults);
       setShowResults(true);
       
       toast({
