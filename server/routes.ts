@@ -17,6 +17,7 @@ import dashboardRoutes from "./routes/dashboard-fixed";
 import { LoggingService } from "./services/loggingService";
 import userProfileRoutes from "./routes/user/profile";
 import picsartRoutes from "./routes/picsart";
+import { logger } from "./utils/logger";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -110,7 +111,7 @@ import userUsageRoutes from './routes/user/usage';
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
 
-// Broadcast function for real-time notifications
+// Broadcast function for real-time notifications - Optimized logging
 function broadcastNotification(type: string, data: any) {
   const messageId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   const message = JSON.stringify({ 
@@ -120,11 +121,12 @@ function broadcastNotification(type: string, data: any) {
     messageId 
   });
   
-  console.log(`📡 [WS_BROADCAST] Broadcasting notification`);
-  console.log(`   🆔 Message ID: ${messageId}`);
-  console.log(`   📋 Type: ${type}`);
-  console.log(`   📊 Connected Clients: ${connectedClients.size}`);
-  console.log(`   📄 Data Preview: ${JSON.stringify(data).substring(0, 200)}...`);
+  logger.debug('Broadcasting WebSocket notification', {
+    messageId,
+    type,
+    connectedClients: connectedClients.size,
+    dataPreview: JSON.stringify(data).substring(0, 100)
+  }, 'WEBSOCKET');
   
   let successCount = 0;
   let errorCount = 0;
@@ -135,27 +137,30 @@ function broadcastNotification(type: string, data: any) {
         client.send(message);
         successCount++;
       } catch (error) {
-        console.error(`❌ [WS_SEND_ERROR] Failed to send to client ${index}:`, error);
+        logger.error(`Failed to send WebSocket message to client ${index}`, { error: error.message, messageId }, 'WEBSOCKET');
         errorCount++;
-        // Remove broken client
         connectedClients.delete(client);
       }
     } else {
-      console.log(`🔌 [WS_SKIP] Skipping client ${index} (state: ${client.readyState})`);
-      // Remove dead client
+      logger.trace(`Skipping client ${index} (state: ${client.readyState})`, { messageId }, 'WEBSOCKET');
       connectedClients.delete(client);
       errorCount++;
     }
   });
   
-  console.log(`📊 [WS_BROADCAST_RESULT] Message ${messageId}: ${successCount} sent, ${errorCount} failed`);
+  logger.info('WebSocket broadcast completed', {
+    messageId,
+    successCount,
+    errorCount,
+    type
+  }, 'WEBSOCKET');
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // PHASE 2: SOLID/DRY/KISS Modular Routes Integration
-  console.log('🏗️  [PHASE_2] Registering modular routes...');
+  logger.info('Registering modular routes', {}, 'ROUTES');
   registerModularRoutes(app);
-  console.log('✅ [PHASE_2] Modular routes registered successfully');
+  logger.info('Modular routes registered successfully', {}, 'ROUTES');
   
   // PHASE 3 & 4: All modular routes are now registered in registerModularRoutes()
   // No more duplicate registrations needed here
@@ -166,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { handleStripeWebhook } = await import('./webhooks/stripe');
       await handleStripeWebhook(req, res);
     } catch (error) {
-      console.error('Error loading Stripe webhook handler:', error);
+      logger.error('Error loading Stripe webhook handler', { error: error.message }, 'STRIPE');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -225,7 +230,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(result);
     } catch (error) {
-      console.error('Error fetching paginated suppliers:', error);
+      logger.error('Failed to fetch paginated suppliers', { 
+        error: error.message,
+        page,
+        limit,
+        search: search?.substring(0, 50)
+      }, 'SUPPLIERS');
       res.status(500).json({ error: 'Failed to fetch suppliers' });
     }
   });
@@ -320,7 +330,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const brands = await storage.getSupplierBrands(supplierId);
       res.json(brands);
     } catch (error) {
-      console.error('Error fetching supplier brands:', error);
+      logger.error('Failed to fetch supplier brands', { 
+        error: error.message,
+        supplierId: req.params.id
+      }, 'SUPPLIERS');
       res.status(500).json({ error: 'Failed to fetch brands' });
     }
   });
@@ -335,7 +348,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const brand = await storage.createSupplierBrand(brandData);
       res.status(201).json(brand);
     } catch (error) {
-      console.error('Error creating supplier brand:', error);
+      logger.error('Failed to create supplier brand', { 
+        error: error.message,
+        supplierId: req.params.id
+      }, 'SUPPLIERS');
       res.status(500).json({ error: 'Failed to create brand' });
     }
   });
@@ -346,7 +362,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const brands = await storage.getSupplierBrands(supplierId);
       res.json(brands);
     } catch (error) {
-      console.error('Error fetching supplier brands:', error);
+      logger.error('Failed to fetch supplier brands (authenticated)', { 
+        error: error.message,
+        supplierId: req.params.id,
+        userId: req.user?.id
+      }, 'SUPPLIERS');
       res.status(500).json({ error: 'Failed to fetch brands' });
     }
   });
@@ -357,7 +377,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteSupplierBrand(brandId);
       res.json({ success: true });
     } catch (error) {
-      console.error('Error deleting supplier brand:', error);
+      logger.error('Failed to delete supplier brand', { 
+        error: error.message,
+        brandId: req.params.brandId
+      }, 'SUPPLIERS');
       res.status(500).json({ error: 'Failed to delete brand' });
     }
   });
@@ -370,7 +393,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const conversations = await storage.getSupplierConversations(supplierId, userId);
       res.json(conversations);
     } catch (error) {
-      console.error('Error fetching supplier conversations:', error);
+      logger.error('Failed to fetch supplier conversations', { 
+        error: error.message,
+        supplierId: req.params.id,
+        userId: req.user?.id
+      }, 'SUPPLIERS');
       res.status(500).json({ error: 'Failed to fetch conversations' });
     }
   });

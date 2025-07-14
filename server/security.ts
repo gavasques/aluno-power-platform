@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { z } from 'zod';
 import crypto from 'crypto';
 import validator from 'validator';
+import { logger } from './utils/logger';
 
 // Security headers middleware
 export const securityHeaders = (req: Request, res: Response, next: NextFunction) => {
@@ -318,17 +319,20 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
   next();
 };
 
-// Authentication middleware
+// Authentication middleware - Optimized logging
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('🔍 [AUTH] Request headers:', JSON.stringify({
-    authorization: req.headers.authorization,
-    'user-agent': req.headers['user-agent']?.substring(0, 50) + '...'
-  }));
+  logger.trace('Authentication request received', {
+    hasAuth: !!req.headers.authorization,
+    userAgent: req.headers['user-agent']?.substring(0, 50)
+  }, 'AUTH');
   
   const token = req.headers.authorization?.replace('Bearer ', '');
-  console.log('🔍 [AUTH] Extracted token:', token ? token.substring(0, 10) + '...' : 'null');
   
   if (!token) {
+    logger.warn('Authentication required - missing token', {
+      path: req.path,
+      method: req.method
+    }, 'AUTH');
     return res.status(401).json({ 
       error: 'Authentication required',
       details: 'Please provide a valid authorization token'
@@ -342,9 +346,11 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     // Validate the session token
     const user = await AuthService.validateSession(token);
     
-    console.log('🔍 [AUTH] User validation result:', user ? { userFound: true, userId: user.id, userRole: user.role } : 'null');
-    
     if (!user) {
+      logger.warn('Invalid or expired token', {
+        tokenPrefix: token.substring(0, 10),
+        path: req.path
+      }, 'AUTH');
       return res.status(401).json({ 
         error: 'Invalid or expired token',
         details: 'Please login again'
@@ -360,11 +366,18 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       username: user.username
     };
     
-    console.log('🔍 [AUTH] User object set on request:', JSON.stringify((req as any).user, null, 2));
+    logger.debug('User authenticated successfully', {
+      userId: user.id,
+      userRole: user.role,
+      path: req.path
+    }, 'AUTH');
     
     next();
   } catch (error) {
-    console.error('❌ [AUTH] Token validation error:', error);
+    logger.error('Token validation error', { 
+      error: error.message,
+      path: req.path 
+    }, 'AUTH');
     return res.status(401).json({ 
       error: 'Authentication failed',
       details: 'Please login again'
@@ -372,17 +385,30 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-// Role-based authorization middleware
+// Role-based authorization middleware - Optimized logging
 export const requireRole = (allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const userRole = (req as any).user?.role;
+    const userId = (req as any).user?.id;
     
     if (!userRole || !allowedRoles.includes(userRole)) {
+      logger.warn('Insufficient permissions', {
+        userId,
+        userRole,
+        requiredRoles: allowedRoles,
+        path: req.path
+      }, 'AUTH');
       return res.status(403).json({ 
         error: 'Insufficient permissions',
         details: `This operation requires one of: ${allowedRoles.join(', ')}`
       });
     }
+    
+    logger.trace('Role authorization successful', {
+      userId,
+      userRole,
+      path: req.path
+    }, 'AUTH');
     
     next();
   };
