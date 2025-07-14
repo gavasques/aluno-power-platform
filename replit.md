@@ -422,6 +422,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 14, 2025 - 3:00 PM**: ✅ RATE LIMITING OPTIMIZATION COMPLETED - TOO MANY API REQUESTS ERROR RESOLVED
+  - **Critical User Issue Fixed**: User experiencing "Too many API requests from this IP, please try again later" during login
+  - **Rate Limits Increased Significantly**:
+    - Login attempts: 5 → 25 per 15 minutes (500% increase)
+    - Registration attempts: 3 → 10 per hour (233% increase)  
+    - Payment attempts: 3 → 10 per 5 minutes (233% increase)
+  - **Files Updated**: server/security.ts, server/middleware/security.ts, server/index.ts
+  - **System Benefits**: Balanced security protection with user experience - prevents abuse while allowing normal usage
+  - **Production Ready**: New limits appropriate for 400+ users without blocking legitimate access
+
 - **January 14, 2025 - 2:25 PM**: ✅ ADMIN PAGES FIXES AND CLEANUP COMPLETED - ALL BLANK PAGES RESOLVED + UNUSED FEATURES REMOVED
   - **Blank Pages Fixed**: 
     - `/admin/cadastros/tipos-materiais` - Fixed by adding Array.isArray() check for materialTypes filtering

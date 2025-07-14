@@ -66,8 +66,8 @@ app.use(enhancedAuth);
 app.use(enhancedCSRF);
 
 // Apply anonymous rate limiting for public endpoints
-app.use('/api/auth/login', anonymousRateLimiter(5, 15)); // 5 attempts per 15 minutes
-app.use('/api/auth/register', anonymousRateLimiter(3, 60)); // 3 registrations per hour
+app.use('/api/auth/login', anonymousRateLimiter(25, 15)); // 25 attempts per 15 minutes
+app.use('/api/auth/register', anonymousRateLimiter(10, 60)); // 10 registrations per hour
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -17,7 +17,7 @@ export const generalRateLimit = rateLimit({
 
 export const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // 5 tentativas de login por IP
+  max: 25, // 25 tentativas de login por IP
   message: {
     error: 'Muitas tentativas de login. Tente novamente em 15 minutos.',
     statusCode: 429,
@@ -28,7 +28,7 @@ export const authRateLimit = rateLimit({
 
 export const paymentRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutos
-  max: 3, // 3 tentativas de pagamento por IP
+  max: 10, // 10 tentativas de pagamento por IP
   message: {
     error: 'Muitas tentativas de pagamento. Tente novamente em 5 minutos.',
     statusCode: 429,
