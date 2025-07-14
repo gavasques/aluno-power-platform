@@ -313,7 +313,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/agentes/amazon-negative-reviews/resultado/:sessionId">
+                          <Route path="/agentes/amazon-negative-reviews/result">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>

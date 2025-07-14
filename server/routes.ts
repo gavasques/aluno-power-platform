@@ -2197,15 +2197,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log usage for tracking (existing)
       try {
+        const usageId = `usage_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         await storage.createAgentUsage({
+          id: usageId,
           agentId: 'amazon-customer-service',
           userId: user.id,
           inputTokens,
           outputTokens,
           totalTokens,
-          cost: totalCost,
-          processingTime,
-          createdAt: new Date()
+          costUsd: totalCost.toString(),
+          processingTimeMs: processingTime,
+          status: 'success'
         });
       } catch (logError) {
         console.error('❌ [CUSTOMER_SERVICE] Error logging usage:', logError);
@@ -2421,15 +2423,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log usage for tracking (existing)
       try {
+        const usageId = `usage_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         await storage.createAgentUsage({
+          id: usageId,
           agentId: 'amazon-negative-reviews',
           userId: user.id,
           inputTokens,
           outputTokens,
           totalTokens,
-          cost: totalCost,
-          processingTime,
-          createdAt: new Date()
+          costUsd: totalCost.toString(),
+          processingTimeMs: processingTime,
+          status: 'success'
         });
       } catch (logError) {
         console.error('❌ [NEGATIVE_REVIEWS] Error logging usage:', logError);
