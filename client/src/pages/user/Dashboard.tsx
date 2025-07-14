@@ -367,370 +367,346 @@ const UserDashboard = () => {
   const planCredits = subscription?.planCredits || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/20">
-      <div className="w-full px-2 py-6 space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-[1600px] mx-auto px-4 py-6">
         
-        {/* Modern Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 text-white shadow-xl">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <Crown className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold">
-                    Olá, {currentUser.name || 'Usuário'}!
-                  </h1>
-                  <p className="text-blue-100 text-lg">
-                    Bem-vindo ao seu painel de controle
-                  </p>
-                </div>
-              </div>
+        {/* Compact Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-6 mb-6 text-white">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">
+                Olá, {currentUser.name || 'Usuário'}!
+              </h1>
+              <p className="text-blue-100 text-sm">
+                Bem-vindo ao seu painel de controle
+              </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-2 mb-1">
-                  <Coins className="h-5 w-5 text-yellow-300" />
-                  <span className="text-sm text-blue-100">Créditos Disponíveis</span>
-                </div>
-                <div className="text-3xl font-bold text-white">
-                  {creditBalance.toLocaleString()}
+            <div className="flex items-center gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+                <div className="flex items-center gap-2">
+                  <Coins className="h-4 w-4 text-yellow-300" />
+                  <div>
+                    <span className="text-xs text-blue-100 block">Créditos</span>
+                    <span className="text-lg font-bold">{creditBalance.toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
               
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-2 mb-1">
-                  <Crown className="h-5 w-5 text-purple-300" />
-                  <span className="text-sm text-blue-100">Plano Atual</span>
-                </div>
-                <div className="text-xl font-bold text-white capitalize">
-                  {planName}
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-purple-300" />
+                  <div>
+                    <span className="text-xs text-blue-100 block">Plano</span>
+                    <span className="text-lg font-bold capitalize">{planName}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-4 flex flex-wrap gap-2">
             <Button
               variant="secondary"
+              size="sm"
               className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm"
               onClick={() => handleQuickAction('agents')}
             >
-              <Zap className="h-4 w-4 mr-2" />
-              Usar Agentes IA
+              <Zap className="h-4 w-4 mr-1" />
+              Agentes IA
             </Button>
             <Button
               variant="secondary"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm"
-              onClick={() => handleQuickAction('products')}
-            >
-              <CreditCard className="h-4 w-4 mr-2" />
-              Meus Produtos
-            </Button>
-            <Button
-              variant="secondary"
+              size="sm"
               className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm"
               onClick={() => handleQuickAction('buy-credits')}
             >
-              <Coins className="h-4 w-4 mr-2" />
+              <CreditCard className="h-4 w-4 mr-1" />
               Comprar Créditos
             </Button>
             <Button
               variant="secondary"
+              size="sm"
               className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm"
-              onClick={() => handleQuickAction('upgrade')}
+              onClick={() => handleQuickAction('products')}
             >
-              <ArrowUpRight className="h-4 w-4 mr-2" />
-              Melhorar Plano
+              <ArrowUpRight className="h-4 w-4 mr-1" />
+              Meus Produtos
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm"
+              onClick={() => handleQuickAction('manage-subscription')}
+            >
+              <Calendar className="h-4 w-4 mr-1" />
+              Assinatura
             </Button>
           </div>
         </div>
 
-        {/* Promotional Banners */}
-        <PromotionalBanners />
-
-        {/* Modern Full-Width Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Main 3-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* YouTube Videos Preview - Simplified */}
-          <div className="lg:col-span-2">
-            <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-2xl shadow-2xl border-0 overflow-hidden">
-              <CardHeader className="pb-4">
+          {/* Left Column - Main Stats & Info (5 cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            
+            {/* Promotional Banners */}
+            <PromotionalBanners />
+            
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
-                      <Youtube className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl font-bold text-white">
-                        Últimos Vídeos
-                      </CardTitle>
-                      <CardDescription className="text-gray-400">
-                        Conteúdo sobre Amazon FBA e e-commerce
-                      </CardDescription>
-                    </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Créditos Usados</p>
+                    <p className="text-xl font-bold text-gray-900">{creditsUsedThisMonth}</p>
+                    <p className="text-xs text-gray-400">este mês</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <Coins className="h-5 w-5 text-blue-600" />
+                  </div>
+                </div>
+              </Card>
+              
+              <Card className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500">Próxima Fatura</p>
+                    <p className="text-lg font-bold text-gray-900">{nextBilling}</p>
+                    <p className="text-xs text-gray-400">{planStatus === 'active' ? 'Ativa' : 'Pendente'}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                    <Calendar className="h-5 w-5 text-purple-600" />
+                  </div>
+                </div>
+              </Card>
+            </div>
+            
+            {/* Activity Summary */}
+            <Card className="bg-white rounded-lg p-4 shadow-sm">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-gray-400" />
+                Atividade Recente
+              </h3>
+              <div className="space-y-2">
+                <div className="text-center py-6">
+                  <Clock className="h-6 w-6 text-gray-300 mx-auto mb-2" />
+                  <p className="text-xs text-gray-500">Histórico em breve</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+          
+          {/* Middle Column - Videos (4 cols) */}
+          <div className="lg:col-span-4">
+            <Card className="bg-white rounded-lg shadow-sm">
+              <CardHeader className="p-4 pb-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    <Youtube className="h-4 w-4 text-red-600" />
+                    Últimos Vídeos
+                  </h3>
+                  <div className="flex gap-1">
                     <Button 
-                      variant="outline" 
+                      variant="ghost" 
                       size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                      className="h-7 px-2 text-xs"
                       onClick={() => handleQuickAction('videos')}
                     >
-                      <Play className="h-4 w-4 mr-2" />
                       Ver Todos
                     </Button>
                     <Button 
-                      variant="outline" 
+                      variant="ghost" 
                       size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                      className="h-7 px-2"
                       onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
                     >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Canal
+                      <ExternalLink className="h-3 w-3" />
                     </Button>
                     {userSummary?.user?.role === 'admin' && (
                       <Button 
                         variant="ghost" 
                         size="sm"
+                        className="h-7 px-2"
                         onClick={async () => {
-                          console.log('🔄 Invalidating cache and refreshing videos...');
-                          // Invalidar cache primeiro
                           await queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
-                          // Depois refetch
                           await refetchVideos();
-                          console.log('✅ Videos refreshed!');
                         }}
-                        className="text-gray-400 hover:text-white"
                       >
-                        🔄 Atualizar
+                        🔄
                       </Button>
                     )}
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-0">
                 {videosLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[...Array(3)].map((_, i) => (
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="bg-gray-700 rounded-xl h-32 mb-3"></div>
-                        <div className="bg-gray-700 h-3 rounded mb-2"></div>
-                        <div className="bg-gray-700 h-2 rounded w-2/3"></div>
+                        <div className="bg-gray-200 rounded-lg h-16 mb-2"></div>
                       </div>
                     ))}
                   </div>
                 ) : youtubeVideos && youtubeVideos.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-3">
                     {youtubeVideos
                       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-                      .slice(0, 3).map((video) => (
+                      .slice(0, 4).map((video) => (
                       <div 
                         key={video.id} 
-                        className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
+                        className="flex gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 -mx-2 transition-colors"
                         onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
                       >
-                        <div className="relative bg-gray-700 rounded-xl overflow-hidden mb-3 aspect-video">
+                        <div className="relative w-28 h-16 flex-shrink-0">
                           <img 
                             src={video.thumbnailUrl} 
                             alt={video.title}
-                            className="w-full h-full object-cover transition-opacity group-hover:opacity-80"
+                            className="w-full h-full object-cover rounded-md"
                           />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
-                              <Play className="h-6 w-6 text-white ml-1" />
-                            </div>
+                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-md">
+                            <Play className="h-6 w-6 text-white" />
                           </div>
-                          <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                          <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded">
                             {video.duration}
                           </div>
                         </div>
-                        <h3 className="text-white font-semibold text-lg mb-2 line-clamp-2 group-hover:text-red-400 transition-colors">
-                          {video.title}
-                        </h3>
-                        <div className="flex items-center justify-between text-gray-400 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Eye className="h-4 w-4" />
-                            {formatViewCount(video.viewCount)}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+                            {video.title}
+                          </h4>
+                          <div className="flex items-center gap-3 text-xs text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Eye className="h-3 w-3" />
+                              {formatViewCount(video.viewCount)}
+                            </span>
+                            <span>{formatPublishedDate(video.publishedAt)}</span>
                           </div>
-                          <span>{formatPublishedDate(video.publishedAt)}</span>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Youtube className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-300 mb-2">Nenhum vídeo disponível</h3>
-                    <p className="text-gray-500">Os últimos vídeos do YouTube aparecerão aqui</p>
+                  <div className="text-center py-8">
+                    <Youtube className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Nenhum vídeo disponível</p>
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
-
-          {/* News Section - Blue Modern Container */}
-          <div>
-            <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-2xl shadow-2xl border-0 text-white">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <Rss className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl font-bold text-white">
-                      Central de Notícias
-                    </CardTitle>
-                    <CardDescription className="text-blue-100">
-                      Últimas novidades e anúncios
-                    </CardDescription>
-                  </div>
-                </div>
+          
+          {/* Right Column - News & Updates (3 cols) */}
+          <div className="lg:col-span-3 space-y-4">
+            
+            {/* News Section */}
+            <Card className="bg-white rounded-lg shadow-sm">
+              <CardHeader className="p-4 pb-3">
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Rss className="h-4 w-4 text-blue-600" />
+                  Notícias
+                </h3>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-0">
                 {newsLoading ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="bg-white/20 h-4 rounded mb-2"></div>
-                        <div className="bg-white/20 h-3 rounded w-3/4 mb-2"></div>
-                        <div className="bg-white/20 h-3 rounded w-1/2"></div>
+                        <div className="bg-gray-200 h-3 rounded mb-2"></div>
+                        <div className="bg-gray-200 h-2 rounded w-3/4"></div>
                       </div>
                     ))}
                   </div>
                 ) : newsData && newsData.length > 0 ? (
-                  <div className="space-y-4">
-                    {newsData.slice(0, 5).map((news) => (
+                  <div className="space-y-3">
+                    {newsData.slice(0, 3).map((news) => (
                       <div 
                         key={news.id} 
-                        className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
+                        className="cursor-pointer hover:bg-gray-50 rounded-lg p-2 -mx-2 transition-colors"
                         onClick={() => openNewsModal(news)}
                       >
-                        <h3 className="font-semibold text-white text-lg mb-2 line-clamp-2">
+                        <h4 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
                           {news.title}
-                        </h3>
-                        <p className="text-blue-100 text-sm mb-3 line-clamp-2">
-                          {news.summary || news.content?.substring(0, 120) + '...'}
-                        </p>
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <div className="bg-white/20 px-2 py-1 rounded-full text-blue-100">
-                              {news.category || 'Geral'}
-                            </div>
-                            {news.featured && (
-                              <div className="bg-yellow-400/20 px-2 py-1 rounded-full text-yellow-200 border border-yellow-400/30">
-                                Destaque
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-blue-200">
-                            <Clock className="h-4 w-4" />
-                            {formatCreatedDate(news.createdAt || '')}
-                          </div>
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span className="bg-gray-100 px-2 py-0.5 rounded">
+                            {news.category || 'Geral'}
+                          </span>
+                          <span>{formatCreatedDate(news.createdAt || '')}</span>
                         </div>
                       </div>
                     ))}
                     <Button 
-                      variant="secondary" 
-                      className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border-0"
+                      variant="ghost" 
+                      size="sm"
+                      className="w-full h-8 text-xs"
                       onClick={() => window.location.href = '/noticias'}
                     >
-                      Ver Todas as Notícias
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                      Ver Todas
+                      <ArrowRight className="h-3 w-3 ml-1" />
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Rss className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Nenhuma notícia disponível</h3>
-                    <p className="text-blue-200">As últimas notícias aparecerão aqui</p>
+                  <div className="text-center py-6">
+                    <Rss className="h-6 w-6 text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs text-gray-500">Sem notícias</p>
                   </div>
                 )}
               </CardContent>
             </Card>
-          </div>
-
-          {/* Updates Section - Green Modern Container */}
-          <div>
-            <Card className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-2xl shadow-2xl border-0 text-white">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <Users className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl font-bold text-white">
-                      Central de Novidades
-                    </CardTitle>
-                    <CardDescription className="text-emerald-100">
-                      Atualizações do sistema e novas funcionalidades
-                    </CardDescription>
-                  </div>
-                </div>
+            
+            {/* Updates Section */}
+            <Card className="bg-white rounded-lg shadow-sm">
+              <CardHeader className="p-4 pb-3">
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Star className="h-4 w-4 text-emerald-600" />
+                  Novidades
+                </h3>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-0">
                 {updatesLoading ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="bg-white/20 h-4 rounded mb-2"></div>
-                        <div className="bg-white/20 h-3 rounded w-3/4 mb-2"></div>
-                        <div className="bg-white/20 h-3 rounded w-1/2"></div>
+                        <div className="bg-gray-200 h-3 rounded mb-2"></div>
+                        <div className="bg-gray-200 h-2 rounded w-3/4"></div>
                       </div>
                     ))}
                   </div>
                 ) : updatesData && updatesData.length > 0 ? (
-                  <div className="space-y-4">
-                    {updatesData.slice(0, 5).map((update) => (
+                  <div className="space-y-3">
+                    {updatesData.slice(0, 3).map((update) => (
                       <div 
                         key={update.id} 
-                        className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
+                        className="cursor-pointer hover:bg-gray-50 rounded-lg p-2 -mx-2 transition-colors"
                         onClick={() => openUpdateModal(update)}
                       >
-                        <h3 className="font-semibold text-white text-lg mb-2 line-clamp-2">
+                        <h4 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
                           {update.title}
-                        </h3>
-                        <p className="text-emerald-100 text-sm mb-3 line-clamp-2">
-                          {update.summary || update.content?.substring(0, 120) + '...'}
-                        </p>
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <div className="bg-white/20 px-2 py-1 rounded-full text-emerald-100">
-                              {update.version || 'v1.0'}
-                            </div>
-                            <div className="bg-white/20 px-2 py-1 rounded-full text-emerald-100">
-                              {update.type || 'Feature'}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {formatCreatedDate(update.createdAt || '')}
-                          </div>
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">
+                            {update.type || 'Feature'}
+                          </span>
+                          <span>{formatCreatedDate(update.createdAt || '')}</span>
                         </div>
                       </div>
                     ))}
                     <Button 
-                      variant="secondary" 
-                      className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border-0"
+                      variant="ghost" 
+                      size="sm"
+                      className="w-full h-8 text-xs"
                       onClick={() => window.location.href = '/novidades'}
                     >
-                      Ver Todas as Novidades
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                      Ver Todas
+                      <ArrowRight className="h-3 w-3 ml-1" />
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Users className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Nenhuma novidade disponível</h3>
-                    <p className="text-emerald-200">As últimas atualizações aparecerão aqui</p>
+                  <div className="text-center py-6">
+                    <Star className="h-6 w-6 text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs text-gray-500">Sem novidades</p>
                   </div>
                 )}
               </CardContent>
