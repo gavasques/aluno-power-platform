@@ -382,8 +382,8 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
   }, []);
 
   return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
         {/* Header do Agente */}
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border">
           <div className="flex items-center justify-between mb-3">
@@ -521,7 +521,6 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
               </div>
             </div>
           </details>
-        </div>
         </div>
       </div>
 
