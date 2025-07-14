@@ -1,7 +1,10 @@
 import { ExternalLink, ShoppingBag, Sparkles, ArrowRight, Search, Percent } from "lucide-react";
+import { memo, useMemo, useCallback } from "react";
 
-export function PromotionalBanners() {
-  const banners = [
+// OPTIMIZED: Memoized PromotionalBanners component
+export const PromotionalBanners = memo(() => {
+  // OPTIMIZED: Memoized banners data to prevent recreation on every render
+  const banners = useMemo(() => [
     {
       title: "Venda Moda na Amazon com 0% de Comissão !!!",
       description: "Cadastre-se na Amazon pelo Link abaixo, e participe dessa promoção. Válido apenas para as categorias relacionadas a Moda, Relógios, Bolsas e Mochilas.",
@@ -43,7 +46,12 @@ export function PromotionalBanners() {
       buttonBg: "bg-orange-600 hover:bg-orange-700",
       size: "small",
     }
-  ];
+  ], []);
+
+  // OPTIMIZED: Memoized click handler to prevent unnecessary re-renders
+  const handleBannerClick = useCallback((link: string) => {
+    window.open(link, '_blank');
+  }, []);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
@@ -52,7 +60,7 @@ export function PromotionalBanners() {
         <div
           key={index}
           className={`lg:col-span-4 relative overflow-hidden rounded-2xl ${banner.bgColor} p-6 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group min-h-[280px] flex flex-col`}
-          onClick={() => window.open(banner.link, '_blank')}
+          onClick={() => handleBannerClick(banner.link)}
         >
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
@@ -104,7 +112,7 @@ export function PromotionalBanners() {
       {banners[2] && (
         <div
           className={`lg:col-span-4 relative overflow-hidden rounded-2xl ${banners[2].bgColor} p-6 cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group flex flex-col min-h-[280px]`}
-          onClick={() => window.open(banners[2].offers?.[0]?.link || '#', '_blank')}
+          onClick={() => handleBannerClick(banners[2].offers?.[0]?.link || '#')}
         >
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
@@ -162,4 +170,4 @@ export function PromotionalBanners() {
       )}
     </div>
   );
-}
+}); // End of memo

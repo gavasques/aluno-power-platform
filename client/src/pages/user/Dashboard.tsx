@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -89,7 +89,8 @@ interface YouTubeVideo {
   commentCount: number;
 }
 
-const UserDashboard = () => {
+// OPTIMIZED: Memoized Dashboard component
+const UserDashboard = memo(() => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState('overview');
@@ -100,8 +101,8 @@ const UserDashboard = () => {
   const [newsModalOpen, setNewsModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
 
-  // Função para buscar dados completos de uma notícia
-  const fetchFullNews = async (newsId: number) => {
+  // OPTIMIZED: Memoized fetch functions to prevent recreation on every render
+  const fetchFullNews = useCallback(async (newsId: number) => {
     try {
       const response = await fetch(`/api/news/${newsId}`, {
         headers: {
@@ -115,10 +116,10 @@ const UserDashboard = () => {
       console.error('Erro ao buscar notícia completa:', error);
     }
     return null;
-  };
+  }, []);
 
-  // Função para buscar dados completos de uma novidade
-  const fetchFullUpdate = async (updateId: number) => {
+  // OPTIMIZED: Memoized fetch function for updates
+  const fetchFullUpdate = useCallback(async (updateId: number) => {
     try {
       const response = await fetch(`/api/updates/${updateId}`, {
         headers: {
@@ -132,25 +133,25 @@ const UserDashboard = () => {
       console.error('Erro ao buscar novidade completa:', error);
     }
     return null;
-  };
+  }, []);
 
-  // Função para abrir modal de notícia
-  const openNewsModal = async (news: any) => {
+  // OPTIMIZED: Memoized modal handler to prevent recreation
+  const openNewsModal = useCallback(async (news: any) => {
     const fullNews = await fetchFullNews(news.id);
     if (fullNews) {
       setSelectedNews(fullNews);
       setNewsModalOpen(true);
     }
-  };
+  }, [fetchFullNews]);
 
-  // Função para abrir modal de novidade
-  const openUpdateModal = async (update: any) => {
+  // OPTIMIZED: Memoized update modal handler
+  const openUpdateModal = useCallback(async (update: any) => {
     const fullUpdate = await fetchFullUpdate(update.id);
     if (fullUpdate) {
       setSelectedUpdate(fullUpdate);
       setUpdateModalOpen(true);
     }
-  };
+  }, [fetchFullUpdate]);
 
   // Simplificar carregamento - apenas dados essenciais
   const { data: userSummary, isLoading } = useQuery({
@@ -212,7 +213,8 @@ const UserDashboard = () => {
     gcTime: 15 * 60 * 1000,
   });
 
-  const handleQuickAction = async (action: string) => {
+  // OPTIMIZED: Memoized quick action handler
+  const handleQuickAction = useCallback(async (action: string) => {
     try {
       // Implementar ações rápidas
       switch (action) {
@@ -247,7 +249,7 @@ const UserDashboard = () => {
         variant: "destructive"
       });
     }
-  };
+  }, [toast]);
 
   const formatViewCount = (count: number) => {
     if (count >= 1000000) {
@@ -872,6 +874,6 @@ const UserDashboard = () => {
       </Dialog>
     </div>
   );
-};
+}); // End of memo
 
 export default UserDashboard;

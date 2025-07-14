@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Star, Search, CheckCircle, Wrench, ExternalLink, Globe, Heart, Users, Trophy, ArrowRight, Filter, Grid2X2, List, ChevronRight, TrendingUp, Award, Clock, Package } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { useLocation } from "wouter";
 import { useTools } from "@/contexts/ToolsContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
-const Tools = () => {
+// OPTIMIZED: Memoized Tools component to prevent unnecessary re-renders
+const Tools = memo(() => {
   const { tools, toolTypes } = useTools();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
@@ -23,49 +24,58 @@ const Tools = () => {
   const [sortBy, setSortBy] = useState("name");
   const [, setLocation] = useLocation();
 
-  // Featured tools (you can customize which tools are featured)
-  const featuredToolIds = [1, 2, 3, 4]; // Example IDs - you can change these
-  const featuredTools = tools.filter(tool => featuredToolIds.includes(tool.id)).slice(0, 4);
+  // OPTIMIZED: Memoized featured tools calculation
+  const featuredTools = useMemo(() => {
+    const featuredToolIds = [1, 2, 3, 4]; // Example IDs - you can change these
+    return tools.filter(tool => featuredToolIds.includes(tool.id)).slice(0, 4);
+  }, [tools]);
 
-  const filteredTools = tools.filter(tool => {
-    const matchesSearch = tool.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tool.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tool.features?.some(f => f.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesType = selectedType === "all" || tool.typeId?.toString() === selectedType;
-    const matchesBrazilSupport = selectedBrazilSupport.length === 0 || 
-                                 (tool.brazilSupport && selectedBrazilSupport.includes(tool.brazilSupport));
-    const matchesRating = selectedRating === "all" || 
-                         (selectedRating === "4+" && Number(tool.averageRating) >= 4) ||
-                         (selectedRating === "3+" && Number(tool.averageRating) >= 3);
-    return matchesSearch && matchesType && matchesBrazilSupport && matchesRating;
-  });
+  // OPTIMIZED: Memoized filtered tools calculation
+  const filteredTools = useMemo(() => {
+    return tools.filter(tool => {
+      const matchesSearch = tool.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           tool.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           tool.features?.some(f => f.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesType = selectedType === "all" || tool.typeId?.toString() === selectedType;
+      const matchesBrazilSupport = selectedBrazilSupport.length === 0 || 
+                                   (tool.brazilSupport && selectedBrazilSupport.includes(tool.brazilSupport));
+      const matchesRating = selectedRating === "all" || 
+                           (selectedRating === "4+" && Number(tool.averageRating) >= 4) ||
+                           (selectedRating === "3+" && Number(tool.averageRating) >= 3);
+      return matchesSearch && matchesType && matchesBrazilSupport && matchesRating;
+    });
+  }, [tools, searchTerm, selectedType, selectedBrazilSupport, selectedRating]);
 
-  // Sort tools
-  const sortedTools = [...filteredTools].sort((a, b) => {
-    switch(sortBy) {
-      case "name":
-        return (a.name || "").localeCompare(b.name || "");
-      case "rating":
-        return (Number(b.averageRating) || 0) - (Number(a.averageRating) || 0);
-      case "reviews":
-        return (b.totalReviews || 0) - (a.totalReviews || 0);
-      default:
-        return 0;
-    }
-  });
+  // OPTIMIZED: Memoized sorted tools calculation
+  const sortedTools = useMemo(() => {
+    return [...filteredTools].sort((a, b) => {
+      switch(sortBy) {
+        case "name":
+          return (a.name || "").localeCompare(b.name || "");
+        case "rating":
+          return (Number(b.averageRating) || 0) - (Number(a.averageRating) || 0);
+        case "reviews":
+          return (b.totalReviews || 0) - (a.totalReviews || 0);
+        default:
+          return 0;
+      }
+    });
+  }, [filteredTools, sortBy]);
 
-  const renderStars = (rating: number) => {
+  // OPTIMIZED: Memoized star renderer to prevent re-creation
+  const renderStars = useCallback((rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
         className={`h-3.5 w-3.5 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`}
       />
     ));
-  };
+  }, []);
 
-  const handleToolClick = (toolId: number) => {
+  // OPTIMIZED: Memoized click handler to prevent child re-renders
+  const handleToolClick = useCallback((toolId: number) => {
     setLocation(`/hub/ferramentas/${toolId}`);
-  };
+  }, [setLocation]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -427,6 +437,6 @@ const Tools = () => {
       </div>
     </div>
   );
-};
+}); // End of memo
 
 export default Tools;
