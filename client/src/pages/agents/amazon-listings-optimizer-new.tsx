@@ -286,7 +286,21 @@ export default function AmazonListingsOptimizerNew() {
   };
 
   const handleSubmit = async () => {
-    if (!isFormValid) return;
+    console.log('handleSubmit called');
+    console.log('isFormValid:', isFormValid);
+    console.log('formData:', formData);
+    console.log('reviewsTab:', reviewsTab);
+    console.log('uploadedFiles:', uploadedFiles);
+    
+    if (!isFormValid) {
+      console.log('Form is not valid, returning early');
+      toast({
+        title: "Formulário incompleto",
+        description: "Preencha todos os campos obrigatórios antes de continuar.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Verificar créditos primeiro
     try {
@@ -497,8 +511,25 @@ export default function AmazonListingsOptimizerNew() {
     }
   };
 
-  const isFormValid = formData.productName && formData.brand && formData.category && 
-    (reviewsTab === "text" ? formData.reviewsData : uploadedFiles.length > 0);
+  // Validação do formulário com logs detalhados
+  const isFormValid = (() => {
+    const hasProductName = !!formData.productName;
+    const hasBrand = !!formData.brand;
+    const hasCategory = !!formData.category;
+    const hasReviewsData = reviewsTab === "text" ? !!formData.reviewsData : uploadedFiles.length > 0;
+    
+    console.log('Form validation:', {
+      hasProductName,
+      hasBrand,
+      hasCategory,
+      hasReviewsData,
+      reviewsTab,
+      uploadedFilesCount: uploadedFiles.length,
+      reviewsDataLength: formData.reviewsData.length
+    });
+    
+    return hasProductName && hasBrand && hasCategory && hasReviewsData;
+  })();
 
   return (
     <div className="min-h-screen bg-gray-50">
