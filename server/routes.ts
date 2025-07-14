@@ -3385,28 +3385,41 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         totalTokens,
         cost,
         duration,
-        feature
+        feature,
+        creditsUsed
       } = req.body;
 
+      // Sanitize numeric values to prevent NaN
+      const safeParseInt = (value: any, defaultValue: number = 0): number => {
+        const parsed = parseInt(value);
+        return isNaN(parsed) ? defaultValue : parsed;
+      };
+
+      const safeParseFloat = (value: any, defaultValue: number = 0): number => {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? defaultValue : parsed;
+      };
+
       const logData = {
-        userId: parseInt(userId),
-        provider,
-        model,
-        prompt,
-        response,
-        promptCharacters: promptCharacters || prompt.length,
-        responseCharacters: responseCharacters || response.length,
-        inputTokens: inputTokens || 0,
-        outputTokens: outputTokens || 0,
-        totalTokens: totalTokens || 0,
-        cost: cost || 0,
-        duration: duration || 0,
+        userId: safeParseInt(userId),
+        provider: provider || 'openai',
+        model: model || 'gpt-4o-mini',
+        prompt: prompt || '',
+        response: response || '',
+        promptCharacters: safeParseInt(promptCharacters, prompt?.length || 0),
+        responseCharacters: safeParseInt(responseCharacters, response?.length || 0),
+        inputTokens: safeParseInt(inputTokens),
+        outputTokens: safeParseInt(outputTokens),
+        totalTokens: safeParseInt(totalTokens),
+        cost: safeParseFloat(cost).toString(),
+        creditsUsed: safeParseInt(creditsUsed).toString(),
+        duration: safeParseInt(duration),
         feature: feature || 'html-description'
       };
 
       const [savedLog] = await db.insert(aiGenerationLogs).values(logData).returning();
 
-      console.log(`💾 [AI_LOG] Saved generation log - User: ${userId}, Model: ${model}, Cost: $${cost}, Characters: ${responseCharacters}`);
+      console.log(`💾 [AI_LOG] Saved generation log - User: ${logData.userId}, Model: ${logData.model}, Cost: $${logData.cost}, Credits: ${logData.creditsUsed}`);
 
       res.json({ 
         success: true, 

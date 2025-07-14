@@ -31,6 +31,12 @@ export class LoggingService {
         }
       }
 
+      // Sanitize numeric values to prevent NaN
+      const safeNumber = (value: any, defaultValue: number = 0): number => {
+        const parsed = typeof value === 'number' ? value : parseFloat(value);
+        return isNaN(parsed) ? defaultValue : parsed;
+      };
+
       const logData = {
         userId,
         provider,
@@ -39,12 +45,12 @@ export class LoggingService {
         response: response.substring(0, 10000), // Limitar tamanho
         promptCharacters: prompt.length,
         responseCharacters: response.length,
-        inputTokens,
-        outputTokens,
-        totalTokens,
-        cost: cost.toString(),
-        creditsUsed: creditsUsed.toString(),
-        duration,
+        inputTokens: safeNumber(inputTokens),
+        outputTokens: safeNumber(outputTokens),
+        totalTokens: safeNumber(totalTokens),
+        cost: safeNumber(cost).toString(),
+        creditsUsed: safeNumber(creditsUsed).toString(),
+        duration: safeNumber(duration),
         feature
       };
 

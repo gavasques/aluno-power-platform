@@ -422,6 +422,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 14, 2025 - 11:56 PM**: ✅ DATABASE NaN ERRORS FIXED - AI GENERATION LOGS VALIDATION IMPLEMENTED
+  - **Critical Database Issue Resolved**: Fixed "invalid input syntax for type integer: 'NaN'" errors in AI generation logs
+  - **Input Validation Added**: Implemented safeParseInt and safeParseFloat functions to handle NaN values
+  - **API Endpoint Fixed**: Updated `/api/ai-generation-logs` with proper data sanitization and validation
+  - **Logging Service Enhanced**: Added NaN prevention in loggingService.ts across all logging functions
+  - **Database Schema Alignment**: Corrected field names to match schema (cost vs costUsd, creditsUsed as decimal)
+  - **System Stability**: Amazon Listings Optimizer now processes without database errors
+  - **User Impact**: All AI agents can now log usage data without causing system failures
+
 - **January 14, 2025 - 6:45 PM**: ✅ AMAZON LISTING OPTIMIZER AUTHENTICATION BUG FIXED - COMPLETE TOKEN INTEGRATION
   - **Root Cause**: Amazon Listing Optimizer was making API requests without authentication tokens, causing 401 errors
   - **Solution Applied**: Added proper `Authorization: Bearer ${localStorage.getItem('auth_token')}` headers to all 6 API calls:
