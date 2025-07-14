@@ -180,15 +180,15 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
           onProcess={() => {
             // Roteamento baseado no ID do agente
             if (agent.id === 'agent-amazon-listings') {
-              window.location.href = '/agentes/amazon-listings-optimizer';
+              window.location.href = '/agentes/amazon-listing';
             } else if (agent.id === 'amazon-negative-reviews') {
               window.location.href = '/agentes/amazon-negative-reviews';
             } else if (agent.id === 'amazon-customer-service') {
               window.location.href = '/agentes/amazon-customer-service';
             } else if (agent.id === 'html-description-generator') {
-              window.location.href = '/agentes/html-description-generator';
+              window.location.href = '/agentes/html-description';
             } else if (agent.id === 'bullet-points-generator') {
-              window.location.href = '/agentes/bullet-points-generator';
+              window.location.href = '/agentes/bullet-points';
             } else {
               window.location.href = `/agentes/${agent.id}`;
             }
