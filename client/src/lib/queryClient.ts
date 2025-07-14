@@ -42,7 +42,10 @@ export const queryClient = new QueryClient({
           if (signal?.aborted) {
             throw new Error('Query was cancelled');
           }
-          console.error('Query error for:', url, error);
+          // Only log errors in development or for non-503 service unavailable errors
+          if (process.env.NODE_ENV === 'development' || !error?.message?.includes('HTTP 503')) {
+            console.error('Query error for:', url, error);
+          }
           throw error;
         }
       },

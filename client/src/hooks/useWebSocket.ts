@@ -19,12 +19,22 @@ export function useWebSocket() {
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
+    
+    // Validate host to prevent invalid URLs
+    if (!host || host.includes('undefined') || host.includes('null')) {
+      console.warn(`🚫 [WS_CLIENT] Invalid host detected: ${host}, skipping WebSocket connection`);
+      setLastError('Invalid host configuration');
+      return;
+    }
+    
     const wsUrl = `${protocol}//${host}/ws`;
 
-    console.log(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
-    console.log(`   🌐 URL: ${wsUrl}`);
-    console.log(`   📍 Protocol: ${protocol}`);
-    console.log(`   🏠 Host: ${host}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
+      console.log(`   🌐 URL: ${wsUrl}`);
+      console.log(`   📍 Protocol: ${protocol}`);
+      console.log(`   🏠 Host: ${host}`);
+    }
 
     const connectWebSocket = () => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {

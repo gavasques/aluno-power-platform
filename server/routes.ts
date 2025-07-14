@@ -1160,9 +1160,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Check if YouTube API is available
       if (!process.env.YOUTUBE_API_KEY) {
-        return res.status(503).json({ 
+        logger.debug('YouTube channel info request with missing API key', { endpoint: '/api/youtube-channel-info' });
+        return res.status(200).json({ 
           error: 'YouTube service unavailable', 
-          message: 'YouTube API key not configured' 
+          message: 'YouTube API key not configured',
+          fallback: true,
+          channelData: {
+            title: 'Guilherme Vasques',
+            subscriberCount: 'N/A',
+            videoCount: 'N/A',
+            viewCount: 'N/A',
+            customUrl: '@guilhermeavasques',
+            description: 'Canal focado em Amazon FBA e e-commerce'
+          }
         });
       }
 
