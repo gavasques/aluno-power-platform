@@ -28,6 +28,7 @@ export const routeComponents = {
   listingsOptimizer: () => import('../pages/agents/amazon-listings-optimizer-new'),
   htmlDescription: () => import('../pages/agents/HtmlDescriptionAgent'),
   testAgent: () => import('../pages/agents/TestAgent'),
+  simpleTestAgent: () => import('../pages/agents/SimpleTestAgent'),
   bulletPoints: () => import('../pages/agents/BulletPointsAgent'),
   imageEditor: () => import('../pages/agents/amazon-product-photography'),
   lifestyleModel: () => import('../pages/agents/lifestyle-with-model'),

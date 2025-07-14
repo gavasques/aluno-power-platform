@@ -56,6 +56,7 @@ const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
 const HtmlDescriptionAgent = lazy(() => routeComponents.htmlDescription());
 const BulletPointsAgent = lazy(() => routeComponents.bulletPoints());
 const TestAgent = lazy(() => routeComponents.testAgent());
+const SimpleTestAgent = lazy(() => routeComponents.simpleTestAgent());
 const AmazonProductPhotography = lazy(() => routeComponents.imageEditor());
 const LifestyleWithModel = lazy(() => routeComponents.lifestyleModel());
 const InfographicGenerator = lazy(() => routeComponents.infographicGen());
@@ -242,6 +243,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <TestAgent />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/simple-test">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <SimpleTestAgent />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
