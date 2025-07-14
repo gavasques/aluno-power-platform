@@ -83,7 +83,7 @@ const SimplesNacional = lazy(() => routeComponents.simplesNacional());
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
 const InvestimentosROI = lazy(() => routeComponents.investmentROI());
 
-// Heavy AI features - lazy load
+// Heavy AI features - lazy load (results and admin only)
 const AmazonListingsOptimizer = lazy(() => routeComponents.listingsOptimizer());
 const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
 const AmazonCustomerService = lazy(() => import("./pages/agents/amazon-customer-service"));
@@ -202,7 +202,95 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* AGENT ROUTES - CONSOLIDATED */}
+                          {/* AI AGENTS ROUTES - Complete agent route section */}
+                          
+                          {/* Amazon Listings Optimizer */}
+                          <Route path="/agentes/amazon-listing/resultado/:sessionId">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonListingsOptimizerResult />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          <Route path="/agentes/amazon-listing">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonListingsOptimizer />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* HTML Description Agent */}
+                          <Route path="/agentes/html-description">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <HtmlDescriptionAgent />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Bullet Points Agent */}
+                          <Route path="/agentes/bullet-points">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <BulletPointsAgent />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Main Image Editor Agent */}
+                          <Route path="/agentes/main-image-editor">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonProductPhotography />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Lifestyle with Model Agent */}
+                          <Route path="/agentes/lifestyle-model">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <LifestyleWithModel />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Infographic Generator */}
+                          <Route path="/agentes/infographic-generator">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <InfographicGenerator />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Advanced Infographic Generator */}
+                          <Route path="/agentes/advanced-infographic">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AdvancedInfographicGenerator />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
                           <Route path="/agentes/amazon-negative-reviews/resultado/:sessionId">
                             <ProtectedRoute>
                               <Layout>
