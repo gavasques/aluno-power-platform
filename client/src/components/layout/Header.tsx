@@ -43,14 +43,14 @@ const menuItems: any[] = [];
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background shadow-sm">
-      <div className="flex h-16 items-center justify-between w-full px-4 sm:px-6">
-        <div className="flex items-center space-x-6">
+      <div className="flex h-12 items-center justify-between w-full px-2 sm:px-4">
+        <div className="flex items-center space-x-3">
           <Link to="/" className="flex items-center space-x-2">
             <img
               src="/lovable-uploads/65475935-e163-4901-b637-8076c0c36804.png"
               alt="Guilherme Vasques Logo"
-              className="h-8 w-auto object-contain"
-              style={{ maxWidth: "180px" }}
+              className="h-6 w-auto object-contain"
+              style={{ maxWidth: "150px" }}
             />
           </Link>
           <NavigationMenu>
@@ -103,7 +103,7 @@ export function Header() {
                     {section.title}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    <div className="grid w-[350px] gap-2 p-3 md:w-[400px] md:grid-cols-2 lg:w-[500px]">
                       {section.items.map((item) => (
                         <NavigationMenuLink key={item.href} asChild>
                           <Link

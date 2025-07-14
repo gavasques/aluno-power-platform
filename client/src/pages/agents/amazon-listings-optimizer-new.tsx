@@ -284,46 +284,46 @@ export default function AmazonListingsOptimizerNew() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-4 space-y-4">
-        {/* Header */}
-        <div className="flex items-center space-x-4 mb-4">
+      <div className="max-w-[1600px] mx-auto px-2 sm:px-3 py-2 space-y-2">
+        {/* Header - COMPACTO */}
+        <div className="flex items-center space-x-3 mb-2">
           <Link href="/agentes">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+            <Button variant="ghost" size="sm" className="h-8 px-2">
+              <ArrowLeft className="h-3 w-3 mr-1" />
               Voltar aos Agentes
             </Button>
           </Link>
-          <div className="flex items-center space-x-3">
-            <ShoppingCart className="h-6 w-6 text-orange-500" />
+          <div className="flex items-center space-x-2">
+            <ShoppingCart className="h-5 w-5 text-orange-500" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-lg font-bold text-gray-900">
                 Amazon Listings Optimizer
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs text-gray-600">
                 Otimize suas listagens da Amazon com análise de avaliações dos concorrentes
               </p>
             </div>
           </div>
         </div>
 
-        {/* Credit Cost Warning */}
-        <Alert className="border-orange-200 bg-orange-50">
-          <AlertCircle className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
+        {/* Credit Cost Warning - COMPACTO */}
+        <Alert className="border-orange-200 bg-orange-50 py-2">
+          <AlertCircle className="h-3 w-3 text-orange-600" />
+          <AlertDescription className="text-orange-800 text-sm">
             <strong>Custo:</strong> Este agente consome <strong>{requiredCredits} créditos</strong> por otimização. Verifique seu saldo antes de prosseguir.
           </AlertDescription>
         </Alert>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Form */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            {/* Main Form - COMPACTO */}
             <div className="lg:col-span-2">
               <Card>
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg">Informações do Produto</CardTitle>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Informações do Produto</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
                   {/* Product Name and Brand */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
                       <Label htmlFor="productName">Nome do Produto *</Label>
                       <Input
@@ -355,7 +355,7 @@ export default function AmazonListingsOptimizerNew() {
                   </div>
 
                   {/* Category and Target Audience */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
                       <Label htmlFor="category">Categoria *</Label>
                       <Select
@@ -398,7 +398,7 @@ export default function AmazonListingsOptimizerNew() {
                   </div>
 
                   {/* Keywords */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
                       <Label htmlFor="keywords">Palavras-chave Principais</Label>
                       <Input
@@ -455,8 +455,8 @@ export default function AmazonListingsOptimizerNew() {
                         <TabsTrigger value="text">Texto Manual</TabsTrigger>
                       </TabsList>
                       
-                      <TabsContent value="upload" className="space-y-4">
-                        <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 bg-blue-50">
+                      <TabsContent value="upload" className="space-y-2">
+                        <div className="border-2 border-dashed border-blue-300 rounded-lg p-3 bg-blue-50">
                           <div className="text-center">
                             <Upload className="mx-auto h-12 w-12 text-blue-500 mb-4" />
                             <div className="relative">
@@ -545,56 +545,56 @@ export default function AmazonListingsOptimizerNew() {
               </Card>
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-4">
+            {/* Sidebar - COMPACTO */}
+            <div className="space-y-2">
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center space-x-2 text-base">
-                    <Info className="h-4 w-4" />
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center space-x-2 text-sm">
+                    <Info className="h-3 w-3" />
                     Como Funciona
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2">
                   <div className="flex items-start gap-2">
                     <Badge variant="outline" className="text-xs">1</Badge>
                     <div>
-                      <h4 className="font-medium text-sm">Análise de Avaliações</h4>
+                      <h4 className="font-medium text-xs">Análise de Avaliações</h4>
                       <p className="text-xs text-muted-foreground">
                         Analisamos as avaliações dos concorrentes para identificar pontos fortes e fracos
                       </p>
                     </div>
                   </div>
                   
-                  <Separator className="my-2" />
+                  <Separator className="my-1" />
                   
                   <div className="flex items-start gap-2">
                     <Badge variant="outline" className="text-xs">2</Badge>
                     <div>
-                      <h4 className="font-medium text-sm">Geração de Títulos</h4>
+                      <h4 className="font-medium text-xs">Geração de Títulos</h4>
                       <p className="text-xs text-muted-foreground">
                         Criamos títulos otimizados baseados na análise e suas palavras-chave
                       </p>
                     </div>
                   </div>
 
-                  <Separator className="my-2" />
+                  <Separator className="my-1" />
                   
                   <div className="flex items-start gap-2">
                     <Badge variant="outline" className="text-xs">3</Badge>
                     <div>
-                      <h4 className="font-medium text-sm">Geração de Bullet Points</h4>
+                      <h4 className="font-medium text-xs">Geração de Bullet Points</h4>
                       <p className="text-xs text-muted-foreground">
                         Desenvolvemos bullet points persuasivos usando dados da análise e títulos gerados
                       </p>
                     </div>
                   </div>
                   
-                  <Separator className="my-2" />
+                  <Separator className="my-1" />
                   
                   <div className="flex items-start gap-2">
                     <Badge variant="outline" className="text-xs">4</Badge>
                     <div>
-                      <h4 className="font-medium text-sm">Descrição Completa</h4>
+                      <h4 className="font-medium text-xs">Descrição Completa</h4>
                       <p className="text-xs text-muted-foreground">
                         Criamos uma descrição otimizada integrando todas as etapas anteriores
                       </p>
