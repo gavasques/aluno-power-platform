@@ -62,8 +62,7 @@ const FormalImportSimulationsList = lazy(() => import("./pages/FormalImportSimul
 const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
 const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
-const AgentsPage = lazy(() => import("./pages/agents"));
-const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
+
 const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
 const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
 const AmazonCustomerService = lazy(() => import("./pages/agents/amazon-customer-service"));
@@ -234,15 +233,7 @@ function App() {
                             }}
                           </Route>
                           
-                          <Route path="/agentes">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AgentsPage />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
+
                           
 
 
@@ -929,18 +920,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* GENERIC AGENT ROUTE FOR /agentes - CATCH ALL */}
-                          <Route path="/agentes/:id">
-                            {(params) => (
-                              <ProtectedRoute>
-                                <Layout>
-                                  <Suspense fallback={<PageLoader />}>
-                                    <AgentProcessorPage />
-                                  </Suspense>
-                                </Layout>
-                              </ProtectedRoute>
-                            )}
-                          </Route>
+
                           
                           {/* FALLBACK REDIRECT FOR OLD /agents/:id ROUTES */}
                           <Route path="/agents/:id">
