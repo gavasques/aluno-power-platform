@@ -44,6 +44,8 @@ export default function AmazonListingsOptimizerNew() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [reviewsTab, setReviewsTab] = useState<"upload" | "text">("upload");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [results, setResults] = useState<any>(null);
+  const [showResults, setShowResults] = useState(false);
 
   // Dynamic cost checking
   const { getFeatureCost } = useGetFeatureCost();
@@ -249,10 +251,19 @@ export default function AmazonListingsOptimizerNew() {
         console.error('Erro ao registrar log:', logError);
       }
       
-      // 9. Show success message instead of navigation
+      // 9. Store results and show success message
+      const sessionResponse = await apiRequest(`/api/amazon-sessions/${sessionId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      
+      setResults(sessionResponse);
+      setShowResults(true);
+      
       toast({
         title: "Listagem otimizada com sucesso!",
-        description: "Sua listagem foi processada e otimizada com IA. Verifique os resultados.",
+        description: "Sua listagem foi processada e otimizada com IA. Verifique os resultados abaixo.",
         variant: "default"
       });
       
@@ -273,9 +284,9 @@ export default function AmazonListingsOptimizerNew() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-4 space-y-4">
         {/* Header */}
-        <div className="flex items-center space-x-4 mb-6">
+        <div className="flex items-center space-x-4 mb-4">
           <Link href="/agentes">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -283,12 +294,12 @@ export default function AmazonListingsOptimizerNew() {
             </Button>
           </Link>
           <div className="flex items-center space-x-3">
-            <ShoppingCart className="h-8 w-8 text-orange-500" />
+            <ShoppingCart className="h-6 w-6 text-orange-500" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900">
                 Amazon Listings Optimizer
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm text-gray-600">
                 Otimize suas listagens da Amazon com análise de avaliações dos concorrentes
               </p>
             </div>
@@ -303,16 +314,16 @@ export default function AmazonListingsOptimizerNew() {
           </AlertDescription>
         </Alert>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Form */}
             <div className="lg:col-span-2">
               <Card>
-                <CardHeader>
-                  <CardTitle>Informações do Produto</CardTitle>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg">Informações do Produto</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4">
                   {/* Product Name and Brand */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="productName">Nome do Produto *</Label>
                       <Input
@@ -344,7 +355,7 @@ export default function AmazonListingsOptimizerNew() {
                   </div>
 
                   {/* Category and Target Audience */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="category">Categoria *</Label>
                       <Select
@@ -387,7 +398,7 @@ export default function AmazonListingsOptimizerNew() {
                   </div>
 
                   {/* Keywords */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="keywords">Palavras-chave Principais</Label>
                       <Input
@@ -426,7 +437,7 @@ export default function AmazonListingsOptimizerNew() {
                       value={formData.features}
                       onChange={(e) => handleInputChange("features", e.target.value.slice(0, 8000))}
                       placeholder="Ex: 30h de bateria, resistente à água, design ergonômico, conexão Bluetooth 5.0, cancelamento ativo de ruído..."
-                      rows={6}
+                      rows={4}
                       maxLength={8000}
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -535,56 +546,56 @@ export default function AmazonListingsOptimizerNew() {
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Info className="h-5 w-5" />
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center space-x-2 text-base">
+                    <Info className="h-4 w-4" />
                     Como Funciona
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Badge variant="outline">1</Badge>
+                <CardContent className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <Badge variant="outline" className="text-xs">1</Badge>
                     <div>
-                      <h4 className="font-medium">Análise de Avaliações</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <h4 className="font-medium text-sm">Análise de Avaliações</h4>
+                      <p className="text-xs text-muted-foreground">
                         Analisamos as avaliações dos concorrentes para identificar pontos fortes e fracos
                       </p>
                     </div>
                   </div>
                   
-                  <Separator />
+                  <Separator className="my-2" />
                   
-                  <div className="flex items-start gap-3">
-                    <Badge variant="outline">2</Badge>
+                  <div className="flex items-start gap-2">
+                    <Badge variant="outline" className="text-xs">2</Badge>
                     <div>
-                      <h4 className="font-medium">Geração de Títulos</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <h4 className="font-medium text-sm">Geração de Títulos</h4>
+                      <p className="text-xs text-muted-foreground">
                         Criamos títulos otimizados baseados na análise e suas palavras-chave
                       </p>
                     </div>
                   </div>
 
-                  <Separator />
+                  <Separator className="my-2" />
                   
-                  <div className="flex items-start gap-3">
-                    <Badge variant="outline">3</Badge>
+                  <div className="flex items-start gap-2">
+                    <Badge variant="outline" className="text-xs">3</Badge>
                     <div>
-                      <h4 className="font-medium">Geração de Bullet Points</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <h4 className="font-medium text-sm">Geração de Bullet Points</h4>
+                      <p className="text-xs text-muted-foreground">
                         Desenvolvemos bullet points persuasivos usando dados da análise e títulos gerados
                       </p>
                     </div>
                   </div>
                   
-                  <Separator />
+                  <Separator className="my-2" />
                   
-                  <div className="flex items-start gap-3">
-                    <Badge variant="outline">4</Badge>
+                  <div className="flex items-start gap-2">
+                    <Badge variant="outline" className="text-xs">4</Badge>
                     <div>
-                      <h4 className="font-medium">Descrição Completa</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <h4 className="font-medium text-sm">Descrição Completa</h4>
+                      <p className="text-xs text-muted-foreground">
                         Criamos uma descrição otimizada integrando todas as etapas anteriores
                       </p>
                     </div>
@@ -593,26 +604,113 @@ export default function AmazonListingsOptimizerNew() {
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle>Dicas</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Dicas</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">Use dados reais do Helium10</span>
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                    <span className="text-xs">Use dados reais do Helium10</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">Inclua palavras-chave relevantes</span>
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                    <span className="text-xs">Inclua palavras-chave relevantes</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">Defina seu público-alvo</span>
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                    <span className="text-xs">Defina seu público-alvo</span>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </div>
+
+          {/* Results Section */}
+          {showResults && results && (
+            <div className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    <span>Resultados da Otimização</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Step 1: Analysis */}
+                  {results.analysis && (
+                    <div>
+                      <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
+                        <Badge variant="outline">1</Badge>
+                        <span>Análise de Avaliações</span>
+                      </h3>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap">{results.analysis}</pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 2: Titles */}
+                  {results.titles && (
+                    <div>
+                      <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
+                        <Badge variant="outline">2</Badge>
+                        <span>Títulos Otimizados</span>
+                      </h3>
+                      <div className="space-y-2">
+                        {results.titles.split('\n').filter((title: string) => title.trim()).map((title: string, index: number) => (
+                          <div key={index} className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            <span className="text-sm font-medium">{title.trim()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 3: Bullet Points */}
+                  {results.bulletPoints && (
+                    <div>
+                      <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
+                        <Badge variant="outline">3</Badge>
+                        <span>Bullet Points</span>
+                      </h3>
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap">{results.bulletPoints}</pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 4: Description */}
+                  {results.description && (
+                    <div>
+                      <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
+                        <Badge variant="outline">4</Badge>
+                        <span>Descrição Completa</span>
+                      </h3>
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap">{results.description}</pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Download Button */}
+                  <div className="flex justify-center pt-4">
+                    <Button
+                      onClick={() => {
+                        toast({
+                          title: "Download iniciado",
+                          description: "O relatório está sendo gerado...",
+                        });
+                      }}
+                      size="lg"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Baixar Relatório PDF
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
       </div>
     </div>
   );

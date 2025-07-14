@@ -35,17 +35,17 @@ const BulletPointsAgent: React.FC = () => {
   return (
     <>
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6">
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
-                <List className="h-6 w-6 text-blue-600" />
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-4">
+          <div className="mb-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
+                <List className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-gray-900">
                   Gerador de Bullet Points
                 </h1>
-                <p className="text-lg text-gray-600 mt-1">
+                <p className="text-sm text-gray-600">
                   Crie bullet points persuasivos para produtos Amazon com alta conversão
                 </p>
               </div>

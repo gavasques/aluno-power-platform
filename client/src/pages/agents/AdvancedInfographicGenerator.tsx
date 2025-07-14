@@ -273,25 +273,25 @@ export default function AdvancedInfographicGenerator() {
   };
 
   return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="container mx-auto px-4 py-4 max-w-6xl">
+      <div className="mb-4">
+        <h1 className="text-xl font-bold text-gray-900 mb-1">
           Gerador Avançado de Infográficos
         </h1>
-        <p className="text-gray-600">
+        <p className="text-sm text-gray-600">
           Sistema inteligente de 3 etapas para criar infográficos profissionais para Amazon
         </p>
         
         {/* Progress Bar */}
-        <div className="mt-6">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
+        <div className="mt-3">
+          <div className="flex justify-between text-xs text-gray-600 mb-1">
             <span>Dados do Produto</span>
             <span>Conceitos</span>
             <span>Prompt Otimizado</span>
             <span>Gerando</span>
             <span>Concluído</span>
           </div>
-          <Progress value={getStepProgress()} className="h-2" />
+          <Progress value={getStepProgress()} className="h-1.5" />
         </div>
       </div>
 
