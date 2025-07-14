@@ -3723,6 +3723,365 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       res.status(500).json({ error: 'Erro interno do servidor' });
     }
   });
+
+  // ==========================================
+  // AMAZON REVIEWS EXTRACTOR ROUTES
+  // ==========================================
+
+  interface ReviewData {
+    review_title: string;
+    review_star_rating: string;
+    review_comment: string;
+  }
+
+  interface AmazonAPIResponse {
+    status: string;
+    data: {
+      reviews: Array<{
+        review_title?: string;
+        review_star_rating?: string;
+        review_comment?: string;
+      }>;
+    };
+  }
+
+  // Endpoint para extrair reviews da Amazon
+  app.post('/api/amazon-reviews/extract', async (req: any, res: any) => {
+    try {
+      const { asin, page = 1, country = 'BR', sort_by = 'MOST_RECENT' } = req.body;
+      
+      console.log('🔧 Criando sessão com ID:', sessionId);
+      console.log('🔧 Dados recebidos:', { nomeProduto, marca, categoria });
+      
+      // Criar sessão com dados do produto
+      const sessionData: InsertAmazonListingSession = {
+        id: sessionId,
+        idUsuario: '2', // ID fixo para teste
+        status: 'active',
+        currentStep: 0,
+        nomeProduto,
+        marca,
+        categoria,
+        keywords,
+        principaisCaracteristicas,
+        publicoAlvo,
+        reviewsData
+      };
+
+      console.log('🔧 Tentando inserir no banco:', sessionData);
+      const [session] = await db.insert(amazonListingSessions).values(sessionData).returning();
+      console.log('🔧 Sessão criada no banco:', session?.id);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Sessão criada com sucesso',
+        session: {
+          id: session.id,
+          sessionHash: session.sessionHash,
+          idUsuario: session.idUsuario,
+          status: session.status,
+          currentStep: session.currentStep,
+          dataHoraCreated: session.dataHoraCreated
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Erro ao criar sessão Amazon customizada:', error);
+      res.status(500).json({ error: 'Erro interno do servidor', details: error.message });
+    }
+  });
+
+  // Salvar dados do produto na sessão
+  app.put('/api/amazon-sessions/:sessionId/data', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const productData = req.body;
+      
+      // Validar dados obrigatórios conforme especificação
+      const requiredFields = ['nomeProduto', 'marca', 'categoria', 'keywords', 'reviewsData'];
+      const missingFields = requiredFields.filter(field => !productData[field]);
+      
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          error: `Campos obrigatórios ausentes: ${missingFields.join(', ')}`
+        });
+      }
+
+      const session = await amazonService.updateSessionData(sessionId, productData);
+      
+      res.json({
+        success: true,
+        message: 'Dados salvos com sucesso',
+        session: {
+          id: session.id,
+          sessionHash: session.sessionHash,
+          status: session.status,
+          currentStep: session.currentStep
+        }
+      });
+    } catch (error: any) {
+      console.error('Erro ao salvar dados da sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Processar Etapa 1: Análise de Avaliações
+  app.post('/api/amazon-sessions/:sessionId/process-step1', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      // Notificar clientes sobre início do processamento
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 1,
+        status: 'processing',
+        message: 'Iniciando análise das avaliações...'
+      });
+
+      const result = await amazonService.processStep1_AnalysisReviews(sessionId);
+      
+      // Notificar clientes sobre conclusão
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 1,
+        status: 'completed',
+        message: 'Análise das avaliações concluída'
+      });
+      
+      res.json({
+        success: true,
+        step: 1,
+        status: 'completed',
+        result: result
+      });
+    } catch (error: any) {
+      console.error('Erro na Etapa 1:', error);
+      
+      // Notificar erro
+      broadcastNotification('amazon_processing', {
+        sessionId: req.params.sessionId,
+        step: 1,
+        status: 'error',
+        message: error.message
+      });
+      
+      res.status(500).json({ 
+        error: error.message || 'Erro no processamento da Etapa 1' 
+      });
+    }
+  });
+
+  // Processar Etapa 2: Gerar Títulos
+  app.post('/api/amazon-sessions/:sessionId/process-step2', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      // Notificar clientes sobre início do processamento
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 2,
+        status: 'processing',
+        message: 'Gerando títulos otimizados...'
+      });
+
+      const result = await amazonService.processStep2_GenerateTitles(sessionId);
+      
+      // Notificar clientes sobre conclusão
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 2,
+        status: 'completed',
+        message: 'Títulos gerados com sucesso'
+      });
+      
+      res.json({
+        success: true,
+        step: 2,
+        status: 'completed',
+        result: result
+      });
+    } catch (error: any) {
+      console.error('Erro na Etapa 2:', error);
+      
+      // Notificar erro
+      broadcastNotification('amazon_processing', {
+        sessionId: req.params.sessionId,
+        step: 2,
+        status: 'error',
+        message: error.message
+      });
+      
+      res.status(500).json({ 
+        error: error.message || 'Erro no processamento da Etapa 2' 
+      });
+    }
+  });
+
+  // Processar Etapa 3: Gerar Bullet Points
+  app.post('/api/amazon-sessions/:sessionId/process-step3', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      // Notificar clientes sobre início do processamento
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 3,
+        status: 'processing',
+        message: 'Gerando bullet points otimizados...'
+      });
+
+      const result = await amazonService.processStep3_BulletPoints(sessionId);
+      
+      // Notificar clientes sobre conclusão
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 3,
+        status: 'completed',
+        message: 'Bullet points gerados com sucesso'
+      });
+
+      res.json({ 
+        success: true, 
+        step: 3, 
+        status: 'completed', 
+        result: result 
+      });
+    } catch (error: any) {
+      console.error('Erro ao processar Etapa 3:', error);
+      
+      // Notificar clientes sobre erro
+      broadcastNotification('amazon_processing', {
+        sessionId: req.params.sessionId,
+        step: 3,
+        status: 'error',
+        message: 'Erro ao gerar bullet points'
+      });
+      
+      res.status(500).json({ 
+        success: false, 
+        error: error.message || 'Erro interno do servidor' 
+      });
+    }
+  });
+
+  // Processar Etapa 4: Gerar Descrição
+  app.post('/api/amazon-sessions/:sessionId/process-step4', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      // Notificar clientes sobre início do processamento
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 4,
+        status: 'processing',
+        message: 'Gerando descrição completa...'
+      });
+
+      const result = await amazonService.processStep4_Description(sessionId);
+      
+      // Notificar clientes sobre conclusão
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        step: 4,
+        status: 'completed',
+        message: 'Descrição gerada com sucesso'
+      });
+
+      res.json({ 
+        success: true, 
+        step: 4, 
+        status: 'completed', 
+        result: result 
+      });
+    } catch (error: any) {
+      console.error('Erro ao processar Etapa 4:', error);
+      
+      // Notificar clientes sobre erro
+      broadcastNotification('amazon_processing', {
+        sessionId: req.params.sessionId,
+        step: 4,
+        status: 'error',
+        message: 'Erro ao gerar descrição'
+      });
+      
+      res.status(500).json({ 
+        success: false, 
+        error: error.message || 'Erro interno do servidor' 
+      });
+    }
+  });
+
+  // Abortar processamento
+  app.post('/api/amazon-sessions/:sessionId/abort', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      await amazonService.abortProcessing(sessionId);
+      
+      // Notificar clientes sobre abort
+      broadcastNotification('amazon_processing', {
+        sessionId,
+        status: 'aborted',
+        message: 'Processamento abortado pelo usuário'
+      });
+      
+      res.json({
+        success: true,
+        message: 'Processamento abortado com sucesso'
+      });
+    } catch (error: any) {
+      console.error('Erro ao abortar processamento:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Buscar sessão e resultados
+  app.get('/api/amazon-sessions/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const session = await amazonService.getSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+
+      res.json({
+        success: true,
+        session: session
+      });
+    } catch (error: any) {
+      console.error('Erro ao buscar sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Download dos resultados em TXT
+  app.get('/api/amazon-sessions/:sessionId/download', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const session = await amazonService.getSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+
+      if (!session.reviewsInsight || !session.titulos) {
+        return res.status(400).json({ 
+          error: 'Processamento ainda não concluído' 
+        });
+      }
+
+      const content = amazonService.generateDownloadContent(session);
+      const filename = `amazon-listing-${session.sessionHash}.txt`;
+      
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(content);
+    } catch (error: any) {
+      console.error('Erro ao gerar download:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
   // ==========================================
   // AMAZON REVIEWS EXTRACTOR ROUTES
   // ==========================================
