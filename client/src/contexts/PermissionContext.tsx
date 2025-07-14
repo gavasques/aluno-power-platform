@@ -4,6 +4,7 @@ import { apiRequest } from '@/lib/queryClient';
 
 interface PermissionContextType {
   features: string[];
+  userFeatures: string[];
   hasAccess: (featureCode: string) => boolean;
   checkAccess: (featureCode: string) => Promise<boolean>;
   isLoading: boolean;
@@ -28,6 +29,7 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
       const response = await apiRequest('/api/permissions/user-features', {
         method: 'GET',
       }) as { features: string[] };
+      console.log('🔍 [PERMISSION_CONTEXT] Features from API:', response.features);
       setFeatures(response.features || []);
     } catch (error) {
       console.error('Error fetching user features:', error);
@@ -68,6 +70,7 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
     <PermissionContext.Provider
       value={{
         features,
+        userFeatures: features,
         hasAccess,
         checkAccess,
         isLoading,

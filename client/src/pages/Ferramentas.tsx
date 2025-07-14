@@ -122,8 +122,10 @@ const ferramentas = [
 const categories = ["Todos", "Imagem", "Design", "Amazon", "Empresas"];
 
 export default function Ferramentas() {
-  const { hasAccess, isLoading } = usePermissions();
+  const { hasAccess, isLoading, userFeatures } = usePermissions();
   const { toast } = useToast();
+  
+  console.log('🔍 [FERRAMENTAS] User features:', userFeatures);
 
   const handleAccessDenied = (toolName: string) => {
     toast({
@@ -168,45 +170,71 @@ export default function Ferramentas() {
         {ferramentas.map((ferramenta) => {
           const hasPermission = hasAccess(ferramenta.permission);
           
-          return (
-            <Card key={ferramenta.href} className={`${hasPermission ? 'group hover:shadow-lg transition-shadow cursor-pointer' : 'opacity-70'}`}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <ferramenta.icon className={`h-8 w-8 ${hasPermission ? 'text-primary' : 'text-gray-400'}`} />
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {ferramenta.credits} {ferramenta.credits === 1 ? 'crédito' : 'créditos'}
-                    </Badge>
-                    <Badge variant="secondary" className="text-xs">
-                      {ferramenta.category}
-                    </Badge>
-                  </div>
-                </div>
-                <CardTitle className="text-lg">{ferramenta.title}</CardTitle>
-                <CardDescription className="text-sm">
-                  {ferramenta.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                {hasPermission ? (
-                  <Link href={ferramenta.href}>
+          if (hasPermission) {
+            return (
+              <Link key={ferramenta.href} href={ferramenta.href}>
+                <Card className="group hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <ferramenta.icon className="h-8 w-8 text-primary" />
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {ferramenta.credits} {ferramenta.credits === 1 ? 'crédito' : 'créditos'}
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {ferramenta.category}
+                        </Badge>
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg">{ferramenta.title}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {ferramenta.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
                     <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group-hover:bg-primary/10 transition-colors">
                       <span className="text-sm font-medium">Acessar ferramenta</span>
                       <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
-                  </Link>
-                ) : (
-                  <div 
-                    className="flex items-center justify-between p-3 bg-gray-100 rounded-lg cursor-not-allowed"
-                    onClick={() => handleAccessDenied(ferramenta.title)}
-                  >
-                    <span className="text-sm font-medium text-gray-500">sem acesso</span>
-                    <Lock className="h-4 w-4 text-gray-400" />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          } else {
+            return (
+              <div
+                key={ferramenta.href}
+                onClick={() => handleAccessDenied(ferramenta.title)}
+                className="cursor-not-allowed"
+              >
+                <Card className="opacity-60 h-full">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <ferramenta.icon className="h-8 w-8 text-gray-400" />
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {ferramenta.credits} {ferramenta.credits === 1 ? 'crédito' : 'créditos'}
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {ferramenta.category}
+                        </Badge>
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg">{ferramenta.title}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {ferramenta.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between p-3 bg-gray-100 rounded-lg">
+                      <span className="text-sm font-medium text-gray-500">sem acesso</span>
+                      <Lock className="h-4 w-4 text-gray-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          }
         })}
       </div>
     </div>

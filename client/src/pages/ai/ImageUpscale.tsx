@@ -110,7 +110,7 @@ export default function ImageUpscale() {
       />
 
       <PermissionGuard 
-        featureCode="ai.upscale"
+        featureCode="tools.image_upscale"
         showMessage={true}
         message="Você não tem permissão para usar a ferramenta de upscale de imagens."
       >
