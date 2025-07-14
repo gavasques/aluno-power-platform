@@ -601,5 +601,3 @@ export default function AmazonListingsOptimizerNew() {
     </div>
   );
 }
-
-export default AmazonListingsOptimizerNew;
