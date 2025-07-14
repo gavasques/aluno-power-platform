@@ -25,7 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PermissionGuard } from "@/components/guards/PermissionGuard";
+
 import { useGetFeatureCost, useCanProcessFeature } from "@/hooks/useFeatureCosts";
 
 export default function AmazonListingsOptimizerNew() {
@@ -281,11 +281,6 @@ export default function AmazonListingsOptimizerNew() {
           </AlertDescription>
         </Alert>
 
-        <PermissionGuard 
-          featureCode="agents.amazon_listing"
-          showMessage={true}
-          message="Você não tem permissão para usar o Amazon Listings Optimizer."
-        >
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Form */}
             <div className="lg:col-span-2">
@@ -596,7 +591,6 @@ export default function AmazonListingsOptimizerNew() {
               </Card>
             </div>
           </div>
-        </PermissionGuard>
       </div>
     </div>
   );

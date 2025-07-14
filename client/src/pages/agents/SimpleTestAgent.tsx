@@ -1,13 +1,8 @@
 import React from 'react';
-import { PermissionGuard } from '@/components/guards/PermissionGuard';
+
 
 const SimpleTestAgent: React.FC = () => {
   return (
-    <PermissionGuard 
-      featureCode="agents.html_descriptions"
-      showMessage={true}
-      message="Teste de agente simples."
-    >
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -35,7 +30,6 @@ const SimpleTestAgent: React.FC = () => {
           </div>
         </div>
       </div>
-    </PermissionGuard>
   );
 };
 

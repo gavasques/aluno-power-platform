@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { MessageSquare, Bot, AlertCircle, ArrowRight, Clock, Target, User, Building, Package, Hash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { PermissionGuard } from "@/components/guards/PermissionGuard";
+
 
 const AmazonNegativeReviews = () => {
   const [negativeReview, setNegativeReview] = useState("");
@@ -84,11 +84,6 @@ const AmazonNegativeReviews = () => {
   };
 
   return (
-    <PermissionGuard 
-      featureCode="agents.amazon_negative_reviews"
-      showMessage={true}
-      message="Você não tem permissão para usar o Amazon Negative Reviews Response."
-    >
       <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex items-center gap-3 mb-6">
         <div className="bg-red-100 p-3 rounded-lg">
@@ -283,7 +278,6 @@ const AmazonNegativeReviews = () => {
         </div>
       </div>
     </div>
-    </PermissionGuard>
   );
 };
 

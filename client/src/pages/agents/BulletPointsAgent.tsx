@@ -8,7 +8,7 @@ import { BulletPointsInput } from '@/components/agents/BulletPointsInput';
 import { BulletPointsOutput } from '@/components/agents/BulletPointsOutput';
 import { ReplaceDialog } from '@/components/agents/ReplaceDialog';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
-import { PermissionGuard } from '@/components/guards/PermissionGuard';
+
 import { AgentCostDisplay } from '@/components/AgentCostDisplay';
 
 const BulletPointsAgent: React.FC = () => {
@@ -33,11 +33,6 @@ const BulletPointsAgent: React.FC = () => {
   }, [updateAgentConfig]);
 
   return (
-    <PermissionGuard 
-      featureCode="agents.bullet_points"
-      showMessage={true}
-      message="Você não tem permissão para usar o Gerador de Bullet Points."
-    >
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6">
           <div className="mb-6">
@@ -97,7 +92,6 @@ const BulletPointsAgent: React.FC = () => {
         onReplace={handleReplace}
         onKeepBoth={handleKeepBoth}
       />
-    </PermissionGuard>
   );
 };
 
