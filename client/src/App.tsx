@@ -55,6 +55,7 @@ const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
 // AI Agents - heavy components, load on demand
 const HtmlDescriptionAgent = lazy(() => routeComponents.htmlDescription());
 const BulletPointsAgent = lazy(() => routeComponents.bulletPoints());
+const TestAgent = lazy(() => routeComponents.testAgent());
 const AmazonProductPhotography = lazy(() => routeComponents.imageEditor());
 const LifestyleWithModel = lazy(() => routeComponents.lifestyleModel());
 const InfographicGenerator = lazy(() => routeComponents.infographicGen());
@@ -231,6 +232,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <HtmlDescriptionAgent />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/test">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <TestAgent />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

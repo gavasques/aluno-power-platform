@@ -27,6 +27,7 @@ export const routeComponents = {
   // AI Agents - heavy ML components
   listingsOptimizer: () => import('../pages/agents/amazon-listings-optimizer-new'),
   htmlDescription: () => import('../pages/agents/HtmlDescriptionAgent'),
+  testAgent: () => import('../pages/agents/TestAgent'),
   bulletPoints: () => import('../pages/agents/BulletPointsAgent'),
   imageEditor: () => import('../pages/agents/amazon-product-photography'),
   lifestyleModel: () => import('../pages/agents/lifestyle-with-model'),
