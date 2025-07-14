@@ -240,6 +240,9 @@ export class PermissionService {
       { code: 'tools.product_details', name: 'Detalhes do Produto', category: 'Ferramentas', sortOrder: 6 },
       { code: 'tools.cnpj_lookup', name: 'Consulta CNPJ', category: 'Ferramentas', sortOrder: 7 },
       { code: 'tools.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Ferramentas', sortOrder: 8 },
+      { code: 'tools.logo_generation_pro', name: 'Gerador de Logomarcas PRO', category: 'Ferramentas', sortOrder: 9 },
+      { code: 'tools.upscale_pro', name: 'Upscale PRO', category: 'Ferramentas', sortOrder: 10 },
+      { code: 'tools.ultra_enhance_pro', name: 'Ultra Melhorador PRO', category: 'Ferramentas', sortOrder: 11 },
       
       // Agentes IA
       { code: 'agents.amazon_listing', name: 'Amazon Listing Optimizer', category: 'Agentes', sortOrder: 1 },
@@ -257,8 +260,8 @@ export class PermissionService {
       { code: 'hub.partners', name: 'Parceiros', category: 'HUB', sortOrder: 2 },
       { code: 'hub.suppliers', name: 'Fornecedores', category: 'HUB', sortOrder: 3 },
       { code: 'hub.tools', name: 'Ferramentas', category: 'HUB', sortOrder: 4 },
-      { code: 'hub.templates', name: 'Templates', category: 'HUB', sortOrder: 5 },
-      { code: 'hub.materials', name: 'Materiais', category: 'HUB', sortOrder: 6 },
+      { code: 'hub.materials', name: 'Materiais', category: 'HUB', sortOrder: 5 },
+      { code: 'hub.prompts', name: 'Prompts IA', category: 'HUB', sortOrder: 6 },
       
       // Minha Área
       { code: 'myarea.suppliers', name: 'Meus Fornecedores', category: 'Minha Área', sortOrder: 1 },
@@ -266,12 +269,15 @@ export class PermissionService {
       { code: 'myarea.materials', name: 'Meus Materiais', category: 'Minha Área', sortOrder: 3 },
       { code: 'myarea.brands', name: 'Minhas Marcas', category: 'Minha Área', sortOrder: 4 },
       { code: 'myarea.subscriptions', name: 'Minhas Assinaturas', category: 'Minha Área', sortOrder: 5 },
+      { code: 'myarea.profile', name: 'Meu Perfil', category: 'Minha Área', sortOrder: 6 },
+      { code: 'myarea.import_export', name: 'Importar/Exportar', category: 'Minha Área', sortOrder: 7 },
       
       // Simuladores e Outros
       { code: 'simulators.simples_nacional', name: 'Simples Nacional', category: 'Simuladores', sortOrder: 1 },
       { code: 'simulators.importacao_simples', name: 'Importação Simplificada', category: 'Simuladores', sortOrder: 2 },
       { code: 'simulators.importacao_formal', name: 'Importação Formal', category: 'Simuladores', sortOrder: 3 },
-      { code: 'simulators.viabilidade_produto', name: 'Viabilidade de Produto', category: 'Simuladores', sortOrder: 4 },
+      { code: 'simulators.investimentos_roi', name: 'Retorno sobre Investimento', category: 'Simuladores', sortOrder: 4 },
+      { code: 'simulators.marketplace_comparison', name: 'Comparador de Marketplaces', category: 'Simuladores', sortOrder: 5 },
       
       // Conteúdo e Notícias
       { code: 'content.news', name: 'Notícias', category: 'Conteúdo', sortOrder: 1 },
