@@ -17,18 +17,25 @@ export function useWebSocket() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Disable WebSocket in production to avoid connection errors
+    if (process.env.NODE_ENV === 'production') {
+      return;
+    }
+    
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
     
     // Validate host to prevent invalid URLs
-    if (!host || host.includes('undefined') || host.includes('null')) {
-      console.warn(`🚫 [WS_CLIENT] Invalid host detected: ${host}, skipping WebSocket connection`);
+    if (!host || host.includes('undefined') || host.includes('null') || host.includes('token')) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`🚫 [WS_CLIENT] Invalid host detected: ${host}, skipping WebSocket connection`);
+      }
       setLastError('Invalid host configuration');
       return;
     }
     
     // Clean the host to remove any tokens or query parameters
-    const cleanHost = host.split('?')[0].split('#')[0];
+    const cleanHost = host.split('?')[0].split('#')[0].split('/token')[0];
     const wsUrl = `${protocol}//${cleanHost}/ws`;
 
     if (process.env.NODE_ENV === 'development') {

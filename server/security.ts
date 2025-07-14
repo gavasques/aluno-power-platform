@@ -12,7 +12,7 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
   
   // Only set HSTS in production with HTTPS
   if (process.env.NODE_ENV === 'production') {
@@ -30,7 +30,7 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
     "connect-src 'self' wss: ws: https:; " +
     "frame-ancestors 'none'; " +
     "frame-src 'none'; " +
-    "sandbox allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads; " +
+
     "base-uri 'self';"
   );
   
