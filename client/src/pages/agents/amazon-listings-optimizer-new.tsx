@@ -131,7 +131,10 @@ export default function AmazonListingsOptimizerNew() {
       // 1. Criar sessão
       const sessionResponse = await fetch('/api/amazon-sessions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
         body: JSON.stringify({ idUsuario: 'user-1' })
       });
       
@@ -145,7 +148,10 @@ export default function AmazonListingsOptimizerNew() {
       // 2. Salvar dados do produto
       const dataResponse = await fetch(`/api/amazon-sessions/${sessionId}/data`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
         body: JSON.stringify(submitData)
       });
       
@@ -156,7 +162,10 @@ export default function AmazonListingsOptimizerNew() {
       // 3. Processar Etapa 1 (Análise)
       const step1Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step1`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
       });
       
       if (!step1Response.ok) {
@@ -166,7 +175,10 @@ export default function AmazonListingsOptimizerNew() {
       // 4. Processar Etapa 2 (Títulos)
       const step2Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step2`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
       });
       
       if (!step2Response.ok) {
@@ -176,7 +188,10 @@ export default function AmazonListingsOptimizerNew() {
       // 5. Processar Etapa 3 (Bullet Points)
       const step3Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step3`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
       });
       
       if (!step3Response.ok) {
@@ -186,7 +201,10 @@ export default function AmazonListingsOptimizerNew() {
       // 6. Processar Etapa 4 (Descrição)
       const step4Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step4`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
       });
       
       if (!step4Response.ok) {

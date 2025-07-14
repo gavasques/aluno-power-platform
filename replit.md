@@ -422,6 +422,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 14, 2025 - 6:45 PM**: ✅ AMAZON LISTING OPTIMIZER AUTHENTICATION BUG FIXED - COMPLETE TOKEN INTEGRATION
+  - **Root Cause**: Amazon Listing Optimizer was making API requests without authentication tokens, causing 401 errors
+  - **Solution Applied**: Added proper `Authorization: Bearer ${localStorage.getItem('auth_token')}` headers to all 6 API calls:
+    - POST /api/amazon-sessions (session creation)
+    - PUT /api/amazon-sessions/${sessionId}/data (data saving)
+    - POST /api/amazon-sessions/${sessionId}/process-step1 (analysis)
+    - POST /api/amazon-sessions/${sessionId}/process-step2 (title generation)
+    - POST /api/amazon-sessions/${sessionId}/process-step3 (bullet points)
+    - POST /api/amazon-sessions/${sessionId}/process-step4 (description)
+  - **Files Updated**: client/src/pages/agents/amazon-listings-optimizer-new.tsx
+  - **System Benefits**: Amazon Listing Optimizer now properly authenticated and functional
+  - **User Impact**: "Erro de não autorizado" resolved, agent now processes correctly
+
 - **January 14, 2025 - 5:50 PM**: ✅ CONSOLE ERRORS COMPLETELY ELIMINATED - WEBSOCKET & CSP ISSUES FIXED
   - **WebSocket Production Fix**: Disabled WebSocket connections in production to prevent connection errors with tokens in URL
   - **CSP Policy Corrected**: Removed problematic sandbox directive causing parsing errors
