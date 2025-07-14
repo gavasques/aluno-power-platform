@@ -189,6 +189,14 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
               window.location.href = '/agentes/html-description';
             } else if (agent.id === 'bullet-points-generator') {
               window.location.href = '/agentes/bullet-points';
+            } else if (agent.id === 'agent-amazon-product-photography') {
+              window.location.href = '/agentes/main-image-editor';
+            } else if (agent.id === 'agent-lifestyle-with-model') {
+              window.location.href = '/agentes/lifestyle-model';
+            } else if (agent.id === 'agent-infographic-generator') {
+              window.location.href = '/agentes/infographic-generator';
+            } else if (agent.id === 'advanced-infographic-generator') {
+              window.location.href = '/agentes/advanced-infographic';
             } else {
               window.location.href = `/agentes/${agent.id}`;
             }

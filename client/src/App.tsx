@@ -563,7 +563,7 @@ function App() {
                           
                           {/* Redirects - Consolidated for backwards compatibility */}
                           <Route path="/hub/descricao-html">
-                            {() => { window.location.href = '/agents/html-description-generator'; return null; }}
+                            {() => { window.location.href = '/agentes/html-description'; return null; }}
                           </Route>
                           <Route path="/ai/image-upscale">
                             {() => { window.location.href = '/ferramentas/image-upscale'; return null; }}
