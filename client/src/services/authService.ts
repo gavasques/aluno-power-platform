@@ -1,4 +1,5 @@
 import { User } from '@shared/schema';
+import { logger } from '@/lib/logger';
 
 export interface AuthResponse {
   success: boolean;
@@ -75,7 +76,7 @@ export class AuthService {
 
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      console.log('🔐 FRONTEND LOGIN - Starting login request:', {
+      logger.debug('Frontend login request started', {
         email: credentials.email,
         passwordLength: credentials.password.length
       });
@@ -85,7 +86,7 @@ export class AuthService {
         body: JSON.stringify(credentials),
       });
 
-      console.log('🔐 FRONTEND LOGIN - Success response:', {
+      logger.debug('Frontend login success', {
         hasUser: !!data.user,
         hasToken: !!data.token,
         userId: data.user?.id
@@ -97,9 +98,8 @@ export class AuthService {
         token: data.token,
       };
     } catch (error) {
-      console.log('🔐 FRONTEND LOGIN - Error:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        errorType: error instanceof Error ? error.constructor.name : typeof error
+      logger.debug('Frontend login error', {
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
 
       return {
@@ -137,15 +137,15 @@ export class AuthService {
 
   static async getCurrentUser(): Promise<User | null> {
     try {
-      console.log('🔍 FRONTEND AUTH - Getting current user...');
+      logger.debug('Getting current user');
       const data = await AuthService.makeRequest(AuthService.ENDPOINTS.ME);
-      console.log('🔍 FRONTEND AUTH - Current user response:', {
+      logger.debug('Current user response', {
         hasUser: !!data.user,
         userId: data.user?.id
       });
       return data.user;
     } catch (error) {
-      console.log('🔍 FRONTEND AUTH - Get current user failed:', {
+      logger.debug('Get current user failed', {
         error: error instanceof Error ? error.message : 'Unknown error'
       });
       return null;

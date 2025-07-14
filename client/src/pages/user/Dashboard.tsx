@@ -172,18 +172,7 @@ const UserDashboard = memo(() => {
     refetchOnMount: false, // Cache normal
   });
 
-  // Debug: log dos vídeos recebidos
-  useEffect(() => {
-    if (youtubeVideos) {
-      console.log('✅ Videos recebidos:', youtubeVideos.length);
-      console.log('🎬 Primeiros 3 vídeos:', youtubeVideos.slice(0, 3).map(v => ({
-        id: v.id,
-        title: v.title.substring(0, 50) + '...',
-        publishedAt: v.publishedAt
-      })));
-      console.log('🔍 Video INMETRO encontrado?', youtubeVideos.find(v => v.title.includes('INMETRO')) ? 'SIM' : 'NÃO');
-    }
-  }, [youtubeVideos]);
+
 
   // Fetch published news preview (lightweight)
   const { data: newsData = [], isLoading: newsLoading } = useQuery<Partial<News>[]>({
