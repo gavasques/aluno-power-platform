@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import Layout from '@/components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
 import type { Agent } from '@shared/schema';
 import { List } from 'lucide-react';
@@ -34,12 +33,11 @@ const BulletPointsAgent: React.FC = () => {
   }, [updateAgentConfig]);
 
   return (
-    <Layout>
-      <PermissionGuard 
-        featureCode="agents.bullet_points"
-        showMessage={true}
-        message="Você não tem permissão para usar o Gerador de Bullet Points."
-      >
+    <PermissionGuard 
+      featureCode="agents.bullet_points"
+      showMessage={true}
+      message="Você não tem permissão para usar o Gerador de Bullet Points."
+    >
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6">
           <div className="mb-6">
@@ -99,8 +97,7 @@ const BulletPointsAgent: React.FC = () => {
         onReplace={handleReplace}
         onKeepBoth={handleKeepBoth}
       />
-      </PermissionGuard>
-    </Layout>
+    </PermissionGuard>
   );
 };
 

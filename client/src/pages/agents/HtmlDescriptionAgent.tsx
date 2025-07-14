@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -383,12 +382,11 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
   }, []);
 
   return (
-    <Layout>
-      <PermissionGuard 
-        featureCode="agents.html_descriptions"
-        showMessage={true}
-        message="Você não tem permissão para usar o Gerador de Descrições HTML."
-      >
+    <PermissionGuard 
+      featureCode="agents.html_descriptions"
+      showMessage={true}
+      message="Você não tem permissão para usar o Gerador de Descrições HTML."
+    >
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
         {/* Header do Agente */}
@@ -568,8 +566,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      </PermissionGuard>
-    </Layout>
+    </PermissionGuard>
   );
 };
 
