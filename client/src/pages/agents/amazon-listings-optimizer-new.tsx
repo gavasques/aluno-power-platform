@@ -27,7 +27,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { useGetFeatureCost, useCanProcessFeature } from "@/hooks/useFeatureCosts";
-import jsPDF from 'jspdf';
+// Importação dinâmica do jsPDF para evitar problemas de SSR
+const loadJsPDF = async () => {
+  const { default: jsPDF } = await import('jspdf');
+  return jsPDF;
+};
 
 // Função para baixar conteúdo como TXT
 const downloadTXT = (results: any, formData: any) => {
@@ -82,10 +86,12 @@ const downloadTXT = (results: any, formData: any) => {
 };
 
 // Função para baixar conteúdo como PDF
-const downloadPDF = (results: any, formData: any) => {
+const downloadPDF = async (results: any, formData: any) => {
   if (!results) return;
   
-  const pdf = new jsPDF();
+  try {
+    const jsPDF = await loadJsPDF();
+    const pdf = new jsPDF();
   const pageWidth = pdf.internal.pageSize.getWidth();
   const margin = 20;
   const maxWidth = pageWidth - 2 * margin;
@@ -181,6 +187,10 @@ const downloadPDF = (results: any, formData: any) => {
   }
   
   pdf.save(`amazon-listing-${formData.productName.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.pdf`);
+  } catch (error) {
+    console.error('Erro ao gerar PDF:', error);
+    throw error;
+  }
 };
 
 export default function AmazonListingsOptimizerNew() {
@@ -244,7 +254,7 @@ export default function AmazonListingsOptimizerNew() {
     }
     
     try {
-      downloadPDF(results, formData);
+      await downloadPDF(results, formData);
       toast({
         title: "Download iniciado",
         description: "O relatório PDF está sendo baixado...",
@@ -296,7 +306,7 @@ export default function AmazonListingsOptimizerNew() {
       console.log('Form is not valid, returning early');
       toast({
         title: "Formulário incompleto",
-        description: "Preencha todos os campos obrigatórios antes de continuar.",
+        description: "Preencha pelo menos o nome do produto e adicione dados das avaliações dos concorrentes.",
         variant: "destructive"
       });
       return;
@@ -511,24 +521,21 @@ export default function AmazonListingsOptimizerNew() {
     }
   };
 
-  // Validação do formulário com logs detalhados
+  // Validação simplificada do formulário - apenas verificar se tem dados das avaliações
   const isFormValid = (() => {
-    const hasProductName = !!formData.productName;
-    const hasBrand = !!formData.brand;
-    const hasCategory = !!formData.category;
-    const hasReviewsData = reviewsTab === "text" ? !!formData.reviewsData : uploadedFiles.length > 0;
+    const hasProductName = !!formData.productName?.trim();
+    const hasReviewsData = reviewsTab === "text" ? !!formData.reviewsData?.trim() : uploadedFiles.length > 0;
     
     console.log('Form validation:', {
       hasProductName,
-      hasBrand,
-      hasCategory,
       hasReviewsData,
       reviewsTab,
       uploadedFilesCount: uploadedFiles.length,
-      reviewsDataLength: formData.reviewsData.length
+      reviewsDataLength: formData.reviewsData?.length || 0,
+      productName: formData.productName
     });
     
-    return hasProductName && hasBrand && hasCategory && hasReviewsData;
+    return hasProductName && hasReviewsData;
   })();
 
   return (
