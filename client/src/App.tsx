@@ -224,103 +224,8 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
-                          <Route path="/agents/amazon-listings-optimizer-new">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonListingsOptimizer />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/amazon-listings-optimizer/result">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonListingsOptimizerResult />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/amazon-listings-optimizer">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonListingsOptimizer />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/agent-amazon-product-photography">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonProductPhotography />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/agent-lifestyle-with-model">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <LifestyleWithModel />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/agent-infographic-generator">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <InfographicGenerator />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/advanced-infographic-generator">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AdvancedInfographicGenerator />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/html-description-generator">
-                            <ProtectedRoute>
-                              <Suspense fallback={<PageLoader />}>
-                                <HtmlDescriptionAgent />
-                              </Suspense>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agents/bullet-points-generator">
-                            <ProtectedRoute>
-                              <Suspense fallback={<PageLoader />}>
-                                <BulletPointsAgent />
-                              </Suspense>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          {/* SPECIFIC ROUTES BEFORE GENERIC */}
-                          <Route path="/agents/amazon-customer-service">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonCustomerService />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
+
+
                           
                           <Route path="/agents">
                             {() => {
@@ -822,18 +727,7 @@ function App() {
                             )}
                           </Route>
 
-                          {/* MyArea routes (English alias) - Protected */}
-                          <Route path="/myarea/:section/:id?/:action?">
-                            {(params) => (
-                              <ProtectedRoute>
-                                <Layout>
-                                  <Suspense fallback={<PageLoader />}>
-                                    <MyArea />
-                                  </Suspense>
-                                </Layout>
-                              </ProtectedRoute>
-                            )}
-                          </Route>
+
 
                           {/* Admin routes - Protected with admin requirement */}
 
