@@ -14,19 +14,35 @@ import { backgroundPrefetch } from '@/lib/prefetch';
 import { useFontLoader } from '@/lib/fontLoader';
 import { useOptimizedIcons } from '@/components/IconLoader';
 import { HelmetProvider } from 'react-helmet-async';
+// PHASE 2.2 BUNDLE SIZE OPTIMIZATION - Dynamic imports with intelligent loading
+import { routeComponents, prefetchStrategy } from '@/lib/dynamicComponents';
+import { useAuth } from './contexts/AuthContext';
 
-// Lazy load pages for better performance
+// PHASE 2.2 OPTIMIZED DYNAMIC IMPORTS - Intelligent component loading
+// Core components - immediate loading
+const Dashboard = lazy(() => import("./pages/user/Dashboard"));
+
+// High priority - preload on interaction
+const Tools = lazy(() => routeComponents.tools());
+const Agentes = lazy(() => routeComponents.agents());
+const MyArea = lazy(() => routeComponents.myArea());
+
+// Medium priority - load on demand
 const Videos = lazy(() => import("./pages/Videos"));
-const News = lazy(() => import("./pages/News"));
-const Updates = lazy(() => import("./pages/Updates"));
+const News = lazy(() => routeComponents.news());
+const Updates = lazy(() => routeComponents.updates());
+const Hub = lazy(() => routeComponents.hub());
+
+// Admin components - role-restricted loading
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const Admin = lazy(() => import("./pages/Admin"));
-const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
+const Admin = lazy(() => routeComponents.admin());
+const UserManagement = lazy(() => routeComponents.userManagement());
 const UserEdit = lazy(() => import("./pages/admin/UserEdit"));
 const GroupEdit = lazy(() => import("./pages/admin/GroupEdit"));
 
 
-const ContentManagement = lazy(() => import("./pages/admin/ContentManagement"));
+// Content and hub components - medium priority
+const ContentManagement = lazy(() => routeComponents.contentManagement());
 const Suppliers = lazy(() => import("./pages/hub/Suppliers"));
 const Partners = lazy(() => import("./pages/hub/Partners"));
 const PartnerDetail = lazy(() => import("./pages/hub/PartnerDetailSimple"));
@@ -36,41 +52,45 @@ const SupplierDetail = lazy(() => import("./pages/hub/SupplierDetail"));
 
 const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
 
-const HtmlDescriptionAgent = lazy(() => import("./pages/agents/HtmlDescriptionAgent"));
-const BulletPointsAgent = lazy(() => import("./pages/agents/BulletPointsAgent"));
-const AmazonProductPhotography = lazy(() => import("./pages/agents/amazon-product-photography"));
-const LifestyleWithModel = lazy(() => import("./pages/agents/lifestyle-with-model"));
-const InfographicGenerator = lazy(() => import("./pages/agents/infographic-generator"));
-const AdvancedInfographicGenerator = lazy(() => import("./pages/agents/AdvancedInfographicGenerator"));
-const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtractor"));
-const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
-const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
+// AI Agents - heavy components, load on demand
+const HtmlDescriptionAgent = lazy(() => routeComponents.htmlDescription());
+const BulletPointsAgent = lazy(() => routeComponents.bulletPoints());
+const AmazonProductPhotography = lazy(() => routeComponents.imageEditor());
+const LifestyleWithModel = lazy(() => routeComponents.lifestyleModel());
+const InfographicGenerator = lazy(() => routeComponents.infographicGen());
+const AdvancedInfographicGenerator = lazy(() => routeComponents.advancedInfographic());
+
+// Hub tools - medium priority
+const AmazonReviewExtractor = lazy(() => routeComponents.amazonReviews());
+const KeywordSearchReport = lazy(() => routeComponents.keywordSearch());
+const AmazonProductDetails = lazy(() => routeComponents.productDetails());
 const CNPJConsulta = lazy(() => import("./pages/hub/CNPJConsulta"));
 const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSuggestions"));
-const Tools = lazy(() => import("./pages/hub/Tools"));
 const Materials = lazy(() => import("./pages/hub/Materials"));
-const Hub = lazy(() => import("./pages/Hub"));
+
+// Navigation pages - immediate for core paths
 const Ferramentas = lazy(() => import("./pages/Ferramentas"));
-const Agentes = lazy(() => import("./pages/Agentes"));
-const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
-const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
+
+// Simulators - load on demand
+const ImportacaoSimplificada = lazy(() => routeComponents.importSimulator());
 const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsList"));
 const InformalImportSimulator = lazy(() => import("./pages/InformalImportSimulator"));
 const FormalImportSimulator = lazy(() => import("./pages/FormalImportSimulator"));
 const FormalImportSimulationsList = lazy(() => import("./pages/FormalImportSimulationsList"));
-const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
+const SimplesNacional = lazy(() => routeComponents.simplesNacional());
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
-const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
+const InvestimentosROI = lazy(() => routeComponents.investmentROI());
 
-const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
+// Heavy AI features - lazy load
+const AmazonListingsOptimizer = lazy(() => routeComponents.listingsOptimizer());
 const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
 const AmazonCustomerService = lazy(() => import("./pages/agents/amazon-customer-service"));
 const AmazonCustomerServiceResult = lazy(() => import("./pages/agents/amazon-customer-service-result"));
 const AmazonNegativeReviews = lazy(() => import("./pages/agents/amazon-negative-reviews"));
 const AmazonNegativeReviewsResult = lazy(() => import("./pages/agents/amazon-negative-reviews-result"));
-const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
+const AgentProviderSettings = lazy(() => routeComponents.agentSettings());
 
 
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
