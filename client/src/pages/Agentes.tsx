@@ -106,39 +106,39 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
   const isBeta = agent.name.toLowerCase().includes('beta') || agent.description?.toLowerCase().includes('beta');
   
   return (
-    <Card className="group relative overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white">
-      {/* Card Header com gradiente */}
-      <CardHeader className="pb-4">
+    <Card className="group relative overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white h-fit">
+      {/* Card Header - COMPACTO */}
+      <CardHeader className="pb-2 pt-3">
         <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            {/* Ícone da categoria com background gradiente */}
-            <div className={`p-3 rounded-xl bg-gradient-to-br ${categoryInfo.gradient} shadow-lg`}>
-              <IconComponent className="w-6 h-6 text-white" />
+          <div className="flex items-center space-x-2">
+            {/* Ícone da categoria - MENOR */}
+            <div className={`p-2 rounded-lg bg-gradient-to-br ${categoryInfo.gradient} shadow-md`}>
+              <IconComponent className="w-4 h-4 text-white" />
             </div>
             
-            {/* Badges de status */}
-            <div className="flex flex-col space-y-1">
+            {/* Badges de status - COMPACTOS */}
+            <div className="flex flex-col space-y-0.5">
               {isNew && (
-                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs px-2 py-0.5">
-                  <Sparkles className="w-3 h-3 mr-1" />
+                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs px-1.5 py-0">
+                  <Sparkles className="w-2 h-2 mr-0.5" />
                   Novo!
                 </Badge>
               )}
               {isBeta && (
-                <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs px-2 py-0.5">
+                <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs px-1.5 py-0">
                   Beta
                 </Badge>
               )}
             </div>
           </div>
           
-          {/* Botão de favoritar */}
+          {/* Botão de favoritar - MENOR */}
           <button
             onClick={() => onToggleFavorite(agent.id)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors group"
+            className="p-1 rounded-md hover:bg-gray-100 transition-colors group"
           >
             <Star 
-              className={`w-5 h-5 transition-all duration-200 ${
+              className={`w-3 h-3 transition-all duration-200 ${
                 isFavorited 
                   ? 'fill-amber-400 text-amber-400' 
                   : 'text-gray-300 group-hover:text-amber-400'
@@ -148,12 +148,12 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
         </div>
       </CardHeader>
       
-      <CardContent className="pt-0">
-        {/* Badge da categoria e créditos */}
-        <div className="flex items-center justify-between mb-3">
+      <CardContent className="pt-0 pb-3">
+        {/* Badge da categoria e créditos - COMPACTOS */}
+        <div className="flex items-center justify-between mb-2">
           <Badge 
             variant="outline"
-            className={`text-xs font-medium border ${categoryInfo.color}`}
+            className={`text-xs font-medium border ${categoryInfo.color} px-1.5 py-0`}
           >
             {agent.category || "Geral"}
           </Badge>
@@ -163,17 +163,17 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
           />
         </div>
         
-        {/* Nome do agente */}
-        <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
+        {/* Nome do agente - MENOR */}
+        <h3 className="font-bold text-sm text-gray-900 mb-1.5 line-clamp-1 group-hover:text-blue-600 transition-colors">
           {agent.name}
         </h3>
         
-        {/* Descrição */}
-        <p className="text-gray-600 text-sm mb-6 line-clamp-2 leading-relaxed">
+        {/* Descrição - COMPACTA */}
+        <p className="text-gray-600 text-xs mb-3 line-clamp-2 leading-relaxed">
           {agent.description || "Agente de IA para automação e otimização"}
         </p>
         
-        {/* Botão de ação com créditos */}
+        {/* Botão de ação - COMPACTO */}
         <CreditCostButton
           featureName={AGENT_FEATURE_MAP[agent.id] || `agents.${agent.id}`}
           userBalance={userBalance}
@@ -201,10 +201,10 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
               window.location.href = `/agentes/${agent.id}`;
             }
           }}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 text-xs py-1.5"
           showCreditsInButton={false}
         >
-          <Sparkles className="w-4 h-4 mr-2" />
+          <Sparkles className="w-3 h-3 mr-1" />
           Usar Agente
         </CreditCostButton>
       </CardContent>
@@ -308,10 +308,10 @@ export default function Agentes() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Agentes de IA</h1>
-        <p className="text-muted-foreground">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-4 space-y-4">
+      <div className="flex flex-col space-y-1">
+        <h1 className="text-2xl font-bold text-foreground">Agentes de IA</h1>
+        <p className="text-sm text-muted-foreground">
           Descubra e use agentes especializados para otimizar seu negócio
         </p>
       </div>
@@ -385,8 +385,8 @@ export default function Agentes() {
         </div>
       )}
 
-      {/* Grid de agentes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Grid de agentes - 4 COLUNAS COMPACTAS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3">
         {filteredAgents.map((agent: Agent) => (
           <AgentCard
             key={agent.id}

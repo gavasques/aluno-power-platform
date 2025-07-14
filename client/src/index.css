@@ -78,6 +78,73 @@
     font-weight: 500;
     margin-bottom: 0.25rem;
   }
+
+  /* COMPACTAÇÃO ESPECÍFICA DE CARDS - EFEITO 75% ZOOM */
+  /* Cards mais compactos em toda a plataforma */
+  .card {
+    height: fit-content;
+  }
+  
+  /* Headers de cards compactos */
+  .card .card-header {
+    padding: 0.75rem 1rem 0.5rem;
+  }
+  
+  /* Content de cards compacto */
+  .card .card-content {
+    padding: 0.75rem 1rem 0.75rem;
+  }
+  
+  /* Títulos menores */
+  .card .card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  
+  /* Descrições compactas */
+  .card .card-description {
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+  }
+  
+  /* Badges menores */
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+  }
+  
+  /* Botões mais compactos */
+  .card button {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+  
+  /* Ícones menores em cards */
+  .card .lucide {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Otimizações específicas para ferramentas, hub, minha área, simuladores */
+  .compact-card {
+    height: fit-content;
+  }
+  
+  .compact-card .card-header {
+    padding: 0.5rem 0.75rem 0.25rem;
+  }
+  
+  .compact-card .card-content {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .compact-card .card-title {
+    font-size: 0.875rem;
+  }
+  
+  .compact-card .card-description {
+    font-size: 0.75rem;
+  }
 }
 
 /* Optimized Font Loading Strategy */

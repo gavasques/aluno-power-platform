@@ -144,10 +144,10 @@ export default function Ferramentas() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Ferramentas</h1>
-        <p className="text-muted-foreground">
+    <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-4 space-y-4">
+      <div className="flex flex-col space-y-1">
+        <h1 className="text-2xl font-bold text-foreground">Ferramentas</h1>
+        <p className="text-sm text-muted-foreground">
           Acesse todas as ferramentas disponíveis para otimizar seu negócio
         </p>
       </div>
@@ -165,36 +165,36 @@ export default function Ferramentas() {
         ))}
       </div>
 
-      {/* Grid de ferramentas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Grid de ferramentas - 4 COLUNAS COMPACTAS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3">
         {ferramentas.map((ferramenta) => {
           const hasPermission = hasAccess(ferramenta.permission);
           
           if (hasPermission) {
             return (
               <Link key={ferramenta.href} href={ferramenta.href}>
-                <Card className="group hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader className="pb-3">
+                <Card className="group hover:shadow-lg transition-shadow cursor-pointer h-fit compact-card">
+                  <CardHeader className="pb-2 pt-3">
                     <div className="flex items-center justify-between">
-                      <ferramenta.icon className="h-8 w-8 text-primary" />
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
+                      <ferramenta.icon className="h-5 w-5 text-primary" />
+                      <div className="flex items-center gap-1">
+                        <Badge variant="outline" className="text-xs px-1.5 py-0">
                           {ferramenta.credits} {ferramenta.credits === 1 ? 'crédito' : 'créditos'}
                         </Badge>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0">
                           {ferramenta.category}
                         </Badge>
                       </div>
                     </div>
-                    <CardTitle className="text-lg">{ferramenta.title}</CardTitle>
-                    <CardDescription className="text-sm">
+                    <CardTitle className="text-sm font-semibold">{ferramenta.title}</CardTitle>
+                    <CardDescription className="text-xs leading-relaxed">
                       {ferramenta.description}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group-hover:bg-primary/10 transition-colors">
-                      <span className="text-sm font-medium">Acessar ferramenta</span>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <CardContent className="pt-0 pb-3">
+                    <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg group-hover:bg-primary/10 transition-colors">
+                      <span className="text-xs font-medium">Acessar ferramenta</span>
+                      <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   </CardContent>
                 </Card>
