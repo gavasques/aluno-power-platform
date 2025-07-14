@@ -15,7 +15,6 @@ import { ResponseHandler } from '../utils/ResponseHandler';
 import { ValidationHelper } from '../utils/ValidationHelper';
 import { insertProductSchema } from '../../shared/schema';
 import { storage } from '../storage';
-import { optimizedProductService, type ProductSearchOptions } from '../services/OptimizedProductService';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
