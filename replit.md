@@ -422,6 +422,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 14, 2025 - 2:25 PM**: ✅ ADMIN PAGES FIXES AND CLEANUP COMPLETED - ALL BLANK PAGES RESOLVED + UNUSED FEATURES REMOVED
+  - **Blank Pages Fixed**: 
+    - `/admin/cadastros/tipos-materiais` - Fixed by adding Array.isArray() check for materialTypes filtering
+    - `/admin/conteudo/fornecedores` - Fixed by adding Array.isArray() check for suppliers filtering
+  - **Unused Features Removed**:
+    - `/admin/cadastros/tipos-prompts-ia` - Removed "Tipos de Prompts IA" from AdminCadastros.tsx
+    - `/admin/cadastros/tipos-templates` - Template functionality already removed in previous cleanup
+    - `/admin/conteudo/templates` - Template functionality already removed in previous cleanup
+    - `/admin/conteudo/prompts-ia` - Removed "Prompts IA" from ContentManagement.tsx
+  - **Root Cause**: Components were trying to filter data that might not be arrays, causing blank pages
+  - **Solution**: Added Array.isArray() checks before filtering operations to ensure data safety
+  - **Import Cleanup**: Removed unused imports from AdminCadastros.tsx and ContentManagement.tsx
+  - **System Benefits**: Admin interface now clean and fully functional with proper error handling
+
 - **January 14, 2025 - 2:20 PM**: ✅ AMAZON LISTINGS OPTIMIZER CREDIT SYSTEM BUG FIXED - DYNAMIC COST CHECKING IMPLEMENTED
   - **Issue Identified**: Amazon Listings Optimizer had hardcoded 10 credit validation despite actual cost being 3 credits
   - **Dynamic Cost Integration**: Implemented useGetFeatureCost and useCanProcessFeature hooks for real-time cost validation
