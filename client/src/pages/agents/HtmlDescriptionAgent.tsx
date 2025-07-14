@@ -182,7 +182,7 @@ const HtmlDescriptionAgent: React.FC = () => {
   }, [textInput]);
 
   // Exemplo de texto
-  const exampleText = `Maca BKZA é top, ela é dobrável e super resistente, aguenta até 200kg, e tem bolsa para levar.
+  const exampleText = `Produto premium com qualidade superior, design moderno e funcionalidade prática para o dia a dia.
 
 Material resistente e durável
 Ideal para uso diário

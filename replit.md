@@ -3758,7 +3758,7 @@ Preferred communication style: Simple, everyday language.
     - Sistema de cópia de dados funcionando (individual e em lote)
     - Navegação integrada no Hub de Recursos com ícone Tag
   - **Dados de Teste Confirmados**:
-    - Testes realizados com palavras "maca" e "maca estetica"
+    - Testes realizados com palavras exemplo e verificação de funcionalidade
     - Logs salvos corretamente com estrutura adequada
     - Performance API: 850ms-4325ms dependendo da complexidade da busca
     - Total de 10 sugestões retornadas por consulta conforme padrão Amazon
