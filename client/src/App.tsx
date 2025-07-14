@@ -182,7 +182,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* SPECIFIC AGENT ROUTES - MUST BE FIRST */}
+                          {/* AGENT ROUTES - CONSOLIDATED */}
                           <Route path="/agentes/amazon-negative-reviews/resultado/:sessionId">
                             <ProtectedRoute>
                               <Layout>
@@ -431,69 +431,33 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
+                          {/* Redirects - Consolidated for backwards compatibility */}
                           <Route path="/hub/descricao-html">
-                            {() => {
-                              // Redirect to the new agent route
-                              window.location.href = '/agents/html-description-generator';
-                              return null;
-                            }}
+                            {() => { window.location.href = '/agents/html-description-generator'; return null; }}
                           </Route>
-
-                          {/* Redirects for backwards compatibility */}
                           <Route path="/ai/image-upscale">
-                            {() => {
-                              window.location.href = '/ferramentas/image-upscale';
-                              return null;
-                            }}
+                            {() => { window.location.href = '/ferramentas/image-upscale'; return null; }}
                           </Route>
-                          
                           <Route path="/ai/background-removal">
-                            {() => {
-                              window.location.href = '/ferramentas/background-removal';
-                              return null;
-                            }}
+                            {() => { window.location.href = '/ferramentas/background-removal'; return null; }}
                           </Route>
-                          
                           <Route path="/hub/amazon-reviews">
-                            {() => {
-                              window.location.href = '/ferramentas/amazon-reviews';
-                              return null;
-                            }}
+                            {() => { window.location.href = '/ferramentas/amazon-reviews'; return null; }}
                           </Route>
-                          
                           <Route path="/hub/relatorio-keywords">
-                            {() => {
-                              window.location.href = '/ferramentas/relatorio-keywords';
-                              return null;
-                            }}
+                            {() => { window.location.href = '/ferramentas/relatorio-keywords'; return null; }}
                           </Route>
-                          
                           <Route path="/ferramentas/picsart-background-removal">
-                            {() => {
-                              window.location.href = '/ferramentas/background-removal-pro';
-                              return null;
-                            }}
+                            {() => { window.location.href = '/ferramentas/background-removal-pro'; return null; }}
                           </Route>
-                          
                           <Route path="/hub/produto-detalhes">
-                            {() => {
-                              window.location.href = '/ferramentas/produto-detalhes';
-                              return null;
-                            }}
+                            {() => { window.location.href = '/ferramentas/produto-detalhes'; return null; }}
                           </Route>
-                          
                           <Route path="/hub/consulta-cnpj">
-                            {() => {
-                              window.location.href = '/ferramentas/consulta-cnpj';
-                              return null;
-                            }}
+                            {() => { window.location.href = '/ferramentas/consulta-cnpj'; return null; }}
                           </Route>
-                          
                           <Route path="/hub/keyword-suggestions">
-                            {() => {
-                              window.location.href = '/ferramentas/keyword-suggestions';
-                              return null;
-                            }}
+                            {() => { window.location.href = '/ferramentas/keyword-suggestions'; return null; }}
                           </Route>
                           
 
@@ -642,42 +606,10 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* Minha Área routes - Protected */}
-                          <Route path="/minha-area/perfil">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <UserProfile />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
+
                           
-                          {/* Product Import/Export - Protected */}
-                          <Route path="/minha-area/importacao-exportacao">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <ProductImportExport />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          {/* Product Management - Protected */}
-                          <Route path="/minha-area/produtos">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <MyProductsList />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          {/* Product routes now handled by MyArea.tsx catch-all */}
-                          
-                          <Route path="/minha-area/:section/:id?/:action?">
+                          {/* MyArea - Unified catch-all handler for all user sections */}
+                          <Route path="/minha-area/:section?/:id?/:action?">
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
@@ -859,46 +791,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* SPECIFIC AGENT ROUTES FOR /agentes */}
-                          <Route path="/agentes/amazon-negative-reviews">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonNegativeReviews />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agentes/amazon-negative-reviews/result">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonNegativeReviewsResult />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agentes/amazon-customer-service">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonCustomerService />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agentes/amazon-customer-service/result">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonCustomerServiceResult />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
+
 
 
                           
