@@ -422,6 +422,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 14, 2025 - 2:20 PM**: ✅ AMAZON LISTINGS OPTIMIZER CREDIT SYSTEM BUG FIXED - DYNAMIC COST CHECKING IMPLEMENTED
+  - **Issue Identified**: Amazon Listings Optimizer had hardcoded 10 credit validation despite actual cost being 3 credits
+  - **Dynamic Cost Integration**: Implemented useGetFeatureCost and useCanProcessFeature hooks for real-time cost validation
+  - **Hardcoded Values Replaced**: Fixed all hardcoded references:
+    - Credit validation logic: Changed from hardcoded 10 to dynamic cost checking
+    - UI alert message: Updated to show actual required credits (3)
+    - Logging system: Updated creditsUsed to use dynamic requiredCredits value
+  - **User Experience Fixed**: Users with 979 credits can now access tool that requires only 3 credits
+  - **Error Messages Enhanced**: More informative error messages showing actual vs required credits
+  - **System Benefits**: All agents now use consistent dynamic cost checking system
+
 - **January 14, 2025 - 2:15 PM**: ✅ AGENT PAGES WHITE SCREEN ISSUE FIXED - COMPLETE ROUTING SYSTEM RESTORED
   - **Missing Export Statement Fixed**: Added missing `export default` statement to amazon-listings-optimizer-new.tsx
   - **Route Validation Completed**: All 7 agent routes now properly loading (HTTP 200 OK status):

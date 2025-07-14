@@ -26,6 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
+import { useGetFeatureCost, useCanProcessFeature } from "@/hooks/useFeatureCosts";
 
 export default function AmazonListingsOptimizerNew() {
   const [location, navigate] = useLocation();
@@ -43,6 +44,12 @@ export default function AmazonListingsOptimizerNew() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [reviewsTab, setReviewsTab] = useState<"upload" | "text">("upload");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
+  // Dynamic cost checking
+  const { getFeatureCost } = useGetFeatureCost();
+  const { canProcess } = useCanProcessFeature();
+  const featureName = "agents.amazon_listing";
+  const requiredCredits = getFeatureCost(featureName);
 
   // Buscar departamentos da API
   const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
@@ -79,10 +86,13 @@ export default function AmazonListingsOptimizerNew() {
         }
       });
       
-      if (dashboardResponse.user.creditBalance < 10) {
+      const userBalance = dashboardResponse.user.creditBalance;
+      const { canProcess: canAfford, missingCredits } = canProcess(featureName, userBalance);
+      
+      if (!canAfford) {
         toast({
           title: "Créditos insuficientes",
-          description: "Você precisa de pelo menos 10 créditos para usar este agente.",
+          description: `Você precisa de ${requiredCredits} créditos para usar este agente. Você tem ${userBalance} créditos (faltam ${missingCredits}).`,
           variant: "destructive"
         });
         return;
@@ -210,7 +220,7 @@ export default function AmazonListingsOptimizerNew() {
           },
           body: JSON.stringify({
             feature: 'agents.amazon_listing',
-            creditsUsed: 10,
+            creditsUsed: requiredCredits,
             prompt: `Produto: ${formData.productName}`,
             response: 'Listagem otimizada gerada',
             provider: 'openai',
@@ -267,7 +277,7 @@ export default function AmazonListingsOptimizerNew() {
         <Alert className="border-orange-200 bg-orange-50">
           <AlertCircle className="h-4 w-4 text-orange-600" />
           <AlertDescription className="text-orange-800">
-            <strong>Custo:</strong> Este agente consome <strong>10 créditos</strong> por otimização. Verifique seu saldo antes de prosseguir.
+            <strong>Custo:</strong> Este agente consome <strong>{requiredCredits} créditos</strong> por otimização. Verifique seu saldo antes de prosseguir.
           </AlertDescription>
         </Alert>
 
