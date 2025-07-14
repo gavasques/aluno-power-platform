@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { users, featureCosts } from "../../shared/schema";
+import { users, featureCosts, userCreditBalance } from "../../shared/schema";
 import { eq } from "drizzle-orm";
 
 export class CreditService {
@@ -22,33 +22,36 @@ export class CreditService {
 
       const creditsToDeduct = featureCost[0].costPerUse;
       
-      // 2. Verificar saldo atual do usuário
+      // 2. Verificar saldo atual do usuário na tabela correta
       const userCredits = await db
-        .select({ credits: users.credits })
-        .from(users)
-        .where(eq(users.id, userId))
+        .select({ currentBalance: userCreditBalance.currentBalance })
+        .from(userCreditBalance)
+        .where(eq(userCreditBalance.userId, userId))
         .limit(1);
 
       if (!userCredits.length) {
-        throw new Error(`User ${userId} not found`);
+        throw new Error(`User ${userId} not found in credit balance`);
       }
 
-      const currentCredits = parseFloat(userCredits[0].credits || '0');
+      const currentCredits = userCredits[0].currentBalance;
       
       // 3. Verificar se tem créditos suficientes
       if (currentCredits < creditsToDeduct) {
         throw new Error(`Insufficient credits. User has ${currentCredits}, needs ${creditsToDeduct}`);
       }
 
-      // 4. Descontar créditos
+      // 4. Descontar créditos na tabela correta
       const newBalance = currentCredits - creditsToDeduct;
+      const newSpent = (await db.select({ totalSpent: userCreditBalance.totalSpent }).from(userCreditBalance).where(eq(userCreditBalance.userId, userId)).limit(1))[0]?.totalSpent || 0;
+      
       await db
-        .update(users)
+        .update(userCreditBalance)
         .set({ 
-          credits: newBalance.toString(),
+          currentBalance: newBalance,
+          totalSpent: newSpent + creditsToDeduct,
           updatedAt: new Date()
         })
-        .where(eq(users.id, userId));
+        .where(eq(userCreditBalance.userId, userId));
 
       console.log(`💰 [CREDIT] Deducted ${creditsToDeduct} credits from user ${userId} (${currentCredits} → ${newBalance})`);
       
@@ -73,14 +76,14 @@ export class CreditService {
 
       const required = featureCost.length ? featureCost[0].costPerUse : 0;
       
-      // Buscar saldo atual
+      // Buscar saldo atual da tabela correta user_credit_balance
       const userCredits = await db
-        .select({ credits: users.credits })
-        .from(users)
-        .where(eq(users.id, userId))
+        .select({ currentBalance: userCreditBalance.currentBalance })
+        .from(userCreditBalance)
+        .where(eq(userCreditBalance.userId, userId))
         .limit(1);
 
-      const current = userCredits.length ? parseFloat(userCredits[0].credits || '0') : 0;
+      const current = userCredits.length ? userCredits[0].currentBalance : 0;
       
       return {
         hasEnough: current >= required,
