@@ -49,7 +49,7 @@ export default function AmazonListingsOptimizerNew() {
   const { getFeatureCost } = useGetFeatureCost();
   const { canProcess } = useCanProcessFeature();
   const featureName = "agents.amazon_listing";
-  const requiredCredits = getFeatureCost(featureName);
+  const requiredCredits = getFeatureCost(featureName) || 3; // Default to 3 if not found
 
   // Buscar departamentos da API
   const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
@@ -220,7 +220,7 @@ export default function AmazonListingsOptimizerNew() {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           },
           body: JSON.stringify({
-            amount: 10,
+            amount: requiredCredits,
             reason: 'Amazon Listings Optimizer - Otimização de listagem'
           })
         });
@@ -249,8 +249,12 @@ export default function AmazonListingsOptimizerNew() {
         console.error('Erro ao registrar log:', logError);
       }
       
-      // 9. Navegar para resultados
-      navigate(`/agents/amazon-listings-optimizer/result?session=${sessionId}`);
+      // 9. Show success message instead of navigation
+      toast({
+        title: "Listagem otimizada com sucesso!",
+        description: "Sua listagem foi processada e otimizada com IA. Verifique os resultados.",
+        variant: "default"
+      });
       
     } catch (error) {
       console.error("Error processing:", error);
@@ -521,7 +525,7 @@ export default function AmazonListingsOptimizerNew() {
                       ) : (
                         <>
                           <Sparkles className="h-4 w-4 mr-2" />
-                          Otimizar Listagem (10 créditos)
+                          Otimizar Listagem ({requiredCredits} créditos)
                         </>
                       )}
                     </Button>
