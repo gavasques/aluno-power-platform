@@ -1,8 +1,8 @@
-# Aluno Power Platform - AI Agents System
+# Core Guilherme Vasques - Advanced E-commerce AI Platform
 
 ## Overview
 
-This is a comprehensive educational e-commerce platform focused on Amazon FBA and e-commerce training, featuring an integrated AI agents system. The platform provides tools, resources, and AI-powered assistance for students learning e-commerce strategies.
+This is a comprehensive educational e-commerce platform focused on Amazon FBA and e-commerce training, featuring an advanced multi-provider AI system. The platform provides 100+ tools, resources, simulators, and AI-powered assistance for students learning e-commerce strategies. Originally launched as "Aluno Power Platform", rebranded to "Core Guilherme Vasques" to reflect the expanded scope and professional focus.
 
 ## System Architecture
 
@@ -10,49 +10,109 @@ This is a comprehensive educational e-commerce platform focused on Amazon FBA an
 - **Framework**: React with TypeScript and Vite for fast development
 - **Styling**: Tailwind CSS with shadcn/ui component library
 - **State Management**: TanStack Query for server state and React Context for local state
-- **Routing**: Wouter for lightweight client-side routing
+- **Routing**: Wouter for lightweight client-side routing with optimized route structure
 - **Theme**: Light theme with HSL-based color system
+- **Performance**: Lazy loading, code splitting, optimized bundle size
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express framework
 - **API**: RESTful API with WebSocket support for real-time features
 - **Database**: PostgreSQL with Drizzle ORM
-- **AI Integration**: OpenAI API for agent processing
-- **External Services**: YouTube API for video content management
+- **AI Integration**: Multi-provider AI system (OpenAI, xAI/Grok, Anthropic/Claude, Google Gemini, DeepSeek, OpenRouter)
+- **External Services**: RapidAPI YouTube v2 for video content management, Amazon API integrations, CNPJ lookup services
+- **Security**: Role-based permission system, CSRF protection, rate limiting, input sanitization
 
 ### Database Schema
-The system uses PostgreSQL with the following core tables:
-- `agents` - AI agent configurations
+The system uses PostgreSQL with comprehensive schema including:
+
+**AI & Agents:**
+- `agents` - AI agent configurations and settings
 - `agent_prompts` - Prompt templates for different agent operations
 - `agent_usage` - Usage tracking and analytics
 - `agent_generations` - Generated content storage
-- Supporting tables for users, materials, tools, partners, suppliers, and content management
+- `ai_img_generation_logs` - Image processing logs and results
+
+**User Management & Permissions:**
+- `users` - User accounts and profiles
+- `user_groups` - Role-based access groups (admin, support, user, etc.)
+- `group_permissions` - Permission mappings for user groups
+- `system_features` - Available platform features and tools
+- `user_sessions` - Secure session management
+
+**Content & Resources:**
+- `materials` - Educational materials and resources
+- `tools` - Platform tools catalog (100+ tools)
+- `partners` - Business partners directory
+- `suppliers` - Supplier management (both public hub and personal)
+- `news` - News and announcements system
+- `updates` - Platform updates and changelog
+- `youtube_videos` - Video content from synchronized channels
+
+**E-commerce & Products:**
+- `products` - User product catalog with multi-channel support
+- `product_channels` - Sales channel configurations (Amazon, Mercado Livre, etc.)
+- `brands` - Brand management
+- `import_simulations` - Import/export calculation tools
+
+**Knowledge Base:**
+- `knowledge_base_docs` - Document storage with AI summaries
+- `knowledge_base_collections` - Multiple knowledge bases per user
+- `knowledge_base_doc_collections` - Document-collection relationships
 
 ## Key Components
 
 ### AI Agents System
-- **Purpose**: Amazon listing optimization through competitor review analysis
-- **Core Features**: 
-  - CSV upload from Helium10 or manual text input
-  - Analysis of competitor reviews
-  - Generation of optimized titles, bullet points, and descriptions
-  - Token usage tracking and cost monitoring
-- **Models**: Configurable OpenAI models with temperature and token limits
+- **Multi-Provider Architecture**: Support for 6 major AI providers (OpenAI, xAI/Grok, Anthropic/Claude, Google Gemini, DeepSeek, OpenRouter)
+- **Available Agents**:
+  - **Amazon Listing Optimizer**: Competitor review analysis and listing optimization
+  - **HTML Description Generator**: Product description creation
+  - **Bullet Points Generator**: Product feature optimization
+  - **Image Editors**: Main image and lifestyle model editing
+  - **Infographic Generators**: Basic and advanced infographic creation
+  - **Customer Service Agent**: Support response generation
+  - **Negative Reviews Analyzer**: Review sentiment analysis and response suggestions
+- **Advanced Features**: 
+  - Web search integration (OpenAI, Grok)
+  - Vision capabilities for image analysis
+  - Reasoning mode for complex analysis
+  - JSON structured outputs
+  - Function calling and code interpretation
+  - Knowledge base integration for context-aware responses
+- **Cost Management**: Dynamic pricing, credit system, usage tracking, and comprehensive logging
+
+### Tools Ecosystem (100+ Tools)
+- **Image Processing**: Background removal, upscaling, enhancement, logo generation
+- **Amazon Tools**: Product research, keyword analysis, review analysis, ads optimization
+- **Business Tools**: CNPJ lookup, supplier research, market analysis
+- **Import/Export Calculators**: Multiple simulation tools for different import scenarios
+- **Analytics & Reports**: Comprehensive data analysis and visualization tools
 
 ### Content Management
-- **Hub Resources**: Tools, materials, templates, prompts, partners, and suppliers (public/administrative content)
-- **News & Updates**: Publishing system with categorization and featured content
-- **Video Integration**: YouTube channel synchronization with automated content fetching
-- **User Area**: Personal content management and product catalog
-- **Supplier Management**: Two distinct areas:
-  - **Hub de Recursos / Fornecedores**: Public supplier directory for general reference
-  - **Minha Área / Meus Fornecedores**: Personal supplier management with user-specific data, brands, contacts, and files
+- **Hub Resources**: Tools catalog, materials library, AI prompts, partners directory, and public suppliers (curated content)
+- **News & Updates**: Publishing system with categorization, featured content, and modal viewing system
+- **Video Integration**: RapidAPI YouTube v2 synchronization with automated daily content fetching
+- **User Personal Area (Minha Área)**: Complete personal workspace including:
+  - Product catalog with multi-channel support (Amazon FBA/FBM, Mercado Livre, Shopee, etc.)
+  - Personal supplier management with brands, contacts, and file storage
+  - Import/export planning and documentation
+  - Personal materials and knowledge base
+  - Profile and subscription management
+- **Permission-Based Access**: Role-based content visibility and feature access control
 
 ### Admin Panel
-- **Dashboard**: Analytics and system overview
-- **User Management**: Role-based access control (admin, support, user)
-- **Content Administration**: Full CRUD operations for all resource types
-- **System Configuration**: Platform settings and AI credit management
+- **Dashboard**: Analytics, system overview, and performance monitoring
+- **User Management**: Complete user lifecycle management with role-based access control
+  - User groups: Admin, Support, Mentorados, Alunos, Pagantes, Gratuito
+  - Granular permission system with 45+ platform features
+  - Credit management and usage monitoring
+- **Content Administration**: Full CRUD operations for all content types
+  - Tools, materials, partners, suppliers, news, updates
+  - AI agent configuration and prompt management
+  - Knowledge base administration
+- **System Configuration**: 
+  - AI provider settings and API key management
+  - Platform settings and feature toggles
+  - Performance optimization controls
 
 ## Data Flow
 
@@ -65,21 +125,24 @@ The system uses PostgreSQL with the following core tables:
 6. Real-time updates via WebSocket connections
 
 ### Content Synchronization
-1. YouTube service runs scheduled sync (1x daily at 9:00 AM)
+1. **RapidAPI YouTube v2** service runs scheduled sync (1x daily at 9:00 AM)
 2. Fetches latest videos from @guilhermeavasques channel (last 30 days)
-3. Stores metadata and thumbnails in database with enhanced statistics tracking
-4. WebSocket notifications for real-time updates
-5. Content categorization and search indexing
-6. Manual sync endpoint available at /api/youtube-videos/sync for testing
-7. Advanced logging system with detailed progress tracking
+3. Intelligent data mapping: video_id, author, views, duration to database schema
+4. Stores metadata and thumbnails with enhanced statistics tracking
+5. WebSocket notifications for real-time updates
+6. Content categorization and search indexing
+7. Manual sync endpoint available at /api/youtube-videos/sync for admin testing
+8. Advanced logging system with detailed progress tracking
+9. **Migration completed** from problematic YouTube API v3 to stable RapidAPI integration
 
 ## External Dependencies
 
 ### Core Dependencies
-- **OpenAI API**: AI agent processing and content generation
-- **YouTube Data API v3**: Video content synchronization
+- **Multi-Provider AI APIs**: OpenAI, xAI (Grok), Anthropic (Claude), Google Gemini, DeepSeek, OpenRouter
+- **RapidAPI YouTube v2**: Video content synchronization (migrated from YouTube API v3)
 - **Neon Database**: Serverless PostgreSQL hosting
 - **shadcn/ui**: Component library for consistent UI
+- **Third-party Services**: Picsart API (image processing), Amazon APIs, CNPJ lookup services
 
 ### Development Tools
 - **Drizzle Kit**: Database migrations and schema management
@@ -102,10 +165,35 @@ The system uses PostgreSQL with the following core tables:
 - Database connection pooling with Neon
 
 ### Performance Optimizations
-- Query result caching with TanStack Query
-- Lazy loading for route components
-- Image optimization and CDN integration
-- WebSocket connection management
+- **Query Management**: TanStack Query with intelligent caching strategies (static: 1h, semi-static: 30min, dynamic: 5min)
+- **Route Structure**: Optimized from 76 to 69 routes (-9.2% reduction) with consolidated patterns
+- **Lazy Loading**: Route-based code splitting and component lazy loading
+- **Image Processing**: CDN integration and optimized asset delivery
+- **WebSocket Management**: Real-time connection optimization
+- **Cache System**: Enterprise-grade in-memory cache with TTL expiration and LRU eviction
+
+## Route Architecture
+
+### Optimized Route Structure (69 Routes)
+- **Main Sections**: `/ferramentas`, `/hub`, `/agentes`, `/simuladores`, `/minha-area`, `/admin`
+- **Dynamic Patterns**: Catch-all routes for scalable section management
+- **Consolidated Redirects**: Compact backward compatibility redirects
+- **Agent Routes**: Unified handling for all AI agent types
+- **Permission-Based**: Route access controlled by user permissions
+
+### Route Categories
+1. **Tools Routes (22)**: Individual tool pages with unified `/ferramentas/*` pattern
+2. **Admin Routes (14)**: Administrative functions with `/admin/*` pattern  
+3. **Simulator Routes (12)**: Import/export calculators with `/simuladores/*` pattern
+4. **Hub Routes (8)**: Public resource pages with `/hub/*` pattern
+5. **Agent Routes (6)**: AI agent interfaces with `/agentes/*` pattern
+6. **User Area Routes (4)**: Personal workspace with `/minha-area/*` catch-all
+7. **Compatibility Redirects (3)**: Backward compatibility maintenance
+
+### Future Optimization Potential
+- Simulator routes could use dynamic patterns (8 routes → 2-3 routes)
+- Admin routes have consolidation potential (14 routes → 8-10 routes)
+- Tool routes could implement dynamic routing (22 routes → 5-8 routes)
 
 ## AI Providers - Guia Completo de Uso
 
@@ -285,6 +373,7 @@ The system uses PostgreSQL with the following core tables:
 - Provider: anthropic
 - Necessita: `ANTHROPIC_API_KEY`
 - Status: Configurado e funcional
+- **Funcionalidade Especial**: Extended Thinking com controle de budget_tokens para raciocínio profundo
 
 **Google (Gemini)**
 - Provider: gemini  
@@ -295,6 +384,13 @@ The system uses PostgreSQL with the following core tables:
 - Provider: deepseek
 - Necessita: `DEEPSEEK_API_KEY` 
 - Status: Configurado e funcional
+
+**OpenRouter**
+- Provider: openrouter
+- Necessita: `OPENROUTER_API_KEY`
+- Status: Configurado e funcional
+- **Funcionalidade Especial**: Acesso a 318+ modelos dinâmicos em tempo real, incluindo modelos de última geração como x-ai/grok-4
+- **Dynamic Model Fetching**: Sistema busca modelos automaticamente da API OpenRouter sem necessidade de atualizações de código
 
 ---
 
@@ -325,6 +421,19 @@ The system uses PostgreSQL with the following core tables:
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+
+- **January 14, 2025 - 1:05 PM**: ✅ REPLIT.MD COMPREHENSIVE REVIEW AND UPDATE COMPLETED
+  - **Platform Name Updated**: "Aluno Power Platform" → "Core Guilherme Vasques" reflecting rebranding
+  - **AI Integration Corrected**: Single OpenAI → Multi-provider system (OpenAI, xAI/Grok, Anthropic, Google, DeepSeek, OpenRouter)
+  - **YouTube API Updated**: Corrected from "YouTube Data API v3" → "RapidAPI YouTube v2" (migration completed)
+  - **AI Agents Expanded**: Amazon listing only → 9 different agents documented
+  - **Database Schema Detailed**: Comprehensive schema documentation with all major table categories
+  - **Tools Ecosystem Added**: 100+ tools catalog properly documented
+  - **Permission System Documented**: Complete role-based access control explanation
+  - **Route Architecture Added**: New section documenting optimized 69-route structure
+  - **External Dependencies Updated**: All current APIs and services properly listed
+  - **Templates References Removed**: Cleaned outdated template functionality references
+  - **Advanced Features Documented**: OpenRouter dynamic models, Claude Extended Thinking, reasoning modes
 
 - **January 14, 2025 - 1:00 PM**: ✅ ROUTE STRUCTURE OPTIMIZATION COMPLETED - 80+ ROUTES REDUCED TO 69 ROUTES
   - **Complex Route Structure Simplified**: Reduced from 76 to 69 active routes (-9.2% reduction)
