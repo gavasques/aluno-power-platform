@@ -285,9 +285,8 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       const responseText = data.response;
       const creditsToDeduct = getFeatureCost(FEATURE_CODE);
 
-      // Créditos já foram deduzidos automaticamente pelo backend
-
       // Salvar log da geração (somente se usuário estiver logado)
+      // LoggingService deduze automaticamente os créditos quando creditsUsed = 0
       if (user && user.id) {
         await fetch('/api/ai-generation-logs', {
           method: 'POST',
@@ -307,9 +306,9 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
             outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
             totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
             cost: data.cost || 0,
-            creditsUsed: creditsToDeduct, // Crédito dinâmico consumido
+            creditsUsed: 0, // LoggingService deduz automaticamente quando 0
             duration: duration,
-            feature: 'bullet-points-generator'
+            feature: FEATURE_CODE
           })
         });
         

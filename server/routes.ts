@@ -3399,7 +3399,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { LoggingService } = await import('./services/loggingService');
       await LoggingService.saveAiLog(
         parseInt(userId),
-        'agents.html_descriptions', // Feature code para dedução de créditos
+        feature, // Feature code dinâmico para dedução de créditos
         prompt,
         response,
         provider,
