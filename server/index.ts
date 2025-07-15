@@ -5,6 +5,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { scheduler } from "./services/scheduler";
 import { compressionMiddleware, cacheHeaders, performanceMetrics, memoryMonitor } from "./middleware/performanceMiddleware";
+import { optimizedProductService } from "./services/OptimizedProductService";
 import { 
   securityHeaders, 
   apiLimiter, 
@@ -221,6 +222,15 @@ app.use((req, res, next) => {
     reusePort: true,
   }, async () => {
     log(`serving on port ${port}`);
+    
+    // PHASE 1 PERFORMANCE: Initialize database optimizations
+    console.log('🚀 [PERFORMANCE] Initializing Phase 1 optimizations...');
+    try {
+      await optimizedProductService.initialize();
+      console.log('✅ [PERFORMANCE] Phase 1 optimizations ready - Target: 70-80% speed improvement');
+    } catch (error) {
+      console.error('❌ [PERFORMANCE] Failed to initialize optimizations:', error);
+    }
     
     // Start the YouTube video scheduler
     scheduler.start();

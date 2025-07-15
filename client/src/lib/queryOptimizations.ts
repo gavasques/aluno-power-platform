@@ -59,6 +59,7 @@ export const QUERY_CLASSIFICATIONS = {
   '/api/tool-types': DATA_TYPES.STATIC,
   '/api/departments': DATA_TYPES.STATIC,
   '/api/materials': DATA_TYPES.SEMI_STATIC,
+  '/api/templates': DATA_TYPES.SEMI_STATIC,
   '/api/prompts': DATA_TYPES.SEMI_STATIC,
   '/api/youtube-videos': DATA_TYPES.SEMI_STATIC,
   '/api/products': DATA_TYPES.DYNAMIC,
@@ -181,7 +182,7 @@ export function warmContextCache(queryClient: QueryClient, route: string) {
     '/dashboard': ['/api/dashboard/summary', '/api/youtube-videos'],
     '/agentes': ['/api/agents', '/api/permissions/user-features'],
     '/ferramentas': ['/api/tools', '/api/tool-types'],
-    '/hub': ['/api/materials', '/api/partners'],
+    '/hub': ['/api/materials', '/api/partners', '/api/templates'],
     '/minha-area': ['/api/products', '/api/suppliers', '/api/brands'],
   };
 

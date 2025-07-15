@@ -13,6 +13,7 @@ import { Database } from '../db';
 import { suppliers, supplierContacts, supplierBrands, supplierFiles } from '@shared/schema';
 import { eq, and, desc, asc, like, ilike, or, sql, count } from 'drizzle-orm';
 import { cache } from '../cache';
+import { DatabaseOptimizationService } from './DatabaseOptimizationService';
 import { performance } from 'perf_hooks';
 
 interface PaginationOptions {
@@ -58,10 +59,12 @@ interface PerformanceMetrics {
 export class SupplierOptimizationService {
   private static instance: SupplierOptimizationService;
   private db: Database;
+  private dbOptimizationService: DatabaseOptimizationService;
   private performanceMetrics: PerformanceMetrics;
 
   private constructor(db: Database) {
     this.db = db;
+    this.dbOptimizationService = DatabaseOptimizationService.getInstance(db);
     this.performanceMetrics = {
       cacheHits: 0,
       cacheMisses: 0,
@@ -482,7 +485,8 @@ export class SupplierOptimizationService {
     try {
       console.log('🚀 Initializing supplier optimizations...');
       
-      // Database optimizations removed - handled at database level
+      await this.dbOptimizationService.initializeSupplierOptimizations();
+      await this.dbOptimizationService.setupMaintenanceTasks();
       
       console.log('✅ Supplier optimizations initialized');
     } catch (error) {
