@@ -100,7 +100,7 @@ João Silva`;
 
   return (
     <PermissionGuard 
-      featureCode="agents.amazon_customer_service"
+      featureCode="agents.customer_service"
       showMessage={true}
       message="Você não tem permissão para usar o Amazon Customer Service Email Response."
     >

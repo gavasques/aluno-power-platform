@@ -274,7 +274,7 @@ export default function AdvancedInfographicGenerator() {
 
   return (
     <PermissionGuard 
-      featureCode="agents.advanced_infographic_generator"
+      featureCode="agents.advanced_infographic"
       showMessage={true}
       message="Você não tem permissão para usar o Gerador Avançado de Infográficos."
     >

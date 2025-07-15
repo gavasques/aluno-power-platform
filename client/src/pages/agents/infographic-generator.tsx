@@ -245,7 +245,7 @@ export default function InfographicGenerator() {
 
   return (
     <PermissionGuard 
-      featureCode="agents.infographic_generator"
+      featureCode="agents.infographic_editor"
       showMessage={true}
       message="Você não tem permissão para usar o Editor de Foto Infográficos."
     >

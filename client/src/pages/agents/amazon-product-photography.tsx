@@ -147,7 +147,7 @@ export default function AmazonProductPhotography() {
 
   return (
     <PermissionGuard 
-      featureCode="agents.amazon_product_photography"
+      featureCode="agents.main_image_editor"
       showMessage={true}
       message="Você não tem permissão para usar o Editor de Imagem Principal."
     >

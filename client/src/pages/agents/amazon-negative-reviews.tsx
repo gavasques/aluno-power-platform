@@ -85,7 +85,7 @@ const AmazonNegativeReviews = () => {
 
   return (
     <PermissionGuard 
-      featureCode="agents.amazon_negative_reviews"
+      featureCode="agents.negative_reviews"
       showMessage={true}
       message="Você não tem permissão para usar o Amazon Negative Reviews Response."
     >
