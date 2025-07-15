@@ -2191,37 +2191,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       global.customerServiceSessions.set(sessionId, sessionData);
 
-      // Descontar créditos e salvar no AI Generation Logs
-      let creditsUsed = 0;
-      try {
-        // Importar CreditService
-        const { CreditService } = await import('./services/creditService');
-        creditsUsed = await CreditService.deductCredits(user.id, 'agents.amazon_customer_service');
-      } catch (creditError) {
-        console.error('❌ [CREDIT] Failed to deduct credits:', creditError);
-      }
-
+      // Save to AI Generation Logs with AUTOMATIC CREDIT DEDUCTION
       try {
         const fullPrompt = `${systemPrompt}\n\n${processedPrompt}`;
         
-        await db.insert(aiGenerationLogs).values({
-          userId: user.id,
-          provider: 'anthropic',
-          model: agent.model || 'claude-sonnet-4-20250514',
-          prompt: fullPrompt,
-          response: responseText,
-          promptCharacters: fullPrompt.length,
-          responseCharacters: responseText.length,
+        const { LoggingService } = await import('./services/loggingService');
+        await LoggingService.saveAiLog(
+          user.id,
+          'agents.amazon_customer_service', // Feature code para dedução de créditos
+          fullPrompt,
+          responseText,
+          'anthropic',
+          agent.model || 'claude-sonnet-4-20250514',
           inputTokens,
           outputTokens,
           totalTokens,
-          cost: totalCost.toString(),
-          creditsUsed: creditsUsed.toString(),
-          duration: processingTime,
-          feature: 'amazon-customer-service'
-        });
+          totalCost,
+          0, // creditsUsed = 0 para dedução automática
+          processingTime
+        );
         
-        console.log(`💾 [AI_LOG] Saved generation log - User: ${user.id}, Model: ${agent.model}, Cost: $${totalCost.toFixed(6)}, Credits: ${creditsUsed}, Tokens: ${totalTokens}`);
+        console.log(`💾 [AI_LOG] Saved generation log - User: ${user.id}, Model: ${agent.model}, Cost: $${totalCost.toFixed(6)}, Tokens: ${totalTokens}`);
       } catch (logError) {
         console.error('❌ [AI_LOG] Error saving generation log:', logError);
       }
@@ -2392,56 +2382,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       global.negativeReviewsSessions.set(sessionId, sessionData);
 
-      // Save to AI Generation Logs table
+      // Save to AI Generation Logs with AUTOMATIC CREDIT DEDUCTION
       try {
         const fullPrompt = `${systemPrompt.content}\n\n${processedPrompt}`;
         
-        await db.insert(aiGenerationLogs).values({
-          userId: user.id,
-          provider: 'anthropic',
-          model: agent.model || 'claude-sonnet-4-20250514',
-          prompt: fullPrompt,
-          response: responseText,
-          promptCharacters: fullPrompt.length,
-          responseCharacters: responseText.length,
+        const { LoggingService } = await import('./services/loggingService');
+        await LoggingService.saveAiLog(
+          user.id,
+          'agents.customer_service', // Feature code para dedução de créditos
+          fullPrompt,
+          responseText,
+          'anthropic',
+          agent.model || 'claude-sonnet-4-20250514',
           inputTokens,
           outputTokens,
           totalTokens,
-          cost: totalCost.toString(),
-          duration: processingTime,
-          feature: 'amazon-negative-reviews',
-          metadata: {
-            agentType: 'amazon-negative-reviews',
-            agentName: 'Amazon Negative Reviews Response',
-            sessionId: sessionId,
-            requestData: {
-              sellerName: sellerName,
-              sellerPosition: sellerPosition,
-              customerName: customerName,
-              orderId: orderId,
-              userInfo: userInfo || 'Nenhuma informação adicional',
-              negativeReviewLength: negativeReview.length,
-              negativeReviewPreview: negativeReview.substring(0, 100) + (negativeReview.length > 100 ? '...' : '')
-            },
-            responseAnalysis: {
-              responseLength: responseText.length,
-              responseWordCount: responseText.split(' ').length,
-              sentiment: 'Resposta estratégica para avaliação negativa',
-              urgency: 'Alta - Resposta para feedback negativo',
-              keyElements: ['Empatia', 'Responsabilização', 'Solução proativa', 'Convite para nova experiência'],
-              responseStructure: ['Abertura empática', 'Responsabilização genuína', 'Solução proativa', 'Educação sutil', 'Convite futuro', 'Fechamento caloroso']
-            },
-            performance: {
-              inputTokens,
-              outputTokens,
-              totalTokens,
-              costUsd: totalCost,
-              processingTimeMs: processingTime,
-              tokensPerSecond: Math.round(totalTokens / (processingTime / 1000)),
-              efficiency: totalTokens > 3000 ? 'High' : totalTokens > 1500 ? 'Medium' : 'Low'
-            }
-          }
-        });
+          totalCost,
+          0, // creditsUsed = 0 para dedução automática
+          processingTime
+        );
         
         console.log(`📊 [AI_GENERATION_LOG] Amazon Negative Reviews processado`);
         console.log(`📊 [DETAILS] Cliente: ${customerName} | Pedido: ${orderId} | Vendedor: ${sellerName}`);
@@ -3050,23 +3009,22 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           ? (imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`)
           : imageUrl;
         
-        // Save to ai_generation_logs with correct structure
-        await db.insert(aiGenerationLogs).values({
-          userId: user.id,
-          provider: 'openai',
-          model: 'gpt-image-1',
-          prompt: userPrompt,
-          response: 'Imagem lifestyle gerada com sucesso via GPT-Image-1',
-          promptCharacters: userPrompt.length,
-          responseCharacters: 50, // Fixed value for image generation
-          inputTokens: response.usage?.input_tokens || 0,
-          outputTokens: response.usage?.output_tokens || 0,
-          totalTokens: response.usage?.total_tokens || 0,
-          cost: realCost.toString(),
-          duration: processingTime * 1000, // Convert to milliseconds
-          feature: 'lifestyle-with-model',
-          createdAt: new Date()
-        });
+        // Save to ai_generation_logs with AUTOMATIC CREDIT DEDUCTION
+        const { LoggingService } = await import('./services/loggingService');
+        await LoggingService.saveAiLog(
+          user.id,
+          'agents.lifestyle_model', // Feature code para dedução de créditos
+          userPrompt,
+          'Imagem lifestyle gerada com sucesso via GPT-Image-1',
+          'openai',
+          'gpt-image-1',
+          response.usage?.input_tokens || 0,
+          response.usage?.output_tokens || 0,
+          response.usage?.total_tokens || 0,
+          realCost,
+          0, // creditsUsed = 0 para dedução automática
+          processingTime * 1000
+        );
 
         // Return result
         return res.json({
@@ -3236,23 +3194,22 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           ? (imageBase64.startsWith('data:') ? imageBase64 : `data:image/png;base64,${imageBase64}`)
           : imageUrl;
         
-        // Save to ai_generation_logs with correct structure
-        await db.insert(aiGenerationLogs).values({
-          userId: user.id,
-          provider: 'openai',
-          model: 'gpt-image-1',
-          prompt: systemPrompt.content,
-          response: 'Imagem gerada com sucesso via GPT-Image-1',
-          promptCharacters: systemPrompt.content.length,
-          responseCharacters: 50, // Fixed value for image generation
-          inputTokens: response.usage?.input_tokens || 0,
-          outputTokens: response.usage?.output_tokens || 0,
-          totalTokens: response.usage?.total_tokens || 0,
-          cost: realCost.toString(),
-          duration: processingTime * 1000, // Convert to milliseconds
-          feature: 'gerador-imagem-principal',
-          createdAt: new Date()
-        });
+        // Save to ai_generation_logs with AUTOMATIC CREDIT DEDUCTION
+        const { LoggingService } = await import('./services/loggingService');
+        await LoggingService.saveAiLog(
+          user.id,
+          'agents.main_image_editor', // Feature code para dedução de créditos
+          systemPrompt.content,
+          'Imagem gerada com sucesso via GPT-Image-1',
+          'openai',
+          'gpt-image-1',
+          response.usage?.input_tokens || 0,
+          response.usage?.output_tokens || 0,
+          response.usage?.total_tokens || 0,
+          realCost,
+          0, // creditsUsed = 0 para dedução automática
+          processingTime * 1000
+        );
 
         // Return result
         res.json({
@@ -3438,14 +3395,28 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         feature: feature || 'html-description'
       };
 
-      const [savedLog] = await db.insert(aiGenerationLogs).values(logData).returning();
+      // Use LoggingService for automatic credit deduction instead of direct insertion
+      const { LoggingService } = await import('./services/loggingService');
+      await LoggingService.saveAiLog(
+        parseInt(userId),
+        'agents.html_descriptions', // Feature code para dedução de créditos
+        prompt,
+        response,
+        provider,
+        model,
+        inputTokens || 0,
+        outputTokens || 0,
+        totalTokens || 0,
+        parseFloat(cost) || 0,
+        0, // creditsUsed = 0 para dedução automática
+        duration || 0
+      );
 
       console.log(`💾 [AI_LOG] Saved generation log - User: ${userId}, Model: ${model}, Cost: $${cost}, Characters: ${responseCharacters}`);
 
       res.json({ 
         success: true, 
-        message: 'AI generation log saved successfully',
-        logId: savedLog.id
+        message: 'AI generation log saved successfully'
       });
     } catch (error: any) {
       console.error('Error saving AI generation log:', error);
@@ -6603,23 +6574,22 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         cost: cost.toFixed(6)
       });
 
-      // Save to ai_generation_logs
-      await db.insert(aiGenerationLogs).values({
-        userId: user.id,
-        provider: 'anthropic',
-        model: 'claude-sonnet-4-20250514',
-        prompt: systemPrompt,
-        response: responseText,
-        promptCharacters: systemPrompt.length,
-        responseCharacters: responseText.length,
-        inputTokens: inputTokens,
-        outputTokens: outputTokens,
-        totalTokens: inputTokens + outputTokens,
-        cost: cost.toString(),
-        duration: processingTime * 1000,
-        feature: 'infographic-generator-step1',
-        createdAt: new Date()
-      });
+      // Save to ai_generation_logs with AUTOMATIC CREDIT DEDUCTION
+      const { LoggingService } = await import('./services/loggingService');
+      await LoggingService.saveAiLog(
+        user.id,
+        'agents.infographic_editor', // Feature code para dedução de créditos
+        systemPrompt,
+        responseText,
+        'anthropic',
+        'claude-sonnet-4-20250514',
+        inputTokens,
+        outputTokens,
+        inputTokens + outputTokens,
+        cost,
+        0, // creditsUsed = 0 para dedução automática
+        processingTime * 1000
+      );
 
       console.log('✅ [INFOGRAPHIC_STEP1] Text optimization completed:', {
         processingTime: `${processingTime}s`,
@@ -6833,23 +6803,22 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         usage: response.usage
       });
 
-      // Save to ai_generation_logs  
-      await db.insert(aiGenerationLogs).values({
-        userId: user.id,
-        provider: 'openai',
-        model: 'gpt-image-1',
-        prompt: userPrompt,
-        response: `${images.length} infográficos gerados com sucesso via GPT-Image-1`,
-        promptCharacters: userPrompt.length,
-        responseCharacters: 50, // Fixed value for image generation
-        inputTokens: 0, // Image generation doesn't provide standard token usage
-        outputTokens: 0, // Image generation doesn't provide standard token usage
-        totalTokens: response.usage?.total_tokens || 0,
-        cost: realCost.toString(),
-        duration: processingTime * 1000,
-        feature: 'infographic-generator-step2',
-        createdAt: new Date()
-      });
+      // Save to ai_generation_logs with AUTOMATIC CREDIT DEDUCTION  
+      const { LoggingService } = await import('./services/loggingService');
+      await LoggingService.saveAiLog(
+        user.id,
+        'agents.advanced_infographic', // Feature code para dedução de créditos
+        userPrompt,
+        `${images.length} infográficos gerados com sucesso via GPT-Image-1`,
+        'openai',
+        'gpt-image-1',
+        0, // Image generation doesn't provide standard token usage
+        0, // Image generation doesn't provide standard token usage
+        response.usage?.total_tokens || 0,
+        realCost,
+        0, // creditsUsed = 0 para dedução automática
+        processingTime * 1000
+      );
 
       res.json({
         success: true,
