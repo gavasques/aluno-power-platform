@@ -3072,7 +3072,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  app.post('/api/agents/amazon-product-photography/process', photographyUpload.single('image'), requireAuth, async (req: any, res: any) => {
+  app.post('/api/agents/amazon-product-photography/process', requireAuth, photographyUpload.single('image'), async (req: any, res: any) => {
     console.log('🌐 [REQUEST] POST /api/agents/amazon-product-photography/process');
     
     try {
