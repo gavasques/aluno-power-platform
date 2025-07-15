@@ -3,6 +3,7 @@ import Layout from '@/components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
 import type { Agent } from '@shared/schema';
 import { List, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 import { useBulletPointsGenerator } from '@/hooks/useBulletPointsGenerator';
 import { BulletPointsInput } from '@/components/agents/BulletPointsInput';
