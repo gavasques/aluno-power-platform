@@ -11,6 +11,7 @@ import { useLocation, useParams } from "wouter";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Store } from "lucide-react";
+import { logger } from "@/utils/logger";
 
 const ProductForm = () => {
   const [, setLocation] = useLocation();
@@ -366,8 +367,8 @@ const ProductForm = () => {
             </Button>
             <Button 
               onClick={() => {
-                console.log('Save button clicked');
-                console.log('Current product data:', productData);
+                logger.debug('Save button clicked');
+                logger.debug('Current product data:', productData);
                 handleSubmit();
               }} 
               size="lg"

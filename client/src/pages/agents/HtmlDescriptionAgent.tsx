@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import { AgentCostDisplay } from '@/components/AgentCostDisplay';
+import { logger } from '@/utils/logger';
 
 const HtmlDescriptionAgent: React.FC = () => {
   const [textInput, setTextInput] = useState('');
@@ -290,7 +291,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
           })
         });
       } catch (creditError) {
-        console.error('Erro ao descontar crédito:', creditError);
+        logger.error('Erro ao descontar crédito:', creditError);
       }
 
       // Salvar log da geração de IA com crédito dinâmico
@@ -319,16 +320,16 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
           })
         });
         
-        console.log(`💾 Log salvo - Usuário: ${user.id}, Créditos: ${creditsToDeduct}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
+        logger.debug(`💾 Log salvo - Usuário: ${user.id}, Créditos: ${creditsToDeduct}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
       } catch (logError) {
-        console.error('Erro ao salvar log de IA:', logError);
+        logger.error('Erro ao salvar log de IA:', logError);
       }
 
       setGeneratedDescription(responseText);
       setShowReplaceDialog(true);
       
     } catch (error) {
-      console.error('Erro ao gerar descrição:', error);
+      logger.error('Erro ao gerar descrição:', error);
       toast({
         variant: "destructive",
         title: "❌ Erro",

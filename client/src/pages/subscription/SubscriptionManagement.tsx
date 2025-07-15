@@ -9,6 +9,7 @@ import { Loader2, CreditCard, Calendar, AlertTriangle, ExternalLink, Crown, Zap 
 import { stripeService, formatStripeAmount, formatStripeDate, getSubscriptionStatusBadge } from '@/services/stripeService';
 import { SUBSCRIPTION_PLANS, formatPrice } from '../../../shared/stripe-config';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 import { StripeCheckoutModal } from '@/components/stripe/StripeCheckoutModal';
 
 export default function SubscriptionManagement() {
@@ -36,7 +37,7 @@ export default function SubscriptionManagement() {
       return stripeService.createSubscriptionCheckout({ priceId });
     },
     onSuccess: (data) => {
-      console.log('🔍 [SUBSCRIPTION MANAGEMENT] Checkout URL received:', data.url);
+      logger.debug('🔍 [SUBSCRIPTION MANAGEMENT] Checkout URL received:', data.url);
       
       // Set URL and open modal (which will redirect automatically)
       setCheckoutUrl(data.url);
@@ -44,7 +45,7 @@ export default function SubscriptionManagement() {
       setLoadingCheckout(null);
     },
     onError: (error) => {
-      console.error('Checkout error:', error);
+      logger.error('Checkout error:', error);
       toast({
         title: 'Erro no checkout',
         description: error instanceof Error ? error.message : 'Erro desconhecido',

@@ -29,6 +29,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import type { News, Update } from '@shared/schema';
 import { PromotionalBanners } from '@/components/banners/PromotionalBanners';
+import { logger } from '@/utils/logger';
 
 interface DashboardData {
   user: {
@@ -112,7 +113,7 @@ const UserDashboard = () => {
         return await response.json();
       }
     } catch (error) {
-      console.error('Erro ao buscar notícia completa:', error);
+      logger.error('Erro ao buscar notícia completa:', error);
     }
     return null;
   };
@@ -129,7 +130,7 @@ const UserDashboard = () => {
         return await response.json();
       }
     } catch (error) {
-      console.error('Erro ao buscar novidade completa:', error);
+      logger.error('Erro ao buscar novidade completa:', error);
     }
     return null;
   };
@@ -485,12 +486,12 @@ const UserDashboard = () => {
                         variant="ghost" 
                         size="sm"
                         onClick={async () => {
-                          console.log('🔄 Invalidating cache and refreshing videos...');
+                          logger.debug('🔄 Invalidating cache and refreshing videos...');
                           // Invalidar cache primeiro
                           await queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
                           // Depois refetch
                           await refetchVideos();
-                          console.log('✅ Videos refreshed!');
+                          logger.debug('✅ Videos refreshed!');
                         }}
                         className="text-gray-400 hover:text-white"
                       >

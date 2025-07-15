@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 export interface WebSocketMessage {
   type: string;
@@ -21,31 +22,31 @@ export function useWebSocket() {
     const host = window.location.host;
     const wsUrl = `${protocol}//${host}/ws`;
 
-    console.log(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
-    console.log(`   🌐 URL: ${wsUrl}`);
-    console.log(`   📍 Protocol: ${protocol}`);
-    console.log(`   🏠 Host: ${host}`);
+    logger.debug(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
+    logger.debug(`   🌐 URL: ${wsUrl}`);
+    logger.debug(`   📍 Protocol: ${protocol}`);
+    logger.debug(`   🏠 Host: ${host}`);
 
     const connectWebSocket = () => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        console.log(`🔌 [WS_CLIENT] Already connected, skipping connection attempt`);
+        logger.debug(`🔌 [WS_CLIENT] Already connected, skipping connection attempt`);
         return;
       }
 
       const attemptNumber = connectionAttempts + 1;
       setConnectionAttempts(attemptNumber);
 
-      console.log(`🚀 [WS_CLIENT] Connection attempt #${attemptNumber}`);
-      console.log(`   🌐 Attempting WebSocket connection to: ${wsUrl}`);
+      logger.debug(`🚀 [WS_CLIENT] Connection attempt #${attemptNumber}`);
+      logger.debug(`   🌐 Attempting WebSocket connection to: ${wsUrl}`);
 
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = (event) => {
-        console.log(`✅ [WS_CLIENT] WebSocket connected successfully`);
-        console.log(`   🔗 Ready State: ${ws.readyState}`);
-        console.log(`   📊 Attempt #${attemptNumber} succeeded`);
-        console.log(`   🕐 Event:`, event);
+        logger.debug(`✅ [WS_CLIENT] WebSocket connected successfully`);
+        logger.debug(`   🔗 Ready State: ${ws.readyState}`);
+        logger.debug(`   📊 Attempt #${attemptNumber} succeeded`);
+        logger.debug(`   🕐 Event:`, event);
 
         setIsConnected(true);
         setConnectionAttempts(0); // Reset counter on successful connection
@@ -61,7 +62,7 @@ export function useWebSocket() {
       ws.onmessage = (event) => {
         try {
           const data: WebSocketMessage = JSON.parse(event.data);
-          console.log(`📨 [WS_CLIENT] Message received:`, {
+          logger.debug(`📨 [WS_CLIENT] Message received:`, {
             type: data.type,
             timestamp: data.timestamp,
             messageId: (data as any).messageId,
@@ -95,50 +96,50 @@ export function useWebSocket() {
               break;
 
             case 'connection':
-              console.log(`🎉 [WS_CLIENT] Connection established:`, data.data.message);
+              logger.debug(`🎉 [WS_CLIENT] Connection established:`, data.data.message);
               break;
 
             default:
-              console.log('Unknown WebSocket message type:', data.type);
+              logger.debug('Unknown WebSocket message type:', data.type);
           }
 
           setLastMessage(data);
         } catch (error) {
-          console.error(`❌ [WS_CLIENT] Error parsing message:`, error);
-          console.error(`   📄 Raw data:`, event.data);
+          logger.error(`❌ [WS_CLIENT] Error parsing message:`, error);
+          logger.error(`   📄 Raw data:`, event.data);
           setLastError(`Failed to parse message: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       };
 
       ws.onclose = (event) => {
-        console.log(`🔌 [WS_CLIENT] WebSocket disconnected`);
-        console.log(`   📋 Code: ${event.code}`);
-        console.log(`   💬 Reason: ${event.reason || 'No reason provided'}`);
-        console.log(`   🧹 Clean: ${event.wasClean}`);
-        console.log(`   🔗 Ready State: ${ws.readyState}`);
+        logger.debug(`🔌 [WS_CLIENT] WebSocket disconnected`);
+        logger.debug(`   📋 Code: ${event.code}`);
+        logger.debug(`   💬 Reason: ${event.reason || 'No reason provided'}`);
+        logger.debug(`   🧹 Clean: ${event.wasClean}`);
+        logger.debug(`   🔗 Ready State: ${ws.readyState}`);
 
         setIsConnected(false);
 
         // Don't reconnect if it was a clean close
         if (!event.wasClean && attemptNumber < 10) {
           const backoffDelay = Math.min(1000 * Math.pow(2, attemptNumber - 1), 30000);
-          console.log(`🔄 [WS_CLIENT] Scheduling reconnection in ${backoffDelay}ms (attempt ${attemptNumber + 1})`);
+          logger.debug(`🔄 [WS_CLIENT] Scheduling reconnection in ${backoffDelay}ms (attempt ${attemptNumber + 1})`);
 
           reconnectTimeoutRef.current = setTimeout(() => {
-            console.log(`⏰ [WS_CLIENT] Reconnection timeout triggered`);
+            logger.debug(`⏰ [WS_CLIENT] Reconnection timeout triggered`);
             connectWebSocket();
           }, backoffDelay);
         } else if (attemptNumber >= 10) {
-          console.log(`❌ [WS_CLIENT] Max reconnection attempts reached (${attemptNumber})`);
+          logger.debug(`❌ [WS_CLIENT] Max reconnection attempts reached (${attemptNumber})`);
           setLastError('Max reconnection attempts reached');
         }
       };
 
       ws.onerror = (error) => {
-        console.error(`💥 [WS_CLIENT] WebSocket error:`, error);
-        console.error(`   📊 Current State: ${ws.readyState}`);
-        console.error(`   🔗 URL: ${wsUrl}`);
-        console.error(`   📈 Attempt: ${attemptNumber}`);
+        logger.error(`💥 [WS_CLIENT] WebSocket error:`, error);
+        logger.error(`   📊 Current State: ${ws.readyState}`);
+        logger.error(`   🔗 URL: ${wsUrl}`);
+        logger.error(`   📈 Attempt: ${attemptNumber}`);
 
         setIsConnected(false);
         setLastError(`WebSocket error on attempt ${attemptNumber}`);
@@ -148,16 +149,16 @@ export function useWebSocket() {
     connectWebSocket();
 
     return () => {
-      console.log(`🧹 [WS_CLIENT] Cleaning up WebSocket connection`);
+      logger.debug(`🧹 [WS_CLIENT] Cleaning up WebSocket connection`);
 
       if (reconnectTimeoutRef.current) {
-        console.log(`⏰ [WS_CLIENT] Clearing reconnection timeout`);
+        logger.debug(`⏰ [WS_CLIENT] Clearing reconnection timeout`);
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
       }
 
       if (wsRef.current) {
-        console.log(`🔌 [WS_CLIENT] Closing WebSocket connection (state: ${wsRef.current.readyState})`);
+        logger.debug(`🔌 [WS_CLIENT] Closing WebSocket connection (state: ${wsRef.current.readyState})`);
         wsRef.current.close(1000, 'Component unmounting');
         wsRef.current = null;
       }
@@ -171,10 +172,10 @@ export function useWebSocket() {
         clientTimestamp: new Date().toISOString()
       };
 
-      console.log(`📤 [WS_CLIENT] Sending message:`, messageData);
+      logger.debug(`📤 [WS_CLIENT] Sending message:`, messageData);
       wsRef.current.send(JSON.stringify(messageData));
     } else {
-      console.warn(`⚠️ [WS_CLIENT] Cannot send message - WebSocket not connected (state: ${wsRef.current?.readyState || 'null'})`);
+      logger.warn(`⚠️ [WS_CLIENT] Cannot send message - WebSocket not connected (state: ${wsRef.current?.readyState || 'null'})`);
       setLastError('Cannot send message - not connected');
     }
   }, []);

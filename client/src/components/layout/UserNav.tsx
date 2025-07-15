@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { User, LogOut, Home, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { logger } from "@/utils/logger";
 
 export function UserNav() {
   const { user, logout } = useAuth();
@@ -84,10 +85,10 @@ export function UserNav() {
         <DropdownMenuItem 
           className="flex items-center gap-3 px-4 py-2 text-destructive hover:bg-neutral-100 rounded transition cursor-pointer"
           onClick={() => {
-            console.log('🔥 UserNav: Logout button clicked');
-            console.log('🔥 UserNav: Current user before logout:', user);
+            logger.debug('🔥 UserNav: Logout button clicked');
+            logger.debug('🔥 UserNav: Current user before logout:', user);
             logout();
-            console.log('🔥 UserNav: Logout function called, redirecting to /login');
+            logger.debug('🔥 UserNav: Logout function called, redirecting to /login');
           }}
         >
           <LogOut className="h-5 w-5" />

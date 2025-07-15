@@ -32,6 +32,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, FileText, Hash, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 // Schema de validação seguindo princípios DRY
 const amazonListingSchema = z.object({
@@ -243,7 +244,7 @@ export function AmazonListingOptimizerForm() {
   const onSubmit = (data: AmazonListingFormData) => {
     handleFormChange(data);
     // TODO: Implementar processamento final
-    console.log('Processando listing:', data);
+    logger.debug('Processando listing:', data);
   };
 
   return (

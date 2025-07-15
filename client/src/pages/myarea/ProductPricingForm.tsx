@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
+import { logger } from "@/utils/logger";
 import { 
   PricingProduct, 
   ProductCosts, 
@@ -138,9 +139,9 @@ export default function ProductPricingForm() {
   // Update form when product is loaded
   useEffect(() => {
     if (existingProduct && isEditing) {
-      console.log("🔍 [PRODUCT_PRICING_FORM] Existing product data:", existingProduct);
-      console.log("🔍 [PRODUCT_PRICING_FORM] BrandId from product:", existingProduct?.brandId);
-      console.log("🔍 [PRODUCT_PRICING_FORM] Category from product:", existingProduct?.category);
+      logger.debug("🔍 [PRODUCT_PRICING_FORM] Existing product data:", existingProduct);
+      logger.debug("🔍 [PRODUCT_PRICING_FORM] BrandId from product:", existingProduct?.brandId);
+      logger.debug("🔍 [PRODUCT_PRICING_FORM] Category from product:", existingProduct?.category);
       
       // Map existing product data to form structure
       const productDimensions = existingProduct?.dimensions || {
@@ -171,7 +172,7 @@ export default function ProductPricingForm() {
         channels: existingProduct?.channels || [],
       });
       
-      console.log("🔍 [PRODUCT_PRICING_FORM] Form reset values:", {
+      logger.debug("🔍 [PRODUCT_PRICING_FORM] Form reset values:", {
         brandId: existingProduct?.brandId?.toString() || "",
         categoryId: existingProduct?.category?.toString() || "",
         sku: existingProduct?.sku || existingProduct?.internalCode || ""
@@ -181,11 +182,11 @@ export default function ProductPricingForm() {
       setTimeout(() => {
         if (existingProduct?.brandId) {
           form.setValue("brandId", existingProduct.brandId.toString());
-          console.log("🔍 [PRODUCT_PRICING_FORM] Force set brandId:", existingProduct.brandId.toString());
+          logger.debug("🔍 [PRODUCT_PRICING_FORM] Force set brandId:", existingProduct.brandId.toString());
         }
         if (existingProduct?.category) {
           form.setValue("categoryId", existingProduct.category.toString());
-          console.log("🔍 [PRODUCT_PRICING_FORM] Force set categoryId:", existingProduct.category.toString());
+          logger.debug("🔍 [PRODUCT_PRICING_FORM] Force set categoryId:", existingProduct.category.toString());
         }
       }, 100);
       

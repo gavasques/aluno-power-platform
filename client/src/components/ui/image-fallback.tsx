@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { ImageIcon } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface ImageFallbackProps {
   src: string;
@@ -43,12 +44,12 @@ export const ImageFallback: React.FC<ImageFallbackProps> = ({
         alt={alt}
         className={className}
         onError={() => {
-          console.error('Erro ao carregar imagem:', src);
+          logger.error('Erro ao carregar imagem:', src);
           setHasError(true);
           setIsLoading(false);
         }}
         onLoad={() => {
-          console.log('Imagem carregada com sucesso:', src);
+          logger.debug('Imagem carregada com sucesso:', src);
           setIsLoading(false);
         }}
         style={{ display: isLoading ? 'none' : 'block' }}

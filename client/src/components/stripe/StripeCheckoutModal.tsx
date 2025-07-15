@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface StripeCheckoutModalProps {
   open: boolean;
@@ -13,7 +14,7 @@ export function StripeCheckoutModal({ open, onClose, checkoutUrl }: StripeChecko
 
   useEffect(() => {
     if (open && checkoutUrl) {
-      console.log('🔍 [STRIPE MODAL] Opening checkout modal with URL:', checkoutUrl);
+      logger.debug('🔍 [STRIPE MODAL] Opening checkout modal with URL:', checkoutUrl);
       
       // Redirect immediately in the same window
       window.location.href = checkoutUrl;

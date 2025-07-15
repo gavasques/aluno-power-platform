@@ -19,6 +19,7 @@ import {
 import { useSuppliers } from "@/contexts/SuppliersContext";
 import { SUPPLIER_CATEGORIES, SUPPLIER_DEPARTMENTS, FILE_TYPES, SupplierFile } from "@/types/supplier";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 interface SupplierContact {
   name: string;
@@ -80,7 +81,7 @@ const SupplierForm = () => {
         const data = await response.json();
         setDepartments(data);
       } catch (error) {
-        console.error('Erro ao carregar departamentos:', error);
+        logger.error('Erro ao carregar departamentos:', error);
       }
     };
 

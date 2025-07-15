@@ -22,6 +22,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation } from '@tanstack/react-query';
+import { logger } from '@/utils/logger';
 
 // Reusable components
 import ImageUploadComponent from './ImageUploadComponent';
@@ -77,7 +78,7 @@ const BackgroundRemovalTool: React.FC = () => {
   // Process image mutation
   const processImageMutation = useMutation({
     mutationFn: async ({ imageData, fileName, parameters }: { imageData: string; fileName: string; parameters: BackgroundRemovalParams }) => {
-      console.log('🚀 [BACKGROUND_REMOVAL] Starting processing...');
+      logger.debug('🚀 [BACKGROUND_REMOVAL] Starting processing...');
       
       const response = await fetch('/api/picsart/background-removal', {
         method: 'POST',
@@ -98,7 +99,7 @@ const BackgroundRemovalTool: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log('✅ [BACKGROUND_REMOVAL] Processing completed successfully');
+      logger.debug('✅ [BACKGROUND_REMOVAL] Processing completed successfully');
       return data;
     },
     onSuccess: (data) => {
@@ -111,7 +112,7 @@ const BackgroundRemovalTool: React.FC = () => {
       });
     },
     onError: (error) => {
-      console.error('❌ [BACKGROUND_REMOVAL] Processing failed:', error);
+      logger.error('❌ [BACKGROUND_REMOVAL] Processing failed:', error);
       
       toast({
         title: "Erro no processamento",
@@ -127,7 +128,7 @@ const BackgroundRemovalTool: React.FC = () => {
     setFileName(fileName);
     setResult(null);
     setProcessingProgress(0);
-    console.log(`📤 [BACKGROUND_REMOVAL] Image selected: ${fileName}`);
+    logger.debug(`📤 [BACKGROUND_REMOVAL] Image selected: ${fileName}`);
   }, []);
 
   // Handle image removal

@@ -10,6 +10,7 @@ import { CategorySection } from "./CategorySection";
 import { VideoCard } from "./VideoCard";
 import { useToast } from "@/hooks/use-toast";
 import type { YoutubeVideo } from "@shared/schema";
+import { logger } from "@/utils/logger";
 
 // Custom hook for video data processing
 function useVideoData() {
@@ -102,7 +103,7 @@ export function VideosSection() {
   }, [groupedVideos]);
 
   const handleShowMore = (category: string) => {
-    console.log('Show more videos for category:', category);
+    logger.debug('Show more videos for category:', category);
     setShowMoreCategories(prev => ({
       ...prev,
       [category]: !prev[category]

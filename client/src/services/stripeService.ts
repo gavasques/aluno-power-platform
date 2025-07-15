@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/queryClient';
+import { logger } from '@/utils/logger';
 
 export interface CreateCheckoutRequest {
   priceId: string;
@@ -85,7 +86,7 @@ export interface ProductsResponse {
 export const stripeService = {
   // Create subscription checkout session
   createSubscriptionCheckout: async (request: CreateCheckoutRequest): Promise<CheckoutResponse> => {
-    console.log('🔍 [STRIPE SERVICE] Creating subscription checkout:', request);
+    logger.debug('🔍 [STRIPE SERVICE] Creating subscription checkout:', request);
     
     const response = await fetch('/api/stripe/create-checkout-session', {
       method: 'POST',
@@ -100,19 +101,19 @@ export const stripeService = {
       })
     });
 
-    console.log('🔍 [STRIPE SERVICE] Response status:', response.status);
+    logger.debug('🔍 [STRIPE SERVICE] Response status:', response.status);
 
     if (!response.ok) {
       const error = await response.json();
-      console.error('🔍 [STRIPE SERVICE] Error response:', error);
+      logger.error('🔍 [STRIPE SERVICE] Error response:', error);
       throw new Error(error.details || 'Failed to create subscription checkout');
     }
 
     const data = await response.json();
-    console.log('🔍 [STRIPE SERVICE] Success response:', data);
+    logger.debug('🔍 [STRIPE SERVICE] Success response:', data);
     
     const result = { sessionId: data.sessionId || '', url: data.checkoutUrl };
-    console.log('🔍 [STRIPE SERVICE] Returning data:', result);
+    logger.debug('🔍 [STRIPE SERVICE] Returning data:', result);
     
     return result;
   },

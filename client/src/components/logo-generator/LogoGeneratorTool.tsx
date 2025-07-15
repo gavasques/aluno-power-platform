@@ -23,6 +23,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import LogoHistoryModal from './LogoHistoryModal';
+import { logger } from "@/utils/logger";
 
 interface LogoGeneratorToolProps {
   onLogoGenerated?: (results: any) => void;
@@ -127,7 +128,7 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
     setLogos([]);
 
     try {
-      console.log('🎨 Sending logo generation request:', formData);
+      logger.debug('🎨 Sending logo generation request:', formData);
       
       const response = await fetch('/api/picsart/logo-generation', {
         method: 'POST',
@@ -139,7 +140,7 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
       });
 
       const result = await response.json();
-      console.log('🎨 Logo generation response:', result);
+      logger.debug('🎨 Logo generation response:', result);
 
       if (!response.ok) {
         throw new Error(result.error || result.details || 'Falha na geração de logomarcas');
@@ -157,7 +158,7 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
         throw new Error('Resposta inválida do servidor');
       }
     } catch (error) {
-      console.error('❌ Logo generation error:', error);
+      logger.error('❌ Logo generation error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       setError(errorMessage);
       
@@ -185,7 +186,7 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
         description: `Logo ${index + 1} baixado com sucesso`,
       });
     } catch (error) {
-      console.error('❌ Download error:', error);
+      logger.error('❌ Download error:', error);
       toast({
         title: "Erro no download",
         description: "Falha ao baixar a imagem",

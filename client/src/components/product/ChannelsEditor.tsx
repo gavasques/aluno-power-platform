@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
+import { logger } from '@/utils/logger';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, Package, Store, Check, X, TrendingUp, TrendingDown, ChevronDown, ChevronRight } from 'lucide-react';
@@ -412,7 +413,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       setIsSaving(true);
       const token = localStorage.getItem("auth_token");
 
-      console.log("🔍 [CHANNELS_FORM] Form data being submitted:", data);
+      logger.debug("🔍 [CHANNELS_FORM] Form data being submitted:", data);
 
       // Validate that active channels have price filled
       const validationErrors: string[] = [];
@@ -474,7 +475,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
 
       onClose();
     } catch (error) {
-      console.error('Error updating channels:', error);
+      logger.error('Error updating channels:', error);
       toast({
         title: "Erro ao atualizar",
         description: "Não foi possível atualizar os canais de venda.",

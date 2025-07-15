@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGetFeatureCost } from '@/hooks/useFeatureCosts';
 import type { Agent } from '@shared/schema';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
+import { logger } from '@/utils/logger';
 
 interface UseBulletPointsGeneratorProps {
   agent?: Agent;
@@ -189,7 +190,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         temperature: typeof agent.temperature === 'string' ? parseFloat(agent.temperature) : agent.temperature || 0.7,
         maxTokens: agent.maxTokens || 2000
       };
-      console.log('🔧 [BULLET_POINTS] Auto-updating agent config:', newConfig);
+      logger.debug('🔧 [BULLET_POINTS] Auto-updating agent config:', newConfig);
       setAgentConfig(newConfig);
     }
   }, [agent]);
@@ -202,7 +203,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         temperature: typeof agent.temperature === 'string' ? parseFloat(agent.temperature) : agent.temperature || 0.7,
         maxTokens: agent.maxTokens || 2000
       };
-      console.log('🔧 [BULLET_POINTS] Manual update agent config:', newConfig);
+      logger.debug('🔧 [BULLET_POINTS] Manual update agent config:', newConfig);
       setAgentConfig(newConfig);
     }
   }, [agent]);
@@ -239,7 +240,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         maxTokens: agentData.maxTokens || 2000
       };
 
-      console.log('🚀 [BULLET_POINTS] Starting generation with FRESH config:', currentConfig);
+      logger.debug('🚀 [BULLET_POINTS] Starting generation with FRESH config:', currentConfig);
       setAgentConfig(currentConfig); // Atualizar o estado local também
 
       const startTime = Date.now();
@@ -312,7 +313,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
           })
         });
         
-        console.log(`💾 Log salvo - Usuário: ${user.id}, Créditos: ${creditsToDeduct}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
+        logger.debug(`💾 Log salvo - Usuário: ${user.id}, Créditos: ${creditsToDeduct}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
       }
 
       if (state.bulletPointsOutput && state.bulletPointsOutput.trim()) {

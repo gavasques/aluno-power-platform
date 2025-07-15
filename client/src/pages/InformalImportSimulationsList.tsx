@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Trash2, Edit, Plus, Search, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { logger } from '@/utils/logger';
 
 interface InformalImportSimulation {
   id: number;
@@ -52,10 +53,10 @@ const InformalImportSimulationsList: React.FC = () => {
 
   // Log results
   if (error) {
-    console.error('❌ FRONTEND - Erro ao carregar simulações de importação simplificada:', error);
+    logger.error('❌ FRONTEND - Erro ao carregar simulações de importação simplificada:', error);
   }
   if (simulations.length > 0) {
-    console.log('✅ FRONTEND - Simulações de importação simplificada carregadas:', simulations.length);
+    logger.debug('✅ FRONTEND - Simulações de importação simplificada carregadas:', simulations.length);
   }
 
   // Delete simulation mutation

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import type { Department } from '@shared/schema';
+import { logger } from '@/utils/logger';
 
 interface SupplierEditDialogProps {
   open: boolean;
@@ -67,7 +68,7 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
 
   useEffect(() => {
     if (supplier && open) {
-      console.log('🔥 SupplierEditDialog: Loading data for supplier:', supplier.tradeName);
+      logger.debug('🔥 SupplierEditDialog: Loading data for supplier:', supplier.tradeName);
       setFormData({
         tradeName: supplier.tradeName || '',
         corporateName: supplier.corporateName || '',
@@ -93,7 +94,7 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🔥 SupplierEditDialog: Submitting form data:', formData);
+    logger.debug('🔥 SupplierEditDialog: Submitting form data:', formData);
     
     try {
       await onSave(formData);
@@ -103,7 +104,7 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
       });
       onClose();
     } catch (error) {
-      console.error('Error updating supplier:', error);
+      logger.error('Error updating supplier:', error);
       toast({
         title: "Erro",
         description: "Erro ao atualizar fornecedor. Tente novamente.",

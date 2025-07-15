@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { User } from '@shared/schema';
 import { AuthService, LoginCredentials, RegisterData } from '@/services/authService';
 import { prefetchUserData, backgroundPrefetch } from '@/lib/prefetch';
+import { logger } from '@/utils/logger';
 
 // Interfaces seguindo Single Responsibility Principle
 interface AuthState {
@@ -145,7 +146,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Logout action seguindo Single Responsibility
   const logout = (): void => {
-    AuthService.logout().catch(console.error);
+    AuthService.logout().catch(logger.error);
     TokenManager.removeToken();
     setState({
       user: null,
