@@ -2198,7 +2198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.amazon_customer_service', // Feature code para dedução de créditos
+          'agents.customer_service', // Feature code para dedução de créditos
           fullPrompt,
           responseText,
           'anthropic',
@@ -2389,7 +2389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.customer_service', // Feature code para dedução de créditos
+          'agents.negative_reviews', // Feature code para dedução de créditos
           fullPrompt,
           responseText,
           'anthropic',
