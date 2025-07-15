@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useGetFeatureCost } from '@/hooks/useFeatureCosts';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 import type { Agent } from '@shared/schema';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
 import { logger } from '@/utils/logger';
@@ -173,7 +173,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
 
   const { toast } = useToast();
   const { user } = useAuth();
-  const { getFeatureCost } = useGetFeatureCost();
+  const { logAIGeneration, getFeatureCost } = useCreditSystem();
   
   const FEATURE_CODE = 'agents.bullet_points';
 
@@ -283,37 +283,20 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       const endTime = Date.now();
       const duration = endTime - startTime;
       const responseText = data.response;
-      const creditsToDeduct = getFeatureCost(FEATURE_CODE);
 
-      // Salvar log da geração (somente se usuário estiver logado)
-      // LoggingService deduze automaticamente os créditos quando creditsUsed = 0
-      if (user && user.id) {
-        await fetch('/api/ai-generation-logs', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            provider: currentConfig.provider,
-            model: currentConfig.model,
-            prompt: prompt,
-            response: responseText,
-            promptCharacters: prompt.length,
-            responseCharacters: responseText.length,
-            inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
-            outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
-            totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
-            cost: data.cost || 0,
-            creditsUsed: 0, // LoggingService deduz automaticamente quando 0
-            duration: duration,
-            feature: FEATURE_CODE
-          })
-        });
-        
-        logger.debug(`💾 Log salvo - Usuário: ${user.id}, Créditos: ${creditsToDeduct}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
-      }
+      // Salvar log da geração com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: currentConfig.provider,
+        model: currentConfig.model,
+        prompt: prompt,
+        response: responseText,
+        inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
+        outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
+        totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
+        cost: data.cost || 0,
+        duration: duration
+      });
 
       if (state.bulletPointsOutput && state.bulletPointsOutput.trim()) {
         updateState({ 

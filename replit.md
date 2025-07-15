@@ -326,6 +326,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 15, 2025 - 7:40 PM**: ✅ CRITICAL BULLET POINTS AGENT CREDIT BUG FIXED - UNIFIED CREDIT SYSTEM IMPLEMENTED
+  - **Bug Root Causes Fixed**: 
+    - ❌ Endpoint `/api/ai-generation-logs` was hardcoded with 'agents.html_descriptions' instead of dynamic feature
+    - ❌ Hook useBulletPointsGenerator was sending 'bullet-points-generator' instead of 'agents.bullet_points' 
+    - ❌ System wasn't using LoggingService automatic credit deduction pattern
+  - **Critical Fixes Applied**:
+    - ✅ Fixed endpoint to use dynamic `feature` parameter from frontend
+    - ✅ Corrected hook to use proper feature code 'agents.bullet_points'
+    - ✅ Implemented LoggingService automatic deduction with creditsUsed = 0
+    - ✅ Created unified `useCreditSystem` hook to prevent future inconsistencies
+  - **Code Quality Improvements**:
+    - ✅ Created comprehensive credit system documentation in docs/CREDIT_SYSTEM_STANDARDS.md
+    - ✅ Identified 3 inconsistent credit patterns across 6+ agent files requiring refactoring
+    - ✅ Established standardized approach using useCreditSystem hook for all agents
+    - ✅ Removed duplicate credit verification and logging code
+  - **System Status**: Bullet points agent now correctly deducts 1 credit per use with unified credit system foundation
+
 - **January 15, 2025 - 6:25 PM**: ✅ PRODUCTION CONSOLE LOGS SECURITY FIX - ALL SENSITIVE LOGS REMOVED FROM PRODUCTION
   - **Security Issue Fixed**: Console logs containing sensitive information (tokens, emails, user IDs, permissions) were appearing in production
   - **Authentication Logs Removed**: Eliminated all console.log statements from AuthContext, AuthService with token and user data
