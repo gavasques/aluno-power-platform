@@ -47,17 +47,39 @@ export const fileToBase64 = (file: File): Promise<string> => {
 };
 
 export const downloadImage = async (url: string, filename: string): Promise<void> => {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  
-  const downloadUrl = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = downloadUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(downloadUrl);
+  try {
+    let blob: Blob;
+    
+    // Verifica se é uma URL base64
+    if (url.startsWith('data:')) {
+      // Converte base64 para blob
+      const response = await fetch(url);
+      blob = await response.blob();
+    } else {
+      // Para URLs normais, faz fetch
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Erro no download: ${response.status}`);
+      }
+      blob = await response.blob();
+    }
+    
+    // Cria o link de download
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+    
+    console.log(`✅ Download concluído: ${filename}`);
+  } catch (error) {
+    console.error('❌ Erro no download:', error);
+    throw error;
+  }
 };
 
 export const getAuthHeaders = () => {

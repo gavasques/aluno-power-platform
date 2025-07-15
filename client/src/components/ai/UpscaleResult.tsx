@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Download, Eye, ArrowLeftRight, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { downloadImage, createImageViewer, generateFileName } from "@/utils/upscale";
+import { useToast } from "@/hooks/use-toast";
 import type { UpscaleData, UploadedImage } from "@/types/upscale";
 
 interface UpscaleResultProps {
@@ -138,16 +139,18 @@ const ActionButtons = ({
   scale,
   onDownload,
   onView,
+  isDownloading,
 }: {
   result: UpscaleData;
   scale: number;
   onDownload: () => void;
   onView: () => void;
+  isDownloading: boolean;
 }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-    <Button onClick={onDownload} className="w-full">
+    <Button onClick={onDownload} className="w-full" disabled={isDownloading}>
       <Download className="h-4 w-4 mr-2" />
-      Baixar Imagem
+      {isDownloading ? 'Baixando...' : 'Baixar Imagem'}
     </Button>
     <Button variant="outline" onClick={onView} className="w-full">
       <Eye className="h-4 w-4 mr-2" />
@@ -185,12 +188,30 @@ export function UpscaleResult({
   originalImage,
   scale,
 }: UpscaleResultProps) {
+  const { toast } = useToast();
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const handleDownload = async () => {
+    if (isDownloading) return;
+    
+    setIsDownloading(true);
     try {
       const filename = generateFileName(scale);
       await downloadImage(result.upscaledImageUrl, filename);
+      
+      toast({
+        title: "Download concluído!",
+        description: `Imagem salva como ${filename}`,
+      });
     } catch (error) {
       console.error('Download error:', error);
+      toast({
+        title: "Erro no download",
+        description: "Não foi possível baixar a imagem. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -223,6 +244,7 @@ export function UpscaleResult({
         scale={scale}
         onDownload={handleDownload}
         onView={handleView}
+        isDownloading={isDownloading}
       />
     </div>
   );
