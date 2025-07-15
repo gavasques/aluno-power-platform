@@ -125,7 +125,7 @@ export default function Ferramentas() {
   const { hasAccess, isLoading, userFeatures } = usePermissions();
   const { toast } = useToast();
   
-  console.log('🔍 [FERRAMENTAS] User features:', userFeatures);
+
 
   const handleAccessDenied = (toolName: string) => {
     toast({

@@ -358,7 +358,6 @@ export default function ProductBasicDataTab({
                   <FormLabel>Marca</FormLabel>
                   <Select 
                     onValueChange={(value) => {
-                      console.log("🔍 [BRAND_SELECT] onValueChange called with:", value);
                       field.onChange(value);
                     }}
                     value={field.value || ""}
@@ -452,7 +451,6 @@ export default function ProductBasicDataTab({
                   </FormLabel>
                   <Select 
                     onValueChange={(value) => {
-                      console.log("🔍 [CATEGORY_SELECT] onValueChange called with:", value);
                       field.onChange(value);
                     }}
                     value={field.value || ""}

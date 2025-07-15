@@ -48,7 +48,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
       const token = localStorage.getItem("auth_token");
       const costs = form.getValues("costs");
       
-      console.log('🔍 [SAVE COSTS] Form values:', costs);
+
       
       // Convert Brazilian format (comma) to US format (dot) before sending
       const costsData = {
@@ -59,7 +59,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
         }
       };
       
-      console.log('🔍 [SAVE COSTS] Data to send:', costsData);
+
 
       const response = await fetch(`/api/products/${productId}`, {
         method: "PUT",

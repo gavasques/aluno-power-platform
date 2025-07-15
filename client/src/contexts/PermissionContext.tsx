@@ -29,10 +29,8 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
       const response = await apiRequest('/api/permissions/user-features', {
         method: 'GET',
       }) as { features: string[] };
-      console.log('🔍 [PERMISSION_CONTEXT] Features from API:', response.features);
       setFeatures(response.features || []);
     } catch (error) {
-      console.error('Error fetching user features:', error);
       setFeatures([]);
     } finally {
       setIsLoading(false);
@@ -56,7 +54,6 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
       }) as { hasAccess: boolean };
       return response.hasAccess || false;
     } catch (error) {
-      console.error('Error checking access:', error);
       return false;
     }
   };

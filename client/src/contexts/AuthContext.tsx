@@ -60,23 +60,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Authentication check seguindo Open/Closed Principle
   const checkAuthStatus = async (): Promise<void> => {
-    console.log('🔥 AuthContext: useEffect triggered, checking authentication state');
-
     if (TokenManager.wasLoggedOut()) {
-      console.log('🔥 AuthContext: User explicitly logged out, staying logged out');
       setState(prev => ({ ...prev, isLoading: false }));
       return;
     }
 
     const token = TokenManager.getToken();
-    console.log('🔥 AuthContext: Token from storage:', {
-      hasToken: !!token,
-      tokenLength: token?.length,
-      tokenPreview: token?.substring(0, 10) + '...'
-    });
 
     if (!token) {
-      console.log('🔥 AuthContext: No token found, setting as logged out');
       setState(prev => ({ 
         ...prev, 
         isLoading: false,
@@ -88,14 +79,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
-      console.log('🔥 AuthContext: Attempting to get current user with token');
       const user = await AuthService.getCurrentUser();
-      
-      console.log('🔥 AuthContext: User validation result:', {
-        userFound: !!user,
-        userId: user?.id,
-        userEmail: user?.email
-      });
 
       if (user) {
         setState({
@@ -106,16 +90,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
         
         // Prefetch user-specific data after successful authentication
-        prefetchUserData().catch(error => 
-          console.warn('Failed to prefetch user data:', error)
-        );
+        prefetchUserData().catch(() => {
+          // Silent error handling
+        });
       } else {
         throw new Error('No user returned from API');
       }
     } catch (error) {
-      console.log('🔥 AuthContext: Authentication failed, clearing token:', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
       TokenManager.removeToken();
       setState({
         user: null,
