@@ -210,7 +210,7 @@ Garantia de 12 meses`;
     }
 
     // Validar se usuário tem créditos suficientes
-    const userBalance = creditsData?.data?.balance || 0;
+    const userBalance = creditsData?.balance?.currentBalance || 0;
     const creditValidation = canProcess(FEATURE_CODE, userBalance);
     
     if (!creditValidation.canProcess) {
