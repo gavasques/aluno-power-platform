@@ -25,173 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-import { useGetFeatureCost, useCanProcessFeature } from "@/hooks/useFeatureCosts";
-// Importação dinâmica do jsPDF para evitar problemas de SSR
-const loadJsPDF = async () => {
-  const { default: jsPDF } = await import('jspdf');
-  return jsPDF;
-};
-
-// Função para baixar conteúdo como TXT
-const downloadTXT = (results: any, formData: any) => {
-  if (!results) return;
-  
-  let content = `RELATÓRIO DE OTIMIZAÇÃO AMAZON LISTINGS\n`;
-  content += `===========================================\n\n`;
-  content += `Data de Geração: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
-  
-  content += `DADOS DO PRODUTO:\n`;
-  content += `-----------------\n`;
-  content += `Nome do Produto: ${formData.productName}\n`;
-  content += `Marca: ${formData.brand}\n`;
-  content += `Categoria: ${formData.category}\n`;
-  content += `Público Alvo: ${formData.targetAudience}\n`;
-  content += `Palavras-chave: ${formData.keywords}\n`;
-  content += `Long Tail Keywords: ${formData.longTailKeywords}\n\n`;
-  
-  if (results.analysis) {
-    content += `ANÁLISE DE AVALIAÇÕES DOS CONCORRENTES:\n`;
-    content += `======================================\n`;
-    content += `${results.analysis}\n\n`;
-  }
-  
-  if (results.titles) {
-    content += `TÍTULOS OTIMIZADOS:\n`;
-    content += `==================\n`;
-    content += `${results.titles}\n\n`;
-  }
-  
-  if (results.bulletPoints) {
-    content += `BULLET POINTS:\n`;
-    content += `=============\n`;
-    content += `${results.bulletPoints}\n\n`;
-  }
-  
-  if (results.description) {
-    content += `DESCRIÇÃO COMPLETA:\n`;
-    content += `==================\n`;
-    content += `${results.description}\n\n`;
-  }
-  
-  content += `---\nRelatório gerado pelo Core Guilherme Vasques\n`;
-  
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `amazon-listing-${formData.productName.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.txt`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
-// Função para baixar conteúdo como PDF
-const downloadPDF = async (results: any, formData: any) => {
-  if (!results) return;
-  
-  try {
-    const jsPDF = await loadJsPDF();
-    const pdf = new jsPDF();
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const margin = 20;
-  const maxWidth = pageWidth - 2 * margin;
-  let yPosition = 30;
-  
-  // Função para adicionar texto com quebra de linha
-  const addTextWithWrap = (text: string, fontSize = 10) => {
-    pdf.setFontSize(fontSize);
-    const lines = pdf.splitTextToSize(text, maxWidth);
-    pdf.text(lines, margin, yPosition);
-    yPosition += lines.length * (fontSize * 0.5) + 5;
-    
-    // Verificar se precisa de nova página
-    if (yPosition > pdf.internal.pageSize.getHeight() - 30) {
-      pdf.addPage();
-      yPosition = 30;
-    }
-  };
-  
-  // Título principal
-  pdf.setFontSize(18);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('RELATÓRIO DE OTIMIZAÇÃO AMAZON LISTINGS', margin, yPosition);
-  yPosition += 20;
-  
-  // Data de geração
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(`Data de Geração: ${new Date().toLocaleDateString('pt-BR')}`, margin, yPosition);
-  yPosition += 15;
-  
-  // Dados do produto
-  pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('DADOS DO PRODUTO:', margin, yPosition);
-  yPosition += 10;
-  
-  pdf.setFont('helvetica', 'normal');
-  addTextWithWrap(`Nome do Produto: ${formData.productName}`);
-  addTextWithWrap(`Marca: ${formData.brand}`);
-  addTextWithWrap(`Categoria: ${formData.category}`);
-  addTextWithWrap(`Público Alvo: ${formData.targetAudience}`);
-  addTextWithWrap(`Palavras-chave: ${formData.keywords}`);
-  addTextWithWrap(`Long Tail Keywords: ${formData.longTailKeywords}`);
-  yPosition += 10;
-  
-  // Análise
-  if (results.analysis) {
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('ANÁLISE DE AVALIAÇÕES DOS CONCORRENTES:', margin, yPosition);
-    yPosition += 10;
-    addTextWithWrap(results.analysis);
-    yPosition += 10;
-  }
-  
-  // Títulos
-  if (results.titles) {
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('TÍTULOS OTIMIZADOS:', margin, yPosition);
-    yPosition += 10;
-    addTextWithWrap(results.titles);
-    yPosition += 10;
-  }
-  
-  // Bullet Points
-  if (results.bulletPoints) {
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('BULLET POINTS:', margin, yPosition);
-    yPosition += 10;
-    addTextWithWrap(results.bulletPoints);
-    yPosition += 10;
-  }
-  
-  // Descrição
-  if (results.description) {
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('DESCRIÇÃO COMPLETA:', margin, yPosition);
-    yPosition += 10;
-    addTextWithWrap(results.description);
-  }
-  
-  // Rodapé
-  const totalPages = pdf.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    pdf.setPage(i);
-    pdf.setFontSize(8);
-    pdf.setFont('helvetica', 'italic');
-    pdf.text('Relatório gerado pelo Core Guilherme Vasques', margin, pdf.internal.pageSize.getHeight() - 10);
-  }
-  
-  pdf.save(`amazon-listing-${formData.productName.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.pdf`);
-  } catch (error) {
-    console.error('Erro ao gerar PDF:', error);
-    throw error;
-  }
-};
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
 
 export default function AmazonListingsOptimizerNew() {
   const [location, navigate] = useLocation();
@@ -209,14 +43,6 @@ export default function AmazonListingsOptimizerNew() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [reviewsTab, setReviewsTab] = useState<"upload" | "text">("upload");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [results, setResults] = useState<any>(null);
-  const [showResults, setShowResults] = useState(false);
-
-  // Dynamic cost checking
-  const { getFeatureCost } = useGetFeatureCost();
-  const { canProcess } = useCanProcessFeature();
-  const featureName = "agents.amazon_listing";
-  const requiredCredits = getFeatureCost(featureName) || 3; // Default to 3 if not found
 
   // Buscar departamentos da API
   const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
@@ -242,92 +68,8 @@ export default function AmazonListingsOptimizerNew() {
 
   const { toast } = useToast();
 
-  // Validação simplificada do formulário - apenas verificar se tem dados das avaliações
-  const isFormValid = (() => {
-    const hasProductName = !!formData.productName?.trim();
-    const hasReviewsData = reviewsTab === "text" ? !!formData.reviewsData?.trim() : uploadedFiles.length > 0;
-    
-    console.log('Form validation:', {
-      hasProductName,
-      hasReviewsData,
-      reviewsTab,
-      uploadedFilesCount: uploadedFiles.length,
-      reviewsDataLength: formData.reviewsData?.length || 0,
-      productName: formData.productName
-    });
-    
-    return hasProductName && hasReviewsData;
-  })();
-
-  // Funções de download
-  const handleDownloadPDF = async () => {
-    if (!results) {
-      toast({
-        title: "Erro no download",
-        description: "Nenhum resultado disponível para download.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      await downloadPDF(results, formData);
-      toast({
-        title: "Download iniciado",
-        description: "O relatório PDF está sendo baixado...",
-      });
-    } catch (error) {
-      console.error('Erro no download PDF:', error);
-      toast({
-        title: "Erro no download",
-        description: "Ocorreu um erro ao gerar o PDF.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleDownloadTXT = () => {
-    if (!results) {
-      toast({
-        title: "Erro no download",
-        description: "Nenhum resultado disponível para download.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      downloadTXT(results, formData);
-      toast({
-        title: "Download iniciado",
-        description: "O arquivo TXT está sendo baixado...",
-      });
-    } catch (error) {
-      console.error('Erro no download TXT:', error);
-      toast({
-        title: "Erro no download",
-        description: "Ocorreu um erro ao gerar o arquivo TXT.",
-        variant: "destructive"
-      });
-    }
-  };
-
   const handleSubmit = async () => {
-    console.log('handleSubmit called');
-    console.log('isFormValid:', isFormValid);
-    console.log('formData:', formData);
-    console.log('reviewsTab:', reviewsTab);
-    console.log('uploadedFiles:', uploadedFiles);
-    
-    if (!isFormValid) {
-      console.log('Form is not valid, returning early');
-      toast({
-        title: "Formulário incompleto",
-        description: "Preencha pelo menos o nome do produto e adicione dados das avaliações dos concorrentes.",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!isFormValid) return;
     
     // Verificar créditos primeiro
     try {
@@ -337,13 +79,10 @@ export default function AmazonListingsOptimizerNew() {
         }
       });
       
-      const userBalance = dashboardResponse.user.creditBalance;
-      const { canProcess: canAfford, missingCredits } = canProcess(featureName, userBalance);
-      
-      if (!canAfford) {
+      if (dashboardResponse.user.creditBalance < 10) {
         toast({
           title: "Créditos insuficientes",
-          description: `Você precisa de ${requiredCredits} créditos para usar este agente. Você tem ${userBalance} créditos (faltam ${missingCredits}).`,
+          description: "Você precisa de pelo menos 10 créditos para usar este agente.",
           variant: "destructive"
         });
         return;
@@ -382,10 +121,7 @@ export default function AmazonListingsOptimizerNew() {
       // 1. Criar sessão
       const sessionResponse = await fetch('/api/amazon-sessions', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idUsuario: 'user-1' })
       });
       
@@ -399,10 +135,7 @@ export default function AmazonListingsOptimizerNew() {
       // 2. Salvar dados do produto
       const dataResponse = await fetch(`/api/amazon-sessions/${sessionId}/data`, {
         method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submitData)
       });
       
@@ -413,10 +146,7 @@ export default function AmazonListingsOptimizerNew() {
       // 3. Processar Etapa 1 (Análise)
       const step1Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step1`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
       
       if (!step1Response.ok) {
@@ -426,10 +156,7 @@ export default function AmazonListingsOptimizerNew() {
       // 4. Processar Etapa 2 (Títulos)
       const step2Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step2`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
       
       if (!step2Response.ok) {
@@ -439,10 +166,7 @@ export default function AmazonListingsOptimizerNew() {
       // 5. Processar Etapa 3 (Bullet Points)
       const step3Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step3`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
       
       if (!step3Response.ok) {
@@ -452,10 +176,7 @@ export default function AmazonListingsOptimizerNew() {
       // 6. Processar Etapa 4 (Descrição)
       const step4Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step4`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
       
       if (!step4Response.ok) {
@@ -471,7 +192,7 @@ export default function AmazonListingsOptimizerNew() {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           },
           body: JSON.stringify({
-            amount: requiredCredits,
+            amount: 10,
             reason: 'Amazon Listings Optimizer - Otimização de listagem'
           })
         });
@@ -489,7 +210,7 @@ export default function AmazonListingsOptimizerNew() {
           },
           body: JSON.stringify({
             feature: 'agents.amazon_listing',
-            creditsUsed: requiredCredits,
+            creditsUsed: 10,
             prompt: `Produto: ${formData.productName}`,
             response: 'Listagem otimizada gerada',
             provider: 'openai',
@@ -500,31 +221,8 @@ export default function AmazonListingsOptimizerNew() {
         console.error('Erro ao registrar log:', logError);
       }
       
-      // 9. Obter dados das respostas e exibir resultados
-      const step1Data = await step1Response.json();
-      const step2Data = await step2Response.json();
-      const step3Data = await step3Response.json();
-      const step4Data = await step4Response.json();
-      
-      console.log('Dados processados:', { step1Data, step2Data, step3Data, step4Data });
-      
-      // Extrair conteúdo real das respostas
-      const resultData = {
-        sessionId: sessionId,
-        analysis: step1Data?.result || step1Data?.analysis || "Análise concluída",
-        titles: step2Data?.result || step2Data?.titles || "Títulos gerados",
-        bulletPoints: step3Data?.result || step3Data?.bulletPoints || "Bullet points gerados",
-        description: step4Data?.result || step4Data?.description || "Descrição gerada"
-      };
-      
-      setResults(resultData);
-      setShowResults(true);
-      
-      toast({
-        title: "Listagem otimizada com sucesso!",
-        description: "Sua listagem foi processada e otimizada com IA. Verifique os resultados abaixo.",
-        variant: "default"
-      });
+      // 9. Navegar para resultados
+      navigate(`/agents/amazon-listings-optimizer/result?session=${sessionId}`);
       
     } catch (error) {
       console.error("Error processing:", error);
@@ -538,48 +236,56 @@ export default function AmazonListingsOptimizerNew() {
     }
   };
 
+  const isFormValid = formData.productName && formData.brand && formData.category && 
+    (reviewsTab === "text" ? formData.reviewsData : uploadedFiles.length > 0);
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1600px] mx-auto px-2 sm:px-3 py-2 space-y-2">
-        {/* Header - COMPACTO */}
-        <div className="flex items-center space-x-3 mb-2">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center space-x-4 mb-6">
           <Link href="/agentes">
-            <Button variant="ghost" size="sm" className="h-8 px-2">
-              <ArrowLeft className="h-3 w-3 mr-1" />
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar aos Agentes
             </Button>
           </Link>
-          <div className="flex items-center space-x-2">
-            <ShoppingCart className="h-5 w-5 text-orange-500" />
+          <div className="flex items-center space-x-3">
+            <ShoppingCart className="h-8 w-8 text-orange-500" />
             <div>
-              <h1 className="text-lg font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900">
                 Amazon Listings Optimizer
               </h1>
-              <p className="text-xs text-gray-600">
+              <p className="text-gray-600">
                 Otimize suas listagens da Amazon com análise de avaliações dos concorrentes
               </p>
             </div>
           </div>
         </div>
 
-        {/* Credit Cost Warning - COMPACTO */}
-        <Alert className="border-orange-200 bg-orange-50 py-2">
-          <AlertCircle className="h-3 w-3 text-orange-600" />
-          <AlertDescription className="text-orange-800 text-sm">
-            <strong>Custo:</strong> Este agente consome <strong>{requiredCredits} créditos</strong> por otimização. Verifique seu saldo antes de prosseguir.
+        {/* Credit Cost Warning */}
+        <Alert className="border-orange-200 bg-orange-50">
+          <AlertCircle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
+            <strong>Custo:</strong> Este agente consome <strong>10 créditos</strong> por otimização. Verifique seu saldo antes de prosseguir.
           </AlertDescription>
         </Alert>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            {/* Main Form - COMPACTO */}
+        <PermissionGuard 
+          featureCode="agents.amazon_listing"
+          showMessage={true}
+          message="Você não tem permissão para usar o Amazon Listings Optimizer."
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Form */}
             <div className="lg:col-span-2">
               <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Informações do Produto</CardTitle>
+                <CardHeader>
+                  <CardTitle>Informações do Produto</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-6">
                   {/* Product Name and Brand */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="productName">Nome do Produto *</Label>
                       <Input
@@ -611,7 +317,7 @@ export default function AmazonListingsOptimizerNew() {
                   </div>
 
                   {/* Category and Target Audience */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="category">Categoria *</Label>
                       <Select
@@ -654,7 +360,7 @@ export default function AmazonListingsOptimizerNew() {
                   </div>
 
                   {/* Keywords */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="keywords">Palavras-chave Principais</Label>
                       <Input
@@ -693,7 +399,7 @@ export default function AmazonListingsOptimizerNew() {
                       value={formData.features}
                       onChange={(e) => handleInputChange("features", e.target.value.slice(0, 8000))}
                       placeholder="Ex: 30h de bateria, resistente à água, design ergonômico, conexão Bluetooth 5.0, cancelamento ativo de ruído..."
-                      rows={4}
+                      rows={6}
                       maxLength={8000}
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -711,8 +417,8 @@ export default function AmazonListingsOptimizerNew() {
                         <TabsTrigger value="text">Texto Manual</TabsTrigger>
                       </TabsList>
                       
-                      <TabsContent value="upload" className="space-y-2">
-                        <div className="border-2 border-dashed border-blue-300 rounded-lg p-3 bg-blue-50">
+                      <TabsContent value="upload" className="space-y-4">
+                        <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 bg-blue-50">
                           <div className="text-center">
                             <Upload className="mx-auto h-12 w-12 text-blue-500 mb-4" />
                             <div className="relative">
@@ -792,7 +498,7 @@ export default function AmazonListingsOptimizerNew() {
                       ) : (
                         <>
                           <Sparkles className="h-4 w-4 mr-2" />
-                          Otimizar Listagem ({requiredCredits} créditos)
+                          Otimizar Listagem (10 créditos)
                         </>
                       )}
                     </Button>
@@ -801,57 +507,57 @@ export default function AmazonListingsOptimizerNew() {
               </Card>
             </div>
 
-            {/* Sidebar - COMPACTO */}
-            <div className="space-y-2">
+            {/* Sidebar */}
+            <div className="space-y-6">
               <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center space-x-2 text-sm">
-                    <Info className="h-3 w-3" />
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Info className="h-5 w-5" />
                     Como Funciona
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <Badge variant="outline" className="text-xs">1</Badge>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline">1</Badge>
                     <div>
-                      <h4 className="font-medium text-xs">Análise de Avaliações</h4>
-                      <p className="text-xs text-muted-foreground">
+                      <h4 className="font-medium">Análise de Avaliações</h4>
+                      <p className="text-sm text-muted-foreground">
                         Analisamos as avaliações dos concorrentes para identificar pontos fortes e fracos
                       </p>
                     </div>
                   </div>
                   
-                  <Separator className="my-1" />
+                  <Separator />
                   
-                  <div className="flex items-start gap-2">
-                    <Badge variant="outline" className="text-xs">2</Badge>
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline">2</Badge>
                     <div>
-                      <h4 className="font-medium text-xs">Geração de Títulos</h4>
-                      <p className="text-xs text-muted-foreground">
+                      <h4 className="font-medium">Geração de Títulos</h4>
+                      <p className="text-sm text-muted-foreground">
                         Criamos títulos otimizados baseados na análise e suas palavras-chave
                       </p>
                     </div>
                   </div>
 
-                  <Separator className="my-1" />
+                  <Separator />
                   
-                  <div className="flex items-start gap-2">
-                    <Badge variant="outline" className="text-xs">3</Badge>
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline">3</Badge>
                     <div>
-                      <h4 className="font-medium text-xs">Geração de Bullet Points</h4>
-                      <p className="text-xs text-muted-foreground">
+                      <h4 className="font-medium">Geração de Bullet Points</h4>
+                      <p className="text-sm text-muted-foreground">
                         Desenvolvemos bullet points persuasivos usando dados da análise e títulos gerados
                       </p>
                     </div>
                   </div>
                   
-                  <Separator className="my-1" />
+                  <Separator />
                   
-                  <div className="flex items-start gap-2">
-                    <Badge variant="outline" className="text-xs">4</Badge>
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline">4</Badge>
                     <div>
-                      <h4 className="font-medium text-xs">Descrição Completa</h4>
-                      <p className="text-xs text-muted-foreground">
+                      <h4 className="font-medium">Descrição Completa</h4>
+                      <p className="text-sm text-muted-foreground">
                         Criamos uma descrição otimizada integrando todas as etapas anteriores
                       </p>
                     </div>
@@ -860,117 +566,27 @@ export default function AmazonListingsOptimizerNew() {
               </Card>
 
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Dicas</CardTitle>
+                <CardHeader>
+                  <CardTitle>Dicas</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-1.5">
+                <CardContent className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-green-500" />
-                    <span className="text-xs">Use dados reais do Helium10</span>
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">Use dados reais do Helium10</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-green-500" />
-                    <span className="text-xs">Inclua palavras-chave relevantes</span>
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">Inclua palavras-chave relevantes</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-green-500" />
-                    <span className="text-xs">Defina seu público-alvo</span>
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">Defina seu público-alvo</span>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </div>
-
-          {/* Results Section */}
-          {showResults && results && (
-            <div className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    <span>Resultados da Otimização</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Step 1: Analysis */}
-                  {results.analysis && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
-                        <Badge variant="outline">1</Badge>
-                        <span>Análise de Avaliações</span>
-                      </h3>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <pre className="text-sm whitespace-pre-wrap">{results.analysis}</pre>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Step 2: Titles */}
-                  {results.titles && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
-                        <Badge variant="outline">2</Badge>
-                        <span>Títulos Otimizados</span>
-                      </h3>
-                      <div className="space-y-2">
-                        {results.titles.split('\n').filter((title: string) => title.trim()).map((title: string, index: number) => (
-                          <div key={index} className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                            <span className="text-sm font-medium">{title.trim()}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Step 3: Bullet Points */}
-                  {results.bulletPoints && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
-                        <Badge variant="outline">3</Badge>
-                        <span>Bullet Points</span>
-                      </h3>
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <pre className="text-sm whitespace-pre-wrap">{results.bulletPoints}</pre>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Step 4: Description */}
-                  {results.description && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-3 flex items-center space-x-2">
-                        <Badge variant="outline">4</Badge>
-                        <span>Descrição Completa</span>
-                      </h3>
-                      <div className="bg-purple-50 p-4 rounded-lg">
-                        <pre className="text-sm whitespace-pre-wrap">{results.description}</pre>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Download Buttons */}
-                  <div className="flex justify-center gap-4 pt-4">
-                    <Button
-                      onClick={handleDownloadPDF}
-                      size="lg"
-                      variant="default"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Baixar PDF
-                    </Button>
-                    <Button
-                      onClick={handleDownloadTXT}
-                      size="lg"
-                      variant="outline"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Baixar TXT
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+        </PermissionGuard>
       </div>
     </div>
   );

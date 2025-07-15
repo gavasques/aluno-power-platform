@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +28,7 @@ import {
   Loader2,
   Wand2
 } from 'lucide-react';
-
+import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import { AgentCostDisplay } from '@/components/AgentCostDisplay';
 
 const HtmlDescriptionAgent: React.FC = () => {
@@ -182,7 +183,7 @@ const HtmlDescriptionAgent: React.FC = () => {
   }, [textInput]);
 
   // Exemplo de texto
-  const exampleText = `Produto premium com qualidade superior, design moderno e funcionalidade prática para o dia a dia.
+  const exampleText = `Maca BKZA é top, ela é dobrável e super resistente, aguenta até 200kg, e tem bolsa para levar.
 
 Material resistente e durável
 Ideal para uso diário
@@ -209,7 +210,7 @@ Garantia de 12 meses`;
     }
 
     // Validar se usuário tem créditos suficientes
-    const userBalance = creditsData?.balance?.currentBalance || 0;
+    const userBalance = creditsData?.data?.balance || 0;
     const creditValidation = canProcess(FEATURE_CODE, userBalance);
     
     if (!creditValidation.canProcess) {
@@ -382,17 +383,23 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-4 space-y-4">
+    <Layout>
+      <PermissionGuard 
+        featureCode="agents.html_descriptions"
+        showMessage={true}
+        message="Você não tem permissão para usar o Gerador de Descrições HTML."
+      >
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
         {/* Header do Agente */}
-        <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border">
-          <div className="flex items-center justify-between mb-2">
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Code2 className="h-5 w-5 text-purple-600" />
+                <Code2 className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Gerador de Descrições HTML</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Gerador de Descrições HTML</h1>
                 <p className="text-gray-600">Agente especializado em criar descrições persuasivas para Amazon</p>
               </div>
             </div>
@@ -522,6 +529,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
             </div>
           </details>
         </div>
+        </div>
       </div>
 
       {/* Dialog de Confirmação IA */}
@@ -560,7 +568,8 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </PermissionGuard>
+    </Layout>
   );
 };
 

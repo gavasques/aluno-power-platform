@@ -14,35 +14,19 @@ import { backgroundPrefetch } from '@/lib/prefetch';
 import { useFontLoader } from '@/lib/fontLoader';
 import { useOptimizedIcons } from '@/components/IconLoader';
 import { HelmetProvider } from 'react-helmet-async';
-// PHASE 2.2 BUNDLE SIZE OPTIMIZATION - Dynamic imports with intelligent loading
-import { routeComponents, prefetchStrategy } from '@/lib/dynamicComponents';
-import { useAuth } from './contexts/AuthContext';
 
-// PHASE 2.2 OPTIMIZED DYNAMIC IMPORTS - Intelligent component loading
-// Core components - immediate loading
-const Dashboard = lazy(() => import("./pages/user/Dashboard"));
-
-// High priority - preload on interaction
-const Tools = lazy(() => routeComponents.tools());
-const Agentes = lazy(() => routeComponents.agents());
-const MyArea = lazy(() => routeComponents.myArea());
-
-// Medium priority - load on demand
+// Lazy load pages for better performance
 const Videos = lazy(() => import("./pages/Videos"));
-const News = lazy(() => routeComponents.news());
-const Updates = lazy(() => routeComponents.updates());
-const Hub = lazy(() => routeComponents.hub());
-
-// Admin components - role-restricted loading
+const News = lazy(() => import("./pages/News"));
+const Updates = lazy(() => import("./pages/Updates"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const Admin = lazy(() => routeComponents.admin());
-const UserManagement = lazy(() => routeComponents.userManagement());
+const Admin = lazy(() => import("./pages/Admin"));
+const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const UserEdit = lazy(() => import("./pages/admin/UserEdit"));
 const GroupEdit = lazy(() => import("./pages/admin/GroupEdit"));
 
 
-// Content and hub components - medium priority
-const ContentManagement = lazy(() => routeComponents.contentManagement());
+const ContentManagement = lazy(() => import("./pages/admin/ContentManagement"));
 const Suppliers = lazy(() => import("./pages/hub/Suppliers"));
 const Partners = lazy(() => import("./pages/hub/Partners"));
 const PartnerDetail = lazy(() => import("./pages/hub/PartnerDetailSimple"));
@@ -52,47 +36,41 @@ const SupplierDetail = lazy(() => import("./pages/hub/SupplierDetail"));
 
 const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
 
-// AI Agents - heavy components, load on demand
-const HtmlDescriptionAgent = lazy(() => routeComponents.htmlDescription());
-const BulletPointsAgent = lazy(() => routeComponents.bulletPoints());
-const TestAgent = lazy(() => routeComponents.testAgent());
-const SimpleTestAgent = lazy(() => routeComponents.simpleTestAgent());
-const AmazonProductPhotography = lazy(() => routeComponents.imageEditor());
-const LifestyleWithModel = lazy(() => routeComponents.lifestyleModel());
-const InfographicGenerator = lazy(() => routeComponents.infographicGen());
-const AdvancedInfographicGenerator = lazy(() => routeComponents.advancedInfographic());
-
-// Hub tools - medium priority
-const AmazonReviewExtractor = lazy(() => routeComponents.amazonReviews());
-const KeywordSearchReport = lazy(() => routeComponents.keywordSearch());
-const AmazonProductDetails = lazy(() => routeComponents.productDetails());
+const HtmlDescriptionAgent = lazy(() => import("./pages/agents/HtmlDescriptionAgent"));
+const BulletPointsAgent = lazy(() => import("./pages/agents/BulletPointsAgent"));
+const AmazonProductPhotography = lazy(() => import("./pages/agents/amazon-product-photography"));
+const LifestyleWithModel = lazy(() => import("./pages/agents/lifestyle-with-model"));
+const InfographicGenerator = lazy(() => import("./pages/agents/infographic-generator"));
+const AdvancedInfographicGenerator = lazy(() => import("./pages/agents/AdvancedInfographicGenerator"));
+const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtractor"));
+const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
+const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
 const CNPJConsulta = lazy(() => import("./pages/hub/CNPJConsulta"));
 const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSuggestions"));
+const Tools = lazy(() => import("./pages/hub/Tools"));
 const Materials = lazy(() => import("./pages/hub/Materials"));
-
-// Navigation pages - immediate for core paths
+const Hub = lazy(() => import("./pages/Hub"));
 const Ferramentas = lazy(() => import("./pages/Ferramentas"));
+const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
-
-// Simulators - load on demand
-const ImportacaoSimplificada = lazy(() => routeComponents.importSimulator());
+const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
 const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsList"));
 const InformalImportSimulator = lazy(() => import("./pages/InformalImportSimulator"));
 const FormalImportSimulator = lazy(() => import("./pages/FormalImportSimulator"));
 const FormalImportSimulationsList = lazy(() => import("./pages/FormalImportSimulationsList"));
-const SimplesNacional = lazy(() => routeComponents.simplesNacional());
+const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
-const InvestimentosROI = lazy(() => routeComponents.investmentROI());
-
-// Heavy AI features - lazy load (results and admin only)
-const AmazonListingsOptimizer = lazy(() => routeComponents.listingsOptimizer());
+const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
+const AgentsPage = lazy(() => import("./pages/agents"));
+const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
+const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
 const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
 const AmazonCustomerService = lazy(() => import("./pages/agents/amazon-customer-service"));
 const AmazonCustomerServiceResult = lazy(() => import("./pages/agents/amazon-customer-service-result"));
 const AmazonNegativeReviews = lazy(() => import("./pages/agents/amazon-negative-reviews"));
 const AmazonNegativeReviewsResult = lazy(() => import("./pages/agents/amazon-negative-reviews-result"));
-const AgentProviderSettings = lazy(() => routeComponents.agentSettings());
+const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
 
 
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
@@ -109,6 +87,8 @@ const UserProfile = lazy(() => import("./pages/myarea/UserProfile"));
 
 // My Area Product Management
 const MyProductsList = lazy(() => import('./pages/myarea/MyProductsList'));
+const ProductForm = lazy(() => import('./pages/myarea/ProductForm'));
+const ProductPreview = lazy(() => import('./pages/myarea/ProductPreview'));
 const ProductImportExport = lazy(() => import('./pages/myarea/ProductImportExport'));
 
 
@@ -204,116 +184,8 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* AI AGENTS ROUTES - Complete agent route section */}
-                          
-                          {/* Amazon Listings Optimizer */}
-                          <Route path="/agentes/amazon-listing/resultado/:sessionId">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonListingsOptimizerResult />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          <Route path="/agentes/amazon-listing">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonListingsOptimizer />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          {/* HTML Description Agent */}
-                          <Route path="/agentes/html-description">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <HtmlDescriptionAgent />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agentes/test">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <TestAgent />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agentes/simple-test">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <SimpleTestAgent />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          {/* Bullet Points Agent */}
-                          <Route path="/agentes/bullet-points">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <BulletPointsAgent />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          {/* Main Image Editor Agent */}
-                          <Route path="/agentes/main-image-editor">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AmazonProductPhotography />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          {/* Lifestyle with Model Agent */}
-                          <Route path="/agentes/lifestyle-model">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <LifestyleWithModel />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          {/* Infographic Generator */}
-                          <Route path="/agentes/infographic-generator">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <InfographicGenerator />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          {/* Advanced Infographic Generator */}
-                          <Route path="/agentes/advanced-infographic">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <AdvancedInfographicGenerator />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-                          
-                          <Route path="/agentes/amazon-negative-reviews/result">
+                          {/* SPECIFIC AGENT ROUTES - MUST BE FIRST */}
+                          <Route path="/agentes/amazon-negative-reviews/resultado/:sessionId">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -362,7 +234,15 @@ function App() {
                             }}
                           </Route>
                           
-
+                          <Route path="/agentes">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AgentsPage />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
                           
 
 
@@ -561,33 +441,69 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          {/* Redirects - Consolidated for backwards compatibility */}
                           <Route path="/hub/descricao-html">
-                            {() => { window.location.href = '/agentes/html-description'; return null; }}
+                            {() => {
+                              // Redirect to the new agent route
+                              window.location.href = '/agents/html-description-generator';
+                              return null;
+                            }}
                           </Route>
+
+                          {/* Redirects for backwards compatibility */}
                           <Route path="/ai/image-upscale">
-                            {() => { window.location.href = '/ferramentas/image-upscale'; return null; }}
+                            {() => {
+                              window.location.href = '/ferramentas/image-upscale';
+                              return null;
+                            }}
                           </Route>
+                          
                           <Route path="/ai/background-removal">
-                            {() => { window.location.href = '/ferramentas/background-removal'; return null; }}
+                            {() => {
+                              window.location.href = '/ferramentas/background-removal';
+                              return null;
+                            }}
                           </Route>
+                          
                           <Route path="/hub/amazon-reviews">
-                            {() => { window.location.href = '/ferramentas/amazon-reviews'; return null; }}
+                            {() => {
+                              window.location.href = '/ferramentas/amazon-reviews';
+                              return null;
+                            }}
                           </Route>
+                          
                           <Route path="/hub/relatorio-keywords">
-                            {() => { window.location.href = '/ferramentas/relatorio-keywords'; return null; }}
+                            {() => {
+                              window.location.href = '/ferramentas/relatorio-keywords';
+                              return null;
+                            }}
                           </Route>
+                          
                           <Route path="/ferramentas/picsart-background-removal">
-                            {() => { window.location.href = '/ferramentas/background-removal-pro'; return null; }}
+                            {() => {
+                              window.location.href = '/ferramentas/background-removal-pro';
+                              return null;
+                            }}
                           </Route>
+                          
                           <Route path="/hub/produto-detalhes">
-                            {() => { window.location.href = '/ferramentas/produto-detalhes'; return null; }}
+                            {() => {
+                              window.location.href = '/ferramentas/produto-detalhes';
+                              return null;
+                            }}
                           </Route>
+                          
                           <Route path="/hub/consulta-cnpj">
-                            {() => { window.location.href = '/ferramentas/consulta-cnpj'; return null; }}
+                            {() => {
+                              window.location.href = '/ferramentas/consulta-cnpj';
+                              return null;
+                            }}
                           </Route>
+                          
                           <Route path="/hub/keyword-suggestions">
-                            {() => { window.location.href = '/ferramentas/keyword-suggestions'; return null; }}
+                            {() => {
+                              window.location.href = '/ferramentas/keyword-suggestions';
+                              return null;
+                            }}
                           </Route>
                           
 
@@ -736,10 +652,70 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-
+                          {/* Minha Área routes - Protected */}
+                          <Route path="/minha-area/perfil">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <UserProfile />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
                           
-                          {/* MyArea - Unified catch-all handler for all user sections */}
-                          <Route path="/minha-area/:section?/:id?/:action?">
+                          {/* Product Import/Export - Protected */}
+                          <Route path="/minha-area/importacao-exportacao">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductImportExport />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          {/* Product Management - Protected */}
+                          <Route path="/minha-area/produtos">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <MyProductsList />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/minha-area/produtos/novo">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductForm />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/minha-area/produtos/:id/editar">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductForm />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/minha-area/produtos/:id">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductPreview />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/minha-area/:section/:id?/:action?">
                             {(params) => (
                               <ProtectedRoute>
                                 <Layout>
@@ -899,15 +875,6 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/agentes">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <Agentes />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
 
 
                           {/* Home route - Protected */}
@@ -921,9 +888,59 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
+                          {/* SPECIFIC AGENT ROUTES FOR /agentes */}
+                          <Route path="/agentes/amazon-negative-reviews">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviews />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/amazon-negative-reviews/result">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviewsResult />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/amazon-customer-service">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerService />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/amazon-customer-service/result">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerServiceResult />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
 
-
-
+                          {/* GENERIC AGENT ROUTE FOR /agentes - CATCH ALL */}
+                          <Route path="/agentes/:id">
+                            {(params) => (
+                              <ProtectedRoute>
+                                <Layout>
+                                  <Suspense fallback={<PageLoader />}>
+                                    <AgentProcessorPage />
+                                  </Suspense>
+                                </Layout>
+                              </ProtectedRoute>
+                            )}
+                          </Route>
                           
                           {/* FALLBACK REDIRECT FOR OLD /agents/:id ROUTES */}
                           <Route path="/agents/:id">

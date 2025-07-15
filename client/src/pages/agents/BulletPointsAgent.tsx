@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import Layout from '@/components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
 import type { Agent } from '@shared/schema';
 import { List } from 'lucide-react';
@@ -8,7 +9,7 @@ import { BulletPointsInput } from '@/components/agents/BulletPointsInput';
 import { BulletPointsOutput } from '@/components/agents/BulletPointsOutput';
 import { ReplaceDialog } from '@/components/agents/ReplaceDialog';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
-
+import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import { AgentCostDisplay } from '@/components/AgentCostDisplay';
 
 const BulletPointsAgent: React.FC = () => {
@@ -33,19 +34,24 @@ const BulletPointsAgent: React.FC = () => {
   }, [updateAgentConfig]);
 
   return (
-    <>
+    <Layout>
+      <PermissionGuard 
+        featureCode="agents.bullet_points"
+        showMessage={true}
+        message="Você não tem permissão para usar o Gerador de Bullet Points."
+      >
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-4">
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
-                <List className="h-5 w-5 text-blue-600" />
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6">
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
+                <List className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-gray-900">
                   Gerador de Bullet Points
                 </h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-lg text-gray-600 mt-1">
                   Crie bullet points persuasivos para produtos Amazon com alta conversão
                 </p>
               </div>
@@ -93,7 +99,8 @@ const BulletPointsAgent: React.FC = () => {
         onReplace={handleReplace}
         onKeepBoth={handleKeepBoth}
       />
-    </>
+      </PermissionGuard>
+    </Layout>
   );
 };
 

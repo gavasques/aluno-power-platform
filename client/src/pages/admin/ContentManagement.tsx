@@ -8,14 +8,17 @@ import { Plus, FileText, Users, Wrench, Package, BrainCircuit } from "lucide-rea
 import { useRoute, useLocation } from "wouter";
 import { usePartners } from "@/contexts/PartnersContext";
 import { useSuppliers } from "@/contexts/SuppliersContext";
+import { usePrompts } from "@/contexts/PromptsContext";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
-import ToolsManagerRefactored from "@/components/admin/tools/ToolsManagerRefactored";
-import MaterialsManagerRefactored from "@/components/admin/materials/MaterialsManagerRefactored";
+import ToolsManager from "@/components/admin/conteudo/ToolsManager";
+import MaterialsManager from "@/components/admin/conteudo/MaterialsManager";
 import SuppliersManager from "@/components/admin/conteudo/SuppliersManager";
 import SupplierForm from "@/components/admin/conteudo/SupplierForm";
 import SupplierDetail from "@/components/admin/conteudo/SupplierDetail";
 import MaterialFormAdmin from "./conteudo/MaterialFormAdmin";
 import MaterialDetailAdmin from "./conteudo/MaterialDetailAdmin";
+import PromptsAIManager from "@/components/admin/cadastros/PromptsAIManager";
+import PromptForm from "@/components/admin/cadastros/PromptForm";
 import { NewsCenter } from "./content/NewsCenter";
 import { UpdatesCenter } from "./content/UpdatesCenter";
 
@@ -25,6 +28,7 @@ const ContentManagement = () => {
   const [, setLocation] = useLocation();
   const { partners } = usePartners();
   const { suppliers } = useSuppliers();
+  const { prompts } = usePrompts();
   
   const subsection = params?.subsection;
   const id = params?.id;
@@ -50,19 +54,23 @@ const ContentManagement = () => {
   }
   
   if (subsection === 'ferramentas') {
-    return <ToolsManagerRefactored />;
+    return <ToolsManager />;
   }
 
   if (subsection === 'materiais') {
     if (id === 'novo') return <MaterialFormAdmin />;
     if (id && action === 'edit') return <MaterialFormAdmin />;
     if (id) return <MaterialDetailAdmin />;
-    return <MaterialsManagerRefactored />;
+    return <MaterialsManager />;
   }
 
 
 
-
+  if (subsection === 'prompts-ia') {
+    if (id === 'novo') return <PromptForm />;
+    if (id && action === 'edit') return <PromptForm />;
+    return <PromptsAIManager />;
+  }
 
   if (subsection === 'noticias') {
     return <NewsCenter />;
@@ -173,7 +181,26 @@ const ContentManagement = () => {
 
 
 
-
+        <Card 
+          className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => setLocation('/admin/conteudo/prompts-ia')}
+        >
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <BrainCircuit className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">Prompts IA</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm mb-4">Biblioteca de prompts para inteligência artificial</p>
+            <div className="flex justify-between items-center">
+              <Badge className="bg-purple-100 text-purple-800 border-purple-200">{prompts.length} prompts</Badge>
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                Gerenciar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

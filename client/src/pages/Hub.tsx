@@ -60,10 +60,10 @@ const categories = ["Todos", "Conteúdo", "Rede", "Fornecedores", "Ferramentas",
 
 export default function Hub() {
   return (
-    <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-4 space-y-4">
-      <div className="flex flex-col space-y-1">
-        <h1 className="text-2xl font-bold text-foreground">Hub de Recursos</h1>
-        <p className="text-sm text-muted-foreground">
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold text-foreground">Hub de Recursos</h1>
+        <p className="text-muted-foreground">
           Central de conhecimento e recursos para seu crescimento no e-commerce
         </p>
       </div>
@@ -81,28 +81,28 @@ export default function Hub() {
         ))}
       </div>
 
-      {/* Grid de recursos do hub - 4 COLUNAS COMPACTAS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3">
+      {/* Grid de recursos do hub */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {hubItems.map((item) => (
           <PermissionGuard key={item.href} featureCode={item.permission}>
-            <Card className="group hover:shadow-lg transition-shadow cursor-pointer h-fit compact-card">
-              <CardHeader className="pb-2 pt-3">
+            <Card className="group hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <item.icon className="h-5 w-5 text-primary" />
-                  <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                  <item.icon className="h-8 w-8 text-primary" />
+                  <Badge variant="secondary" className="text-xs">
                     {item.category}
                   </Badge>
                 </div>
-                <CardTitle className="text-sm font-semibold">{item.title}</CardTitle>
-                <CardDescription className="text-xs leading-relaxed">
+                <CardTitle className="text-lg">{item.title}</CardTitle>
+                <CardDescription className="text-sm">
                   {item.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 pb-3">
+              <CardContent className="pt-0">
                 <Link href={item.href}>
-                  <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg group-hover:bg-primary/10 transition-colors">
-                    <span className="text-xs font-medium">Acessar seção</span>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group-hover:bg-primary/10 transition-colors">
+                    <span className="text-sm font-medium">Acessar seção</span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                 </Link>
               </CardContent>

@@ -95,11 +95,11 @@ export default function SimuladoresIndex() {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-4 space-y-4">
+    <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Simuladores</h1>
-        <p className="text-sm text-muted-foreground">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold">Simuladores</h1>
+        <p className="text-muted-foreground">
           Ferramentas de cálculo para tributação, importação e análise de viabilidade
         </p>
       </div>
@@ -160,41 +160,41 @@ export default function SimuladoresIndex() {
         </div>
       )}
 
-      {/* Grid de simuladores - 4 COLUNAS COMPACTAS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3">
+      {/* Grid de simuladores */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map((item) => {
           const IconComponent = item.icon;
           
           return (
-            <Card key={item.id} className="hover:shadow-lg transition-shadow flex flex-col h-fit compact-card">
-              <CardHeader className="pb-2 pt-3">
+            <Card key={item.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
+              <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-primary/10 rounded-lg">
-                      <IconComponent className="w-4 h-4 text-primary" />
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <IconComponent className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <CardTitle className="text-sm font-semibold">{item.title}</CardTitle>
-                      <Badge variant="outline" className="text-xs mt-0.5 px-1.5 py-0">
+                      <CardTitle className="text-lg">{item.title}</CardTitle>
+                      <Badge variant="outline" className="text-xs mt-1">
                         {item.category}
                       </Badge>
                     </div>
                   </div>
                   {item.isNew && (
-                    <Badge className="bg-green-100 text-green-800 text-xs px-1.5 py-0">
+                    <Badge className="bg-green-100 text-green-800 text-xs">
                       Novo!
                     </Badge>
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="flex flex-col space-y-3 pb-3">
-                <CardDescription className="text-xs leading-relaxed">
+              <CardContent className="flex flex-col flex-1 space-y-4">
+                <CardDescription className="text-sm leading-relaxed flex-1">
                   {item.description}
                 </CardDescription>
                 
-                <Button asChild className="w-full text-xs py-1.5" disabled={!item.isAvailable}>
+                <Button asChild className="w-full mt-auto" disabled={!item.isAvailable}>
                   <Link to={item.href}>
-                    <Calculator className="w-3 h-3 mr-1" />
+                    <Calculator className="w-4 h-4 mr-2" />
                     {item.isAvailable ? 'Simular' : 'Em breve'}
                   </Link>
                 </Button>

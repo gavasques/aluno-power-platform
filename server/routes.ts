@@ -17,8 +17,6 @@ import dashboardRoutes from "./routes/dashboard-fixed";
 import { LoggingService } from "./services/loggingService";
 import userProfileRoutes from "./routes/user/profile";
 import picsartRoutes from "./routes/picsart";
-import { logger } from "./utils/logger";
-import { queryCache } from "./utils/queryCache";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -112,7 +110,7 @@ import userUsageRoutes from './routes/user/usage';
 // WebSocket connections storage
 const connectedClients = new Set<WebSocket>();
 
-// Broadcast function for real-time notifications - Optimized logging
+// Broadcast function for real-time notifications
 function broadcastNotification(type: string, data: any) {
   const messageId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   const message = JSON.stringify({ 
@@ -122,12 +120,11 @@ function broadcastNotification(type: string, data: any) {
     messageId 
   });
   
-  logger.debug('Broadcasting WebSocket notification', {
-    messageId,
-    type,
-    connectedClients: connectedClients.size,
-    dataPreview: JSON.stringify(data).substring(0, 100)
-  }, 'WEBSOCKET');
+  console.log(`📡 [WS_BROADCAST] Broadcasting notification`);
+  console.log(`   🆔 Message ID: ${messageId}`);
+  console.log(`   📋 Type: ${type}`);
+  console.log(`   📊 Connected Clients: ${connectedClients.size}`);
+  console.log(`   📄 Data Preview: ${JSON.stringify(data).substring(0, 200)}...`);
   
   let successCount = 0;
   let errorCount = 0;
@@ -138,30 +135,27 @@ function broadcastNotification(type: string, data: any) {
         client.send(message);
         successCount++;
       } catch (error) {
-        logger.error(`Failed to send WebSocket message to client ${index}`, { error: error.message, messageId }, 'WEBSOCKET');
+        console.error(`❌ [WS_SEND_ERROR] Failed to send to client ${index}:`, error);
         errorCount++;
+        // Remove broken client
         connectedClients.delete(client);
       }
     } else {
-      logger.trace(`Skipping client ${index} (state: ${client.readyState})`, { messageId }, 'WEBSOCKET');
+      console.log(`🔌 [WS_SKIP] Skipping client ${index} (state: ${client.readyState})`);
+      // Remove dead client
       connectedClients.delete(client);
       errorCount++;
     }
   });
   
-  logger.info('WebSocket broadcast completed', {
-    messageId,
-    successCount,
-    errorCount,
-    type
-  }, 'WEBSOCKET');
+  console.log(`📊 [WS_BROADCAST_RESULT] Message ${messageId}: ${successCount} sent, ${errorCount} failed`);
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // PHASE 2: SOLID/DRY/KISS Modular Routes Integration
-  logger.info('Registering modular routes', {}, 'ROUTES');
+  console.log('🏗️  [PHASE_2] Registering modular routes...');
   registerModularRoutes(app);
-  logger.info('Modular routes registered successfully', {}, 'ROUTES');
+  console.log('✅ [PHASE_2] Modular routes registered successfully');
   
   // PHASE 3 & 4: All modular routes are now registered in registerModularRoutes()
   // No more duplicate registrations needed here
@@ -172,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { handleStripeWebhook } = await import('./webhooks/stripe');
       await handleStripeWebhook(req, res);
     } catch (error) {
-      logger.error('Error loading Stripe webhook handler', { error: error.message }, 'STRIPE');
+      console.error('Error loading Stripe webhook handler:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -231,12 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(result);
     } catch (error) {
-      logger.error('Failed to fetch paginated suppliers', { 
-        error: error.message,
-        page,
-        limit,
-        search: search?.substring(0, 50)
-      }, 'SUPPLIERS');
+      console.error('Error fetching paginated suppliers:', error);
       res.status(500).json({ error: 'Failed to fetch suppliers' });
     }
   });
@@ -331,10 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const brands = await storage.getSupplierBrands(supplierId);
       res.json(brands);
     } catch (error) {
-      logger.error('Failed to fetch supplier brands', { 
-        error: error.message,
-        supplierId: req.params.id
-      }, 'SUPPLIERS');
+      console.error('Error fetching supplier brands:', error);
       res.status(500).json({ error: 'Failed to fetch brands' });
     }
   });
@@ -349,10 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const brand = await storage.createSupplierBrand(brandData);
       res.status(201).json(brand);
     } catch (error) {
-      logger.error('Failed to create supplier brand', { 
-        error: error.message,
-        supplierId: req.params.id
-      }, 'SUPPLIERS');
+      console.error('Error creating supplier brand:', error);
       res.status(500).json({ error: 'Failed to create brand' });
     }
   });
@@ -363,11 +346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const brands = await storage.getSupplierBrands(supplierId);
       res.json(brands);
     } catch (error) {
-      logger.error('Failed to fetch supplier brands (authenticated)', { 
-        error: error.message,
-        supplierId: req.params.id,
-        userId: req.user?.id
-      }, 'SUPPLIERS');
+      console.error('Error fetching supplier brands:', error);
       res.status(500).json({ error: 'Failed to fetch brands' });
     }
   });
@@ -378,10 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteSupplierBrand(brandId);
       res.json({ success: true });
     } catch (error) {
-      logger.error('Failed to delete supplier brand', { 
-        error: error.message,
-        brandId: req.params.brandId
-      }, 'SUPPLIERS');
+      console.error('Error deleting supplier brand:', error);
       res.status(500).json({ error: 'Failed to delete brand' });
     }
   });
@@ -394,11 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const conversations = await storage.getSupplierConversations(supplierId, userId);
       res.json(conversations);
     } catch (error) {
-      logger.error('Failed to fetch supplier conversations', { 
-        error: error.message,
-        supplierId: req.params.id,
-        userId: req.user?.id
-      }, 'SUPPLIERS');
+      console.error('Error fetching supplier conversations:', error);
       res.status(500).json({ error: 'Failed to fetch conversations' });
     }
   });
@@ -1155,27 +1127,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // YouTube channel info endpoint - Uses RapidAPI integration, no direct YouTube API
+  // YouTube channel info endpoint
   app.get('/api/youtube-channel-info', async (req, res) => {
     try {
-      // Return static channel information since we use RapidAPI for videos
-      logger.debug('YouTube channel info request - returning static data', { endpoint: '/api/youtube-channel-info' });
-      res.json({
-        title: 'Guilherme Vasques',
-        subscriberCount: '50K+',
-        videoCount: '200+',
-        viewCount: '2M+',
-        customUrl: '@guilhermeavasques',
-        thumbnails: {
-          default: { url: '/placeholder.svg' },
-          medium: { url: '/placeholder.svg' },
-          high: { url: '/placeholder.svg' }
-        },
-        description: 'Canal focado em Amazon FBA e e-commerce - cursos, dicas e estratégias para vendedores',
-        channelId: 'UCccs9hxFuzq77stdELIU59w'
-      });
+      // Check if YouTube API is available
+      if (!process.env.YOUTUBE_API_KEY) {
+        return res.status(503).json({ 
+          error: 'YouTube service unavailable', 
+          message: 'YouTube API key not configured' 
+        });
+      }
+
+      const channelInfo = await youtubeService.fetchChannelInfo('@guilhermeavasques');
+      if (channelInfo) {
+        res.json({
+          title: channelInfo.snippet.title,
+          subscriberCount: channelInfo.statistics.subscriberCount,
+          videoCount: channelInfo.statistics.videoCount,
+          viewCount: channelInfo.statistics.viewCount,
+          customUrl: channelInfo.snippet.customUrl,
+          thumbnails: channelInfo.snippet.thumbnails,
+          description: channelInfo.snippet.description,
+          channelId: channelInfo.id
+        });
+      } else {
+        res.status(404).json({ error: 'Channel not found' });
+      }
     } catch (error) {
-      logger.error('Error in YouTube channel info endpoint:', error);
+      console.error('Error fetching channel info:', error);
       res.status(500).json({ error: 'Failed to fetch channel info' });
     }
   });
@@ -2190,17 +2169,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log usage for tracking (existing)
       try {
-        const usageId = `usage_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         await storage.createAgentUsage({
-          id: usageId,
           agentId: 'amazon-customer-service',
           userId: user.id,
           inputTokens,
           outputTokens,
           totalTokens,
-          costUsd: totalCost.toString(),
-          processingTimeMs: processingTime,
-          status: 'success'
+          cost: totalCost,
+          processingTime,
+          createdAt: new Date()
         });
       } catch (logError) {
         console.error('❌ [CUSTOMER_SERVICE] Error logging usage:', logError);
@@ -2416,17 +2393,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log usage for tracking (existing)
       try {
-        const usageId = `usage_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         await storage.createAgentUsage({
-          id: usageId,
           agentId: 'amazon-negative-reviews',
           userId: user.id,
           inputTokens,
           outputTokens,
           totalTokens,
-          costUsd: totalCost.toString(),
-          processingTimeMs: processingTime,
-          status: 'success'
+          cost: totalCost,
+          processingTime,
+          createdAt: new Date()
         });
       } catch (logError) {
         console.error('❌ [NEGATIVE_REVIEWS] Error logging usage:', logError);
@@ -3385,41 +3360,28 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         totalTokens,
         cost,
         duration,
-        feature,
-        creditsUsed
+        feature
       } = req.body;
 
-      // Sanitize numeric values to prevent NaN
-      const safeParseInt = (value: any, defaultValue: number = 0): number => {
-        const parsed = parseInt(value);
-        return isNaN(parsed) ? defaultValue : parsed;
-      };
-
-      const safeParseFloat = (value: any, defaultValue: number = 0): number => {
-        const parsed = parseFloat(value);
-        return isNaN(parsed) ? defaultValue : parsed;
-      };
-
       const logData = {
-        userId: safeParseInt(userId),
-        provider: provider || 'openai',
-        model: model || 'gpt-4o-mini',
-        prompt: prompt || '',
-        response: response || '',
-        promptCharacters: safeParseInt(promptCharacters, prompt?.length || 0),
-        responseCharacters: safeParseInt(responseCharacters, response?.length || 0),
-        inputTokens: safeParseInt(inputTokens),
-        outputTokens: safeParseInt(outputTokens),
-        totalTokens: safeParseInt(totalTokens),
-        cost: safeParseFloat(cost).toString(),
-        creditsUsed: safeParseInt(creditsUsed).toString(),
-        duration: safeParseInt(duration),
+        userId: parseInt(userId),
+        provider,
+        model,
+        prompt,
+        response,
+        promptCharacters: promptCharacters || prompt.length,
+        responseCharacters: responseCharacters || response.length,
+        inputTokens: inputTokens || 0,
+        outputTokens: outputTokens || 0,
+        totalTokens: totalTokens || 0,
+        cost: cost || 0,
+        duration: duration || 0,
         feature: feature || 'html-description'
       };
 
       const [savedLog] = await db.insert(aiGenerationLogs).values(logData).returning();
 
-      console.log(`💾 [AI_LOG] Saved generation log - User: ${logData.userId}, Model: ${logData.model}, Cost: $${logData.cost}, Credits: ${logData.creditsUsed}`);
+      console.log(`💾 [AI_LOG] Saved generation log - User: ${userId}, Model: ${model}, Cost: $${cost}, Characters: ${responseCharacters}`);
 
       res.json({ 
         success: true, 
@@ -6735,78 +6697,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Register Picsart integration routes
   app.use('/api/picsart', picsartRoutes);
   console.log('✅ [PICSART] Routes registered successfully');
-
-  // Cache monitoring endpoints for admins
-  app.get('/api/admin/cache/stats', requireAuth, async (req, res) => {
-    try {
-      const user = req.user;
-      if (user.role !== 'admin') {
-        return res.status(403).json({ error: 'Admin access required' });
-      }
-
-      const stats = queryCache.getStats();
-      const health = queryCache.getHealthStatus();
-      
-      res.json({
-        stats,
-        health,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      logger.error('Error getting cache stats', { error: error.message }, 'CACHE');
-      res.status(500).json({ error: 'Failed to get cache statistics' });
-    }
-  });
-
-  app.post('/api/admin/cache/clear', requireAuth, async (req, res) => {
-    try {
-      const user = req.user;
-      if (user.role !== 'admin') {
-        return res.status(403).json({ error: 'Admin access required' });
-      }
-
-      await queryCache.clear();
-      
-      logger.info('Cache cleared by admin', { userId: user.id }, 'CACHE');
-      res.json({ message: 'Cache cleared successfully' });
-    } catch (error) {
-      logger.error('Error clearing cache', { error: error.message }, 'CACHE');
-      res.status(500).json({ error: 'Failed to clear cache' });
-    }
-  });
-
-  app.post('/api/admin/cache/invalidate', requireAuth, async (req, res) => {
-    try {
-      const user = req.user;
-      if (user.role !== 'admin') {
-        return res.status(403).json({ error: 'Admin access required' });
-      }
-
-      const { pattern } = req.body;
-      if (!pattern) {
-        return res.status(400).json({ error: 'Pattern is required' });
-      }
-
-      const deletedCount = await queryCache.invalidatePattern(pattern);
-      
-      logger.info('Cache pattern invalidated by admin', { 
-        userId: user.id, 
-        pattern, 
-        deletedCount 
-      }, 'CACHE');
-      
-      res.json({ 
-        message: 'Cache pattern invalidated successfully',
-        deletedCount
-      });
-    } catch (error) {
-      logger.error('Error invalidating cache pattern', { 
-        error: error.message,
-        pattern: req.body.pattern 
-      }, 'CACHE');
-      res.status(500).json({ error: 'Failed to invalidate cache pattern' });
-    }
-  });
 
   return httpServer;
 }

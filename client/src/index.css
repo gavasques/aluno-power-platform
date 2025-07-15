@@ -21,130 +21,6 @@
   .no-spin {
     -moz-appearance: textfield;
   }
-
-  /* COMPACT LAYOUT OPTIMIZATION - 75% zoom equivalent */
-  .compact-layout {
-    --scaling-factor: 0.85;
-    transform: scale(var(--scaling-factor));
-    transform-origin: top left;
-  }
-  
-  /* Compact font sizes */
-  .text-compact-xs { font-size: 0.65rem; line-height: 0.85rem; }
-  .text-compact-sm { font-size: 0.75rem; line-height: 1rem; }
-  .text-compact-base { font-size: 0.8rem; line-height: 1.1rem; }
-  .text-compact-lg { font-size: 0.9rem; line-height: 1.2rem; }
-  .text-compact-xl { font-size: 1rem; line-height: 1.3rem; }
-  
-  /* Compact spacing */
-  .space-compact > * + * { margin-top: 0.375rem; }
-  .gap-compact { gap: 0.375rem; }
-  .p-compact { padding: 0.375rem; }
-  .px-compact { padding-left: 0.375rem; padding-right: 0.375rem; }
-  .py-compact { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-  .m-compact { margin: 0.375rem; }
-  
-  /* Compact heights */
-  .h-compact-8 { height: 1.75rem; }
-  .h-compact-10 { height: 2.25rem; }
-  .h-compact-12 { height: 2.75rem; }
-  
-  /* Global compact optimizations for forms and cards */
-  input[type="text"], input[type="email"], input[type="password"], 
-  input[type="number"], select, textarea {
-    font-size: 0.8rem;
-    padding: 0.375rem 0.5rem;
-    line-height: 1.2;
-  }
-  
-  /* Compact button sizes */
-  button {
-    font-size: 0.8rem;
-    padding: 0.375rem 0.75rem;
-  }
-  
-  /* Compact card headers and content */
-  .card-header {
-    padding: 0.75rem 1rem 0.5rem;
-  }
-  
-  .card-content {
-    padding: 0.75rem 1rem;
-  }
-  
-  /* Compact labels */
-  label {
-    font-size: 0.8rem;
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-  }
-
-  /* COMPACTAÇÃO ESPECÍFICA DE CARDS - EFEITO 75% ZOOM */
-  /* Cards mais compactos em toda a plataforma */
-  .card {
-    height: fit-content;
-  }
-  
-  /* Headers de cards compactos */
-  .card .card-header {
-    padding: 0.75rem 1rem 0.5rem;
-  }
-  
-  /* Content de cards compacto */
-  .card .card-content {
-    padding: 0.75rem 1rem 0.75rem;
-  }
-  
-  /* Títulos menores */
-  .card .card-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-  }
-  
-  /* Descrições compactas */
-  .card .card-description {
-    font-size: 0.75rem;
-    line-height: 1.25rem;
-  }
-  
-  /* Badges menores */
-  .badge {
-    font-size: 0.75rem;
-    padding: 0.125rem 0.5rem;
-  }
-  
-  /* Botões mais compactos */
-  .card button {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
-  }
-  
-  /* Ícones menores em cards */
-  .card .lucide {
-    width: 1rem;
-    height: 1rem;
-  }
-
-  /* Otimizações específicas para ferramentas, hub, minha área, simuladores */
-  .compact-card {
-    height: fit-content;
-  }
-  
-  .compact-card .card-header {
-    padding: 0.5rem 0.75rem 0.25rem;
-  }
-  
-  .compact-card .card-content {
-    padding: 0.5rem 0.75rem;
-  }
-  
-  .compact-card .card-title {
-    font-size: 0.875rem;
-  }
-  
-  .compact-card .card-description {
-    font-size: 0.75rem;
-  }
 }
 
 /* Optimized Font Loading Strategy */
@@ -339,16 +215,16 @@
     100% { background-position: -200% 0; }
   }
 
-  /* Sistema de Layout Padronizado e Otimizado - COMPACTO */
+  /* Sistema de Layout Padronizado e Otimizado */
   /* Variáveis CSS customizadas para consistência */
   :root {
-    /* Espacamento padronizado - REDUZIDO 50% */
-    --spacing-xs: 0.125rem;  /* 2px */
-    --spacing-sm: 0.25rem;   /* 4px */
-    --spacing-md: 0.5rem;    /* 8px */
-    --spacing-lg: 0.75rem;   /* 12px */
-    --spacing-xl: 1rem;      /* 16px */
-    --spacing-2xl: 1.5rem;   /* 24px */
+    /* Espacamento padronizado */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
     
     /* Container max-widths */
     --container-sm: 640px;
@@ -357,10 +233,10 @@
     --container-xl: 1280px;
     --container-2xl: 1536px;
     
-    /* Layout heights - COMPACTO */
-    --header-height: 48px;   /* Era 64px */
-    --header-compact: 40px;  /* Era 48px */
-    --sidebar-width: 240px;  /* Era 256px */
+    /* Layout heights */
+    --header-height: 64px;
+    --header-compact: 48px;
+    --sidebar-width: 256px;
     
     /* Animações otimizadas */
     --transition-fast: 150ms ease-in-out;
@@ -371,20 +247,20 @@
     --z-modal: 1050;
   }
 
-  /* Container System Responsivo - COMPACTO */
+  /* Container System Responsivo */
   .container-responsive {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: var(--spacing-sm);  /* Reduzido de md para sm */
-    padding-right: var(--spacing-sm); /* Reduzido de md para sm */
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
   }
   
   @media (min-width: 640px) {
     .container-responsive {
       max-width: var(--container-sm);
-      padding-left: var(--spacing-md);  /* Reduzido de lg para md */
-      padding-right: var(--spacing-md); /* Reduzido de lg para md */
+      padding-left: var(--spacing-lg);
+      padding-right: var(--spacing-lg);
     }
   }
   
@@ -397,8 +273,8 @@
   @media (min-width: 1024px) {
     .container-responsive {
       max-width: var(--container-lg);
-      padding-left: var(--spacing-lg);  /* Reduzido de xl para lg */
-      padding-right: var(--spacing-lg); /* Reduzido de xl para lg */
+      padding-left: var(--spacing-xl);
+      padding-right: var(--spacing-xl);
     }
   }
   

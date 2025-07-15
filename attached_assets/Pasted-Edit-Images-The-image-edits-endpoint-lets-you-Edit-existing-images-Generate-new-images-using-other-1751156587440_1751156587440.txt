@@ -1,0 +1,98 @@
+Edit Images
+The image edits endpoint lets you:
+
+Edit existing images
+Generate new images using other images as a reference
+Edit parts of an image by uploading an image and mask indicating which areas should be replaced (a process known as inpainting)
+Create a new image using image references
+You can use one or more images as a reference to generate a new image.
+
+In this example, we'll use 4 input images to generate a new image of a gift basket containing the items in the reference images.
+
+Body Lotion
+Soap
+Incense Kit
+Bath Bomb
+Bath Gift Set
+
+Responses API
+
+Image API
+With the Responses API, you can provide input images in 2 different ways:
+
+By providing an image as a Base64-encoded data URL
+By providing a file ID (created with the Files API)
+We're actively working on supporting fully qualified URLs to image files as input as well.
+
+Create a File
+Edit an image
+import fs from "fs";
+import OpenAI from "openai";
+
+const openai = new OpenAI();
+
+async function createFile(filePath) {
+  const fileContent = fs.createReadStream(filePath);
+  const result = await openai.files.create({
+    file: fileContent,
+    purpose: "vision",
+  });
+  return result.id;
+}
+Create a base64 encoded image
+Edit an image
+import fs from "fs";
+import OpenAI from "openai";
+
+const openai = new OpenAI();
+
+const prompt = `Generate a photorealistic image of a gift basket on a white background 
+labeled 'Relax & Unwind' with a ribbon and handwriting-like font, 
+containing all the items in the reference pictures.`;
+
+const base64Image1 = encodeImage("body-lotion.png");
+const base64Image2 = encodeImage("soap.png");
+const fileId1 = await createFile("body-lotion.png");
+const fileId2 = await createFile("incense-kit.png");
+
+
+const response = await openai.responses.create({
+  model: "gpt-4.1",
+  input: [
+    {
+      role: "user",
+      content: [
+        { type: "input_text", text: prompt },
+        {
+          type: "input_image",
+          image_url: `data:image/jpeg;base64,${base64Image1}`,
+        },
+        {
+          type: "input_image",
+          image_url: `data:image/jpeg;base64,${base64Image2}`,
+        },
+        {
+          type: "input_image",
+          file_id: fileId1,
+        },
+        {
+          type: "input_image",
+          file_id: fileId2,
+        },
+      ],
+    },
+  ],
+  tools: [{ type: "image_generation" }],
+});
+
+const imageData = response.output
+  .filter((output) => output.type === "image_generation_call")
+  .map((output) => output.result);
+
+if (imageData.length > 0) {
+  const imageBase64 = imageData[0];
+  const fs = await import("fs");
+  fs.writeFileSync("gift-basket.png", Buffer.from(imageBase64, "base64"));
+} else {
+  console.log(response.output.content);
+}

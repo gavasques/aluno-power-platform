@@ -92,7 +92,7 @@ const MaterialTypesManager = () => {
     },
   });
 
-  const filteredAndSortedMaterialTypes = Array.isArray(materialTypes) ? materialTypes
+  const filteredAndSortedMaterialTypes = materialTypes
     .filter((materialType) => materialType.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       switch (sortBy) {
@@ -104,7 +104,7 @@ const MaterialTypesManager = () => {
         default:
           return a.name.localeCompare(b.name, 'pt-BR');
       }
-    }) : [];
+    });
 
   function handleAddMaterialType(e: React.FormEvent) {
     e.preventDefault();

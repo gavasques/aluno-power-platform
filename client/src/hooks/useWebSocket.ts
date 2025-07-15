@@ -17,33 +17,14 @@ export function useWebSocket() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Disable WebSocket in production to avoid connection errors
-    if (process.env.NODE_ENV === 'production') {
-      return;
-    }
-    
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
-    
-    // Validate host to prevent invalid URLs
-    if (!host || host.includes('undefined') || host.includes('null') || host.includes('token')) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`🚫 [WS_CLIENT] Invalid host detected: ${host}, skipping WebSocket connection`);
-      }
-      setLastError('Invalid host configuration');
-      return;
-    }
-    
-    // Clean the host to remove any tokens or query parameters
-    const cleanHost = host.split('?')[0].split('#')[0].split('/token')[0];
-    const wsUrl = `${protocol}//${cleanHost}/ws`;
+    const wsUrl = `${protocol}//${host}/ws`;
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
-      console.log(`   🌐 URL: ${wsUrl}`);
-      console.log(`   📍 Protocol: ${protocol}`);
-      console.log(`   🏠 Host: ${host}`);
-    }
+    console.log(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
+    console.log(`   🌐 URL: ${wsUrl}`);
+    console.log(`   📍 Protocol: ${protocol}`);
+    console.log(`   🏠 Host: ${host}`);
 
     const connectWebSocket = () => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -203,9 +184,7 @@ export function useWebSocket() {
     if (wsRef.current?.readyState !== WebSocket.OPEN) {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host;
-      // Clean the host to remove any tokens or query parameters
-    const cleanHost = host.split('?')[0].split('#')[0];
-    const wsUrl = `${protocol}//${cleanHost}/ws`;
+      const wsUrl = `${protocol}//${host}/ws`;
       
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;

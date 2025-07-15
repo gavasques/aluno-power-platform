@@ -2,7 +2,6 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { User } from '@shared/schema';
 import { AuthService, LoginCredentials, RegisterData } from '@/services/authService';
 import { prefetchUserData, backgroundPrefetch } from '@/lib/prefetch';
-import { logger } from '@/lib/logger';
 
 // Interfaces seguindo Single Responsibility Principle
 interface AuthState {
@@ -61,22 +60,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Authentication check seguindo Open/Closed Principle
   const checkAuthStatus = async (): Promise<void> => {
-    logger.debug('AuthContext: Checking authentication state');
+    console.log('🔥 AuthContext: useEffect triggered, checking authentication state');
 
     if (TokenManager.wasLoggedOut()) {
-      logger.debug('AuthContext: User explicitly logged out, staying logged out');
+      console.log('🔥 AuthContext: User explicitly logged out, staying logged out');
       setState(prev => ({ ...prev, isLoading: false }));
       return;
     }
 
     const token = TokenManager.getToken();
-    logger.debug('AuthContext: Token from storage', {
+    console.log('🔥 AuthContext: Token from storage:', {
       hasToken: !!token,
-      tokenLength: token?.length
+      tokenLength: token?.length,
+      tokenPreview: token?.substring(0, 10) + '...'
     });
 
     if (!token) {
-      logger.debug('AuthContext: No token found, setting as logged out');
+      console.log('🔥 AuthContext: No token found, setting as logged out');
       setState(prev => ({ 
         ...prev, 
         isLoading: false,
@@ -88,12 +88,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
-      logger.debug('AuthContext: Attempting to get current user with token');
+      console.log('🔥 AuthContext: Attempting to get current user with token');
       const user = await AuthService.getCurrentUser();
       
-      logger.debug('AuthContext: User validation result', {
+      console.log('🔥 AuthContext: User validation result:', {
         userFound: !!user,
-        userId: user?.id
+        userId: user?.id,
+        userEmail: user?.email
       });
 
       if (user) {
@@ -106,13 +107,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         // Prefetch user-specific data after successful authentication
         prefetchUserData().catch(error => 
-          logger.warn('Failed to prefetch user data:', error)
+          console.warn('Failed to prefetch user data:', error)
         );
       } else {
         throw new Error('No user returned from API');
       }
     } catch (error) {
-      logger.debug('AuthContext: Authentication failed, clearing token', {
+      console.log('🔥 AuthContext: Authentication failed, clearing token:', {
         error: error instanceof Error ? error.message : 'Unknown error'
       });
       TokenManager.removeToken();

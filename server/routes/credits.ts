@@ -56,12 +56,11 @@ router.post('/deduct', requireAuth, async (req, res) => {
     await db.insert(creditTransactions).values({
       userId: userId,
       type: 'deduction',
-      amount: -amount, // Negative for deductions
-      balanceBefore: balance.currentBalance,
-      balanceAfter: balance.currentBalance - amount,
+      amount: amount,
+      cost: 0, // Não há custo para deduções
       description: reason,
-      relatedId: `deduction-${Date.now()}`,
-      relatedType: 'ai_generation',
+      reference: `deduction-${Date.now()}`,
+      status: 'completed',
       metadata: { 
         source: 'system',
         originalBalance: balance.currentBalance,

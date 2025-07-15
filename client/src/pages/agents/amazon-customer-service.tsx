@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Bot, AlertCircle, ArrowRight, Clock, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
 
 const AmazonCustomerService = () => {
   const [emailContent, setEmailContent] = useState("");
@@ -99,6 +99,11 @@ Aguardo retorno urgente.
 João Silva`;
 
   return (
+    <PermissionGuard 
+      featureCode="agents.amazon_customer_service"
+      showMessage={true}
+      message="Você não tem permissão para usar o Amazon Customer Service Email Response."
+    >
       <div className="container mx-auto p-6 max-w-4xl">
       {/* Header */}
       <div className="mb-8">
@@ -257,6 +262,7 @@ João Silva`;
         </div>
       </div>
     </div>
+    </PermissionGuard>
   );
 };
 

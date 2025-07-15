@@ -1,8 +1,8 @@
-# Core Guilherme Vasques - Advanced E-commerce AI Platform
+# Aluno Power Platform - AI Agents System
 
 ## Overview
 
-This is a comprehensive educational e-commerce platform focused on Amazon FBA and e-commerce training, featuring an advanced multi-provider AI system. The platform provides 100+ tools, resources, simulators, and AI-powered assistance for students learning e-commerce strategies. Originally launched as "Aluno Power Platform", rebranded to "Core Guilherme Vasques" to reflect the expanded scope and professional focus.
+This is a comprehensive educational e-commerce platform focused on Amazon FBA and e-commerce training, featuring an integrated AI agents system. The platform provides tools, resources, and AI-powered assistance for students learning e-commerce strategies.
 
 ## System Architecture
 
@@ -10,109 +10,49 @@ This is a comprehensive educational e-commerce platform focused on Amazon FBA an
 - **Framework**: React with TypeScript and Vite for fast development
 - **Styling**: Tailwind CSS with shadcn/ui component library
 - **State Management**: TanStack Query for server state and React Context for local state
-- **Routing**: Wouter for lightweight client-side routing with optimized route structure
+- **Routing**: Wouter for lightweight client-side routing
 - **Theme**: Light theme with HSL-based color system
-- **Performance**: Lazy loading, code splitting, optimized bundle size
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express framework
 - **API**: RESTful API with WebSocket support for real-time features
 - **Database**: PostgreSQL with Drizzle ORM
-- **AI Integration**: Multi-provider AI system (OpenAI, xAI/Grok, Anthropic/Claude, Google Gemini, DeepSeek, OpenRouter)
-- **External Services**: RapidAPI YouTube v2 for video content management, Amazon API integrations, CNPJ lookup services
-- **Security**: Role-based permission system, CSRF protection, rate limiting, input sanitization
+- **AI Integration**: OpenAI API for agent processing
+- **External Services**: YouTube API for video content management
 
 ### Database Schema
-The system uses PostgreSQL with comprehensive schema including:
-
-**AI & Agents:**
-- `agents` - AI agent configurations and settings
+The system uses PostgreSQL with the following core tables:
+- `agents` - AI agent configurations
 - `agent_prompts` - Prompt templates for different agent operations
 - `agent_usage` - Usage tracking and analytics
 - `agent_generations` - Generated content storage
-- `ai_img_generation_logs` - Image processing logs and results
-
-**User Management & Permissions:**
-- `users` - User accounts and profiles
-- `user_groups` - Role-based access groups (admin, support, user, etc.)
-- `group_permissions` - Permission mappings for user groups
-- `system_features` - Available platform features and tools
-- `user_sessions` - Secure session management
-
-**Content & Resources:**
-- `materials` - Educational materials and resources
-- `tools` - Platform tools catalog (100+ tools)
-- `partners` - Business partners directory
-- `suppliers` - Supplier management (both public hub and personal)
-- `news` - News and announcements system
-- `updates` - Platform updates and changelog
-- `youtube_videos` - Video content from synchronized channels
-
-**E-commerce & Products:**
-- `products` - User product catalog with multi-channel support
-- `product_channels` - Sales channel configurations (Amazon, Mercado Livre, etc.)
-- `brands` - Brand management
-- `import_simulations` - Import/export calculation tools
-
-**Knowledge Base:**
-- `knowledge_base_docs` - Document storage with AI summaries
-- `knowledge_base_collections` - Multiple knowledge bases per user
-- `knowledge_base_doc_collections` - Document-collection relationships
+- Supporting tables for users, materials, tools, partners, suppliers, and content management
 
 ## Key Components
 
 ### AI Agents System
-- **Multi-Provider Architecture**: Support for 6 major AI providers (OpenAI, xAI/Grok, Anthropic/Claude, Google Gemini, DeepSeek, OpenRouter)
-- **Available Agents**:
-  - **Amazon Listing Optimizer**: Competitor review analysis and listing optimization
-  - **HTML Description Generator**: Product description creation
-  - **Bullet Points Generator**: Product feature optimization
-  - **Image Editors**: Main image and lifestyle model editing
-  - **Infographic Generators**: Basic and advanced infographic creation
-  - **Customer Service Agent**: Support response generation
-  - **Negative Reviews Analyzer**: Review sentiment analysis and response suggestions
-- **Advanced Features**: 
-  - Web search integration (OpenAI, Grok)
-  - Vision capabilities for image analysis
-  - Reasoning mode for complex analysis
-  - JSON structured outputs
-  - Function calling and code interpretation
-  - Knowledge base integration for context-aware responses
-- **Cost Management**: Dynamic pricing, credit system, usage tracking, and comprehensive logging
-
-### Tools Ecosystem (100+ Tools)
-- **Image Processing**: Background removal, upscaling, enhancement, logo generation
-- **Amazon Tools**: Product research, keyword analysis, review analysis, ads optimization
-- **Business Tools**: CNPJ lookup, supplier research, market analysis
-- **Import/Export Calculators**: Multiple simulation tools for different import scenarios
-- **Analytics & Reports**: Comprehensive data analysis and visualization tools
+- **Purpose**: Amazon listing optimization through competitor review analysis
+- **Core Features**: 
+  - CSV upload from Helium10 or manual text input
+  - Analysis of competitor reviews
+  - Generation of optimized titles, bullet points, and descriptions
+  - Token usage tracking and cost monitoring
+- **Models**: Configurable OpenAI models with temperature and token limits
 
 ### Content Management
-- **Hub Resources**: Tools catalog, materials library, AI prompts, partners directory, and public suppliers (curated content)
-- **News & Updates**: Publishing system with categorization, featured content, and modal viewing system
-- **Video Integration**: RapidAPI YouTube v2 synchronization with automated daily content fetching
-- **User Personal Area (Minha Área)**: Complete personal workspace including:
-  - Product catalog with multi-channel support (Amazon FBA/FBM, Mercado Livre, Shopee, etc.)
-  - Personal supplier management with brands, contacts, and file storage
-  - Import/export planning and documentation
-  - Personal materials and knowledge base
-  - Profile and subscription management
-- **Permission-Based Access**: Role-based content visibility and feature access control
+- **Hub Resources**: Tools, materials, templates, prompts, partners, and suppliers (public/administrative content)
+- **News & Updates**: Publishing system with categorization and featured content
+- **Video Integration**: YouTube channel synchronization with automated content fetching
+- **User Area**: Personal content management and product catalog
+- **Supplier Management**: Two distinct areas:
+  - **Hub de Recursos / Fornecedores**: Public supplier directory for general reference
+  - **Minha Área / Meus Fornecedores**: Personal supplier management with user-specific data, brands, contacts, and files
 
 ### Admin Panel
-- **Dashboard**: Analytics, system overview, and performance monitoring
-- **User Management**: Complete user lifecycle management with role-based access control
-  - User groups: Admin, Support, Mentorados, Alunos, Pagantes, Gratuito
-  - Granular permission system with 45+ platform features
-  - Credit management and usage monitoring
-- **Content Administration**: Full CRUD operations for all content types
-  - Tools, materials, partners, suppliers, news, updates
-  - AI agent configuration and prompt management
-  - Knowledge base administration
-- **System Configuration**: 
-  - AI provider settings and API key management
-  - Platform settings and feature toggles
-  - Performance optimization controls
+- **Dashboard**: Analytics and system overview
+- **User Management**: Role-based access control (admin, support, user)
+- **Content Administration**: Full CRUD operations for all resource types
+- **System Configuration**: Platform settings and AI credit management
 
 ## Data Flow
 
@@ -125,24 +65,21 @@ The system uses PostgreSQL with comprehensive schema including:
 6. Real-time updates via WebSocket connections
 
 ### Content Synchronization
-1. **RapidAPI YouTube v2** service runs scheduled sync (1x daily at 9:00 AM)
+1. YouTube service runs scheduled sync (1x daily at 9:00 AM)
 2. Fetches latest videos from @guilhermeavasques channel (last 30 days)
-3. Intelligent data mapping: video_id, author, views, duration to database schema
-4. Stores metadata and thumbnails with enhanced statistics tracking
-5. WebSocket notifications for real-time updates
-6. Content categorization and search indexing
-7. Manual sync endpoint available at /api/youtube-videos/sync for admin testing
-8. Advanced logging system with detailed progress tracking
-9. **Migration completed** from problematic YouTube API v3 to stable RapidAPI integration
+3. Stores metadata and thumbnails in database with enhanced statistics tracking
+4. WebSocket notifications for real-time updates
+5. Content categorization and search indexing
+6. Manual sync endpoint available at /api/youtube-videos/sync for testing
+7. Advanced logging system with detailed progress tracking
 
 ## External Dependencies
 
 ### Core Dependencies
-- **Multi-Provider AI APIs**: OpenAI, xAI (Grok), Anthropic (Claude), Google Gemini, DeepSeek, OpenRouter
-- **RapidAPI YouTube v2**: Video content synchronization (migrated from YouTube API v3)
+- **OpenAI API**: AI agent processing and content generation
+- **YouTube Data API v3**: Video content synchronization
 - **Neon Database**: Serverless PostgreSQL hosting
 - **shadcn/ui**: Component library for consistent UI
-- **Third-party Services**: Picsart API (image processing), Amazon APIs, CNPJ lookup services
 
 ### Development Tools
 - **Drizzle Kit**: Database migrations and schema management
@@ -165,35 +102,10 @@ The system uses PostgreSQL with comprehensive schema including:
 - Database connection pooling with Neon
 
 ### Performance Optimizations
-- **Query Management**: TanStack Query with intelligent caching strategies (static: 1h, semi-static: 30min, dynamic: 5min)
-- **Route Structure**: Optimized from 76 to 69 routes (-9.2% reduction) with consolidated patterns
-- **Lazy Loading**: Route-based code splitting and component lazy loading
-- **Image Processing**: CDN integration and optimized asset delivery
-- **WebSocket Management**: Real-time connection optimization
-- **Cache System**: Enterprise-grade in-memory cache with TTL expiration and LRU eviction
-
-## Route Architecture
-
-### Optimized Route Structure (69 Routes)
-- **Main Sections**: `/ferramentas`, `/hub`, `/agentes`, `/simuladores`, `/minha-area`, `/admin`
-- **Dynamic Patterns**: Catch-all routes for scalable section management
-- **Consolidated Redirects**: Compact backward compatibility redirects
-- **Agent Routes**: Unified handling for all AI agent types
-- **Permission-Based**: Route access controlled by user permissions
-
-### Route Categories
-1. **Tools Routes (22)**: Individual tool pages with unified `/ferramentas/*` pattern
-2. **Admin Routes (14)**: Administrative functions with `/admin/*` pattern  
-3. **Simulator Routes (12)**: Import/export calculators with `/simuladores/*` pattern
-4. **Hub Routes (8)**: Public resource pages with `/hub/*` pattern
-5. **Agent Routes (6)**: AI agent interfaces with `/agentes/*` pattern
-6. **User Area Routes (4)**: Personal workspace with `/minha-area/*` catch-all
-7. **Compatibility Redirects (3)**: Backward compatibility maintenance
-
-### Future Optimization Potential
-- Simulator routes could use dynamic patterns (8 routes → 2-3 routes)
-- Admin routes have consolidation potential (14 routes → 8-10 routes)
-- Tool routes could implement dynamic routing (22 routes → 5-8 routes)
+- Query result caching with TanStack Query
+- Lazy loading for route components
+- Image optimization and CDN integration
+- WebSocket connection management
 
 ## AI Providers - Guia Completo de Uso
 
@@ -373,7 +285,6 @@ The system uses PostgreSQL with comprehensive schema including:
 - Provider: anthropic
 - Necessita: `ANTHROPIC_API_KEY`
 - Status: Configurado e funcional
-- **Funcionalidade Especial**: Extended Thinking com controle de budget_tokens para raciocínio profundo
 
 **Google (Gemini)**
 - Provider: gemini  
@@ -384,13 +295,6 @@ The system uses PostgreSQL with comprehensive schema including:
 - Provider: deepseek
 - Necessita: `DEEPSEEK_API_KEY` 
 - Status: Configurado e funcional
-
-**OpenRouter**
-- Provider: openrouter
-- Necessita: `OPENROUTER_API_KEY`
-- Status: Configurado e funcional
-- **Funcionalidade Especial**: Acesso a 318+ modelos dinâmicos em tempo real, incluindo modelos de última geração como x-ai/grok-4
-- **Dynamic Model Fetching**: Sistema busca modelos automaticamente da API OpenRouter sem necessidade de atualizações de código
 
 ---
 
@@ -421,324 +325,6 @@ The system uses PostgreSQL with comprehensive schema including:
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-
-- **January 14, 2025 - 11:56 PM**: ✅ DATABASE NaN ERRORS FIXED - AI GENERATION LOGS VALIDATION IMPLEMENTED
-  - **Critical Database Issue Resolved**: Fixed "invalid input syntax for type integer: 'NaN'" errors in AI generation logs
-  - **Input Validation Added**: Implemented safeParseInt and safeParseFloat functions to handle NaN values
-  - **API Endpoint Fixed**: Updated `/api/ai-generation-logs` with proper data sanitization and validation
-  - **Logging Service Enhanced**: Added NaN prevention in loggingService.ts across all logging functions
-  - **Database Schema Alignment**: Corrected field names to match schema (cost vs costUsd, creditsUsed as decimal)
-  - **System Stability**: Amazon Listings Optimizer now processes without database errors
-  - **User Impact**: All AI agents can now log usage data without causing system failures
-
-- **January 14, 2025 - 6:45 PM**: ✅ AMAZON LISTING OPTIMIZER AUTHENTICATION BUG FIXED - COMPLETE TOKEN INTEGRATION
-  - **Root Cause**: Amazon Listing Optimizer was making API requests without authentication tokens, causing 401 errors
-  - **Solution Applied**: Added proper `Authorization: Bearer ${localStorage.getItem('auth_token')}` headers to all 6 API calls:
-    - POST /api/amazon-sessions (session creation)
-    - PUT /api/amazon-sessions/${sessionId}/data (data saving)
-    - POST /api/amazon-sessions/${sessionId}/process-step1 (analysis)
-    - POST /api/amazon-sessions/${sessionId}/process-step2 (title generation)
-    - POST /api/amazon-sessions/${sessionId}/process-step3 (bullet points)
-    - POST /api/amazon-sessions/${sessionId}/process-step4 (description)
-  - **Files Updated**: client/src/pages/agents/amazon-listings-optimizer-new.tsx
-  - **System Benefits**: Amazon Listing Optimizer now properly authenticated and functional
-  - **User Impact**: "Erro de não autorizado" resolved, agent now processes correctly
-
-- **January 14, 2025 - 5:50 PM**: ✅ CONSOLE ERRORS COMPLETELY ELIMINATED - WEBSOCKET & CSP ISSUES FIXED
-  - **WebSocket Production Fix**: Disabled WebSocket connections in production to prevent connection errors with tokens in URL
-  - **CSP Policy Corrected**: Removed problematic sandbox directive causing parsing errors
-  - **Permissions Policy Enhanced**: Added missing permissions to prevent unrecognized feature warnings
-  - **Host Validation Improved**: Enhanced token detection and URL cleaning for WebSocket connections
-  - **YouTube Integration Corrected**: Removed direct YouTube API references, using only RapidAPI integration with static channel info
-  - **Environment-Aware Features**: WebSocket and debug logging only active in development mode
-  - **Production Ready**: Application now runs without any console errors, warnings, or unrecognized features
-  - **User Experience**: Completely clean browser console for production deployment
-
-- **January 14, 2025 - 5:40 PM**: ✅ PRODUCTION CONSOLE LOGS COMPLETELY ELIMINATED - CSP FONT LOADING FIXED
-  - **Console Log Cleanup Completed**: Removed all debug console.log statements from production build
-  - **Production-Safe Logging Implemented**: Created environment-aware logger system that only shows debug info in development
-  - **Files Updated**: AuthContext.tsx, AuthService.ts, PermissionContext.tsx, Dashboard.tsx
-  - **CSP Font Policy Fixed**: Updated Content Security Policy to allow data URIs and multiple font sources
-  - **Font Sources Allowed**: Added support for fonts.googleapis.com and data: URIs in font-src directive
-  - **Connection Policy Enhanced**: Updated connect-src to allow HTTPS connections for API calls
-  - **Production Ready**: Application now clean of debug logs and CSP violations for production deployment
-  - **User Experience**: No more console pollution in production while maintaining debug capability in development
-
-- **January 14, 2025 - 5:20 PM**: ✅ COMPLETE PERMISSION SYSTEM RESTRUCTURE COMPLETED - ALL AGENT PAGE PROTECTIONS REMOVED
-  - **Permission Architecture Restructured**: Successfully removed all PermissionGuard protections from individual agent pages
-  - **Comprehensive Removal Completed**: All agent files cleaned of PermissionGuard wrappers:
-    - infographic-generator.tsx ✅ REMOVED
-    - lifestyle-with-model.tsx ✅ REMOVED  
-    - amazon-customer-service.tsx ✅ REMOVED
-    - amazon-negative-reviews.tsx ✅ REMOVED
-    - amazon-listings-optimizer-new.tsx ✅ REMOVED
-    - TestAgent.tsx ✅ REMOVED
-    - SimpleTestAgent.tsx ✅ REMOVED
-  - **Architecture Benefit**: Access control now centralized at agent card level in Agentes.tsx
-  - **Security Maintained**: Users without permissions cannot enter agent pages through card restrictions
-  - **System Status**: Complete migration from page-level to card-level permission control operational
-  - **Performance Impact**: Removed permission checking overhead from all agent page renders
-
-- **January 14, 2025 - 5:15 PM**: ✅ COMPLETE AGENT ROUTING SYSTEM FIXED - ALL REDIRECTS NOW WORKING CORRECTLY
-  - **Agent Redirection Issues Resolved**: Fixed all agent redirect mismatches between agent IDs and actual route paths
-  - **Specific Redirects Corrected**:
-    - `agent-amazon-product-photography` → `/agentes/main-image-editor` ✅ WORKING
-    - `html-description-generator` → `/agentes/html-description` ✅ WORKING
-    - `bullet-points-generator` → `/agentes/bullet-points` ✅ WORKING
-    - `agent-lifestyle-with-model` → `/agentes/lifestyle-model` ✅ WORKING
-    - `agent-infographic-generator` → `/agentes/infographic-generator` ✅ WORKING
-    - `advanced-infographic-generator` → `/agentes/advanced-infographic` ✅ WORKING
-    - `agent-amazon-listings` → `/agentes/amazon-listing` ✅ WORKING
-  - **Rate Limits Increased Again**: Auth attempts: 25 → 50 per 15 minutes, API requests: 100 → 200 per 15 minutes
-  - **Root Cause**: Generic fallback redirect `/agentes/${agent.id}` was using agent IDs that didn't match actual route paths
-  - **Solution**: Implemented specific redirect cases in Agentes.tsx for each agent ID to match exact route definitions in App.tsx
-  - **User Confirmation**: Editor de Imagem Principal tested and confirmed working correctly
-  - **System Status**: All agent white screen issues resolved, complete routing system operational
-
-- **January 14, 2025 - 3:00 PM**: ✅ RATE LIMITING OPTIMIZATION COMPLETED - TOO MANY API REQUESTS ERROR RESOLVED
-  - **Critical User Issue Fixed**: User experiencing "Too many API requests from this IP, please try again later" during login
-  - **Rate Limits Increased Significantly**:
-    - Login attempts: 5 → 25 per 15 minutes (500% increase)
-    - Registration attempts: 3 → 10 per hour (233% increase)  
-    - Payment attempts: 3 → 10 per 5 minutes (233% increase)
-  - **Files Updated**: server/security.ts, server/middleware/security.ts, server/index.ts
-  - **System Benefits**: Balanced security protection with user experience - prevents abuse while allowing normal usage
-  - **Production Ready**: New limits appropriate for 400+ users without blocking legitimate access
-
-- **January 14, 2025 - 2:25 PM**: ✅ ADMIN PAGES FIXES AND CLEANUP COMPLETED - ALL BLANK PAGES RESOLVED + UNUSED FEATURES REMOVED
-  - **Blank Pages Fixed**: 
-    - `/admin/cadastros/tipos-materiais` - Fixed by adding Array.isArray() check for materialTypes filtering
-    - `/admin/conteudo/fornecedores` - Fixed by adding Array.isArray() check for suppliers filtering
-  - **Unused Features Removed**:
-    - `/admin/cadastros/tipos-prompts-ia` - Removed "Tipos de Prompts IA" from AdminCadastros.tsx
-    - `/admin/cadastros/tipos-templates` - Template functionality already removed in previous cleanup
-    - `/admin/conteudo/templates` - Template functionality already removed in previous cleanup
-    - `/admin/conteudo/prompts-ia` - Removed "Prompts IA" from ContentManagement.tsx
-  - **Root Cause**: Components were trying to filter data that might not be arrays, causing blank pages
-  - **Solution**: Added Array.isArray() checks before filtering operations to ensure data safety
-  - **Import Cleanup**: Removed unused imports from AdminCadastros.tsx and ContentManagement.tsx
-  - **System Benefits**: Admin interface now clean and fully functional with proper error handling
-
-- **January 14, 2025 - 2:20 PM**: ✅ AMAZON LISTINGS OPTIMIZER CREDIT SYSTEM BUG FIXED - DYNAMIC COST CHECKING IMPLEMENTED
-  - **Issue Identified**: Amazon Listings Optimizer had hardcoded 10 credit validation despite actual cost being 3 credits
-  - **Dynamic Cost Integration**: Implemented useGetFeatureCost and useCanProcessFeature hooks for real-time cost validation
-  - **Hardcoded Values Replaced**: Fixed all hardcoded references:
-    - Credit validation logic: Changed from hardcoded 10 to dynamic cost checking
-    - UI alert message: Updated to show actual required credits (3)
-    - Logging system: Updated creditsUsed to use dynamic requiredCredits value
-  - **User Experience Fixed**: Users with 979 credits can now access tool that requires only 3 credits
-  - **Error Messages Enhanced**: More informative error messages showing actual vs required credits
-  - **System Benefits**: All agents now use consistent dynamic cost checking system
-
-- **January 14, 2025 - 2:15 PM**: ✅ AGENT PAGES WHITE SCREEN ISSUE FIXED - COMPLETE ROUTING SYSTEM RESTORED
-  - **Missing Export Statement Fixed**: Added missing `export default` statement to amazon-listings-optimizer-new.tsx
-  - **Route Validation Completed**: All 7 agent routes now properly loading (HTTP 200 OK status):
-    - /agentes/amazon-listing - Amazon Listings Optimizer ✅
-    - /agentes/html-description - HTML Description Generator ✅
-    - /agentes/bullet-points - Bullet Points Generator ✅
-    - /agentes/main-image-editor - Main Image Editor ✅
-    - /agentes/lifestyle-model - Lifestyle with Model ✅
-    - /agentes/infographic-generator - Infographic Generator ✅
-    - /agentes/advanced-infographic - Advanced Infographic Generator ✅
-  - **Routing System Restored**: Complete agent routing system operational with proper authentication and lazy loading
-  - **Performance Maintained**: All optimizations from previous phases preserved while fixing white screen issue
-
-- **January 14, 2025 - 2:00 PM**: ✅ PHASE 2.2 BUNDLE SIZE OPTIMIZATION COMPLETED - COMPREHENSIVE BUNDLE REDUCTION & PERFORMANCE ENHANCEMENT
-  - **Dynamic Component Loading**: Implemented intelligent component loading system:
-    - 45+ components converted to lazy loading with priority-based loading
-    - Smart prefetching based on user role and route context
-    - Route-based code splitting reducing initial bundle by 60-80%
-    - Progressive loading for heavy AI and image processing components
-  - **Tree-Shaking Optimizations**: Advanced dependency optimization:
-    - Native function replacements for heavy libraries (lodash, date-fns)
-    - Selective imports reducing bundle size by 20-30%
-    - Bundle analysis and dead code elimination strategies
-    - Micro-utility functions replacing heavyweight dependencies
-  - **Icon Loading Optimization**: Selective icon import system:
-    - 100+ icons categorized by priority (critical vs. lazy loading)
-    - 40-60% reduction in icon bundle size (100KB+ → 35-50KB typical)
-    - Feature-specific icon lazy loading on demand
-    - Enhanced IconLoader component with intelligent caching
-  - **Performance Monitoring**: Built-in optimization tracking:
-    - Real-time bundle size monitoring and reporting
-    - Component load time tracking and optimization metrics
-    - Memory usage monitoring and resource optimization
-    - Comprehensive performance reporting system
-  - **Technical Implementation**: 4 optimization utility files created:
-    - `client/src/lib/dynamicComponents.ts` - Advanced dynamic loading strategies
-    - `client/src/lib/optimizedIcons.ts` - Selective icon imports with priority system
-    - `client/src/lib/treeshaking.ts` - Tree-shaking utilities and native replacements
-    - `client/src/lib/performanceMonitor.ts` - Bundle optimization monitoring
-  - **Performance Benefits Achieved**:
-    - 50-75% total bundle size reduction across all routes
-    - 60-80% faster initial page load times
-    - 90% improvement in perceived navigation speed
-    - 40% reduction in runtime memory consumption
-  - **App.tsx Enhancement**: Intelligent component loading with user context-aware prefetching
-  - **Report Generated**: BUNDLE_SIZE_OPTIMIZATION_REPORT.md with comprehensive analysis
-  - **Status**: All optimization systems operational and monitoring active
-  - **Next Phase**: Ready for Phase 2.3 Component Lazy Loading and Virtual Rendering
-
-- **January 14, 2025 - 1:26 PM**: ✅ PHASE 2.1 REACT PERFORMANCE OPTIMIZATION COMPLETED - COMPREHENSIVE FRONTEND OPTIMIZATION
-  - **React.memo Implementation**: Applied to 3 high-impact components (Tools, PromotionalBanners, Dashboard)
-  - **useMemo Optimizations**: Memoized expensive computations including:
-    - Tools filtering and sorting logic for 100+ tools catalog
-    - Featured tools calculation in Tools component
-    - Banner configuration data in PromotionalBanners
-  - **useCallback Optimizations**: Memoized event handlers and functions:
-    - Tool click navigation handlers
-    - Banner click handlers for external links
-    - Dashboard modal handlers (news/updates)
-    - API fetching functions (fetchFullNews, fetchFullUpdate)
-    - Quick action navigation handlers
-  - **Performance Benefits Achieved**:
-    - 40-60% reduction in unnecessary re-renders estimated
-    - Eliminated expensive recalculations for tool filtering/sorting
-    - Prevented recreation of event handlers causing child re-renders
-    - Optimized complex dashboard with multiple data sources
-  - **Technical Implementation**: 12 performance patterns applied across 3 components
-  - **Report Generated**: REACT_PERFORMANCE_OPTIMIZATION_REPORT.md with comprehensive analysis
-
-- **January 14, 2025 - 1:25 PM**: ✅ PHASE 1.3 DATABASE QUERY OPTIMIZATION COMPLETED - COMPREHENSIVE PERFORMANCE ENHANCEMENT
-  - **Database Indexes Implementation**: Added comprehensive indexes for high-frequency queries:
-    - Supplier tables: userId, categoryId, tradeName, corporateName, createdAt, updatedAt indexes
-    - User sessions: userId, expiresAt, createdAt indexes for authentication performance
-    - Partner reviews: partnerId, userId, isApproved indexes for review aggregations
-    - Supplier conversations: supplierId, userId, channel, createdAt indexes for communication tracking
-    - User group members: userId, groupId, addedAt indexes for permission queries
-  - **Query Result Caching System**: Enterprise-grade in-memory cache (server/utils/queryCache.ts):
-    - TTL-based expiration with automatic cleanup (2-minute intervals)
-    - Pattern-based cache invalidation for data consistency
-    - LRU eviction when memory limits reached (5000 entries max)
-    - Cache statistics tracking (hit rate, memory usage, health status)
-    - Conditional cache keys for different query patterns
-  - **N+1 Query Pattern Elimination**: Optimized critical storage methods:
-    - getPartnersWithReviewStats: Single SQL join with aggregations instead of individual review queries
-    - Partner review replies: Bulk fetching with inArray instead of loop-based queries
-    - 10x+ performance improvement for partner statistics calculations
-  - **Cache Integration**: Integrated caching into key storage operations:
-    - getSuppliers: 5-minute cache with user-specific keys
-    - getPartnersWithReviewStats: 15-minute cache for aggregated statistics
-    - Automatic cache invalidation on create/update/delete operations
-    - Pattern-based invalidation for related data consistency
-  - **Admin Cache Monitoring**: Added three cache management endpoints:
-    - GET /api/admin/cache/stats: View cache statistics and health metrics
-    - POST /api/admin/cache/clear: Clear entire cache (admin only)
-    - POST /api/admin/cache/invalidate: Invalidate specific cache patterns
-  - **Performance Benefits**:
-    - Database query performance improved through strategic indexing
-    - Reduced database load through intelligent query result caching
-    - Eliminated N+1 query patterns in partner review statistics
-    - Real-time cache health monitoring for production environments
-    - Memory-efficient cache with automatic cleanup and eviction policies
-
-- **January 14, 2025 - 1:12 PM**: ✅ PHASE 1.1 BACKEND LOGGING OPTIMIZATION COMPLETED - 68% REDUCTION IN SERVER CONSOLE LOGS
-  - **Performance Achievement**: Successfully reduced server console logs from 980 to 313 (68% reduction)
-  - **Structured Logging System Implemented**: Created enterprise-grade logger with environment-based conditional logging
-  - **Critical Middleware Optimized**: Performance middleware now uses structured logging reducing per-request impact
-  - **Authentication Optimization**: Replaced verbose console.log statements with efficient structured logging
-  - **WebSocket Broadcasting Optimized**: Critical real-time notification system performance improved
-  - **Routes.ts Critical Optimization**: Replaced performance-impacting console.error statements with structured logging
-  - **Production-Safe Logging**: Conditional logging automatically disabled in production environment
-  - **System Benefits**: 
-    - 68% reduction in server logging overhead
-    - Structured JSON logging for production environments
-    - Environment-based log level control (ERROR/WARN only in production)
-    - Performance-focused logging with context and metadata
-    - Maintained debugging capability in development
-  - **Technical Implementation**: New `/server/utils/logger.ts` with LogLevel enum, conditional output, and specialized methods for API, database, authentication, and WebSocket logging
-  - **Server Performance**: Immediate improvement in response times and reduced console noise
-  - **Legacy Compatibility**: New structured logging works alongside existing console.logs during transition
-
-- **January 14, 2025 - 1:05 PM**: ✅ REPLIT.MD COMPREHENSIVE REVIEW AND UPDATE COMPLETED
-  - **Platform Name Updated**: "Aluno Power Platform" → "Core Guilherme Vasques" reflecting rebranding
-  - **AI Integration Corrected**: Single OpenAI → Multi-provider system (OpenAI, xAI/Grok, Anthropic, Google, DeepSeek, OpenRouter)
-  - **YouTube API Updated**: Corrected from "YouTube Data API v3" → "RapidAPI YouTube v2" (migration completed)
-  - **AI Agents Expanded**: Amazon listing only → 9 different agents documented
-  - **Database Schema Detailed**: Comprehensive schema documentation with all major table categories
-  - **Tools Ecosystem Added**: 100+ tools catalog properly documented
-  - **Permission System Documented**: Complete role-based access control explanation
-  - **Route Architecture Added**: New section documenting optimized 69-route structure
-  - **External Dependencies Updated**: All current APIs and services properly listed
-  - **Templates References Removed**: Cleaned outdated template functionality references
-  - **Advanced Features Documented**: OpenRouter dynamic models, Claude Extended Thinking, reasoning modes
-
-- **January 14, 2025 - 1:00 PM**: ✅ ROUTE STRUCTURE OPTIMIZATION COMPLETED - 80+ ROUTES REDUCED TO 69 ROUTES
-  - **Complex Route Structure Simplified**: Reduced from 76 to 69 active routes (-9.2% reduction)
-  - **Agent Route Duplications Eliminated**: Removed duplicate `/agentes/amazon-negative-reviews` and `/agentes/amazon-customer-service` routes
-  - **MyArea Route Consolidation**: Eliminated specific routes `/minha-area/perfil` and `/minha-area/importacao-exportacao` captured by catch-all pattern
-  - **Redirect Routes Optimized**: Consolidated 9 backward compatibility redirects into compact single-line format
-  - **Route Pattern Analysis**: Identified potential future optimizations:
-    - 8 simulator routes following similar patterns
-    - 15 admin routes with consolidation potential
-    - 11 tool routes that could use dynamic patterns
-  - **Maintenance Benefits**: Significantly reduced route complexity for better maintainability
-  - **Performance Impact**: Cleaner routing structure improves bundle size and navigation performance
-  - **Architecture Preserved**: All functional routes maintained, only duplicates and redundant patterns removed
-  - **Future Optimization Ready**: Foundation laid for further route pattern consolidation if needed
-
-- **January 14, 2025 - 12:54 PM**: ✅ PHASE 4 ORPHANED PAGES CLEANUP COMPLETED - 8 ORPHANED FILES REMOVED
-  - **Critical Error Fixed**: Resolved "AgentsPage is not defined" error that was causing application crashes
-  - **Orphaned Pages Removed**: 
-    - `client/src/pages/agents.tsx` (410 lines) - Duplicate agents page causing errors, already have /agentes routes
-    - `client/src/pages/myarea/MyProductsOptimized.tsx` (estimated 300+ lines) - Orphaned optimized version not imported anywhere
-    - `client/src/pages/myarea/MySuppliersOptimized.tsx` (estimated 400+ lines) - Orphaned optimized version not imported anywhere
-  - **Backend Cleanup Completed**:
-    - `server/routes_backup.ts` (242KB) - Large backup file no longer needed
-    - `server/services/aiProviderService.backup.ts` (21KB) - Legacy backup service
-    - `server/services/aiProviderService.ts.backup` (23KB) - Duplicate backup service
-    - `server/routes/stripe/webhook-test.ts` - Test file not in production use
-    - `client/src/pages/agents/amazon-listings-optimizer-new-broken.tsx` - Broken version
-  - **Additional Orphaned Files Removed**:
-    - `test-rapidapi.js` (72 lines) - Development test script no longer needed
-    - `update-password.js` (39 lines) - One-time utility script removed for security
-  - **Import References Fixed**: Cleaned up server/routes/index.ts to remove references to deleted webhook-test file
-  - **System Status**: Application running perfectly with 345 frontend files and 87 backend files
-  - **Architecture Preserved**: All functional "Refactored" and "Optimized" components verified as actively used and maintained
-  - **Performance Benefits**: Reduced bundle size, eliminated dead code, improved build performance
-  - **Total Cleanup Achievement**: Over 16,500+ lines of dead code removed across all optimization phases
-
-- **January 14, 2025 - 12:50 PM**: ✅ ADMIN COMPONENT WRAPPER ELIMINATION COMPLETED - REFACTORED ARCHITECTURE STREAMLINED
-  - **Wrapper Components Eliminated**: Removed unnecessary wrapper layers that added no value
-  - **Direct Import Strategy**: Updated ContentManagement.tsx to import refactored components directly
-  - **Components Removed**:
-    - `ToolsManager.tsx` (6 lines) - Simple wrapper for ToolsManagerRefactored
-    - `MaterialsManager.tsx` (6 lines) - Simple wrapper for MaterialsManagerRefactored
-  - **Architecture Simplified**: Direct imports eliminate unnecessary abstraction layers
-  - **Component Analysis Completed**: Confirmed SuppliersManager vs ProductSuppliersManager serve different purposes (admin management vs product association)
-  - **No False Duplications**: SupplierForm only exists in admin/conteudo/ - user's mention of admin/cadastros/ was incorrect
-  - **Total Lines Removed**: 12 lines of wrapper code eliminated
-  - **System Benefits**: Cleaner imports, reduced complexity, better maintainability
-
-- **January 14, 2025 - 12:47 PM**: ✅ DUPLICATED COMPONENT ARCHITECTURE CLEANUP COMPLETED - PRODUCT MANAGEMENT UNIFIED
-  - **Critical Duplicate Architecture Issue Resolved**: Fixed conflicting product management routes that were causing system confusion
-  - **Unified Product Architecture**: Consolidated from dual routing system to single MyArea.tsx-based architecture
-  - **Removed Conflicting Routes**: Eliminated duplicate App.tsx routes `/minha-area/produtos/*` that conflicted with MyArea.tsx catch-all
-  - **Orphaned Components Removed**: 
-    - `ProductForm.tsx` (392 lines) - Less feature-rich version, replaced by ProductPricingForm.tsx
-    - `ProductPreview.tsx` (241 lines) - Basic preview version, replaced by ProductDetail.tsx
-  - **Final Architecture**: Single unified system using ProductPricingForm + ProductDetail + ProductPricing in MyArea.tsx
-  - **Benefits**: Eliminated route conflicts, unified product management under single comprehensive architecture
-  - **Total Lines Removed**: 633 additional lines of duplicate product management code
-  - **System Status**: Product management now has single, consistent interface with no routing conflicts
-
-- **January 14, 2025 - 12:40 PM**: ✅ PHASE 4 ORPHANED PAGES CLEANUP COMPLETED - 8 ORPHANED FILES REMOVED
-  - **Critical Error Fixed**: Resolved "AgentsPage is not defined" error that was causing application crashes
-  - **Orphaned Pages Removed**: 
-    - `client/src/pages/agents.tsx` (410 lines) - Duplicate agents page causing errors, already have /agentes routes
-    - `client/src/pages/myarea/MyProductsOptimized.tsx` (estimated 300+ lines) - Orphaned optimized version not imported anywhere
-    - `client/src/pages/myarea/MySuppliersOptimized.tsx` (estimated 400+ lines) - Orphaned optimized version not imported anywhere
-  - **Backend Cleanup Completed**:
-    - `server/routes_backup.ts` (242KB) - Large backup file no longer needed
-    - `server/services/aiProviderService.backup.ts` (21KB) - Legacy backup service
-    - `server/services/aiProviderService.ts.backup` (23KB) - Duplicate backup service
-    - `server/routes/stripe/webhook-test.ts` - Test file not in production use
-    - `client/src/pages/agents/amazon-listings-optimizer-new-broken.tsx` - Broken version
-  - **Import References Fixed**: Cleaned up server/routes/index.ts to remove references to deleted webhook-test file
-  - **System Status**: Application running perfectly with 345 frontend files and 87 backend files
-  - **Architecture Preserved**: All functional "Refactored" and "Optimized" components verified as actively used and maintained
-  - **Performance Benefits**: Reduced bundle size, eliminated dead code, improved build performance
-  - **Total Cleanup Achievement**: Over 16,500+ lines of dead code removed across all optimization phases
 
 - **January 14, 2025 - 12:28 PM**: ✅ PHASE 3 FRONTEND ROUTE OPTIMIZATION COMPLETED - 450+ LINES OF DUPLICATE ROUTES REMOVED
   - **All Duplicate English Agent Routes Removed**: Eliminated all `/agents/*` duplicates while preserving Portuguese `/agentes/*` versions with fallback redirect
@@ -3780,7 +3366,7 @@ Preferred communication style: Simple, everyday language.
     - Sistema de cópia de dados funcionando (individual e em lote)
     - Navegação integrada no Hub de Recursos com ícone Tag
   - **Dados de Teste Confirmados**:
-    - Testes realizados com palavras exemplo e verificação de funcionalidade
+    - Testes realizados com palavras "maca" e "maca estetica"
     - Logs salvos corretamente com estrutura adequada
     - Performance API: 850ms-4325ms dependendo da complexidade da busca
     - Total de 10 sugestões retornadas por consulta conforme padrão Amazon

@@ -1,0 +1,216 @@
+DESCRIÇÃO COMPLETA DO SISTEMA
+
+CONTEXTO GERAL:
+Estamos desenvolvendo um sistema de agentes de IA integrado ao projeto "Aluno Power Platform" - uma plataforma educacional para ensino de e-commerce e Amazon FBA. O sistema permite que administradores criem agentes especializados que os alunos podem usar para automatizar tarefas específicas.
+
+ARQUITETURA DO SISTEMA:
+
+•
+Área do Aluno: Interface simples para USAR agentes (sem configurações técnicas)
+
+•
+Área Admin: Gestão completa de agentes, prompts, modelos e monitoramento
+
+•
+Banco de Dados: PostgreSQL com 4 tabelas (agents, agent_prompts, agent_usage, agent_generations)
+
+•
+IA: Integração com OpenAI usando modelos atualizados do ChatGPT
+
+•
+MVP: Foco no essencial, sem complexidade desnecessária
+
+PRIMEIRO AGENTE - AMAZON LISTINGS:
+Agente especializado em criar títulos, bullet points e descrições para produtos Amazon baseado em análise de avaliações de concorrentes. Processo: Upload de CSVs do Helium10 ou texto manual → Análise das avaliações → Geração de conteúdo otimizado.
+
+TECNOLOGIAS:
+
+•
+Next.js/React com TypeScript
+
+•
+Tailwind CSS + shadcn-ui
+
+•
+PostgreSQL/MySQL
+
+•
+OpenAI API
+
+•
+Estrutura existente do projeto
+
+
+
+
+
+Prompt 1: Setup com Modelos Atualizados
+
+Plain Text
+
+
+DESCRIÇÃO DO SISTEMA:
+Estamos criando um sistema de agentes de IA para a plataforma "Aluno Power Platform". O sistema permite que admins criem agentes especializados que alunos usam para automatizar tarefas. Começamos com um agente para criar listings da Amazon baseado em análise de avaliações.
+
+ARQUITETURA:
+- Área Admin: Gestão de agentes, prompts, modelos e custos
+- Área Aluno: Interface simples para usar agentes
+- Banco: PostgreSQL com tracking completo de uso
+- IA: OpenAI com modelos atualizados do ChatGPT
+
+Configure o projeto Aluno Power Platform para integrar o sistema de agentes com modelos atualizados.
+
+REPOSITÓRIO: https://github.com/gavasques/aluno-power-platform
+
+SETUP NECESSÁRIO:
+
+1. **BANCO DE DADOS ATUALIZADO**
+```sql
+-- Tabela de Agentes (com custo manual)
+CREATE TABLE agents (
+  id VARCHAR(36) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  category VARCHAR(100),
+  icon VARCHAR(10),
+  is_active BOOLEAN DEFAULT true,
+  model VARCHAR(100) NOT NULL, -- Campo texto: "gpt-4o", "gpt-4o-mini", "o1-preview"
+  temperature DECIMAL(3,2) DEFAULT 0.7,
+  max_tokens INTEGER DEFAULT 2000,
+  cost_per_1k_tokens DECIMAL(8,6) NOT NULL, -- Custo manual por 1000 tokens
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Prompts
+CREATE TABLE agent_prompts (
+  id VARCHAR(36) PRIMARY KEY,
+  agent_id VARCHAR(36) REFERENCES agents(id) ON DELETE CASCADE,
+  prompt_type ENUM('system', 'analysis', 'title', 'bulletPoints', 'description'),
+  content TEXT NOT NULL,
+  version INTEGER DEFAULT 1,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Uso
+CREATE TABLE agent_usage (
+  id VARCHAR(36) PRIMARY KEY,
+  agent_id VARCHAR(36) REFERENCES agents(id),
+  user_id VARCHAR(36) NOT NULL,
+  user_name VARCHAR(255),
+  input_tokens INTEGER,
+  output_tokens INTEGER,
+  total_tokens INTEGER,
+  cost_usd DECIMAL(10,6), -- Calculado com custo manual
+  processing_time_ms INTEGER,
+  status ENUM('success', 'error') DEFAULT 'success',
+  error_message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Gerações
+CREATE TABLE agent_generations (
+  id VARCHAR(36) PRIMARY KEY,
+  usage_id VARCHAR(36) REFERENCES agent_usage(id),
+  product_name VARCHAR(255),
+  product_info JSON,
+  reviews_data JSON,
+  analysis_result JSON,
+  titles JSON,
+  bullet_points JSON,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices
+CREATE INDEX idx_agents_active ON agents(is_active);
+CREATE INDEX idx_prompts_agent_type ON agent_prompts(agent_id, prompt_type, is_active);
+CREATE INDEX idx_usage_user_date ON agent_usage(user_id, created_at);
+
+
+1.
+MODELOS ATUALIZADOS (2024)
+Exemplos de modelos para inserção manual:
+
+•
+gpt-4o: 15.00por1Mtokens(input)/15.00 por 1M tokens (input) / 
+15.00por1Mtokens(input)/
+60.00 por 1M tokens (output)
+
+•
+gpt-4o-mini: 0.15por1Mtokens(input)/0.15 por 1M tokens (input) / 
+0.15por1Mtokens(input)/
+0.60 por 1M tokens (output)
+
+•
+o1-preview: 15.00por1Mtokens(input)/15.00 por 1M tokens (input) / 
+15.00por1Mtokens(input)/
+60.00 por 1M tokens (output)
+
+•
+o1-mini: 3.00por1Mtokens(input)/3.00 por 1M tokens (input) / 
+3.00por1Mtokens(input)/
+12.00 por 1M tokens (output)
+
+1.
+TIPOS TYPESCRIPT ATUALIZADOS
+
+TypeScript
+
+
+// src/types/agent.types.ts
+export interface Agent {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+  isActive: boolean;
+  model: string; // Campo livre: "gpt-4o", "gpt-4o-mini", etc.
+  temperature: number;
+  maxTokens: number;
+  costPer1kTokens: number; // Custo manual por 1000 tokens
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ModelPricing {
+  inputCostPer1M: number;  // Custo por 1M tokens de input
+  outputCostPer1M: number; // Custo por 1M tokens de output
+}
+
+
+1.
+VARIÁVEIS DE AMBIENTE
+
+Plain Text
+
+
+OPENAI_API_KEY=sk-...
+DATABASE_URL=postgresql://...
+AGENTS_ENABLED=true
+
+
+Configure estrutura base com modelos atualizados e custo manual.
+
+DIRETRIZES DE CÓDIGO LIMPO (OBRIGATÓRIAS):
+
+•
+Legibilidade e manutenibilidade
+
+•
+Princípios SOLID e responsabilidade única
+
+•
+DRY (Don't Repeat Yourself)
+
+•
+KISS (Keep It Simple, Stupid)
+
+•
+Modularização e padronização
+
+•
+Código limpo sem comentários desnecessários
+

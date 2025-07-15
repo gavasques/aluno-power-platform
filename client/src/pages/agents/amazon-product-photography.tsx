@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
 
 interface ProcessingResult {
   originalImage: string;
@@ -146,6 +146,11 @@ export default function AmazonProductPhotography() {
   };
 
   return (
+    <PermissionGuard 
+      featureCode="agents.amazon_product_photography"
+      showMessage={true}
+      message="Você não tem permissão para usar o Editor de Imagem Principal."
+    >
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto p-6 max-w-6xl">
         {/* Header */}
@@ -386,5 +391,6 @@ export default function AmazonProductPhotography() {
         )}
       </div>
     </div>
+    </PermissionGuard>
   );
 }

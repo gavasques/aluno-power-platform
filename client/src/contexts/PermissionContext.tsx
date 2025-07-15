@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { apiRequest } from '@/lib/queryClient';
-import { logger } from '@/lib/logger';
 
 interface PermissionContextType {
   features: string[];
@@ -30,10 +29,10 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
       const response = await apiRequest('/api/permissions/user-features', {
         method: 'GET',
       }) as { features: string[] };
-      logger.debug('Permission context features loaded', { featuresCount: response.features?.length });
+      console.log('🔍 [PERMISSION_CONTEXT] Features from API:', response.features);
       setFeatures(response.features || []);
     } catch (error) {
-      logger.error('Error fetching user features:', error);
+      console.error('Error fetching user features:', error);
       setFeatures([]);
     } finally {
       setIsLoading(false);
@@ -57,7 +56,7 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
       }) as { hasAccess: boolean };
       return response.hasAccess || false;
     } catch (error) {
-      logger.error('Error checking access:', error);
+      console.error('Error checking access:', error);
       return false;
     }
   };

@@ -34,12 +34,12 @@ const SuppliersManager = () => {
 
   const categories = ["Todas", "Fabricantes", "Distribuidores", "Importadores", "Representantes", "Atacadistas", "Dropshipping"];
 
-  const filteredSuppliers = Array.isArray(suppliers) ? suppliers.filter(supplier => {
+  const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch = supplier.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          supplier.corporateName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Todas" || supplier.category.name === selectedCategory;
     return matchesSearch && matchesCategory;
-  }) : [];
+  });
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (

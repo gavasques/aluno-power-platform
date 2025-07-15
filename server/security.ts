@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import { z } from 'zod';
 import crypto from 'crypto';
 import validator from 'validator';
-import { logger } from './utils/logger';
 
 // Security headers middleware
 export const securityHeaders = (req: Request, res: Response, next: NextFunction) => {
@@ -12,7 +11,7 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   
   // Only set HSTS in production with HTTPS
   if (process.env.NODE_ENV === 'production') {
@@ -25,12 +24,10 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
     "default-src 'self'; " +
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://replit.com; " +
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
     "img-src 'self' data: https: blob:; " +
-    "connect-src 'self' wss: ws: https:; " +
+    "connect-src 'self' wss: ws:; " +
     "frame-ancestors 'none'; " +
-    "frame-src 'none'; " +
-
     "base-uri 'self';"
   );
   
@@ -55,14 +52,14 @@ export const createRateLimit = (windowMs: number, max: number, message: string) 
 // API rate limiting
 export const apiLimiter = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  200, // 200 requests per window (increased from 100)
+  100, // 100 requests per window
   'Too many API requests from this IP, please try again later'
 );
 
 // Authentication rate limiting (stricter)
 export const authLimiter = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  50, // 50 login attempts per window (increased from 25)
+  5, // 5 login attempts per window
   'Too many login attempts from this IP, please try again later'
 );
 
@@ -321,20 +318,17 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
   next();
 };
 
-// Authentication middleware - Optimized logging
+// Authentication middleware
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-  logger.trace('Authentication request received', {
-    hasAuth: !!req.headers.authorization,
-    userAgent: req.headers['user-agent']?.substring(0, 50)
-  }, 'AUTH');
+  console.log('🔍 [AUTH] Request headers:', JSON.stringify({
+    authorization: req.headers.authorization,
+    'user-agent': req.headers['user-agent']?.substring(0, 50) + '...'
+  }));
   
   const token = req.headers.authorization?.replace('Bearer ', '');
+  console.log('🔍 [AUTH] Extracted token:', token ? token.substring(0, 10) + '...' : 'null');
   
   if (!token) {
-    logger.warn('Authentication required - missing token', {
-      path: req.path,
-      method: req.method
-    }, 'AUTH');
     return res.status(401).json({ 
       error: 'Authentication required',
       details: 'Please provide a valid authorization token'
@@ -348,11 +342,9 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     // Validate the session token
     const user = await AuthService.validateSession(token);
     
+    console.log('🔍 [AUTH] User validation result:', user ? { userFound: true, userId: user.id, userRole: user.role } : 'null');
+    
     if (!user) {
-      logger.warn('Invalid or expired token', {
-        tokenPrefix: token.substring(0, 10),
-        path: req.path
-      }, 'AUTH');
       return res.status(401).json({ 
         error: 'Invalid or expired token',
         details: 'Please login again'
@@ -368,18 +360,11 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       username: user.username
     };
     
-    logger.debug('User authenticated successfully', {
-      userId: user.id,
-      userRole: user.role,
-      path: req.path
-    }, 'AUTH');
+    console.log('🔍 [AUTH] User object set on request:', JSON.stringify((req as any).user, null, 2));
     
     next();
   } catch (error) {
-    logger.error('Token validation error', { 
-      error: error.message,
-      path: req.path 
-    }, 'AUTH');
+    console.error('❌ [AUTH] Token validation error:', error);
     return res.status(401).json({ 
       error: 'Authentication failed',
       details: 'Please login again'
@@ -387,30 +372,17 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-// Role-based authorization middleware - Optimized logging
+// Role-based authorization middleware
 export const requireRole = (allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const userRole = (req as any).user?.role;
-    const userId = (req as any).user?.id;
     
     if (!userRole || !allowedRoles.includes(userRole)) {
-      logger.warn('Insufficient permissions', {
-        userId,
-        userRole,
-        requiredRoles: allowedRoles,
-        path: req.path
-      }, 'AUTH');
       return res.status(403).json({ 
         error: 'Insufficient permissions',
         details: `This operation requires one of: ${allowedRoles.join(', ')}`
       });
     }
-    
-    logger.trace('Role authorization successful', {
-      userId,
-      userRole,
-      path: req.path
-    }, 'AUTH');
     
     next();
   };

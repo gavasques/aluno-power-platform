@@ -11,7 +11,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen bg-background">
       <AdminHeader />
       <AdminBreadcrumbs />
-      <main className="flex-1 bg-background min-h-[calc(100vh-100px)] p-3">
+      <main className="flex-1 bg-background min-h-[calc(100vh-120px)] p-6">
         <div className="max-w-7xl mx-auto">
           {children}
         </div>

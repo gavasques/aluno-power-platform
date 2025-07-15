@@ -5,7 +5,6 @@
 
 import { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
-import { logger, logApiRequest, logApiResponse, logSlowRequest } from '../utils/logger';
 
 /**
  * Compression middleware with optimized settings
@@ -55,13 +54,10 @@ export const cacheHeaders = (req: Request, res: Response, next: NextFunction) =>
 };
 
 /**
- * Performance metrics middleware - Optimized logging
+ * Performance metrics middleware
  */
 export const performanceMetrics = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
-  
-  // Log incoming request
-  logApiRequest(req);
   
   res.on('finish', () => {
     const duration = Date.now() - startTime;
@@ -71,19 +67,14 @@ export const performanceMetrics = (req: Request, res: Response, next: NextFuncti
       res.set('X-Response-Time', `${duration}ms`);
     }
     
-    // Log API response
-    logApiResponse(req, res, duration);
+    // Log slow requests (> 1000ms)
+    if (duration > 1000) {
+      console.warn(`🐌 [SLOW_REQUEST] ${req.method} ${req.path} took ${duration}ms`);
+    }
     
-    // Log slow requests
-    logSlowRequest(req, duration);
-    
-    // Performance-specific logging for critical APIs
+    // Log performance metrics for products API
     if (req.path.includes('/api/products') && duration > 500) {
-      logger.warn('Products API slow response', {
-        path: req.path,
-        duration: `${duration}ms`,
-        threshold: '500ms'
-      }, 'PRODUCTS_API');
+      console.log(`⚡ [PRODUCTS_API] ${req.method} ${req.path} - ${duration}ms`);
     }
   });
   
@@ -119,7 +110,7 @@ function generateETag(url: string): string {
 }
 
 /**
- * Memory usage monitoring - Optimized sampling
+ * Memory usage monitoring
  */
 export const memoryMonitor = (req: Request, res: Response, next: NextFunction) => {
   // Check memory usage every 100 requests (simple sampling)
@@ -132,14 +123,11 @@ export const memoryMonitor = (req: Request, res: Response, next: NextFunction) =
       external: Math.round(memUsage.external / 1024 / 1024)
     };
     
-    logger.info('Memory usage sample', memMB, 'MEMORY');
+    console.log(`📊 [MEMORY_USAGE] RSS: ${memMB.rss}MB, Heap: ${memMB.heapUsed}/${memMB.heapTotal}MB`);
     
     // Warn if memory usage is high
     if (memMB.heapUsed > 512) {
-      logger.warn('High memory usage detected', {
-        heapUsed: `${memMB.heapUsed}MB`,
-        recommendation: 'Consider optimization'
-      }, 'MEMORY');
+      console.warn(`⚠️ [HIGH_MEMORY] Heap usage: ${memMB.heapUsed}MB - Consider optimization`);
     }
   }
   

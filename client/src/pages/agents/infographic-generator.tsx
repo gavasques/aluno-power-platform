@@ -11,7 +11,7 @@ import { Download, Users, Sparkles, Zap, AlertTriangle, Upload } from 'lucide-re
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
-
+import { PermissionGuard } from '@/components/guards/PermissionGuard';
 
 interface InfographicData {
   originalData: {
@@ -244,6 +244,11 @@ export default function InfographicGenerator() {
   const isDescriptionTooLong = remainingChars < 0;
 
   return (
+    <PermissionGuard 
+      featureCode="agents.infographic_generator"
+      showMessage={true}
+      message="Você não tem permissão para usar o Editor de Foto Infográficos."
+    >
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Header */}
       <div className="mb-8 text-center">
@@ -610,5 +615,6 @@ export default function InfographicGenerator() {
         </div>
       </div>
     </div>
+    </PermissionGuard>
   );
 }

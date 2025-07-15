@@ -62,11 +62,11 @@ const adminMenuItems = [
 export function AdminHeader() {
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-border shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/95">
-      <div className="flex h-12 items-center justify-between w-full px-2 sm:px-4">
-        <div className="flex items-center space-x-3">
+      <div className="flex h-16 items-center justify-between w-full px-4 sm:px-6">
+        <div className="flex items-center space-x-6">
           <Link to="/admin" className="flex items-center space-x-2 group">
-            <Shield className="h-6 w-6 text-primary group-hover:text-primary/80 transition-colors" />
-            <span className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">Painel Admin</span>
+            <Shield className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors" />
+            <span className="font-bold text-foreground group-hover:text-primary transition-colors">Painel Admin</span>
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
@@ -88,13 +88,13 @@ export function AdminHeader() {
                     {section.title}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid w-[350px] gap-2 p-3 md:w-[400px] md:grid-cols-2 lg:w-[500px] bg-white border border-border shadow-xl">
+                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-white border border-border shadow-xl">
                       {section.items.map((item) => (
                         <NavigationMenuLink key={item.href} asChild>
                           <Link
                             to={item.href}
                             className={cn(
-                              "block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary text-foreground"
+                              "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary text-foreground"
                             )}
                           >
                             <div className="flex items-center space-x-2">

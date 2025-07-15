@@ -158,8 +158,7 @@ export type InsertSupplierReview = {
   comment: string;
   isApproved?: boolean;
 };
-import { eq, ilike, and, or, desc, asc, sql, count, avg } from "drizzle-orm";
-import { queryCache, CACHE_TTL } from "./utils/queryCache";
+import { eq, ilike, and, or, desc, asc, sql, count } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -422,17 +421,8 @@ export class DatabaseStorage implements IStorage {
 
   // Suppliers
   async getSuppliers(userId?: number): Promise<Supplier[]> {
-    // Generate cache key
-    const cacheKey = queryCache.generateKey('suppliers', 'list', { userId: userId || 'all' });
-    const cached = await queryCache.get<Supplier[]>(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    // Execute query
-    let result: Supplier[];
     if (userId) {
-      result = await db.query.suppliers.findMany({
+      return await db.query.suppliers.findMany({
         where: eq(suppliers.userId, userId),
         with: {
           category: true,
@@ -442,22 +432,18 @@ export class DatabaseStorage implements IStorage {
           reviews: true
         }
       });
-    } else {
-      // For admin or when no userId specified, return all
-      result = await db.query.suppliers.findMany({
-        with: {
-          category: true,
-          brands: true,
-          contacts: true,
-          files: true,
-          reviews: true
-        }
-      });
     }
-
-    // Cache the result
-    await queryCache.set(cacheKey, result, CACHE_TTL.DYNAMIC_DATA);
-    return result;
+    
+    // For admin or when no userId specified, return all
+    return await db.query.suppliers.findMany({
+      with: {
+        category: true,
+        brands: true,
+        contacts: true,
+        files: true,
+        reviews: true
+      }
+    });
   }
 
   async getSupplier(id: number): Promise<Supplier | undefined> {
@@ -474,10 +460,6 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .returning();
-
-    // Invalidate supplier caches
-    await queryCache.invalidatePattern('suppliers:*');
-    
     return created;
   }
 
@@ -490,18 +472,11 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(suppliers.id, id))
       .returning();
-
-    // Invalidate supplier caches
-    await queryCache.invalidatePattern('suppliers:*');
-    
     return updated;
   }
 
   async deleteSupplier(id: number): Promise<void> {
     await db.delete(suppliers).where(eq(suppliers.id, id));
-    
-    // Invalidate supplier caches
-    await queryCache.invalidatePattern('suppliers:*');
   }
 
   async searchSuppliers(query: string): Promise<Supplier[]> {
@@ -692,40 +667,32 @@ export class DatabaseStorage implements IStorage {
 
   async getPartnersWithReviewStats(): Promise<Partner[]> {
     try {
-      // Check cache first
-      const cacheKey = queryCache.generateKey('partners', 'withReviewStats');
-      const cached = await queryCache.get<Partner[]>(cacheKey);
-      if (cached) {
-        return cached;
-      }
-
-      // OPTIMIZED: Single query with aggregation instead of N+1 pattern
-      const partnersWithStats = await db
-        .select({
-          partner: partners,
-          averageRating: avg(partnerReviews.rating),
-          totalReviews: count(partnerReviews.id)
+      const allPartners = await db.select().from(partners);
+      
+      const partnersWithStats = await Promise.all(
+        allPartners.map(async (partner) => {
+          const reviews = await db
+            .select()
+            .from(partnerReviews)
+            .where(and(eq(partnerReviews.partnerId, partner.id), eq(partnerReviews.isApproved, true)));
+          
+          const totalReviews = reviews.length;
+          let averageRating = '0';
+          
+          if (totalReviews > 0) {
+            const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+            averageRating = (totalRating / totalReviews).toFixed(1);
+          }
+          
+          return {
+            ...partner,
+            averageRating,
+            totalReviews
+          };
         })
-        .from(partners)
-        .leftJoin(
-          partnerReviews, 
-          and(
-            eq(partnerReviews.partnerId, partners.id),
-            eq(partnerReviews.isApproved, true)
-          )
-        )
-        .groupBy(partners.id)
-        .orderBy(asc(partners.name));
-
-      const result = partnersWithStats.map(row => ({
-        ...row.partner,
-        averageRating: row.averageRating ? Number(row.averageRating).toFixed(1) : '0',
-        totalReviews: Number(row.totalReviews) || 0
-      }));
-
-      // Cache the result
-      await queryCache.set(cacheKey, result, CACHE_TTL.STATS_DATA);
-      return result;
+      );
+      
+      return partnersWithStats;
     } catch (error) {
       console.error('Error calculating review stats:', error);
       return await this.getPartners();
@@ -1692,19 +1659,15 @@ export class DatabaseStorage implements IStorage {
         return [];
       }
 
-      // OPTIMIZED: Fetch all replies in single query instead of N+1 pattern
+      // Get all review IDs
       const reviewIds = reviews.map(row => row.review.id);
-      
-      // Fetch all replies for all reviews in one query
-      const allReplies = reviewIds.length > 0 ? await db
-        .select({
-          reply: partnerReviewReplies,
-          user: users
-        })
-        .from(partnerReviewReplies)
-        .leftJoin(users, eq(partnerReviewReplies.userId, users.id))
-        .where(inArray(partnerReviewReplies.reviewId, reviewIds))
-        .orderBy(asc(partnerReviewReplies.createdAt)) : [];
+
+      // Fetch all replies for all reviews
+      const allReplies: (PartnerReviewReply & { user: User })[] = [];
+      for (const reviewId of reviewIds) {
+        const replies = await this.getPartnerReviewReplies(reviewId);
+        allReplies.push(...replies);
+      }
 
       // Group replies by review ID
       const repliesByReview = allReplies.reduce((acc, reply) => {
@@ -1754,10 +1717,6 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .returning();
-
-    // Invalidate partner stats cache since review stats changed
-    await queryCache.invalidatePattern('partners:*');
-    
     return created;
   }
 

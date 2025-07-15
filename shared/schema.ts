@@ -42,11 +42,7 @@ export const userGroupMembers = pgTable("user_group_members", {
   userId: integer("user_id").references(() => users.id).notNull(),
   groupId: integer("group_id").references(() => userGroups.id).notNull(),
   addedAt: timestamp("added_at").notNull().defaultNow(),
-}, (table) => ({
-  userIdIdx: index("user_group_members_user_id_idx").on(table.userId),
-  groupIdIdx: index("user_group_members_group_id_idx").on(table.groupId),
-  addedAtIdx: index("user_group_members_added_at_idx").on(table.addedAt),
-}));
+});
 
 // User Sessions table
 export const userSessions = pgTable("user_sessions", {
@@ -55,11 +51,7 @@ export const userSessions = pgTable("user_sessions", {
   sessionToken: text("session_token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (table) => ({
-  userIdIdx: index("user_sessions_user_id_idx").on(table.userId),
-  expiresAtIdx: index("user_sessions_expires_at_idx").on(table.expiresAt),
-  createdAtIdx: index("user_sessions_created_at_idx").on(table.createdAt),
-}));
+});
 
 // Categories
 export const categories = pgTable("categories", {
@@ -128,16 +120,7 @@ export const suppliers = pgTable("suppliers", {
   
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  // Database Indexes for Performance Optimization
-  userIdIdx: index("suppliers_user_id_idx").on(table.userId),
-  tradeNameIdx: index("suppliers_trade_name_idx").on(table.tradeName),
-  corporateNameIdx: index("suppliers_corporate_name_idx").on(table.corporateName),
-  categoryIdIdx: index("suppliers_category_id_idx").on(table.categoryId),
-  createdAtIdx: index("suppliers_created_at_idx").on(table.createdAt),
-  isVerifiedIdx: index("suppliers_is_verified_idx").on(table.isVerified),
-  statusIdx: index("suppliers_status_idx").on(table.status),
-}));
+});
 
 // Supplier Contacts
 export const supplierContacts = pgTable("supplier_contacts", {
@@ -152,11 +135,7 @@ export const supplierContacts = pgTable("supplier_contacts", {
   notes: text("notes"), // observação
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  supplierIdIdx: index("supplier_contacts_supplier_id_idx").on(table.supplierId),
-  userIdIdx: index("supplier_contacts_user_id_idx").on(table.userId),
-  createdAtIdx: index("supplier_contacts_created_at_idx").on(table.createdAt),
-}));
+});
 
 // Supplier Files
 export const supplierFiles = pgTable("supplier_files", {
@@ -169,12 +148,7 @@ export const supplierFiles = pgTable("supplier_files", {
   fileSize: integer("file_size").notNull(),
   type: text("type").notNull(), // 'catalog', 'price_sheet', 'presentation', 'certificate', 'other'
   uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
-}, (table) => ({
-  supplierIdIdx: index("supplier_files_supplier_id_idx").on(table.supplierId),
-  userIdIdx: index("supplier_files_user_id_idx").on(table.userId),
-  typeIdx: index("supplier_files_type_idx").on(table.type),
-  uploadedAtIdx: index("supplier_files_uploaded_at_idx").on(table.uploadedAt),
-}));
+});
 
 // Supplier Brands
 export const supplierBrands = pgTable("supplier_brands", {
@@ -186,12 +160,7 @@ export const supplierBrands = pgTable("supplier_brands", {
   logo: text("logo"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  supplierIdIdx: index("supplier_brands_supplier_id_idx").on(table.supplierId),
-  userIdIdx: index("supplier_brands_user_id_idx").on(table.userId),
-  nameIdx: index("supplier_brands_name_idx").on(table.name),
-  createdAtIdx: index("supplier_brands_created_at_idx").on(table.createdAt),
-}));
+});
 
 // Supplier Reviews
 export const supplierReviews = pgTable("supplier_reviews", {
@@ -202,13 +171,7 @@ export const supplierReviews = pgTable("supplier_reviews", {
   comment: text("comment").notNull(),
   isApproved: boolean("is_approved").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (table) => ({
-  supplierIdIdx: index("supplier_reviews_supplier_id_idx").on(table.supplierId),
-  userIdIdx: index("supplier_reviews_user_id_idx").on(table.userId),
-  isApprovedIdx: index("supplier_reviews_is_approved_idx").on(table.isApproved),
-  createdAtIdx: index("supplier_reviews_created_at_idx").on(table.createdAt),
-  ratingIdx: index("supplier_reviews_rating_idx").on(table.rating),
-}));
+});
 
 // Supplier Conversations (CRM)
 export const supplierConversations = pgTable("supplier_conversations", {
@@ -222,12 +185,7 @@ export const supplierConversations = pgTable("supplier_conversations", {
   attachedFileId: integer("attached_file_id").references(() => supplierFiles.id), // Arquivo anexo opcional
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  supplierIdIdx: index("supplier_conversations_supplier_id_idx").on(table.supplierId),
-  userIdIdx: index("supplier_conversations_user_id_idx").on(table.userId),
-  channelIdx: index("supplier_conversations_channel_idx").on(table.channel),
-  createdAtIdx: index("supplier_conversations_created_at_idx").on(table.createdAt),
-}));
+});
 
 // Partners
 export const partners = pgTable("partners", {

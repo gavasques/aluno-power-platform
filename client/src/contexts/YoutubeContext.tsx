@@ -54,9 +54,9 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/youtube-channel-info'],
     queryFn: () => apiRequest<ChannelInfo>('/api/youtube-channel-info'),
-    retry: false, // Don't retry on errors
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours - static data
-    gcTime: 24 * 60 * 60 * 1000, // 24 hours cache
+    retry: false, // Don't retry on 404 errors
+    staleTime: 30 * 60 * 1000, // 30 minutes - semi-static data
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     throwOnError: false, // Don't throw errors to avoid component crashes
