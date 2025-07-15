@@ -56,7 +56,7 @@ export default function AdvancedInfographicGenerator() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
-  const [effortLevel, setEffortLevel] = useState('normal');
+  const [effortLevel] = useState('high');
 
   // Fetch categories for dropdown
   const { data: departments = [] } = useQuery<any[]>({
@@ -356,18 +356,7 @@ export default function AdvancedInfographicGenerator() {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="effortLevel">Nível de Esforço</Label>
-                  <Select value={effortLevel} onValueChange={setEffortLevel} data-effort-select>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="normal">Normal ($)</SelectItem>
-                      <SelectItem value="high">Alto ($$$$)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+
               </div>
 
               {/* Image Upload */}
@@ -376,9 +365,6 @@ export default function AdvancedInfographicGenerator() {
                   <Label className="text-base font-semibold text-red-600">
                     Imagem do Produto (OBRIGATÓRIO) *
                   </Label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Esta imagem será usada como referência pelo GPT-Image-1
-                  </p>
                   
                   {!imagePreview ? (
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
