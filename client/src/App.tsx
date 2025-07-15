@@ -72,7 +72,7 @@ const AmazonNegativeReviews = lazy(() => import("./pages/agents/amazon-negative-
 const AmazonNegativeReviewsResult = lazy(() => import("./pages/agents/amazon-negative-reviews-result"));
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
 
-const LayoutDemo = lazy(() => import("./components/layout/LayoutDemo"));
+
 const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
 const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
 const BackgroundRemovalPro = lazy(() => import("./pages/tools/BackgroundRemovalPro"));
@@ -601,13 +601,7 @@ function App() {
                             }}
                           </Route>
                           
-                          <Route path="/layout-demo">
-                            <ProtectedRoute>
-                              <Suspense fallback={<PageLoader />}>
-                                <LayoutDemo />
-                              </Suspense>
-                            </ProtectedRoute>
-                          </Route>
+
 
                           <Route path="/hub/:section">
                             {(params) => (
