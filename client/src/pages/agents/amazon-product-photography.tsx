@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
+import { useCreditSystem } from "@/hooks/useCreditSystem";
 
 interface ProcessingResult {
   originalImage: string;
@@ -36,6 +37,9 @@ export default function AmazonProductPhotography() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+
+  const FEATURE_CODE = 'agents.amazon_product_photography';
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -85,6 +89,13 @@ export default function AmazonProductPhotography() {
   const processImage = async () => {
     if (!selectedFile) return;
 
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
 
@@ -106,6 +117,20 @@ export default function AmazonProductPhotography() {
 
       const data = await response.json();
       setResult(data);
+
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'amazon-product-photography',
+        model: 'product-photography-ai',
+        prompt: 'Processamento de imagem para fotografia profissional de produto Amazon',
+        response: 'Imagem processada com sucesso',
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: data.cost || 0,
+        duration: data.processingTime || 0
+      });
 
       toast({
         title: "Imagem processada com sucesso!",

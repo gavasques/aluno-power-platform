@@ -12,6 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
 import Layout from "@/components/layout/Layout";
 import { Link } from "wouter";
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 
 const AmazonNegativeReviews = () => {
   const [negativeReview, setNegativeReview] = useState("");
@@ -23,6 +24,9 @@ const AmazonNegativeReviews = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast } = useCreditSystem();
+
+  const FEATURE_CODE = 'agents.negative_reviews';
 
   const fillExample = () => {
     setNegativeReview("Produto chegou com defeito, a trava do suporte da cabeça não está fixando corretamente. Além disso, demorou muito para chegar e a embalagem estava danificada. Muito decepcionado com a compra, esperava muito mais qualidade pelo preço pago. Não recomendo.");
@@ -52,6 +56,13 @@ const AmazonNegativeReviews = () => {
       return;
     }
 
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -71,6 +82,20 @@ const AmazonNegativeReviews = () => {
       });
 
       if (response.sessionId) {
+        // Registrar log de uso com dedução automática de créditos
+        await logAIGeneration({
+          featureCode: FEATURE_CODE,
+          provider: 'amazon-negative-reviews',
+          model: 'negative-reviews-ai',
+          prompt: `Resposta para avaliação negativa processada`,
+          response: 'Resposta gerada com sucesso',
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          cost: 0,
+          duration: 0
+        });
+
         setLocation(`/agentes/amazon-negative-reviews/result?sessionId=${response.sessionId}`);
       }
     } catch (error: any) {

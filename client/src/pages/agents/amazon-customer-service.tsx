@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
 import Layout from "@/components/layout/Layout";
 import { Link } from "wouter";
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 
 const AmazonCustomerService = () => {
   const [emailContent, setEmailContent] = useState("");
@@ -18,6 +19,9 @@ const AmazonCustomerService = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast } = useCreditSystem();
+
+  const FEATURE_CODE = 'agents.customer_service';
 
   const handleSubmit = async () => {
     if (!emailContent.trim()) {
@@ -35,6 +39,13 @@ const AmazonCustomerService = () => {
         description: "Por favor, insira suas observações sobre o ocorrido",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
       return;
     }
 
@@ -64,6 +75,20 @@ const AmazonCustomerService = () => {
         });
 
         if (processResponse?.sessionId) {
+          // Registrar log de uso com dedução automática de créditos
+          await logAIGeneration({
+            featureCode: FEATURE_CODE,
+            provider: 'amazon-customer-service',
+            model: 'customer-service-ai',
+            prompt: `Email de atendimento processado`,
+            response: 'Resposta gerada com sucesso',
+            inputTokens: 0,
+            outputTokens: 0,
+            totalTokens: 0,
+            cost: 0,
+            duration: 0
+          });
+
           // Navigate to results page
           setLocation(`/agentes/amazon-customer-service/resultado/${processResponse.sessionId}`);
         } else {

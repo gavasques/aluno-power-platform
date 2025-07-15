@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { useGetFeatureCost, useCanProcessFeature } from '@/hooks/useFeatureCosts';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,8 +48,7 @@ const HtmlDescriptionAgent: React.FC = () => {
   });
   const { toast } = useToast();
   const { user } = useAuth();
-  const { getFeatureCost } = useGetFeatureCost();
-  const { canProcess } = useCanProcessFeature();
+  const { logAIGeneration, checkCredits, showInsufficientCreditsToast } = useCreditSystem();
 
   // Buscar saldo de créditos do usuário
   const { data: creditsData } = useQuery({
@@ -213,15 +212,9 @@ Garantia de 12 meses`;
     }
 
     // Validar se usuário tem créditos suficientes
-    const userBalance = creditsData?.balance?.currentBalance || 0;
-    const creditValidation = canProcess(FEATURE_CODE, userBalance);
-    
-    if (!creditValidation.canProcess) {
-      toast({
-        variant: "destructive",
-        title: "❌ Créditos Insuficientes",
-        description: `Você precisa de ${creditValidation.requiredCredits} créditos para usar este agente. Saldo atual: ${userBalance} créditos.`
-      });
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
       return;
     }
 
@@ -277,55 +270,20 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
 
       const responseText = data.response || '';
       const duration = Date.now() - startTime;
-      const creditsToDeduct = getFeatureCost(FEATURE_CODE);
 
-      // Descontar créditos dinamicamente do usuário
-      try {
-        await fetch('/api/credits/deduct', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          },
-          body: JSON.stringify({
-            amount: creditsToDeduct,
-            reason: 'Geração de Descrição HTML com IA'
-          })
-        });
-      } catch (creditError) {
-        logger.error('Erro ao descontar crédito:', creditError);
-      }
-
-      // Salvar log da geração de IA com crédito dinâmico
-      try {
-        await fetch('/api/ai-generation-logs', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            provider: agentConfig.provider,
-            model: agentConfig.model,
-            prompt: prompt,
-            response: responseText,
-            promptCharacters: prompt.length,
-            responseCharacters: responseText.length,
-            inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
-            outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
-            totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
-            cost: data.cost || 0,
-            creditsUsed: creditsToDeduct, // Crédito dinâmico consumido
-            duration: duration,
-            feature: 'html-description-agent'
-          })
-        });
-        
-        logger.debug(`💾 Log salvo - Usuário: ${user.id}, Créditos: ${creditsToDeduct}, Caracteres: ${responseText.length}, Duração: ${duration}ms`);
-      } catch (logError) {
-        logger.error('Erro ao salvar log de IA:', logError);
-      }
+      // Salvar log da geração com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: agentConfig.provider,
+        model: agentConfig.model,
+        prompt: prompt,
+        response: responseText,
+        inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
+        outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
+        totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
+        cost: data.cost || 0,
+        duration: duration
+      });
 
       setGeneratedDescription(responseText);
       setShowReplaceDialog(true);

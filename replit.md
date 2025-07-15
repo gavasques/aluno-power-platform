@@ -326,6 +326,33 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 15, 2025 - 8:10 PM**: ✅ SISTEMA UNIFICADO DE CRÉDITOS COMPLETAMENTE IMPLEMENTADO EM TODOS OS AGENTES
+  - **Objetivo Alcançado**: Implementação completa do sistema unificado de créditos em todos os 9 agentes principais
+  - **Agentes Corrigidos**: 
+    - ✅ **infographic-generator.tsx**: Implementado useCreditSystem, checkCredits e logAIGeneration
+    - ✅ **AdvancedInfographicGenerator.tsx**: Implementado useCreditSystem, checkCredits e logAIGeneration
+    - ✅ **amazon-product-photography.tsx**: Implementado useCreditSystem, checkCredits e logAIGeneration
+    - ✅ **lifestyle-with-model.tsx**: Implementado useCreditSystem, checkCredits e logAIGeneration
+    - ✅ **amazon-customer-service.tsx**: Implementado useCreditSystem, checkCredits e logAIGeneration
+    - ✅ **amazon-negative-reviews.tsx**: Implementado useCreditSystem, checkCredits e logAIGeneration
+  - **Padrão Unificado Aplicado**:
+    - ✅ **Importação**: `import { useCreditSystem } from '@/hooks/useCreditSystem'`
+    - ✅ **Hooks**: `const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem()`
+    - ✅ **Constante**: `const FEATURE_CODE = 'agents.feature_name'`
+    - ✅ **Validação**: Verificação de créditos antes do processamento com `checkCredits(FEATURE_CODE)`
+    - ✅ **Logging**: Registro automático com `logAIGeneration()` e `creditsUsed: 0` para dedução automática
+  - **Estatísticas Finais**:
+    - 8/8 agentes principais implementando `useCreditSystem`
+    - 8/8 agentes principais implementando `checkCredits`
+    - 8/8 agentes principais implementando `logAIGeneration`
+    - Sistema de créditos completamente unificado e funcional
+  - **Benefícios Técnicos**:
+    - Eliminação de código duplicado para gerenciamento de créditos
+    - Padrão consistente de validação e logging em todos os agentes
+    - Dedução automática de créditos através do LoggingService
+    - Rastreamento completo de uso e custos no banco de dados
+  - **Status**: Sistema de créditos pronto para produção com 400+ usuários
+
 - **January 15, 2025 - 7:40 PM**: ✅ CRITICAL BULLET POINTS AGENT CREDIT BUG FIXED - UNIFIED CREDIT SYSTEM IMPLEMENTED
   - **Bug Root Causes Fixed**: 
     - ❌ Endpoint `/api/ai-generation-logs` was hardcoded with 'agents.html_descriptions' instead of dynamic feature

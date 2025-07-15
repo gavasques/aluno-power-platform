@@ -14,6 +14,7 @@ import { Loader2, Upload, CheckCircle, ArrowRight, Image, Download, ArrowLeft } 
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import Layout from '@/components/layout/Layout';
 import { Link } from 'wouter';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 
 interface ProductData {
   name: string;
@@ -47,6 +48,9 @@ interface InfographicSession {
 
 export default function AdvancedInfographicGenerator() {
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+
+  const FEATURE_CODE = 'agents.infographic_generator';
   const [session, setSession] = useState<InfographicSession>({ step: 'input' });
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
@@ -99,6 +103,13 @@ export default function AdvancedInfographicGenerator() {
 
   // Step 1: Analyze product and generate concepts
   const analyzeProduct = async (productData: ProductData) => {
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     setLoading(true);
     toast({
       title: "Analisando produto...",
@@ -226,6 +237,20 @@ export default function AdvancedInfographicGenerator() {
         step: 'completed',
         finalImageUrl: generateResult.finalImageUrl
       }));
+
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'advanced-infographic',
+        model: 'advanced-infographic-generator',
+        prompt: `Produto: ${productData.name}`,
+        response: 'Infográfico avançado gerado com sucesso',
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: 0
+      });
 
       toast({
         title: "Infográfico criado com sucesso!",

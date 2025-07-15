@@ -27,6 +27,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
 import Layout from "@/components/layout/Layout";
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 
 export default function AmazonListingsOptimizerNew() {
   const [location, navigate] = useLocation();
@@ -68,32 +69,17 @@ export default function AmazonListingsOptimizerNew() {
   };
 
   const { toast } = useToast();
+  const { logAIGeneration, checkCredits, showInsufficientCreditsToast } = useCreditSystem();
+
+  const FEATURE_CODE = 'agents.amazon_listing';
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
     
     // Verificar créditos primeiro
-    try {
-      const dashboardResponse = await apiRequest('/api/dashboard/summary', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      });
-      
-      if (dashboardResponse.user.creditBalance < 10) {
-        toast({
-          title: "Créditos insuficientes",
-          description: "Você precisa de pelo menos 10 créditos para usar este agente.",
-          variant: "destructive"
-        });
-        return;
-      }
-    } catch (error) {
-      toast({
-        title: "Erro ao verificar créditos",
-        description: "Não foi possível verificar seu saldo de créditos.",
-        variant: "destructive"
-      });
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
       return;
     }
     
@@ -184,43 +170,19 @@ export default function AmazonListingsOptimizerNew() {
         throw new Error('Erro na geração de descrição');
       }
       
-      // 7. Deduzir créditos
-      try {
-        await fetch('/api/credits/deduct', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          },
-          body: JSON.stringify({
-            amount: 10,
-            reason: 'Amazon Listings Optimizer - Otimização de listagem'
-          })
-        });
-      } catch (creditError) {
-        console.error('Erro ao deduzir créditos:', creditError);
-      }
-
-      // 8. Registrar log de uso
-      try {
-        await apiRequest('/api/ai-generation-logs', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            feature: 'agents.amazon_listing',
-            creditsUsed: 10,
-            prompt: `Produto: ${formData.productName}`,
-            response: 'Listagem otimizada gerada',
-            provider: 'openai',
-            model: 'gpt-4o-mini'
-          })
-        });
-      } catch (logError) {
-        console.error('Erro ao registrar log:', logError);
-      }
+      // 7. Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'openai',
+        model: 'gpt-4o-mini',
+        prompt: `Produto: ${formData.productName}`,
+        response: 'Listagem otimizada gerada',
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: 0
+      });
       
       // 9. Navegar para resultados
       navigate(`/agents/amazon-listings-optimizer/result?session=${sessionId}`);

@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 
 interface InfographicData {
   originalData: {
@@ -39,6 +40,9 @@ interface InfographicData {
 
 export default function InfographicGenerator() {
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+
+  const FEATURE_CODE = 'agents.infographic_generator';
   
   // Buscar departamentos para o dropdown
   const { data: departments = [] } = useQuery({
@@ -127,6 +131,13 @@ export default function InfographicGenerator() {
       return;
     }
 
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     setIsProcessing(true);
     setCurrentStep('step1');
 
@@ -181,6 +192,20 @@ export default function InfographicGenerator() {
         processingTime: etapa2Response.processingTime,
         cost: etapa2Response.cost
       }));
+
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'gpt-image-1',
+        model: 'gpt-image-1',
+        prompt: `Produto: ${formData.nomeProduto}`,
+        response: `Infográfico gerado com ${etapa2Response.images?.length || 0} imagens`,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: etapa2Response.cost || 0,
+        duration: etapa2Response.processingTime || 0
+      });
 
       setCurrentStep('complete');
 

@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 
 export default function LifestyleWithModel() {
   const [formData, setFormData] = useState({
@@ -35,6 +36,9 @@ export default function LifestyleWithModel() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+
+  const FEATURE_CODE = 'agents.lifestyle_with_model';
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -124,6 +128,13 @@ export default function LifestyleWithModel() {
       return;
     }
 
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     setIsProcessing(true);
     setResult(null);
     setProcessingTime(0);
@@ -165,6 +176,20 @@ export default function LifestyleWithModel() {
 
       clearInterval(timer);
       setResult(response);
+
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'lifestyle-with-model',
+        model: 'lifestyle-ai-generator',
+        prompt: `Produto: ${formData.produtoNome}, Ambiente: ${formData.ambiente}`,
+        response: 'Imagem lifestyle gerada com sucesso',
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: response.cost || 0,
+        duration: response.processingTime || 0
+      });
       
       toast({
         title: 'Sucesso!',
