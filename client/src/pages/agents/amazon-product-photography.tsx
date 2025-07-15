@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Link } from "wouter";
+import Layout from "@/components/layout/Layout";
 import { 
   ArrowLeft, 
   Camera, 
@@ -146,21 +147,22 @@ export default function AmazonProductPhotography() {
   };
 
   return (
-    <PermissionGuard 
-      featureCode="agents.main_image_editor"
-      showMessage={true}
-      message="Você não tem permissão para usar o Editor de Imagem Principal."
-    >
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto p-6 max-w-6xl">
-        {/* Header */}
-        <div className="mb-8">
-          <Link href="/agentes">
-            <Button variant="ghost" className="mb-6 hover:bg-white/80 dark:hover:bg-slate-800/80">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar para Agentes
-            </Button>
-          </Link>
+    <Layout>
+      <PermissionGuard 
+        featureCode="agents.main_image_editor"
+        showMessage={true}
+        message="Você não tem permissão para usar o Editor de Imagem Principal."
+      >
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="container mx-auto p-6 max-w-6xl">
+          {/* Header */}
+          <div className="mb-8">
+            <Link href="/agentes">
+              <Button variant="ghost" className="mb-6 hover:bg-white/80 dark:hover:bg-slate-800/80">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar para Agentes
+              </Button>
+            </Link>
           
           <div className="bg-white dark:bg-slate-900 rounded-xl p-8 shadow-sm border">
             <div className="flex items-center gap-3 mb-4">
@@ -390,7 +392,8 @@ export default function AmazonProductPhotography() {
           </div>)
         )}
       </div>
-    </div>
-    </PermissionGuard>
+        </div>
+      </PermissionGuard>
+    </Layout>
   );
 }

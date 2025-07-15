@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
 import type { Agent } from '@shared/schema';
-import { List } from 'lucide-react';
+import { List, ArrowLeft } from 'lucide-react';
 
 import { useBulletPointsGenerator } from '@/hooks/useBulletPointsGenerator';
 import { BulletPointsInput } from '@/components/agents/BulletPointsInput';
@@ -11,6 +11,7 @@ import { ReplaceDialog } from '@/components/agents/ReplaceDialog';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import { AgentCostDisplay } from '@/components/AgentCostDisplay';
+import { Link } from 'wouter';
 
 const BulletPointsAgent: React.FC = () => {
   const { data: agent } = useQuery<Agent>({
@@ -44,6 +45,12 @@ const BulletPointsAgent: React.FC = () => {
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6">
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-4">
+              <Link href="/agentes">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar
+                </Button>
+              </Link>
               <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
                 <List className="h-6 w-6 text-blue-600" />
               </div>

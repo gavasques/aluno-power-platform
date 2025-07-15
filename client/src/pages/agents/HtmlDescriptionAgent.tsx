@@ -26,11 +26,13 @@ import {
   Code2,
   Settings,
   Loader2,
-  Wand2
+  Wand2,
+  ArrowLeft
 } from 'lucide-react';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import { AgentCostDisplay } from '@/components/AgentCostDisplay';
 import { logger } from '@/utils/logger';
+import { Link } from 'wouter';
 
 const HtmlDescriptionAgent: React.FC = () => {
   const [textInput, setTextInput] = useState('');
@@ -396,6 +398,12 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
+              <Link href="/agentes">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar
+                </Button>
+              </Link>
               <div className="p-2 bg-purple-100 rounded-lg">
                 <Code2 className="h-6 w-6 text-purple-600" />
               </div>

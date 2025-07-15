@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Mail, Bot, AlertCircle, ArrowRight, Clock, Target } from "lucide-react";
+import { Mail, Bot, AlertCircle, ArrowRight, Clock, Target, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
+import Layout from "@/components/layout/Layout";
+import { Link } from "wouter";
 
 const AmazonCustomerService = () => {
   const [emailContent, setEmailContent] = useState("");
@@ -99,27 +101,34 @@ Aguardo retorno urgente.
 João Silva`;
 
   return (
-    <PermissionGuard 
-      featureCode="agents.customer_service"
-      showMessage={true}
-      message="Você não tem permissão para usar o Amazon Customer Service Email Response."
-    >
-      <div className="container mx-auto p-6 max-w-4xl">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Mail className="h-6 w-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Amazon Customer Service Email Response</h1>
-            <p className="text-muted-foreground">
-              Agente especializado em responder emails de clientes insatisfeitos com tom caloroso e soluções proativas
-            </p>
+    <Layout>
+      <PermissionGuard 
+        featureCode="agents.customer_service"
+        showMessage={true}
+        message="Você não tem permissão para usar o Amazon Customer Service Email Response."
+      >
+        <div className="container mx-auto p-6 max-w-4xl">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Link href="/agentes">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+            </Link>
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Mail className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Amazon Customer Service Email Response</h1>
+              <p className="text-muted-foreground">
+                Agente especializado em responder emails de clientes insatisfeitos com tom caloroso e soluções proativas
+              </p>
 
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -261,8 +270,9 @@ João Silva`;
           </Alert>
         </div>
       </div>
-    </div>
-    </PermissionGuard>
+        </div>
+      </PermissionGuard>
+    </Layout>
   );
 };
 

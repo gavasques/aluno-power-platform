@@ -10,8 +10,10 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, Upload, CheckCircle, ArrowRight, Image, Download } from 'lucide-react';
+import { Loader2, Upload, CheckCircle, ArrowRight, Image, Download, ArrowLeft } from 'lucide-react';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
+import Layout from '@/components/layout/Layout';
+import { Link } from 'wouter';
 
 interface ProductData {
   name: string;
@@ -273,19 +275,28 @@ export default function AdvancedInfographicGenerator() {
   };
 
   return (
-    <PermissionGuard 
-      featureCode="agents.advanced_infographic"
-      showMessage={true}
-      message="Você não tem permissão para usar o Gerador Avançado de Infográficos."
-    >
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Gerador Avançado de Infográficos
-        </h1>
-        <p className="text-gray-600">
-          Sistema inteligente de 3 etapas para criar infográficos profissionais para Amazon
-        </p>
+    <Layout>
+      <PermissionGuard 
+        featureCode="agents.advanced_infographic"
+        showMessage={true}
+        message="Você não tem permissão para usar o Gerador Avançado de Infográficos."
+      >
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <Link href="/agentes">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+            </Link>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Gerador Avançado de Infográficos
+          </h1>
+          <p className="text-gray-600">
+            Sistema inteligente de 3 etapas para criar infográficos profissionais para Amazon
+          </p>
         
         {/* Progress Bar */}
         <div className="mt-6">
@@ -622,7 +633,8 @@ export default function AdvancedInfographicGenerator() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-    </PermissionGuard>
+        </div>
+      </PermissionGuard>
+    </Layout>
   );
 }

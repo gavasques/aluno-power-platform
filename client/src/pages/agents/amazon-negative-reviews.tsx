@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MessageSquare, Bot, AlertCircle, ArrowRight, Clock, Target, User, Building, Package, Hash } from "lucide-react";
+import { MessageSquare, Bot, AlertCircle, ArrowRight, Clock, Target, User, Building, Package, Hash, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
+import Layout from "@/components/layout/Layout";
+import { Link } from "wouter";
 
 const AmazonNegativeReviews = () => {
   const [negativeReview, setNegativeReview] = useState("");
@@ -84,21 +86,28 @@ const AmazonNegativeReviews = () => {
   };
 
   return (
-    <PermissionGuard 
-      featureCode="agents.negative_reviews"
-      showMessage={true}
-      message="Você não tem permissão para usar o Amazon Negative Reviews Response."
-    >
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-red-100 p-3 rounded-lg">
-          <MessageSquare className="h-8 w-8 text-red-600" />
+    <Layout>
+      <PermissionGuard 
+        featureCode="agents.negative_reviews"
+        showMessage={true}
+        message="Você não tem permissão para usar o Amazon Negative Reviews Response."
+      >
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="flex items-center gap-3 mb-6">
+          <Link href="/agentes">
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+          </Link>
+          <div className="bg-red-100 p-3 rounded-lg">
+            <MessageSquare className="h-8 w-8 text-red-600" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Amazon Negative Reviews Response</h1>
+            <p className="text-gray-600">Agente especializado em responder avaliações negativas com tom caloroso e soluções proativas</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Amazon Negative Reviews Response</h1>
-          <p className="text-gray-600">Agente especializado em responder avaliações negativas com tom caloroso e soluções proativas</p>
-        </div>
-      </div>
 
       <div className="grid md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
@@ -282,8 +291,9 @@ const AmazonNegativeReviews = () => {
           </Card>
         </div>
       </div>
-    </div>
-    </PermissionGuard>
+        </div>
+      </PermissionGuard>
+    </Layout>
   );
 };
 
