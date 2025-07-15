@@ -201,7 +201,7 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
 
     // Get tool configuration for cost
     const creditsNeeded = parseFloat(toolConfig.costPerUse);
-    console.log(`💰 [PICSART] Credits needed: ${creditsNeeded} for user ${userId}`);
+    // Credits validation passed
 
     // Check user credits first
     const userCredits = await db.select({ credits: users.credits })
@@ -236,7 +236,7 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
       })
       .where(eq(users.id, userId));
 
-    console.log(`💰 [PICSART] Credits deducted: ${creditsNeeded} (${currentCredits} → ${currentCredits - creditsNeeded})`);
+    // Credits deducted successfully
 
     // Process the image
     console.log(`🎨 [PICSART] Starting background removal for user ${userId}`);
@@ -497,7 +497,7 @@ router.post('/logo-generation', requireAuth, async (req, res) => {
       })
       .where(eq(users.id, userId));
     
-    console.log(`💰 [PICSART] Credits deducted: ${creditsNeeded} (${currentCredits} → ${currentCredits - creditsNeeded})`);
+    // Credits deducted successfully
     
     // Prepare parameters for logo generation
     const parameters = {
@@ -847,7 +847,7 @@ router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, r
       })
       .where(eq(users.id, userId));
     
-    console.log(`💰 [PICSART] Credits deducted: ${creditsNeeded} (${currentCredits} → ${currentCredits - creditsNeeded})`);
+    // Credits deducted successfully
     
     // Process ultra enhance
     const result = await picsartService.processUltraEnhance(
@@ -1024,7 +1024,7 @@ router.post('/upscale-pro/process', requireAuth, upload.single('image'), async (
       })
       .where(eq(users.id, userId));
     
-    console.log(`💰 [PICSART] Credits deducted: ${creditsNeeded} (${currentCredits} → ${currentCredits - creditsNeeded})`);
+    // Credits deducted successfully
     
     // Process upscale pro
     const result = await picsartService.processUpscalePro(

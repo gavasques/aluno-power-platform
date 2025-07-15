@@ -50,7 +50,7 @@ export class LoggingService {
 
       await db.insert(aiGenerationLogs).values(logData);
       
-      console.log(`💾 [AI_LOG] ${feature} saved for user ${userId} - ${provider}/${model} - Cost: ${cost} - Credits: ${creditsUsed}`);
+      // AI log saved successfully
     } catch (error) {
       console.error(`❌ [AI_LOG] Error saving ${feature} log:`, error);
     }
@@ -105,7 +105,7 @@ export class LoggingService {
 
       await db.insert(aiImgGenerationLogs).values(logData);
       
-      console.log(`🖼️ [IMG_LOG] ${feature} saved for user ${userId} - ${provider}/${model} - Cost: ${cost} - Credits: ${creditsUsed}`);
+      // Image log saved successfully
     } catch (error) {
       console.error(`❌ [IMG_LOG] Error saving ${feature} log:`, error);
     }
@@ -145,7 +145,7 @@ export class LoggingService {
 
       await db.insert(aiGenerationLogs).values(logData);
       
-      console.log(`🌐 [API_LOG] ${feature} saved for user ${userId} - ${provider} - Cost: ${cost} - Credits: ${creditsUsed}`);
+      // API log saved successfully
     } catch (error) {
       console.error(`❌ [API_LOG] Error saving ${feature} log:`, error);
     }

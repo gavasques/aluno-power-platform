@@ -3241,7 +3241,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           totalTokens: 0,
           cost: '0.00',
           duration: errorDuration,
-          feature: 'gerador-imagem-principal',
+          feature: 'agents.main_image_editor',
           createdAt: new Date()
         });
       } catch (logError) {

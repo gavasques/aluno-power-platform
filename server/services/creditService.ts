@@ -16,7 +16,7 @@ export class CreditService {
         .limit(1);
 
       if (!featureCost.length) {
-        console.log(`⚠️ [CREDIT] Feature cost not found for: ${featureName}, using 0 credits`);
+        // Feature cost not found - using 0 credits as fallback
         return 0;
       }
 
@@ -50,7 +50,7 @@ export class CreditService {
         })
         .where(eq(users.id, userId));
 
-      console.log(`💰 [CREDIT] Deducted ${creditsToDeduct} credits from user ${userId} (${currentCredits} → ${newBalance})`);
+      // Credits deducted successfully
       
       return creditsToDeduct;
     } catch (error) {
