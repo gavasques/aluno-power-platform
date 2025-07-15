@@ -326,6 +326,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 15, 2025 - 8:35 PM**: ✅ CREDIT DISPLAY ADDED TO HEADER - USERS CAN NOW SEE THEIR CREDIT BALANCE AT ALL TIMES
+  - **New Feature**: Added credit balance display to main header next to user avatar
+  - **Component Created**: CreditDisplay.tsx with blue badge design showing coin icon and balance
+  - **User Experience**: 
+    - ✅ **Always Visible**: Credit balance always visible in header regardless of page
+    - ✅ **Real-time Updates**: Uses useUserCreditBalance hook for live balance updates
+    - ✅ **Professional Design**: Blue badge with coin icon matching platform theme
+    - ✅ **Loading State**: Shows skeleton loader while fetching balance
+    - ✅ **Responsive**: Works across all screen sizes
+  - **Technical Implementation**: 
+    - Integrated into Header.tsx between ThemeToggle and UserNav
+    - Uses existing useUserCreditBalance hook for data fetching
+    - Styled with blue theme (bg-blue-50 text-blue-700) for clear visibility
+    - Loading animation for smooth user experience
+  - **User Benefit**: Users can now monitor their credit consumption in real-time without navigating to dashboard
+  - **Status**: Credit visibility system complete - users have full transparency of their credit balance
+
 - **January 15, 2025 - 8:30 PM**: ✅ UNIFIED CREDIT SYSTEM IMPLEMENTATION COMPLETED - ALL MAJOR SIMULATORS NOW INTEGRATED
   - **Final Implementation Phase**: Successfully completed credit system integration across all major simulators
   - **Final 4 Simulators Implemented**:

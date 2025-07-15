@@ -2,6 +2,7 @@
 import { Link } from "wouter";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserNav } from "@/components/layout/UserNav";
+import { CreditDisplay } from "@/components/layout/CreditDisplay";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -143,6 +144,7 @@ export function Header() {
           </NavigationMenu>
         </div>
         <div className="flex items-center space-x-4">
+          <CreditDisplay />
           <ThemeToggle />
           <UserNav />
         </div>
