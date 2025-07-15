@@ -14,6 +14,8 @@ import { Calculator, Plus, Trash2, Copy, Save, Download, ArrowLeft, ArrowRight, 
 import { useLocation, useRoute } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 import jsPDF from 'jspdf';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { useUserCreditBalance } from '@/hooks/useUserCredits';
 
 interface Tax {
   nome: string;
@@ -274,10 +276,14 @@ const exportToPDF = (simulation: FormalImportSimulation) => {
   doc.save(fileName);
 };
 
+const FEATURE_CODE = 'simulators.formal_import';
+
 export default function FormalImportSimulator() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+  const { balance: userBalance } = useUserCreditBalance();
 
   // Funções de formatação
   const formatCurrency = (value: number) => {
@@ -427,11 +433,27 @@ export default function FormalImportSimulator() {
         throw error;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast({
         title: "Simulação salva com sucesso!",
         description: `Código: ${data.codigoSimulacao || data.nome}`
       });
+      
+      // Registrar log de uso com dedução automática de créditos apenas para novas simulações
+      if (!simulationId) {
+        await logAIGeneration({
+          featureCode: FEATURE_CODE,
+          provider: 'formal-import',
+          model: 'simulation',
+          prompt: `Simulação formal: ${simulation.nome}`,
+          response: `Simulação criada com ${simulation.produtos.length} produtos`,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          cost: 0,
+          duration: 0
+        });
+      }
       
       // Invalidar cache imediatamente e forçar refetch
       queryClient.invalidateQueries({ queryKey: ['/api/simulators/formal-import'] });
@@ -475,7 +497,7 @@ export default function FormalImportSimulator() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
       // Verificar se simulação tem dados mínimos necessários
       if (!simulation.nome || !simulation.produtos || simulation.produtos.length === 0) {
@@ -485,6 +507,15 @@ export default function FormalImportSimulator() {
           variant: "destructive"
         });
         return;
+      }
+      
+      // Verificar créditos apenas para novas simulações
+      if (!simulationId) {
+        const creditCheck = await checkCredits(FEATURE_CODE);
+        if (!creditCheck.canProcess) {
+          showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+          return;
+        }
       }
       
       saveMutation.mutate(simulation);

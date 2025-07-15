@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import LogoHistoryModal from './LogoHistoryModal';
 import { logger } from "@/utils/logger";
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 
 interface LogoGeneratorToolProps {
   onLogoGenerated?: (results: any) => void;
@@ -49,6 +50,8 @@ const colorTones = [
   { value: 'Red', label: 'Vermelho' }
 ];
 
+const FEATURE_CODE = 'tools.logo_generation';
+
 export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({ 
   onLogoGenerated, 
   disabled = false 
@@ -66,6 +69,7 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
 
   // Get feature cost for dynamic pricing
   const { data: featureCosts } = useQuery({
@@ -123,6 +127,13 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
       return;
     }
 
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     setIsGenerating(true);
     setError(null);
     setLogos([]);
@@ -149,6 +160,20 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
       if (result.success && result.data.logos) {
         setLogos(result.data.logos);
         onLogoGenerated?.(result.data);
+
+        // Registrar log de uso com dedução automática de créditos
+        await logAIGeneration({
+          featureCode: FEATURE_CODE,
+          provider: 'picsart',
+          model: 'logo-generation-ai',
+          prompt: `Geração de logo para marca: ${formData.brandName}`,
+          response: `${result.data.logos.length} logomarcas geradas com sucesso`,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          cost: 0,
+          duration: result.data.processingTime || 0
+        });
         
         toast({
           title: "Logomarcas geradas com sucesso!",

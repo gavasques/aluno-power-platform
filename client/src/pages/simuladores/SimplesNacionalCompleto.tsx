@@ -6,11 +6,17 @@ import { ResumoSimulacao } from "@/components/simulators/simples-nacional-comple
 import { TabelaMeses } from "@/components/simulators/simples-nacional-completo/components/TabelaMeses";
 import { AlertaLegal } from "@/components/simulators/simples-nacional-completo/components/AlertaLegal";
 import { exportarParaCSV, baixarCSV } from "@/components/simulators/simples-nacional-completo/utils";
+import { useCreditSystem } from "@/hooks/useCreditSystem";
+import { useUserCreditBalance } from "@/hooks/useUserCredits";
+
+const FEATURE_CODE = 'simulators.simples_nacional_completo';
 
 export default function SimplesNacionalCompleto() {
   const { toast } = useToast();
   const { meses, novoMes, adicionarMes, removerMes, updateNovoMes } = useSimulationData();
   const { mesesCalculados, resumo } = useCalculations(meses);
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+  const { balance: userBalance } = useUserCreditBalance();
 
   const handleAdicionarMes = () => {
     const result = adicionarMes();
@@ -36,7 +42,7 @@ export default function SimplesNacionalCompleto() {
     });
   };
 
-  const handleExportarCSV = () => {
+  const handleExportarCSV = async () => {
     if (mesesCalculados.length === 0) {
       toast({
         title: "Nenhum dado",
@@ -46,8 +52,29 @@ export default function SimplesNacionalCompleto() {
       return;
     }
 
+    // Verificar créditos antes de exportar
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     const csvContent = exportarParaCSV(mesesCalculados);
     baixarCSV(csvContent);
+    
+    // Registrar log de uso com dedução automática de créditos
+    await logAIGeneration({
+      featureCode: FEATURE_CODE,
+      provider: 'simples-nacional-completo',
+      model: 'simulation',
+      prompt: `Exportação CSV - ${mesesCalculados.length} meses`,
+      response: `Arquivo CSV exportado com sucesso - ${mesesCalculados.length} meses de dados`,
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      cost: 0,
+      duration: 0
+    });
     
     toast({
       title: "Arquivo exportado",

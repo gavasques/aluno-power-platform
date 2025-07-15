@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation } from '@tanstack/react-query';
 import { logger } from '@/utils/logger';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 
 // Reusable components
 import ImageUploadComponent from './ImageUploadComponent';
@@ -54,6 +55,8 @@ interface ProcessingResult {
   totalTime: number;
 }
 
+const FEATURE_CODE = 'tools.picsart_background_removal';
+
 const BackgroundRemovalTool: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
@@ -74,6 +77,7 @@ const BackgroundRemovalTool: React.FC = () => {
   const [processingProgress, setProcessingProgress] = useState(0);
 
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
 
   // Process image mutation
   const processImageMutation = useMutation({
@@ -102,9 +106,23 @@ const BackgroundRemovalTool: React.FC = () => {
       logger.debug('✅ [BACKGROUND_REMOVAL] Processing completed successfully');
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setResult(data);
       setProcessingProgress(100);
+
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'picsart',
+        model: 'background-removal-ai',
+        prompt: 'Remoção de fundo profissional',
+        response: 'Imagem processada com sucesso',
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: data.processingTime || 0
+      });
       
       toast({
         title: "Processamento concluído",
@@ -148,13 +166,20 @@ const BackgroundRemovalTool: React.FC = () => {
   }, []);
 
   // Start processing
-  const handleStartProcessing = useCallback(() => {
+  const handleStartProcessing = useCallback(async () => {
     if (!selectedImage || !fileName) {
       toast({
         title: "Erro",
         description: "Selecione uma imagem primeiro",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
       return;
     }
 

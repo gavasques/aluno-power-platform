@@ -11,6 +11,8 @@ import { CountrySelector } from '@/components/common/CountrySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CreditCostButton } from '@/components/CreditCostButton';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { useToast } from '@/hooks/use-toast';
 
 // Types
 interface ReviewData {
@@ -55,6 +57,8 @@ const extractOrValidateASIN = (input: string): string | null => {
   return null;
 };
 
+const FEATURE_CODE = 'tools.amazon_reviews';
+
 export default function AmazonReviewExtractor() {
   const { user } = useAuth();
   const [urlInput, setUrlInput] = useState('');
@@ -73,6 +77,8 @@ export default function AmazonReviewExtractor() {
 
   const { execute, loading } = useApiRequest();
   const { balance: userBalance } = useUserCreditBalance();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+  const { toast } = useToast();
 
   const addUrl = () => {
     if (!urlInput.trim()) return;
@@ -130,6 +136,13 @@ export default function AmazonReviewExtractor() {
   const extractReviews = async () => {
     if (state.urls.length === 0) return;
 
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     setState(prev => ({
       ...prev,
       isExtracting: true,
@@ -182,6 +195,20 @@ export default function AmazonReviewExtractor() {
         isExtracting: false,
         progress: 100
       }));
+
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'amazon',
+        model: 'review-extractor',
+        prompt: `Extração de reviews de ${state.urls.length} produtos`,
+        response: `${allReviews.length} reviews extraídos com sucesso`,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: 0
+      });
 
     } catch (error: any) {
       setState(prev => ({

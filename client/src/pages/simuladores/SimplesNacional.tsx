@@ -9,6 +9,10 @@ import { Save, Calculator, FileText, AlertTriangle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { useUserCreditBalance } from '@/hooks/useUserCredits';
+
+const FEATURE_CODE = 'simulators.simples_nacional';
 
 // Formatação brasileira de números com formato específico R$ X.XXX.XXXX,XX
 const formatBrazilianNumber = (value: number, decimals: number = 2): string => {
@@ -135,6 +139,8 @@ const defaultSimulation: SimulacaoCompleta = {
 export default function SimplesNacional() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+  const { balance: userBalance } = useUserCreditBalance();
   
   // State management
   const [activeSimulation, setActiveSimulation] = useState<SimulacaoCompleta>(defaultSimulation);
@@ -176,10 +182,31 @@ export default function SimplesNacional() {
         });
       }
     },
-    onSuccess: (data) => {
-      if (!simulationId) {
+    onSuccess: async (data) => {
+      const isNewSimulation = !simulationId;
+      
+      if (isNewSimulation) {
         setSimulationId(data.id);
+        
+        // Registrar log de uso com dedução automática de créditos apenas para novas simulações
+        try {
+          await logAIGeneration({
+            featureCode: FEATURE_CODE,
+            provider: 'simples-nacional',
+            model: 'calculation',
+            prompt: `Nova simulação Simples Nacional - ${activeSimulation.nomeSimulacao}`,
+            response: `Simulação criada com sucesso - Faturamento: ${activeSimulation.faturamento12Meses}`,
+            inputTokens: 0,
+            outputTokens: 0,
+            totalTokens: 0,
+            cost: 0,
+            duration: 0
+          });
+        } catch (error) {
+          console.error('Erro ao registrar log:', error);
+        }
       }
+      
       toast({
         title: "Simulação salva",
         description: "Simulação salva com sucesso!",
@@ -206,7 +233,7 @@ export default function SimplesNacional() {
   }, [activeSimulation.faturamento12Meses, activeSimulation.faturamentoSemST, activeSimulation.faturamentoComST]);
 
   // Handlers
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!calculoResult || calculoResult.erro) {
       toast({
         title: "Erro",
@@ -214,6 +241,15 @@ export default function SimplesNacional() {
         variant: "destructive",
       });
       return;
+    }
+    
+    // Verificar créditos antes de salvar nova simulação
+    if (!simulationId) {
+      const creditCheck = await checkCredits(FEATURE_CODE);
+      if (!creditCheck.canProcess) {
+        showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+        return;
+      }
     }
     
     saveMutation.mutate({

@@ -12,6 +12,8 @@ import { useUserCreditBalance } from '@/hooks/useUserCredits';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CopyButton } from '@/components/common/CopyButton';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { useToast } from '@/hooks/use-toast';
 
 interface KeywordSuggestionsData {
   meta: {
@@ -25,6 +27,8 @@ interface KeywordSuggestionsData {
   suggestions: string[];
 }
 
+const FEATURE_CODE = 'tools.keyword_suggestions';
+
 export default function AmazonKeywordSuggestions() {
   const [keyword, setKeyword] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('BR');
@@ -35,9 +39,18 @@ export default function AmazonKeywordSuggestions() {
     successMessage: 'Sugestões carregadas com sucesso!',
   });
   const { balance: userBalance } = useUserCreditBalance();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+  const { toast } = useToast();
 
   const handleSearch = async () => {
     if (!keyword.trim()) return;
+
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
 
     const data = await execute(
       () => fetch(`/api/amazon-keyword-suggestions?prefix=${encodeURIComponent(keyword)}&region=${selectedCountry}`),
@@ -47,6 +60,20 @@ export default function AmazonKeywordSuggestions() {
     if (data?.suggestions) {
       setSuggestions(data.suggestions);
       setIsExpanded(true);
+      
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'amazon',
+        model: 'keyword-suggestions',
+        prompt: `Sugestões de palavras-chave para: ${keyword}`,
+        response: `${data.suggestions.length} sugestões encontradas`,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: 0
+      });
     }
   };
 

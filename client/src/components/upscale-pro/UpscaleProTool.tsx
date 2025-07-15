@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, Download, ZoomIn, Loader2, Check, AlertCircle, CreditCard, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
 
 const SUPPORTED_FORMATS = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -33,6 +34,8 @@ interface ProcessingResult {
   duration: number;
 }
 
+const FEATURE_CODE = 'tools.upscale_pro';
+
 export function UpscaleProTool() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
@@ -46,6 +49,7 @@ export function UpscaleProTool() {
   });
   
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
 
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -90,6 +94,13 @@ export function UpscaleProTool() {
   const processImage = async () => {
     if (!selectedFile) return;
 
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     try {
       // Validate parameters
       const validatedParams = UpscaleProSchema.parse(parameters);
@@ -127,6 +138,21 @@ export function UpscaleProTool() {
       const result: ProcessingResult = await response.json();
       
       setResult(result);
+
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'picsart',
+        model: 'upscale-pro-ai',
+        prompt: `Upscale de imagem ${parameters.upscale_factor}x formato ${parameters.format}`,
+        response: 'Imagem ampliada com sucesso',
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: result.duration || 0
+      });
+
       toast({
         title: 'Sucesso!',
         description: `Imagem ampliada em ${(result.duration / 1000).toFixed(1)}s`,

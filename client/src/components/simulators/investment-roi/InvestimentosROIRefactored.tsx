@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { useUserCreditBalance } from '@/hooks/useUserCredits';
 
 // Types and utilities
 import { 
@@ -34,6 +36,8 @@ import { SummaryPanel } from './components/SummaryPanel';
 import { ActionsPanel } from './components/ActionsPanel';
 import { SimulationSelector } from './components/SimulationSelector';
 
+const FEATURE_CODE = 'simulators.investimentos_roi';
+
 /**
  * Refactored Investment and ROI Simulator Component
  * 
@@ -46,6 +50,8 @@ import { SimulationSelector } from './components/SimulationSelector';
  */
 export default function InvestimentosROIRefactored() {
   const { toast } = useToast();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+  const { balance: userBalance } = useUserCreditBalance();
 
   // Configuration state
   const [config, setConfig] = useState<ConfiguracaoSimulacao>(DEFAULT_CONFIG);
@@ -186,10 +192,31 @@ export default function InvestimentosROIRefactored() {
   };
 
   // Export CSV handler
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
     try {
+      // Verificar créditos antes de exportar
+      const creditCheck = await checkCredits(FEATURE_CODE);
+      if (!creditCheck.canProcess) {
+        showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+        return;
+      }
+
       const fileName = `simulacao_investimentos_${simulationName.replace(/[^a-zA-Z0-9]/g, '-')}_${new Date().toISOString().split('T')[0]}`;
       exportToCSV(giros, fileName);
+      
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'investments-roi',
+        model: 'simulation',
+        prompt: `Exportação CSV - ${simulationName}`,
+        response: `Arquivo CSV exportado com sucesso - ${giros.length} giros de dados`,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: 0
+      });
       
       toast({
         title: "CSV exportado",
@@ -206,8 +233,15 @@ export default function InvestimentosROIRefactored() {
   };
 
   // Export PDF handler
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     try {
+      // Verificar créditos antes de exportar
+      const creditCheck = await checkCredits(FEATURE_CODE);
+      if (!creditCheck.canProcess) {
+        showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+        return;
+      }
+
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const margin = 20;
@@ -288,6 +322,20 @@ export default function InvestimentosROIRefactored() {
 
       const fileName = generatePDFFileName(simulationName);
       doc.save(fileName);
+      
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'investments-roi',
+        model: 'simulation',
+        prompt: `Exportação PDF - ${simulationName}`,
+        response: `Arquivo PDF exportado com sucesso - ${giros.length} giros de dados`,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: 0
+      });
       
       toast({
         title: "PDF exportado",

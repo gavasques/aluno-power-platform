@@ -7,6 +7,8 @@ import { CNPJInput, validateCNPJ } from '@/components/common/CNPJInput';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CreditCostButton } from '@/components/CreditCostButton';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { useToast } from '@/hooks/use-toast';
 
 // Types
 interface EnderecoData {
@@ -92,6 +94,8 @@ const ExpandableSection: React.FC<ExpandableSectionProps> = ({
   </Card>
 );
 
+const FEATURE_CODE = 'tools.cnpj_lookup';
+
 export default function CNPJConsulta() {
   const [cnpj, setCnpj] = useState('');
   const [cnpjData, setCnpjData] = useState<CNPJResponse | null>(null);
@@ -107,9 +111,18 @@ export default function CNPJConsulta() {
     successMessage: 'Dados da empresa consultados com sucesso!',
   });
   const { balance: userBalance } = useUserCreditBalance();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+  const { toast } = useToast();
 
   const handleSubmit = async () => {
     if (!validateCNPJ(cnpj)) return;
+
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
 
     const data = await execute(
       () => fetch(`/api/cnpj-consulta?cnpj=${cnpj}`),
@@ -118,6 +131,20 @@ export default function CNPJConsulta() {
     if (data) {
       setCnpjData(data);
       setExpandedSections(prev => ({ ...prev, basicInfo: true }));
+      
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'cnpj-api',
+        model: 'cnpj-lookup',
+        prompt: `Consulta de CNPJ: ${cnpj}`,
+        response: `Dados da empresa: ${data.dados?.razao_social || 'Consultado'}`,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: 0
+      });
     }
   };
 

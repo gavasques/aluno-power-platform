@@ -326,6 +326,47 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 15, 2025 - 8:30 PM**: ✅ UNIFIED CREDIT SYSTEM IMPLEMENTATION COMPLETED - ALL MAJOR SIMULATORS NOW INTEGRATED
+  - **Final Implementation Phase**: Successfully completed credit system integration across all major simulators
+  - **Final 4 Simulators Implemented**:
+    - ✅ **FormalImportSimulator.tsx**: Credit validation for new simulations with automatic logging
+    - ✅ **SimplesNacionalCompleto.tsx**: Credit validation for CSV exports with automatic logging
+    - ✅ **InvestimentosROIRefactored.tsx**: Credit validation for both CSV and PDF exports with automatic logging
+    - ✅ **SimplesNacional.tsx**: Credit validation for new simulations with automatic logging
+  - **Implementation Pattern Applied**:
+    - ✅ **Imports**: `useCreditSystem`, `useUserCreditBalance` hooks imported
+    - ✅ **Feature Codes**: `simulators.formal_import`, `simulators.simples_nacional_completo`, `simulators.investimentos_roi`, `simulators.simples_nacional`
+    - ✅ **Credit Validation**: Pre-execution credit checks with user feedback
+    - ✅ **Automatic Logging**: Post-execution logging with comprehensive metadata
+    - ✅ **Smart Logic**: New simulations/exports consume credits, editing existing ones doesn't
+  - **Technical Implementation**:
+    - Credit checks implemented before main processing functions (save, export, generate)
+    - Automatic credit deduction through LoggingService integration
+    - Comprehensive logging with provider, model, and usage metadata
+    - Consistent error handling and user feedback patterns
+  - **System Coverage**: All 8 agents + 12+ tools + 4 simulators now have complete unified credit system implementation
+  - **Status**: Unified credit system implementation COMPLETE across entire platform
+
+- **January 15, 2025 - 8:20 PM**: ✅ CONTINUED TOOLS CREDIT SYSTEM IMPLEMENTATION - 3 MORE TOOLS COMPLETED
+  - **Tools Completed**: Extended credit system implementation to 3 additional hub tools
+  - **Newly Implemented**:
+    - ✅ **AmazonReviewExtractor.tsx**: Complete credit integration with checkCredits validation and logAIGeneration
+    - ✅ **CNPJConsulta.tsx**: Full credit system with automatic deduction and usage tracking
+    - ✅ **KeywordSearchReport.tsx**: Credit validation and logging for keyword search functionality
+  - **Implementation Pattern Applied**:
+    - ✅ **Imports**: `useCreditSystem`, `useToast` hooks imported
+    - ✅ **Feature Codes**: `tools.amazon_reviews`, `tools.cnpj_lookup`, `tools.keyword_report`
+    - ✅ **Credit Validation**: Pre-execution credit checks with user feedback
+    - ✅ **Automatic Logging**: Post-execution logging with comprehensive metadata
+    - ✅ **Error Handling**: Graceful credit shortage handling with informative toasts
+  - **Technical Implementation**:
+    - Credit checks implemented before main processing functions
+    - Automatic credit deduction through LoggingService integration
+    - Comprehensive logging with provider, model, and usage metadata
+    - Consistent error handling and user feedback patterns
+  - **Current Progress**: 9+ tools now have complete unified credit system implementation
+  - **Status**: Continuing systematic credit system implementation across all platform tools
+
 - **January 15, 2025 - 8:10 PM**: ✅ SISTEMA UNIFICADO DE CRÉDITOS COMPLETAMENTE IMPLEMENTADO EM TODOS OS AGENTES
   - **Objetivo Alcançado**: Implementação completa do sistema unificado de créditos em todos os 9 agentes principais
   - **Agentes Corrigidos**: 

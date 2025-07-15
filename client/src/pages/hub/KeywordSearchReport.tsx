@@ -14,6 +14,8 @@ import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CreditCostButton } from '@/components/CreditCostButton';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { useToast } from '@/hooks/use-toast';
 
 // Types
 interface Product {
@@ -62,6 +64,8 @@ const DEALS_OPTIONS = [
   { value: 'TODAYS_DEALS', label: 'Ofertas do Dia' }
 ];
 
+const FEATURE_CODE = 'tools.keyword_report';
+
 export default function KeywordSearchReport() {
   const [searchParams, setSearchParams] = useState({
     query: '',
@@ -87,6 +91,8 @@ export default function KeywordSearchReport() {
 
   const { execute, loading } = useApiRequest();
   const { balance: userBalance } = useUserCreditBalance();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+  const { toast } = useToast();
 
   const updateSearchParam = (key: string, value: any) => {
     setSearchParams(prev => ({ ...prev, [key]: value }));
@@ -115,6 +121,13 @@ export default function KeywordSearchReport() {
 
   const startSearch = async () => {
     if (!searchParams.query.trim()) return;
+
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
 
     setState(prev => ({
       ...prev,
@@ -188,6 +201,20 @@ export default function KeywordSearchReport() {
         totalProducts: allProducts.length,
         progress: 100
       }));
+
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'amazon',
+        model: 'keyword-search',
+        prompt: `Pesquisa: ${searchParams.query}`,
+        response: `${allProducts.length} produtos encontrados`,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: 0
+      });
 
     } catch (error) {
       setState(prev => ({

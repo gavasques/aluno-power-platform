@@ -28,6 +28,8 @@ import { CreditCostButton } from '@/components/CreditCostButton';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { useToast } from '@/hooks/use-toast';
 
 // Types
 interface ProductData {
@@ -118,6 +120,8 @@ const ExpandableSection = ({
   </Card>
 );
 
+const FEATURE_CODE = 'tools.product_details';
+
 export default function AmazonProductDetails() {
   const [asin, setAsin] = useState<string>('');
   const [country, setCountry] = useState<string>('BR');
@@ -135,6 +139,8 @@ export default function AmazonProductDetails() {
     successMessage: 'Produto encontrado com sucesso!',
   });
   const { balance: userBalance } = useUserCreditBalance();
+  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
+  const { toast } = useToast();
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -150,6 +156,13 @@ export default function AmazonProductDetails() {
   const searchProduct = async () => {
     if (!asin.trim() || !validateAsin(asin)) return;
 
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+      return;
+    }
+
     const data = await execute(
       () => fetch('/api/amazon-product-details', {
         method: 'POST',
@@ -160,6 +173,20 @@ export default function AmazonProductDetails() {
 
     if (data?.status === 'OK' && data.data) {
       setProductData(data);
+      
+      // Registrar log de uso com dedução automática de créditos
+      await logAIGeneration({
+        featureCode: FEATURE_CODE,
+        provider: 'amazon',
+        model: 'product-details',
+        prompt: `Busca de produto ASIN: ${asin}`,
+        response: `Produto encontrado: ${data.data.product_title}`,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        duration: 0
+      });
     }
   };
 
