@@ -52,9 +52,16 @@ export const downloadImage = async (url: string, filename: string): Promise<void
     
     // Verifica se é uma URL base64
     if (url.startsWith('data:')) {
-      // Converte base64 para blob
-      const response = await fetch(url);
-      blob = await response.blob();
+      // Para URLs base64, converte diretamente para blob
+      const byteCharacters = atob(url.split(',')[1]);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const mimeMatch = url.match(/data:([^;]+)/);
+      const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+      blob = new Blob([byteArray], { type: mimeType });
     } else {
       // Para URLs normais, faz fetch
       const response = await fetch(url);
@@ -70,15 +77,21 @@ export const downloadImage = async (url: string, filename: string): Promise<void
     link.href = downloadUrl;
     link.download = filename;
     link.style.display = 'none';
+    
+    // Adiciona o link ao DOM, clica e remove
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(downloadUrl);
+    
+    // Cleanup
+    setTimeout(() => {
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    }, 100);
     
     console.log(`✅ Download concluído: ${filename}`);
   } catch (error) {
     console.error('❌ Erro no download:', error);
-    throw error;
+    throw new Error(`Falha no download: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
   }
 };
 

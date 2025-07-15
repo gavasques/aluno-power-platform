@@ -5733,9 +5733,54 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         });
       }
 
+      // CHECK AND DEDUCT CREDITS BEFORE PROCESSING
+      const creditsNeeded = 2; // 2 credits per upscale
+      console.log(`💰 [IMAGE_UPSCALE] Credits needed: ${creditsNeeded} for upscale`);
+      
+      // Check user credits
+      const userCredits = await db.select({ credits: users.credits })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      
+      if (!userCredits.length) {
+        return res.status(404).json({
+          error: 'Usuário não encontrado'
+        });
+      }
+      
+      const currentCredits = parseFloat(userCredits[0].credits || '0');
+      
+      if (currentCredits < creditsNeeded) {
+        return res.status(400).json({
+          error: 'Créditos insuficientes',
+          details: `Você precisa de ${creditsNeeded} créditos mas tem apenas ${currentCredits}`,
+          creditsNeeded,
+          currentCredits
+        });
+      }
+      
+      // Deduct credits before processing
+      await db.update(users)
+        .set({ 
+          credits: (currentCredits - creditsNeeded).toString(),
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+      
+      console.log(`✅ [IMAGE_UPSCALE] Credits deducted: ${creditsNeeded} (${currentCredits} → ${currentCredits - creditsNeeded})`);
+
       // Get the uploaded image
       const uploadedImage = await storage.getGeneratedImageById(imageId);
       if (!uploadedImage) {
+        // Refund credits if image not found
+        await db.update(users)
+          .set({ 
+            credits: currentCredits.toString(),
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, userId));
+        
         return res.status(404).json({ 
           error: 'Imagem não encontrada' 
         });
@@ -5885,6 +5930,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         },
         status: 'success',
         cost: '0.10',
+        creditsUsed: creditsNeeded.toString(),
         duration: Date.now() - startTime,
         requestId: upscaledRecord.id,
         sessionId: req.sessionId || 'unknown',
@@ -5894,12 +5940,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           endpoint: 'image-upscale/process',
           originalImageId: imageId,
           requestTimestamp: new Date().toISOString(),
-          responseSize: JSON.stringify(pixelcutResult).length
+          responseSize: JSON.stringify(pixelcutResult).length,
+          creditsDeducted: creditsNeeded
         }
       };
 
       await storage.createAiImgGenerationLog(logData);
-      console.log(`📊 [AI_IMG_LOG] Saved upscale log - User: ${userId}, Scale: ${scale}x, Cost: $0.10, Duration: ${Date.now() - startTime}ms`);
+      console.log(`📊 [AI_IMG_LOG] Saved upscale log - User: ${userId}, Scale: ${scale}x, Cost: $0.10, Credits: ${creditsNeeded}, Duration: ${Date.now() - startTime}ms`);
 
       // Keep temporary image for potential reprocessing
       // await storage.deleteGeneratedImage(imageId); // Only delete when user explicitly removes/changes image
@@ -5921,6 +5968,32 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.error('❌ [IMAGE_UPSCALE] Error:', error);
       
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      const userId = req.user?.id;
+      
+      // REFUND CREDITS IF PROCESSING FAILED
+      if (userId) {
+        try {
+          const creditsNeeded = 2;
+          const userCredits = await db.select({ credits: users.credits })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
+          
+          if (userCredits.length) {
+            const currentCredits = parseFloat(userCredits[0].credits || '0');
+            await db.update(users)
+              .set({ 
+                credits: (currentCredits + creditsNeeded).toString(),
+                updatedAt: new Date()
+              })
+              .where(eq(users.id, userId));
+            
+            console.log(`💰 [IMAGE_UPSCALE] Credits refunded: ${creditsNeeded} (${currentCredits} → ${currentCredits + creditsNeeded})`);
+          }
+        } catch (refundError) {
+          console.error('❌ [IMAGE_UPSCALE] Failed to refund credits:', refundError);
+        }
+      }
       
       // Check if it's a credits issue and return error message
       if (errorMessage.includes('Créditos da API PixelCut esgotados') || errorMessage.includes('insufficient_api_credits')) {
@@ -5932,7 +6005,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       
       // Log other errors in AI Image Generation Logs
       try {
-        const userId = req.user?.id;
         if (userId) {
           const uploadedImage = await storage.getGeneratedImageById(req.body.imageId);
           const errorLogData = {
