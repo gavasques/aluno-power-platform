@@ -145,10 +145,10 @@ export default function Login() {
       return;
     }
 
-    if (password.length < 12) {
+    if (password.length < 8) {
       toast({
         title: "Senha inválida",
-        description: "A senha deve ter pelo menos 12 caracteres.",
+        description: "A senha deve ter pelo menos 8 caracteres.",
         variant: "destructive",
       });
       return;
@@ -402,13 +402,13 @@ export default function Login() {
                             <Input
                               id="register-password"
                               type="password"
-                              placeholder="Mínimo 12 caracteres"
+                              placeholder="Mínimo 8 caracteres"
                               value={registerData.password}
                               onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
                               required
                             />
                             <p className="text-xs text-gray-500">
-                              Mínimo 12 caracteres incluindo maiúscula, minúscula, número e símbolo
+                              Mínimo 8 caracteres incluindo maiúscula, minúscula e número
                             </p>
                           </div>
                           <div className="flex gap-3">
