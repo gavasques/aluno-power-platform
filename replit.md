@@ -326,6 +326,25 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 16, 2025 - 7:00 PM**: ✅ COMPLETE REBRANDING TO "CORE GUILHERME VASQUES" + NEW LOGIN PAGE + AGENT PERMISSIONS UPDATED
+  - **Brand Identity Complete**: Successfully replaced all "Aluno Power" references with "Core Guilherme Vasques"
+  - **New Login Page**: Created modern, professional login page with:
+    - ✅ New logo integration from attached assets
+    - ✅ Comprehensive system information display
+    - ✅ 6 feature cards showcasing platform capabilities
+    - ✅ Modern gradient design with professional branding
+    - ✅ Responsive layout with improved user experience
+  - **Branding Updates Applied**:
+    - ✅ `client/src/pages/Login.tsx`: Complete redesign with new logo and system information
+    - ✅ `client/src/components/auth/AuthLayout.tsx`: Updated branding and description
+    - ✅ `client/src/components/layout/OptimizedLayout.tsx`: Header branding updated
+    - ✅ `client/src/pages/tools/LogoGeneratorPro.tsx`: SEO and meta tags updated
+    - ✅ `client/index.html`: Title already updated to "Core Guilherme Vasques"
+  - **Agent Permissions Verified**: Added new agent "agents.keyword_analysis" to system_features table
+  - **System Features**: New "Análise de Palavras-Chave para Amazon" agent properly configured
+  - **Login Experience**: Professional 2-column layout with feature showcase and system information
+  - **Brand Consistency**: All user-facing references now use "Core Guilherme Vasques" branding
+
 - **July 16, 2025 - 6:10 PM**: ✅ OPENROUTER REASONING MODELS DRAMATICALLY EXPANDED - 60+ MODELS + HTML ENCODING BUG FIXED
   - **Massively Expanded Reasoning Detection**: Updated isReasoningModel() to detect 60+ models across all major providers
   - **Claude Reasoning Added**: Integrated anthropic/claude-3.7-sonnet:thinking model with full reasoning capabilities
