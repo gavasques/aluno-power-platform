@@ -105,6 +105,9 @@
 **GLM Reasoning Models:**
 15. **thudm/glm-4.1v-9b-thinking** ($0.035/$0.035 por 1M tokens) - ✅ Reasoning + Effort • ✅ Vision • ❌ Web Search • 65k tokens
 
+**Claude Reasoning Models:**
+16. **anthropic/claude-3.7-sonnet:thinking** ($3/$15 por 1M tokens) - ✅ Reasoning + Effort • ✅ Vision • ✅ Web Search • 200k tokens
+
 #### Modelos Multimodais:
 1. **openai/gpt-4o** ($2.5/$10 por 1M tokens)
    - ✅ Vision: Sim
@@ -173,7 +176,8 @@
 | sonar-reasoning | ✅ | ✅ | ❌ | ❌ | ✅ (native) | 127k | $1/$1 |
 | **GLM Models** |
 | glm-4.1v-9b-thinking | ✅ | ✅ | ✅ | ❌ | ❌ | 65k | $0.035/$0.035 |
-| **Anthropic Models** |
+| **Claude Models** |
+| claude-3.7-sonnet:thinking | ✅ | ✅ | ✅ | ✅ | ✅ | 200k | $3/$15 |
 | claude-3.5-sonnet | ❌ | ❌ | ✅ | ✅ | ✅ | 200k | $3/$15 |
 
 ### 🧪 Como Testar

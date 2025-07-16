@@ -1314,7 +1314,7 @@ export default function AgentProviderSettings() {
                     </div>
 
                     {/* Reasoning Capabilities for specific models */}
-                    {(formData.model.includes('o1') || formData.model.includes('reasoning') || formData.model.includes('sonar') || formData.model.includes('deepseek-r1') || formData.model.includes('grok') || formData.model.includes('qwq') || formData.model.includes('phi-4') || formData.model.includes('gemini-2') || formData.model.includes('thinking')) && (
+                    {(formData.model.includes('o1') || formData.model.includes('reasoning') || formData.model.includes('sonar') || formData.model.includes('deepseek-r1') || formData.model.includes('grok') || formData.model.includes('qwq') || formData.model.includes('phi-4') || formData.model.includes('gemini-2') || formData.model.includes('thinking') || formData.model.includes('claude-3.7-sonnet:thinking')) && (
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
                           <Brain className="h-4 w-4 text-indigo-600" />
@@ -1347,7 +1347,7 @@ export default function AgentProviderSettings() {
                             </div>
                             
                             {/* Reasoning Effort for compatible models */}
-                            {(formData.model.includes('o1-mini') || formData.model.includes('deepseek-r1') || formData.model.includes('qwq') || formData.model.includes('phi-4-reasoning') || formData.model.includes('sonar-reasoning') || formData.model.includes('thinking')) && (
+                            {(formData.model.includes('o1-mini') || formData.model.includes('deepseek-r1') || formData.model.includes('qwq') || formData.model.includes('phi-4-reasoning') || formData.model.includes('sonar-reasoning') || formData.model.includes('thinking') || formData.model.includes('claude-3.7-sonnet:thinking')) && (
                               <div>
                                 <Label htmlFor="reasoningEffort" className="text-sm">
                                   Nível de esforço de raciocínio

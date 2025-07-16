@@ -162,6 +162,14 @@ export class OpenRouterProvider extends BaseProvider {
       },
       {
         provider: 'openrouter' as const,
+        model: 'anthropic/claude-3.7-sonnet:thinking',
+        inputCostPer1M: 3000,
+        outputCostPer1M: 15000,
+        maxTokens: 200000,
+        capabilities: ['text', 'vision', 'reasoning', 'reasoning-effort']
+      },
+      {
+        provider: 'openrouter' as const,
         model: 'openai/gpt-4o-mini',
         inputCostPer1M: 150,
         outputCostPer1M: 600,
@@ -236,6 +244,18 @@ export class OpenRouterProvider extends BaseProvider {
 
     console.log(`🚀 [OPENROUTER] Processing request for model: ${request.model}`);
     
+    // Decode HTML entities in model name if present
+    const decodedModel = request.model
+      .replace(/&#x2F;/g, '/')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"');
+    
+    if (decodedModel !== request.model) {
+      console.log('🔧 [OPENROUTER] Decoded model name:', decodedModel);
+    }
+    
     try {
       const headers = {
         'Authorization': `Bearer ${this.apiKey}`,
@@ -249,7 +269,7 @@ export class OpenRouterProvider extends BaseProvider {
 
       // Build request body compatible with OpenRouter format
       const body: any = {
-        model: this.getModelName(request),
+        model: decodedModel,
         messages: processedMessages,
         temperature: request.temperature || 0.7,
         max_tokens: Math.min(request.maxTokens || 4000, 16000), // Increased limit for complex tasks
@@ -270,19 +290,19 @@ export class OpenRouterProvider extends BaseProvider {
       }
 
       // Add reasoning parameters for reasoning-capable models
-      if (this.isReasoningModel(request.model) && request.openrouterAdvanced?.enableReasoning) {
+      if (this.isReasoningModel(decodedModel) && request.openrouterAdvanced?.enableReasoning) {
         // For reasoning models, use specific parameters
-        if (request.openrouterAdvanced?.reasoning_effort && (request.model.includes('o1-mini') || request.model.includes('deepseek-r1'))) {
+        if (request.openrouterAdvanced?.reasoning_effort && (decodedModel.includes('o1-mini') || decodedModel.includes('deepseek-r1'))) {
           body.reasoning_effort = request.openrouterAdvanced.reasoning_effort;
         }
         
         // Reasoning models might have different temperature/token constraints
-        if (request.model.includes('o1')) {
+        if (decodedModel.includes('o1')) {
           body.temperature = Math.min(request.temperature || 0.7, 1.0); // o1 models have temperature limits
         }
         
         // Log reasoning activation
-        console.log(`🧠 [OPENROUTER] Reasoning mode activated for ${request.model} with effort: ${request.openrouterAdvanced?.reasoning_effort || 'default'}`);
+        console.log(`🧠 [OPENROUTER] Reasoning mode activated for ${decodedModel} with effort: ${request.openrouterAdvanced?.reasoning_effort || 'default'}`);
       }
 
       // Add plugins for advanced features
@@ -292,7 +312,7 @@ export class OpenRouterProvider extends BaseProvider {
       }
 
       // Add web search options for models with native web search
-      if (request.openrouterAdvanced?.searchContextSize && this.hasNativeWebSearch(request.model)) {
+      if (request.openrouterAdvanced?.searchContextSize && this.hasNativeWebSearch(decodedModel)) {
         body.web_search_options = {
           search_context_size: request.openrouterAdvanced.searchContextSize
         };
@@ -311,7 +331,7 @@ export class OpenRouterProvider extends BaseProvider {
         }
       }
 
-      console.log(`🔧 [OPENROUTER] Request params for ${request.model}:`, JSON.stringify(body, null, 2));
+      console.log(`🔧 [OPENROUTER] Request params for ${decodedModel}:`, JSON.stringify(body, null, 2));
 
       const response = await fetch(`${this.baseURL}/chat/completions`, {
         method: 'POST',
@@ -569,7 +589,7 @@ export class OpenRouterProvider extends BaseProvider {
       // Perplexity reasoning models
       'sonar-reasoning', 'sonar-deep-research', 'sonar-pro',
       // Anthropic reasoning models
-      'claude.*thinking',
+      'claude.*thinking', 'claude-3.7-sonnet:thinking',
       // GLM reasoning models
       'glm.*thinking',
       // Mistral reasoning models
