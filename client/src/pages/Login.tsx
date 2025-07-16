@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Bot, Camera, Search, MessageSquare, Edit3, BarChart3, Shield, Zap, Star } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Loader2, Bot, Camera, Search, MessageSquare, Edit3, BarChart3, Shield, Zap, Star, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import newLogo from '@assets/Asset 14-8_1752691852003.png';
 
@@ -17,6 +18,9 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const { toast } = useToast();
 
   // Redirect if already logged in
@@ -79,17 +83,25 @@ export default function Login() {
     }
   };
 
-  const handleForgotPassword = async () => {
-    const emailAddress = prompt("Digite seu email para recuperação de senha:");
-    if (!emailAddress) return;
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotPasswordEmail) {
+      toast({
+        title: "Erro",
+        description: "Por favor, digite seu email",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    setForgotPasswordLoading(true);
     try {
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: emailAddress }),
+        body: JSON.stringify({ email: forgotPasswordEmail }),
       });
 
       if (response.ok) {
@@ -97,6 +109,8 @@ export default function Login() {
           title: "Email enviado",
           description: "Instruções para recuperação de senha foram enviadas para seu email.",
         });
+        setForgotPasswordOpen(false);
+        setForgotPasswordEmail('');
       } else {
         toast({
           title: "Erro",
@@ -110,6 +124,8 @@ export default function Login() {
         description: "Erro ao processar solicitação. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setForgotPasswordLoading(false);
     }
   };
 
@@ -261,13 +277,67 @@ export default function Login() {
                 
                 <div className="mt-6 space-y-4">
                   <div className="text-center">
-                    <button
-                      type="button"
-                      className="text-sm text-blue-600 hover:text-blue-800 underline"
-                      onClick={handleForgotPassword}
-                    >
-                      Esqueci minha senha
-                    </button>
+                    <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+                      <DialogTrigger asChild>
+                        <button
+                          type="button"
+                          className="text-sm text-blue-600 hover:text-blue-800 underline"
+                        >
+                          Esqueci minha senha
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <Mail className="h-5 w-5 text-blue-600" />
+                            Recuperar Senha
+                          </DialogTitle>
+                          <DialogDescription>
+                            Digite seu email e enviaremos instruções para redefinir sua senha.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="forgot-email">Email</Label>
+                            <Input
+                              id="forgot-email"
+                              type="email"
+                              placeholder="seu@email.com"
+                              value={forgotPasswordEmail}
+                              onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                              required
+                            />
+                          </div>
+                          <div className="flex gap-3">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setForgotPasswordOpen(false)}
+                              className="flex-1"
+                            >
+                              Cancelar
+                            </Button>
+                            <Button 
+                              type="submit" 
+                              disabled={forgotPasswordLoading}
+                              className="flex-1"
+                            >
+                              {forgotPasswordLoading ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Enviando...
+                                </>
+                              ) : (
+                                <>
+                                  <Mail className="mr-2 h-4 w-4" />
+                                  Enviar
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   
                   <div className="text-center">
