@@ -70,6 +70,7 @@ const AmazonCustomerService = lazy(() => import("./pages/agents/amazon-customer-
 const AmazonCustomerServiceResult = lazy(() => import("./pages/agents/amazon-customer-service-result"));
 const AmazonNegativeReviews = lazy(() => import("./pages/agents/amazon-negative-reviews"));
 const AmazonNegativeReviewsResult = lazy(() => import("./pages/agents/amazon-negative-reviews-result"));
+const KeywordAnalysisAgent = lazy(() => import("./pages/agents/keyword-analysis-agent"));
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
 
 
@@ -220,6 +221,16 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <AmazonCustomerService />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/agentes/keyword-analysis-agent">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <KeywordAnalysisAgent />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
