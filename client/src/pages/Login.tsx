@@ -13,7 +13,7 @@ import newLogo from '@assets/Asset 14-8_1752691852003.png';
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { user, isLoading: authLoading, login } = useAuth();
+  const { user, isLoading: authLoading, login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -76,6 +76,84 @@ export default function Login() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const emailAddress = prompt("Digite seu email para recuperação de senha:");
+    if (!emailAddress) return;
+
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: emailAddress }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Email enviado",
+          description: "Instruções para recuperação de senha foram enviadas para seu email.",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Erro ao enviar email de recuperação. Verifique o endereço informado.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao processar solicitação. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRegister = async () => {
+    const name = prompt("Digite seu nome completo:");
+    if (!name) return;
+
+    const emailAddress = prompt("Digite seu email:");
+    if (!emailAddress) return;
+
+    const password = prompt("Digite uma senha (mínimo 12 caracteres, incluindo maiúscula, minúscula, número e símbolo):");
+    if (!password) return;
+
+    if (password.length < 12) {
+      toast({
+        title: "Senha inválida",
+        description: "A senha deve ter pelo menos 12 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const result = await register(emailAddress, name, password);
+
+      if (result.success) {
+        toast({
+          title: "Cadastro realizado com sucesso",
+          description: "Bem-vindo ao Core Guilherme Vasques!",
+        });
+        setLocation('/');
+      } else {
+        toast({
+          title: "Erro no cadastro",
+          description: result.error || "Erro ao criar conta",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro no cadastro",
+        description: "Erro ao processar cadastro. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -186,13 +264,7 @@ export default function Login() {
                     <button
                       type="button"
                       className="text-sm text-blue-600 hover:text-blue-800 underline"
-                      onClick={() => {
-                        // TODO: Implementar modal de esqueci senha
-                        toast({
-                          title: "Em desenvolvimento",
-                          description: "Funcionalidade em desenvolvimento. Entre em contato conosco.",
-                        });
-                      }}
+                      onClick={handleForgotPassword}
                     >
                       Esqueci minha senha
                     </button>
@@ -205,13 +277,7 @@ export default function Login() {
                     <button
                       type="button"
                       className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors"
-                      onClick={() => {
-                        // TODO: Implementar modal de cadastro
-                        toast({
-                          title: "Em desenvolvimento",
-                          description: "Funcionalidade em desenvolvimento. Entre em contato conosco.",
-                        });
-                      }}
+                      onClick={handleRegister}
                     >
                       Cadastrar-se
                     </button>
