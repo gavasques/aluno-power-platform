@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Loader2, Bot, Camera, Search, MessageSquare, Edit3, BarChart3, Shield, Zap, Star, Mail } from 'lucide-react';
+import { Loader2, Bot, Camera, Search, MessageSquare, Edit3, BarChart3, Shield, Zap, Star, Mail, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import newLogo from '@assets/Asset 14-8_1752691852003.png';
 
@@ -21,6 +21,9 @@ export default function Login() {
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [registerData, setRegisterData] = useState({ name: '', email: '', password: '' });
+  const [registerLoading, setRegisterLoading] = useState(false);
   const { toast } = useToast();
 
   // Redirect if already logged in
@@ -129,15 +132,18 @@ export default function Login() {
     }
   };
 
-  const handleRegister = async () => {
-    const name = prompt("Digite seu nome completo:");
-    if (!name) return;
-
-    const emailAddress = prompt("Digite seu email:");
-    if (!emailAddress) return;
-
-    const password = prompt("Digite uma senha (mínimo 12 caracteres, incluindo maiúscula, minúscula, número e símbolo):");
-    if (!password) return;
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { name, email, password } = registerData;
+    
+    if (!name || !email || !password) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (password.length < 12) {
       toast({
@@ -148,14 +154,17 @@ export default function Login() {
       return;
     }
 
+    setRegisterLoading(true);
     try {
-      const result = await register(emailAddress, name, password);
+      const result = await register(email, name, password);
 
       if (result.success) {
         toast({
           title: "Cadastro realizado com sucesso",
           description: "Bem-vindo ao Core Guilherme Vasques!",
         });
+        setRegisterOpen(false);
+        setRegisterData({ name: '', email: '', password: '' });
         setLocation('/');
       } else {
         toast({
@@ -170,6 +179,8 @@ export default function Login() {
         description: "Erro ao processar cadastro. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setRegisterLoading(false);
     }
   };
 
@@ -344,13 +355,92 @@ export default function Login() {
                     <p className="text-sm text-gray-600 mb-2">
                       Ainda não tem acesso?
                     </p>
-                    <button
-                      type="button"
-                      className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors"
-                      onClick={handleRegister}
-                    >
-                      Cadastrar-se
-                    </button>
+                    <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
+                      <DialogTrigger asChild>
+                        <button
+                          type="button"
+                          className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors"
+                        >
+                          Cadastrar-se
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <UserPlus className="h-5 w-5 text-green-600" />
+                            Criar Conta
+                          </DialogTitle>
+                          <DialogDescription>
+                            Preencha seus dados para criar uma conta no Core Guilherme Vasques.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="register-name">Nome completo</Label>
+                            <Input
+                              id="register-name"
+                              type="text"
+                              placeholder="Seu nome completo"
+                              value={registerData.name}
+                              onChange={(e) => setRegisterData(prev => ({ ...prev, name: e.target.value }))}
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="register-email">Email</Label>
+                            <Input
+                              id="register-email"
+                              type="email"
+                              placeholder="seu@email.com"
+                              value={registerData.email}
+                              onChange={(e) => setRegisterData(prev => ({ ...prev, email: e.target.value }))}
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="register-password">Senha</Label>
+                            <Input
+                              id="register-password"
+                              type="password"
+                              placeholder="Mínimo 12 caracteres"
+                              value={registerData.password}
+                              onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
+                              required
+                            />
+                            <p className="text-xs text-gray-500">
+                              Mínimo 12 caracteres incluindo maiúscula, minúscula, número e símbolo
+                            </p>
+                          </div>
+                          <div className="flex gap-3">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setRegisterOpen(false)}
+                              className="flex-1"
+                            >
+                              Cancelar
+                            </Button>
+                            <Button 
+                              type="submit" 
+                              disabled={registerLoading}
+                              className="flex-1"
+                            >
+                              {registerLoading ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Criando...
+                                </>
+                              ) : (
+                                <>
+                                  <UserPlus className="mr-2 h-4 w-4" />
+                                  Criar conta
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </CardContent>
