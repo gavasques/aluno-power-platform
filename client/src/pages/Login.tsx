@@ -9,12 +9,11 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Bot, Camera, Search, MessageSquare, Edit3, BarChart3, Shield, Zap, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
 import newLogo from '@assets/Asset 14-8_1752691852003.png';
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -54,16 +53,9 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      const response = await apiRequest('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const result = await login(email, password);
 
-      if (response.success) {
-        localStorage.setItem('auth_token', response.token);
+      if (result.success) {
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao Core Guilherme Vasques!",
@@ -72,7 +64,7 @@ export default function Login() {
       } else {
         toast({
           title: "Erro no login",
-          description: response.message || "Credenciais inválidas",
+          description: result.error || "Credenciais inválidas",
           variant: "destructive",
         });
       }
