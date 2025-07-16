@@ -181,10 +181,41 @@ export default function Login() {
                   </Button>
                 </form>
                 
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-600">
-                    Ainda não tem acesso? Entre em contato conosco
-                  </p>
+                <div className="mt-6 space-y-4">
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      className="text-sm text-blue-600 hover:text-blue-800 underline"
+                      onClick={() => {
+                        // TODO: Implementar modal de esqueci senha
+                        toast({
+                          title: "Em desenvolvimento",
+                          description: "Funcionalidade em desenvolvimento. Entre em contato conosco.",
+                        });
+                      }}
+                    >
+                      Esqueci minha senha
+                    </button>
+                  </div>
+                  
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-2">
+                      Ainda não tem acesso?
+                    </p>
+                    <button
+                      type="button"
+                      className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors"
+                      onClick={() => {
+                        // TODO: Implementar modal de cadastro
+                        toast({
+                          title: "Em desenvolvimento",
+                          description: "Funcionalidade em desenvolvimento. Entre em contato conosco.",
+                        });
+                      }}
+                    >
+                      Cadastrar-se
+                    </button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -237,10 +268,10 @@ export default function Login() {
                 </p>
                 <div className="flex items-center space-x-4 text-sm">
                   <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    ✓ Suporte especializado
+                    ✓ Resultados comprovados
                   </Badge>
                   <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    ✓ Atualizações constantes
+                    ✓ Tecnologia avançada
                   </Badge>
                 </div>
               </CardContent>
