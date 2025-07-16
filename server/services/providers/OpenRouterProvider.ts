@@ -26,14 +26,14 @@ export class OpenRouterProvider extends BaseProvider {
     }
 
     return [
-      // Popular models available on OpenRouter
+      // Popular models available on OpenRouter with enhanced capabilities
       {
         provider: 'openrouter' as const,
         model: 'openai/gpt-4o',
         inputCostPer1M: 2500,
         outputCostPer1M: 10000,
         maxTokens: 128000,
-        capabilities: ['text', 'vision'],
+        capabilities: ['text', 'vision', 'pdf', 'web-search', 'tools'],
         recommended: true
       },
       {
@@ -42,7 +42,7 @@ export class OpenRouterProvider extends BaseProvider {
         inputCostPer1M: 150,
         outputCostPer1M: 600,
         maxTokens: 128000,
-        capabilities: ['text', 'vision'],
+        capabilities: ['text', 'vision', 'pdf', 'web-search', 'tools'],
         recommended: true
       },
       {
@@ -51,7 +51,7 @@ export class OpenRouterProvider extends BaseProvider {
         inputCostPer1M: 3000,
         outputCostPer1M: 15000,
         maxTokens: 200000,
-        capabilities: ['text', 'vision'],
+        capabilities: ['text', 'vision', 'pdf', 'web-search', 'tools'],
         recommended: true
       },
       {
@@ -60,7 +60,7 @@ export class OpenRouterProvider extends BaseProvider {
         inputCostPer1M: 250,
         outputCostPer1M: 1250,
         maxTokens: 200000,
-        capabilities: ['text', 'vision']
+        capabilities: ['text', 'vision', 'pdf', 'web-search']
       },
       {
         provider: 'openrouter' as const,
@@ -68,7 +68,7 @@ export class OpenRouterProvider extends BaseProvider {
         inputCostPer1M: 1250,
         outputCostPer1M: 5000,
         maxTokens: 2000000,
-        capabilities: ['text', 'vision']
+        capabilities: ['text', 'vision', 'pdf', 'web-search', 'tools']
       },
       {
         provider: 'openrouter' as const,
@@ -76,7 +76,7 @@ export class OpenRouterProvider extends BaseProvider {
         inputCostPer1M: 520,
         outputCostPer1M: 750,
         maxTokens: 128000,
-        capabilities: ['text']
+        capabilities: ['text', 'pdf', 'web-search']
       },
       {
         provider: 'openrouter' as const,
@@ -84,7 +84,7 @@ export class OpenRouterProvider extends BaseProvider {
         inputCostPer1M: 3000,
         outputCostPer1M: 9000,
         maxTokens: 128000,
-        capabilities: ['text']
+        capabilities: ['text', 'pdf', 'web-search']
       },
       {
         provider: 'openrouter' as const,
@@ -92,15 +92,15 @@ export class OpenRouterProvider extends BaseProvider {
         inputCostPer1M: 1000,
         outputCostPer1M: 1000,
         maxTokens: 127072,
-        capabilities: ['text', 'search']
+        capabilities: ['text', 'web-search-native', 'reasoning']
       },
       {
         provider: 'openrouter' as const,
-        model: 'auto',
+        model: 'openrouter/auto',
         inputCostPer1M: 0,
         outputCostPer1M: 0,
         maxTokens: 200000,
-        capabilities: ['text', 'vision', 'auto-routing']
+        capabilities: ['text', 'vision', 'pdf', 'web-search', 'auto-routing', 'tools']
       }
     ];
   }
@@ -120,26 +120,55 @@ export class OpenRouterProvider extends BaseProvider {
         'X-Title': 'Aluno Power Platform - AI Agents'
       };
 
-      // Build request body compatible with OpenAI format
+      // Convert messages to support multimodal content (images/PDFs)
+      const processedMessages = this.processMultimodalMessages(request);
+
+      // Build request body compatible with OpenRouter format
       const body: any = {
-        model: request.model,
-        messages: request.messages,
+        model: this.getModelName(request),
+        messages: processedMessages,
         temperature: request.temperature || 0.7,
-        max_tokens: Math.min(request.maxTokens || 4000, 4000), // Limit to prevent timeouts
+        max_tokens: Math.min(request.maxTokens || 4000, 16000), // Increased limit for complex tasks
       };
 
-      // Add optional parameters if provided
-      if (request.openaiAdvanced?.top_p !== undefined) {
-        body.top_p = request.openaiAdvanced.top_p;
+      // Add OpenRouter advanced parameters
+      if (request.top_p !== undefined) {
+        body.top_p = request.top_p;
       }
-      if (request.openaiAdvanced?.frequency_penalty !== undefined) {
-        body.frequency_penalty = request.openaiAdvanced.frequency_penalty;
+      if (request.frequency_penalty !== undefined) {
+        body.frequency_penalty = request.frequency_penalty;
       }
-      if (request.openaiAdvanced?.presence_penalty !== undefined) {
-        body.presence_penalty = request.openaiAdvanced.presence_penalty;
+      if (request.presence_penalty !== undefined) {
+        body.presence_penalty = request.presence_penalty;
       }
-      if (request.openaiAdvanced?.seed !== undefined) {
-        body.seed = request.openaiAdvanced.seed;
+      if (request.seed !== undefined) {
+        body.seed = request.seed;
+      }
+
+      // Add plugins for advanced features
+      const plugins = this.buildPlugins(request);
+      if (plugins.length > 0) {
+        body.plugins = plugins;
+      }
+
+      // Add web search options for models with native web search
+      if (request.openrouterAdvanced?.searchContextSize && this.hasNativeWebSearch(request.model)) {
+        body.web_search_options = {
+          search_context_size: request.openrouterAdvanced.searchContextSize
+        };
+      }
+
+      // Add response format if specified
+      if (request.response_format) {
+        body.response_format = request.response_format;
+      }
+
+      // Add tools if specified
+      if (request.tools && request.tools.length > 0) {
+        body.tools = request.tools;
+        if (request.tool_choice) {
+          body.tool_choice = request.tool_choice;
+        }
       }
 
       console.log(`🔧 [OPENROUTER] Request params for ${request.model}:`, JSON.stringify(body, null, 2));
@@ -166,9 +195,22 @@ export class OpenRouterProvider extends BaseProvider {
       const outputTokens = usage.completion_tokens || 0;
       const totalTokens = usage.total_tokens || (inputTokens + outputTokens);
 
-      // For cost calculation, we'll use a conservative estimate
-      // since OpenRouter pricing varies by model
-      const estimatedCost = (inputTokens * 0.000001) + (outputTokens * 0.000002);
+      // Enhanced cost calculation with web search and PDF processing costs
+      let totalCost = (inputTokens * 0.000001) + (outputTokens * 0.000002);
+      
+      // Add web search costs if applicable
+      if (plugins.some(p => p.id === 'web')) {
+        const webSearchResults = request.openrouterAdvanced?.webSearchMaxResults || 5;
+        totalCost += (webSearchResults / 1000) * 4; // $4 per 1000 results
+      }
+
+      // Add PDF processing costs if applicable
+      if (plugins.some(p => p.id === 'file-parser')) {
+        const pdfEngine = request.openrouterAdvanced?.pdfEngine || 'mistral-ocr';
+        if (pdfEngine === 'mistral-ocr') {
+          totalCost += 2; // $2 per 1000 pages estimate
+        }
+      }
 
       return {
         content,
@@ -177,7 +219,7 @@ export class OpenRouterProvider extends BaseProvider {
           outputTokens,
           totalTokens
         },
-        cost: estimatedCost
+        cost: totalCost
       };
 
     } catch (error) {
@@ -254,19 +296,156 @@ export class OpenRouterProvider extends BaseProvider {
     }
   }
 
+  private getModelName(request: AIRequest): string {
+    // Add :online suffix for web search if enabled
+    if (request.openrouterAdvanced?.enableWebSearch && !request.model.includes(':online')) {
+      return `${request.model}:online`;
+    }
+    return request.model;
+  }
+
+  private hasNativeWebSearch(model: string): boolean {
+    // Models with built-in web search capabilities
+    const nativeWebSearchModels = [
+      'perplexity/',
+      'openai/gpt-4',
+      'openai/gpt-4o'
+    ];
+    return nativeWebSearchModels.some(prefix => model.startsWith(prefix));
+  }
+
+  private processMultimodalMessages(request: AIRequest): any[] {
+    return request.messages.map(message => {
+      if (message.role === 'user' && (request.imageData || request.referenceImages?.length || request.attachments?.length)) {
+        const content = [];
+        
+        // Add text content first
+        content.push({
+          type: 'text',
+          text: message.content
+        });
+
+        // Add image data if provided
+        if (request.imageData) {
+          content.push({
+            type: 'image_url',
+            image_url: {
+              url: request.imageData.startsWith('data:') ? request.imageData : `data:image/png;base64,${request.imageData}`
+            }
+          });
+        }
+
+        // Add reference images
+        if (request.referenceImages?.length) {
+          request.referenceImages.forEach(img => {
+            content.push({
+              type: 'image_url',
+              image_url: {
+                url: img.data.startsWith('data:') ? img.data : `data:image/png;base64,${img.data}`
+              }
+            });
+          });
+        }
+
+        // Add attachments (PDFs, other files)
+        if (request.attachments?.length) {
+          request.attachments.forEach(attachment => {
+            if (attachment.type === 'pdf') {
+              content.push({
+                type: 'file',
+                file: {
+                  filename: attachment.filename,
+                  file_data: attachment.data.startsWith('data:') ? attachment.data : `data:application/pdf;base64,${attachment.data}`
+                }
+              });
+            } else if (attachment.type === 'image') {
+              content.push({
+                type: 'image_url',
+                image_url: {
+                  url: attachment.data.startsWith('data:') ? attachment.data : `data:image/png;base64,${attachment.data}`
+                }
+              });
+            }
+          });
+        }
+
+        return {
+          ...message,
+          content: content
+        };
+      }
+      return message;
+    });
+  }
+
+  private buildPlugins(request: AIRequest): any[] {
+    const plugins = [];
+
+    // Web search plugin
+    if (request.openrouterAdvanced?.enableWebSearch) {
+      const webPlugin: any = {
+        id: 'web'
+      };
+      
+      if (request.openrouterAdvanced.webSearchMaxResults) {
+        webPlugin.max_results = Math.min(Math.max(request.openrouterAdvanced.webSearchMaxResults, 1), 10);
+      }
+      
+      if (request.openrouterAdvanced.webSearchPrompt) {
+        webPlugin.search_prompt = request.openrouterAdvanced.webSearchPrompt;
+      }
+      
+      plugins.push(webPlugin);
+    }
+
+    // PDF processing plugin
+    if (request.openrouterAdvanced?.enablePdfProcessing || request.attachments?.some(a => a.type === 'pdf')) {
+      const pdfPlugin: any = {
+        id: 'file-parser',
+        pdf: {
+          engine: request.openrouterAdvanced?.pdfEngine || 'pdf-text'
+        }
+      };
+      plugins.push(pdfPlugin);
+    }
+
+    return plugins;
+  }
+
   private parseCapabilities(model: any): string[] {
-    const capabilities = ['chat'];
+    const capabilities = ['text'];
     
-    if (model.modalities?.includes('image')) {
+    // Check for vision capabilities
+    if (model.architecture?.input_modalities?.includes('image') || model.modalities?.includes('image')) {
       capabilities.push('vision');
     }
     
+    // Check for file/PDF processing
+    if (model.architecture?.input_modalities?.includes('file')) {
+      capabilities.push('pdf');
+    }
+    
+    // Check for tools support
     if (model.supported_parameters?.includes('tools')) {
       capabilities.push('tools');
     }
     
-    if (model.supported_parameters?.includes('response_format')) {
+    // Check for structured outputs
+    if (model.supported_parameters?.includes('response_format') || model.supported_parameters?.includes('structured_outputs')) {
       capabilities.push('json');
+    }
+
+    // Check for web search (OpenRouter supports web search on all models via plugin)
+    capabilities.push('web-search');
+
+    // Check for reasoning capabilities (based on model name patterns)
+    if (model.id?.includes('reasoning') || model.id?.includes('sonar') || model.name?.toLowerCase().includes('reasoning')) {
+      capabilities.push('reasoning');
+    }
+
+    // Native web search for specific models
+    if (model.id?.includes('online') || model.id?.includes('sonar') || model.id?.includes('perplexity')) {
+      capabilities.push('web-search-native');
     }
 
     return capabilities;
