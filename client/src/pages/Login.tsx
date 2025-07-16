@@ -492,14 +492,7 @@ export default function Login() {
                   Junte-se a centenas de vendedores que já estão usando nossa plataforma 
                   para escalar seus negócios na Amazon.
                 </p>
-                <div className="flex items-center space-x-4 text-sm">
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    ✓ Resultados comprovados
-                  </Badge>
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    ✓ Tecnologia avançada
-                  </Badge>
-                </div>
+                
               </CardContent>
             </Card>
           </div>
