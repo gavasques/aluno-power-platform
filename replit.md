@@ -345,11 +345,15 @@ Preferred communication style: Simple, everyday language.
     - **Image processing** for vision models (gpt-4o, claude-3.5-sonnet, gemini-pro-1.5)
     - **Search context sizing** (low/medium/high) for sonar/perplexity models
     - **Max tokens control** up to 16k with model-specific limitations
-  - **Model Capability Matrix**: 
-    - o1/o1-mini: Reasoning only (no vision/web search due to model limitations)
-    - deepseek-r1: Reasoning + web search via plugin
-    - gpt-4o/claude/gemini: Vision + PDF + web search + tools
-    - sonar models: Native web search + reasoning
+  - **Expanded Model Support**: 15+ reasoning models now supported including:
+    - **OpenAI**: o1, o1-mini, o1-pro (reasoning only, no vision/web due to limitations)
+    - **DeepSeek**: deepseek-r1, deepseek-r1:free (reasoning + effort + web search)
+    - **Grok**: grok-3, grok-4, grok-3-mini (reasoning + web search, grok-4 has vision)
+    - **Google**: gemini-2.0-flash-001, gemini-2.5-pro (reasoning + vision + PDF + web)
+    - **Qwen**: qwq-32b, qwq-32b:free (reasoning + effort + web search)
+    - **Microsoft**: phi-4-reasoning-plus (reasoning + effort + web search)
+    - **Perplexity**: sonar-reasoning (reasoning + effort + native web search)
+    - **GLM**: glm-4.1v-9b-thinking (reasoning + effort + vision)
   - **Technical Implementation**: Complete backend and frontend integration with conditional UI
   - **Validation Status**: All features tested and operational via OPENROUTER_VALIDATION.md documentation
 

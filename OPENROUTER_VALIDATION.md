@@ -4,8 +4,15 @@
 
 ### 📋 Funcionalidades Implementadas
 
-#### 1. 🧠 Raciocínio Avançado (Reasoning)
-- **Modelos Suportados**: openai/o1, openai/o1-mini, deepseek/deepseek-r1, perplexity/sonar
+#### 1. 🧠 Raciocínio Avançado (Reasoning) - EXPANDIDO
+- **Modelos OpenAI**: o1, o1-mini, o1-preview, o1-pro
+- **Modelos DeepSeek**: deepseek-r1, deepseek-r1:free, r1-distill-*, r1t2-chimera
+- **Modelos Qwen**: qwq-32b, qwq-32b:free
+- **Modelos Grok**: grok-3, grok-4, grok-3-mini (todos têm reasoning)
+- **Modelos Google**: gemini-2.0-flash-001, gemini-2.5-pro
+- **Modelos Microsoft**: phi-4-reasoning-plus
+- **Modelos Perplexity**: sonar-reasoning, sonar-reasoning-pro, sonar-deep-research
+- **Outros**: GLM thinking, Claude thinking, Mistral thinking, Arcee maestro-reasoning
 - **Interface**: 
   - ✅ Ícone Brain para identificação visual
   - ✅ Toggle switch para ativar/desativar reasoning
@@ -65,24 +72,38 @@
 
 ### 🎯 Modelos e Suas Capacidades Específicas
 
-#### Modelos de Reasoning:
-1. **openai/o1** ($15/$60 por 1M tokens)
-   - ✅ Reasoning: Sim (sem controle de effort)
-   - ✅ Max Tokens: 100k
-   - ❌ Vision: Não
-   - ❌ Web Search: Não (limitação do modelo)
+#### Modelos de Reasoning Expandidos:
 
-2. **openai/o1-mini** ($3/$12 por 1M tokens)  
-   - ✅ Reasoning: Sim (com controle de effort)
-   - ✅ Max Tokens: 65k
-   - ❌ Vision: Não
-   - ❌ Web Search: Não (limitação do modelo)
+**OpenAI Reasoning Models:**
+1. **openai/o1** ($15/$60 por 1M tokens) - ✅ Reasoning • ❌ Vision • ❌ Web Search • 100k tokens
+2. **openai/o1-mini** ($3/$12 por 1M tokens) - ✅ Reasoning + Effort • ❌ Vision • ❌ Web Search • 65k tokens  
+3. **openai/o1-pro** ($60/$240 por 1M tokens) - ✅ Reasoning • ❌ Vision • ❌ Web Search • 100k tokens
 
-3. **deepseek/deepseek-r1** ($0.55/$2.19 por 1M tokens)
-   - ✅ Reasoning: Sim (com controle de effort)
-   - ✅ Max Tokens: 65k
-   - ❌ Vision: Não
-   - ✅ Web Search: Sim (via plugin)
+**DeepSeek Reasoning Models:**
+4. **deepseek/deepseek-r1** ($0.55/$2.19 por 1M tokens) - ✅ Reasoning + Effort • ❌ Vision • ✅ Web Search • 65k tokens
+5. **deepseek/deepseek-r1:free** (GRATUITO) - ✅ Reasoning + Effort • ❌ Vision • ✅ Web Search • 65k tokens
+
+**Grok Reasoning Models:**
+6. **x-ai/grok-4** ($3/$3 por 1M tokens) - ✅ Reasoning • ✅ Vision • ✅ Web Search • 256k tokens
+7. **x-ai/grok-3** ($3/$3 por 1M tokens) - ✅ Reasoning • ❌ Vision • ✅ Web Search • 131k tokens
+8. **x-ai/grok-3-mini** ($0.3/$0.3 por 1M tokens) - ✅ Reasoning • ❌ Vision • ✅ Web Search • 131k tokens
+
+**Google Gemini Reasoning Models:**
+9. **google/gemini-2.0-flash-001** ($0.075/$0.3 por 1M tokens) - ✅ Reasoning • ✅ Vision • ✅ Web Search • 1M tokens
+10. **google/gemini-2.5-pro** ($1.25/$5 por 1M tokens) - ✅ Reasoning • ✅ Vision • ✅ Web Search • 2M tokens
+
+**Qwen Reasoning Models:**
+11. **qwen/qwq-32b** ($1.8/$1.8 por 1M tokens) - ✅ Reasoning + Effort • ❌ Vision • ✅ Web Search • 32k tokens
+12. **qwen/qwq-32b:free** (GRATUITO) - ✅ Reasoning + Effort • ❌ Vision • ✅ Web Search • 32k tokens
+
+**Microsoft Reasoning Models:**
+13. **microsoft/phi-4-reasoning-plus** ($1/$1 por 1M tokens) - ✅ Reasoning + Effort • ❌ Vision • ✅ Web Search • 16k tokens
+
+**Perplexity Reasoning Models:**
+14. **perplexity/sonar-reasoning** ($1/$1 por 1M tokens) - ✅ Reasoning + Effort • ❌ Vision • ✅ Native Web Search • 127k tokens
+
+**GLM Reasoning Models:**
+15. **thudm/glm-4.1v-9b-thinking** ($0.035/$0.035 por 1M tokens) - ✅ Reasoning + Effort • ✅ Vision • ❌ Web Search • 65k tokens
 
 #### Modelos Multimodais:
 1. **openai/gpt-4o** ($2.5/$10 por 1M tokens)
@@ -123,17 +144,37 @@
 - ✅ **hasNativeWebSearch()**: Identificação de modelos sonar/perplexity
 - ✅ **processMultimodalMessages()**: Suporte a imagens e PDFs
 
-### 📊 Matriz de Funcionalidades por Modelo
+### 📊 Matriz Expandida de Funcionalidades por Modelo
 
-| Modelo | Reasoning | Effort Control | Vision | PDF | Web Search | Max Tokens |
-|--------|-----------|----------------|--------|-----|------------|------------|
-| openai/o1 | ✅ | ❌ | ❌ | ❌ | ❌ | 100k |
-| openai/o1-mini | ✅ | ✅ | ❌ | ❌ | ❌ | 65k |
-| deepseek/deepseek-r1 | ✅ | ✅ | ❌ | ❌ | ✅ | 65k |
-| openai/gpt-4o | ❌ | ❌ | ✅ | ✅ | ✅ | 128k |
-| claude-3.5-sonnet | ❌ | ❌ | ✅ | ✅ | ✅ | 200k |
-| gemini-pro-1.5 | ❌ | ❌ | ✅ | ✅ | ✅ | 2M |
-| sonar-large-online | ✅ | ❌ | ❌ | ❌ | ✅ (native) | 127k |
+| Modelo | Reasoning | Effort | Vision | PDF | Web Search | Max Tokens | Custo/1M |
+|--------|-----------|--------|--------|-----|------------|------------|----------|
+| **OpenAI Models** |
+| openai/o1 | ✅ | ❌ | ❌ | ❌ | ❌ | 100k | $15/$60 |
+| openai/o1-mini | ✅ | ✅ | ❌ | ❌ | ❌ | 65k | $3/$12 |
+| openai/o1-pro | ✅ | ❌ | ❌ | ❌ | ❌ | 100k | $60/$240 |
+| openai/gpt-4o | ❌ | ❌ | ✅ | ✅ | ✅ | 128k | $2.5/$10 |
+| **DeepSeek Models** |
+| deepseek/deepseek-r1 | ✅ | ✅ | ❌ | ❌ | ✅ | 65k | $0.55/$2.19 |
+| deepseek/deepseek-r1:free | ✅ | ✅ | ❌ | ❌ | ✅ | 65k | FREE |
+| **Grok Models** |
+| x-ai/grok-4 | ✅ | ❌ | ✅ | ✅ | ✅ | 256k | $3/$3 |
+| x-ai/grok-3 | ✅ | ❌ | ❌ | ❌ | ✅ | 131k | $3/$3 |
+| x-ai/grok-3-mini | ✅ | ❌ | ❌ | ❌ | ✅ | 131k | $0.3/$0.3 |
+| **Google Models** |
+| gemini-2.0-flash-001 | ✅ | ❌ | ✅ | ✅ | ✅ | 1M | $0.075/$0.3 |
+| gemini-2.5-pro | ✅ | ❌ | ✅ | ✅ | ✅ | 2M | $1.25/$5 |
+| gemini-pro-1.5 | ❌ | ❌ | ✅ | ✅ | ✅ | 2M | $1.25/$5 |
+| **Qwen Models** |
+| qwen/qwq-32b | ✅ | ✅ | ❌ | ❌ | ✅ | 32k | $1.8/$1.8 |
+| qwen/qwq-32b:free | ✅ | ✅ | ❌ | ❌ | ✅ | 32k | FREE |
+| **Microsoft Models** |
+| phi-4-reasoning-plus | ✅ | ✅ | ❌ | ❌ | ✅ | 16k | $1/$1 |
+| **Perplexity Models** |
+| sonar-reasoning | ✅ | ✅ | ❌ | ❌ | ✅ (native) | 127k | $1/$1 |
+| **GLM Models** |
+| glm-4.1v-9b-thinking | ✅ | ✅ | ✅ | ❌ | ❌ | 65k | $0.035/$0.035 |
+| **Anthropic Models** |
+| claude-3.5-sonnet | ❌ | ❌ | ✅ | ✅ | ✅ | 200k | $3/$15 |
 
 ### 🧪 Como Testar
 

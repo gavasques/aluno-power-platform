@@ -55,11 +55,110 @@ export class OpenRouterProvider extends BaseProvider {
       },
       {
         provider: 'openrouter' as const,
+        model: 'openai/o1-pro',
+        inputCostPer1M: 60000,
+        outputCostPer1M: 240000,
+        maxTokens: 100000,
+        capabilities: ['text', 'reasoning', 'deep-analysis'],
+        recommended: true
+      },
+      {
+        provider: 'openrouter' as const,
         model: 'deepseek/deepseek-r1',
         inputCostPer1M: 550,
         outputCostPer1M: 2190,
         maxTokens: 65536,
         capabilities: ['text', 'reasoning', 'deep-analysis', 'reasoning-effort']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'deepseek/deepseek-r1:free',
+        inputCostPer1M: 0,
+        outputCostPer1M: 0,
+        maxTokens: 65536,
+        capabilities: ['text', 'reasoning', 'deep-analysis', 'reasoning-effort']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'x-ai/grok-4',
+        inputCostPer1M: 3000,
+        outputCostPer1M: 3000,
+        maxTokens: 256000,
+        capabilities: ['text', 'vision', 'reasoning', 'web-search', 'tools'],
+        recommended: true
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'x-ai/grok-3',
+        inputCostPer1M: 3000,
+        outputCostPer1M: 3000,
+        maxTokens: 131072,
+        capabilities: ['text', 'reasoning', 'web-search', 'tools']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'x-ai/grok-3-mini',
+        inputCostPer1M: 300,
+        outputCostPer1M: 300,
+        maxTokens: 131072,
+        capabilities: ['text', 'reasoning', 'web-search']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'google/gemini-2.0-flash-001',
+        inputCostPer1M: 75,
+        outputCostPer1M: 300,
+        maxTokens: 1000000,
+        capabilities: ['text', 'vision', 'reasoning', 'pdf', 'web-search', 'tools'],
+        recommended: true
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'google/gemini-2.5-pro',
+        inputCostPer1M: 1250,
+        outputCostPer1M: 5000,
+        maxTokens: 2000000,
+        capabilities: ['text', 'vision', 'reasoning', 'pdf', 'web-search', 'tools']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'qwen/qwq-32b',
+        inputCostPer1M: 1800,
+        outputCostPer1M: 1800,
+        maxTokens: 32768,
+        capabilities: ['text', 'reasoning', 'reasoning-effort', 'web-search']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'qwen/qwq-32b:free',
+        inputCostPer1M: 0,
+        outputCostPer1M: 0,
+        maxTokens: 32768,
+        capabilities: ['text', 'reasoning', 'reasoning-effort', 'web-search']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'microsoft/phi-4-reasoning-plus',
+        inputCostPer1M: 1000,
+        outputCostPer1M: 1000,
+        maxTokens: 16384,
+        capabilities: ['text', 'reasoning', 'reasoning-effort', 'web-search']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'perplexity/sonar-reasoning',
+        inputCostPer1M: 1000,
+        outputCostPer1M: 1000,
+        maxTokens: 127072,
+        capabilities: ['text', 'reasoning', 'web-search-native', 'reasoning-effort']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'thudm/glm-4.1v-9b-thinking',
+        inputCostPer1M: 35,
+        outputCostPer1M: 35,
+        maxTokens: 65536,
+        capabilities: ['text', 'vision', 'reasoning', 'reasoning-effort']
       },
       {
         provider: 'openrouter' as const,
@@ -454,11 +553,47 @@ export class OpenRouterProvider extends BaseProvider {
   }
 
   private isReasoningModel(model: string): boolean {
-    const reasoningModels = [
-      'o1', 'o1-mini', 'deepseek-r1', 'deepseek-reasoner', 
-      'reasoning', 'sonar', 'perplexity/'
+    const reasoningPatterns = [
+      // OpenAI reasoning models
+      'o1', 'o1-mini', 'o1-preview', 'o1-pro',
+      // DeepSeek reasoning models
+      'deepseek-r1', 'deepseek-reasoner', 'r1-distill', 'r1t2-chimera', 'r1t-chimera',
+      // Qwen reasoning models
+      'qwq-32b', 'qwen.*thinking', 'qwen.*reasoning',
+      // Grok reasoning models (all grok models have reasoning capabilities)
+      'grok-3', 'grok-4', 'grok-vision', 'grok-beta',
+      // Google Gemini reasoning models
+      'gemini-2.0', 'gemini-2.5',
+      // Microsoft reasoning models
+      'phi-4-reasoning', 'phi.*reasoning',
+      // Perplexity reasoning models
+      'sonar-reasoning', 'sonar-deep-research', 'sonar-pro',
+      // Anthropic reasoning models
+      'claude.*thinking',
+      // GLM reasoning models
+      'glm.*thinking',
+      // Mistral reasoning models
+      'magistral.*thinking',
+      // Arcee reasoning models
+      'maestro-reasoning',
+      // Moonshot reasoning models
+      'kimi.*thinking',
+      // Generic patterns
+      'reasoning', 'thinking'
     ];
-    return reasoningModels.some(prefix => model.includes(prefix));
+    
+    // Convert to lowercase for case-insensitive matching
+    const modelLower = model.toLowerCase();
+    
+    return reasoningPatterns.some(pattern => {
+      // Handle regex-like patterns
+      if (pattern.includes('.*')) {
+        const regex = new RegExp(pattern.replace(/\.\*/g, '.*'));
+        return regex.test(modelLower);
+      }
+      // Handle simple substring matching
+      return modelLower.includes(pattern);
+    });
   }
 
   private parseCapabilities(model: any): string[] {
@@ -467,7 +602,21 @@ export class OpenRouterProvider extends BaseProvider {
     // Check for reasoning capabilities
     if (this.isReasoningModel(model.id || model.model || '')) {
       capabilities.push('reasoning');
-      if (model.id?.includes('o1-mini') || model.id?.includes('deepseek-r1')) {
+      
+      // Models that support reasoning effort control
+      const effortControlModels = [
+        'o1-mini', 'deepseek-r1', 'qwq-32b', 'phi-4-reasoning', 
+        'sonar-reasoning', 'maestro-reasoning', 'glm.*thinking'
+      ];
+      
+      const modelId = (model.id || model.model || '').toLowerCase();
+      if (effortControlModels.some(pattern => {
+        if (pattern.includes('.*')) {
+          const regex = new RegExp(pattern.replace(/\.\*/g, '.*'));
+          return regex.test(modelId);
+        }
+        return modelId.includes(pattern);
+      })) {
         capabilities.push('reasoning-effort');
       }
     }
