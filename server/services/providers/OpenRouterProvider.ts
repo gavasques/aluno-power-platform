@@ -38,6 +38,31 @@ export class OpenRouterProvider extends BaseProvider {
       },
       {
         provider: 'openrouter' as const,
+        model: 'openai/o1',
+        inputCostPer1M: 15000,
+        outputCostPer1M: 60000,
+        maxTokens: 100000,
+        capabilities: ['text', 'reasoning', 'deep-analysis'],
+        recommended: true
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'openai/o1-mini',
+        inputCostPer1M: 3000,
+        outputCostPer1M: 12000,
+        maxTokens: 65536,
+        capabilities: ['text', 'reasoning', 'deep-analysis', 'reasoning-effort']
+      },
+      {
+        provider: 'openrouter' as const,
+        model: 'deepseek/deepseek-r1',
+        inputCostPer1M: 550,
+        outputCostPer1M: 2190,
+        maxTokens: 65536,
+        capabilities: ['text', 'reasoning', 'deep-analysis', 'reasoning-effort']
+      },
+      {
+        provider: 'openrouter' as const,
         model: 'openai/gpt-4o-mini',
         inputCostPer1M: 150,
         outputCostPer1M: 600,
@@ -143,6 +168,22 @@ export class OpenRouterProvider extends BaseProvider {
       }
       if (request.seed !== undefined) {
         body.seed = request.seed;
+      }
+
+      // Add reasoning parameters for reasoning-capable models
+      if (this.isReasoningModel(request.model) && request.openrouterAdvanced?.enableReasoning) {
+        // For reasoning models, use specific parameters
+        if (request.openrouterAdvanced?.reasoning_effort && (request.model.includes('o1-mini') || request.model.includes('deepseek-r1'))) {
+          body.reasoning_effort = request.openrouterAdvanced.reasoning_effort;
+        }
+        
+        // Reasoning models might have different temperature/token constraints
+        if (request.model.includes('o1')) {
+          body.temperature = Math.min(request.temperature || 0.7, 1.0); // o1 models have temperature limits
+        }
+        
+        // Log reasoning activation
+        console.log(`🧠 [OPENROUTER] Reasoning mode activated for ${request.model} with effort: ${request.openrouterAdvanced?.reasoning_effort || 'default'}`);
       }
 
       // Add plugins for advanced features
@@ -412,8 +453,24 @@ export class OpenRouterProvider extends BaseProvider {
     return plugins;
   }
 
+  private isReasoningModel(model: string): boolean {
+    const reasoningModels = [
+      'o1', 'o1-mini', 'deepseek-r1', 'deepseek-reasoner', 
+      'reasoning', 'sonar', 'perplexity/'
+    ];
+    return reasoningModels.some(prefix => model.includes(prefix));
+  }
+
   private parseCapabilities(model: any): string[] {
     const capabilities = ['text'];
+    
+    // Check for reasoning capabilities
+    if (this.isReasoningModel(model.id || model.model || '')) {
+      capabilities.push('reasoning');
+      if (model.id?.includes('o1-mini') || model.id?.includes('deepseek-r1')) {
+        capabilities.push('reasoning-effort');
+      }
+    }
     
     // Check for vision capabilities
     if (model.architecture?.input_modalities?.includes('image') || model.modalities?.includes('image')) {

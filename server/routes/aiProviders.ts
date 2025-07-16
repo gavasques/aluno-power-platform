@@ -48,7 +48,9 @@ const testRequestSchema = z.object({
     webSearchPrompt: z.string().optional(),
     enablePdfProcessing: z.boolean().optional(),
     pdfEngine: z.enum(['pdf-text', 'mistral-ocr', 'native']).optional(),
-    searchContextSize: z.enum(['low', 'medium', 'high']).optional()
+    searchContextSize: z.enum(['low', 'medium', 'high']).optional(),
+    enableReasoning: z.boolean().optional(),
+    reasoning_effort: z.enum(['low', 'medium', 'high']).optional()
   }).optional()
 });
 

@@ -22,7 +22,8 @@ import {
   Wrench,
   Settings2,
   Database,
-  Globe
+  Globe,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -123,7 +124,9 @@ export default function AgentProviderSettings() {
     webSearchPrompt: '',
     enablePdfProcessing: false,
     pdfEngine: 'pdf-text' as 'pdf-text' | 'mistral-ocr' | 'native',
-    searchContextSize: 'medium' as 'low' | 'medium' | 'high'
+    searchContextSize: 'medium' as 'low' | 'medium' | 'high',
+    enableOpenRouterReasoning: false,
+    openRouterReasoningEffort: 'medium' as 'low' | 'medium' | 'high'
   });
 
   const [testPrompt, setTestPrompt] = useState('Olá! Como você está hoje?');
@@ -236,6 +239,8 @@ export default function AgentProviderSettings() {
         enablePdfProcessing?: boolean;
         pdfEngine?: 'pdf-text' | 'mistral-ocr' | 'native';
         searchContextSize?: 'low' | 'medium' | 'high';
+        enableReasoning?: boolean;
+        reasoning_effort?: 'low' | 'medium' | 'high';
       };
     }) => {
       const token = localStorage.getItem('auth_token');
@@ -438,7 +443,9 @@ export default function AgentProviderSettings() {
         webSearchPrompt: formData.webSearchPrompt || '',
         enablePdfProcessing: formData.enablePdfProcessing,
         pdfEngine: formData.pdfEngine,
-        searchContextSize: formData.searchContextSize
+        searchContextSize: formData.searchContextSize,
+        enableReasoning: formData.enableOpenRouterReasoning,
+        reasoning_effort: formData.openRouterReasoningEffort
       };
     }
 
@@ -1305,6 +1312,82 @@ export default function AgentProviderSettings() {
                       <span className="text-xl">🌐</span>
                       <h3 className="text-lg font-semibold text-orange-800">Funcionalidades Avançadas do OpenRouter</h3>
                     </div>
+
+                    {/* Reasoning Capabilities for specific models */}
+                    {(formData.model.includes('o1') || formData.model.includes('reasoning') || formData.model.includes('sonar') || formData.model.includes('deepseek-r1')) && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Brain className="h-4 w-4 text-indigo-600" />
+                          <Label className="text-indigo-800 font-medium">
+                            Raciocínio Avançado
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="enableOpenRouterReasoning"
+                            checked={formData.enableOpenRouterReasoning}
+                            onCheckedChange={(checked) =>
+                              setFormData({ ...formData, enableOpenRouterReasoning: checked })
+                            }
+                          />
+                          <Label htmlFor="enableOpenRouterReasoning" className="text-sm">
+                            Ativar modo de raciocínio profundo
+                          </Label>
+                        </div>
+                        
+                        {formData.enableOpenRouterReasoning && (
+                          <div className="space-y-3 ml-6 pl-4 border-l-2 border-indigo-200">
+                            <div className="p-3 bg-indigo-50 rounded border border-indigo-200">
+                              <p className="text-sm text-indigo-700 mb-2">
+                                <strong>O que faz:</strong> Ativa raciocínio sistemático e análise step-by-step para problemas complexos.
+                              </p>
+                              <p className="text-sm text-indigo-600">
+                                <strong>Ideal para:</strong> Matemática, lógica, análise técnica, resolução de problemas complexos
+                              </p>
+                            </div>
+                            
+                            {/* Reasoning Effort for compatible models */}
+                            {(formData.model.includes('o1-mini') || formData.model.includes('deepseek-r1')) && (
+                              <div>
+                                <Label htmlFor="reasoningEffort" className="text-sm">
+                                  Nível de esforço de raciocínio
+                                </Label>
+                                <Select
+                                  value={formData.openRouterReasoningEffort || 'medium'}
+                                  onValueChange={(value) =>
+                                    setFormData({ ...formData, openRouterReasoningEffort: value })
+                                  }
+                                >
+                                  <SelectTrigger className="mt-1">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="low">
+                                      <div className="flex flex-col">
+                                        <span>Baixo</span>
+                                        <span className="text-xs text-gray-500">Raciocínio rápido e direto</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="medium">
+                                      <div className="flex flex-col">
+                                        <span>Médio (Recomendado)</span>
+                                        <span className="text-xs text-gray-500">Balanceado entre velocidade e profundidade</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="high">
+                                      <div className="flex flex-col">
+                                        <span>Alto</span>
+                                        <span className="text-xs text-gray-500">Raciocínio mais profundo e detalhado</span>
+                                      </div>
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Web Search Plugin */}
                     <div className="space-y-3">

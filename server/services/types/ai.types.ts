@@ -34,6 +34,8 @@ export interface AIRequest {
     enablePdfProcessing?: boolean; // For PDF processing
     pdfEngine?: 'pdf-text' | 'mistral-ocr' | 'native'; // PDF processing engine
     searchContextSize?: 'low' | 'medium' | 'high'; // For built-in web search models
+    enableReasoning?: boolean; // For reasoning-capable models
+    reasoning_effort?: 'low' | 'medium' | 'high'; // Reasoning effort level
   };
   attachments?: Array<{
     data: string;
