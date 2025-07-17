@@ -26,17 +26,6 @@ export interface AIRequest {
     enableExtendedThinking?: boolean; // For Extended Thinking feature
     thinkingBudgetTokens?: number; // Token budget for thinking process
   };
-  // OpenRouter-specific features
-  openrouterAdvanced?: {
-    enableWebSearch?: boolean; // For web search plugin
-    webSearchMaxResults?: number; // Number of web search results (1-10)
-    webSearchPrompt?: string; // Custom search prompt
-    enablePdfProcessing?: boolean; // For PDF processing
-    pdfEngine?: 'pdf-text' | 'mistral-ocr' | 'native'; // PDF processing engine
-    searchContextSize?: 'low' | 'medium' | 'high'; // For built-in web search models
-    enableReasoning?: boolean; // For reasoning-capable models
-    reasoning_effort?: 'low' | 'medium' | 'high'; // Reasoning effort level
-  };
   attachments?: Array<{
     data: string;
     filename: string;

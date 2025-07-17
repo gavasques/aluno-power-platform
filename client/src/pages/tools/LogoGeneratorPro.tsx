@@ -31,13 +31,13 @@ const LogoGeneratorPro: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Gerador de Logomarcas PRO - Core Guilherme Vasques</title>
+        <title>Gerador de Logomarcas PRO - Aluno Power</title>
         <meta 
           name="description" 
           content="Crie logomarcas profissionais com inteligência artificial. Gerador PRO com múltiplas opções de personalização e download em alta qualidade." 
         />
         <meta name="keywords" content="gerador de logo, logomarca, design, inteligência artificial, marca, branding" />
-        <meta property="og:title" content="Gerador de Logomarcas PRO - Core Guilherme Vasques" />
+        <meta property="og:title" content="Gerador de Logomarcas PRO - Aluno Power" />
         <meta property="og:description" content="Crie logomarcas profissionais com inteligência artificial" />
         <meta property="og:type" content="website" />
       </Helmet>

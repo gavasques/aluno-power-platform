@@ -321,10 +321,9 @@ export class SecureAuthenticationService {
       errors.push('Must contain at least one number');
     }
     
-    // Special characters no longer required
-    // if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    //   errors.push('Must contain at least one special character');
-    // }
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      errors.push('Must contain at least one special character');
+    }
 
     // Check for common weak passwords
     const commonPasswords = ['password', '123456', 'qwerty', 'admin'];

@@ -206,7 +206,7 @@ export const OptimizedLayout = memo<OptimizedLayoutProps>(({
         <header className="header-optimized">
           <div className="container-responsive flex-between">
             <div className="flex items-center space-x-4">
-              <h1 className="font-bold text-xl">Core Guilherme Vasques</h1>
+              <h1 className="font-bold text-xl">Aluno Power</h1>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-muted-foreground hide-mobile">

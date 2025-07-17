@@ -84,7 +84,6 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { youtubeService } from "./services/youtubeService";
 import { openaiService } from "./services/openaiService";
-import { whatsappService } from "./services/whatsappService";
 
 // 🏗️  [PHASE_3] MATERIAL DOMAIN MODULAR INTEGRATION
 import { MaterialController } from "./controllers/MaterialController";
@@ -4374,18 +4373,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     password: z.string().min(6)
   });
 
-  const registerWithPhoneSchema = z.object({
-    email: z.string().email(),
-    name: z.string().min(1),
-    password: z.string().min(8),
-    phone: z.string().min(10)
-  });
-
-  const verifyPhoneSchema = z.object({
-    userId: z.number(),
-    code: z.string().length(6)
-  });
-
   // Login route
   app.post('/api/auth/login', async (req, res) => {
     try {
@@ -4511,242 +4498,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // Register with phone verification route
-  app.post('/api/auth/register-with-phone', async (req, res) => {
-    try {
-      const userData = registerWithPhoneSchema.parse(req.body);
-      
-      // Validate password strength
-      const passwordValidation = AuthService.validatePasswordStrength(userData.password);
-      if (!passwordValidation.valid) {
-        return res.status(400).json({ 
-          error: 'A senha deve ter pelo menos 8 caracteres com maiúscula, minúscula e número',
-          details: passwordValidation.errors
-        });
-      }
-      
-      // Check if user already exists
-      const existingUser = await AuthService.getUserByEmail(userData.email);
-      if (existingUser) {
-        return res.status(400).json({ error: 'Email já está em uso' });
-      }
-
-      // Create user (unverified)
-      const user = await AuthService.createUser({
-        username: userData.email,
-        ...userData,
-        role: 'user',
-        isActive: false, // Will be activated after phone verification
-        emailVerified: false,
-        phoneVerified: false
-      });
-
-      // Generate verification code and save it
-      const verificationCode = whatsappService.generateVerificationCode();
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-      await db.insert(phoneVerificationCodes).values({
-        userId: user.id,
-        phone: userData.phone,
-        code: verificationCode,
-        expiresAt,
-        isUsed: false
-      });
-
-      // Send WhatsApp verification
-      const whatsappResult = await whatsappService.sendVerificationCode(userData.phone, verificationCode);
-      
-      if (!whatsappResult.success) {
-        console.error('Failed to send WhatsApp:', whatsappResult.error);
-        return res.status(500).json({ 
-          error: 'Erro ao enviar código de verificação. Tente novamente.',
-          details: whatsappResult.error
-        });
-      }
-
-      res.status(201).json({
-        success: true,
-        message: 'Usuário criado. Código de verificação enviado via WhatsApp.',
-        userId: user.id
-      });
-
-    } catch (error: any) {
-      console.error('Register with phone error:', error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
-      }
-      res.status(400).json({ error: 'Erro ao processar cadastro' });
-    }
-  });
-
-  // Verify phone route
-  app.post('/api/auth/verify-phone', async (req, res) => {
-    try {
-      const { userId, code } = verifyPhoneSchema.parse(req.body);
-
-      // Find verification code
-      const [verificationRecord] = await db
-        .select()
-        .from(phoneVerificationCodes)
-        .where(
-          and(
-            eq(phoneVerificationCodes.userId, userId),
-            eq(phoneVerificationCodes.code, code),
-            eq(phoneVerificationCodes.isUsed, false)
-          )
-        )
-        .limit(1);
-
-      if (!verificationRecord) {
-        return res.status(400).json({ error: 'Código de verificação inválido' });
-      }
-
-      // Check if code has expired
-      if (new Date() > verificationRecord.expiresAt) {
-        return res.status(400).json({ error: 'Código de verificação expirado' });
-      }
-
-      // Mark code as used
-      await db
-        .update(phoneVerificationCodes)
-        .set({ isUsed: true })
-        .where(eq(phoneVerificationCodes.id, verificationRecord.id));
-
-      // Activate user account
-      await db
-        .update(users)
-        .set({ 
-          isActive: true, 
-          phoneVerified: true,
-          updatedAt: new Date()
-        })
-        .where(eq(users.id, userId));
-
-      // Get updated user
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
-
-      // Create session token
-      const sessionToken = await AuthService.createSession(user.id);
-
-      // Assign new user to "Gratuito" group
-      const { UserGroupService } = await import('./services/userGroupService');
-      await UserGroupService.assignDefaultGroup(user.id);
-
-      // Welcome message is sent from main verification endpoint in index.ts
-      console.log('📱 Skipping duplicate welcome message (sent from main endpoint)');
-
-      res.json({
-        success: true,
-        message: 'Telefone verificado com sucesso!',
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          phoneVerified: true
-        },
-        sessionToken
-      });
-
-    } catch (error: any) {
-      console.error('Phone verification error:', error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
-      }
-      res.status(500).json({ error: 'Erro ao verificar telefone' });
-    }
-  });
-
-  // Simple test endpoint
-  app.get('/api/evolution/test', async (req, res) => {
-    console.log('🧪 Simple test endpoint called');
-    res.json({ 
-      message: 'Test endpoint working',
-      timestamp: new Date().toISOString(),
-      env: {
-        hasUrl: !!process.env.EVOLUTION_API_URL,
-        hasKey: !!process.env.EVOLUTION_API_KEY,
-        hasInstance: !!process.env.EVOLUTION_INSTANCE_NAME
-      }
-    });
-  });
-
-  // Evolution API status check endpoint
-  app.get('/api/evolution/status', requireAuth, async (req, res) => {
-    try {
-      console.log('🔍 Verificando configuração da Evolution API...');
-      
-      // Check environment variables
-      const hasUrl = !!process.env.EVOLUTION_API_URL;
-      const hasKey = !!process.env.EVOLUTION_API_KEY;
-      const hasInstance = !!process.env.EVOLUTION_INSTANCE_NAME;
-      
-      console.log('📋 Variáveis de ambiente:');
-      console.log('   EVOLUTION_API_URL:', hasUrl ? '✅ Configurada' : '❌ Não configurada');
-      console.log('   EVOLUTION_API_KEY:', hasKey ? '✅ Configurada' : '❌ Não configurada');
-      console.log('   EVOLUTION_INSTANCE_NAME:', hasInstance ? '✅ Configurada' : '❌ Não configurada');
-      
-      if (!hasUrl || !hasKey || !hasInstance) {
-        console.log('❌ Configuração incompleta detectada');
-        return res.json({
-          status: 'error',
-          message: 'Configuração incompleta',
-          details: {
-            url: hasUrl,
-            key: hasKey,
-            instance: hasInstance
-          }
-        });
-      }
-
-      // Import and test connection
-      console.log('📡 Testando conexão com Evolution API...');
-      const { whatsappService: whatsapp } = await import('./services/whatsappService');
-      const isConnected = await whatsapp.checkConnection();
-      
-      // Generate test code
-      const testCode = whatsapp.generateVerificationCode();
-      
-      console.log('📊 Resultado do teste:');
-      console.log('   Conexão:', isConnected ? '✅ Ativa' : '❌ Inativa');
-      console.log('   Código gerado:', testCode);
-      
-      const result = {
-        status: isConnected ? 'success' : 'warning',
-        message: isConnected ? 'Evolution API configurada e conectada' : 'Evolution API configurada mas instância inativa',
-        details: {
-          config: {
-            url: hasUrl,
-            key: hasKey,
-            instance: hasInstance
-          },
-          connection: isConnected,
-          testCode: testCode,
-          instanceName: process.env.EVOLUTION_INSTANCE_NAME,
-          timestamp: new Date().toISOString()
-        }
-      };
-      
-      console.log('📤 Enviando resposta:', JSON.stringify(result, null, 2));
-      res.json(result);
-      
-    } catch (error) {
-      console.error('❌ Erro ao verificar Evolution API:', error);
-      const errorResult = {
-        status: 'error',
-        message: 'Erro ao testar Evolution API',
-        error: error.message
-      };
-      console.log('📤 Enviando erro:', JSON.stringify(errorResult, null, 2));
-      res.json(errorResult);
-    }
-  });
-
   // Get current user route (legacy)
   app.get('/api/auth/user', async (req, res) => {
     try {
@@ -4847,45 +4598,19 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     try {
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
       
-      console.log('🔐 Solicitação de recuperação de senha para:', email);
-      
       const resetToken = await AuthService.generatePasswordResetToken(email);
       if (!resetToken) {
-        console.log('❌ Email não encontrado:', email);
         return res.status(404).json({ error: 'Email não encontrado' });
       }
 
-      // Get user name for personalized email
-      const { users } = await import('@shared/schema');
-      const { eq } = await import('drizzle-orm');
-      const { db } = await import('./db');
-      
-      const [user] = await db
-        .select({ name: users.name })
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
-
-      // Send email using EmailService
-      const { EmailService } = await import('./services/emailService');
-      
-      await EmailService.sendPasswordReset(email, resetToken, user?.name);
-      
-      console.log('✅ Email de recuperação enviado para:', email);
-
+      // In production, send email here
       res.json({ 
         success: true, 
-        message: 'Instruções de recuperação enviadas para seu email'
+        message: 'Token de reset enviado por email',
+        resetToken // Remove this in production
       });
     } catch (error: any) {
-      console.error('❌ Erro na recuperação de senha:', error);
-      
-      if (error.message === 'Falha ao enviar email de recuperação' || error.message === 'Falha na configuração SMTP') {
-        return res.status(500).json({ 
-          error: 'Erro no servidor de email. Tente novamente em alguns minutos.' 
-        });
-      }
-      
+      console.error('Forgot password error:', error);
       res.status(400).json({ error: 'Dados inválidos' });
     }
   });
@@ -6008,54 +5733,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         });
       }
 
-      // CHECK AND DEDUCT CREDITS BEFORE PROCESSING
-      const creditsNeeded = 2; // 2 credits per upscale
-      console.log(`💰 [IMAGE_UPSCALE] Credits needed: ${creditsNeeded} for upscale`);
-      
-      // Check user credits
-      const userCredits = await db.select({ credits: users.credits })
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
-      
-      if (!userCredits.length) {
-        return res.status(404).json({
-          error: 'Usuário não encontrado'
-        });
-      }
-      
-      const currentCredits = parseFloat(userCredits[0].credits || '0');
-      
-      if (currentCredits < creditsNeeded) {
-        return res.status(400).json({
-          error: 'Créditos insuficientes',
-          details: `Você precisa de ${creditsNeeded} créditos mas tem apenas ${currentCredits}`,
-          creditsNeeded,
-          currentCredits
-        });
-      }
-      
-      // Deduct credits before processing
-      await db.update(users)
-        .set({ 
-          credits: (currentCredits - creditsNeeded).toString(),
-          updatedAt: new Date()
-        })
-        .where(eq(users.id, userId));
-      
-      console.log(`✅ [IMAGE_UPSCALE] Credits deducted: ${creditsNeeded} (${currentCredits} → ${currentCredits - creditsNeeded})`);
-
       // Get the uploaded image
       const uploadedImage = await storage.getGeneratedImageById(imageId);
       if (!uploadedImage) {
-        // Refund credits if image not found
-        await db.update(users)
-          .set({ 
-            credits: currentCredits.toString(),
-            updatedAt: new Date()
-          })
-          .where(eq(users.id, userId));
-        
         return res.status(404).json({ 
           error: 'Imagem não encontrada' 
         });
@@ -6205,7 +5885,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         },
         status: 'success',
         cost: '0.10',
-        creditsUsed: creditsNeeded.toString(),
         duration: Date.now() - startTime,
         requestId: upscaledRecord.id,
         sessionId: req.sessionId || 'unknown',
@@ -6215,13 +5894,12 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           endpoint: 'image-upscale/process',
           originalImageId: imageId,
           requestTimestamp: new Date().toISOString(),
-          responseSize: JSON.stringify(pixelcutResult).length,
-          creditsDeducted: creditsNeeded
+          responseSize: JSON.stringify(pixelcutResult).length
         }
       };
 
       await storage.createAiImgGenerationLog(logData);
-      console.log(`📊 [AI_IMG_LOG] Saved upscale log - User: ${userId}, Scale: ${scale}x, Cost: $0.10, Credits: ${creditsNeeded}, Duration: ${Date.now() - startTime}ms`);
+      console.log(`📊 [AI_IMG_LOG] Saved upscale log - User: ${userId}, Scale: ${scale}x, Cost: $0.10, Duration: ${Date.now() - startTime}ms`);
 
       // Keep temporary image for potential reprocessing
       // await storage.deleteGeneratedImage(imageId); // Only delete when user explicitly removes/changes image
@@ -6243,32 +5921,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       console.error('❌ [IMAGE_UPSCALE] Error:', error);
       
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      const userId = req.user?.id;
-      
-      // REFUND CREDITS IF PROCESSING FAILED
-      if (userId) {
-        try {
-          const creditsNeeded = 2;
-          const userCredits = await db.select({ credits: users.credits })
-            .from(users)
-            .where(eq(users.id, userId))
-            .limit(1);
-          
-          if (userCredits.length) {
-            const currentCredits = parseFloat(userCredits[0].credits || '0');
-            await db.update(users)
-              .set({ 
-                credits: (currentCredits + creditsNeeded).toString(),
-                updatedAt: new Date()
-              })
-              .where(eq(users.id, userId));
-            
-            console.log(`💰 [IMAGE_UPSCALE] Credits refunded: ${creditsNeeded} (${currentCredits} → ${currentCredits + creditsNeeded})`);
-          }
-        } catch (refundError) {
-          console.error('❌ [IMAGE_UPSCALE] Failed to refund credits:', refundError);
-        }
-      }
       
       // Check if it's a credits issue and return error message
       if (errorMessage.includes('Créditos da API PixelCut esgotados') || errorMessage.includes('insufficient_api_credits')) {
@@ -6280,6 +5932,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       
       // Log other errors in AI Image Generation Logs
       try {
+        const userId = req.user?.id;
         if (userId) {
           const uploadedImage = await storage.getGeneratedImageById(req.body.imageId);
           const errorLogData = {

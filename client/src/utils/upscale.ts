@@ -47,52 +47,17 @@ export const fileToBase64 = (file: File): Promise<string> => {
 };
 
 export const downloadImage = async (url: string, filename: string): Promise<void> => {
-  try {
-    let blob: Blob;
-    
-    // Verifica se é uma URL base64
-    if (url.startsWith('data:')) {
-      // Para URLs base64, converte diretamente para blob
-      const byteCharacters = atob(url.split(',')[1]);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const mimeMatch = url.match(/data:([^;]+)/);
-      const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
-      blob = new Blob([byteArray], { type: mimeType });
-    } else {
-      // Para URLs normais, faz fetch
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Erro no download: ${response.status}`);
-      }
-      blob = await response.blob();
-    }
-    
-    // Cria o link de download
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = filename;
-    link.style.display = 'none';
-    
-    // Adiciona o link ao DOM, clica e remove
-    document.body.appendChild(link);
-    link.click();
-    
-    // Cleanup
-    setTimeout(() => {
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
-    }, 100);
-    
-    console.log(`✅ Download concluído: ${filename}`);
-  } catch (error) {
-    console.error('❌ Erro no download:', error);
-    throw new Error(`Falha no download: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
-  }
+  const response = await fetch(url);
+  const blob = await response.blob();
+  
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
 };
 
 export const getAuthHeaders = () => {

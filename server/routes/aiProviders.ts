@@ -35,23 +35,7 @@ const testRequestSchema = z.object({
     type: z.string()
   })).optional(),
   fineTuneModel: z.string().optional(),
-  selectedCollections: z.array(z.number()).optional(),
-  // Claude-specific features
-  claudeAdvanced: z.object({
-    enableExtendedThinking: z.boolean().optional(),
-    thinkingBudgetTokens: z.number().optional()
-  }).optional(),
-  // OpenRouter-specific features
-  openrouterAdvanced: z.object({
-    enableWebSearch: z.boolean().optional(),
-    webSearchMaxResults: z.number().min(1).max(10).optional(),
-    webSearchPrompt: z.string().optional(),
-    enablePdfProcessing: z.boolean().optional(),
-    pdfEngine: z.enum(['pdf-text', 'mistral-ocr', 'native']).optional(),
-    searchContextSize: z.enum(['low', 'medium', 'high']).optional(),
-    enableReasoning: z.boolean().optional(),
-    reasoning_effort: z.enum(['low', 'medium', 'high']).optional()
-  }).optional()
+  selectedCollections: z.array(z.number()).optional()
 });
 
 router.post('/test', requireAuth, async (req, res) => {
@@ -94,10 +78,6 @@ router.post('/test', requireAuth, async (req, res) => {
       tools: validatedData.tools,
       fineTuneModel: validatedData.fineTuneModel,
       selectedCollections: validatedData.selectedCollections,
-      // Claude-specific features
-      claudeAdvanced: validatedData.claudeAdvanced,
-      // OpenRouter-specific features
-      openrouterAdvanced: validatedData.openrouterAdvanced,
     };
 
     console.log('🚀 [AI_PROVIDER_TEST] Request prepared:', {
@@ -118,9 +98,7 @@ router.post('/test', requireAuth, async (req, res) => {
         presence_penalty: aiRequest.presence_penalty,
         tools: aiRequest.tools?.length || 0,
         fineTuneModel: aiRequest.fineTuneModel
-      },
-      claudeAdvanced: aiRequest.claudeAdvanced,
-      openrouterAdvanced: aiRequest.openrouterAdvanced
+      }
     });
 
     // Log detailed parameters being sent to the AI provider

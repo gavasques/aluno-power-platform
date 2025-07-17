@@ -9,7 +9,6 @@ import type {
   BackgroundRemovalOptions 
 } from '@/types/ai-image';
 import { CompressionProfile, getCompressionConfig, estimateCompressedSize } from '@/config/compression';
-import { useQueryClient } from '@tanstack/react-query';
 
 interface UseImageProcessingReturn {
   // Estado
@@ -26,7 +25,6 @@ interface UseImageProcessingReturn {
 }
 
 export const useImageProcessing = (compressionProfile: CompressionProfile = 'general') => {
-  const queryClient = useQueryClient();
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [processedImage, setProcessedImage] = useState<ProcessedImage | null>(null);
   const [state, setState] = useState<ProcessingState>({
@@ -69,11 +67,6 @@ export const useImageProcessing = (compressionProfile: CompressionProfile = 'gen
       const result = await AIImageService.removeBackground(uploadedImage.id, options);
       setProcessedImage(result);
 
-      // Invalidar cache do saldo de créditos para atualizar imediatamente
-      await queryClient.invalidateQueries({
-        queryKey: ['/api/dashboard/summary']
-      });
-
       updateState({ isProcessing: false, step: '' });
     } catch (error) {
       updateState({ 
@@ -82,7 +75,7 @@ export const useImageProcessing = (compressionProfile: CompressionProfile = 'gen
         error: error instanceof Error ? error.message : 'Erro no processamento' 
       });
     }
-  }, [uploadedImage, updateState, queryClient]);
+  }, [uploadedImage, updateState]);
 
   const processUpscale = useCallback(async (options: UpscaleOptions) => {
     if (!uploadedImage) return;
@@ -94,11 +87,6 @@ export const useImageProcessing = (compressionProfile: CompressionProfile = 'gen
       const result = await AIImageService.upscaleImage(uploadedImage.id, options);
       setProcessedImage(result);
 
-      // Invalidar cache do saldo de créditos para atualizar imediatamente
-      await queryClient.invalidateQueries({
-        queryKey: ['/api/dashboard/summary']
-      });
-
       updateState({ isProcessing: false, step: '' });
     } catch (error) {
       updateState({ 
@@ -107,7 +95,7 @@ export const useImageProcessing = (compressionProfile: CompressionProfile = 'gen
         error: error instanceof Error ? error.message : 'Erro no processamento' 
       });
     }
-  }, [uploadedImage, updateState, queryClient]);
+  }, [uploadedImage, updateState]);
 
   const downloadImage = useCallback(async (fileName?: string) => {
     if (!processedImage || !uploadedImage) return;

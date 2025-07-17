@@ -4,7 +4,7 @@
  */
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useGetFeatureCost, useCanProcessFeature } from "@/hooks/useFeatureCosts";
+import { useGetFeatureCost } from "@/hooks/useGetFeatureCost";
 import { logger } from "@/utils/logger";
 
 interface CreditCheckResult {
@@ -32,8 +32,7 @@ interface LogAIGenerationParams {
 export function useCreditSystem() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { getFeatureCost } = useGetFeatureCost();
-  const { canProcess } = useCanProcessFeature();
+  const { getFeatureCost, canProcess } = useGetFeatureCost();
 
   /**
    * Verifica se o usuário tem créditos suficientes

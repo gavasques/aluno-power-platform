@@ -12,10 +12,10 @@ export function AuthLayout({ children, title = "Bem-vindo", subtitle = "Faça lo
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Core Guilherme Vasques
+            Aluno Power Platform
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Plataforma completa de inteligência artificial para Amazon FBA e e-commerce
+            Sua plataforma de aprendizado para Amazon FBA
           </p>
         </div>
         

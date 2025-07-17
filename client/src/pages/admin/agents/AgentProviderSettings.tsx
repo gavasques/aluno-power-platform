@@ -22,8 +22,7 @@ import {
   Wrench,
   Settings2,
   Database,
-  Globe,
-  FileText
+  Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,15 +117,7 @@ export default function AgentProviderSettings() {
     // Claude specific features
     enableExtendedThinking: false,
     thinkingBudgetTokens: 10000,
-    // OpenRouter specific features
-    enableWebSearch: false,
-    webSearchMaxResults: 5,
-    webSearchPrompt: '',
-    enablePdfProcessing: false,
-    pdfEngine: 'pdf-text' as 'pdf-text' | 'mistral-ocr' | 'native',
-    searchContextSize: 'medium' as 'low' | 'medium' | 'high',
-    enableOpenRouterReasoning: false,
-    openRouterReasoningEffort: 'medium' as 'low' | 'medium' | 'high'
+    // OpenRouter specific features - no special features needed, uses OpenAI-compatible parameters
   });
 
   const [testPrompt, setTestPrompt] = useState('Olá! Como você está hoje?');
@@ -231,17 +222,6 @@ export default function AgentProviderSettings() {
       enableSearch?: boolean;
       enableImageUnderstanding?: boolean;
       referenceImages?: Array<{ data: string; filename: string }>;
-      // OpenRouter specific
-      openrouterAdvanced?: {
-        enableWebSearch?: boolean;
-        webSearchMaxResults?: number;
-        webSearchPrompt?: string;
-        enablePdfProcessing?: boolean;
-        pdfEngine?: 'pdf-text' | 'mistral-ocr' | 'native';
-        searchContextSize?: 'low' | 'medium' | 'high';
-        enableReasoning?: boolean;
-        reasoning_effort?: 'low' | 'medium' | 'high';
-      };
     }) => {
       const token = localStorage.getItem('auth_token');
       const response = await fetch('/api/ai-providers/test', {
@@ -433,20 +413,6 @@ export default function AgentProviderSettings() {
           thinkingBudgetTokens: formData.thinkingBudgetTokens
         };
       }
-    }
-
-    // Add OpenRouter-specific features
-    if (formData.provider === 'openrouter') {
-      testData.openrouterAdvanced = {
-        enableWebSearch: formData.enableWebSearch,
-        webSearchMaxResults: formData.webSearchMaxResults,
-        webSearchPrompt: formData.webSearchPrompt || '',
-        enablePdfProcessing: formData.enablePdfProcessing,
-        pdfEngine: formData.pdfEngine,
-        searchContextSize: formData.searchContextSize,
-        enableReasoning: formData.enableOpenRouterReasoning,
-        reasoning_effort: formData.openRouterReasoningEffort
-      };
     }
 
     // Add image data for image models
@@ -1313,270 +1279,54 @@ export default function AgentProviderSettings() {
                       <h3 className="text-lg font-semibold text-orange-800">Funcionalidades Avançadas do OpenRouter</h3>
                     </div>
 
-                    {/* Reasoning Capabilities for specific models */}
-                    {(formData.model.includes('o1') || formData.model.includes('reasoning') || formData.model.includes('sonar') || formData.model.includes('deepseek-r1') || formData.model.includes('grok') || formData.model.includes('qwq') || formData.model.includes('phi-4') || formData.model.includes('gemini-2') || formData.model.includes('thinking') || formData.model.includes('claude-3.7-sonnet:thinking')) && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Brain className="h-4 w-4 text-indigo-600" />
-                          <Label className="text-indigo-800 font-medium">
-                            Raciocínio Avançado
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="enableOpenRouterReasoning"
-                            checked={formData.enableOpenRouterReasoning}
-                            onCheckedChange={(checked) =>
-                              setFormData({ ...formData, enableOpenRouterReasoning: checked })
-                            }
-                          />
-                          <Label htmlFor="enableOpenRouterReasoning" className="text-sm">
-                            Ativar modo de raciocínio profundo
-                          </Label>
-                        </div>
-                        
-                        {formData.enableOpenRouterReasoning && (
-                          <div className="space-y-3 ml-6 pl-4 border-l-2 border-indigo-200">
-                            <div className="p-3 bg-indigo-50 rounded border border-indigo-200">
-                              <p className="text-sm text-indigo-700 mb-2">
-                                <strong>O que faz:</strong> Ativa raciocínio sistemático e análise step-by-step para problemas complexos.
-                              </p>
-                              <p className="text-sm text-indigo-600">
-                                <strong>Ideal para:</strong> Matemática, lógica, análise técnica, resolução de problemas complexos
-                              </p>
-                            </div>
-                            
-                            {/* Reasoning Effort for compatible models */}
-                            {(formData.model.includes('o1-mini') || formData.model.includes('deepseek-r1') || formData.model.includes('qwq') || formData.model.includes('phi-4-reasoning') || formData.model.includes('sonar-reasoning') || formData.model.includes('thinking') || formData.model.includes('claude-3.7-sonnet:thinking')) && (
-                              <div>
-                                <Label htmlFor="reasoningEffort" className="text-sm">
-                                  Nível de esforço de raciocínio
-                                </Label>
-                                <Select
-                                  value={formData.openRouterReasoningEffort || 'medium'}
-                                  onValueChange={(value) =>
-                                    setFormData({ ...formData, openRouterReasoningEffort: value })
-                                  }
-                                >
-                                  <SelectTrigger className="mt-1">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="low">
-                                      <div className="flex flex-col">
-                                        <span>Baixo</span>
-                                        <span className="text-xs text-gray-500">Raciocínio rápido e direto</span>
-                                      </div>
-                                    </SelectItem>
-                                    <SelectItem value="medium">
-                                      <div className="flex flex-col">
-                                        <span>Médio (Recomendado)</span>
-                                        <span className="text-xs text-gray-500">Balanceado entre velocidade e profundidade</span>
-                                      </div>
-                                    </SelectItem>
-                                    <SelectItem value="high">
-                                      <div className="flex flex-col">
-                                        <span>Alto</span>
-                                        <span className="text-xs text-gray-500">Raciocínio mais profundo e detalhado</span>
-                                      </div>
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            )}
-                          </div>
+                    {/* OpenRouter Introduction */}
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-medium text-blue-800 mb-2">OpenRouter - Portal de IA Unificado:</h4>
+                      <div className="text-sm text-blue-700 space-y-1">
+                        <div>🎯 <strong>Acesso a 400+ modelos</strong> de OpenAI, Anthropic, Google, Meta, Mistral e mais</div>
+                        <div>💰 <strong>Modelos gratuitos disponíveis</strong> para experimentação e uso básico</div>
+                        <div>🔀 <strong>Auto-routing</strong> - seleciona automaticamente o melhor modelo para sua tarefa</div>
+                        <div>⚡ <strong>API unificada</strong> - acesse todos os modelos com uma única integração</div>
+                      </div>
+                    </div>
+
+                    {/* Current Model Info */}
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <h4 className="font-medium text-green-800 mb-2">Modelo Selecionado: {formData.model}</h4>
+                      <div className="text-sm text-green-700 space-y-1">
+                        {formData.model === 'auto' && (
+                          <>
+                            <div>🤖 <strong>Auto-routing</strong> - OpenRouter escolhe o melhor modelo automaticamente</div>
+                            <div>💡 <strong>Ideal para:</strong> Quando você quer a melhor resposta sem se preocupar com qual modelo usar</div>
+                            <div>💰 <strong>Custo:</strong> Variável baseado no modelo selecionado automaticamente</div>
+                          </>
+                        )}
+                        {formData.model.includes('gpt-4o') && (
+                          <>
+                            <div>✅ Chat avançado • ✅ Análise de imagens • ✅ Qualidade premium</div>
+                            <div>💡 <strong>Ideal para:</strong> Tarefas complexas que exigem raciocínio avançado e análise visual</div>
+                          </>
+                        )}
+                        {formData.model.includes('claude') && (
+                          <>
+                            <div>✅ Análise profunda • ✅ Raciocínio lógico • ✅ Respostas detalhadas</div>
+                            <div>💡 <strong>Ideal para:</strong> Análise de documentos, pesquisa e tarefas que requerem reflexão</div>
+                          </>
+                        )}
+                        {formData.model.includes('llama') && (
+                          <>
+                            <div>✅ Open source • ✅ Rápido • ✅ Eficiente</div>
+                            <div>💡 <strong>Ideal para:</strong> Tarefas gerais com boa qualidade e velocidade</div>
+                          </>
+                        )}
+                        {formData.model.includes('free') && (
+                          <>
+                            <div>🆓 <strong>Modelo gratuito</strong> - sem custos de uso</div>
+                            <div>💡 <strong>Ideal para:</strong> Experimentação, prototipagem e uso casual</div>
+                          </>
                         )}
                       </div>
-                    )}
-
-                    {/* Web Search Plugin */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Search className="h-4 w-4 text-blue-600" />
-                        <Label className="text-blue-800 font-medium">
-                          Busca na Web em Tempo Real
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="enableWebSearch"
-                          checked={formData.enableWebSearch}
-                          onCheckedChange={(checked) =>
-                            setFormData({ ...formData, enableWebSearch: checked })
-                          }
-                        />
-                        <Label htmlFor="enableWebSearch" className="text-sm">
-                          Ativar busca na web durante as respostas
-                        </Label>
-                      </div>
-                      
-                      {formData.enableWebSearch && (
-                        <div className="space-y-3 ml-6 pl-4 border-l-2 border-blue-200">
-                          <div className="p-3 bg-blue-50 rounded border border-blue-200">
-                            <p className="text-sm text-blue-700 mb-2">
-                              <strong>O que faz:</strong> Permite ao modelo buscar informações atualizadas na internet durante a conversa.
-                            </p>
-                            <p className="text-sm text-blue-600">
-                              <strong>Custo adicional:</strong> $4 por 1000 resultados de busca
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="webSearchMaxResults" className="text-sm">
-                              Máximo de resultados por busca (1-10)
-                            </Label>
-                            <div className="mt-1">
-                              <Slider
-                                id="webSearchMaxResults"
-                                min={1}
-                                max={10}
-                                step={1}
-                                value={[formData.webSearchMaxResults]}
-                                onValueChange={(value) =>
-                                  setFormData({ ...formData, webSearchMaxResults: value[0] })
-                                }
-                                className="w-full"
-                              />
-                              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                <span>1</span>
-                                <span className="font-medium">{formData.webSearchMaxResults}</span>
-                                <span>10</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div>
-                            <Label htmlFor="webSearchPrompt" className="text-sm">
-                              Prompt personalizado para busca (opcional)
-                            </Label>
-                            <Textarea
-                              id="webSearchPrompt"
-                              value={formData.webSearchPrompt}
-                              onChange={(e) =>
-                                setFormData({ ...formData, webSearchPrompt: e.target.value })
-                              }
-                              placeholder="Ex: Busque informações técnicas atualizadas sobre..."
-                              className="mt-1"
-                            />
-                          </div>
-                        </div>
-                      )}
                     </div>
-
-                    {/* PDF Processing */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-purple-600" />
-                        <Label className="text-purple-800 font-medium">
-                          Processamento de PDFs
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="enablePdfProcessing"
-                          checked={formData.enablePdfProcessing}
-                          onCheckedChange={(checked) =>
-                            setFormData({ ...formData, enablePdfProcessing: checked })
-                          }
-                        />
-                        <Label htmlFor="enablePdfProcessing" className="text-sm">
-                          Ativar processamento de documentos PDF
-                        </Label>
-                      </div>
-                      
-                      {formData.enablePdfProcessing && (
-                        <div className="space-y-3 ml-6 pl-4 border-l-2 border-purple-200">
-                          <div className="p-3 bg-purple-50 rounded border border-purple-200">
-                            <p className="text-sm text-purple-700 mb-2">
-                              <strong>O que faz:</strong> Permite ao modelo ler e analisar documentos PDF enviados.
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="pdfEngine" className="text-sm">
-                              Engine de processamento PDF
-                            </Label>
-                            <Select
-                              value={formData.pdfEngine}
-                              onValueChange={(value) =>
-                                setFormData({ ...formData, pdfEngine: value })
-                              }
-                            >
-                              <SelectTrigger className="mt-1">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pdf-text">
-                                  <div className="flex flex-col">
-                                    <span>PDF Text (Gratuito)</span>
-                                    <span className="text-xs text-gray-500">Extração básica de texto</span>
-                                  </div>
-                                </SelectItem>
-                                <SelectItem value="mistral-ocr">
-                                  <div className="flex flex-col">
-                                    <span>Mistral OCR ($2/1000 páginas)</span>
-                                    <span className="text-xs text-gray-500">OCR avançado com reconhecimento inteligente</span>
-                                  </div>
-                                </SelectItem>
-                                <SelectItem value="native">
-                                  <div className="flex flex-col">
-                                    <span>Native (Baseado em tokens)</span>
-                                    <span className="text-xs text-gray-500">Processamento nativo do modelo</span>
-                                  </div>
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Search Context Size for Native Web Search Models */}
-                    {(formData.model.includes('perplexity') || formData.model.includes('sonar')) && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-green-600" />
-                          <Label className="text-green-800 font-medium">
-                            Tamanho do Contexto de Busca
-                          </Label>
-                        </div>
-                        <div className="p-3 bg-green-50 rounded border border-green-200">
-                          <p className="text-sm text-green-700 mb-3">
-                            <strong>Este modelo possui busca nativa:</strong> Configure o tamanho do contexto de busca.
-                          </p>
-                          <Select
-                            value={formData.searchContextSize}
-                            onValueChange={(value) =>
-                              setFormData({ ...formData, searchContextSize: value })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="low">
-                                <div className="flex flex-col">
-                                  <span>Baixo</span>
-                                  <span className="text-xs text-gray-500">Menos contexto, respostas mais rápidas</span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="medium">
-                                <div className="flex flex-col">
-                                  <span>Médio (Recomendado)</span>
-                                  <span className="text-xs text-gray-500">Balanceado entre velocidade e qualidade</span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="high">
-                                <div className="flex flex-col">
-                                  <span>Alto</span>
-                                  <span className="text-xs text-gray-500">Máximo contexto, respostas mais completas</span>
-                                </div>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    )}
 
                     {/* Model Categories */}
                     <div className="space-y-3">
@@ -1608,8 +1358,56 @@ export default function AgentProviderSettings() {
                         <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
                           <h5 className="font-medium text-yellow-800">🔍 Modelos com Busca</h5>
                           <p className="text-xs text-yellow-600 mt-1">
-                            Perplexity Sonar - com acesso à web nativo
+                            Perplexity Sonar - com acesso à web
                           </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Auto-routing Feature */}
+                    {formData.model === 'auto' && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Bot className="h-4 w-4 text-orange-600" />
+                          <Label className="text-orange-800 font-medium">
+                            Auto-routing Inteligente
+                          </Label>
+                        </div>
+                        <div className="p-3 bg-orange-100 rounded border border-orange-200">
+                          <p className="text-sm text-orange-700 mb-2">
+                            <strong>Como funciona:</strong> O OpenRouter analisa seu prompt e automaticamente seleciona o modelo mais adequado.
+                          </p>
+                          <div className="text-xs text-orange-600 space-y-1">
+                            <div><strong>Para código:</strong> Pode usar CodeLlama, Deepseek Coder ou GPT-4</div>
+                            <div><strong>Para imagens:</strong> Seleciona modelos vision como GPT-4o ou Claude</div>
+                            <div><strong>Para análise:</strong> Usa Claude 3.5 Sonnet ou GPT-4</div>
+                            <div><strong>Para velocidade:</strong> Prefere modelos mais rápidos como Llama ou Mistral</div>
+                          </div>
+                        </div>
+                        <Alert>
+                          <Bot className="h-4 w-4" />
+                          <AlertDescription className="text-sm">
+                            <strong>Recomendado:</strong> Use auto-routing quando não tiver certeza de qual modelo escolher. 
+                            O OpenRouter otimiza automaticamente para qualidade, velocidade e custo.
+                          </AlertDescription>
+                        </Alert>
+                      </div>
+                    )}
+
+                    {/* Cost Information */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-orange-600" />
+                        <Label className="text-orange-800 font-medium">
+                          Informações de Custo
+                        </Label>
+                      </div>
+                      <div className="p-3 bg-gray-50 border border-gray-200 rounded">
+                        <div className="text-sm text-gray-700 space-y-1">
+                          <div>💰 <strong>Modelos gratuitos:</strong> $0.00 por token - sem limitações de uso básico</div>
+                          <div>⚡ <strong>Modelos rápidos:</strong> $0.20-$1.00 por 1M tokens - boa qualidade, baixo custo</div>
+                          <div>🔥 <strong>Modelos premium:</strong> $2.00-$15.00 por 1M tokens - máxima qualidade</div>
+                          <div>🔀 <strong>Auto-routing:</strong> Custo variável baseado no modelo selecionado</div>
                         </div>
                       </div>
                     </div>
@@ -1617,8 +1415,8 @@ export default function AgentProviderSettings() {
                     <Alert>
                       <Globe className="h-4 w-4" />
                       <AlertDescription className="text-sm">
-                        <strong>OpenRouter:</strong> Acesse 400+ modelos de IA com funcionalidades avançadas como busca na web, 
-                        processamento de PDFs e análise de imagens através de uma única API unificada.
+                        <strong>Vantagem do OpenRouter:</strong> Acesse os melhores modelos de IA do mundo através de uma única API. 
+                        Experimente modelos gratuitos ou use premium conforme sua necessidade.
                       </AlertDescription>
                     </Alert>
                   </div>

@@ -19,7 +19,6 @@ export const users = pgTable("users", {
   magicLinkToken: text("magic_link_token"),
   magicLinkExpiresAt: timestamp("magic_link_expires_at"),
   emailVerified: boolean("email_verified").notNull().default(false),
-  phoneVerified: boolean("phone_verified").notNull().default(false),
   stripeCustomerId: text("stripe_customer_id"),
   credits: decimal("credits", { precision: 10, scale: 2 }).notNull().default("0.00"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -51,17 +50,6 @@ export const userSessions = pgTable("user_sessions", {
   userId: integer("user_id").references(() => users.id).notNull(),
   sessionToken: text("session_token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-// Phone Verification Codes table
-export const phoneVerificationCodes = pgTable("phone_verification_codes", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  phone: text("phone").notNull(),
-  code: text("code").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  isUsed: boolean("is_used").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
