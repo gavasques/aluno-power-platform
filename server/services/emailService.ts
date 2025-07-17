@@ -56,7 +56,10 @@ export class EmailService {
     try {
       const transporter = await this.getTransporter();
       
-      const resetUrl = `${process.env.APP_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+      // Auto-detect production URL or use configured APP_URL
+      const baseUrl = process.env.APP_URL || 
+        (process.env.REPL_ID ? `https://${process.env.REPL_ID}.replit.app` : 'http://localhost:5000');
+      const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
       
       const htmlContent = `
         <!DOCTYPE html>
