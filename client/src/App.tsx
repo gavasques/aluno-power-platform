@@ -87,7 +87,8 @@ const UserProfile = lazy(() => import("./pages/myarea/UserProfile"));
 
 // My Area Product Management
 const MyProductsList = lazy(() => import("./pages/myarea/MyProductsList"));
-
+const ProductBasicDataEdit = lazy(() => import("./pages/myarea/ProductBasicDataEdit"));
+const ProductPricingChannelsEdit = lazy(() => import("./pages/myarea/ProductPricingChannelsEdit"));
 const ProductPreview = lazy(() => import("./pages/myarea/ProductPreview"));
 const ProductImportExport = lazy(() => import("./pages/myarea/ProductImportExport"));
 
@@ -779,7 +780,26 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-
+                          {/* Product Edit Routes - Must be before generic :id route */}
+                          <Route path="/minha-area/produtos/:id/editar-dados">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductBasicDataEdit />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/minha-area/produtos/:id/editar-precos">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductPricingChannelsEdit />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
                           
                           <Route path="/minha-area/produtos/:id">
                             <ProtectedRoute>

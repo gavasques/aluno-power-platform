@@ -102,8 +102,12 @@ export default function MyProductsList() {
     return product.brand || '-';
   };
 
-  const handleEdit = (id: number) => {
-    window.location.href = `/minha-area/produtos/${id}/editar`;
+  const handleEditBasicData = (id: number) => {
+    setLocation(`/minha-area/produtos/${id}/editar-dados`);
+  };
+
+  const handleEditPricing = (id: number) => {
+    setLocation(`/minha-area/produtos/${id}/editar-precos`);
   };
 
   const handleCreate = () => {
@@ -292,7 +296,7 @@ export default function MyProductsList() {
                 <TableHead className="w-[140px] py-4 font-semibold text-gray-700">Marca</TableHead>
                 <TableHead className="w-[120px] text-right py-4 font-semibold text-gray-700">Custo</TableHead>
                 <TableHead className="min-w-[280px] py-4 font-semibold text-gray-700">Canais Ativos</TableHead>
-                <TableHead className="w-[200px] text-center py-4 font-semibold text-gray-700">Ações</TableHead>
+                <TableHead className="w-[220px] text-center py-4 font-semibold text-gray-700">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -440,11 +444,23 @@ export default function MyProductsList() {
                               className="h-8 px-2 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleEdit(product.id);
+                                handleEditBasicData(product.id);
                               }}
-                              title="Editar informações"
+                              title="Editar dados do produto"
                             >
                               <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 px-2 text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 transition-all duration-200"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditPricing(product.id);
+                              }}
+                              title="Editar preços e canais"
+                            >
+                              <TrendingUp className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="outline"
