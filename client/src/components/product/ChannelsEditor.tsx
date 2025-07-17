@@ -395,10 +395,13 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
           taxPercent: parseFloat((product as any).taxPercent) || 0,
         };
 
+        const packCost = parseFloat((product as any).packCost) || 0;
+
         const calculation = calculateChannelProfitability(
           channel.type,
           channel.data as any,
-          productBase
+          productBase,
+          packCost
         );
 
         newCalculations[channel.type] = calculation;

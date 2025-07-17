@@ -81,7 +81,8 @@ const calculateCommission = (
 export const calculateChannelProfitability = (
   channelType: string,
   channelData: ChannelData,
-  productBase: ProductBaseData
+  productBase: ProductBaseData,
+  packCost: number = 0
 ): ChannelCalculationResult => {
   const price = parseValue(channelData.price);
   const productCost = productBase.costItem;
@@ -100,8 +101,8 @@ export const calculateChannelProfitability = (
   // Calculate tax cost based on sale price
   const taxCost = price * (taxPercent / 100);
   
-  // Base costs (product + taxes)
-  let totalCosts = productCost + taxCost;
+  // Base costs (product + taxes + pack cost)
+  let totalCosts = productCost + taxCost + packCost;
   
   // Add channel-specific costs based on channel type
   switch (channelType) {

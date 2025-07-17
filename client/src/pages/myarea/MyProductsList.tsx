@@ -129,9 +129,11 @@ export default function MyProductsList() {
           taxPercent: parseFloat(product.taxPercent) || 0,
         };
 
+        const packCost = parseFloat(product.packCost) || 0;
+
         return {
           channel,
-          calculation: calculateChannelProfitability(channel.type, channel.data || {}, productBase)
+          calculation: calculateChannelProfitability(channel.type, channel.data || {}, productBase, packCost)
         };
       });
     } catch (error) {
