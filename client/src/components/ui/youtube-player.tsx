@@ -63,7 +63,8 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ url, title, classN
             title={title}
             className="absolute inset-0 w-full h-full"
             frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
             loading="lazy"
           />
         </div>

@@ -62,7 +62,7 @@ const MaterialViewer = ({ material }: { material: MaterialWithType }) => {
             <iframe
               src={`https://www.youtube.com/embed/${videoId}`}
               className="w-full h-full rounded-lg"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              allowFullScreen
               title={material.title}
             />
           </div>

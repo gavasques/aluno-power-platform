@@ -18,9 +18,6 @@ import path from "path";
 
 const app = express();
 
-// Trust proxy for rate limiting to work correctly
-app.set('trust proxy', true);
-
 // SECURITY MIDDLEWARE - Applied first for protection
 app.use(helmet({
   contentSecurityPolicy: false, // We set custom CSP in securityHeaders

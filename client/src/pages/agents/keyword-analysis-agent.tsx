@@ -180,30 +180,18 @@ IMPORTANTE: Priorize termos com intenção de compra, volume relevante no Brasil
         },
         body: JSON.stringify({
           provider: 'openai',
-          model: 'gpt-4o-mini',
+          model: 'gpt-4o',
           prompt: prompt,
           maxTokens: 8000,
-          temperature: 0.7
+          temperature: 0.7,
+          enableWebSearch: true,
+          enableReasoning: true
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error('API Error Response:', response.status, errorData);
-        
-        // Se for erro 401, fazer logout
-        if (response.status === 401) {
-          localStorage.removeItem('auth_token');
-          window.location.href = '/login';
-          return;
-        }
-        
-        try {
-          const error = JSON.parse(errorData);
-          throw new Error(error.error || error.details || `Erro ${response.status}: Falha na análise de palavras-chave`);
-        } catch {
-          throw new Error(`Erro ${response.status}: ${errorData || 'Falha na análise de palavras-chave'}`);
-        }
+        const error = await response.json();
+        throw new Error(error.details || 'Falha na análise de palavras-chave');
       }
 
       const data = await response.json();

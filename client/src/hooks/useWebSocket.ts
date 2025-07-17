@@ -18,39 +18,14 @@ export function useWebSocket() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Skip WebSocket in development to avoid conflicts with Vite HMR and debugging tools
-    if (import.meta.env.DEV) {
-      console.log(`🚧 [WS_CLIENT] Skipping WebSocket in development to avoid tool conflicts`);
-      return;
-    }
-    
-    // Get the actual host and port from the current location
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    let host = window.location.hostname;
-    let port = window.location.port;
-    
-    // If no port is specified, use the default for the protocol
-    if (!port) {
-      port = window.location.protocol === 'https:' ? '443' : '80';
-    }
-    
-    // For development, use the Express server port (5000)
-    if (host === 'localhost' || host === '127.0.0.1') {
-      port = '5000';
-    }
-    
-    const wsUrl = `${protocol}//${host}:${port}/ws`;
-    
-    // Prevent WebSocket connection if host is invalid
-    if (!host || host === 'undefined') {
-      console.warn(`⚠️ [WS_CLIENT] Invalid host detected: ${host}, skipping WebSocket connection`);
-      return;
-    }
+    const host = window.location.host;
+    const wsUrl = `${protocol}//${host}/ws`;
 
-    console.log(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
+    logger.debug(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
     logger.debug(`   🌐 URL: ${wsUrl}`);
     logger.debug(`   📍 Protocol: ${protocol}`);
-    logger.debug(`   🏠 Host: ${host}:${port}`);
+    logger.debug(`   🏠 Host: ${host}`);
 
     const connectWebSocket = () => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -206,12 +181,6 @@ export function useWebSocket() {
   }, []);
 
   const connect = useCallback(() => {
-    // Prevent connection if host is invalid
-    if (!window.location.host || window.location.host.includes('undefined')) {
-      logger.warn(`⚠️ [WS_CLIENT] Invalid host in connect: ${window.location.host}, skipping connection`);
-      return;
-    }
-    
     // connectWebSocket is defined in the useEffect above
     if (wsRef.current?.readyState !== WebSocket.OPEN) {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

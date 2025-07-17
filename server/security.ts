@@ -11,37 +11,25 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  // Minimal Permissions-Policy to avoid browser warnings about unsupported features
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  
-  // Add development environment headers to block debugging tools interference
-  if (process.env.NODE_ENV === 'development') {
-    res.setHeader('X-Development-Mode', 'true');
-    res.setHeader('X-Block-External-Tools', 'true');
-  }
   
   // Only set HSTS in production with HTTPS
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // Content Security Policy - stricter in production to block debugging tools
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const cspDirectives = [
-    "default-src 'self'",
-    isDevelopment 
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://replit.com https://cdn.jsdelivr.net"
-      : "script-src 'self' https://replit.com https://cdn.jsdelivr.net",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com data: blob:",
-    "img-src 'self' data: https: blob:",
-    "connect-src 'self' wss: ws: https:",
-    "frame-src 'self' https://www.youtube.com https://youtube.com",
-    "frame-ancestors 'none'",
-    "base-uri 'self'"
-  ];
-  
-  res.setHeader('Content-Security-Policy', cspDirectives.join('; ') + ';');
+  // Content Security Policy
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://replit.com; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: https: blob:; " +
+    "connect-src 'self' wss: ws:; " +
+    "frame-ancestors 'none'; " +
+    "base-uri 'self';"
+  );
   
   next();
 };
@@ -61,10 +49,10 @@ export const createRateLimit = (windowMs: number, max: number, message: string) 
   });
 };
 
-// API rate limiting - More lenient for development
+// API rate limiting
 export const apiLimiter = createRateLimit(
-  1 * 60 * 1000, // 1 minute
-  300, // 300 requests per minute (5 req/sec)
+  15 * 60 * 1000, // 15 minutes
+  100, // 100 requests per window
   'Too many API requests from this IP, please try again later'
 );
 

@@ -8,18 +8,12 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { AuthProvider } from "./contexts/AuthContext";
 import { CombinedProvider } from "./contexts/CombinedProvider";
-import { AgentsProvider } from "./contexts/AgentsContext";
-import { MaterialsProvider } from "./contexts/MaterialsContext";
-import { ToolsProvider } from "./contexts/ToolsContext";
-import { PartnersProvider } from "./contexts/PartnersContext";
 import { Suspense, lazy, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { backgroundPrefetch } from '@/lib/prefetch';
 import { useFontLoader } from '@/lib/fontLoader';
 import { useOptimizedIcons } from '@/components/IconLoader';
 import { HelmetProvider } from 'react-helmet-async';
-
-console.log('📱 App.tsx loaded - imports successful');
 
 // Lazy load pages for better performance
 const Videos = lazy(() => import("./pages/Videos"));

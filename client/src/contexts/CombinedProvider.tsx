@@ -25,20 +25,25 @@ export function CombinedProvider({ children }: CombinedProviderProps) {
   // Initialize background sync for all contexts
   useBackgroundSync();
 
-  // Re-enable providers with improved rate limiting
   return (
     <PermissionProvider>
-      <ProductProvider>
-        <MaterialsProvider>
-          <PartnersProvider>
-            <ToolsProvider>
-              <AgentsProvider>
-                {children}
-              </AgentsProvider>
-            </ToolsProvider>
-          </PartnersProvider>
-        </MaterialsProvider>
-      </ProductProvider>
+      <YoutubeProvider>
+        <PartnersProvider>
+          <SuppliersProvider>
+            <MaterialsProvider>
+              <ProductProvider>
+                <ToolsProvider>
+                  <PromptsProvider>
+                    <AgentsProvider>
+                      {children}
+                    </AgentsProvider>
+                  </PromptsProvider>
+                </ToolsProvider>
+              </ProductProvider>
+            </MaterialsProvider>
+          </SuppliersProvider>
+        </PartnersProvider>
+      </YoutubeProvider>
     </PermissionProvider>
   );
 }
