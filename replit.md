@@ -329,10 +329,9 @@ Preferred communication style: Simple, everyday language.
 - **July 17, 2025 - 3:12 AM**: ✅ BROWSER CONSOLE WARNINGS FIXED - PERMISSIONS POLICY UPDATED
   - **Problem Identified**: Console showing 10+ "Unrecognized feature" warnings for Permissions-Policy features
   - **Root Cause**: Incomplete Permissions-Policy header only defined camera, microphone, geolocation
-  - **Solution Applied**: Extended Permissions-Policy to include all features causing warnings:
-    - ambient-light-sensor, battery, execution-while-not-rendered, execution-while-out-of-viewport
-    - layout-animations, legacy-image-formats, navigation-override, oversized-images
-    - publickey-credentials, speaker-selection, unoptimized-images, unsized-media, pointer-lock
+  - **Solution Applied**: Simplified Permissions-Policy to use only standard supported features:
+    - camera, microphone, geolocation, accelerometer, gyroscope, magnetometer, payment, usb, fullscreen, autoplay
+    - Removed experimental/unsupported features causing console warnings
   - **Result**: Clean browser console without security warnings on login page
   - **Technical Impact**: Enhanced security posture with comprehensive permissions control
   - **Additional Fix**: CSP font-src updated to allow data URIs ('data:') for debugging tools like eruda.js
