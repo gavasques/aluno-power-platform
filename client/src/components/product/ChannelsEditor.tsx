@@ -351,7 +351,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
   // Update form when product loads
   React.useEffect(() => {
     if (product && isOpen) {
-      const productChannels = (product as any).channels || [];
+      const productChannels = (product as any).data?.channels || [];
       
       // Create a map of existing channels
       const channelMap = new Map(productChannels.map((ch: any) => [ch.type, ch]));
@@ -391,8 +391,8 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
     watchedValues.channels.forEach((channel, index) => {
       if (channel.isActive && channel.data) {
         const productBase = {
-          costItem: parseFloat((product as any).costItem) || 0,
-          taxPercent: parseFloat((product as any).taxPercent) || 0,
+          costItem: parseFloat((product as any).data?.costItem) || 0,
+          taxPercent: parseFloat((product as any).data?.taxPercent) || 0,
         };
 
         const calculation = calculateChannelProfitability(
@@ -560,8 +560,8 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
                     {isActive && isExpanded && (
                       <CardContent className="space-y-3 pt-0">
                         <div className="text-sm text-muted-foreground mb-3">
-                          Custo do produto: R$ {(product as any)?.costItem || '0,00'} | 
-                          Impostos: {(product as any)?.taxPercent || '0,00'}%
+                          Custo do produto: R$ {(product as any)?.data?.costItem || '0,00'} | 
+                          Impostos: {(product as any)?.data?.taxPercent || '0,00'}%
                         </div>
                         
                         <div className="grid grid-cols-2 gap-3">
