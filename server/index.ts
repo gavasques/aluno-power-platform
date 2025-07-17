@@ -24,7 +24,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false // Allow embedding for development
 }));
 app.use(securityHeaders); // Custom security headers including CSP
-app.use('/api', apiLimiter); // Rate limiting for API routes
+// Rate limiting disabled for development - app.use('/api', apiLimiter);
 
 // PHASE 1 PERFORMANCE OPTIMIZATIONS
 app.use(compressionMiddleware); // Enhanced compression
@@ -63,12 +63,12 @@ app.use(sanitizeBody);
 // Apply enhanced authentication to all API routes
 app.use(enhancedAuth);
 
-// Apply CSRF protection to state-changing operations
-app.use(enhancedCSRF);
+// CSRF protection disabled for development
+// app.use(enhancedCSRF);
 
-// Apply anonymous rate limiting for public endpoints
-app.use('/api/auth/login', anonymousRateLimiter(5, 15)); // 5 attempts per 15 minutes
-app.use('/api/auth/register', anonymousRateLimiter(3, 60)); // 3 registrations per hour
+// Rate limiting disabled for development
+// app.use('/api/auth/login', anonymousRateLimiter(5, 15)); // 5 attempts per 15 minutes
+// app.use('/api/auth/register', anonymousRateLimiter(3, 60)); // 3 registrations per hour
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -13,6 +13,9 @@ const PUBLIC_API_ENDPOINTS = [
   '/api/youtube-videos', // Public video listing
   '/api/news/published', // Public news
   '/api/updates/published', // Public updates
+  '/api/agents', // Public agents listing
+  '/api/news/published/preview', // Public news preview
+  '/api/updates/published/preview', // Public updates preview
 ];
 
 // Endpoints that require specific handling
@@ -29,6 +32,8 @@ const SPECIAL_ENDPOINTS = {
     '/api/dashboard/summary',
     '/api/permissions/check',
     '/api/permissions/user-features',
+    '/api/news/published/preview',
+    '/api/updates/published/preview',
   ]
 };
 
@@ -61,6 +66,7 @@ export const enhancedAuth = async (req: Request, res: Response, next: NextFuncti
     '/api/tool-types$',
     '/api/partners$', // Partners listing is public
     '/api/materials$', // Materials listing is public
+    '/api/agents/[^/]+$', // Specific agent by ID is public
   ];
 
   if (req.method === 'GET' && matchesPattern(req.path, publicGetPatterns)) {
