@@ -112,8 +112,8 @@ export default function ProductBasicDataEdit() {
         method: "PATCH",
         body: JSON.stringify({
           ...data,
-          brandId: data.brandId ? parseInt(data.brandId) : null,
-          supplierId: data.supplierId ? parseInt(data.supplierId) : null,
+          brandId: data.brandId && data.brandId !== "0" ? parseInt(data.brandId) : null,
+          supplierId: data.supplierId && data.supplierId !== "0" ? parseInt(data.supplierId) : null,
         }),
       });
 
@@ -257,7 +257,7 @@ export default function ProductBasicDataEdit() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">Nenhuma marca</SelectItem>
+                            <SelectItem value="0">Nenhuma marca</SelectItem>
                             {brands.map((brand: any) => (
                               <SelectItem key={brand.id} value={brand.id.toString()}>
                                 {brand.name}
@@ -283,7 +283,7 @@ export default function ProductBasicDataEdit() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">Nenhum fornecedor</SelectItem>
+                            <SelectItem value="0">Nenhum fornecedor</SelectItem>
                             {suppliers.map((supplier: any) => (
                               <SelectItem key={supplier.id} value={supplier.id.toString()}>
                                 {supplier.tradeName}
