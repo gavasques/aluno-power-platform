@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGetFeatureCost, useCanProcessFeature } from "@/hooks/useFeatureCosts";
 import { logger } from "@/utils/logger";
+import { queryClient } from "@/lib/queryClient";
 
 interface CreditCheckResult {
   canProcess: boolean;
@@ -115,6 +116,10 @@ export function useCreditSystem() {
 
       const requiredCredits = getFeatureCost(params.featureCode);
       logger.debug(`💾 Log AI salvo - Feature: ${params.featureCode}, Créditos: ${requiredCredits}, Usuário: ${user.id}`);
+      
+      // Invalidar cache de créditos para atualizar o saldo na interface
+      await queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/credits/balance'] });
       
       return true;
     } catch (error) {
