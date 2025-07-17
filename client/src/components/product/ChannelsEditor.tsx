@@ -331,12 +331,13 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
     });
   };
 
-  // Load product data
+  // Load product data - force fresh API call
   const { data: product, isLoading: loadingProduct } = useQuery({
-    queryKey: [`/api/products/${productId}`],
+    queryKey: [`/api/products/${productId}`, 'channels-editor', Date.now()], // Force unique key
     enabled: isOpen,
-    staleTime: 0, // Force fresh data
-    gcTime: 0, // Don't cache
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
   });
 
   const form = useForm<ChannelFormData>({
@@ -357,6 +358,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       
       // Check response structure and extract channels
       console.log('🔍 [FULL RESPONSE] Complete product response:', product);
+      console.log('🔍 [QUERY KEY] Using query key:', [`/api/products/${productId}`, 'channels-editor', Date.now()]);
       
       // Handle both response formats: direct channels or nested in data
       let productChannels = [];

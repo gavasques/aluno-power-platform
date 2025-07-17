@@ -111,23 +111,24 @@ export class ProductController extends BaseController {
       
       const productId = ValidationHelper.parseId(id);
       
-      // Use optimized service if user is authenticated
-      if (userId) {
-        const product = await optimizedProductService.getOptimizedProduct(productId, userId);
-        if (!product) {
-          ResponseHandler.notFound(res, 'Product not found or access denied');
-          return;
-        }
-        ResponseHandler.success(res, product);
-      } else {
-        // Fallback for unauthenticated requests
-        const product = await storage.getProduct(productId);
-        if (!product) {
-          ResponseHandler.notFound(res, 'Product not found');
-          return;
-        }
-        ResponseHandler.success(res, product);
+      // TEMPORARY DEBUG: Force direct storage call to bypass OptimizedProductService
+      const product = await storage.getProduct(productId);
+      
+      console.log('🔍 [DEBUG GETPRODUCT] Raw from storage:', JSON.stringify(product, null, 2));
+      
+      // Verify user ownership if userId provided
+      if (product && userId && product.userId !== userId) {
+        ResponseHandler.notFound(res, 'Product not found or access denied');
+        return;
       }
+      
+      if (!product) {
+        ResponseHandler.notFound(res, 'Product not found');
+        return;
+      }
+      
+      console.log('🔍 [DEBUG GETPRODUCT] Before ResponseHandler.success - channels:', JSON.stringify(product.channels, null, 2));
+      ResponseHandler.success(res, product);
     } catch (error) {
       this.handleError(res, error, 'Failed to fetch product');
     }
