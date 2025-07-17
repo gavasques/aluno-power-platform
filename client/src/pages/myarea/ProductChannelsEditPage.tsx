@@ -18,10 +18,12 @@ export default function ProductChannelsEditPage({}: ProductChannelsEditPageProps
   const productId = window.location.pathname.split('/')[3];
 
   // Get product data
-  const { data: product, isLoading } = useQuery({
+  const { data: productResponse, isLoading } = useQuery({
     queryKey: [`/api/products/${productId}`],
     enabled: !!productId,
   });
+
+  const product = productResponse?.data;
 
   const handleBack = () => {
     setLocation('/minha-area/produtos');
