@@ -18,6 +18,12 @@ export function useWebSocket() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Prevent WebSocket connection if no host is available (avoiding localhost:undefined errors)
+    if (!window.location.host || window.location.host.includes('undefined')) {
+      logger.warn(`⚠️ [WS_CLIENT] Invalid host detected: ${window.location.host}, skipping WebSocket connection`);
+      return;
+    }
+    
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
     const wsUrl = `${protocol}//${host}/ws`;
@@ -181,6 +187,12 @@ export function useWebSocket() {
   }, []);
 
   const connect = useCallback(() => {
+    // Prevent connection if host is invalid
+    if (!window.location.host || window.location.host.includes('undefined')) {
+      logger.warn(`⚠️ [WS_CLIENT] Invalid host in connect: ${window.location.host}, skipping connection`);
+      return;
+    }
+    
     // connectWebSocket is defined in the useEffect above
     if (wsRef.current?.readyState !== WebSocket.OPEN) {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

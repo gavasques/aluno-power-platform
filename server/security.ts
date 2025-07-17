@@ -27,11 +27,12 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://replit.com; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://replit.com https://cdn.jsdelivr.net; " +
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "font-src 'self' https://fonts.gstatic.com data:; " +
+    "font-src 'self' https://fonts.gstatic.com data: blob:; " +
     "img-src 'self' data: https: blob:; " +
-    "connect-src 'self' wss: ws:; " +
+    "connect-src 'self' wss: ws: https:; " +
+    "frame-src 'self' https://www.youtube.com https://youtube.com; " +
     "frame-ancestors 'none'; " +
     "base-uri 'self';"
   );
