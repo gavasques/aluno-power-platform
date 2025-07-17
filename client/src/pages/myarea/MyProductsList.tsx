@@ -288,7 +288,7 @@ export default function MyProductsList() {
                   const isExpanded = expandedRows.has(product.id);
 
                   return (
-                    <div key={product.id}>
+                    <React.Fragment key={product.id}>
                       <TableRow 
                         key={product.id}
                         className="cursor-pointer hover:bg-blue-50/30 transition-colors border-b border-gray-100"
@@ -522,7 +522,7 @@ export default function MyProductsList() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </div>
+                    </React.Fragment>
                   );
                 })
               )}
