@@ -39,7 +39,8 @@ export class AuthService {
 
   private static async makeRequest<T = any>(
     url: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    skipAuth: boolean = false
   ): Promise<T> {
     const token = localStorage.getItem('auth_token');
     
@@ -47,7 +48,8 @@ export class AuthService {
       'Content-Type': 'application/json',
     };
 
-    if (token) {
+    // Only add Authorization header if not skipping auth and token exists
+    if (!skipAuth && token) {
       defaultHeaders['Authorization'] = `Bearer ${token}`;
     }
 
@@ -98,7 +100,7 @@ export class AuthService {
       const data = await AuthService.makeRequest(AuthService.ENDPOINTS.REGISTER, {
         method: 'POST',
         body: JSON.stringify(userData),
-      });
+      }, true); // Skip auth for registration
 
       return {
         success: true,

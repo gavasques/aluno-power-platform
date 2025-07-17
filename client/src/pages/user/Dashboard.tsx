@@ -101,14 +101,10 @@ const UserDashboard = () => {
   const [newsModalOpen, setNewsModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
 
-  // Função para buscar dados completos de uma notícia
+  // Função para buscar dados completos de uma notícia (público)
   const fetchFullNews = async (newsId: number) => {
     try {
-      const response = await fetch(`/api/news/${newsId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      });
+      const response = await fetch(`/api/news/${newsId}`);
       if (response.ok) {
         return await response.json();
       }
@@ -118,14 +114,10 @@ const UserDashboard = () => {
     return null;
   };
 
-  // Função para buscar dados completos de uma novidade
+  // Função para buscar dados completos de uma novidade (público)
   const fetchFullUpdate = async (updateId: number) => {
     try {
-      const response = await fetch(`/api/updates/${updateId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      });
+      const response = await fetch(`/api/updates/${updateId}`);
       if (response.ok) {
         return await response.json();
       }
@@ -157,15 +149,17 @@ const UserDashboard = () => {
   const { data: userSummary, isLoading } = useQuery({
     queryKey: ['/api/dashboard/summary'],
     enabled: true,
-    retry: false,
+    retry: 1,
     staleTime: 5 * 60 * 1000, // 5 minutos
+    refetchOnMount: false, // Avoid refetch on mount
+    refetchOnWindowFocus: false, // Avoid refetch on focus
   });
 
   // Log para debug
   const { data: youtubeVideos, isLoading: videosLoading, refetch: refetchVideos } = useQuery<YouTubeVideo[]>({
     queryKey: ['/api/youtube-videos'],
-    enabled: true,
-    retry: false,
+    enabled: false, // Disable YouTube videos for now to reduce requests
+    retry: 1,
     staleTime: 5 * 60 * 1000, // 5 minutos de cache normal
     gcTime: 15 * 60 * 1000, // 15 minutos
     refetchOnWindowFocus: false, // Sem refetch automático
@@ -174,32 +168,22 @@ const UserDashboard = () => {
 
 
 
-  // Fetch published news preview (lightweight)
+  // Fetch published news preview (lightweight) - usando queryClient padrão
   const { data: newsData = [], isLoading: newsLoading } = useQuery<Partial<News>[]>({
     queryKey: ['/api/news/published/preview'],
-    queryFn: async () => {
-      const response = await fetch('/api/news/published/preview');
-      if (!response.ok) {
-        throw new Error('Failed to fetch news');
-      }
-      return response.json();
-    },
+    enabled: !!userSummary, // Só carrega após o dashboard summary
     staleTime: 5 * 60 * 1000, // 5 minutes cache
     gcTime: 15 * 60 * 1000,
+    retry: 1,
   });
 
-  // Fetch published updates preview (lightweight)
+  // Fetch published updates preview (lightweight) - usando queryClient padrão
   const { data: updatesData = [], isLoading: updatesLoading } = useQuery<Partial<Update>[]>({
     queryKey: ['/api/updates/published/preview'],
-    queryFn: async () => {
-      const response = await fetch('/api/updates/published/preview');
-      if (!response.ok) {
-        throw new Error('Failed to fetch updates');
-      }
-      return response.json();
-    },
+    enabled: !!userSummary, // Só carrega após o dashboard summary
     staleTime: 5 * 60 * 1000, // 5 minutes cache
     gcTime: 15 * 60 * 1000,
+    retry: 1,
   });
 
   const handleQuickAction = async (action: string) => {
