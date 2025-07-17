@@ -1,12 +1,28 @@
+console.log('🚨 main.tsx: File loaded - very first line');
+
 import { createRoot } from 'react-dom/client'
+console.log('🚨 main.tsx: createRoot imported');
+
 import App from './App.tsx'
+console.log('🚨 main.tsx: App imported');
+
 import './index.css'
+console.log('🚨 main.tsx: index.css imported');
+
 import { initEnvironmentProtection } from './utils/environmentDetection'
+console.log('🚨 main.tsx: initEnvironmentProtection imported');
+
 import { initDevelopmentCleanup } from './utils/developmentCleanup'
+console.log('🚨 main.tsx: initDevelopmentCleanup imported');
+
+console.log('🚨 main.tsx: All imports complete, calling init functions...');
 
 // Initialize environment protection and cleanup before anything else
 initEnvironmentProtection();
+console.log('🚨 main.tsx: initEnvironmentProtection called');
+
 initDevelopmentCleanup();
+console.log('🚨 main.tsx: initDevelopmentCleanup called');
 
 // Global error handling for unhandled promise rejections
 window.addEventListener('unhandledrejection', (event) => {
