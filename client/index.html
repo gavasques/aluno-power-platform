@@ -39,6 +39,41 @@
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Block problematic WebSocket connections from debugging tools -->
+    <script>
+      // Override WebSocket constructor to block problematic connections
+      const OriginalWebSocket = window.WebSocket;
+      window.WebSocket = function(url, protocols) {
+        // Block connections from debugging tools that cause console errors
+        if (typeof url === 'string' && (
+          url.includes('undefined') || 
+          url.includes('eruda') || 
+          url.includes('vconsole') ||
+          url.includes('MPauxjTNmQHX')
+        )) {
+          console.debug('Blocked WebSocket connection to:', url);
+          // Return a mock WebSocket that doesn't actually connect
+          return {
+            readyState: 3, // CLOSED
+            close: () => {},
+            send: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {}
+          };
+        }
+        // Allow legitimate WebSocket connections
+        return new OriginalWebSocket(url, protocols);
+      };
+      
+      // Copy static properties
+      Object.setPrototypeOf(window.WebSocket, OriginalWebSocket);
+      window.WebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
+      window.WebSocket.OPEN = OriginalWebSocket.OPEN;
+      window.WebSocket.CLOSING = OriginalWebSocket.CLOSING;
+      window.WebSocket.CLOSED = OriginalWebSocket.CLOSED;
+    </script>
+    
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
