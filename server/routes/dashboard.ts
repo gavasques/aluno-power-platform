@@ -14,17 +14,20 @@ router.get('/summary', requireAuth, async (req, res) => {
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    // Get user info
+    // Get user info with credits
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
-      columns: { id: true, name: true, email: true, role: true }
+      columns: { id: true, name: true, email: true, role: true, credits: true }
     });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Get current credit balance
+    // Get current credit balance from user table (primary source)
+    const currentBalance = parseFloat(user.credits?.toString() || '0');
+    
+    // Get legacy credit data for backwards compatibility
     const creditData = await db.query.userCreditBalance.findFirst({
       where: eq(userCreditBalance.userId, userId)
     });
@@ -79,10 +82,10 @@ router.get('/summary', requireAuth, async (req, res) => {
         name: user.name,
         email: user.email,
         plan: planName,
-        creditBalance: creditData?.currentBalance || 0
+        creditBalance: currentBalance
       },
       credits: {
-        current: creditData?.currentBalance || 0,
+        current: currentBalance,
         totalEarned: creditData?.totalEarned || 0,
         totalSpent: creditData?.totalSpent || 0,
         usageThisMonth: creditUsageThisMonth[0]?.totalSpent || 0

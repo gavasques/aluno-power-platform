@@ -121,7 +121,8 @@ export function useCreditSystem() {
       try {
         await queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
         await queryClient.invalidateQueries({ queryKey: ['/api/credits/balance'] });
-        console.log('🔄 Cache invalidated - credit balance should update');
+        await queryClient.refetchQueries({ queryKey: ['/api/dashboard/summary'] });
+        console.log('🔄 Cache invalidated and refetched - credit balance should now show:', currentBalance);
       } catch (cacheError) {
         console.error('❌ Error invalidating cache:', cacheError);
       }
