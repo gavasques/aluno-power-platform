@@ -151,12 +151,14 @@ const UserDashboard = () => {
     enabled: true,
     retry: 1,
     staleTime: 5 * 60 * 1000, // 5 minutos
+    refetchOnMount: false, // Avoid refetch on mount
+    refetchOnWindowFocus: false, // Avoid refetch on focus
   });
 
   // Log para debug
   const { data: youtubeVideos, isLoading: videosLoading, refetch: refetchVideos } = useQuery<YouTubeVideo[]>({
     queryKey: ['/api/youtube-videos'],
-    enabled: !!userSummary, // Só carrega após o dashboard summary
+    enabled: false, // Disable YouTube videos for now to reduce requests
     retry: 1,
     staleTime: 5 * 60 * 1000, // 5 minutos de cache normal
     gcTime: 15 * 60 * 1000, // 15 minutos

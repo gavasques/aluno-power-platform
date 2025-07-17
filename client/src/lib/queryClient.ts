@@ -14,13 +14,25 @@ export const queryClient = new QueryClient({
       notifyOnChangeProps: 'all', // Fine-grained re-render control
       // Optimize retry logic for better performance
       retry: (failureCount, error) => {
-        // Don't retry 4xx errors (client errors)
-        if (error instanceof Error && error.message.includes('HTTP 4')) {
-          return false;
+        // Don't retry 4xx errors (client errors) except 429
+        if (error instanceof Error) {
+          if (error.message.includes('HTTP 429')) {
+            // Retry 429 (rate limit) errors with longer delay
+            return failureCount < 3;
+          }
+          if (error.message.includes('HTTP 4')) {
+            return false;
+          }
         }
         return failureCount < 2; // Reduced retry count for faster failure handling
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Cap retry delay
+      retryDelay: (attemptIndex, error) => {
+        // Longer delay for rate limit errors
+        if (error?.message?.includes('HTTP 429')) {
+          return Math.min(5000 * 2 ** attemptIndex, 30000); // 5s, 10s, 30s
+        }
+        return Math.min(1000 * 2 ** attemptIndex, 5000); // Normal delay
+      },
       queryFn: async ({ queryKey, signal }) => {
         const url = queryKey[0] as string;
         
@@ -61,6 +73,12 @@ export const queryClient = new QueryClient({
               localStorage.removeItem('auth_token');
               window.location.href = '/login';
               throw new Error('Authentication required');
+            }
+            
+            // Handle 429 rate limit errors
+            if (response.status === 429) {
+              console.warn('Rate limit hit for:', url);
+              throw new Error(`HTTP 429: Rate limit exceeded`);
             }
             
             const errorText = await response.text().catch(() => 'Unknown error');
