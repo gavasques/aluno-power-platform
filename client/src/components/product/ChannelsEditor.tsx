@@ -680,3 +680,5 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
     </Dialog>
   );
 };
+
+export default ChannelsEditor;
