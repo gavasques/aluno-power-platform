@@ -25,6 +25,7 @@ export class LoggingService {
       if (creditsUsed === 0) {
         try {
           creditsUsed = await CreditService.deductCredits(userId, feature);
+          console.log(`✅ [CREDIT] Successfully deducted ${creditsUsed} credits for ${feature} - User: ${userId}`);
         } catch (creditError) {
           console.error(`❌ [CREDIT] Failed to deduct credits for ${feature}:`, creditError);
           // Continue sem descontar créditos se der erro na configuração
@@ -50,6 +51,7 @@ export class LoggingService {
 
       await db.insert(aiGenerationLogs).values(logData);
       
+      console.log(`💾 [AI_LOG] Saved generation log - User: ${userId}, Feature: ${feature}, Model: ${model}, Credits: ${creditsUsed}`);
       // AI log saved successfully
     } catch (error) {
       console.error(`❌ [AI_LOG] Error saving ${feature} log:`, error);

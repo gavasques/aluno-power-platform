@@ -282,6 +282,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
         outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
         totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
         cost: data.cost || 0,
+        creditsUsed: 0, // 0 para dedução automática através do LoggingService
         duration: duration
       });
 
