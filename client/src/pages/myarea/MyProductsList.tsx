@@ -119,20 +119,21 @@ export default function MyProductsList() {
   };
 
   const getChannelCalculations = (product: any): { channel: any; calculation: ChannelCalculationResult }[] => {
-    const activeChannels = getActiveChannels(product);
-    if (!activeChannels.length) return [];
+    try {
+      const activeChannels = getActiveChannels(product);
+      if (!activeChannels.length) return [];
 
-    return activeChannels.map((channel: any) => {
-      const productBase = {
-        costItem: parseFloat(product.costItem) || 0,
-        taxPercent: parseFloat(product.taxPercent) || 0,
-      };
+      return activeChannels.map((channel: any) => {
+        const productBase = {
+          costItem: parseFloat(product.costItem) || 0,
+          taxPercent: parseFloat(product.taxPercent) || 0,
+        };
 
-      return {
-        channel,
-            calculation: calculateChannelProfitability(channel.type, channel.data || {}, productBase)
-          };
-        });
+        return {
+          channel,
+          calculation: calculateChannelProfitability(channel.type, channel.data || {}, productBase)
+        };
+      });
     } catch (error) {
       return [];
     }
