@@ -295,11 +295,11 @@ export default function Login() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8 items-center min-h-screen">
+    <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 overflow-hidden">
+      <div className="container mx-auto px-4 py-4 h-full flex flex-col">
+        <div className="grid lg:grid-cols-2 gap-8 items-center flex-1">
           {/* Left Side - Login Form */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center lg:h-full">
             <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="text-center space-y-4">
                 <div className="flex justify-center mb-4">
@@ -602,23 +602,23 @@ export default function Login() {
           </div>
 
           {/* Right Side - System Information */}
-          <div className="space-y-8">
+          <div className="space-y-6 lg:h-full lg:flex lg:flex-col lg:justify-center">
             <div className="text-center lg:text-left">
               <Badge variant="secondary" className="mb-4 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200">
                 <Star className="w-3 h-3 mr-1" />
                 Plataforma Premium
               </Badge>
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
                 Transforme seu negócio na 
                 <span className="text-gradient bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> Amazon</span>
               </h1>
-              <p className="text-xl text-gray-600 mb-8">
+              <p className="text-lg text-gray-600 mb-6">
                 Mais de 10 agentes de IA especializados para otimizar suas vendas, 
                 criar conteúdo profissional e automatizar processos complexos.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {features.map((feature, index) => (
                 <Card key={index} className="border-0 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 hover:shadow-lg">
                   <CardContent className="p-4">
@@ -653,7 +653,7 @@ export default function Login() {
         </div>
         
         {/* Footer de Suporte */}
-        <div className="text-center py-6 border-t border-gray-200/50 mt-8">
+        <div className="text-center py-3 border-t border-gray-200/50 mt-auto">
           <p className="text-sm text-gray-600">
             Precisa de ajuda? Entre em contato com 
             <a 
