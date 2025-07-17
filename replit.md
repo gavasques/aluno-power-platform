@@ -326,6 +326,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 17, 2025 - 3:12 AM**: ✅ BROWSER CONSOLE WARNINGS FIXED - PERMISSIONS POLICY UPDATED
+  - **Problem Identified**: Console showing 10+ "Unrecognized feature" warnings for Permissions-Policy features
+  - **Root Cause**: Incomplete Permissions-Policy header only defined camera, microphone, geolocation
+  - **Solution Applied**: Extended Permissions-Policy to include all features causing warnings:
+    - ambient-light-sensor, battery, execution-while-not-rendered, execution-while-out-of-viewport
+    - layout-animations, legacy-image-formats, navigation-override, oversized-images
+    - publickey-credentials, speaker-selection
+  - **Result**: Clean browser console without security warnings on login page
+  - **Technical Impact**: Enhanced security posture with comprehensive permissions control
+
 - **July 17, 2025 - 2:50 AM**: ✅ EMAIL SYSTEM CUSTOMIZED WITH PERSONAL DOMAIN & SUPPORT EMAIL
   - **Custom Domain Integration**: All 8 email methods now use https://core-guilherme-vasques.com.br
   - **Support Email Updated**: Changed footer from "Equipe Core Guilherme Vasques / Suporte: o email" to "Precisa de suporte? / Envie email para suporte@guivasques.app"
