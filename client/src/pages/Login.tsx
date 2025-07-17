@@ -651,6 +651,19 @@ export default function Login() {
             </Card>
           </div>
         </div>
+        
+        {/* Footer de Suporte */}
+        <div className="text-center py-6 border-t border-gray-200/50 mt-8">
+          <p className="text-sm text-gray-600">
+            Precisa de ajuda? Entre em contato com 
+            <a 
+              href="mailto:suporte@guivasques.app" 
+              className="text-blue-600 hover:text-blue-700 font-medium ml-1"
+            >
+              suporte@guivasques.app
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
