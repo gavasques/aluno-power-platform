@@ -326,6 +326,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 17, 2025 - 3:20 PM**: ✅ AGENTS PAGE DUPLICATION FIXED - PÁGINA ADMINISTRATIVA ÓRFÃ REMOVIDA
+  - **Duplicação Crítica Corrigida**: Identificada e removida duplicação na página de agentes
+  - **Problema**: Existiam 2 arquivos diferentes com mesmo export name causando confusão:
+    - `AgentsPage.tsx` (291 linhas): Interface administrativa para criar/gerenciar agentes
+    - `agents.tsx` (409 linhas): Interface de usuário para listar/usar agentes
+  - **Solução**: Removido `AgentsPage.tsx` órfão, mantido `agents.tsx` funcional
+  - **Rota `/agentes`**: Corretamente usa `agents.tsx` para catálogo de agentes do usuário
+  - **Sistema Benefits**:
+    - Eliminação de código duplicado e confusão de nomenclatura
+    - Rota `/agentes` funciona corretamente com interface do usuário
+    - Redução de 291 linhas de código órfão
+    - Correção de potencial conflito de importação
+  - **Status**: Sistema de agentes limpo - apenas 1 página funcional para `/agentes`
+
 - **January 17, 2025 - 3:15 PM**: ✅ LOGIN SYSTEM CLEANUP COMPLETED - PÁGINAS INATIVAS E ÓRFÃS REMOVIDAS
   - **Páginas Removidas**: Eliminadas 3 páginas placeholder sem funcionalidade real:
     - `Profile.tsx`: Apenas placeholder "O conteúdo para a seção Meu Perfil será implementado aqui"
