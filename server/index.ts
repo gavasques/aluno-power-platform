@@ -14,6 +14,7 @@ import {
   sanitizeError 
 } from "./security";
 import { enhancedAuth, enhancedCSRF, anonymousRateLimiter } from "./middleware/enhancedAuth";
+import authRoutes from "./routes/auth.js";
 import path from "path";
 
 const app = express();
@@ -618,6 +619,9 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// Register authentication routes first (before other routes)
+app.use('/api/auth', authRoutes);
 
 (async () => {
   const server = await registerRoutes(app);

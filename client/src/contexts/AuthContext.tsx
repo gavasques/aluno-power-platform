@@ -1,183 +1,151 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '@shared/schema';
-import { AuthService, LoginCredentials, RegisterData } from '@/services/authService';
-import { prefetchUserData, backgroundPrefetch } from '@/lib/prefetch';
-import { logger } from '@/utils/logger';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// Interfaces seguindo Single Responsibility Principle
-interface AuthState {
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  credits: number;
+  isActive: boolean;
+}
+
+interface AuthContextType {
   user: User | null;
-  token: string | null;
-  isLoading: boolean;
   isAuthenticated: boolean;
-}
-
-interface AuthActions {
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string, name: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
-type AuthContextType = AuthState & AuthActions;
-
-// Token management seguindo Single Responsibility
-class TokenManager {
-  private static readonly TOKEN_KEY = 'auth_token';
-  private static readonly LOGOUT_FLAG = 'user_logged_out';
-
-  static getToken(): string | null {
-    return localStorage.getItem(TokenManager.TOKEN_KEY);
-  }
-
-  static setToken(token: string): void {
-    localStorage.setItem(TokenManager.TOKEN_KEY, token);
-    localStorage.removeItem(TokenManager.LOGOUT_FLAG);
-  }
-
-  static removeToken(): void {
-    localStorage.removeItem(TokenManager.TOKEN_KEY);
-    localStorage.setItem(TokenManager.LOGOUT_FLAG, 'true');
-  }
-
-  static wasLoggedOut(): boolean {
-    return localStorage.getItem(TokenManager.LOGOUT_FLAG) === 'true';
-  }
-}
-
-// Context seguindo Dependency Inversion Principle
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [state, setState] = useState<AuthState>({
-    user: null,
-    token: TokenManager.getToken(),
-    isLoading: true,
-    isAuthenticated: false,
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Authentication check seguindo Open/Closed Principle
-  const checkAuthStatus = async (): Promise<void> => {
-    if (TokenManager.wasLoggedOut()) {
-      setState(prev => ({ ...prev, isLoading: false }));
-      return;
-    }
+  const isAuthenticated = !!user;
 
-    const token = TokenManager.getToken();
-
-    if (!token) {
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false,
-        user: null,
-        token: null,
-        isAuthenticated: false
-      }));
-      return;
-    }
-
-    try {
-      const user = await AuthService.getCurrentUser();
-
-      if (user) {
-        setState({
-          user,
-          token,
-          isLoading: false,
-          isAuthenticated: true,
-        });
-        
-        // Prefetch user-specific data after successful authentication
-        prefetchUserData().catch(() => {
-          // Silent error handling
-        });
-      } else {
-        throw new Error('No user returned from API');
-      }
-    } catch (error) {
-      TokenManager.removeToken();
-      setState({
-        user: null,
-        token: null,
-        isLoading: false,
-        isAuthenticated: false,
-      });
-    }
-  };
-
-  // Login action seguindo Single Responsibility
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    const credentials: LoginCredentials = { email, password };
-    const result = await AuthService.login(credentials);
-
-    if (result.success && result.user && result.token) {
-      TokenManager.setToken(result.token);
-      setState({
-        user: result.user,
-        token: result.token,
-        isLoading: false,
-        isAuthenticated: true,
-      });
-    }
-
-    return result;
-  };
-
-  // Register action seguindo Single Responsibility
-  const register = async (email: string, name: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    const userData: RegisterData = { email, name, password };
-    const result = await AuthService.register(userData);
-
-    if (result.success && result.user && result.token) {
-      TokenManager.setToken(result.token);
-      setState({
-        user: result.user,
-        token: result.token,
-        isLoading: false,
-        isAuthenticated: true,
-      });
-    }
-
-    return result;
-  };
-
-  // Logout action seguindo Single Responsibility
-  const logout = (): void => {
-    AuthService.logout().catch(logger.error);
-    TokenManager.removeToken();
-    setState({
-      user: null,
-      token: null,
-      isLoading: false,
-      isAuthenticated: false,
-    });
-  };
-
+  // Check for existing authentication on mount
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
-  const contextValue: AuthContextType = {
-    ...state,
+  const checkAuthStatus = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/auth/verify', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData.user);
+      } else {
+        // Token is invalid
+        localStorage.removeItem('auth_token');
+      }
+    } catch (error) {
+      console.error('Auth verification failed:', error);
+      localStorage.removeItem('auth_token');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      setIsLoading(true);
+      
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem('auth_token', data.token);
+        setUser(data.user);
+        return { success: true };
+      } else {
+        return { 
+          success: false, 
+          error: data.message || 'Falha na autenticação' 
+        };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        error: 'Erro de conexão. Tente novamente.' 
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('auth_token');
+    setUser(null);
+  };
+
+  const refreshUser = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+
+      const response = await fetch('/api/auth/verify', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData.user);
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  };
+
+  const value: AuthContextType = {
+    user,
+    isAuthenticated,
+    isLoading,
     login,
-    register,
     logout,
+    refreshUser
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-// Hook seguindo Interface Segregation Principle
-export function useAuth(): AuthContextType {
+export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
