@@ -19,6 +19,8 @@ import { useFontLoader } from '@/lib/fontLoader';
 import { useOptimizedIcons } from '@/components/IconLoader';
 import { HelmetProvider } from 'react-helmet-async';
 
+console.log('📱 App.tsx loaded - imports successful');
+
 // Lazy load pages for better performance
 const Videos = lazy(() => import("./pages/Videos"));
 const News = lazy(() => import("./pages/News"));

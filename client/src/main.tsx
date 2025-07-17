@@ -44,4 +44,22 @@ window.addEventListener('error', (event) => {
   }
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+console.log('🚀 Starting React app initialization...');
+const rootElement = document.getElementById("root");
+console.log('🎯 Root element found:', rootElement);
+
+if (!rootElement) {
+  console.error('❌ CRITICAL: Root element not found in DOM!');
+} else {
+  console.log('📦 Creating React root...');
+  try {
+    const root = createRoot(rootElement);
+    console.log('✅ React root created successfully');
+    
+    console.log('🎨 Rendering App component...');
+    root.render(<App />);
+    console.log('✅ App component render called');
+  } catch (error) {
+    console.error('❌ Error during React initialization:', error);
+  }
+}
