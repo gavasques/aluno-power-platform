@@ -129,11 +129,15 @@ export default function MyProductsList() {
           taxPercent: parseFloat(product.taxPercent) || 0,
         };
 
-        const packCost = parseFloat(product.packCost) || 0;
+        const calculation = calculateChannelProfitability(
+          channel.type,
+          channel.data || {},
+          productBase
+        );
 
         return {
           channel,
-          calculation: calculateChannelProfitability(channel.type, channel.data || {}, productBase, packCost)
+          calculation
         };
       });
     } catch (error) {
@@ -463,8 +467,7 @@ export default function MyProductsList() {
                                           {
                                             costItem: product.costItem || 0,
                                             taxPercent: product.taxPercent || 0
-                                          },
-                                          product.packCost || 0
+                                          }
                                         );
 
                                         return (

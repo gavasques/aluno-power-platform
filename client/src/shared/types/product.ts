@@ -17,7 +17,7 @@ export interface ProductFormData {
   photo?: string;
   costItem?: number;
   taxPercent?: number;
-  packCost?: number;
+
   channels?: any[];
 }
 

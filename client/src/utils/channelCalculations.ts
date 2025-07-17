@@ -81,8 +81,7 @@ const calculateCommission = (
 export const calculateChannelProfitability = (
   channelType: string,
   channelData: ChannelData,
-  productBase: ProductBaseData,
-  packCost: number = 0
+  productBase: ProductBaseData
 ): ChannelCalculationResult => {
   const price = parseValue(channelData.price);
   const productCost = productBase.costItem;
@@ -101,8 +100,8 @@ export const calculateChannelProfitability = (
   // Calculate tax cost based on sale price
   const taxCost = price * (taxPercent / 100);
   
-  // Base costs (product + taxes + pack cost)
-  let totalCosts = productCost + taxCost + packCost;
+  // Base costs (product + taxes)
+  let totalCosts = productCost + taxCost;
   
   // Add channel-specific costs based on channel type
   switch (channelType) {
@@ -322,8 +321,7 @@ export interface CostBreakdownItem {
 export const getDetailedCostBreakdown = (
   channelType: string,
   channelData: ChannelData,
-  productBase: ProductBaseData,
-  packCost: number = 0
+  productBase: ProductBaseData
 ): CostBreakdownItem[] => {
   const price = parseValue(channelData.price);
   const productCost = productBase.costItem;
@@ -342,7 +340,6 @@ export const getDetailedCostBreakdown = (
     case 'SITE_PROPRIO':
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const sitePackaging = parseValue(channelData.packagingCostValue);
       const siteFixedCost = price * (parseValue(channelData.fixedCostPercent) / 100);
@@ -364,7 +361,6 @@ export const getDetailedCostBreakdown = (
     case 'AMAZON_FBM':
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const fbmCommission = price * (parseValue(channelData.commissionPercent) / 100);
       const fbmMarketplaceFee = parseValue(channelData.marketplaceFeeValue);
@@ -392,7 +388,6 @@ export const getDetailedCostBreakdown = (
     case 'AMAZON_FBA_ONSITE':
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const onsiteShipping = parseValue(channelData.shippingCost);
       const onsiteCommission = price * (parseValue(channelData.commissionPercent) / 100);
@@ -422,7 +417,6 @@ export const getDetailedCostBreakdown = (
     case 'AMAZON_DBA':
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const dbaShipping = parseValue(channelData.shippingCost);
       const dbaCommission = price * (parseValue(channelData.commissionPercent) / 100);
@@ -484,7 +478,6 @@ export const getDetailedCostBreakdown = (
     case 'MERCADO_LIVRE_ME1':
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const me1Commission = price * (parseValue(channelData.commissionPercent) / 100);
       const me1MarketplaceFee = parseValue(channelData.marketplaceFeeValue);
@@ -510,7 +503,6 @@ export const getDetailedCostBreakdown = (
     case 'MERCADO_LIVRE_FLEX':
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const flexShipping = parseValue(channelData.shippingCost);
       const flexCommission = price * (parseValue(channelData.commissionPercent) / 100);
@@ -540,7 +532,6 @@ export const getDetailedCostBreakdown = (
     case 'MERCADO_LIVRE_ENVIOS':
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const enviosShipping = parseValue(channelData.shippingCost);
       const enviosCommission = price * (parseValue(channelData.commissionPercent) / 100);
@@ -598,7 +589,6 @@ export const getDetailedCostBreakdown = (
     case 'SHOPEE':
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const shopeeCommission = price * (parseValue(channelData.commissionPercent) / 100);
       const shopeeMarketplaceFee = parseValue(channelData.marketplaceFeeValue);
@@ -626,7 +616,6 @@ export const getDetailedCostBreakdown = (
       const magaluFullCost = parseValue(channelData.productCostMagaluFull) || productCost;
       breakdown.push({ label: 'Custo do Produto MGL FULL', value: magaluFullCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const magaluFullCommission = price * (parseValue(channelData.commissionPercent) / 100);
       const magaluFullMarketplaceFee = parseValue(channelData.marketplaceFeeValue);
@@ -653,7 +642,6 @@ export const getDetailedCostBreakdown = (
       // MAGALU ENVIOS usa custo geral do produto
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const magaluEnviosCommission = price * (parseValue(channelData.commissionPercent) / 100);
       const magaluEnviosMarketplaceFee = parseValue(channelData.marketplaceFeeValue);
@@ -682,7 +670,6 @@ export const getDetailedCostBreakdown = (
       // TIKTOKSHOP usa custo geral do produto
       breakdown.push({ label: 'Custo do Produto', value: productCost });
       if (taxCost > 0) breakdown.push({ label: `Impostos s/ Venda (${taxPercent}%)`, value: taxCost });
-      if (packCost > 0) breakdown.push({ label: 'Custo de Embalagem', value: packCost });
       
       const tiktokCommission = price * (parseValue(channelData.commissionPercent) / 100);
       const tiktokMarketplaceFee = parseValue(channelData.marketplaceFeeValue);

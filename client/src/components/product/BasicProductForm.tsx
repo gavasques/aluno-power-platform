@@ -22,7 +22,7 @@ interface BasicProductFormProps {
     supplierId: string;
     ncm: string;
     costItem: number;
-    packCost: number;
+
     taxPercent: number;
     observations?: string;
   };
@@ -57,7 +57,7 @@ export const BasicProductForm = ({
     supplierId: '',
     ncm: '',
     costItem: 0,
-    packCost: 0,
+
     taxPercent: 0,
     observations: '',
     ...productData
@@ -361,16 +361,7 @@ export const BasicProductForm = ({
                 />
               </div>
 
-              <div>
-                <Label className="text-sm font-medium">Custo de Embalagem</Label>
-                <FormattedInput
-                  type="currency"
-                  value={safeProductData.packCost}
-                  onChange={(value) => onInputChange('packCost', value)}
-                  placeholder="R$ 0,00"
-                  className="mt-1"
-                />
-              </div>
+
 
               <div>
                 <Label className="text-sm font-medium">Imposto Global</Label>
