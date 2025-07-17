@@ -468,7 +468,7 @@ export default function MyProductsList() {
                                         return (
                                           <div className="ml-2 mt-1 space-y-1 text-xs border-l-2 border-gray-200 pl-2">
                                             {costBreakdown.map((item: CostBreakdownItem, index: number) => (
-                                              <div key={index} className={cn(
+                                              <div key={`${product.id}-${channel.type}-${item.label}-${index}`} className={cn(
                                                 "flex justify-between",
                                                 item.isRebate ? "text-green-600" : "text-gray-500"
                                               )}>

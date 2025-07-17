@@ -326,6 +326,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 17, 2025 - 9:00 PM**: ✅ EXCEL-BASED COST CALCULATION SYSTEM FULLY IMPLEMENTED - ADVANCED COMMISSION STRUCTURE OPERATIONAL
+  - **Excel Integration Complete**: All 18+ cost fields from Excel spreadsheet fully implemented in system
+  - **Advanced Commission Calculation**: Dynamic commission rates with thresholds ("up to value X", "above value X"), minimum/maximum limits
+  - **Channel Coverage**: All 10 sales channels implemented with comprehensive cost calculations:
+    - Site Próprio, Amazon (FBM/FBA/DBA/FBA OnSite), Mercado Livre (ME1/Flex/Envios/Full), Shopee, Magalu (Full/Envios), TikTok Shop, Other Marketplace
+  - **Cost Field Integration**: Product cost, packaging, taxes, fixed costs, marketing (TaCos), financial costs, rebates, shipping, prep center costs
+  - **Rebate System**: Fixed rebate calculation (now properly subtracted as income, not added as cost)
+  - **Profitability Analysis**: Real-time margin calculation, ROI analysis, cost breakdown with detailed explanations
+  - **Test Results Confirmed**: Product "Maca Portatil Dobrável Bkza" showing correct calculations: Product R$494.12, Tax 12% (R$155.88), costs R$660, profit R$639 (49.2% margin)
+  - **React Issues Fixed**: Fragment warnings resolved, unique keys added to all mapped components
+  - **Database Performance**: Individual product endpoint secured with user ownership verification
+  - **System Status**: Production-ready cost calculation system with Excel-based structure fully operational
+
 - **January 17, 2025 - 8:30 PM**: ✅ COMPREHENSIVE PRODUCT MANAGEMENT REFACTORING COMPLETED - SOLID PRINCIPLES & MODULAR ARCHITECTURE IMPLEMENTED
   - **Objective Achieved**: Complete refactoring of "Meus Produtos" area following 13 specific criteria including SOLID principles, DRY/KISS methodologies, modularization, and performance optimization
   - **Shared Modular Architecture Created**:
