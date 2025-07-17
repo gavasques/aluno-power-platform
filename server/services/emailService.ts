@@ -15,17 +15,17 @@ export class EmailService {
 
   // Initialize email transporter
   private static async getTransporter(): Promise<nodemailer.Transporter> {
-    if (this.transporter) {
-      return this.transporter;
-    }
+    // Force recreate transporter to apply new settings
+    this.transporter = null;
 
+    const port = parseInt(process.env.SMTP_PORT || '587');
     const config: EmailConfig = {
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+      host: process.env.SMTP_HOST?.trim() || 'smtp.gmail.com',
+      port: port,
+      secure: process.env.SMTP_SECURE === 'true' || port === 465, // true for 465, false for other ports
       auth: {
-        user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || '',
+        user: process.env.SMTP_USER?.trim() || '',
+        pass: process.env.SMTP_PASS?.trim() || '',
       },
     };
 
@@ -37,7 +37,7 @@ export class EmailService {
       pass: config.auth.pass ? '✅ Configurado' : '❌ Não configurado'
     });
 
-    this.transporter = nodemailer.createTransporter(config);
+    this.transporter = nodemailer.createTransport(config);
 
     // Verify connection
     try {
