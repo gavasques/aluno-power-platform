@@ -14,7 +14,9 @@ const PUBLIC_API_ENDPOINTS = [
   '/api/stripe/webhook', // Stripe webhooks have their own signature verification
   '/api/youtube-videos', // Public video listing
   '/api/news/published', // Public news
+  '/api/news/published/preview', // Public news preview
   '/api/updates/published', // Public updates
+  '/api/updates/published/preview', // Public updates preview
 ];
 
 // Endpoints that require specific handling
@@ -63,6 +65,8 @@ export const enhancedAuth = async (req: Request, res: Response, next: NextFuncti
     '/api/tool-types$',
     '/api/partners$', // Partners listing is public
     '/api/materials$', // Materials listing is public
+    '/api/agents$', // Agents listing is public for dashboard
+    '/api/youtube-channel-info$', // YouTube channel info is public
   ];
 
   if (req.method === 'GET' && matchesPattern(req.path, publicGetPatterns)) {

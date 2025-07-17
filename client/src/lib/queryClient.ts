@@ -23,17 +23,46 @@ export const queryClient = new QueryClient({
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Cap retry delay
       queryFn: async ({ queryKey, signal }) => {
         const url = queryKey[0] as string;
+        
+        // Check if this is a public endpoint
+        const publicEndpoints = [
+          '/api/news/published/preview',
+          '/api/updates/published/preview',
+          '/api/youtube-videos',
+          '/api/agents',
+          '/api/tools',
+          '/api/materials',
+          '/api/partners',
+          '/api/youtube-channel-info'
+        ];
+        
+        const isPublicEndpoint = publicEndpoints.some(endpoint => url.startsWith(endpoint));
         const token = localStorage.getItem('auth_token');
         
         try {
+          const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+          };
+          
+          // Only add auth token for non-public endpoints
+          if (!isPublicEndpoint && token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+          
           const response = await fetch(url, {
             signal, // Support query cancellation
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
+            headers,
           });
+          
           if (!response.ok) {
+            // Handle 401 specifically for protected endpoints only
+            if (response.status === 401 && !isPublicEndpoint) {
+              console.warn('Query authentication failed - removing token');
+              localStorage.removeItem('auth_token');
+              window.location.href = '/login';
+              throw new Error('Authentication required');
+            }
+            
             const errorText = await response.text().catch(() => 'Unknown error');
             throw new Error(`HTTP ${response.status}: ${errorText}`);
           }
@@ -89,6 +118,14 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   });
 
   if (!response.ok) {
+    // Handle 401 specifically to trigger logout
+    if (response.status === 401) {
+      console.warn('Authentication failed - removing token and redirecting to login');
+      localStorage.removeItem('auth_token');
+      window.location.href = '/login';
+      return {} as T;
+    }
+    
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
     throw new Error(error.error || `HTTP ${response.status}`);
   }
