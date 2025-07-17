@@ -18,20 +18,33 @@ export function useWebSocket() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Prevent WebSocket connection if no host is available (avoiding localhost:undefined errors)
-    if (!window.location.host || window.location.host.includes('undefined')) {
-      logger.warn(`⚠️ [WS_CLIENT] Invalid host detected: ${window.location.host}, skipping WebSocket connection`);
-      return;
+    // Get the actual host and port from the current location
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    let host = window.location.hostname;
+    let port = window.location.port;
+    
+    // If no port is specified, use the default for the protocol
+    if (!port) {
+      port = window.location.protocol === 'https:' ? '443' : '80';
     }
     
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    const wsUrl = `${protocol}//${host}/ws`;
+    // For development, use the Express server port (5000)
+    if (host === 'localhost' || host === '127.0.0.1') {
+      port = '5000';
+    }
+    
+    const wsUrl = `${protocol}//${host}:${port}/ws`;
+    
+    // Prevent WebSocket connection if host is invalid
+    if (!host || host === 'undefined') {
+      logger.warn(`⚠️ [WS_CLIENT] Invalid host detected: ${host}, skipping WebSocket connection`);
+      return;
+    }
 
     logger.debug(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
     logger.debug(`   🌐 URL: ${wsUrl}`);
     logger.debug(`   📍 Protocol: ${protocol}`);
-    logger.debug(`   🏠 Host: ${host}`);
+    logger.debug(`   🏠 Host: ${host}:${port}`);
 
     const connectWebSocket = () => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
