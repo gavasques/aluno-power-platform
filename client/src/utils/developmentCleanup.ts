@@ -50,17 +50,34 @@ export const blockGlobalPollution = () => {
   if (!import.meta.env.DEV) return;
   
   // Prevent external tools from polluting window object
-  Object.defineProperty(window, 'eruda', {
-    get: () => undefined,
-    set: () => false,
-    configurable: false
+  const blockedTools = ['eruda', 'vConsole', 'VConsole', '__REACT_DEVTOOLS_GLOBAL_HOOK__'];
+  
+  blockedTools.forEach(tool => {
+    Object.defineProperty(window, tool, {
+      get: () => undefined,
+      set: () => false,
+      configurable: false,
+      enumerable: false
+    });
   });
   
-  Object.defineProperty(window, 'vConsole', {
-    get: () => undefined,
-    set: () => false,
-    configurable: false
-  });
+  // Block script injection patterns used by debugging tools
+  const originalAppendChild = Document.prototype.appendChild;
+  Document.prototype.appendChild = function(child: Node) {
+    if (child instanceof HTMLScriptElement) {
+      const src = child.src || '';
+      const content = child.textContent || child.innerHTML || '';
+      
+      if (src.includes('eruda') || 
+          content.includes('eruda') || 
+          content.includes('localhost:undefined') ||
+          content.includes('WebSocket') && content.includes('undefined')) {
+        console.warn('🚫 Blocked problematic script injection');
+        return child; // Return but don't actually append
+      }
+    }
+    return originalAppendChild.call(this, child);
+  };
 };
 
 // Initialize all cleanup functions

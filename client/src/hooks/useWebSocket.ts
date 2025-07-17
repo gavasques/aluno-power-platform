@@ -20,7 +20,7 @@ export function useWebSocket() {
   useEffect(() => {
     // Skip WebSocket in development to avoid conflicts with Vite HMR and debugging tools
     if (import.meta.env.DEV) {
-      logger.debug(`🚧 [WS_CLIENT] Skipping WebSocket in development to avoid tool conflicts`);
+      console.log(`🚧 [WS_CLIENT] Skipping WebSocket in development to avoid tool conflicts`);
       return;
     }
     
@@ -43,11 +43,11 @@ export function useWebSocket() {
     
     // Prevent WebSocket connection if host is invalid
     if (!host || host === 'undefined') {
-      logger.warn(`⚠️ [WS_CLIENT] Invalid host detected: ${host}, skipping WebSocket connection`);
+      console.warn(`⚠️ [WS_CLIENT] Invalid host detected: ${host}, skipping WebSocket connection`);
       return;
     }
 
-    logger.debug(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
+    console.log(`🔌 [WS_CLIENT] Initializing WebSocket connection`);
     logger.debug(`   🌐 URL: ${wsUrl}`);
     logger.debug(`   📍 Protocol: ${protocol}`);
     logger.debug(`   🏠 Host: ${host}:${port}`);

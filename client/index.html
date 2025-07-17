@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Core Guilherme Vasques</title>
     
+    <!-- Early protection script - must run before any external tools -->
+    <script type="module" src="/src/utils/earlyProtection.ts"></script>
+    
     <!-- Optimized Font Loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
@@ -40,14 +43,10 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Replit development banner - only load in development -->
+    <!-- Replit development banner - disabled to prevent conflicts -->
     <script>
-      if (window.location.hostname === 'localhost' || window.location.hostname.includes('replit.dev')) {
-        const script = document.createElement('script');
-        script.src = 'https://replit.com/public/js/replit-dev-banner.js';
-        script.onerror = () => console.log('Replit banner failed to load');
-        document.head.appendChild(script);
-      }
+      // Disabled Replit banner to prevent development tool conflicts
+      // Original banner injection disabled for cleaner development environment
     </script>
   </body>
 </html>
