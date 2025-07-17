@@ -106,8 +106,12 @@ export default function MyProductsList() {
     setLocation(`/minha-area/produtos/${id}/editar-dados`);
   };
 
-  const handleEditPricing = (id: number) => {
-    setLocation(`/minha-area/produtos/${id}/editar-precos`);
+  const handleEditCosts = (id: number) => {
+    setLocation(`/minha-area/produtos/${id}/editar-custos`);
+  };
+
+  const handleEditChannels = (id: number) => {
+    setLocation(`/minha-area/produtos/${id}/editar-canais`);
   };
 
   const handleCreate = () => {
@@ -320,7 +324,7 @@ export default function MyProductsList() {
                   const isExpanded = expandedRows.has(product.id);
 
                   return (
-                    <React.Fragment key={`product-${product.id}`}>
+                    <React.Fragment key={product.id}>
                       <TableRow 
                         className="cursor-pointer hover:bg-blue-50/30 transition-colors border-b border-gray-100"
                         onClick={() => toggleRowExpansion(product.id)}
@@ -452,12 +456,24 @@ export default function MyProductsList() {
                             <Button
                               variant="outline"
                               size="sm"
+                              className="h-8 px-2 text-orange-600 border-orange-200 hover:bg-orange-50 hover:border-orange-400 hover:text-orange-700 transition-all duration-200"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditCosts(product.id);
+                              }}
+                              title="Editar custos e impostos"
+                            >
+                              <Calculator className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
                               className="h-8 px-2 text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleEditPricing(product.id);
+                                handleEditChannels(product.id);
                               }}
-                              title="Editar preços e canais"
+                              title="Editar canais de venda"
                             >
                               <TrendingUp className="h-4 w-4" />
                             </Button>

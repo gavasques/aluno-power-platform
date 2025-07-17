@@ -88,6 +88,7 @@ const UserProfile = lazy(() => import("./pages/myarea/UserProfile"));
 // My Area Product Management
 const MyProductsList = lazy(() => import("./pages/myarea/MyProductsList"));
 const ProductBasicDataEdit = lazy(() => import("./pages/myarea/ProductBasicDataEdit"));
+const ProductCostsEdit = lazy(() => import("./pages/myarea/ProductCostsEdit"));
 const ProductPricingChannelsEdit = lazy(() => import("./pages/myarea/ProductPricingChannelsEdit"));
 const ProductPreview = lazy(() => import("./pages/myarea/ProductPreview"));
 const ProductImportExport = lazy(() => import("./pages/myarea/ProductImportExport"));
@@ -791,7 +792,17 @@ function App() {
                             </ProtectedRoute>
                           </Route>
                           
-                          <Route path="/minha-area/produtos/:id/editar-precos">
+                          <Route path="/minha-area/produtos/:id/editar-custos">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductCostsEdit />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/minha-area/produtos/:id/editar-canais">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>

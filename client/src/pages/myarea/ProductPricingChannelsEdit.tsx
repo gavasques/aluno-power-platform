@@ -20,9 +20,6 @@ import { formatBRL } from "@/utils/pricingCalculations";
 import { calculateChannelProfitability } from "@/utils/channelCalculations";
 
 const pricingSchema = z.object({
-  costItem: z.number().min(0, "Custo deve ser positivo"),
-  taxPercent: z.number().min(0).max(100, "Taxa deve estar entre 0 e 100%"),
-  packCost: z.number().min(0, "Custo de embalagem deve ser positivo").optional(),
   channels: z.array(z.object({
     id: z.string().optional(),
     type: z.string(),
@@ -65,17 +62,12 @@ export default function ProductPricingChannelsEdit() {
   const form = useForm<PricingForm>({
     resolver: zodResolver(pricingSchema),
     defaultValues: {
-      costItem: 0,
-      taxPercent: 0,
-      packCost: 0,
       channels: [],
     },
   });
 
   const { watch } = form;
   const watchedChannels = watch("channels");
-  const watchedCostItem = watch("costItem");
-  const watchedTaxPercent = watch("taxPercent");
 
   // Get product data
   const { data: product, isLoading } = useQuery({
@@ -100,9 +92,6 @@ export default function ProductPricingChannelsEdit() {
       }
 
       form.reset({
-        costItem: product.costItem || 0,
-        taxPercent: product.taxPercent || 0,
-        packCost: product.packCost || 0,
         channels: Array.isArray(channels) ? channels : [],
       });
     }
@@ -139,8 +128,8 @@ export default function ProductPricingChannelsEdit() {
         channel.type,
         channel.data,
         {
-          costItem: watchedCostItem,
-          taxPercent: watchedTaxPercent,
+          costItem: product?.costItem || 0,
+          taxPercent: product?.taxPercent || 0,
         }
       );
     } catch (error) {
@@ -154,9 +143,6 @@ export default function ProductPricingChannelsEdit() {
       await apiRequest(`/api/products/${productId}`, {
         method: "PATCH",
         body: JSON.stringify({
-          costItem: data.costItem,
-          taxPercent: data.taxPercent,
-          packCost: data.packCost,
           channels: JSON.stringify(data.channels),
         }),
       });
@@ -213,9 +199,9 @@ export default function ProductPricingChannelsEdit() {
               Voltar
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Editar Preços e Canais</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Editar Canais de Venda</h1>
               <p className="text-muted-foreground">
-                Configure os custos, preços e canais de venda do produto
+                Configure os canais de venda e preços do produto
               </p>
               {product && (
                 <p className="text-sm text-gray-600 mt-1">
@@ -228,88 +214,6 @@ export default function ProductPricingChannelsEdit() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <Tabs defaultValue="costs" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="costs">Custos e Impostos</TabsTrigger>
-                <TabsTrigger value="channels">Canais de Venda</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="costs" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Custos do Produto</CardTitle>
-                    <CardDescription>
-                      Configure os custos e impostos básicos
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="costItem"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Custo do Item *</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                placeholder="0.00"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="taxPercent"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Taxa de Impostos (%)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.1"
-                                max="100"
-                                {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                placeholder="0.0"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="packCost"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Custo de Embalagem</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                placeholder="0.00"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="channels" className="space-y-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
@@ -516,8 +420,6 @@ export default function ProductPricingChannelsEdit() {
                     )}
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
 
             {/* Action buttons */}
             <div className="flex items-center justify-end gap-4 pt-4 border-t">
@@ -537,7 +439,7 @@ export default function ProductPricingChannelsEdit() {
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    Salvar Preços e Canais
+                    Salvar Canais
                   </>
                 )}
               </Button>
