@@ -4847,19 +4847,45 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     try {
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
       
+      console.log('🔐 Solicitação de recuperação de senha para:', email);
+      
       const resetToken = await AuthService.generatePasswordResetToken(email);
       if (!resetToken) {
+        console.log('❌ Email não encontrado:', email);
         return res.status(404).json({ error: 'Email não encontrado' });
       }
 
-      // In production, send email here
+      // Get user name for personalized email
+      const { users } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+      const { db } = await import('./db');
+      
+      const [user] = await db
+        .select({ name: users.name })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      // Send email using EmailService
+      const { EmailService } = await import('./services/emailService');
+      
+      await EmailService.sendPasswordReset(email, resetToken, user?.name);
+      
+      console.log('✅ Email de recuperação enviado para:', email);
+
       res.json({ 
         success: true, 
-        message: 'Token de reset enviado por email',
-        resetToken // Remove this in production
+        message: 'Instruções de recuperação enviadas para seu email'
       });
     } catch (error: any) {
-      console.error('Forgot password error:', error);
+      console.error('❌ Erro na recuperação de senha:', error);
+      
+      if (error.message === 'Falha ao enviar email de recuperação' || error.message === 'Falha na configuração SMTP') {
+        return res.status(500).json({ 
+          error: 'Erro no servidor de email. Tente novamente em alguns minutos.' 
+        });
+      }
+      
       res.status(400).json({ error: 'Dados inválidos' });
     }
   });

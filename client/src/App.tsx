@@ -19,6 +19,7 @@ import { HelmetProvider } from 'react-helmet-async';
 const Videos = lazy(() => import("./pages/Videos"));
 const News = lazy(() => import("./pages/News"));
 const Updates = lazy(() => import("./pages/Updates"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const Admin = lazy(() => import("./pages/Admin"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
@@ -132,6 +133,11 @@ function App() {
                             <Switch>
                           <Route path="/login" component={Login} />
                           <Route path="/auth" component={Login} />
+                          <Route path="/reset-password">
+                            <Suspense fallback={<PageLoader />}>
+                              <ResetPassword />
+                            </Suspense>
+                          </Route>
 
                           {/* Páginas principais de listagem */}
                           <Route path="/ferramentas">
