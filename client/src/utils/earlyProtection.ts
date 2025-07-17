@@ -17,7 +17,7 @@ declare global {
   // Only run in development
   if (typeof window === 'undefined') return;
   
-  console.log('🛡️ Early protection initializing...');
+  // Early protection initializing
   
   // Store original WebSocket immediately
   const OriginalWebSocket = window.WebSocket;
@@ -68,10 +68,10 @@ declare global {
         configurable: false
       });
       window.__WEBSOCKET_PROTECTED = true;
-      console.log('🛡️ WebSocket protection activated');
+      // WebSocket protection activated
     }
   } catch (e) {
-    console.warn('⚠️ Could not secure WebSocket:', e);
+    // Could not secure WebSocket
   }
   
   // Block script loading from problematic sources
@@ -93,5 +93,5 @@ declare global {
     return element;
   };
   
-  console.log('🛡️ Early protection complete');
+  // Early protection complete
 })();

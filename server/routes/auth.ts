@@ -14,7 +14,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_key_change_in_productio
 // Login endpoint
 router.post('/login', async (req, res) => {
   try {
-    console.log('🔐 Login attempt:', { email: req.body.email });
+
     
     const { email, password } = req.body;
 
@@ -33,7 +33,7 @@ router.post('/login', async (req, res) => {
       .limit(1);
 
     if (userResults.length === 0) {
-      console.log('❌ User not found:', email);
+
       return res.status(401).json({
         success: false,
         message: 'Credenciais inválidas'
@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
     const isValidPassword = await bcrypt.compare(password, user.password);
     
     if (!isValidPassword) {
-      console.log('❌ Invalid password for user:', email);
+
       return res.status(401).json({
         success: false,
         message: 'Credenciais inválidas'
@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    console.log('✅ Login successful for user:', email);
+
 
     res.json({
       success: true,
@@ -77,7 +77,7 @@ router.post('/login', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Login error:', error);
+
     res.status(500).json({
       success: false,
       message: 'Erro interno do servidor'
@@ -124,7 +124,7 @@ router.get('/verify', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Token verification error:', error);
+
     res.status(401).json({
       success: false,
       message: 'Token inválido'

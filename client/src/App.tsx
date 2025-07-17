@@ -8,13 +8,9 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import Login from '@/pages/Login';
 import Dashboard from '@/pages/user/Dashboard';
 
-console.log('📱 App.tsx loaded - imports successful');
-
 // Main App Router
 function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
-
-  console.log('🔍 App Router State:', { isAuthenticated, isLoading });
 
   if (isLoading) {
     return (
@@ -28,17 +24,14 @@ function AppRouter() {
   }
 
   if (!isAuthenticated) {
-    console.log('🔐 User not authenticated, showing login');
     return <Login />;
   }
 
-  console.log('✅ User authenticated, showing dashboard');
   return <Dashboard />;
 }
 
 // Main App Component
 export default function App() {
-  console.log('🚀 App component rendering');
   
   return (
     <QueryClientProvider client={queryClient}>

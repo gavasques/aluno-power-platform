@@ -32,7 +32,6 @@ export const blockProblematicWebSockets = () => {
   
   // Skip if already protected by early protection
   if ((window as any).__WEBSOCKET_PROTECTED) {
-    console.log('🛡️ WebSocket already protected by early protection');
     return;
   }
   
@@ -91,7 +90,7 @@ export const blockProblematicWebSockets = () => {
     });
     (window as any).__WEBSOCKET_PROTECTED = true;
   } catch (e) {
-    console.warn('⚠️ WebSocket already protected or cannot be redefined');
+    // WebSocket already protected or cannot be redefined
   }
 };
 
@@ -108,9 +107,9 @@ export const cleanupDevelopmentTools = () => {
           (window as any)[tool].destroy();
         }
         delete (window as any)[tool];
-        console.log(`🧹 Cleaned up problematic tool: ${tool}`);
+        // Tool cleaned up successfully
       } catch (error) {
-        console.warn(`⚠️ Could not clean up ${tool}:`, error);
+        // Could not clean up tool
       }
     }
   });
@@ -118,7 +117,6 @@ export const cleanupDevelopmentTools = () => {
 
 export const initEnvironmentProtection = () => {
   if (isDevelopment()) {
-    console.log('🛡️ Initializing development environment protection');
     blockProblematicWebSockets();
     cleanupDevelopmentTools();
   }

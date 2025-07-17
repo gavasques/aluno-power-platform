@@ -59,7 +59,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.removeItem('auth_token');
       }
     } catch (error) {
-      console.error('Auth verification failed:', error);
+      if (import.meta.env.DEV) {
+        console.error('Auth verification failed:', error);
+      }
       localStorage.removeItem('auth_token');
     } finally {
       setIsLoading(false);
@@ -91,7 +93,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         };
       }
     } catch (error) {
-      console.error('Login error:', error);
+      if (import.meta.env.DEV) {
+        console.error('Login error:', error);
+      }
       return { 
         success: false, 
         error: 'Erro de conexão. Tente novamente.' 
@@ -123,7 +127,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(userData.user);
       }
     } catch (error) {
-      console.error('Failed to refresh user:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to refresh user:', error);
+      }
     }
   };
 
