@@ -4636,8 +4636,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { UserGroupService } = await import('./services/userGroupService');
       await UserGroupService.assignDefaultGroup(user.id);
 
-      // Send welcome message
-      await whatsappService.sendWelcomeMessage(verificationRecord.phone, user.name);
+      // Welcome message is sent from main verification endpoint in index.ts
+      console.log('📱 Skipping duplicate welcome message (sent from main endpoint)');
 
       res.json({
         success: true,

@@ -496,6 +496,7 @@ app.post('/api/auth/verify-phone', async (req, res) => {
     await UserGroupService.assignDefaultGroup(user.id);
 
     // Send welcome message
+    console.log('📱 Sending welcome message to:', user.name);
     await whatsappService.sendWelcomeMessage(verificationRecord.phone, user.name);
 
     res.json({
