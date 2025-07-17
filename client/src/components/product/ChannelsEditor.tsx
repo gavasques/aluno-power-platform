@@ -353,7 +353,11 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
     if (product && isOpen) {
       console.log('📊 CHANNELS MODAL OPENED - Product ID:', productId);
       
-      const productChannels = (product as any).data?.channels || [];
+      // Check both possible locations for channels data
+      const productChannels = (product as any).data?.channels || (product as any).channels || [];
+      console.log('🔍 [DATA LOCATION] Product.data.channels:', (product as any).data?.channels);
+      console.log('🔍 [DATA LOCATION] Product.channels:', (product as any).channels);
+      console.log('🔍 [DATA LOCATION] Selected productChannels:', productChannels);
       
       // Verificar especificamente SITE_PROPRIO e AMAZON_FBA
       const siteProprio = productChannels.find((ch: any) => ch.type === 'SITE_PROPRIO');
@@ -361,6 +365,9 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       
       console.log('📊 Raw channel data - SITE_PROPRIO:', siteProprio);
       console.log('📊 Raw channel data - AMAZON_FBA:', amazonFBA);
+      console.log('📊 Product channels array:', productChannels);
+      console.log('📊 Product.data:', (product as any).data);
+      console.log('📊 Product.channels direct:', (product as any).channels);
       
       // Create a map of existing channels
       const channelMap = new Map(productChannels.map((ch: any) => [ch.type, ch]));
@@ -369,7 +376,11 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       const formChannels = Object.keys(CHANNEL_FIELDS).map(channelType => {
         const existingChannel = channelMap.get(channelType) as any;
         
-
+        if (channelType === 'SITE_PROPRIO' || channelType === 'AMAZON_FBA') {
+          console.log(`🔍 [CHANNEL MAPPING] Channel: ${channelType}`);
+          console.log(`🔍 [CHANNEL MAPPING] existingChannel:`, existingChannel);
+          console.log(`🔍 [CHANNEL MAPPING] existingChannel?.isActive:`, existingChannel?.isActive);
+        }
         
         // Convert string values to numbers for all channel data with safe type handling
         const convertedData: Record<string, any> = {};
