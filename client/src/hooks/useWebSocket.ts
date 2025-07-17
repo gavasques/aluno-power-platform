@@ -18,8 +18,15 @@ export function useWebSocket() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Temporarily disable WebSocket connections in development
+    if (import.meta.env.DEV) {
+      logger.debug('🔌 [WS_CLIENT] WebSocket disabled in development mode');
+      return;
+    }
+    
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
+    // Ensure proper URL format for WebSocket connection
     const wsUrl = `${protocol}//${host}/ws`;
 
     logger.debug(`🔌 [WS_CLIENT] Initializing WebSocket connection`);

@@ -18,15 +18,15 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // Content Security Policy
+  // Content Security Policy - relaxed for development
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; " +
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://replit.com; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "font-src 'self' https://fonts.gstatic.com; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com data:; " +
+    "font-src 'self' https://fonts.gstatic.com data: blob:; " +
     "img-src 'self' data: https: blob:; " +
-    "connect-src 'self' wss: ws:; " +
+    "connect-src 'self' wss: ws: https: http:; " +
     "frame-ancestors 'none'; " +
     "base-uri 'self';"
   );

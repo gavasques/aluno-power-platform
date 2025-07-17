@@ -34,6 +34,12 @@ export const queryClient = new QueryClient({
             },
           });
           if (!response.ok) {
+            // Handle authentication errors gracefully
+            if (response.status === 401) {
+              // Token might be expired or invalid
+              localStorage.removeItem('auth_token');
+              throw new Error('Authentication required - please login again');
+            }
             const errorText = await response.text().catch(() => 'Unknown error');
             throw new Error(`HTTP ${response.status}: ${errorText}`);
           }
@@ -42,7 +48,10 @@ export const queryClient = new QueryClient({
           if (signal?.aborted) {
             throw new Error('Query was cancelled');
           }
-          console.error('Query error for:', url, error);
+          // Only log in development
+          if (import.meta.env.DEV) {
+            console.error('Query error for:', url, error);
+          }
           throw error;
         }
       },
