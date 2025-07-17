@@ -64,6 +64,7 @@ export const queryClient = new QueryClient({
           const response = await fetch(url, {
             signal, // Support query cancellation
             headers,
+            credentials: 'same-origin', // Include cookies for same-origin requests
           });
           
           if (!response.ok) {

@@ -12,8 +12,7 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 
-    'camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), ' +
-    'magnetometer=(), payment=(), usb=(), fullscreen=(), autoplay=()'
+    'camera=(), microphone=(), geolocation=()'
   );
   
   // Only set HSTS in production with HTTPS

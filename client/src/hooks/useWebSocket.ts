@@ -18,6 +18,12 @@ export function useWebSocket() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Skip WebSocket in development to avoid conflicts with Vite HMR
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug(`🚧 [WS_CLIENT] Skipping WebSocket in development to avoid HMR conflicts`);
+      return;
+    }
+    
     // Get the actual host and port from the current location
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     let host = window.location.hostname;
