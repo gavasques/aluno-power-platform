@@ -173,7 +173,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
 
   const { toast } = useToast();
   const { user } = useAuth();
-  const { logAIGeneration, getFeatureCost } = useCreditSystem();
+  const { logAIGeneration, getFeatureCost, checkCredits, showInsufficientCreditsToast } = useCreditSystem();
   
   const FEATURE_CODE = 'agents.bullet_points';
 
@@ -215,6 +215,13 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         title: "❌ Campos obrigatórios",
         description: "Preencha o nome do produto e as informações detalhadas.",
       });
+      return;
+    }
+
+    // Verificar créditos primeiro
+    const creditCheck = await checkCredits(FEATURE_CODE);
+    if (!creditCheck.canProcess) {
+      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
       return;
     }
 
