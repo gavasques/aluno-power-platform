@@ -3,7 +3,6 @@ import { db } from '../db';
 import { 
   users, 
   userSubscriptions, 
-  userCreditBalance, 
   creditTransactions, 
   billingHistory,
   stripeProducts,

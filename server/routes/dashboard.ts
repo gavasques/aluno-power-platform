@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../security';
 import { db } from '../db';
-import { users, userCreditBalance, creditTransactions, userSubscriptions, userPlans, billingHistory, userActivityLogs, aiGenerationLogs, aiImgGenerationLogs } from '../../shared/schema';
+import { users, creditTransactions, userSubscriptions, userPlans, billingHistory, userActivityLogs, aiGenerationLogs, aiImgGenerationLogs } from '../../shared/schema';
 import { eq, desc, gte, sql } from 'drizzle-orm';
 
 const router = Router();
@@ -24,13 +24,8 @@ router.get('/summary', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Get current credit balance from user table (primary source)
+    // Get current credit balance from user table
     const currentBalance = parseFloat(user.credits?.toString() || '0');
-    
-    // Get legacy credit data for backwards compatibility
-    const creditData = await db.query.userCreditBalance.findFirst({
-      where: eq(userCreditBalance.userId, userId)
-    });
 
     // Get current subscription with plan
     const subscription = await db.query.userSubscriptions.findFirst({
@@ -86,8 +81,8 @@ router.get('/summary', requireAuth, async (req, res) => {
       },
       credits: {
         current: currentBalance,
-        totalEarned: creditData?.totalEarned || 0,
-        totalSpent: creditData?.totalSpent || 0,
+        totalEarned: 0, // Legacy field - no longer tracked separately
+        totalSpent: 0,  // Legacy field - no longer tracked separately
         usageThisMonth: creditUsageThisMonth[0]?.totalSpent || 0
       },
       subscription: subscription ? {
@@ -124,8 +119,10 @@ router.get('/credits', requireAuth, async (req, res) => {
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    const creditData = await db.query.userCreditBalance.findFirst({
-      where: eq(userCreditBalance.userId, userId)
+    // Get user's current credit balance
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { credits: true }
     });
 
     // Get recent credit transactions
@@ -136,9 +133,9 @@ router.get('/credits', requireAuth, async (req, res) => {
     });
 
     res.json({
-      balance: creditData?.balance || 0,
-      totalEarned: creditData?.totalEarned || 0,
-      totalSpent: creditData?.totalSpent || 0,
+      balance: parseFloat(user?.credits?.toString() || '0'),
+      totalEarned: 0, // Legacy field - no longer tracked separately
+      totalSpent: 0,  // Legacy field - no longer tracked separately
       recentTransactions
     });
   } catch (error) {

@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { userTrials, userPlans, userCreditBalance, creditTransactions } from '../../shared/schema';
+import { userTrials, userPlans, users, creditTransactions } from '../../shared/schema';
 import { eq, and, gte, lte } from 'drizzle-orm';
 
 interface TrialCreationResult {

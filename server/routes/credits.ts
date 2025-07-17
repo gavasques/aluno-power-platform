@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '../db';
-import { userCreditBalance, creditTransactions } from '../../shared/schema';
+import { users, creditTransactions } from '../../shared/schema';
 import { eq, and } from 'drizzle-orm';
 import { requireAuth } from '../security';
 
@@ -20,37 +20,40 @@ router.post('/deduct', requireAuth, async (req, res) => {
     const userId = req.user.id;
 
     // Verificar saldo atual do usuário
-    const [balance] = await db
-      .select()
-      .from(userCreditBalance)
-      .where(eq(userCreditBalance.userId, userId))
+    const [user] = await db
+      .select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, userId))
       .limit(1);
 
-    if (!balance) {
+    if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Usuário não possui saldo de créditos'
+        message: 'Usuário não encontrado'
       });
     }
 
+    const currentBalance = parseFloat(user.credits?.toString() || '0');
+
     // Verificar se tem créditos suficientes
-    if (balance.currentBalance < amount) {
+    if (currentBalance < amount) {
       return res.status(400).json({
         success: false,
-        message: `Saldo insuficiente. Você tem ${balance.currentBalance} créditos, mas precisa de ${amount}`,
-        currentBalance: balance.currentBalance,
+        message: `Saldo insuficiente. Você tem ${currentBalance} créditos, mas precisa de ${amount}`,
+        currentBalance: currentBalance,
         requiredAmount: amount
       });
     }
 
     // Descontar os créditos
+    const newBalance = currentBalance - amount;
     await db
-      .update(userCreditBalance)
+      .update(users)
       .set({
-        currentBalance: balance.currentBalance - amount,
-        totalSpent: balance.totalSpent + amount
+        credits: newBalance.toString(),
+        updatedAt: new Date()
       })
-      .where(eq(userCreditBalance.userId, userId));
+      .where(eq(users.id, userId));
 
     // Registrar transação
     await db.insert(creditTransactions).values({
@@ -63,18 +66,17 @@ router.post('/deduct', requireAuth, async (req, res) => {
       status: 'completed',
       metadata: { 
         source: 'system',
-        originalBalance: balance.currentBalance,
-        newBalance: balance.currentBalance - amount
+        originalBalance: currentBalance,
+        newBalance: newBalance
       }
     });
 
     // Retornar sucesso com novo saldo
-    const newBalance = balance.currentBalance - amount;
     
     res.json({
       success: true,
       message: `${amount} crédito(s) descontado(s) com sucesso`,
-      previousBalance: balance.currentBalance,
+      previousBalance: currentBalance,
       newBalance: newBalance,
       amountDeducted: amount,
       reason: reason
@@ -103,29 +105,20 @@ router.get('/balance', requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const [balance] = await db
-      .select()
-      .from(userCreditBalance)
-      .where(eq(userCreditBalance.userId, userId))
+    const [user] = await db
+      .select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, userId))
       .limit(1);
 
-    if (!balance) {
-      return res.json({
-        success: true,
-        balance: {
-          currentBalance: 0,
-          totalEarned: 0,
-          totalSpent: 0
-        }
-      });
-    }
+    const currentBalance = parseFloat(user?.credits?.toString() || '0');
 
     res.json({
       success: true,
       balance: {
-        currentBalance: balance.currentBalance,
-        totalEarned: balance.totalEarned,
-        totalSpent: balance.totalSpent
+        currentBalance: currentBalance,
+        totalEarned: 0, // Legacy field - no longer tracked separately
+        totalSpent: 0   // Legacy field - no longer tracked separately
       }
     });
 

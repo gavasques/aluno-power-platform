@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../../db';
-import { users, aiGenerationLogs, aiImgGenerationLogs, userCreditBalance } from '../../../shared/schema';
+import { users, aiGenerationLogs, aiImgGenerationLogs } from '../../../shared/schema';
 import { eq, and, gte, lte, desc, sql, count } from 'drizzle-orm';
 
 const router = Router();
@@ -109,12 +109,12 @@ router.get('/summary', async (req: Request, res: Response) => {
       .slice(0, 5);
 
     // Buscar saldo atual de créditos
-    const creditBalance = await db.select()
-      .from(userCreditBalance)
-      .where(eq(userCreditBalance.userId, user.id))
+    const userData = await db.select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, user.id))
       .limit(1);
 
-    const currentBalance = creditBalance[0]?.currentBalance || 0;
+    const currentBalance = parseFloat(userData[0]?.credits?.toString() || '0');
 
     const summary = {
       period,

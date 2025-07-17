@@ -1270,18 +1270,7 @@ export const userSubscriptions = pgTable("user_subscriptions", {
 }));
 
 // User Credit Balance
-export const userCreditBalance = pgTable("user_credit_balance", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull().unique(),
-  currentBalance: integer("current_balance").notNull().default(0),
-  totalEarned: integer("total_earned").notNull().default(0),
-  totalSpent: integer("total_spent").notNull().default(0),
-  lastResetDate: timestamp("last_reset_date"), // Monthly reset for subscription credits
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  userIdx: index("user_credit_balance_user_idx").on(table.userId),
-  balanceIdx: index("user_credit_balance_balance_idx").on(table.currentBalance),
-}));
+// userCreditBalance table removed - now using users.credits field directly
 
 // Credit Transactions
 export const creditTransactions = pgTable("credit_transactions", {
@@ -1626,12 +1615,7 @@ export const insertUserSubscriptionSchema = createInsertSchema(userSubscriptions
 export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
 export type UserSubscription = typeof userSubscriptions.$inferSelect;
 
-export const insertUserCreditBalanceSchema = createInsertSchema(userCreditBalance).omit({
-  id: true,
-  updatedAt: true,
-});
-export type InsertUserCreditBalance = z.infer<typeof insertUserCreditBalanceSchema>;
-export type UserCreditBalance = typeof userCreditBalance.$inferSelect;
+// userCreditBalance schemas removed - now using users.credits field directly
 
 export const insertCreditTransactionSchema = createInsertSchema(creditTransactions).omit({
   id: true,

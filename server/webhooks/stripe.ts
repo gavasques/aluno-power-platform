@@ -6,7 +6,6 @@ import {
   userSubscriptions, 
   billingHistory, 
   creditTransactions,
-  userCreditBalance,
   stripeWebhookEvents,
   stripeProducts,
   stripePrices

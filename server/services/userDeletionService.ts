@@ -6,7 +6,7 @@ import {
   upscaledImages, aiImgGenerationLogs, supplierBrands, supplierContacts,
   supplierConversations, supportTickets, supportTicketMessages,
   supportTicketFiles, infographics,
-  userSubscriptions, userCreditBalance, stripePaymentIntents,
+  userSubscriptions, stripePaymentIntents,
   stripeCheckoutSessions, userPermissionGroups, creditTransactions
 } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
@@ -96,8 +96,7 @@ export class UserDeletionService {
       const creditTrans = await db.delete(creditTransactions).where(eq(creditTransactions.userId, userId)).returning();
       deletedRecords.creditTransactions = creditTrans.length;
 
-      const creditBalance = await db.delete(userCreditBalance).where(eq(userCreditBalance.userId, userId)).returning();
-      deletedRecords.creditBalance = creditBalance.length;
+      // userCreditBalance table removed - credits now managed in users table
 
       const subscriptions = await db.delete(userSubscriptions).where(eq(userSubscriptions.userId, userId)).returning();
       deletedRecords.subscriptions = subscriptions.length;

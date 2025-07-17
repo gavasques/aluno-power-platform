@@ -326,6 +326,44 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 17, 2025 - 3:15 PM**: ✅ LOGIN SYSTEM CLEANUP COMPLETED - PÁGINAS INATIVAS E ÓRFÃS REMOVIDAS
+  - **Páginas Removidas**: Eliminadas 3 páginas placeholder sem funcionalidade real:
+    - `Profile.tsx`: Apenas placeholder "O conteúdo para a seção Meu Perfil será implementado aqui"
+    - `Courses.tsx`: Apenas placeholder "O conteúdo para a seção Nossos Cursos será implementado aqui"
+    - `Registrations.tsx`: Apenas placeholder "O conteúdo para a seção de Cadastros será implementado aqui"
+  - **NotFound.tsx Corrigida**: Página 404 atualizada com design moderno e uso correto do wouter
+    - Removido import incorreto `react-router-dom`
+    - Implementado design responsivo com tema dark/light
+    - Adicionado botões funcionais "Ir para início" e "Voltar"
+    - Interface em português com feedback visual melhorado
+  - **Roteamento Otimizado**: Removida rota duplicada `/auth` (mantida apenas `/login`)
+  - **Sistema Benefits**:
+    - Redução de código órfão e melhoria da manutenibilidade
+    - Correção de bugs de roteamento e compatibilidade
+    - Interface 404 profissional e funcional
+    - Sistema de login simplificado com uma única rota de entrada
+  - **Status**: Sistema de login limpo e otimizado - todas as páginas inativas removidas
+
+- **January 17, 2025 - 3:10 PM**: ✅ CREDIT SYSTEM UNIFIED & LEGACY TABLE REMOVED - SISTEMA COMPLETAMENTE CORRIGIDO
+  - **Root Cause Fixed**: Dashboard API was reading from wrong table (`user_credit_balance` with stale 976 credits) instead of actual `users.credits` field (26 credits)
+  - **Database Cleanup**: Removed unused `user_credit_balance` table completely from system
+  - **Code Cleanup**: Updated all 8+ files that referenced the removed table:
+    - `server/routes/dashboard.ts`: Now reads from `users.credits` directly
+    - `server/routes/credits.ts`: Updated to use `users` table for balance operations
+    - `server/routes/user/usage.ts`: Fixed credit balance queries
+    - `server/services/*`: Removed all `userCreditBalance` imports and references
+    - `shared/schema.ts`: Removed table definition and schemas
+  - **Credit Addition**: Added 5,000 credits to gavasques@gmail.com (now has 5,026 total credits)
+  - **System Benefits**:
+    - Single source of truth for credits: `users.credits` field only
+    - Eliminated stale data confusion between two credit systems
+    - Simplified database architecture and reduced complexity
+    - All credit operations now consistent across entire platform
+  - **Technical Result**: Credit balance now correctly shows 5,026 credits in both database and API responses
+  - **Status**: Credit system completely unified and functional - no more dual credit tables
+
+## Recent Changes
+
 - **January 15, 2025 - 8:35 PM**: ✅ CREDIT DISPLAY ADDED TO HEADER - USERS CAN NOW SEE THEIR CREDIT BALANCE AT ALL TIMES
   - **New Feature**: Added credit balance display to main header next to user avatar
   - **Component Created**: CreditDisplay.tsx with blue badge design showing coin icon and balance

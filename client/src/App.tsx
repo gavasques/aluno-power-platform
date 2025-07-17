@@ -130,7 +130,6 @@ function App() {
               <CombinedProvider>
                             <Switch>
                           <Route path="/login" component={Login} />
-                          <Route path="/auth" component={Login} />
 
                           {/* Páginas principais de listagem */}
                           <Route path="/ferramentas">
