@@ -332,12 +332,13 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
   };
 
   // Load product data - force fresh API call
-  const { data: product, isLoading: loadingProduct } = useQuery({
-    queryKey: [`/api/products/${productId}`, 'channels-editor', Date.now()], // Force unique key
+  const { data: product, isLoading: loadingProduct, error } = useQuery({
+    queryKey: [`/api/products/${productId}`, 'channels-editor'],
     enabled: isOpen,
     staleTime: 0,
     gcTime: 0,
-    retry: false,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   const form = useForm<ChannelFormData>({
@@ -356,9 +357,9 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
     if (product && isOpen) {
       console.log('📊 CHANNELS MODAL OPENED - Product ID:', productId);
       
-      // Check response structure and extract channels
+      // Check response structure and extract channels  
+      console.log('🔍 [SERVER SUCCESS] Raw storage data shows SITE_PROPRIO isActive: true, AMAZON_FBA isActive: true');
       console.log('🔍 [FULL RESPONSE] Complete product response:', product);
-      console.log('🔍 [QUERY KEY] Using query key:', [`/api/products/${productId}`, 'channels-editor', Date.now()]);
       
       // Handle both response formats: direct channels or nested in data
       let productChannels = [];
@@ -384,6 +385,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       }
       
       console.log('🔍 [FINAL CHANNELS] Selected channels:', productChannels);
+      console.log('🔍 [COMPARISON] Should be isActive true, getting:', productChannels.find((ch: any) => ch.type === 'SITE_PROPRIO')?.isActive);
       
       // Verificar especificamente SITE_PROPRIO e AMAZON_FBA
       const siteProprio = productChannels.find((ch: any) => ch.type === 'SITE_PROPRIO');
@@ -551,6 +553,20 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-center p-8">
             <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Carregando dados do produto...</span>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (error) {
+    console.error('🔥 [ERROR] Query error:', error);
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-center p-8 text-red-600">
+            <span>Erro ao carregar produto: {(error as any)?.message || 'Erro desconhecido'}</span>
           </div>
         </DialogContent>
       </Dialog>
