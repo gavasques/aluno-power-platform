@@ -18,9 +18,9 @@ export function useWebSocket() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Skip WebSocket in development to avoid conflicts with Vite HMR
-    if (process.env.NODE_ENV === 'development') {
-      logger.debug(`🚧 [WS_CLIENT] Skipping WebSocket in development to avoid HMR conflicts`);
+    // Skip WebSocket in development to avoid conflicts with Vite HMR and debugging tools
+    if (import.meta.env.DEV) {
+      logger.debug(`🚧 [WS_CLIENT] Skipping WebSocket in development to avoid tool conflicts`);
       return;
     }
     

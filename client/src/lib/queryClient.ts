@@ -90,7 +90,14 @@ export const queryClient = new QueryClient({
           if (signal?.aborted) {
             throw new Error('Query was cancelled');
           }
-          console.error('Query error for:', url, error);
+          
+          // Filter out network errors caused by external tools
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          if (!errorMessage.includes('localhost:undefined') && 
+              !errorMessage.includes('eruda') &&
+              !errorMessage.includes('kwift.CHROME.js')) {
+            console.error('Query error for:', url, error);
+          }
           throw error;
         }
       },
