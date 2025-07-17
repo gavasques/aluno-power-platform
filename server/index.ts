@@ -181,11 +181,11 @@ app.get('/api/evolution/test-complete', async (req, res) => {
     // Test 1: Basic API connectivity
     console.log('🧪 Test 1: Basic API connectivity');
     try {
-      const response = await fetch(\`\${url}\`, {
+      const response = await fetch(`${url}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${apiKey}\`
+          'Authorization': `Bearer ${apiKey}`
         }
       });
       
@@ -209,11 +209,11 @@ app.get('/api/evolution/test-complete', async (req, res) => {
     // Test 2: List instances
     console.log('🧪 Test 2: List instances');
     try {
-      const response = await fetch(\`\${url}/instance/fetchInstances\`, {
+      const response = await fetch(`${url}/instance/fetchInstances`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${apiKey}\`
+          'Authorization': `Bearer ${apiKey}`
         }
       });
       
@@ -240,11 +240,11 @@ app.get('/api/evolution/test-complete', async (req, res) => {
     // Test 3: Instance status
     console.log('🧪 Test 3: Instance status for', instance);
     try {
-      const response = await fetch(\`\${url}/instance/\${instance}/status\`, {
+      const response = await fetch(`${url}/instance/${instance}/status`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${apiKey}\`
+          'Authorization': `Bearer ${apiKey}`
         }
       });
       
@@ -304,7 +304,7 @@ app.get('/api/evolution/test-complete', async (req, res) => {
     };
     
     console.log('✅ Evolution API comprehensive test completed');
-    console.log('📊 Results:', \`\${successfulTests}/\${totalTests} tests passed\`);
+    console.log('📊 Results:', `${successfulTests}/${totalTests} tests passed`);
     
     res.json(testResults);
     
