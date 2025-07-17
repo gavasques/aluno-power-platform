@@ -10,13 +10,13 @@ import { usePartners } from "@/contexts/PartnersContext";
 import { useSuppliers } from "@/contexts/SuppliersContext";
 import { usePrompts } from "@/contexts/PromptsContext";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
-import ToolsManager from "@/components/admin/conteudo/ToolsManager";
-import MaterialsManager from "@/components/admin/conteudo/MaterialsManager";
+import ToolsManagerRefactored from "@/components/admin/tools/ToolsManagerRefactored";
+import MaterialsManagerRefactored from "@/components/admin/materials/MaterialsManagerRefactored";
 import SuppliersManager from "@/components/admin/conteudo/SuppliersManager";
 import SupplierForm from "@/components/admin/conteudo/SupplierForm";
 import SupplierDetail from "@/components/admin/conteudo/SupplierDetail";
-import MaterialFormAdmin from "./conteudo/MaterialFormAdmin";
-import MaterialDetailAdmin from "./conteudo/MaterialDetailAdmin";
+import { MaterialForm } from "@/components/admin/materials/MaterialForm";
+import { MaterialViewer } from "@/components/user/materials/MaterialViewer";
 import PromptsAIManager from "@/components/admin/cadastros/PromptsAIManager";
 import PromptForm from "@/components/admin/cadastros/PromptForm";
 import { NewsCenter } from "./content/NewsCenter";
@@ -54,14 +54,11 @@ const ContentManagement = () => {
   }
   
   if (subsection === 'ferramentas') {
-    return <ToolsManager />;
+    return <ToolsManagerRefactored />;
   }
 
   if (subsection === 'materiais') {
-    if (id === 'novo') return <MaterialFormAdmin />;
-    if (id && action === 'edit') return <MaterialFormAdmin />;
-    if (id) return <MaterialDetailAdmin />;
-    return <MaterialsManager />;
+    return <MaterialsManagerRefactored />;
   }
 
 
