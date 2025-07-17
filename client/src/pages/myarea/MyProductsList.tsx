@@ -403,8 +403,8 @@ export default function MyProductsList() {
                             </div>
                           ) : (
                             <div className="text-center py-2">
-                              <div className="bg-gray-50 rounded-md p-2 border-2 border-dashed border-gray-300 max-w-[180px] mx-auto">
-                                <span className="text-xs text-gray-500 italic">Nenhum canal</span>
+                              <div className="bg-orange-50 rounded-md p-2 border-2 border-dashed border-orange-200 max-w-[200px] mx-auto">
+                                <span className="text-xs text-orange-600 font-medium">Sem Canais Configurados</span>
                               </div>
                             </div>
                           )}

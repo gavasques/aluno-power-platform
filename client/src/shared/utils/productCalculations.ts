@@ -37,5 +37,14 @@ export function getFullCostCalculation(
 
 export function getActiveChannels(product: any): any[] {
   if (!product?.channels) return [];
-  return product.channels.filter((channel: any) => channel.isActive);
+  return product.channels.filter((channel: any) => {
+    // Channel must be active AND have meaningful data
+    return channel.isActive && 
+           channel.data && 
+           Object.keys(channel.data).length > 0 &&
+           // At least price or other meaningful field must be set
+           (channel.data.price > 0 || 
+            channel.data.commissionPercent > 0 || 
+            channel.data.packagingCostValue > 0);
+  });
 }
