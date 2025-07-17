@@ -33,6 +33,50 @@ const parseValue = (value: string | number | undefined): number => {
   return parseFloat(cleanValue) || 0;
 };
 
+// Calculate commission with variable rates, minimum, and maximum limits
+const calculateCommission = (
+  price: number,
+  channelData: ChannelData
+): number => {
+  // Check if variable commission is enabled
+  const commissionUpToValue = parseValue(channelData.commissionUpToValue);
+  const commissionUpToPercent = parseValue(channelData.commissionUpToPercent);
+  const commissionAbovePercent = parseValue(channelData.commissionAbovePercent);
+  
+  let commission = 0;
+  
+  // Variable commission calculation
+  if (commissionUpToValue > 0 && commissionUpToPercent > 0) {
+    // Calculate commission up to threshold
+    const upToAmount = Math.min(price, commissionUpToValue);
+    commission += upToAmount * (commissionUpToPercent / 100);
+    
+    // Calculate commission above threshold
+    const aboveAmount = Math.max(0, price - commissionUpToValue);
+    if (aboveAmount > 0 && commissionAbovePercent > 0) {
+      commission += aboveAmount * (commissionAbovePercent / 100);
+    }
+  } else {
+    // Standard commission calculation
+    const commissionPercent = parseValue(channelData.commissionPercent);
+    commission = price * (commissionPercent / 100);
+  }
+  
+  // Apply minimum and maximum limits
+  const minCommission = parseValue(channelData.minCommission);
+  const maxCommission = parseValue(channelData.maxCommission);
+  
+  if (minCommission > 0 && commission < minCommission) {
+    commission = minCommission;
+  }
+  
+  if (maxCommission > 0 && commission > maxCommission) {
+    commission = maxCommission;
+  }
+  
+  return commission;
+};
+
 // Calculate channel profitability based on channel type and data
 export const calculateChannelProfitability = (
   channelType: string,
@@ -71,48 +115,48 @@ export const calculateChannelProfitability = (
       break;
       
     case 'AMAZON_FBM':
-      totalCosts += price * (parseValue(channelData.commissionPercent) / 100); // Comissão
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
       totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
       totalCosts += price * (parseValue(channelData.installmentPercent) / 100); // Parcelamento
       totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
       totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
       totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
       totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
-      totalCosts += price * (parseValue(channelData.rebatePercent) / 100); // Rebate %
-      totalCosts += parseValue(channelData.rebateValue); // Rebate R$
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
       break;
       
     case 'AMAZON_FBA_ONSITE':
       totalCosts += parseValue(channelData.shippingCost); // Frete FBA ON Site
-      totalCosts += price * (parseValue(channelData.commissionPercent) / 100); // Comissão
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
       totalCosts += price * (parseValue(channelData.installmentPercent) / 100); // Parcelamento
       totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
       totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
       totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
       totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
-      totalCosts += price * (parseValue(channelData.rebatePercent) / 100); // Rebate %
-      totalCosts += parseValue(channelData.rebateValue); // Rebate R$
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
       totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
       break;
       
     case 'AMAZON_DBA':
       totalCosts += parseValue(channelData.shippingCost); // Frete DBA
-      totalCosts += price * (parseValue(channelData.commissionPercent) / 100); // Comissão
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
       totalCosts += price * (parseValue(channelData.installmentPercent) / 100); // Parcelamento
       totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
       totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
       totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
       totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
       totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
-      totalCosts += price * (parseValue(channelData.rebatePercent) / 100); // Rebate %
-      totalCosts += parseValue(channelData.rebateValue); // Rebate R$
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
       break;
       
     case 'AMAZON_FBA':
       totalCosts = parseValue(channelData.productCostFBA) || productCost; // Custo no FBA (ou produto base)
       totalCosts += taxCost; // Impostos
       totalCosts += parseValue(channelData.shippingCost); // Frete FBA
-      totalCosts += price * (parseValue(channelData.commissionPercent) / 100); // Comissão
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
       totalCosts += price * (parseValue(channelData.installmentPercent) / 100); // Parcelamento
       totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
       totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
@@ -120,70 +164,114 @@ export const calculateChannelProfitability = (
       totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
       totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
       totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
-      totalCosts += price * (parseValue(channelData.rebatePercent) / 100); // Rebate %
-      totalCosts += parseValue(channelData.rebateValue); // Rebate R$
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
       break;
       
     case 'MERCADO_LIVRE_ME1':
-      totalCosts += price * (parseValue(channelData.commissionPercent) / 100); // Comissão
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
       totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
       totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
       totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
       totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
       totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
-      totalCosts += price * (parseValue(channelData.rebatePercent) / 100); // Rebate %
-      totalCosts += parseValue(channelData.rebateValue); // Rebate R$
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
       break;
       
     case 'MERCADO_LIVRE_FLEX':
       totalCosts += parseValue(channelData.shippingCost); // Frete ML Flex
-      totalCosts += price * (parseValue(channelData.commissionPercent) / 100); // Comissão
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
       totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
       totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
       totalCosts -= parseValue(channelData.revenueMLFlex); // Receita ML Flex (subtract as it's revenue)
       totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
       totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
       totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
-      totalCosts += price * (parseValue(channelData.rebatePercent) / 100); // Rebate %
-      totalCosts += parseValue(channelData.rebateValue); // Rebate R$
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
       break;
       
     case 'MERCADO_LIVRE_ENVIOS':
       totalCosts += parseValue(channelData.shippingCost); // Frete ML Envios
-      totalCosts += price * (parseValue(channelData.commissionPercent) / 100); // Comissão
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
       totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
       totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
       totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
       totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
       totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
-      totalCosts += price * (parseValue(channelData.rebatePercent) / 100); // Rebate %
-      totalCosts += parseValue(channelData.rebateValue); // Rebate R$
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
       break;
       
     case 'MERCADO_LIVRE_FULL':
       totalCosts = parseValue(channelData.productCostMLFull) || productCost; // Custo no ML FULL
       totalCosts += taxCost; // Impostos
       totalCosts += parseValue(channelData.shippingCost); // Frete ML FULL
-      totalCosts += price * (parseValue(channelData.commissionPercent) / 100); // Comissão
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
       totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
       totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
       totalCosts += parseValue(channelData.prepCenterCost); // Prep Center
       totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
       totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
       totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
-      totalCosts += price * (parseValue(channelData.rebatePercent) / 100); // Rebate %
-      totalCosts += parseValue(channelData.rebateValue); // Rebate R$
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
       break;
       
     case 'SHOPEE':
-      totalCosts += price * (parseValue(channelData.commissionPercent) / 100); // Comissão
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
       totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
       totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
       totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
       totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
       totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
-      totalCosts += price * (parseValue(channelData.rebatePercent) / 100); // Rebate %
-      totalCosts += parseValue(channelData.rebateValue); // Rebate R$
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
+      break;
+      
+    case 'MAGALU_FULL':
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
+      totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
+      totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
+      totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
+      totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
+      totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
+      break;
+      
+    case 'MAGALU_ENVIOS':
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
+      totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
+      totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
+      totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
+      totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
+      totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
+      break;
+      
+    case 'TIKTOKSHOP_NORMAL':
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
+      totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
+      totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
+      totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
+      totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
+      totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
+      break;
+      
+    case 'MARKETPLACE_OTHER':
+      totalCosts += calculateCommission(price, channelData); // Comissão com cálculo avançado
+      totalCosts += price * (parseValue(channelData.fixedCostPercent) / 100); // Custo Fixo
+      totalCosts += parseValue(channelData.packagingCostValue); // Embalagem
+      totalCosts += price * (parseValue(channelData.otherCostPercent) / 100); // Outro Custo %
+      totalCosts += parseValue(channelData.otherCostValue); // Outro Custo R$
+      totalCosts += price * (parseValue(channelData.tacosCostPercent) / 100); // TaCos
+      totalCosts -= price * (parseValue(channelData.rebatePercent) / 100); // Rebate % (subtract as it's income)
+      totalCosts -= parseValue(channelData.rebateValue); // Rebate R$ (subtract as it's income)
       break;
   }
   
