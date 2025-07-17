@@ -86,10 +86,10 @@ const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPag
 const UserProfile = lazy(() => import("./pages/myarea/UserProfile"));
 
 // My Area Product Management
-const MyProductsList = lazy(() => import('./pages/myarea/MyProductsList'));
-const ProductForm = lazy(() => import('./pages/myarea/ProductForm'));
-const ProductPreview = lazy(() => import('./pages/myarea/ProductPreview'));
-const ProductImportExport = lazy(() => import('./pages/myarea/ProductImportExport'));
+const MyProductsList = lazy(() => import("./pages/myarea/MyProductsList"));
+const ProductForm = lazy(() => import("./pages/myarea/ProductForm"));
+const ProductPreview = lazy(() => import("./pages/myarea/ProductPreview"));
+const ProductImportExport = lazy(() => import("./pages/myarea/ProductImportExport"));
 
 
 // Keep Login as eager import for immediate authentication
