@@ -11,7 +11,7 @@ const MyMaterials = lazy(() => import("./myarea/MyMaterials"));
 const MyBrands = lazy(() => import("./myarea/MyBrands"));
 
 const ProductDetail = lazy(() => import("./myarea/ProductDetail"));
-const ProductPricing = lazy(() => import("./myarea/ProductPricing"));
+
 const ProductPricingForm = lazy(() => import("./myarea/ProductPricingForm"));
 const SupplierDetailRefactored = lazy(() => import("./myarea/SupplierDetailRefactored"));
 const MaterialDetail = lazy(() => import("./myarea/MaterialDetail"));
@@ -65,10 +65,6 @@ const MyArea = () => {
           ) : id && subId === "editar" ? (
             <Suspense fallback={<LoadingSpinner />}>
               <ProductPricingForm />
-            </Suspense>
-          ) : id && subId === "pricing" ? (
-            <Suspense fallback={<LoadingSpinner />}>
-              <ProductPricing />
             </Suspense>
           ) : id ? (
             <Suspense fallback={<LoadingSpinner />}>
