@@ -351,7 +351,18 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
   // Update form when product loads
   React.useEffect(() => {
     if (product && isOpen) {
+      console.log('🔥 [DEBUG] VERIFICANDO COMPONENTE CORRETO');
+      console.log('🔥 [DEBUG] Product completo:', JSON.stringify(product, null, 2));
+      
       const productChannels = (product as any).data?.channels || [];
+      console.log('🔥 [DEBUG] Product channels extraídos:', productChannels);
+      
+      // Verificar especificamente SITE_PROPRIO e AMAZON_FBA
+      const siteProprio = productChannels.find((ch: any) => ch.type === 'SITE_PROPRIO');
+      const amazonFBA = productChannels.find((ch: any) => ch.type === 'AMAZON_FBA');
+      
+      console.log('🔥 [DEBUG] SITE_PROPRIO encontrado:', siteProprio);
+      console.log('🔥 [DEBUG] AMAZON_FBA encontrado:', amazonFBA);
       
       // Create a map of existing channels
       const channelMap = new Map(productChannels.map((ch: any) => [ch.type, ch]));
@@ -359,6 +370,11 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       // Update form with product data
       const formChannels = Object.keys(CHANNEL_FIELDS).map(channelType => {
         const existingChannel = channelMap.get(channelType) as any;
+        
+        if (channelType === 'SITE_PROPRIO' || channelType === 'AMAZON_FBA') {
+          console.log(`🔥 [DEBUG] Processando ${channelType}:`, existingChannel);
+          console.log(`🔥 [DEBUG] isActive original para ${channelType}:`, existingChannel?.isActive);
+        }
         
         // Convert string values to numbers for all channel data with safe type handling
         const convertedData: Record<string, any> = {};
@@ -374,10 +390,17 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
           isActive: existingChannel?.isActive || false,
           data: convertedData,
         };
+        
+        if (channelType === 'SITE_PROPRIO' || channelType === 'AMAZON_FBA') {
+          console.log(`🔥 [DEBUG] Resultado final para ${channelType}:`, result);
+        }
 
         return result;
       });
       
+      console.log('🔥 [DEBUG] FormChannels antes do reset:', formChannels);
+      console.log('🔥 [DEBUG] SITE_PROPRIO no form:', formChannels.find(ch => ch.type === 'SITE_PROPRIO'));
+      console.log('🔥 [DEBUG] AMAZON_FBA no form:', formChannels.find(ch => ch.type === 'AMAZON_FBA'));
 
       form.reset({ channels: formChannels });
     }
