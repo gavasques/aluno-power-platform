@@ -60,6 +60,64 @@ app.use((req, res, next) => {
 // Apply body sanitization after parsing but before route handlers
 app.use(sanitizeBody);
 
+// Evolution API test endpoint (BEFORE authentication middleware)
+app.get('/api/evolution/test-simple', async (req, res) => {
+  try {
+    console.log('🧪 Evolution API test endpoint called');
+    
+    const hasUrl = !!process.env.EVOLUTION_API_URL;
+    const hasKey = !!process.env.EVOLUTION_API_KEY;
+    const hasInstance = !!process.env.EVOLUTION_INSTANCE_NAME;
+    
+    console.log('📋 Checking Evolution API environment variables:');
+    console.log('   EVOLUTION_API_URL:', hasUrl ? '✅ Set' : '❌ Not set');
+    console.log('   EVOLUTION_API_KEY:', hasKey ? '✅ Set' : '❌ Not set');
+    console.log('   EVOLUTION_INSTANCE_NAME:', hasInstance ? '✅ Set' : '❌ Not set');
+    
+    if (!hasUrl || !hasKey || !hasInstance) {
+      return res.json({
+        status: 'error',
+        message: 'Evolution API configuration incomplete',
+        details: { hasUrl, hasKey, hasInstance }
+      });
+    }
+
+    // Try to import and test the WhatsApp service
+    const { whatsappService } = await import('./services/whatsappService');
+    const testCode = whatsappService.generateVerificationCode();
+    
+    console.log('📊 Testing Evolution API connection...');
+    const isConnected = await whatsappService.checkConnection();
+    
+    console.log('📊 Test results:');
+    console.log('   Connection:', isConnected ? '✅ Active' : '❌ Inactive');
+    console.log('   Test code generated:', testCode);
+    
+    res.json({
+      status: isConnected ? 'success' : 'warning',
+      message: isConnected ? 
+        'Evolution API configured and connected successfully' : 
+        'Evolution API configured but connection failed',
+      details: {
+        hasUrl,
+        hasKey,
+        hasInstance,
+        connection: isConnected,
+        testCode,
+        timestamp: new Date().toISOString()
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Evolution API test error:', error);
+    res.json({
+      status: 'error',
+      message: 'Error testing Evolution API',
+      error: error.message
+    });
+  }
+});
+
 // Apply enhanced authentication to all API routes
 app.use(enhancedAuth);
 

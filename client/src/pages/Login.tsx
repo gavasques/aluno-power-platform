@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Loader2, Bot, Camera, Search, MessageSquare, Edit3, BarChart3, Shield, Zap, Star, Mail, UserPlus } from 'lucide-react';
+import { Loader2, Bot, Camera, Search, MessageSquare, Edit3, BarChart3, Shield, Zap, Star, Mail, UserPlus, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import newLogo from '@assets/Asset 14-8_1752691852003.png';
 
@@ -22,7 +22,11 @@ export default function Login() {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
-  const [registerData, setRegisterData] = useState({ name: '', email: '', password: '' });
+  const [registerData, setRegisterData] = useState({ name: '', email: '', password: '', phone: '' });
+  const [verificationOpen, setVerificationOpen] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationLoading, setVerificationLoading] = useState(false);
+  const [tempUserId, setTempUserId] = useState<number | null>(null);
   const [registerLoading, setRegisterLoading] = useState(false);
   const { toast } = useToast();
 
@@ -134,9 +138,9 @@ export default function Login() {
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, email, password } = registerData;
+    const { name, email, password, phone } = registerData;
     
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !phone) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos",
@@ -154,18 +158,36 @@ export default function Login() {
       return;
     }
 
+    // Validar formato do telefone (números brasileiros)
+    const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
+    if (!phoneRegex.test(phone)) {
+      toast({
+        title: "Telefone inválido",
+        description: "Por favor, digite um telefone no formato (11) 99999-9999",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setRegisterLoading(true);
     try {
-      const result = await register(email, name, password);
+      // Primeira etapa: criar conta temporária
+      const response = await fetch('/api/auth/register-with-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, phone })
+      });
+
+      const result = await response.json();
 
       if (result.success) {
-        toast({
-          title: "Cadastro realizado com sucesso",
-          description: "Bem-vindo ao Core Guilherme Vasques!",
-        });
+        setTempUserId(result.userId);
         setRegisterOpen(false);
-        setRegisterData({ name: '', email: '', password: '' });
-        setLocation('/');
+        setVerificationOpen(true);
+        toast({
+          title: "Código enviado!",
+          description: "Verifique seu WhatsApp para o código de verificação",
+        });
       } else {
         toast({
           title: "Erro no cadastro",
@@ -181,6 +203,55 @@ export default function Login() {
       });
     } finally {
       setRegisterLoading(false);
+    }
+  };
+
+  const handleVerificationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!verificationCode || verificationCode.length !== 6) {
+      toast({
+        title: "Código inválido",
+        description: "Por favor, digite o código de 6 dígitos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setVerificationLoading(true);
+    try {
+      const response = await fetch('/api/auth/verify-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: tempUserId, code: verificationCode })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Conta verificada com sucesso!",
+          description: "Bem-vindo ao Core Guilherme Vasques!",
+        });
+        setVerificationOpen(false);
+        setVerificationCode('');
+        setRegisterData({ name: '', email: '', password: '', phone: '' });
+        setLocation('/');
+      } else {
+        toast({
+          title: "Código incorreto",
+          description: result.error || "Código de verificação inválido",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro na verificação",
+        description: "Erro ao verificar código. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setVerificationLoading(false);
     }
   };
 
@@ -398,6 +469,26 @@ export default function Login() {
                             />
                           </div>
                           <div className="space-y-2">
+                            <Label htmlFor="register-phone">Telefone (WhatsApp)</Label>
+                            <Input
+                              id="register-phone"
+                              type="tel"
+                              placeholder="(11) 99999-9999"
+                              value={registerData.phone}
+                              onChange={(e) => {
+                                let value = e.target.value.replace(/\D/g, '');
+                                if (value.length <= 11) {
+                                  value = value.replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3');
+                                  setRegisterData(prev => ({ ...prev, phone: value }));
+                                }
+                              }}
+                              required
+                            />
+                            <p className="text-xs text-gray-500">
+                              Número do WhatsApp para verificação de conta
+                            </p>
+                          </div>
+                          <div className="space-y-2">
                             <Label htmlFor="register-password">Senha</Label>
                             <Input
                               id="register-password"
@@ -442,6 +533,69 @@ export default function Login() {
                       </DialogContent>
                     </Dialog>
                   </div>
+
+                  {/* Modal de Verificação de Telefone */}
+                  <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <Phone className="h-5 w-5 text-green-600" />
+                          Verificar WhatsApp
+                        </DialogTitle>
+                        <DialogDescription>
+                          Digite o código de 6 dígitos que enviamos para seu WhatsApp.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleVerificationSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="verification-code">Código de verificação</Label>
+                          <Input
+                            id="verification-code"
+                            type="text"
+                            placeholder="000000"
+                            maxLength={6}
+                            value={verificationCode}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '');
+                              setVerificationCode(value);
+                            }}
+                            className="text-center text-lg tracking-widest"
+                            required
+                          />
+                          <p className="text-xs text-gray-500 text-center">
+                            Não recebeu? Verifique se o WhatsApp está ativo
+                          </p>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setVerificationOpen(false)}
+                            className="flex-1"
+                          >
+                            Cancelar
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            disabled={verificationLoading || verificationCode.length !== 6}
+                            className="flex-1"
+                          >
+                            {verificationLoading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Verificando...
+                              </>
+                            ) : (
+                              <>
+                                <Phone className="mr-2 h-4 w-4" />
+                                Verificar
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>
