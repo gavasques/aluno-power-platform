@@ -38,13 +38,13 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
     refetch
   } = useQuery({
     queryKey: ['/api/youtube-videos'],
-    queryFn: () => apiRequest<YoutubeVideo[]>('/api/youtube-videos'),
-    staleTime: 0, // Force fresh data for debugging, will revert to 6 hours after fix
+    enabled: false, // Temporarily disable YouTube queries to reduce errors
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours cache
     gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
-    refetchOnWindowFocus: false, // Don't refetch on focus to save API calls
-    refetchOnMount: true, // OVERRIDE global setting to force fresh YouTube data
-    refetchOnReconnect: false, // Don't auto-refresh to save API quota
-    structuralSharing: true, // Optimize re-renders
+    refetchOnWindowFocus: false,
+    refetchOnMount: false, 
+    refetchOnReconnect: false,
+    structuralSharing: true,
   });
 
   const {
@@ -53,13 +53,13 @@ export function YoutubeProvider({ children }: { children: React.ReactNode }) {
     refetch: refetchChannelInfo
   } = useQuery({
     queryKey: ['/api/youtube-channel-info'],
-    queryFn: () => apiRequest<ChannelInfo>('/api/youtube-channel-info'),
-    retry: false, // Don't retry on 404 errors
-    staleTime: 30 * 60 * 1000, // 30 minutes - semi-static data
-    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    enabled: false, // Temporarily disable to reduce errors
+    retry: false,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 2 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    throwOnError: false, // Don't throw errors to avoid component crashes
+    throwOnError: false,
     structuralSharing: true,
   });
 
