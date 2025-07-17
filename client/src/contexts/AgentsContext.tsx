@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Agent } from "../types/agent.types";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "./AuthContext";
 
 interface AgentsContextType {
   agents: Agent[];
@@ -19,9 +20,11 @@ const AgentsContext = createContext<AgentsContextType | undefined>(undefined);
 export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, isAuthenticated } = useAuth();
 
   const { data: agents = [], isLoading, error, refetch } = useQuery<Agent[]>({
     queryKey: ["/api/agents"],
+    enabled: !!user && isAuthenticated,
     staleTime: 60 * 60 * 1000, // 1 hour - agents are static data
     gcTime: 4 * 60 * 60 * 1000, // 4 hours - keep in cache longer
     refetchOnWindowFocus: false, // Don't refetch on focus for static data

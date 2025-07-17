@@ -2,6 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import type { Product as DbProduct, InsertProduct } from '@shared/schema';
+import { useAuth } from './AuthContext';
 
 interface ProductContextType {
   products: DbProduct[];
@@ -20,6 +21,7 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
+  const { user, isAuthenticated } = useAuth();
 
   const {
     data: products = [],
@@ -29,6 +31,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
   } = useQuery({
     queryKey: ['/api/products'],
     queryFn: () => apiRequest<DbProduct[]>('/api/products'),
+    enabled: !!user && isAuthenticated,
     staleTime: 5 * 60 * 1000, // 5 minutes - dynamic data
     gcTime: 30 * 60 * 1000, // 30 minutes
     refetchOnWindowFocus: false, // Don't refetch on focus

@@ -2,6 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import type { Supplier as DbSupplier, InsertSupplier } from '@shared/schema';
+import { useAuth } from './AuthContext';
 
 interface SuppliersContextType {
   suppliers: DbSupplier[];
@@ -19,6 +20,7 @@ const SuppliersContext = createContext<SuppliersContextType | undefined>(undefin
 
 export function SuppliersProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
+  const { user, isAuthenticated } = useAuth();
 
   const {
     data: suppliers = [],
@@ -28,6 +30,7 @@ export function SuppliersProvider({ children }: { children: React.ReactNode }) {
   } = useQuery({
     queryKey: ['/api/suppliers'],
     queryFn: () => apiRequest<DbSupplier[]>('/api/suppliers'),
+    enabled: !!user && isAuthenticated,
     staleTime: 5 * 60 * 1000, // 5 minutes - dynamic data
     gcTime: 30 * 60 * 1000, // 30 minutes
     refetchOnWindowFocus: false, // Don't refetch on focus

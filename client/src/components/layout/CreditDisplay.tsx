@@ -1,9 +1,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Coins } from "lucide-react";
 import { useUserCreditBalance } from "@/hooks/useUserCredits";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function CreditDisplay() {
+  const { user, isAuthenticated } = useAuth();
   const { balance, isLoading } = useUserCreditBalance();
+
+  // Only show credit display if user is authenticated
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   if (isLoading) {
     return (

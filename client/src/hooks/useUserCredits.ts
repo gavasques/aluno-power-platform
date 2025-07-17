@@ -13,11 +13,11 @@ interface UserCreditsResponse {
 }
 
 export function useUserCredits() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   
   return useQuery<UserCreditsResponse>({
     queryKey: ['/api/dashboard/summary'],
-    enabled: !!user,
+    enabled: !!user && isAuthenticated,
     staleTime: 30 * 1000, // 30 segundos
     gcTime: 60 * 1000, // 1 minuto
     select: (data) => ({
