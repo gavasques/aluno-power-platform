@@ -353,11 +353,9 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
     if (product && isOpen) {
       console.log('📊 CHANNELS MODAL OPENED - Product ID:', productId);
       
-      // Check both possible locations for channels data
-      const productChannels = (product as any).data?.channels || (product as any).channels || [];
-      console.log('🔍 [DATA LOCATION] Product.data.channels:', (product as any).data?.channels);
-      console.log('🔍 [DATA LOCATION] Product.channels:', (product as any).channels);
-      console.log('🔍 [DATA LOCATION] Selected productChannels:', productChannels);
+      // The channels data is directly on the product object, not nested in data
+      const productChannels = (product as any).channels || [];
+      console.log('🔍 [FIXED] Using product.channels directly:', productChannels);
       
       // Verificar especificamente SITE_PROPRIO e AMAZON_FBA
       const siteProprio = productChannels.find((ch: any) => ch.type === 'SITE_PROPRIO');

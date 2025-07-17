@@ -1,4 +1,4 @@
-import React, { useState, useMemo, Fragment } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -294,7 +294,7 @@ export default function MyProductsList() {
                   const isExpanded = expandedRows.has(product.id);
 
                   return (
-                    <Fragment key={product.id}>
+                    <React.Fragment key={product.id}>
                       <TableRow 
                         className="cursor-pointer hover:bg-blue-50/30 transition-colors border-b border-gray-100"
                         onClick={() => toggleRowExpansion(product.id)}
@@ -526,7 +526,7 @@ export default function MyProductsList() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </Fragment>
+                    </React.Fragment>
                   );
                 })
               )}
