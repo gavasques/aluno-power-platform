@@ -1243,16 +1243,32 @@ export class DatabaseStorage implements IStorage {
       brandId = brandIdFromText;
     }
 
+    // Parse channels and add debug logging
+    let parsedChannels = [];
+    if (product.channels) {
+      if (typeof product.channels === 'string') {
+        console.log('🔍 [DEBUG GETPRODUCT] Raw JSON channels:', product.channels.substring(0, 200));
+        parsedChannels = JSON.parse(product.channels);
+        console.log('🔍 [DEBUG GETPRODUCT] After JSON.parse:', JSON.stringify(parsedChannels.slice(0, 2), null, 2));
+      } else {
+        parsedChannels = product.channels;
+        console.log('🔍 [DEBUG GETPRODUCT] Already parsed channels:', JSON.stringify(parsedChannels.slice(0, 2), null, 2));
+      }
+    }
+
     // Return with proper brand mapping and channels
-    return {
+    const result = {
       ...product,
       brandId: brandId,
       brandName: brandName,
       // For the brand field, use brandId if available, otherwise keep legacy value
       brand: brandId ? brandId.toString() : product.brand || '',
       // Parse channels from JSON string to array
-      channels: product.channels ? (typeof product.channels === 'string' ? JSON.parse(product.channels) : product.channels) : []
+      channels: parsedChannels
     };
+    
+    console.log('🔍 [DEBUG GETPRODUCT] Final result channels:', JSON.stringify(result.channels.slice(0, 2), null, 2));
+    return result;
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
