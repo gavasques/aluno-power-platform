@@ -20,7 +20,7 @@ const Videos = lazy(() => import("./pages/Videos"));
 const News = lazy(() => import("./pages/News"));
 const Updates = lazy(() => import("./pages/Updates"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-
+const Admin = lazy(() => import("./pages/Admin"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const UserEdit = lazy(() => import("./pages/admin/UserEdit"));
 const GroupEdit = lazy(() => import("./pages/admin/GroupEdit"));
@@ -36,8 +36,12 @@ const SupplierDetail = lazy(() => import("./pages/hub/SupplierDetail"));
 
 const PromptDetail = lazy(() => import("./pages/hub/PromptDetail"));
 
+const HtmlDescriptionAgent = lazy(() => import("./pages/agents/HtmlDescriptionAgent"));
+const BulletPointsAgent = lazy(() => import("./pages/agents/BulletPointsAgent"));
+const AmazonProductPhotography = lazy(() => import("./pages/agents/amazon-product-photography"));
 const LifestyleWithModel = lazy(() => import("./pages/agents/lifestyle-with-model"));
 const InfographicGenerator = lazy(() => import("./pages/agents/infographic-generator"));
+const AdvancedInfographicGenerator = lazy(() => import("./pages/agents/AdvancedInfographicGenerator"));
 const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtractor"));
 const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
 const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
@@ -46,21 +50,32 @@ const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSug
 const Tools = lazy(() => import("./pages/hub/Tools"));
 const Materials = lazy(() => import("./pages/hub/Materials"));
 const Hub = lazy(() => import("./pages/Hub"));
+const Ferramentas = lazy(() => import("./pages/Ferramentas"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
+const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsList"));
+const InformalImportSimulator = lazy(() => import("./pages/InformalImportSimulator"));
+const FormalImportSimulator = lazy(() => import("./pages/FormalImportSimulator"));
+const FormalImportSimulationsList = lazy(() => import("./pages/FormalImportSimulationsList"));
 const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
 const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
 const AgentsPage = lazy(() => import("./pages/agents"));
-
-
+const AgentProcessorPage = lazy(() => import("./pages/AgentProcessorPage"));
+const AmazonListingsOptimizer = lazy(() => import("./pages/agents/amazon-listings-optimizer-new"));
+const AmazonListingsOptimizerResult = lazy(() => import("./pages/agents/amazon-listings-optimizer-result"));
+const AmazonCustomerService = lazy(() => import("./pages/agents/amazon-customer-service"));
+const AmazonCustomerServiceResult = lazy(() => import("./pages/agents/amazon-customer-service-result"));
+const AmazonNegativeReviews = lazy(() => import("./pages/agents/amazon-negative-reviews"));
+const AmazonNegativeReviewsResult = lazy(() => import("./pages/agents/amazon-negative-reviews-result"));
 const AgentProviderSettings = lazy(() => import("./pages/admin/agents/AgentProviderSettings"));
 
 
-
-
+const ImageUpscale = lazy(() => import("./pages/ai/ImageUpscale"));
+const BackgroundRemoval = lazy(() => import("./pages/ai/BackgroundRemoval"));
+const BackgroundRemovalPro = lazy(() => import("./pages/tools/BackgroundRemovalPro"));
 const LogoGeneratorPro = lazy(() => import("./pages/tools/LogoGeneratorPro"));
 const UltraMelhoradorPro = lazy(() => import("./pages/tools/UltraMelhoradorPro"));
 const UpscalePro = lazy(() => import("./pages/tools/UpscalePro"));
@@ -121,7 +136,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <Tools />
+                                  <Ferramentas />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -138,7 +153,25 @@ function App() {
                           </Route>
 
                           {/* Ferramentas routes (migrated from AI and Hub) */}
-
+                          <Route path="/ferramentas/image-upscale">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ImageUpscale />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+                          
+                          <Route path="/ferramentas/background-removal">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <BackgroundRemoval />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
                           
                           <Route path="/ferramentas/amazon-ads-editor">
                             <ProtectedRoute>
@@ -155,6 +188,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviewsResult />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -164,6 +198,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviews />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -173,6 +208,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerServiceResult />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -182,6 +218,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerService />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -191,6 +228,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonListingsOptimizer />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -200,6 +238,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonListingsOptimizerResult />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -209,6 +248,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonListingsOptimizer />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -218,6 +258,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonProductPhotography />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -247,6 +288,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AdvancedInfographicGenerator />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -255,6 +297,7 @@ function App() {
                           <Route path="/agents/html-description-generator">
                             <ProtectedRoute>
                               <Suspense fallback={<PageLoader />}>
+                                <HtmlDescriptionAgent />
                               </Suspense>
                             </ProtectedRoute>
                           </Route>
@@ -262,6 +305,7 @@ function App() {
                           <Route path="/agents/bullet-points-generator">
                             <ProtectedRoute>
                               <Suspense fallback={<PageLoader />}>
+                                <BulletPointsAgent />
                               </Suspense>
                             </ProtectedRoute>
                           </Route>
@@ -271,6 +315,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerService />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -412,6 +457,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <BackgroundRemovalPro />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -475,14 +521,6 @@ function App() {
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
-                          </Route>
-                          
-                          {/* Redirect /hub/tools to /ferramentas for consistency */}
-                          <Route path="/hub/tools">
-                            {() => {
-                              window.location.href = '/ferramentas';
-                              return null;
-                            }}
                           </Route>
                           
 
@@ -625,6 +663,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <InformalImportSimulationsList />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -635,6 +674,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <InformalImportSimulator />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -645,6 +685,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <FormalImportSimulationsList />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -655,6 +696,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <FormalImportSimulator />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -956,6 +998,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviews />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -965,6 +1008,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonNegativeReviewsResult />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -974,6 +1018,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerService />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -983,6 +1028,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
+                                  <AmazonCustomerServiceResult />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
@@ -994,6 +1040,7 @@ function App() {
                               <ProtectedRoute>
                                 <Layout>
                                   <Suspense fallback={<PageLoader />}>
+                                    <AgentProcessorPage />
                                   </Suspense>
                                 </Layout>
                               </ProtectedRoute>
