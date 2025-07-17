@@ -117,7 +117,15 @@ function App() {
                           <Route path="/login" component={Login} />
 
                           {/* Páginas principais de listagem */}
-
+                          <Route path="/ferramentas">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Tools />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
                           
                           <Route path="/hub">
                             <ProtectedRoute>
@@ -467,6 +475,14 @@ function App() {
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
+                          </Route>
+                          
+                          {/* Redirect /hub/tools to /ferramentas for consistency */}
+                          <Route path="/hub/tools">
+                            {() => {
+                              window.location.href = '/ferramentas';
+                              return null;
+                            }}
                           </Route>
                           
 
