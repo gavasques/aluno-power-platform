@@ -89,7 +89,7 @@ const UserProfile = lazy(() => import("./pages/myarea/UserProfile"));
 const MyProductsList = lazy(() => import("./pages/myarea/MyProductsList"));
 const ProductBasicDataEdit = lazy(() => import("./pages/myarea/ProductBasicDataEdit"));
 const ProductCostsEdit = lazy(() => import("./pages/myarea/ProductCostsEdit"));
-const ProductPricingChannelsEdit = lazy(() => import("./pages/myarea/ProductPricingChannelsEdit"));
+const ProductChannelsEditPage = lazy(() => import("./pages/myarea/ProductChannelsEditPage"));
 const ProductPreview = lazy(() => import("./pages/myarea/ProductPreview"));
 const ProductImportExport = lazy(() => import("./pages/myarea/ProductImportExport"));
 
@@ -806,7 +806,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <ProductPricingChannelsEdit />
+                                  <ProductChannelsEditPage />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
