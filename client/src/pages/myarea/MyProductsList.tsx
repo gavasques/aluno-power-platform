@@ -31,6 +31,7 @@ import {
   ChevronsRight,
   ChevronDown,
   ChevronUp,
+  Calculator,
   TrendingUp,
   TrendingDown,
   Eye
