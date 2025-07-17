@@ -326,6 +326,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **July 17, 2025 - 2:50 AM**: ✅ EMAIL SYSTEM CUSTOMIZED WITH PERSONAL DOMAIN & SUPPORT EMAIL
+  - **Custom Domain Integration**: All 8 email methods now use https://core-guilherme-vasques.com.br
+  - **Support Email Updated**: Changed footer from "Equipe Core Guilherme Vasques / Suporte: o email" to "Precisa de suporte? / Envie email para suporte@guivasques.app"
+  - **Unified Email Experience**: All emails (recovery, welcome, payments, credits, renewals, trials, cancellations) now have consistent branding
+  - **Professional Design**: HTML templates with proper styling and support contact information
+
 - **July 17, 2025 - 2:45 AM**: ✅ COMPLETE SMTP EMAIL SYSTEM FULLY OPERATIONAL - ALL EMAIL FUNCTIONALITY WORKING
   - **SMTP Configuration Working**: Hostinger SMTP (smtp.hostinger.com:465) successfully configured and tested
   - **Password Recovery Complete**: Email recovery system sending professional HTML emails with reset tokens

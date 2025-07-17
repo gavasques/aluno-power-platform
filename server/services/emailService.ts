@@ -56,9 +56,8 @@ export class EmailService {
     try {
       const transporter = await this.getTransporter();
       
-      // Auto-detect production URL or use configured APP_URL
-      const baseUrl = process.env.APP_URL || 
-        (process.env.REPL_ID ? `https://${process.env.REPL_ID}.replit.app` : 'http://localhost:5000');
+      // Use custom domain only
+      const baseUrl = 'https://core-guilherme-vasques.com.br';
       const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
       
       const htmlContent = `
@@ -109,8 +108,8 @@ export class EmailService {
               <div class="footer">
                 <p>Se você não conseguir clicar no botão, copie e cole o link acima no seu navegador.</p>
                 <p>Se você não solicitou esta recuperação de senha, pode ignorar este email com segurança.</p>
-                <p><strong>Equipe Core Guilherme Vasques</strong><br>
-                Suporte: suporte@coreguilhermevasques.com</p>
+                <p><strong>Precisa de suporte?</strong><br>
+                Envie email para suporte@guivasques.app</p>
               </div>
             </div>
           </div>
@@ -135,8 +134,8 @@ IMPORTANTE:
 
 Se você não conseguir acessar o link, copie e cole no seu navegador.
 
-Equipe Core Guilherme Vasques
-Suporte: suporte@coreguilhermevasques.com
+Precisa de suporte?
+Envie email para suporte@guivasques.app
       `;
 
       const mailOptions = {
@@ -176,7 +175,11 @@ Suporte: suporte@coreguilhermevasques.com
           <h2>Bem-vindo ao Core Guilherme Vasques!</h2>
           <p>Sua assinatura do plano <strong>${planName}</strong> foi ativada com sucesso.</p>
           <p>Agora você tem acesso a todos os recursos exclusivos da plataforma.</p>
-          <p>Acesse: <a href="${process.env.APP_URL || 'http://localhost:5000'}">Core Guilherme Vasques</a></p>
+          <p>Acesse: <a href="https://core-guilherme-vasques.com.br">Core Guilherme Vasques</a></p>
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
+            <p><strong>Precisa de suporte?</strong><br>
+            Envie email para suporte@guivasques.app</p>
+          </div>
         `
       };
 
@@ -201,6 +204,10 @@ Suporte: suporte@coreguilhermevasques.com
           <h2>Assinatura Cancelada</h2>
           <p>Sua assinatura foi cancelada conforme solicitado.</p>
           <p>Você pode reativar sua assinatura a qualquer momento.</p>
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
+            <p><strong>Precisa de suporte?</strong><br>
+            Envie email para suporte@guivasques.app</p>
+          </div>
         `
       };
 
@@ -224,6 +231,10 @@ Suporte: suporte@coreguilhermevasques.com
           <h2>Pagamento Confirmado</h2>
           <p>Seu pagamento de R$ ${amount.toFixed(2)} foi processado com sucesso.</p>
           <p>Obrigado por escolher o Core Guilherme Vasques!</p>
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
+            <p><strong>Precisa de suporte?</strong><br>
+            Envie email para suporte@guivasques.app</p>
+          </div>
         `
       };
 
@@ -247,6 +258,10 @@ Suporte: suporte@coreguilhermevasques.com
           <h2>Problema com Pagamento</h2>
           <p>Houve um problema ao processar seu pagamento de R$ ${amount.toFixed(2)}.</p>
           <p>Por favor, verifique seus dados de pagamento ou entre em contato conosco.</p>
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
+            <p><strong>Precisa de suporte?</strong><br>
+            Envie email para suporte@guivasques.app</p>
+          </div>
         `
       };
 
@@ -270,6 +285,10 @@ Suporte: suporte@coreguilhermevasques.com
           <h2>Créditos Adicionados</h2>
           <p>${credits} créditos foram adicionados à sua conta!</p>
           <p>Agora você pode usar nossos agentes de IA e ferramentas.</p>
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
+            <p><strong>Precisa de suporte?</strong><br>
+            Envie email para suporte@guivasques.app</p>
+          </div>
         `
       };
 
@@ -293,6 +312,10 @@ Suporte: suporte@coreguilhermevasques.com
           <h2>Lembrete de Renovação</h2>
           <p>Seu plano ${planName} será renovado em ${renewalDate.toLocaleDateString('pt-BR')}.</p>
           <p>Certifique-se de que seus dados de pagamento estão atualizados.</p>
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
+            <p><strong>Precisa de suporte?</strong><br>
+            Envie email para suporte@guivasques.app</p>
+          </div>
         `
       };
 
@@ -316,6 +339,10 @@ Suporte: suporte@coreguilhermevasques.com
           <h2>Período de Teste Terminando</h2>
           <p>Seu período de teste do plano ${planName} termina em ${endDate.toLocaleDateString('pt-BR')}.</p>
           <p>Para continuar usando nossos serviços, faça a assinatura completa.</p>
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
+            <p><strong>Precisa de suporte?</strong><br>
+            Envie email para suporte@guivasques.app</p>
+          </div>
         `
       };
 
