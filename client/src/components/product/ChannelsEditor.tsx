@@ -311,6 +311,10 @@ interface ChannelsEditorProps {
 }
 
 export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpen, onClose }) => {
+  console.log('🚨 CONFIRMANDO: Este é o ChannelsEditor CORRETO (/components/product/ChannelsEditor.tsx)');
+  console.log('🚨 COMPONENT ID: MAIN_CHANNELS_EDITOR_v1.0');
+  console.log('🚨 ProductID:', productId, 'isOpen:', isOpen);
+  
   const { toast } = useToast();
   const [isSaving, setIsSaving] = React.useState(false);
   const [channelCalculations, setChannelCalculations] = React.useState<Record<string, ChannelCalculationResult>>({});
