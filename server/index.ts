@@ -319,15 +319,213 @@ app.get('/api/evolution/test-complete', async (req, res) => {
   }
 });
 
-// Apply enhanced authentication to all API routes
-app.use(enhancedAuth);
+// Register authentication routes BEFORE applying authentication middleware
+app.post('/api/auth/register-with-phone', async (req, res) => {
+  console.log('🟢 WhatsApp registration endpoint reached!');
+  try {
+    const { z } = await import('zod');
+    const { whatsappService } = await import('./services/whatsappService');
+    const { db } = await import('./db');
+    const { phoneVerificationCodes } = await import('@shared/schema');
+    
+    const registerWithPhoneSchema = z.object({
+      name: z.string().min(1),
+      email: z.string().email(),
+      password: z.string().min(8),
+      phone: z.string().min(1)
+    });
+    
+    const userData = registerWithPhoneSchema.parse(req.body);
+    
+    // Validate password strength (simplified validation)
+    const password = userData.password;
+    const passwordErrors = [];
+    
+    if (password.length < 8) passwordErrors.push('Pelo menos 8 caracteres');
+    if (!/[A-Z]/.test(password)) passwordErrors.push('Pelo menos uma letra maiúscula');
+    if (!/[a-z]/.test(password)) passwordErrors.push('Pelo menos uma letra minúscula');
+    if (!/\d/.test(password)) passwordErrors.push('Pelo menos um número');
+    
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({ 
+        error: 'A senha não atende aos requisitos de segurança',
+        details: passwordErrors
+      });
+    }
+    
+    // Check if user already exists
+    const bcrypt = await import('bcryptjs');
+    const { users } = await import('@shared/schema');
+    const { eq } = await import('drizzle-orm');
+    
+    const [existingUser] = await db.select().from(users).where(eq(users.email, userData.email)).limit(1);
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email já está em uso' });
+    }
 
-// Apply CSRF protection to state-changing operations
-app.use(enhancedCSRF);
+    // Hash password
+    const hashedPassword = await bcrypt.default.hash(userData.password, 12);
 
-// Apply anonymous rate limiting for public endpoints
+    // Create user (unverified)
+    const [user] = await db.insert(users).values({
+      username: userData.email,
+      name: userData.name,
+      email: userData.email,
+      password: hashedPassword,
+      role: 'user',
+      isActive: false, // Will be activated after phone verification
+      emailVerified: false,
+      phoneVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+
+    // Generate verification code and save it
+    const verificationCode = whatsappService.generateVerificationCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await db.insert(phoneVerificationCodes).values({
+      userId: user.id,
+      phone: userData.phone,
+      code: verificationCode,
+      expiresAt,
+      isUsed: false
+    });
+
+    // Send WhatsApp verification
+    const whatsappResult = await whatsappService.sendVerificationCode(userData.phone, verificationCode);
+    
+    if (!whatsappResult.success) {
+      console.error('Failed to send WhatsApp:', whatsappResult.error);
+      return res.status(500).json({ 
+        error: 'Erro ao enviar código de verificação. Tente novamente.',
+        details: whatsappResult.error
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Usuário criado. Código de verificação enviado via WhatsApp.',
+      userId: user.id
+    });
+
+  } catch (error: any) {
+    console.error('Register with phone error:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', error.message, error.stack);
+    }
+    res.status(400).json({ error: 'Erro ao processar cadastro', details: error.message });
+  }
+});
+
+app.post('/api/auth/verify-phone', async (req, res) => {
+  try {
+    const { z } = await import('zod');
+    const { whatsappService } = await import('./services/whatsappService');
+    const { db } = await import('./db');
+    const { phoneVerificationCodes, users, userSessions } = await import('@shared/schema');
+    const { eq, and } = await import('drizzle-orm');
+    
+    const verifyPhoneSchema = z.object({
+      userId: z.number(),
+      code: z.string().length(6)
+    });
+    
+    const { userId, code } = verifyPhoneSchema.parse(req.body);
+
+    // Find verification code
+    const [verificationRecord] = await db
+      .select()
+      .from(phoneVerificationCodes)
+      .where(
+        and(
+          eq(phoneVerificationCodes.userId, userId),
+          eq(phoneVerificationCodes.code, code),
+          eq(phoneVerificationCodes.isUsed, false)
+        )
+      )
+      .limit(1);
+
+    if (!verificationRecord) {
+      return res.status(400).json({ error: 'Código de verificação inválido' });
+    }
+
+    // Check if code has expired
+    if (new Date() > verificationRecord.expiresAt) {
+      return res.status(400).json({ error: 'Código de verificação expirado' });
+    }
+
+    // Mark code as used
+    await db
+      .update(phoneVerificationCodes)
+      .set({ isUsed: true })
+      .where(eq(phoneVerificationCodes.id, verificationRecord.id));
+
+    // Activate user account
+    await db
+      .update(users)
+      .set({ 
+        isActive: true, 
+        phoneVerified: true,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+
+    // Get updated user
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    // Create session token
+    const crypto = await import('crypto');
+    
+    const sessionToken = crypto.default.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    
+    await db.insert(userSessions).values({
+      userId: user.id,
+      sessionToken,
+      expiresAt,
+      createdAt: new Date()
+    });
+
+    // Assign new user to "Gratuito" group
+    const { UserGroupService } = await import('./services/userGroupService');
+    await UserGroupService.assignDefaultGroup(user.id);
+
+    // Send welcome message
+    await whatsappService.sendWelcomeMessage(verificationRecord.phone, user.name);
+
+    res.json({
+      success: true,
+      message: 'Telefone verificado com sucesso!',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        phoneVerified: true
+      },
+      sessionToken
+    });
+
+  } catch (error: any) {
+    console.error('Phone verification error:', error);
+    res.status(500).json({ error: 'Erro ao verificar telefone' });
+  }
+});
+
+// Apply rate limiting for authentication endpoints
 app.use('/api/auth/login', anonymousRateLimiter(5, 15)); // 5 attempts per 15 minutes
 app.use('/api/auth/register', anonymousRateLimiter(3, 60)); // 3 registrations per hour
+app.use('/api/auth/register-with-phone', anonymousRateLimiter(3, 60)); // WhatsApp registration
+app.use('/api/auth/verify-phone', anonymousRateLimiter(10, 15)); // Phone verification attempts
+
+// NOTE: enhancedAuth will be applied inside registerRoutes for specific routes
+// This ensures WhatsApp registration routes remain public
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -5,6 +5,8 @@ import { requireAuth } from '../security';
 const PUBLIC_API_ENDPOINTS = [
   '/api/auth/login',
   '/api/auth/register',
+  '/api/auth/register-with-phone', // WhatsApp registration flow
+  '/api/auth/verify-phone', // WhatsApp verification flow
   '/api/auth/logout',
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
