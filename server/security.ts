@@ -53,10 +53,10 @@ export const createRateLimit = (windowMs: number, max: number, message: string) 
   });
 };
 
-// API rate limiting
+// API rate limiting - More lenient for development
 export const apiLimiter = createRateLimit(
-  15 * 60 * 1000, // 15 minutes
-  100, // 100 requests per window
+  1 * 60 * 1000, // 1 minute
+  300, // 300 requests per minute (5 req/sec)
   'Too many API requests from this IP, please try again later'
 );
 
