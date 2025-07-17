@@ -358,9 +358,9 @@ export default function MyProductsList() {
                           )}
                         </TableCell>
                         <TableCell className="min-w-[280px] py-3">
-                          {activeChannels.length > 0 ? (
+                          {channelCalculations.length > 0 ? (
                             <div className="space-y-1">
-                              {activeChannels.slice(0, 2).map(({ channel, calculation }, index) => (
+                              {channelCalculations.slice(0, 2).map(({ channel, calculation }, index) => (
                                 <div key={`${product.id}-${channel.id || channel.type}-${index}`} 
                                      className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-md p-1.5 border border-gray-200 shadow-sm max-w-[250px]">
                                   <div className="flex items-center justify-between">
@@ -387,10 +387,10 @@ export default function MyProductsList() {
                                   </div>
                                 </div>
                               ))}
-                              {activeChannels.length > 2 && (
+                              {channelCalculations.length > 2 && (
                                 <div className="text-center mt-1">
                                   <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-gray-200 text-gray-600">
-                                    +{activeChannels.length - 2} outros
+                                    +{channelCalculations.length - 2} outros
                                   </Badge>
                                 </div>
                               )}
@@ -412,13 +412,13 @@ export default function MyProductsList() {
                         </TableCell>
                       </TableRow>
                       {/* Expanded calculation details */}
-                      {isExpanded && activeChannels.length > 0 && (
+                      {isExpanded && channelCalculations.length > 0 && (
                         <TableRow key={`${product.id}-details`}>
                           <TableCell colSpan={8} className="bg-gray-50 p-4">
                             <div className="space-y-4">
                               <h4 className="font-semibold text-lg mb-2">Detalhes dos Cálculos por Canal</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {activeChannels.map(({ channel, calculation }, index) => (
+                                {channelCalculations.map(({ channel, calculation }, index) => (
                                   <div key={`${product.id}-${channel.type}-${index}`} className="bg-white rounded-lg border p-3 space-y-2">
                                     <div className="flex items-center justify-between mb-2">
                                       <h5 className="font-semibold">{CHANNEL_NAMES[channel.type] || channel.type}</h5>
