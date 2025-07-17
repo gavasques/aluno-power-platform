@@ -118,8 +118,13 @@ export function useCreditSystem() {
       logger.debug(`💾 Log AI salvo - Feature: ${params.featureCode}, Créditos: ${requiredCredits}, Usuário: ${user.id}`);
       
       // Invalidar cache de créditos para atualizar o saldo na interface
-      await queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/credits/balance'] });
+      try {
+        await queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/credits/balance'] });
+        console.log('🔄 Cache invalidated - credit balance should update');
+      } catch (cacheError) {
+        console.error('❌ Error invalidating cache:', cacheError);
+      }
       
       return true;
     } catch (error) {
