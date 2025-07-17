@@ -351,22 +351,14 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
   // Update form when product loads
   React.useEffect(() => {
     if (product && isOpen) {
-      console.log('🔍 [CHANNELS_EDITOR] Product data:', product);
       const productChannels = (product as any).data?.channels || [];
-      console.log('🔍 [CHANNELS_EDITOR] Product channels:', productChannels);
-      console.log('🔍 [CHANNELS_EDITOR] First channel detailed:', JSON.stringify(productChannels[0], null, 2));
-      console.log('🔍 [CHANNELS_EDITOR] SITE_PROPRIO channel:', productChannels.find((ch: any) => ch.type === 'SITE_PROPRIO'));
-      console.log('🔍 [CHANNELS_EDITOR] AMAZON_FBA channel:', productChannels.find((ch: any) => ch.type === 'AMAZON_FBA'));
       
       // Create a map of existing channels
       const channelMap = new Map(productChannels.map((ch: any) => [ch.type, ch]));
-      console.log('🔍 [CHANNELS_EDITOR] Channel map:', channelMap);
       
       // Update form with product data
       const formChannels = Object.keys(CHANNEL_FIELDS).map(channelType => {
         const existingChannel = channelMap.get(channelType) as any;
-        console.log(`🔍 [CHANNELS_EDITOR] Processing ${channelType}:`, existingChannel);
-        console.log(`🔍 [CHANNELS_EDITOR] ${channelType} isActive value:`, existingChannel?.isActive);
         
         // Convert string values to numbers for all channel data with safe type handling
         const convertedData: Record<string, any> = {};
@@ -382,11 +374,11 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
           isActive: existingChannel?.isActive || false,
           data: convertedData,
         };
-        console.log(`🔍 [CHANNELS_EDITOR] Result for ${channelType}:`, result);
+
         return result;
       });
       
-      console.log('🔍 [CHANNELS_EDITOR] Final form channels:', formChannels);
+
       form.reset({ channels: formChannels });
     }
   }, [product, isOpen, form]);

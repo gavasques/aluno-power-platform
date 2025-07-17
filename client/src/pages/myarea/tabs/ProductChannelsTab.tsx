@@ -8,7 +8,7 @@ import {
   Info,
   Store
 } from "lucide-react";
-import { ChannelsEditor } from "@/components/product/ChannelsEditor";
+import ChannelsEditor from "@/components/product/ChannelsEditor";
 
 interface ProductChannelsTabProps {
   form: UseFormReturn<any>;
