@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -315,12 +315,13 @@ export default function MyProductsList() {
                   const activeChannels = getActiveChannels(product);
                   const isExpanded = expandedRows.has(product.id);
 
-                  return [
-                    <TableRow 
-                      key={product.id}
-                      className="cursor-pointer hover:bg-blue-50/30 transition-colors border-b border-gray-100"
-                      onClick={() => toggleRowExpansion(product.id)}
-                    >
+                  return (
+                    <>
+                      <TableRow 
+                        key={product.id}
+                        className="cursor-pointer hover:bg-blue-50/30 transition-colors border-b border-gray-100"
+                        onClick={() => toggleRowExpansion(product.id)}
+                      >
                         <TableCell className="py-3">
                           <Button
                             variant="ghost"
@@ -583,9 +584,9 @@ export default function MyProductsList() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </TableRow>
-                  ];
-                }).flat()
+                    </>
+                  );
+                })
               )}
             </TableBody>
           </Table>
