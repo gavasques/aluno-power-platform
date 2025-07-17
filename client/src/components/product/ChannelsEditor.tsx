@@ -335,6 +335,8 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
   const { data: product, isLoading: loadingProduct } = useQuery({
     queryKey: [`/api/products/${productId}`],
     enabled: isOpen,
+    staleTime: 0, // Force fresh data
+    gcTime: 0, // Don't cache
   });
 
   const form = useForm<ChannelFormData>({
@@ -353,9 +355,33 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
     if (product && isOpen) {
       console.log('📊 CHANNELS MODAL OPENED - Product ID:', productId);
       
-      // The channels data is directly on the product object, not nested in data
-      const productChannels = (product as any).channels || [];
-      console.log('🔍 [FIXED] Using product.channels directly:', productChannels);
+      // Check response structure and extract channels
+      console.log('🔍 [FULL RESPONSE] Complete product response:', product);
+      
+      // Handle both response formats: direct channels or nested in data
+      let productChannels = [];
+      if (product) {
+        // First check if it's the list format: product.data.channels
+        if ((product as any).data?.channels) {
+          productChannels = (product as any).data.channels;
+          console.log('🔍 [STRUCTURE] Using product.data.channels (list endpoint format)');
+        } 
+        // Then check if it's the individual format: product.channels
+        else if ((product as any).channels) {
+          productChannels = (product as any).channels;
+          console.log('🔍 [STRUCTURE] Using product.channels (individual endpoint format)');
+        }
+        // Finally check if response is wrapped in data: product.data (API response format)
+        else if ((product as any).data) {
+          const productData = (product as any).data;
+          if (productData.channels) {
+            productChannels = productData.channels;
+            console.log('🔍 [STRUCTURE] Using product.data.channels (API response format)');
+          }
+        }
+      }
+      
+      console.log('🔍 [FINAL CHANNELS] Selected channels:', productChannels);
       
       // Verificar especificamente SITE_PROPRIO e AMAZON_FBA
       const siteProprio = productChannels.find((ch: any) => ch.type === 'SITE_PROPRIO');
