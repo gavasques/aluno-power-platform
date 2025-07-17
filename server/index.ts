@@ -60,16 +60,106 @@ app.use((req, res, next) => {
 // Apply body sanitization after parsing but before route handlers
 app.use(sanitizeBody);
 
-// Evolution API test endpoint (BEFORE authentication middleware)
-app.get('/api/evolution/test-simple', async (req, res) => {
+// Simple Evolution API test endpoint (BEFORE authentication middleware)
+app.get('/api/evolution/status', async (req, res) => {
+  console.log('🧪 Simple Evolution API status check');
+  
   try {
-    console.log('🧪 Evolution API test endpoint called');
+    const url = process.env.EVOLUTION_API_URL;
+    const apiKey = process.env.EVOLUTION_API_KEY;
+    const instance = process.env.EVOLUTION_INSTANCE_NAME;
     
-    const hasUrl = !!process.env.EVOLUTION_API_URL;
-    const hasKey = !!process.env.EVOLUTION_API_KEY;
-    const hasInstance = !!process.env.EVOLUTION_INSTANCE_NAME;
+    console.log('📋 Configuration:');
+    console.log('   URL:', url ? 'Set' : 'Not set');
+    console.log('   API Key:', apiKey ? 'Set' : 'Not set');
+    console.log('   Instance:', instance ? 'Set' : 'Not set');
     
-    console.log('📋 Checking Evolution API environment variables:');
+    if (!url || !apiKey || !instance) {
+      const response = {
+        status: 'error',
+        message: 'Evolution API configuration incomplete',
+        details: {
+          hasUrl: !!url,
+          hasKey: !!apiKey,
+          hasInstance: !!instance
+        }
+      };
+      console.log('❌ Configuration incomplete');
+      return res.status(400).json(response);
+    }
+
+    // Test basic connectivity
+    console.log('🔍 Testing basic API connectivity...');
+    const response = await fetch(`${url}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      }
+    });
+    
+    const isApiOnline = response.status === 200;
+    console.log('   API Status:', response.status);
+    console.log('   API Online:', isApiOnline ? 'Yes' : 'No');
+    
+    // Test instance status
+    console.log('🔍 Testing instance status...');
+    const instanceResponse = await fetch(`${url}/instance/${instance}/status`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      }
+    });
+    
+    const isInstanceActive = instanceResponse.status === 200;
+    console.log('   Instance Status:', instanceResponse.status);
+    console.log('   Instance Active:', isInstanceActive ? 'Yes' : 'No');
+    
+    const result = {
+      status: isApiOnline ? (isInstanceActive ? 'active' : 'instance_inactive') : 'api_offline',
+      message: isApiOnline ? 
+        (isInstanceActive ? 'Evolution API and instance are active' : 'Evolution API is online but instance is inactive') :
+        'Evolution API is offline',
+      details: {
+        apiOnline: isApiOnline,
+        instanceActive: isInstanceActive,
+        apiStatus: response.status,
+        instanceStatus: instanceResponse.status,
+        url,
+        instance
+      },
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log('✅ Status check completed:', result.status);
+    res.json(result);
+    
+  } catch (error) {
+    console.error('❌ Evolution API status check error:', error.message);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error checking Evolution API status',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Evolution API comprehensive test endpoint (BEFORE authentication middleware)
+app.get('/api/evolution/test-complete', async (req, res) => {
+  try {
+    console.log('🧪 Evolution API comprehensive test started');
+    
+    const url = process.env.EVOLUTION_API_URL;
+    const apiKey = process.env.EVOLUTION_API_KEY;
+    const instance = process.env.EVOLUTION_INSTANCE_NAME;
+    
+    const hasUrl = !!url;
+    const hasKey = !!apiKey;
+    const hasInstance = !!instance;
+    
+    console.log('📋 Configuration check:');
     console.log('   EVOLUTION_API_URL:', hasUrl ? '✅ Set' : '❌ Not set');
     console.log('   EVOLUTION_API_KEY:', hasKey ? '✅ Set' : '❌ Not set');
     console.log('   EVOLUTION_INSTANCE_NAME:', hasInstance ? '✅ Set' : '❌ Not set');
@@ -82,38 +172,149 @@ app.get('/api/evolution/test-simple', async (req, res) => {
       });
     }
 
-    // Try to import and test the WhatsApp service
-    const { whatsappService } = await import('./services/whatsappService');
-    const testCode = whatsappService.generateVerificationCode();
-    
-    console.log('📊 Testing Evolution API connection...');
-    const isConnected = await whatsappService.checkConnection();
-    
-    console.log('📊 Test results:');
-    console.log('   Connection:', isConnected ? '✅ Active' : '❌ Inactive');
-    console.log('   Test code generated:', testCode);
-    
-    res.json({
-      status: isConnected ? 'success' : 'warning',
-      message: isConnected ? 
-        'Evolution API configured and connected successfully' : 
-        'Evolution API configured but connection failed',
-      details: {
-        hasUrl,
-        hasKey,
-        hasInstance,
+    const testResults = {
+      configuration: { hasUrl, hasKey, hasInstance, url, instance },
+      tests: {},
+      timestamp: new Date().toISOString()
+    };
+
+    // Test 1: Basic API connectivity
+    console.log('🧪 Test 1: Basic API connectivity');
+    try {
+      const response = await fetch(\`\${url}\`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': \`Bearer \${apiKey}\`
+        }
+      });
+      
+      testResults.tests.basicConnectivity = {
+        status: response.status,
+        success: response.status < 400,
+        message: response.status < 400 ? 'API base accessible' : 'API base not accessible'
+      };
+      
+      console.log('   Status:', response.status);
+      console.log('   Result:', testResults.tests.basicConnectivity.success ? '✅' : '❌');
+    } catch (error) {
+      testResults.tests.basicConnectivity = {
+        status: 'error',
+        success: false,
+        message: error.message
+      };
+      console.log('   ❌ Error:', error.message);
+    }
+
+    // Test 2: List instances
+    console.log('🧪 Test 2: List instances');
+    try {
+      const response = await fetch(\`\${url}/instance/fetchInstances\`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': \`Bearer \${apiKey}\`
+        }
+      });
+      
+      const data = await response.json();
+      testResults.tests.listInstances = {
+        status: response.status,
+        success: response.status === 200,
+        data: data,
+        message: response.status === 200 ? 'Instances listed successfully' : 'Failed to list instances'
+      };
+      
+      console.log('   Status:', response.status);
+      console.log('   Result:', testResults.tests.listInstances.success ? '✅' : '❌');
+      console.log('   Instances found:', Array.isArray(data) ? data.length : 'N/A');
+    } catch (error) {
+      testResults.tests.listInstances = {
+        status: 'error',
+        success: false,
+        message: error.message
+      };
+      console.log('   ❌ Error:', error.message);
+    }
+
+    // Test 3: Instance status
+    console.log('🧪 Test 3: Instance status for', instance);
+    try {
+      const response = await fetch(\`\${url}/instance/\${instance}/status\`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': \`Bearer \${apiKey}\`
+        }
+      });
+      
+      const data = await response.json();
+      testResults.tests.instanceStatus = {
+        status: response.status,
+        success: response.status === 200,
+        data: data,
+        message: response.status === 200 ? 'Instance status retrieved' : 'Instance not found or inactive'
+      };
+      
+      console.log('   Status:', response.status);
+      console.log('   Result:', testResults.tests.instanceStatus.success ? '✅' : '❌');
+    } catch (error) {
+      testResults.tests.instanceStatus = {
+        status: 'error',
+        success: false,
+        message: error.message
+      };
+      console.log('   ❌ Error:', error.message);
+    }
+
+    // Import and test WhatsApp service
+    console.log('🧪 Test 4: WhatsApp service functionality');
+    try {
+      const { whatsappService } = await import('./services/whatsappService');
+      const testCode = whatsappService.generateVerificationCode();
+      const isConnected = await whatsappService.checkConnection();
+      
+      testResults.tests.whatsappService = {
+        success: isConnected,
+        testCode: testCode,
         connection: isConnected,
-        testCode,
-        timestamp: new Date().toISOString()
-      }
-    });
+        message: isConnected ? 'WhatsApp service operational' : 'WhatsApp service not connected'
+      };
+      
+      console.log('   Test code generated:', testCode);
+      console.log('   Connection result:', isConnected ? '✅' : '❌');
+    } catch (error) {
+      testResults.tests.whatsappService = {
+        success: false,
+        message: error.message
+      };
+      console.log('   ❌ Error:', error.message);
+    }
+    
+    // Determine overall status
+    const successfulTests = Object.values(testResults.tests).filter(test => test.success).length;
+    const totalTests = Object.keys(testResults.tests).length;
+    
+    testResults.overallStatus = {
+      success: successfulTests > 0,
+      successfulTests: successfulTests,
+      totalTests: totalTests,
+      message: successfulTests === totalTests ? 'All tests passed' : 
+               successfulTests > 0 ? 'Some tests passed' : 'All tests failed'
+    };
+    
+    console.log('✅ Evolution API comprehensive test completed');
+    console.log('📊 Results:', \`\${successfulTests}/\${totalTests} tests passed\`);
+    
+    res.json(testResults);
     
   } catch (error) {
-    console.error('❌ Evolution API test error:', error);
+    console.error('❌ Evolution API comprehensive test error:', error);
     res.json({
       status: 'error',
-      message: 'Error testing Evolution API',
-      error: error.message
+      message: 'Error running comprehensive Evolution API test',
+      error: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 });
