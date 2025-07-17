@@ -15,7 +15,8 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
     'camera=(), microphone=(), geolocation=(), ' +
     'ambient-light-sensor=(), battery=(), execution-while-not-rendered=(), ' +
     'execution-while-out-of-viewport=(), layout-animations=(), legacy-image-formats=(), ' +
-    'navigation-override=(), oversized-images=(), publickey-credentials=(), speaker-selection=()'
+    'navigation-override=(), oversized-images=(), publickey-credentials=(), speaker-selection=(), ' +
+    'unoptimized-images=(), unsized-media=(), pointer-lock=()'
   );
   
   // Only set HSTS in production with HTTPS

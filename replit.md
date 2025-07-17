@@ -332,7 +332,7 @@ Preferred communication style: Simple, everyday language.
   - **Solution Applied**: Extended Permissions-Policy to include all features causing warnings:
     - ambient-light-sensor, battery, execution-while-not-rendered, execution-while-out-of-viewport
     - layout-animations, legacy-image-formats, navigation-override, oversized-images
-    - publickey-credentials, speaker-selection
+    - publickey-credentials, speaker-selection, unoptimized-images, unsized-media, pointer-lock
   - **Result**: Clean browser console without security warnings on login page
   - **Technical Impact**: Enhanced security posture with comprehensive permissions control
   - **Additional Fix**: CSP font-src updated to allow data URIs ('data:') for debugging tools like eruda.js
