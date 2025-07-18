@@ -435,291 +435,120 @@ const UserDashboard = () => {
         {/* Promotional Banners */}
         <PromotionalBanners />
 
-        {/* Layout Principal - Grid 3x2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          
-          {/* Coluna 1: Vídeos do YouTube (Expandido) */}
-          <div className="lg:col-span-2">
-            <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg shadow-md border-0 overflow-hidden">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-red-600 rounded-md flex items-center justify-center">
-                      <Youtube className="h-3 w-3 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base font-bold text-white">
-                        Últimos Vídeos
-                      </CardTitle>
-                      <CardDescription className="text-gray-400 text-xs">
-                        Conteúdo sobre Amazon FBA e e-commerce
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700 text-xs h-6"
-                      onClick={() => handleQuickAction('videos')}
-                    >
-                      <Play className="h-3 w-3 mr-1" />
-                      Ver Todos
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700 text-xs h-6"
-                      onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
-                    >
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      Canal
-                    </Button>
-                    {(userSummary as any)?.user?.role === 'admin' && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={async () => {
-                          logger.debug('🔄 Invalidating cache and refreshing videos...');
-                          await queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
-                          await refetchVideos();
-                          logger.debug('✅ Videos refreshed!');
-                        }}
-                        className="text-gray-400 hover:text-white text-xs h-6"
-                      >
-                        🔄
-                      </Button>
-                    )}
-                  </div>
+        {/* Seção de Vídeos - Largura Total */}
+        <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg shadow-md border-0 overflow-hidden">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-red-600 rounded-md flex items-center justify-center">
+                  <Youtube className="h-3 w-3 text-white" />
                 </div>
-              </CardHeader>
-              <CardContent>
-                {videosLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="bg-gray-700 rounded-md h-16 mb-1"></div>
-                        <div className="bg-gray-700 h-2 rounded mb-1"></div>
-                        <div className="bg-gray-700 h-2 rounded w-2/3"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : youtubeVideos && youtubeVideos.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                    {youtubeVideos
-                      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-                      .slice(0, 8).map((video) => (
-                      <div 
-                        key={video.id} 
-                        className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
-                        onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
-                      >
-                        <div className="relative bg-gray-700 rounded-md overflow-hidden mb-1 aspect-video">
-                          <img 
-                            src={video.thumbnailUrl} 
-                            alt={video.title}
-                            className="w-full h-full object-cover transition-opacity group-hover:opacity-80"
-                          />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
-                              <Play className="h-3 w-3 text-white ml-0.5" />
-                            </div>
-                          </div>
-                          <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 py-0.5 rounded">
-                            {video.duration}
-                          </div>
-                        </div>
-                        <h3 className="text-white font-semibold text-xs mb-1 line-clamp-2 group-hover:text-red-400 transition-colors">
-                          {video.title}
-                        </h3>
-                        <div className="flex items-center justify-between text-gray-400 text-xs">
-                          <div className="flex items-center gap-1">
-                            <Eye className="h-2 w-2" />
-                            {formatViewCount(video.viewCount)}
-                          </div>
-                          <span>{formatPublishedDate(video.publishedAt)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Youtube className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <h3 className="text-xs font-semibold text-gray-300 mb-1">Nenhum vídeo disponível</h3>
-                    <p className="text-gray-500 text-xs">Os últimos vídeos do YouTube aparecerão aqui</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Coluna 2: Sidebar com Notícias e Novidades */}
-          <div className="space-y-3">
-            {/* News Section - Compacto */}
-            <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-lg shadow-md border-0 text-white">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center backdrop-blur-sm">
-                    <Rss className="h-3 w-3 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base font-bold text-white">
-                      Notícias
-                    </CardTitle>
-                    <CardDescription className="text-blue-100 text-xs">
-                      Últimas novidades
-                    </CardDescription>
-                  </div>
+                <div>
+                  <CardTitle className="text-base font-bold text-white">
+                    Últimos Vídeos
+                  </CardTitle>
+                  <CardDescription className="text-gray-400 text-xs">
+                    Conteúdo sobre Amazon FBA e e-commerce
+                  </CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {newsLoading ? (
-                  <div className="space-y-2">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="bg-white/20 h-2 rounded mb-1"></div>
-                        <div className="bg-white/20 h-2 rounded w-3/4 mb-1"></div>
-                        <div className="bg-white/20 h-2 rounded w-1/2"></div>
-                      </div>
-                    ))}
+              </div>
+              <div className="flex gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700 text-xs h-6"
+                  onClick={() => handleQuickAction('videos')}
+                >
+                  <Play className="h-3 w-3 mr-1" />
+                  Ver Todos
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700 text-xs h-6"
+                  onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Canal
+                </Button>
+                {(userSummary as any)?.user?.role === 'admin' && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={async () => {
+                      logger.debug('🔄 Invalidating cache and refreshing videos...');
+                      await queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
+                      await refetchVideos();
+                      logger.debug('✅ Videos refreshed!');
+                    }}
+                    className="text-gray-400 hover:text-white text-xs h-6"
+                  >
+                    🔄
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {videosLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+                {[...Array(12)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="bg-gray-700 rounded-md h-16 mb-1"></div>
+                    <div className="bg-gray-700 h-2 rounded mb-1"></div>
+                    <div className="bg-gray-700 h-2 rounded w-2/3"></div>
                   </div>
-                ) : newsData && newsData.length > 0 ? (
-                  <div className="space-y-2">
-                    {newsData.slice(0, 4).map((news) => (
-                      <div 
-                        key={news.id} 
-                        className="bg-white/10 rounded-md p-2 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
-                        onClick={() => openNewsModal(news)}
-                      >
-                        <h3 className="font-semibold text-white text-xs mb-1 line-clamp-2">
-                          {news.title}
-                        </h3>
-                        <p className="text-blue-100 text-xs mb-1 line-clamp-1">
-                          {news.summary || news.content?.substring(0, 60) + '...'}
-                        </p>
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1">
-                            <div className="bg-white/20 px-1 py-0.5 rounded-full text-blue-100 text-xs">
-                              {news.category || 'Geral'}
-                            </div>
-                            {(news as any).featured && (
-                              <div className="bg-yellow-400/20 px-1 py-0.5 rounded-full text-yellow-200 border border-yellow-400/30 text-xs">
-                                Destaque
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-blue-200 text-xs">
-                            <Clock className="h-2 w-2" />
-                            {formatCreatedDate(String(news.createdAt || ''))}
-                          </div>
+                ))}
+              </div>
+            ) : youtubeVideos && youtubeVideos.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+                {youtubeVideos
+                  .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+                  .slice(0, 12).map((video) => (
+                  <div 
+                    key={video.id} 
+                    className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
+                    onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
+                  >
+                    <div className="relative bg-gray-700 rounded-md overflow-hidden mb-1 aspect-video">
+                      <img 
+                        src={video.thumbnailUrl} 
+                        alt={video.title}
+                        className="w-full h-full object-cover transition-opacity group-hover:opacity-80"
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
+                          <Play className="h-3 w-3 text-white ml-0.5" />
                         </div>
                       </div>
-                    ))}
-                    <Button 
-                      variant="secondary" 
-                      size="sm"
-                      className="w-full mt-2 bg-white/20 hover:bg-white/30 text-white border-0 text-xs h-6"
-                      onClick={() => window.location.href = '/noticias'}
-                    >
-                      Ver Todas
-                      <ArrowRight className="h-3 w-3 ml-1" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-1">
-                      <Rss className="h-3 w-3 text-white" />
+                      <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 py-0.5 rounded">
+                        {video.duration}
+                      </div>
                     </div>
-                    <h3 className="text-xs font-semibold text-white mb-1">Nenhuma notícia</h3>
-                    <p className="text-blue-200 text-xs">As últimas notícias aparecerão aqui</p>
+                    <h3 className="text-white font-semibold text-xs mb-1 line-clamp-2 group-hover:text-red-400 transition-colors">
+                      {video.title}
+                    </h3>
+                    <div className="flex items-center justify-between text-gray-400 text-xs">
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-2 w-2" />
+                        {formatViewCount(video.viewCount)}
+                      </div>
+                      <span>{formatPublishedDate(video.publishedAt)}</span>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Updates Section - Compacto */}
-            <Card className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-lg shadow-md border-0 text-white">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center backdrop-blur-sm">
-                    <Users className="h-3 w-3 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base font-bold text-white">
-                      Novidades
-                    </CardTitle>
-                    <CardDescription className="text-emerald-100 text-xs">
-                      Atualizações do sistema
-                    </CardDescription>
-                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Youtube className="h-4 w-4 text-gray-400" />
                 </div>
-              </CardHeader>
-              <CardContent>
-                {updatesLoading ? (
-                  <div className="space-y-2">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="bg-white/20 h-2 rounded mb-1"></div>
-                        <div className="bg-white/20 h-2 rounded w-3/4 mb-1"></div>
-                        <div className="bg-white/20 h-2 rounded w-1/2"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : updatesData && updatesData.length > 0 ? (
-                  <div className="space-y-2">
-                    {updatesData.slice(0, 4).map((update) => (
-                      <div 
-                        key={update.id} 
-                        className="bg-white/10 rounded-md p-2 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
-                        onClick={() => openUpdateModal(update)}
-                      >
-                        <h3 className="font-semibold text-white text-xs mb-1 line-clamp-2">
-                          {update.title}
-                        </h3>
-                        <p className="text-emerald-100 text-xs mb-1 line-clamp-1">
-                          {update.summary || update.content?.substring(0, 60) + '...'}
-                        </p>
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1">
-                            <div className="bg-white/20 px-1 py-0.5 rounded-full text-emerald-100 text-xs">
-                              {update.version || 'v1.0'}
-                            </div>
-                            <div className="bg-white/20 px-1 py-0.5 rounded-full text-emerald-100 text-xs">
-                              {update.type || 'Feature'}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 text-xs">
-                            <Clock className="h-2 w-2" />
-                            {formatCreatedDate(String(update.createdAt || ''))}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <Button 
-                      variant="secondary" 
-                      size="sm"
-                      className="w-full mt-2 bg-white/20 hover:bg-white/30 text-white border-0 text-xs h-6"
-                      onClick={() => window.location.href = '/novidades'}
-                    >
-                      Ver Todas
-                      <ArrowRight className="h-3 w-3 ml-1" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-1">
-                      <Users className="h-3 w-3 text-white" />
-                    </div>
-                    <h3 className="text-xs font-semibold text-white mb-1">Nenhuma novidade</h3>
-                    <p className="text-emerald-200 text-xs">As últimas atualizações aparecerão aqui</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                <h3 className="text-xs font-semibold text-gray-300 mb-1">Nenhum vídeo disponível</h3>
+                <p className="text-gray-500 text-xs">Os últimos vídeos do YouTube aparecerão aqui</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Seção de Estatísticas Rápidas */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-0">
