@@ -115,31 +115,32 @@ Este documento apresenta um plano estruturado para remover código não utilizad
 
 ---
 
-## 📁 Fase 4: Limpeza de Funções e Utils (PRIORIDADE MÉDIA)
+## ✅ Fase 4: Limpeza de Funções e Utils (PRIORIDADE MÉDIA) - CONCLUÍDA
 
 ### 4.1 Funções de Configuração Não Utilizadas
 
-#### Configurações de AI Image
-- **Arquivo**: `/client/src/config/ai-image.ts`
-- **Funções não usadas**: Múltiplas configurações
-- **Ação**: Revisar e remover configurações órfãs
-- **Tempo**: 45 minutos
+#### ✅ Configurações de AI Image
+- **Arquivo**: ~~`/client/src/config/ai-image.ts`~~ **REMOVIDO**
+- **Arquivo**: ~~`/client/src/types/ai-image.ts`~~ **REMOVIDO**
+- **Resultado**: 105 linhas removidas (53+52), imports corrigidos
+- **Motivo**: Configurações nunca importadas ou utilizadas
 
-#### Configurações de Upscale
-- **Arquivo**: `/client/src/config/upscale.ts`
-- **Funções não usadas**: Configurações de scale não utilizadas
-- **Ação**: Limpar configurações desnecessárias
-- **Tempo**: 30 minutos
+#### ✅ Configurações de Upscale
+- **Arquivo**: `/client/src/config/upscale.ts` **MANTIDO**
+- **Motivo**: Configurações em uso (4 arquivos referenciam)
+- **Resultado**: SCALE_OPTIONS, FILE_VALIDATION ativamente utilizados
 
 ### 4.2 Services Não Utilizados
 
-#### Formatters duplicados
-- **Arquivo**: `/client/src/lib/utils/formatters.ts`
-- **Problema**: Funções de formatação duplicadas
-- **Ação**: Consolidar e remover duplicatas
-- **Tempo**: 45 minutos
+#### ✅ Formatters duplicados
+- **Arquivo**: `/client/src/lib/utils/formatters.ts` **MANTIDO**
+- **Motivo**: Amplamente utilizado (263 ocorrências em 42 arquivos)
+- **Resultado**: Sistema unificado de formatação, sem duplicatas
 
-**Estimativa Fase 4**: 2 horas
+**Status**: ✅ **CONCLUÍDO**  
+**Resultado**: 2 arquivos removidos (105 linhas)
+
+**Tempo real**: ~5 minutos (estimativa: 2 horas)
 
 ---
 
@@ -185,20 +186,21 @@ Este documento apresenta um plano estruturado para remover código não utilizad
 |------|-----------|----------------|------------|--------|
 | 1 | Limpeza de Importações | 5-7 horas | ~1 hora | ✅ **CONCLUÍDO** |
 | 2 | Remoção de Componentes | 1-2 horas | ~22 min | ✅ **CONCLUÍDO** |
-| 3 | Hooks Órfãos | 30 minutos | - | 🔄 **PRÓXIMO** |
-| 4 | Funções e Utils | 2 horas | - | ⏳ Pendente |
+| 3 | Hooks Órfãos | 30 minutos | ~5 min | ✅ **CONCLUÍDO** |
+| 4 | Funções e Utils | 2 horas | ~5 min | ✅ **CONCLUÍDO** |
 | 5 | Server-side | 1h45min | - | ⏳ Pendente |
 | 6 | TODOs | 2 horas | - | ⏳ Pendente |
 
 **Tempo Total Estimado**: 12-15 horas  
-**Tempo Real até agora**: ~1h22min  
-**Fases Críticas Concluídas**: ✅ 2/2 (100%)
+**Tempo Real até agora**: ~1h32min  
+**Fases Críticas Concluídas**: ✅ 4/4 (100%)
 
 ### 📊 Progresso Geral
 - ✅ **Fase 1**: Importações (20+ removidas)
 - ✅ **Fase 2**: Componentes (7 arquivos/1,884 linhas removidas)  
-- 🔄 **Fase 3**: Hooks órfãos (próxima)
-- ⏳ **Fases 4-6**: Pendentes
+- ✅ **Fase 3**: Hooks órfãos (2 arquivos/233 linhas removidas)
+- ✅ **Fase 4**: Funções/utils (2 arquivos/105 linhas removidas)
+- ⏳ **Fases 5-6**: Pendentes
 
 ---
 
