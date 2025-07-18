@@ -26,7 +26,7 @@ interface Product {
   updatedAt: string;
 }
 
-export const ProductsNew: React.FC = () => {
+const ProductsNew: React.FC = () => {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<boolean | null>(null);
@@ -341,3 +341,6 @@ export const ProductsNew: React.FC = () => {
     </div>
   );
 };
+
+export default ProductsNew;
+export { ProductsNew };
