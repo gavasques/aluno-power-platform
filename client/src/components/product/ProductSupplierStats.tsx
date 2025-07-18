@@ -28,7 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { formatCurrency } from '@/shared/utils/formatters';
+import { ProductSupplierStatsUtils } from '@/shared/utils/productSupplierUtils';
 import type { ProductSupplierStats } from '@/shared/types/productSupplier';
 
 interface ProductSupplierStatsProps {
@@ -94,7 +94,7 @@ export const ProductSupplierStats: React.FC<ProductSupplierStatsProps> = ({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {formatCurrency(stats.avgCost)}
+              {ProductSupplierUtils.formatCurrency(stats.avgCost)}
             </div>
             <p className="text-xs text-muted-foreground">
               Média entre todos os fornecedores
@@ -136,7 +136,7 @@ export const ProductSupplierStats: React.FC<ProductSupplierStatsProps> = ({
                 <div className="flex items-center gap-2">
                   <TrendingDown className="h-4 w-4 text-green-500" />
                   <span className="text-green-600 font-bold">
-                    {formatCurrency(stats.lowestCost)}
+                    {ProductSupplierUtils.formatCurrency(stats.lowestCost)}
                   </span>
                 </div>
               </div>
@@ -145,7 +145,7 @@ export const ProductSupplierStats: React.FC<ProductSupplierStatsProps> = ({
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-red-500" />
                   <span className="text-red-600 font-bold">
-                    {formatCurrency(stats.highestCost)}
+                    {ProductSupplierUtils.formatCurrency(stats.highestCost)}
                   </span>
                 </div>
               </div>
@@ -154,7 +154,7 @@ export const ProductSupplierStats: React.FC<ProductSupplierStatsProps> = ({
                 <div className="flex items-center gap-2">
                   <Activity className="h-4 w-4 text-blue-500" />
                   <span className="text-blue-600 font-bold">
-                    {formatCurrency(costDifference)}
+                    {ProductSupplierUtils.formatCurrency(costDifference)}
                   </span>
                 </div>
               </div>
@@ -218,7 +218,7 @@ export const ProductSupplierStats: React.FC<ProductSupplierStatsProps> = ({
                   <div>
                     <p className="text-gray-500 mb-1">Custo</p>
                     <p className="font-medium text-green-600">
-                      {formatCurrency(stats.primarySupplier.supplierCost)}
+                      {ProductSupplierUtils.formatCurrency(stats.primarySupplier.supplierCost)}
                     </p>
                   </div>
                   <div>
