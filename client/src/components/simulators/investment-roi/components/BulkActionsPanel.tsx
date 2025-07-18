@@ -2,9 +2,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Settings, Zap } from 'lucide-react';
 import { DEFAULT_BULK_VALUES } from '../types';
-import { formatPercentage, formatCurrency, sanitizeNumericInput } from '../utils';
+import { formatPercentage, sanitizeNumericInput } from '../utils';
 
 interface BulkActionsPanelProps {
   bulkROI: number;
@@ -29,7 +30,7 @@ export function BulkActionsPanel({
   onApplyBulkAporte,
   onApplyBulkRetirada
 }: BulkActionsPanelProps) {
-  const handleNumericChange = (
+  const handlePercentageChange = (
     value: string,
     onChange: (value: number) => void
   ) => {
@@ -58,7 +59,7 @@ export function BulkActionsPanel({
                 id="bulk-roi"
                 type="text"
                 value={bulkROI.toString()}
-                onChange={(e) => handleNumericChange(e.target.value, onBulkROIChange)}
+                onChange={(e) => handlePercentageChange(e.target.value, onBulkROIChange)}
                 placeholder="Ex: 20"
                 className="flex-1"
               />
@@ -79,12 +80,10 @@ export function BulkActionsPanel({
           <div className="space-y-2">
             <Label htmlFor="bulk-aporte">Aporte por Giro</Label>
             <div className="flex gap-2">
-              <Input
-                id="bulk-aporte"
-                type="text"
-                value={bulkAporte.toString()}
-                onChange={(e) => handleNumericChange(e.target.value, onBulkAporteChange)}
-                placeholder="Ex: 1000"
+              <CurrencyInput
+                value={bulkAporte}
+                onChange={onBulkAporteChange}
+                placeholder="Ex: R$ 1.000"
                 className="flex-1"
               />
               <Button 
@@ -95,21 +94,16 @@ export function BulkActionsPanel({
                 <Zap className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {formatCurrency(bulkAporte)}
-            </p>
           </div>
 
           {/* Bulk Retirada */}
           <div className="space-y-2">
             <Label htmlFor="bulk-retirada">Retirada por Giro</Label>
             <div className="flex gap-2">
-              <Input
-                id="bulk-retirada"
-                type="text"
-                value={bulkRetirada.toString()}
-                onChange={(e) => handleNumericChange(e.target.value, onBulkRetiradaChange)}
-                placeholder="Ex: 500"
+              <CurrencyInput
+                value={bulkRetirada}
+                onChange={onBulkRetiradaChange}
+                placeholder="Ex: R$ 500"
                 className="flex-1"
               />
               <Button 
@@ -120,9 +114,6 @@ export function BulkActionsPanel({
                 <Zap className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {formatCurrency(bulkRetirada)}
-            </p>
           </div>
         </div>
       </CardContent>

@@ -2,9 +2,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Calculator } from 'lucide-react';
 import { ConfiguracaoSimulacao } from '../types';
-import { formatCurrency, sanitizeNumericInput } from '../utils';
 
 interface ConfigurationPanelProps {
   config: ConfiguracaoSimulacao;
@@ -19,9 +19,8 @@ export function ConfigurationPanel({ config, onConfigChange }: ConfigurationPane
     });
   };
 
-  const handleNumericInputChange = (field: keyof ConfiguracaoSimulacao, value: string) => {
-    const numericValue = sanitizeNumericInput(value);
-    handleFieldChange(field, numericValue);
+  const handleInvestimentoChange = (value: number) => {
+    handleFieldChange('investimentoInicial', value);
   };
 
   return (
@@ -40,16 +39,11 @@ export function ConfigurationPanel({ config, onConfigChange }: ConfigurationPane
           {/* Investimento Inicial */}
           <div className="space-y-2">
             <Label htmlFor="investimento-inicial">Investimento Inicial</Label>
-            <Input
-              id="investimento-inicial"
-              type="text"
-              value={config.investimentoInicial.toString()}
-              onChange={(e) => handleNumericInputChange('investimentoInicial', e.target.value)}
-              placeholder="Ex: 10000"
+            <CurrencyInput
+              value={config.investimentoInicial}
+              onChange={handleInvestimentoChange}
+              placeholder="Ex: R$ 10.000"
             />
-            <p className="text-sm text-muted-foreground">
-              {formatCurrency(config.investimentoInicial)}
-            </p>
           </div>
 
           {/* Duração do Giro */}
