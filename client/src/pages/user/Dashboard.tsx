@@ -491,7 +491,7 @@ const UserDashboard = () => {
           <Card className="bg-gradient-to-br from-purple-600 to-purple-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative overflow-hidden">
             <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between mb-4">
-                <div>
+                <div className="flex-1">
                   <h3 className="font-bold text-xl mb-2">Venda Moda na Amazon</h3>
                   <p className="text-purple-100 text-sm leading-relaxed">0% de Comissão para novas contas</p>
                 </div>
@@ -503,23 +503,20 @@ const UserDashboard = () => {
               <div className="mt-4">
                 <Button 
                   size="sm" 
-                  className="bg-white text-purple-600 hover:bg-purple-50 font-semibold px-4 py-2 rounded-md"
+                  className="bg-white text-purple-700 hover:bg-purple-50 font-semibold px-4 py-2 rounded-md shadow-md"
                   onClick={() => window.open('https://venda.amazon.com.br/?ld=elbrsoa_atesliberdade_virtualsoftsrp2025na', '_blank')}
                 >
                   Cadastre-se →
                 </Button>
               </div>
             </CardContent>
-            
-            {/* Gradiente overlay decorativo */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-purple-900/20 pointer-events-none"></div>
           </Card>
 
           {/* Venda na Amazon */}
           <Card className="bg-gradient-to-br from-blue-600 to-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative overflow-hidden">
             <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between mb-4">
-                <div>
+                <div className="flex-1">
                   <h3 className="font-bold text-xl mb-2">Venda na Amazon</h3>
                   <p className="text-blue-100 text-sm leading-relaxed">Tenha nossos benefícios exclusivos</p>
                 </div>
@@ -531,23 +528,20 @@ const UserDashboard = () => {
               <div className="mt-4">
                 <Button 
                   size="sm" 
-                  className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-4 py-2 rounded-md"
+                  className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-4 py-2 rounded-md shadow-md"
                   onClick={() => window.open('https://amzn.to/3RTu5Sk', '_blank')}
                 >
                   Cadastre-se →
                 </Button>
               </div>
             </CardContent>
-            
-            {/* Gradiente overlay decorativo */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-transparent to-blue-900/20 pointer-events-none"></div>
           </Card>
 
           {/* Melhor Software */}
           <Card className="bg-gradient-to-br from-orange-600 to-orange-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative overflow-hidden">
             <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between mb-4">
-                <div>
+                <div className="flex-1">
                   <h3 className="font-bold text-xl mb-2">Melhor Software</h3>
                   <p className="text-orange-100 text-sm leading-relaxed">Para encontrar produtos lucrativos</p>
                 </div>
@@ -559,24 +553,20 @@ const UserDashboard = () => {
               <div className="mt-4 flex gap-2">
                 <Button 
                   size="sm" 
-                  className="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-4 py-2 rounded-md"
+                  className="bg-white text-orange-700 hover:bg-orange-50 font-semibold px-4 py-2 rounded-md shadow-md"
                   onClick={() => window.open('https://helium10.com/go/guilherme74', '_blank')}
                 >
                   Anual →
                 </Button>
                 <Button 
                   size="sm" 
-                  variant="outline"
-                  className="border-white text-white hover:bg-white/20 px-4 py-2 rounded-md"
+                  className="bg-white/10 text-white hover:bg-white/20 font-semibold px-4 py-2 rounded-md border-2 border-white backdrop-blur-sm"
                   onClick={() => window.open('https://helium10.com/go/guilherme20', '_blank')}
                 >
                   Mensal →
                 </Button>
               </div>
             </CardContent>
-            
-            {/* Gradiente overlay decorativo */}
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-transparent to-orange-900/20 pointer-events-none"></div>
           </Card>
         </div>
 
