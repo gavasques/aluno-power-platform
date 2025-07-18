@@ -140,6 +140,21 @@ export function Header() {
                   Nossos Cursos
                 </a>
               </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <a 
+                  href="https://portal.guilhermevasques.club" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 hover:text-emerald-700 font-semibold"
+                  )}
+                >
+                  <BookCopy className="mr-2 h-4 w-4" />
+                  Ir para o Curso
+                </a>
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
