@@ -9,10 +9,10 @@ import {
   AlertCircle,
   CheckCircle2,
   Sparkles,
-  Loader2,
   Info,
   X
 } from "lucide-react";
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -456,7 +456,7 @@ export default function AmazonListingsOptimizerNew() {
                     >
                       {isProcessing ? (
                         <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          <ButtonLoader />
                           Processando...
                         </>
                       ) : (

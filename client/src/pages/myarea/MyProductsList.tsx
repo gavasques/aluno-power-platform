@@ -22,7 +22,6 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Plus, 
   Search, 
-  Loader2, 
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -31,6 +30,7 @@ import {
   ChevronUp,
   TrendingDown
 } from "lucide-react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useProducts } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
 import { formatBRL, calculateChannelPricing } from "@/utils/pricingCalculations";
@@ -179,7 +179,7 @@ export default function MyProductsList() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <LoadingSpinner size="lg" />
               <p className="text-lg text-muted-foreground">Carregando produtos...</p>
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function MyProductsList() {
                 }}
                 className="flex items-center gap-2"
               >
-                <Loader2 className="h-4 w-4" />
+                <LoadingSpinner size="sm" />
                 Atualizar
               </Button>
               <div className="text-sm text-muted-foreground">

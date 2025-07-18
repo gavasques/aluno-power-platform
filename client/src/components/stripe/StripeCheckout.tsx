@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Check, Crown, Zap } from 'lucide-react';
+import { Check, Crown, Zap } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 
@@ -206,7 +207,7 @@ export default function StripeCheckout({ currentPlan }: StripeCheckoutProps) {
                 title="Abrirá o checkout do Stripe em nova aba"
               >
                 {isLoading === plan.id && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <ButtonLoader />
                 )}
                 {isCurrentPlan(plan.id) ? 'Plano Atual' : 'Assinar Agora'}
               </Button>

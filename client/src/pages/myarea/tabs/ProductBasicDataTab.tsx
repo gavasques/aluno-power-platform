@@ -20,9 +20,9 @@ import {
   Barcode,
   Building,
   Factory,
-  Save,
-  Loader2
+  Save
 } from "lucide-react";
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { formatBRL } from "@/utils/pricingCalculations";
 import { useState } from "react";
 
@@ -404,7 +404,7 @@ export default function ProductBasicDataTab({
                         disabled={isCreatingBrand || !newBrandName.trim()}
                       >
                         {isCreatingBrand ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <ButtonLoader />
                         ) : (
                           "Criar"
                         )}
@@ -730,7 +730,7 @@ export default function ProductBasicDataTab({
         >
           {isSaving ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <ButtonLoader />
               Salvando...
             </>
           ) : (

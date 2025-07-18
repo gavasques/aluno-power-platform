@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Edit, Package, Loader2, ShoppingCart, Calculator, BarChart3, FileText } from "lucide-react";
+import { ArrowLeft, Edit, Package, ShoppingCart, Calculator, BarChart3, FileText } from "lucide-react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Product } from "@/types/product";
 import ProductSalesChannels from "@/components/product/view/ProductSalesChannels";
 import ProductFinancialSimulation from "@/components/product/view/ProductFinancialSimulation";
@@ -38,10 +39,10 @@ export default function ProductDetail() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p className="text-lg text-muted-foreground">Carregando produto...</p>
-            </div>
+                      <div className="text-center">
+            <LoadingSpinner size="lg" />
+            <p className="text-lg text-muted-foreground">Carregando produto...</p>
+          </div>
           </div>
         </div>
       </div>

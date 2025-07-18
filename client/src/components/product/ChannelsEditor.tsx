@@ -14,7 +14,8 @@ import { useForm } from 'react-hook-form';
 import { logger } from '@/utils/logger';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Package, Store, Check, X, TrendingUp, TrendingDown, ChevronDown, ChevronRight } from 'lucide-react';
+import { Package, Store, Check, X, TrendingUp, TrendingDown, ChevronDown, ChevronRight } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { PercentInput } from '@/components/ui/percent-input';
 import { 
@@ -569,7 +570,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <LoadingSpinner size="lg" />
             <span className="ml-2">Carregando dados do produto...</span>
           </div>
         </DialogContent>
@@ -755,7 +756,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
               <Button type="submit" disabled={isSaving}>
                 {isSaving ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <ButtonLoader />
                     Salvando...
                   </>
                 ) : (

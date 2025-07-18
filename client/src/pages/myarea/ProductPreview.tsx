@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Package, Ruler, DollarSign, Edit, ExternalLink, Building2, Hash, Barcode } from "lucide-react";
 import { useLocation } from "wouter";
 import { formatCurrency } from "@/utils/productCalculations";
-import { Loader2 } from "lucide-react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 export default function ProductPreview() {
   const [, setLocation] = useLocation();
@@ -32,7 +32,7 @@ export default function ProductPreview() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <LoadingSpinner size="md" className="text-blue-600" />
           <p className="text-lg text-slate-600">Carregando produto...</p>
         </div>
       </div>

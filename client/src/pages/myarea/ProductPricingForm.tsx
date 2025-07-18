@@ -25,9 +25,9 @@ import {
   DollarSign, 
   ShoppingCart,
   Save,
-  X,
-  Loader2
+  X
 } from "lucide-react";
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 
 // Import tab components
 import ProductBasicDataTab from "@/pages/myarea/tabs/ProductBasicDataTab";
@@ -399,7 +399,7 @@ export default function ProductPricingForm() {
   if (loadingProduct) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

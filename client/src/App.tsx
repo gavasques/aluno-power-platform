@@ -9,7 +9,7 @@ import { queryClient } from '@/lib/queryClient';
 import { AuthProvider } from "./contexts/AuthContext";
 import { CombinedProvider } from "./contexts/CombinedProvider";
 import { Suspense, lazy, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { backgroundPrefetch } from '@/lib/prefetch';
 import { useFontLoader } from '@/lib/fontLoader';
 import { useOptimizedIcons } from '@/components/IconLoader';
@@ -105,7 +105,7 @@ import Login from "./pages/Login";
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="flex items-center gap-3">
-      <Loader2 className="h-6 w-6 animate-spin" />
+      <LoadingSpinner size="md" />
       <span className="text-sm text-muted-foreground">Carregando...</span>
     </div>
   </div>

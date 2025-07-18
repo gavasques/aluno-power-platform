@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Loader2 } from "lucide-react";
+import { Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -14,6 +14,7 @@ import { ProductFormWrapper } from "@/shared/components/forms/ProductFormWrapper
 import { useUrlProductId } from "@/shared/hooks/useUrlProductId";
 import { useProductQuery } from "@/shared/hooks/useProductQuery";
 import { useProductMutation } from "@/shared/hooks/useProductMutation";
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 
 const basicDataSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -117,7 +118,7 @@ export default function ProductBasicDataEditRefactored() {
         description="Carregando dados do produto..."
       >
         <div className="flex items-center justify-center h-32">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <LoadingSpinner size="lg" />
         </div>
       </ProductFormWrapper>
     );
@@ -350,7 +351,7 @@ export default function ProductBasicDataEditRefactored() {
             >
               {mutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <ButtonLoader className="mr-2" />
                   Salvando...
                 </>
               ) : (

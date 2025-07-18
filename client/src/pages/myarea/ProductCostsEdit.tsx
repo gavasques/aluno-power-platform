@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Save, Loader2 } from "lucide-react";
+import { Save } from "lucide-react";
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -70,7 +71,7 @@ export default function ProductCostsEdit() {
         description="Carregando dados do produto..."
       >
         <div className="flex items-center justify-center h-32">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <LoadingSpinner size="lg" />
         </div>
       </ProductFormWrapper>
     );
@@ -162,7 +163,7 @@ export default function ProductCostsEdit() {
               >
                 {mutation.isPending ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <ButtonLoader />
                     Salvando...
                   </>
                 ) : (

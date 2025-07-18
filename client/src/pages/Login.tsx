@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 // Componentes modulares
 import { AuthLayout } from '@/components/auth/AuthLayout';
@@ -29,7 +29,7 @@ export default function Login() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <LoadingSpinner size="lg" className="text-blue-600" />
       </div>
     );
   }

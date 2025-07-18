@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Upload, FileText, Loader2, Download, Copy, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Download, Copy, CheckCircle, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { AgentWithPrompts, AmazonListingResponse } from "../types/agent.types";
 import { apiRequest } from "@/lib/queryClient";
+import { ButtonLoader } from '@/components/common/LoadingSpinner';
 
 export default function AgentProcessorPage() {
   const { id } = useParams();
@@ -213,7 +214,7 @@ export default function AgentProcessorPage() {
               >
                 {processMutation.isPending ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <ButtonLoader className="mr-2" />
                     Processando...
                   </>
                 ) : (

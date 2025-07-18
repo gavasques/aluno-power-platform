@@ -8,7 +8,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Save, RotateCcw, TrendingUp, TrendingDown } from 'lucide-react';
+import { Save, RotateCcw, TrendingUp, TrendingDown } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { useChannelManager } from '@/hooks/useChannelManager';
 import { ChannelCard } from './ChannelCard';
 import { CHANNEL_CATEGORIES, CHANNEL_METADATA } from '@/shared/constants/channels';
@@ -46,7 +47,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <LoadingSpinner size="lg" />
         <span className="ml-2">Carregando configurações dos canais...</span>
       </div>
     );
@@ -123,7 +124,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
             className="gap-2"
           >
             {isSaving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <ButtonLoader />
             ) : (
               <Save className="h-4 w-4" />
             )}

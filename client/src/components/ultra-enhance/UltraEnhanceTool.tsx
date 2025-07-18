@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkles, Download, Upload, Zap, Star, ArrowUp, Image as ImageIcon, Clock, CreditCard, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Sparkles, Download, Upload, Zap, Star, ArrowUp, Image as ImageIcon, Clock, CreditCard, CheckCircle, XCircle } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 
 interface UltraEnhanceParams {
   upscale_factor: number;
@@ -302,7 +303,7 @@ export function UltraEnhanceTool() {
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <ButtonLoader />
                   Processando...
                 </>
               ) : (

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Loader2, Plus, Trash2, Calculator } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { formatBRL } from "@/utils/pricingCalculations";
 import { calculateChannelProfitability } from "@/utils/channelCalculations";
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 
 const pricingSchema = z.object({
   channels: z.array(z.object({
@@ -175,7 +176,7 @@ export default function ProductPricingChannelsEdit() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <LoadingSpinner size="lg" />
               <p className="text-lg text-muted-foreground">Carregando produto...</p>
             </div>
           </div>
@@ -433,7 +434,7 @@ export default function ProductPricingChannelsEdit() {
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <ButtonLoader className="mr-2" />
                     Salvando...
                   </>
                 ) : (

@@ -10,7 +10,7 @@
  */
 
 import React from 'react';
-import { Loader2, CheckCircle, XCircle, Clock, DollarSign, Zap } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, DollarSign, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -54,7 +54,7 @@ const ProcessingStatusComponent: React.FC<ProcessingStatusComponentProps> = ({
         };
       case 'uploading':
         return {
-          icon: Loader2,
+          icon: LoadingSpinner,
           title: 'Enviando imagem...',
           color: 'text-blue-500',
           bgColor: 'bg-blue-50',
@@ -64,7 +64,7 @@ const ProcessingStatusComponent: React.FC<ProcessingStatusComponentProps> = ({
         };
       case 'processing':
         return {
-          icon: Loader2,
+          icon: LoadingSpinner,
           title: 'Processando com IA...',
           color: 'text-purple-500',
           bgColor: 'bg-purple-50',

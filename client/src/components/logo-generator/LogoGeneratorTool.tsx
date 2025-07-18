@@ -18,7 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Download, Loader2, AlertCircle, CheckCircle, History } from 'lucide-react';
+import { Sparkles, Download, AlertCircle, CheckCircle, History } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -371,7 +372,7 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
             >
               {isGenerating ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <ButtonLoader />
                   Gerando logomarcas...
                 </>
               ) : (

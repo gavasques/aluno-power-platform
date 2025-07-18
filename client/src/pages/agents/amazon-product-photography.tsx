@@ -9,10 +9,10 @@ import {
   AlertCircle,
   CheckCircle2,
   Sparkles,
-  Loader2,
   X,
   Download
 } from "lucide-react";
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -287,7 +287,7 @@ export default function AmazonProductPhotography() {
                 >
                   {isProcessing ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <ButtonLoader />
                       Processando...
                     </>
                   ) : (

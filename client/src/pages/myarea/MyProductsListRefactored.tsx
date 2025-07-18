@@ -22,7 +22,6 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Plus, 
   Search, 
-  Loader2, 
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -30,6 +29,7 @@ import {
   ChevronDown,
   ChevronUp
 } from "lucide-react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useProducts } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
 import { formatBRL } from "@/utils/pricingCalculations";
@@ -167,10 +167,10 @@ export default function MyProductsListRefactored() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p className="text-lg text-muted-foreground">Carregando produtos...</p>
-            </div>
+                      <div className="text-center">
+            <LoadingSpinner size="lg" />
+            <p className="text-lg text-muted-foreground">Carregando produtos...</p>
+          </div>
           </div>
         </div>
       </div>

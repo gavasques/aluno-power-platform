@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, Download, ZoomIn, Loader2, Check, AlertCircle, CreditCard, Sparkles } from 'lucide-react';
+import { Upload, Download, ZoomIn, Check, AlertCircle, CreditCard, Sparkles } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { useCreditSystem } from '@/hooks/useCreditSystem';
@@ -356,7 +357,7 @@ export function UpscaleProTool() {
           {isProcessing && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <LoadingSpinner size="sm" />
                 <span className="text-sm font-medium">Processando imagem...</span>
               </div>
               <Progress value={progress} className="w-full" />
@@ -401,7 +402,7 @@ export function UpscaleProTool() {
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <ButtonLoader />
                   Processando...
                 </>
               ) : (

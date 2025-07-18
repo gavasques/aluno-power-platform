@@ -25,10 +25,10 @@ import {
   Copy,
   Code2,
   Settings,
-  Loader2,
   Wand2,
   ArrowLeft
 } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import { AgentCostDisplay } from '@/components/AgentCostDisplay';
 import { logger } from '@/utils/logger';
@@ -432,7 +432,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
               >
                 {isGenerating ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <ButtonLoader />
                     Gerando...
                   </>
                 ) : (

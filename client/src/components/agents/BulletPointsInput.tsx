@@ -3,7 +3,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Wand2, Loader2 } from 'lucide-react';
+import { Wand2 } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { useToast } from '@/hooks/use-toast';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
 
@@ -253,7 +254,7 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
             className="flex-1 bg-blue-600 hover:bg-blue-700 h-11"
           >
             {isGenerating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <ButtonLoader />
             ) : (
               <Wand2 className="h-4 w-4 mr-2" />
             )}

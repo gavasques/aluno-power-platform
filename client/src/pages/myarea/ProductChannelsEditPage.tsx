@@ -4,9 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Store, Loader2 } from 'lucide-react';
+import { ArrowLeft, Store } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import ChannelsEditor from '@/components/product/ChannelsEditor';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface ProductChannelsEditPageProps {}
 
@@ -39,7 +40,7 @@ export default function ProductChannelsEditPage({}: ProductChannelsEditPageProps
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <LoadingSpinner size="lg" />
           </div>
         </div>
       </div>

@@ -17,12 +17,12 @@ import {
   FileText,
   Clock,
   ArrowRight,
-  Save,
-  Loader2
+  Save
 } from "lucide-react";
 import { formatBRL, formatPercent } from "@/utils/pricingCalculations";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { ButtonLoader } from "@/components/common/LoadingSpinner";
 
 interface ProductCostsTabProps {
   form: UseFormReturn<any>;
@@ -208,7 +208,7 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
               >
                 {isSaving ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <ButtonLoader className="mr-2" />
                     Salvando...
                   </>
                 ) : (

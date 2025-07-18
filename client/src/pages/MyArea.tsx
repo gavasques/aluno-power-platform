@@ -1,8 +1,8 @@
 
 import { useParams } from "wouter";
 import { lazy, Suspense } from "react";
-import { Loader2 } from "lucide-react";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 // Lazy load components for better performance
 const MySuppliers = lazy(() => import("./myarea/MySuppliers"));
@@ -20,12 +20,12 @@ const MySubscriptions = lazy(() => import("../pages/myarea/MySubscriptions"));
 const UserProfile = lazy(() => import("./myarea/UserProfile"));
 
 // Loading component
-const LoadingSpinner = () => (
+const LoadingFallback = () => (
   <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <LoadingSpinner size="lg" />
           <p className="text-lg text-muted-foreground">Carregando...</p>
         </div>
       </div>
@@ -44,11 +44,11 @@ const MyArea = () => {
       return (
         <PermissionGuard featureCode="myarea.suppliers">
           {id ? (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <SupplierDetailRefactored />
             </Suspense>
           ) : (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <MySuppliers />
             </Suspense>
           )}
@@ -59,19 +59,19 @@ const MyArea = () => {
       return (
         <PermissionGuard featureCode="myarea.products">
           {id === "novo" || id === "new" ? (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <ProductPricingForm />
             </Suspense>
           ) : id && subId === "editar" ? (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <ProductPricingForm />
             </Suspense>
           ) : id ? (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <ProductDetail />
             </Suspense>
           ) : (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <MyProductsList />
             </Suspense>
           )}
@@ -82,19 +82,19 @@ const MyArea = () => {
       return (
         <PermissionGuard featureCode="myarea.materials">
           {id === "novo" || id === "new" ? (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <MaterialForm />
             </Suspense>
           ) : fullPath.includes("/edit") ? (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <MaterialForm />
             </Suspense>
           ) : id ? (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <MaterialDetail />
             </Suspense>
           ) : (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingFallback />}>
               <MyMaterials />
             </Suspense>
           )}
@@ -104,7 +104,7 @@ const MyArea = () => {
     case "brands":
       return (
         <PermissionGuard featureCode="myarea.brands">
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<LoadingFallback />}>
             <MyBrands />
           </Suspense>
         </PermissionGuard>
@@ -113,7 +113,7 @@ const MyArea = () => {
     case "subscriptions":
       return (
         <PermissionGuard featureCode="myarea.subscriptions">
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<LoadingFallback />}>
             <MySubscriptions />
           </Suspense>
         </PermissionGuard>
@@ -121,7 +121,7 @@ const MyArea = () => {
     case "perfil":
     case "profile":
       return (
-        <Suspense fallback={<LoadingSpinner />}>
+        <Suspense fallback={<LoadingFallback />}>
           <UserProfile />
         </Suspense>
       );

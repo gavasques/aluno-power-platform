@@ -10,7 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, Upload, CheckCircle, ArrowRight, Image, Download, ArrowLeft } from 'lucide-react';
+import { Upload, CheckCircle, ArrowRight, Image, Download, ArrowLeft } from 'lucide-react';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import Layout from '@/components/layout/Layout';
 import { Link } from 'wouter';

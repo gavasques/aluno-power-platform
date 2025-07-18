@@ -5,9 +5,9 @@ import {
   Download, 
   Copy, 
   CheckCircle2,
-  AlertCircle,
-  Loader2 
+  AlertCircle
 } from "lucide-react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -97,7 +97,7 @@ Data de geração: ${new Date().toLocaleString('pt-BR')}
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
+            <LoadingSpinner size="xl" />
             <p className="text-lg">Carregando resultados...</p>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Scissors } from "lucide-react";
+import { Scissors } from "lucide-react";
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { BACKGROUND_REMOVAL_TIPS } from "@/config/background-removal";
 
 interface BackgroundRemovalControlsProps {
@@ -14,7 +15,7 @@ const ProcessingInfo = () => (
   <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
     <CardContent className="pt-6">
       <div className="flex items-center gap-3">
-        <Loader2 className="h-5 w-5 animate-spin text-yellow-600" />
+        <LoadingSpinner size="sm" className="text-yellow-600" />
         <div>
           <p className="font-medium text-yellow-900 dark:text-yellow-100">
             Removendo background...
@@ -32,7 +33,7 @@ const UploadingInfo = () => (
   <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
     <CardContent className="pt-6">
       <div className="flex items-center gap-3">
-        <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+        <LoadingSpinner size="sm" className="text-blue-600" />
         <div>
           <p className="font-medium text-blue-900 dark:text-blue-100">
             Carregando imagem...
@@ -67,12 +68,12 @@ const RemoveBackgroundButton = ({
     >
       {isProcessing ? (
         <>
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          <ButtonLoader />
           Processando...
         </>
       ) : isUploading ? (
         <>
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          <ButtonLoader />
           Carregando imagem...
         </>
       ) : !hasUploadedImage ? (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGetFeatureCost } from '@/hooks/useFeatureCosts';
-import { Loader2 } from 'lucide-react';
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 interface AgentCostDisplayProps {
   featureCode: string;
@@ -20,7 +20,7 @@ export function AgentCostDisplay({
     return (
       <div className={`bg-white/70 px-4 py-2 rounded-lg border ${className}`}>
         <div className="flex items-center gap-2 text-sm">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <LoadingSpinner size="sm" />
           <span className="text-gray-600">Carregando custo...</span>
         </div>
       </div>

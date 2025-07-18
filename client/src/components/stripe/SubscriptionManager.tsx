@@ -10,9 +10,9 @@ import {
   XCircle, 
   AlertTriangle,
   CheckCircle,
-  Loader2,
   ExternalLink
 } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 
@@ -124,7 +124,7 @@ export default function SubscriptionManager() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center h-48">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <LoadingSpinner size="lg" />
         </CardContent>
       </Card>
     );
@@ -239,7 +239,7 @@ export default function SubscriptionManager() {
                       variant="destructive"
                       size="sm"
                     >
-                      {isCanceling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {isCanceling && <ButtonLoader />}
                       Confirmar Cancelamento
                     </Button>
                     <Button 
