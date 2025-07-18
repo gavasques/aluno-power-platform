@@ -7,7 +7,7 @@ import { AIPageHeader } from "@/components/ai/common/AIPageHeader";
 import { ProcessingFeedback } from "@/components/ai/common/ProcessingFeedback";
 import { ResetButton } from "@/components/ai/common/ResetButton";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
-import { BACKGROUND_REMOVAL_CONFIG } from "@/config/ai-image";
+import { BACKGROUND_REMOVAL_CONFIG } from "@/config/background-removal";
 import { PermissionGuard } from "@/components/guards";
 import { CreditCostButton } from "@/components/CreditCostButton";
 import { useUserCreditBalance } from "@/hooks/useUserCredits";

@@ -9,7 +9,7 @@ import { AIPageHeader } from "@/components/ai/common/AIPageHeader";
 import { ProcessingFeedback } from "@/components/ai/common/ProcessingFeedback";
 import { ResetButton } from "@/components/ai/common/ResetButton";
 import { useImageProcessing } from "@/hooks/useImageProcessing";
-import { UPSCALE_CONFIG } from "@/config/ai-image";
+import { SCALE_OPTIONS } from "@/config/upscale";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
 import { CreditCostButton } from "@/components/CreditCostButton";
 import { useUserCreditBalance } from "@/hooks/useUserCredits";
@@ -37,7 +37,7 @@ const UpscaleControls = ({
     <div className="space-y-3">
       <h3 className="font-medium">Escala de Upscale</h3>
       <div className="grid grid-cols-2 gap-3">
-        {UPSCALE_CONFIG.scales.map((option) => (
+        {SCALE_OPTIONS.map((option) => (
           <button
             key={option.value}
             onClick={() => setScale(option.value)}
@@ -83,7 +83,7 @@ export default function ImageUpscale() {
     reset
   } = useImageProcessing();
 
-  const [scale, setScale] = useState<2 | 4>(UPSCALE_CONFIG.defaultScale);
+  const [scale, setScale] = useState<2 | 4>(2);
   const { balance: userBalance } = useUserCreditBalance();
 
   const { isProcessing, isUploading, error, step } = state;

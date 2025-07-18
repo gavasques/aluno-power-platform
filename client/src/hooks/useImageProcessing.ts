@@ -1,13 +1,45 @@
 import { useState, useCallback } from 'react';
 import { AIImageService } from '@/services/aiImageService';
-import { AI_IMAGE_CONFIG } from '@/config/ai-image';
-import type { 
-  UploadedImage, 
-  ProcessedImage, 
-  ProcessingState, 
-  UpscaleOptions, 
-  BackgroundRemovalOptions 
-} from '@/types/ai-image';
+import { FILE_VALIDATION } from '@/config/upscale';
+
+interface UploadedImage {
+  id: string;
+  url: string;
+  file: File;
+  metadata: {
+    fileName: string;
+    fileSize: number;
+    width?: number;
+    height?: number;
+  };
+}
+
+interface ProcessedImage {
+  id: string;
+  url: string;
+  metadata?: {
+    width?: number;
+    height?: number;
+    fileSize?: number;
+    scale?: number;
+    processingTime?: number;
+  };
+}
+
+interface ProcessingState {
+  isProcessing: boolean;
+  isUploading: boolean;
+  error: string | null;
+  step: string;
+}
+
+interface UpscaleOptions {
+  scale: 2 | 4;
+}
+
+interface BackgroundRemovalOptions {
+  format?: 'png' | 'jpg';
+}
 import { CompressionProfile, getCompressionConfig, estimateCompressedSize } from '@/config/compression';
 
 interface UseImageProcessingReturn {
@@ -43,7 +75,7 @@ export const useImageProcessing = (compressionProfile: CompressionProfile = 'gen
       updateState({ isUploading: true, error: null });
 
       // Validar arquivo
-      AIImageService.validateImageFile(file, AI_IMAGE_CONFIG);
+      AIImageService.validateImageFile(file, FILE_VALIDATION);
 
       // Upload
       const result = await AIImageService.uploadImage(file);

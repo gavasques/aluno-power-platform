@@ -5,7 +5,17 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Download, Eye, Split } from "lucide-react";
 import { downloadProcessedImage } from '@/utils/background-removal';
 
-import type { ProcessedImage } from "@/types/ai-image";
+interface ProcessedImage {
+  id: string;
+  url: string;
+  metadata?: {
+    width?: number;
+    height?: number;
+    fileSize?: number;
+    scale?: number;
+    processingTime?: number;
+  };
+}
 
 interface BackgroundRemovalResultProps {
   originalImage: string;
