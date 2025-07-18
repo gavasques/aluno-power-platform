@@ -760,10 +760,10 @@ const UserDashboard = () => {
                     variant="ghost" 
                     size="sm"
                     className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
-                    onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
+                    onClick={() => window.open('https://portal.guilhermevasques.club', '_blank')}
                   >
                     <Star className="h-3 w-3 mr-2" />
-                    Acesse nosso Curso
+                    Acesse a Plataforma Curso
                   </Button>
                   
                   <Button 
@@ -773,7 +773,7 @@ const UserDashboard = () => {
                     onClick={() => window.open('https://chat.whatsapp.com/Lrq6yGUjQp0KJSVrtfqIrN?mode=r_c', '_blank')}
                   >
                     <MessageCircle className="h-3 w-3 mr-2" />
-                    Grupo WhatsApp Amazon
+                    Grupo Aberto do WhatsApp Amazon + Importação
                   </Button>
                   
                   <Button 
