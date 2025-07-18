@@ -1,14 +1,13 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Search, CheckCircle, Wrench, ExternalLink, Globe, Heart, Users, Trophy, ArrowRight, Filter, Grid2X2, List, ChevronRight, TrendingUp, Award, Clock, Package } from "lucide-react";
+import { Star, Search, CheckCircle, Wrench, Globe, ArrowRight, Filter, Grid2X2, List, ChevronRight, TrendingUp, Package } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useTools } from "@/contexts/ToolsContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";

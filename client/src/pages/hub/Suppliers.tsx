@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Star, Search, Filter, MapPin, Phone, Mail, Globe, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Search, Filter, Phone, Mail, Globe, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import type { Supplier } from "@shared/schema";
 

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { usePrompts } from '@/contexts/PromptsContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
