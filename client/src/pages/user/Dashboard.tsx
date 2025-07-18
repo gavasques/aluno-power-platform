@@ -542,7 +542,7 @@ const UserDashboard = () => {
             <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="font-bold text-xl mb-2">Melhor Software</h3>
+                  <h3 className="font-bold text-xl mb-2">Melhor Software - Helium 10</h3>
                   <p className="text-orange-100 text-sm leading-relaxed">Para encontrar produtos lucrativos</p>
                 </div>
                 <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
@@ -860,7 +860,6 @@ const UserDashboard = () => {
 
         </div>
       </div>
-
       {/* Modal para Notícias */}
       <Dialog open={newsModalOpen} onOpenChange={setNewsModalOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -929,7 +928,6 @@ const UserDashboard = () => {
           )}
         </DialogContent>
       </Dialog>
-
       {/* Modal para Novidades */}
       <Dialog open={updateModalOpen} onOpenChange={setUpdateModalOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
