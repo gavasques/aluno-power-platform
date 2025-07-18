@@ -659,7 +659,7 @@ const UserDashboard = () => {
               <CardContent>
                 {updatesLoading ? (
                   <div className="space-y-2">
-                    {[...Array(4)].map((_, i) => (
+                    {[...Array(3)].map((_, i) => (
                       <div key={i} className="animate-pulse">
                         <div className="bg-white/20 h-2 rounded mb-1"></div>
                         <div className="bg-white/20 h-2 rounded w-3/4 mb-1"></div>
@@ -669,7 +669,7 @@ const UserDashboard = () => {
                   </div>
                 ) : updatesData && updatesData.length > 0 ? (
                   <div className="space-y-2">
-                    {updatesData.slice(0, 4).map((update) => (
+                    {updatesData.slice(0, 3).map((update) => (
                       <div 
                         key={update.id} 
                         className="bg-white/10 rounded-md p-2 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
@@ -708,7 +708,7 @@ const UserDashboard = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-4">
+                  <div className="text-center py-3">
                     <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-1">
                       <Users className="h-3 w-3 text-white" />
                     </div>
@@ -716,63 +716,6 @@ const UserDashboard = () => {
                     <p className="text-emerald-200 text-xs">As últimas atualizações aparecerão aqui</p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Seção de Estatísticas Rápidas - Movida para sidebar */}
-            <Card className="bg-white rounded-lg shadow-sm border-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-bold text-gray-800">
-                  Estatísticas Rápidas
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 pt-0">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-blue-100 rounded-md flex items-center justify-center">
-                        <Activity className="h-3 w-3 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Uso Este Mês</p>
-                        <p className="text-sm font-bold">{creditsUsedThisMonth}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center">
-                        <TrendingUp className="h-3 w-3 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Próxima Cobrança</p>
-                        <p className="text-sm font-bold">{nextBilling}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-purple-100 rounded-md flex items-center justify-center">
-                        <BarChart3 className="h-3 w-3 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Créditos do Plano</p>
-                        <p className="text-sm font-bold">{planCredits}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-orange-100 rounded-md flex items-center justify-center">
-                        <Star className="h-3 w-3 text-orange-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Status</p>
-                        <p className="text-sm font-bold capitalize">{planStatus}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>
