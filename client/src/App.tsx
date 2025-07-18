@@ -95,7 +95,7 @@ const ProductImportExport = lazy(() => import("./pages/myarea/ProductImportExpor
 
 // NEW PARALLEL PRODUCTS & CHANNELS SYSTEM
 const ProductsNew = lazy(() => import("./pages/myarea/ProductsNew"));
-const ProductChannelsManager = lazy(() => import("./pages/myarea/ProductChannelsManagerSimple"));
+const ProductChannelsManager = lazy(() => import("./pages/myarea/ProductChannelsManager"));
 
 
 // Keep Login as eager import for immediate authentication

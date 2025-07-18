@@ -70,9 +70,9 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
                 {channel.isActive && calculation && (
                   <div className="text-right">
                     <div className="text-sm font-semibold">
-                      {formatCurrency(calculation.netProfit)}
+                      {formatCurrency(calculation?.netProfit || 0)}
                     </div>
-                    <div className={`text-xs ${getProfitabilityColor(calculation.marginPercent)}`}>
+                    <div className={`text-xs ${getProfitabilityColor(calculation?.marginPercent || 0)}`}>
                       {formatPercentage(calculation.marginPercent)} • {getProfitabilityStatus(calculation.marginPercent)}
                     </div>
                   </div>

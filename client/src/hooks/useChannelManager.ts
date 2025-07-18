@@ -73,29 +73,55 @@ export function useChannelManager({ productId, productCost, taxPercent }: UseCha
 
   // Initialize channels when product loads
   const initializeChannels = useCallback(() => {
-    if (!product?.data?.channels) return;
+    if (!product?.data) return;
 
-    const productChannels = product.data.channels as SalesChannel[];
-    const initializedChannels: SalesChannel[] = [];
-
-    // Ensure all channel types exist
-    ALL_CHANNEL_TYPES.forEach(channelType => {
-      const existingChannel = productChannels.find(ch => ch.type === channelType);
-      if (existingChannel) {
-        initializedChannels.push(existingChannel);
-      } else {
-        initializedChannels.push(createEmptyChannel(channelType));
+    try {
+      // Safe parsing of channels data
+      let productChannels: SalesChannel[] = [];
+      
+      if (product.data.channels && Array.isArray(product.data.channels)) {
+        productChannels = product.data.channels as SalesChannel[];
       }
-    });
 
-    setChannels(initializedChannels);
-    setHasChanges(false);
+      const initializedChannels: SalesChannel[] = [];
+
+      // Ensure all channel types exist
+      ALL_CHANNEL_TYPES.forEach(channelType => {
+        const existingChannel = productChannels.find(ch => ch?.type === channelType);
+        if (existingChannel) {
+          initializedChannels.push(existingChannel);
+        } else {
+          initializedChannels.push(createEmptyChannel(channelType));
+        }
+      });
+
+      setChannels(initializedChannels);
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Error initializing channels:', error);
+      // Fallback to empty channels
+      const fallbackChannels = ALL_CHANNEL_TYPES.map(createEmptyChannel);
+      setChannels(fallbackChannels);
+      setHasChanges(false);
+    }
   }, [product]);
 
   // Calculate profitability for all channels
   const calculations = useMemo(() => {
-    if (!channels.length || !productCost || !taxPercent) return {};
-    return calculateAllChannels(channels, productCost, taxPercent);
+    if (!channels.length) return {};
+    
+    try {
+      // Safe parsing of numeric values
+      const safeCost = parseFloat(String(productCost || 0));
+      const safeTax = parseFloat(String(taxPercent || 0));
+      
+      if (isNaN(safeCost) || isNaN(safeTax)) return {};
+      
+      return calculateAllChannels(channels, safeCost, safeTax);
+    } catch (error) {
+      console.error('Error calculating channels:', error);
+      return {};
+    }
   }, [channels, productCost, taxPercent]);
 
   // Update channel data
