@@ -93,6 +93,7 @@ const ProductImportExport = lazy(() => import("./pages/myarea/ProductImportExpor
 const ProductsNew = lazy(() => import("./pages/myarea/ProductsNew"));
 const ProductChannelsManager = lazy(() => import("./pages/myarea/ProductChannelsManager"));
 const ProductEdit = lazy(() => import("./pages/myarea/ProductEdit"));
+const ProductEditWithTabs = lazy(() => import("./pages/myarea/ProductEditWithTabs"));
 
 
 // Keep Login as eager import for immediate authentication
@@ -664,7 +665,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <ProductEdit />
+                                  <ProductEditWithTabs />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
