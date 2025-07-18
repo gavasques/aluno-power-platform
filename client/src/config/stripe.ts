@@ -51,10 +51,7 @@ export const STRIPE_CONFIG = {
   ]
 };
 
+import { formatters } from '@/lib/utils/formatters';
+
 // Formatter para moeda brasileira
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value);
-};
+export const formatCurrency = formatters.currency;

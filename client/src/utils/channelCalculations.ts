@@ -293,21 +293,14 @@ export const calculateChannelProfitability = (
   };
 };
 
+import { formatters } from '@/lib/utils/formatters';
+
 // Format currency for Brazilian display
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value);
-};
+export const formatCurrency = formatters.currency;
 
 // Format percentage for Brazilian display
 export const formatPercent = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'percent',
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1
-  }).format(value / 100);
+  return formatters.percentage(value, { precision: 1 });
 };
 
 // Interface for individual cost breakdown items

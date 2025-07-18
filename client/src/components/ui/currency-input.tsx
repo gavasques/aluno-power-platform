@@ -1,5 +1,6 @@
 import React from 'react';
 import { Input } from './input';
+import { formatters } from '@/lib/utils/formatters';
 
 interface CurrencyInputProps {
   value: number;
@@ -11,12 +12,7 @@ interface CurrencyInputProps {
 
 export function CurrencyInput({ value, onChange, placeholder, className, isEditable = true }: CurrencyInputProps) {
   const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+    return formatters.currency(value, { precision: 0 });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,7 +1,19 @@
 // Utility functions for Informal Import Simulation
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { SimulacaoCompleta, ValidationResult, ValidationError, CalculatedResults } from './types';
+import { formatters } from '@/lib/utils/formatters';
+
+// Dynamic imports for PDF generation
+let jsPDF: any;
+let autoTable: any;
+
+const loadPDFLibraries = async () => {
+  if (!jsPDF) {
+    jsPDF = (await import('jspdf')).default;
+  }
+  if (!autoTable) {
+    autoTable = (await import('jspdf-autotable')).default;
+  }
+};
 
 /**
  * Brazilian number formatting utilities
@@ -14,12 +26,7 @@ export const formatBrazilianNumber = (value: number, decimals: number = 2): stri
   });
 };
 
-export const formatCurrency = (value: number): string => {
-  return `R$ ${value.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
-};
+export const formatCurrency = formatters.currency;
 
 export const parseBrazilianNumber = (value: string): number => {
   if (!value || value.trim() === '') return 0;
@@ -82,7 +89,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout;
+  let timeout: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(null, args), wait);

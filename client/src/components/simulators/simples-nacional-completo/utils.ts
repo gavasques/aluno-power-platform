@@ -1,18 +1,10 @@
 import { MesSimulacao, FaixaAliquota, ValidationResult, NovoMesForm } from './types';
 import { ANEXO_I_FAIXAS, ANEXO_II_FAIXAS, VALIDATION_PATTERNS } from './constants';
+import { formatters } from '@/lib/utils/formatters';
 
-export const formatCurrency = (value: number): string => {
-  return `R$ ${value.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
-};
-
+export const formatCurrency = formatters.currency;
 export const formatPercentage = (value: number): string => {
-  return `${(value * 100).toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}%`;
+  return formatters.percentage(value * 100, { precision: 2 });
 };
 
 export const buscarFaixaAnexo = (rbt12: number, anexo: 'Anexo I' | 'Anexo II'): FaixaAliquota => {

@@ -1,24 +1,14 @@
 import { GiroCalculado } from './types';
+import { formatters } from '@/lib/utils/formatters';
 
 /**
  * Currency and number formatting utilities
+ * Using unified formatters for consistency
  */
-export const formatCurrency = (value: number): string => {
-  return `R$ ${value.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
-};
-
-export const formatPercentage = (value: number): string => {
-  return `${value.toFixed(2)}%`;
-};
-
+export const formatCurrency = formatters.currency;
+export const formatPercentage = formatters.percentage;
 export const formatNumber = (value: number, decimals: number = 2): string => {
-  return value.toLocaleString('pt-BR', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
-  });
+  return formatters.number(value, { precision: decimals });
 };
 
 /**

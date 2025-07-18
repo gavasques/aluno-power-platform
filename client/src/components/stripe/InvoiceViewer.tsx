@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Invoice } from '@/types/stripe';
+import { formatters } from '@/lib/utils/formatters';
 
 export const InvoiceViewer: React.FC = () => {
   const { data: invoicesData, isLoading } = useQuery({
@@ -34,10 +35,7 @@ export const InvoiceViewer: React.FC = () => {
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-    }).format(amount / 100);
+    return formatters.currency(amount / 100, { currency: currency.toUpperCase() });
   };
 
   const formatDate = (timestamp: number) => {
