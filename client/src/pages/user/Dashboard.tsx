@@ -27,7 +27,10 @@ import {
   X,
   TrendingUp,
   Activity,
-  BarChart3
+  BarChart3,
+  Instagram,
+  MessageCircle,
+  MessageSquare
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { News, Update } from '@shared/schema';
@@ -347,98 +350,92 @@ const UserDashboard = () => {
   const planCredits = subscription?.planCredits || 0;
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-white to-blue-50/20">
-      <div className="w-full px-2 py-3 pb-2 space-y-3">
+    <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/20 overflow-hidden">
+      <div className="h-full p-3 space-y-3">
         
-        {/* Header Compacto */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-lg p-3 text-white shadow-md">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <Crown className="h-3 w-3 text-white" />
+        {/* Cards de Promoção - Top Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Venda Moda na Amazon */}
+          <Card className="bg-gradient-to-br from-purple-600 to-purple-800 text-white border-0 shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-2">Venda Moda na Amazon</h3>
+                  <p className="text-purple-100 text-sm mb-3">0% de Comissão para novas contas</p>
+                  <Button 
+                    size="sm" 
+                    className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
+                    onClick={() => window.open('https://amazon.com.br', '_blank')}
+                  >
+                    Cadastre-se →
+                  </Button>
                 </div>
-                <div>
-                  <h1 className="text-lg font-bold">
-                    Olá, {currentUser.name || 'Usuário'}!
-                  </h1>
-                  <p className="text-blue-100 text-xs">
-                    Bem-vindo ao seu painel de controle
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <div className="bg-white/10 backdrop-blur-sm rounded-md p-2 border border-white/20">
-                <div className="flex items-center gap-1">
-                  <Coins className="h-3 w-3 text-yellow-300" />
-                  <span className="text-xs text-blue-100">Créditos</span>
-                </div>
-                <div className="text-sm font-bold text-white">
-                  {creditBalance.toLocaleString()}
+                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                  <Crown className="h-6 w-6 text-white" />
                 </div>
               </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-md p-2 border border-white/20">
-                <div className="flex items-center gap-1">
-                  <Crown className="h-3 w-3 text-purple-300" />
-                  <span className="text-xs text-blue-100">Plano</span>
+            </CardContent>
+          </Card>
+
+          {/* Venda na Amazon */}
+          <Card className="bg-gradient-to-br from-blue-600 to-blue-800 text-white border-0 shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-2">Venda na Amazon</h3>
+                  <p className="text-blue-100 text-sm mb-3">Tenha nossos benefícios exclusivos</p>
+                  <Button 
+                    size="sm" 
+                    className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+                    onClick={() => window.open('https://amazon.com.br', '_blank')}
+                  >
+                    Cadastre-se →
+                  </Button>
                 </div>
-                <div className="text-xs font-bold text-white capitalize">
-                  {planName}
+                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                  <Star className="h-6 w-6 text-white" />
                 </div>
               </div>
-            </div>
-          </div>
-          
-          <div className="mt-2 grid grid-cols-4 gap-1">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm text-xs h-6"
-              onClick={() => handleQuickAction('agents')}
-            >
-              <Zap className="h-3 w-3 mr-1" />
-              Agentes
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm text-xs h-6"
-              onClick={() => handleQuickAction('products')}
-            >
-              <CreditCard className="h-3 w-3 mr-1" />
-              Produtos
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm text-xs h-6"
-              onClick={() => handleQuickAction('buy-credits')}
-            >
-              <Coins className="h-3 w-3 mr-1" />
-              Comprar
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm text-xs h-6"
-              onClick={() => handleQuickAction('upgrade')}
-            >
-              <ArrowUpRight className="h-3 w-3 mr-1" />
-              Upgrade
-            </Button>
-          </div>
+            </CardContent>
+          </Card>
+
+          {/* Melhor Software */}
+          <Card className="bg-gradient-to-br from-orange-600 to-orange-800 text-white border-0 shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-2">Melhor Software</h3>
+                  <p className="text-orange-100 text-sm mb-3">Para encontrar produtos lucrativos</p>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      className="bg-white text-orange-600 hover:bg-orange-50 font-semibold"
+                      onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
+                    >
+                      Anual →
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="border-white text-white hover:bg-white/20"
+                      onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
+                    >
+                      Mensal →
+                    </Button>
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                  <Zap className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Promotional Banners */}
-        <PromotionalBanners />
-
         {/* Layout Principal - Grid 2 colunas */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1">
           
-          {/* Coluna 1: Vídeos do YouTube (Expandido para preencher toda a área esquerda) */}
+          {/* Coluna 1: Vídeos do YouTube (2/3 da largura) */}
           <div className="lg:col-span-2">
             <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg shadow-md border-0 overflow-hidden h-full">
               <CardHeader className="pb-2">
@@ -555,9 +552,10 @@ const UserDashboard = () => {
             </Card>
           </div>
 
-          {/* Coluna 2: Sidebar com Notícias, Novidades e Estatísticas */}
-          <div className="space-y-3">
-            {/* News Section - Compacto */}
+          {/* Coluna 2: Sidebar com Notícias, Novidades e Links Sociais */}
+          <div className="lg:col-span-2 space-y-3">
+            
+            {/* Notícias */}
             <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-lg shadow-md border-0 text-white">
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
@@ -639,7 +637,7 @@ const UserDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Updates Section - Compacto */}
+            {/* Novidades */}
             <Card className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-lg shadow-md border-0 text-white">
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
@@ -716,6 +714,78 @@ const UserDashboard = () => {
                     <p className="text-emerald-200 text-xs">As últimas atualizações aparecerão aqui</p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Links Sociais */}
+            <Card className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-md border-0 text-white">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center backdrop-blur-sm">
+                    <ExternalLink className="h-3 w-3 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-bold text-white">
+                      Conecte-se
+                    </CardTitle>
+                    <CardDescription className="text-gray-300 text-xs">
+                      Redes sociais e comunidade
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    onClick={() => window.open('https://instagram.com/guilhermeavasques', '_blank')}
+                  >
+                    <Instagram className="h-3 w-3 mr-2" />
+                    @guilhermeavasques
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
+                  >
+                    <Youtube className="h-3 w-3 mr-2" />
+                    @guilhermeavasques
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
+                  >
+                    <Star className="h-3 w-3 mr-2" />
+                    Acesse nosso Curso
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    onClick={() => window.open('https://chat.whatsapp.com/Lrq6yGUjQp0KJSVrtfqIrN?mode=r_c', '_blank')}
+                  >
+                    <MessageCircle className="h-3 w-3 mr-2" />
+                    Grupo WhatsApp Amazon
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    onClick={() => window.open('https://discord.gg/uMQ8Vbp94q', '_blank')}
+                  >
+                    <MessageSquare className="h-3 w-3 mr-2" />
+                    Acesse nosso Discord
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
