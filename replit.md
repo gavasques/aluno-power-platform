@@ -326,6 +326,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 18, 2025 - 4:20 PM**: ✅ INVESTMENT SIMULATOR REFACTORED - ENHANCED CURRENCY INPUT FIELDS
+  - **Objective Achieved**: Improved user experience with proper currency formatting and simplified component structure
+  - **UI/UX Improvements**:
+    - ✅ **Initial Investment Field**: Replaced plain text input with CurrencyInput component for automatic R$ formatting
+    - ✅ **Bulk Actions Panel**: Updated aporte and retirada fields to use CurrencyInput for consistent monetary input
+    - ✅ **Real-time Formatting**: Automatic currency display (R$ 10.000 format) with number validation
+    - ✅ **Clean Interface**: Removed redundant currency display text (already shown in formatted input)
+  - **Technical Enhancements**:
+    - Integrated existing CurrencyInput component from `@/components/ui/currency-input`
+    - Maintained full functionality while improving input validation and user experience
+    - Used unified formatters system for consistent currency handling across simulator
+    - Streamlined imports and component structure
+  - **Files Modified**: 
+    - `client/src/components/simulators/investment-roi/components/ConfigurationPanel.tsx`
+    - `client/src/components/simulators/investment-roi/components/BulkActionsPanel.tsx`
+  - **Benefits**: Better UX, automatic validation, consistent currency display, simplified codebase
+  - **Verification**: Build passed successfully, all functionality preserved
+
 - **January 18, 2025 - 3:45 PM**: ✅ CODE CLEANUP PHASE 4 COMPLETED - FUNCTIONS AND UTILITIES OPTIMIZATION
   - **Objective Achieved**: Removed unused AI image configurations and optimized imports following systematic refactoring plan
   - **Files Removed**: 
