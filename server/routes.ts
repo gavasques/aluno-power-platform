@@ -17,6 +17,7 @@ import dashboardRoutes from "./routes/dashboard-fixed";
 import { LoggingService } from "./services/loggingService";
 import userProfileRoutes from "./routes/user/profile";
 import picsartRoutes from "./routes/picsart";
+import { productSupplierRoutes } from "./routes/productSupplierRoutes";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -7072,6 +7073,15 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     console.log('✅ [PRODUCT_CHANNELS] Routes registered successfully');
   } catch (error) {
     console.error('❌ Error registering product channels routes:', error);
+  }
+
+  // Product Supplier Management Routes
+  try {
+    const { productSupplierRoutes } = await import('./routes/productSupplierRoutes');
+    app.use('/api/products', productSupplierRoutes);
+    console.log('✅ [PRODUCT_SUPPLIERS] Routes registered successfully');
+  } catch (error) {
+    console.error('❌ Error registering product supplier routes:', error);
   }
 
   return httpServer;

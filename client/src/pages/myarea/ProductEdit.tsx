@@ -42,7 +42,6 @@ const productFormSchema = z.object({
   bulletPoints: z.string().optional(),
   observations: z.string().optional(),
   active: z.boolean().default(true),
-  internalCode: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productFormSchema>;
