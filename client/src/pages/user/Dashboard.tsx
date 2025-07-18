@@ -350,126 +350,241 @@ const UserDashboard = () => {
   const planCredits = subscription?.planCredits || 0;
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/20 overflow-hidden">
-      <div className="h-full p-3 space-y-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/20">
+      <div className="container-responsive py-4">
         
-        {/* Cards de Promoção - Top Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* Venda Moda na Amazon */}
-          <Card className="bg-gradient-to-br from-purple-600 to-purple-800 text-white border-0 shadow-lg">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2">Venda Moda na Amazon</h3>
-                  <p className="text-purple-100 text-sm mb-3">0% de Comissão para novas contas</p>
-                  <Button 
-                    size="sm" 
-                    className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
-                    onClick={() => window.open('https://amazon.com.br', '_blank')}
-                  >
-                    Cadastre-se →
-                  </Button>
-                </div>
-                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Crown className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Venda na Amazon */}
-          <Card className="bg-gradient-to-br from-blue-600 to-blue-800 text-white border-0 shadow-lg">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2">Venda na Amazon</h3>
-                  <p className="text-blue-100 text-sm mb-3">Tenha nossos benefícios exclusivos</p>
-                  <Button 
-                    size="sm" 
-                    className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
-                    onClick={() => window.open('https://amazon.com.br', '_blank')}
-                  >
-                    Cadastre-se →
-                  </Button>
-                </div>
-                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Star className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Melhor Software */}
-          <Card className="bg-gradient-to-br from-orange-600 to-orange-800 text-white border-0 shadow-lg">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2">Melhor Software</h3>
-                  <p className="text-orange-100 text-sm mb-3">Para encontrar produtos lucrativos</p>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      className="bg-white text-orange-600 hover:bg-orange-50 font-semibold"
-                      onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
-                    >
-                      Anual →
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="border-white text-white hover:bg-white/20"
-                      onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
-                    >
-                      Mensal →
-                    </Button>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Layout Principal - Grid 2 colunas */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1">
-          
-          {/* Coluna 1: Vídeos do YouTube (2/3 da largura) */}
-          <div className="lg:col-span-2">
-            <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg shadow-md border-0 overflow-hidden h-full">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-red-600 rounded-md flex items-center justify-center">
-                      <Youtube className="h-3 w-3 text-white" />
+        {/* Header Section - Boas-vindas e Estatísticas Principais */}
+        <div className="mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+                Olá, {currentUser.name || 'Usuário'}! 👋
+              </h1>
+              <p className="text-gray-600">
+                Aqui está um resumo das suas atividades e novidades da plataforma
+              </p>
+            </div>
+            
+            {/* Quick Stats Cards */}
+            <div className="mt-4 lg:mt-0 flex gap-4">
+              <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Coins className="h-5 w-5" />
                     </div>
                     <div>
-                      <CardTitle className="text-base font-bold text-white">
-                        Últimos Vídeos
+                      <p className="text-blue-100 text-sm">Créditos</p>
+                      <p className="text-xl font-bold">{creditBalance.toLocaleString()}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                      {getPlanIcon(planName)}
+                    </div>
+                    <div>
+                      <p className="text-purple-100 text-sm">Plano</p>
+                      <p className="text-lg font-bold">{planName}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Grid Layout */}
+        <div className="layout-grid-2 gap-6 mb-6">
+          
+          {/* Seção de Promoções - Cards Principais */}
+          <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {/* Venda Moda na Amazon */}
+              <Card className="bg-gradient-to-br from-purple-600 to-purple-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg mb-2">Venda Moda na Amazon</h3>
+                      <p className="text-purple-100 text-sm mb-3">0% de Comissão para novas contas</p>
+                      <Button 
+                        size="sm" 
+                        className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
+                        onClick={() => window.open('https://amazon.com.br', '_blank')}
+                      >
+                        Cadastre-se →
+                      </Button>
+                    </div>
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Crown className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Venda na Amazon */}
+              <Card className="bg-gradient-to-br from-blue-600 to-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg mb-2">Venda na Amazon</h3>
+                      <p className="text-blue-100 text-sm mb-3">Tenha nossos benefícios exclusivos</p>
+                      <Button 
+                        size="sm" 
+                        className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+                        onClick={() => window.open('https://amazon.com.br', '_blank')}
+                      >
+                        Cadastre-se →
+                      </Button>
+                    </div>
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Star className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Melhor Software */}
+              <Card className="bg-gradient-to-br from-orange-600 to-orange-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg mb-2">Melhor Software</h3>
+                      <p className="text-orange-100 text-sm mb-3">Para encontrar produtos lucrativos</p>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          className="bg-white text-orange-600 hover:bg-orange-50 font-semibold"
+                          onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
+                        >
+                          Anual →
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="border-white text-white hover:bg-white/20"
+                          onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
+                        >
+                          Mensal →
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Zap className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          
+          {/* Quick Actions - Ações Rápidas */}
+          <div>
+            <Card className="h-fit">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-blue-600" />
+                  Ações Rápidas
+                </CardTitle>
+                <CardDescription>
+                  Acesse rapidamente suas funcionalidades favoritas
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12"
+                  onClick={() => handleQuickAction('agents')}
+                >
+                  <Bot className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Agentes IA</p>
+                    <p className="text-xs text-gray-500">Gere conteúdo inteligente</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12"
+                  onClick={() => handleQuickAction('products')}
+                >
+                  <Archive className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Meus Produtos</p>
+                    <p className="text-xs text-gray-500">Gerencie seu catálogo</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12"
+                  onClick={() => handleQuickAction('buy-credits')}
+                >
+                  <CreditCard className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Comprar Créditos</p>
+                    <p className="text-xs text-gray-500">Aumente seu saldo</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12"
+                  onClick={() => handleQuickAction('videos')}
+                >
+                  <Play className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Vídeos Educativos</p>
+                    <p className="text-xs text-gray-500">Aprenda com especialistas</p>
+                  </div>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Content Grid - 3 Colunas */}
+        <div className="layout-grid-3 gap-6">
+          
+          {/* Vídeos do YouTube - Coluna Principal */}
+          <div className="lg:col-span-2">
+            <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white border-0 shadow-lg">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+                      <Youtube className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg font-bold text-white">
+                        Últimos Vídeos do Canal
                       </CardTitle>
-                      <CardDescription className="text-gray-400 text-xs">
-                        Conteúdo sobre Amazon FBA e e-commerce
+                      <CardDescription className="text-gray-400 text-sm">
+                        Conteúdo sobre Amazon FBA e e-commerce atualizado
                       </CardDescription>
                     </div>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-2">
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700 text-xs h-6"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
                       onClick={() => handleQuickAction('videos')}
                     >
-                      <Play className="h-3 w-3 mr-1" />
+                      <Play className="h-4 w-4 mr-2" />
                       Ver Todos
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700 text-xs h-6"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
                       onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
                     >
-                      <ExternalLink className="h-3 w-3 mr-1" />
+                      <ExternalLink className="h-4 w-4 mr-2" />
                       Canal
                     </Button>
                     {(userSummary as any)?.user?.role === 'admin' && (
@@ -482,7 +597,7 @@ const UserDashboard = () => {
                           await refetchVideos();
                           logger.debug('✅ Videos refreshed!');
                         }}
-                        className="text-gray-400 hover:text-white text-xs h-6"
+                        className="text-gray-400 hover:text-white"
                       >
                         🔄
                       </Button>
@@ -490,48 +605,49 @@ const UserDashboard = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 pb-4">
+              
+              <CardContent className="pb-6">
                 {videosLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                    {[...Array(12)].map((_, i) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(6)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="bg-gray-700 rounded-md h-16 mb-1"></div>
-                        <div className="bg-gray-700 h-2 rounded mb-1"></div>
-                        <div className="bg-gray-700 h-2 rounded w-2/3"></div>
+                        <div className="bg-gray-700 rounded-lg h-32 mb-3"></div>
+                        <div className="bg-gray-700 h-4 rounded mb-2"></div>
+                        <div className="bg-gray-700 h-3 rounded w-3/4"></div>
                       </div>
                     ))}
                   </div>
                 ) : youtubeVideos && youtubeVideos.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {youtubeVideos
                       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-                      .slice(0, 12).map((video) => (
+                      .slice(0, 6).map((video) => (
                       <div 
                         key={video.id} 
                         className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
                         onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
                       >
-                        <div className="relative bg-gray-700 rounded-md overflow-hidden mb-1 aspect-video">
+                        <div className="relative bg-gray-700 rounded-lg overflow-hidden mb-3 aspect-video">
                           <img 
                             src={video.thumbnailUrl} 
                             alt={video.title}
                             className="w-full h-full object-cover transition-opacity group-hover:opacity-80"
                           />
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
-                              <Play className="h-3 w-3 text-white ml-0.5" />
+                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+                              <Play className="h-5 w-5 text-white ml-1" />
                             </div>
                           </div>
-                          <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 py-0.5 rounded">
+                          <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
                             {video.duration}
                           </div>
                         </div>
-                        <h3 className="text-white font-semibold text-xs mb-1 line-clamp-2 group-hover:text-red-400 transition-colors">
+                        <h3 className="text-white font-semibold text-sm mb-2 line-clamp-2 group-hover:text-red-400 transition-colors">
                           {video.title}
                         </h3>
                         <div className="flex items-center justify-between text-gray-400 text-xs">
-                          <div className="flex items-center gap-1">
-                            <Eye className="h-2 w-2" />
+                          <div className="flex items-center gap-2">
+                            <Eye className="h-3 w-3" />
                             {formatViewCount(video.viewCount)}
                           </div>
                           <span>{formatPublishedDate(video.publishedAt)}</span>
@@ -541,75 +657,76 @@ const UserDashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Youtube className="h-4 w-4 text-gray-400" />
+                    <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Youtube className="h-8 w-8 text-gray-400" />
                     </div>
-                    <h3 className="text-xs font-semibold text-gray-300 mb-1">Nenhum vídeo disponível</h3>
-                    <p className="text-gray-500 text-xs">Os últimos vídeos do YouTube aparecerão aqui</p>
+                    <h3 className="text-lg font-semibold text-gray-300 mb-2">Nenhum vídeo disponível</h3>
+                    <p className="text-gray-500">Os últimos vídeos do YouTube aparecerão aqui</p>
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Coluna 2: Sidebar com Notícias, Novidades e Links Sociais */}
-          <div className="lg:col-span-2 space-y-3">
+          {/* Sidebar com Notícias e Novidades */}
+          <div className="space-y-6">
             
             {/* Notícias */}
-            <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-lg shadow-md border-0 text-white">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center backdrop-blur-sm">
-                    <Rss className="h-3 w-3 text-white" />
+            <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white border-0 shadow-lg">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                    <Rss className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-base font-bold text-white">
+                    <CardTitle className="text-lg font-bold text-white">
                       Notícias
                     </CardTitle>
-                    <CardDescription className="text-blue-100 text-xs">
-                      Últimas novidades
+                    <CardDescription className="text-blue-100 text-sm">
+                      Últimas novidades do mercado
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              
+              <CardContent className="pb-6">
                 {newsLoading ? (
-                  <div className="space-y-2">
-                    {[...Array(4)].map((_, i) => (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="bg-white/20 h-2 rounded mb-1"></div>
-                        <div className="bg-white/20 h-2 rounded w-3/4 mb-1"></div>
-                        <div className="bg-white/20 h-2 rounded w-1/2"></div>
+                        <div className="bg-white/20 h-4 rounded mb-2"></div>
+                        <div className="bg-white/20 h-3 rounded w-3/4 mb-2"></div>
+                        <div className="bg-white/20 h-3 rounded w-1/2"></div>
                       </div>
                     ))}
                   </div>
                 ) : newsData && newsData.length > 0 ? (
-                  <div className="space-y-2">
-                    {newsData.slice(0, 4).map((news) => (
+                  <div className="space-y-3">
+                    {newsData.slice(0, 3).map((news) => (
                       <div 
                         key={news.id} 
-                        className="bg-white/10 rounded-md p-2 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
+                        className="bg-white/10 rounded-lg p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
                         onClick={() => openNewsModal(news)}
                       >
-                        <h3 className="font-semibold text-white text-xs mb-1 line-clamp-2">
+                        <h3 className="font-semibold text-white text-sm mb-2 line-clamp-2">
                           {news.title}
                         </h3>
-                        <p className="text-blue-100 text-xs mb-1 line-clamp-1">
-                          {news.summary || news.content?.substring(0, 60) + '...'}
+                        <p className="text-blue-100 text-xs mb-3 line-clamp-2">
+                          {news.summary || news.content?.substring(0, 100) + '...'}
                         </p>
                         <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1">
-                            <div className="bg-white/20 px-1 py-0.5 rounded-full text-blue-100 text-xs">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="bg-white/20 text-blue-100 text-xs">
                               {news.category || 'Geral'}
-                            </div>
+                            </Badge>
                             {(news as any).featured && (
-                              <div className="bg-yellow-400/20 px-1 py-0.5 rounded-full text-yellow-200 border border-yellow-400/30 text-xs">
+                              <Badge variant="secondary" className="bg-yellow-400/20 text-yellow-200 border border-yellow-400/30 text-xs">
                                 Destaque
-                              </div>
+                              </Badge>
                             )}
                           </div>
                           <div className="flex items-center gap-1 text-blue-200 text-xs">
-                            <Clock className="h-2 w-2" />
+                            <Clock className="h-3 w-3" />
                             {formatCreatedDate(String(news.createdAt || ''))}
                           </div>
                         </div>
@@ -617,20 +734,19 @@ const UserDashboard = () => {
                     ))}
                     <Button 
                       variant="secondary" 
-                      size="sm"
-                      className="w-full mt-2 bg-white/20 hover:bg-white/30 text-white border-0 text-xs h-6"
+                      className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border-0"
                       onClick={() => window.location.href = '/noticias'}
                     >
-                      Ver Todas
-                      <ArrowRight className="h-3 w-3 ml-1" />
+                      Ver Todas as Notícias
+                      <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-4">
-                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-1">
-                      <Rss className="h-3 w-3 text-white" />
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Rss className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-xs font-semibold text-white mb-1">Nenhuma notícia</h3>
+                    <h3 className="text-sm font-semibold text-white mb-2">Nenhuma notícia</h3>
                     <p className="text-blue-200 text-xs">As últimas notícias aparecerão aqui</p>
                   </div>
                 )}
@@ -638,58 +754,59 @@ const UserDashboard = () => {
             </Card>
 
             {/* Novidades */}
-            <Card className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-lg shadow-md border-0 text-white">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center backdrop-blur-sm">
-                    <Users className="h-3 w-3 text-white" />
+            <Card className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white border-0 shadow-lg">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                    <TrendingUp className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-base font-bold text-white">
+                    <CardTitle className="text-lg font-bold text-white">
                       Novidades
                     </CardTitle>
-                    <CardDescription className="text-emerald-100 text-xs">
+                    <CardDescription className="text-emerald-100 text-sm">
                       Atualizações do sistema
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              
+              <CardContent className="pb-6">
                 {updatesLoading ? (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="bg-white/20 h-2 rounded mb-1"></div>
-                        <div className="bg-white/20 h-2 rounded w-3/4 mb-1"></div>
-                        <div className="bg-white/20 h-2 rounded w-1/2"></div>
+                        <div className="bg-white/20 h-4 rounded mb-2"></div>
+                        <div className="bg-white/20 h-3 rounded w-3/4 mb-2"></div>
+                        <div className="bg-white/20 h-3 rounded w-1/2"></div>
                       </div>
                     ))}
                   </div>
                 ) : updatesData && updatesData.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {updatesData.slice(0, 3).map((update) => (
                       <div 
                         key={update.id} 
-                        className="bg-white/10 rounded-md p-2 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
+                        className="bg-white/10 rounded-lg p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
                         onClick={() => openUpdateModal(update)}
                       >
-                        <h3 className="font-semibold text-white text-xs mb-1 line-clamp-2">
+                        <h3 className="font-semibold text-white text-sm mb-2 line-clamp-2">
                           {update.title}
                         </h3>
-                        <p className="text-emerald-100 text-xs mb-1 line-clamp-1">
-                          {update.summary || update.content?.substring(0, 60) + '...'}
+                        <p className="text-emerald-100 text-xs mb-3 line-clamp-2">
+                          {update.summary || update.content?.substring(0, 100) + '...'}
                         </p>
                         <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1">
-                            <div className="bg-white/20 px-1 py-0.5 rounded-full text-emerald-100 text-xs">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="bg-white/20 text-emerald-100 text-xs">
                               {update.version || 'v1.0'}
-                            </div>
-                            <div className="bg-white/20 px-1 py-0.5 rounded-full text-emerald-100 text-xs">
+                            </Badge>
+                            <Badge variant="secondary" className="bg-white/20 text-emerald-100 text-xs">
                               {update.type || 'Feature'}
-                            </div>
+                            </Badge>
                           </div>
                           <div className="flex items-center gap-1 text-xs">
-                            <Clock className="h-2 w-2" />
+                            <Clock className="h-3 w-3" />
                             {formatCreatedDate(String(update.createdAt || ''))}
                           </div>
                         </div>
@@ -697,93 +814,103 @@ const UserDashboard = () => {
                     ))}
                     <Button 
                       variant="secondary" 
-                      size="sm"
-                      className="w-full mt-2 bg-white/20 hover:bg-white/30 text-white border-0 text-xs h-6"
+                      className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border-0"
                       onClick={() => window.location.href = '/novidades'}
                     >
-                      Ver Todas
-                      <ArrowRight className="h-3 w-3 ml-1" />
+                      Ver Todas as Novidades
+                      <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-3">
-                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-1">
-                      <Users className="h-3 w-3 text-white" />
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <TrendingUp className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-xs font-semibold text-white mb-1">Nenhuma novidade</h3>
+                    <h3 className="text-sm font-semibold text-white mb-2">Nenhuma novidade</h3>
                     <p className="text-emerald-200 text-xs">As últimas atualizações aparecerão aqui</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Links Sociais */}
-            <Card className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-md border-0 text-white">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center backdrop-blur-sm">
-                    <ExternalLink className="h-3 w-3 text-white" />
+            {/* Links Sociais e Comunidade */}
+            <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white border-0 shadow-lg">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                    <Users className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-base font-bold text-white">
+                    <CardTitle className="text-lg font-bold text-white">
                       Conecte-se
                     </CardTitle>
-                    <CardDescription className="text-gray-300 text-xs">
+                    <CardDescription className="text-gray-300 text-sm">
                       Redes sociais e comunidade
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
+              
+              <CardContent className="pb-6">
+                <div className="space-y-3">
                   <Button 
                     variant="ghost" 
-                    size="sm"
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://instagram.com/guilhermeavasques', '_blank')}
                   >
-                    <Instagram className="h-3 w-3 mr-2" />
-                    @guilhermeavasques
+                    <Instagram className="h-4 w-4 mr-3" />
+                    <div className="text-left">
+                      <p className="font-medium">Instagram</p>
+                      <p className="text-xs text-gray-300">@guilhermeavasques</p>
+                    </div>
                   </Button>
                   
                   <Button 
                     variant="ghost" 
-                    size="sm"
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
                   >
-                    <Youtube className="h-3 w-3 mr-2" />
-                    @guilhermeavasques
+                    <Youtube className="h-4 w-4 mr-3" />
+                    <div className="text-left">
+                      <p className="font-medium">YouTube</p>
+                      <p className="text-xs text-gray-300">@guilhermeavasques</p>
+                    </div>
                   </Button>
                   
                   <Button 
                     variant="ghost" 
-                    size="sm"
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://portal.guilhermevasques.club', '_blank')}
                   >
-                    <Star className="h-3 w-3 mr-2" />
-                    Acesse a Plataforma Curso
+                    <Star className="h-4 w-4 mr-3" />
+                    <div className="text-left">
+                      <p className="font-medium">Plataforma Curso</p>
+                      <p className="text-xs text-gray-300">Portal exclusivo</p>
+                    </div>
                   </Button>
                   
                   <Button 
                     variant="ghost" 
-                    size="sm"
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://chat.whatsapp.com/Lrq6yGUjQp0KJSVrtfqIrN?mode=r_c', '_blank')}
                   >
-                    <MessageCircle className="h-3 w-3 mr-2" />
-                    Grupo Aberto do WhatsApp Amazon + Importação
+                    <MessageCircle className="h-4 w-4 mr-3" />
+                    <div className="text-left">
+                      <p className="font-medium">WhatsApp</p>
+                      <p className="text-xs text-gray-300">Grupo Amazon + Importação</p>
+                    </div>
                   </Button>
                   
                   <Button 
                     variant="ghost" 
-                    size="sm"
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 text-xs h-8"
+                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://discord.gg/uMQ8Vbp94q', '_blank')}
                   >
-                    <MessageSquare className="h-3 w-3 mr-2" />
-                    Acesse nosso Discord
+                    <MessageSquare className="h-4 w-4 mr-3" />
+                    <div className="text-left">
+                      <p className="font-medium">Discord</p>
+                      <p className="text-xs text-gray-300">Comunidade oficial</p>
+                    </div>
                   </Button>
                 </div>
               </CardContent>
