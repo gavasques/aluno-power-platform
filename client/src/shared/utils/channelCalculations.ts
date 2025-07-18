@@ -145,26 +145,30 @@ export function calculateChannelProfitability(
     };
   }
 
-  // Revenue calculation
-  const grossRevenue = data.price;
-  const rebateIncome = data.rebateValue || 0;
+  // Revenue calculation with safe parsing
+  const grossRevenue = parseFloat(String(data.price || 0));
+  const rebateIncome = parseFloat(String(data.rebateValue || 0));
   const netRevenue = grossRevenue + rebateIncome; // Rebate is income, not cost
 
-  // Cost calculations
-  const taxCost = calculatePercentageCost(productCost, taxPercent);
+  // Safe product cost and tax parsing
+  const safeProductCost = parseFloat(String(productCost || 0));
+  const safeTaxPercent = parseFloat(String(taxPercent || 0));
+
+  // Cost calculations with safe parsing
+  const taxCost = calculatePercentageCost(safeProductCost, safeTaxPercent);
   const commissionCost = calculateCommission(grossRevenue, data);
-  const packagingCost = data.packagingCostValue || 0;
-  const fixedCost = calculatePercentageCost(grossRevenue, data.fixedCostPercent || 0);
-  const marketingCost = calculatePercentageCost(grossRevenue, data.marketingCostPercent || 0);
-  const financialCost = calculatePercentageCost(grossRevenue, data.financialCostPercent || 0);
-  const shippingCost = data.shippingCostValue || 0;
-  const prepCenterCost = data.prepCenterCostValue || 0;
+  const packagingCost = parseFloat(String(data.packagingCostValue || 0));
+  const fixedCost = calculatePercentageCost(grossRevenue, parseFloat(String(data.fixedCostPercent || 0)));
+  const marketingCost = calculatePercentageCost(grossRevenue, parseFloat(String(data.marketingCostPercent || 0)));
+  const financialCost = calculatePercentageCost(grossRevenue, parseFloat(String(data.financialCostPercent || 0)));
+  const shippingCost = parseFloat(String(data.shippingCostValue || 0));
+  const prepCenterCost = parseFloat(String(data.prepCenterCostValue || 0));
 
   // Total costs
-  const totalCosts = productCost + taxCost + commissionCost + packagingCost + 
+  const totalCosts = safeProductCost + taxCost + commissionCost + packagingCost + 
                     fixedCost + marketingCost + financialCost + shippingCost + prepCenterCost;
 
-  // Profitability
+  // Profitability with safe calculations
   const grossProfit = grossRevenue - totalCosts;
   const netProfit = netRevenue - totalCosts; // Including rebate income
   const marginPercent = grossRevenue > 0 ? (netProfit / grossRevenue) * 100 : 0;
@@ -172,23 +176,23 @@ export function calculateChannelProfitability(
 
   return {
     channelType: type,
-    grossRevenue,
-    netRevenue,
-    productCost,
-    taxCost,
-    commissionCost,
-    packagingCost,
-    fixedCost,
-    marketingCost,
-    financialCost,
-    shippingCost,
-    prepCenterCost,
-    totalCosts,
-    rebateIncome,
-    grossProfit,
-    netProfit,
-    marginPercent,
-    roiPercent,
+    grossRevenue: isNaN(grossRevenue) ? 0 : grossRevenue,
+    netRevenue: isNaN(netRevenue) ? 0 : netRevenue,
+    productCost: isNaN(safeProductCost) ? 0 : safeProductCost,
+    taxCost: isNaN(taxCost) ? 0 : taxCost,
+    commissionCost: isNaN(commissionCost) ? 0 : commissionCost,
+    packagingCost: isNaN(packagingCost) ? 0 : packagingCost,
+    fixedCost: isNaN(fixedCost) ? 0 : fixedCost,
+    marketingCost: isNaN(marketingCost) ? 0 : marketingCost,
+    financialCost: isNaN(financialCost) ? 0 : financialCost,
+    shippingCost: isNaN(shippingCost) ? 0 : shippingCost,
+    prepCenterCost: isNaN(prepCenterCost) ? 0 : prepCenterCost,
+    totalCosts: isNaN(totalCosts) ? 0 : totalCosts,
+    rebateIncome: isNaN(rebateIncome) ? 0 : rebateIncome,
+    grossProfit: isNaN(grossProfit) ? 0 : grossProfit,
+    netProfit: isNaN(netProfit) ? 0 : netProfit,
+    marginPercent: isNaN(marginPercent) ? 0 : marginPercent,
+    roiPercent: isNaN(roiPercent) ? 0 : roiPercent,
     isValid: true,
     errors: []
   };
@@ -216,36 +220,48 @@ export function calculateAllChannels(
 /**
  * Format currency for display
  */
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number | string | null | undefined): string {
+  const numValue = typeof value === 'number' ? value : parseFloat(String(value || 0));
+  if (isNaN(numValue)) return 'R$ 0,00';
+  
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
-  }).format(value);
+  }).format(numValue);
 }
 
 /**
  * Format percentage for display
  */
-export function formatPercentage(value: number): string {
-  return `${value.toFixed(1)}%`;
+export function formatPercentage(value: number | string | null | undefined): string {
+  const numValue = typeof value === 'number' ? value : parseFloat(String(value || 0));
+  if (isNaN(numValue)) return '0.0%';
+  
+  return `${numValue.toFixed(1)}%`;
 }
 
 /**
  * Get profitability status color
  */
-export function getProfitabilityColor(marginPercent: number): string {
-  if (marginPercent >= 30) return 'text-green-600';
-  if (marginPercent >= 15) return 'text-yellow-600';
-  if (marginPercent >= 0) return 'text-orange-600';
+export function getProfitabilityColor(marginPercent: number | string | null | undefined): string {
+  const numValue = typeof marginPercent === 'number' ? marginPercent : parseFloat(String(marginPercent || 0));
+  if (isNaN(numValue)) return 'text-gray-600';
+  
+  if (numValue >= 30) return 'text-green-600';
+  if (numValue >= 15) return 'text-yellow-600';
+  if (numValue >= 0) return 'text-orange-600';
   return 'text-red-600';
 }
 
 /**
  * Get profitability status text
  */
-export function getProfitabilityStatus(marginPercent: number): string {
-  if (marginPercent >= 30) return 'Excelente';
-  if (marginPercent >= 15) return 'Boa';
-  if (marginPercent >= 0) return 'Baixa';
+export function getProfitabilityStatus(marginPercent: number | string | null | undefined): string {
+  const numValue = typeof marginPercent === 'number' ? marginPercent : parseFloat(String(marginPercent || 0));
+  if (isNaN(numValue)) return 'Indefinido';
+  
+  if (numValue >= 30) return 'Excelente';
+  if (numValue >= 15) return 'Boa';
+  if (numValue >= 0) return 'Baixa';
   return 'Prejuízo';
 }
