@@ -331,14 +331,15 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
     });
   };
 
-  // Load product data - force fresh API call
+  // Load product data - force fresh API call bypassing ALL cache
   const { data: product, isLoading: loadingProduct, error } = useQuery({
-    queryKey: [`/api/products/${productId}`, 'channels-editor'],
+    queryKey: [`/api/products/${productId}`, 'channels-editor', Date.now()], // Force unique every time
     enabled: isOpen,
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    retry: false, // Don't retry failed requests
   });
 
   const form = useForm<ChannelFormData>({
@@ -360,13 +361,22 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       // Check response structure and extract channels  
       console.log('🔍 [SERVER SUCCESS] Raw storage data shows SITE_PROPRIO isActive: true, AMAZON_FBA isActive: true');
       console.log('🔍 [FULL RESPONSE] Complete product response:', product);
-      console.log('🔍 [API CALL DEBUG] Query Key:', [`/api/products/${productId}`, 'channels-editor']);
+      console.log('🔍 [API CALL DEBUG] Query Key:', [`/api/products/${productId}`, 'channels-editor', Date.now()]);
       console.log('🔍 [API CALL DEBUG] Product ID being requested:', productId);
       console.log('🔍 [API CALL DEBUG] Response structure check:');
       console.log('🔍 [API CALL DEBUG] - product.success:', (product as any).success);
       console.log('🔍 [API CALL DEBUG] - product.data exists:', !!(product as any).data);
       console.log('🔍 [API CALL DEBUG] - product.data.channels exists:', !!(product as any).data?.channels);
       console.log('🔍 [API CALL DEBUG] - product.data.channels length:', (product as any).data?.channels?.length);
+      console.log('🔍 [CACHE ISSUE] Response timestamp:', (product as any).timestamp);
+      console.log('🔍 [CACHE ISSUE] Should see fresh server logs with CRITICAL DEBUG if not cached');
+      
+      // Manually invalidate cache and force fresh data
+      if ((product as any).data?.channels?.every((ch: any) => !ch.isActive)) {
+        console.log('🚨 [CACHE DETECTED] All channels inactive - forcing cache refresh');
+        queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}`] });
+        queryClient.removeQueries({ queryKey: [`/api/products/${productId}`] });
+      }
       
       // Handle both response formats: direct channels or nested in data
       let productChannels = [];
