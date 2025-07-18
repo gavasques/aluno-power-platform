@@ -600,8 +600,8 @@ const UserDashboard = () => {
             </Card>
           </div>
 
-          {/* Sidebar com Notícias e Novidades */}
-          <div className="space-y-6">
+          {/* Sidebar com Notícias e Novidades - 2 Colunas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Notícias */}
             <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white border-0 shadow-lg">
@@ -764,8 +764,10 @@ const UserDashboard = () => {
                 )}
               </CardContent>
             </Card>
+          </div>
 
-            {/* Links Sociais e Comunidade */}
+          {/* Links Sociais e Comunidade */}
+          <div className="mt-6">
             <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white border-0 shadow-lg">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
@@ -784,10 +786,10 @@ const UserDashboard = () => {
               </CardHeader>
               
               <CardContent className="pb-6">
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                   <Button 
                     variant="ghost" 
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://instagram.com/guilhermeavasques', '_blank')}
                   >
                     <Instagram className="h-4 w-4 mr-3" />
@@ -799,7 +801,7 @@ const UserDashboard = () => {
                   
                   <Button 
                     variant="ghost" 
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
                   >
                     <Youtube className="h-4 w-4 mr-3" />
@@ -811,7 +813,7 @@ const UserDashboard = () => {
                   
                   <Button 
                     variant="ghost" 
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://portal.guilhermevasques.club', '_blank')}
                   >
                     <Star className="h-4 w-4 mr-3" />
@@ -823,7 +825,7 @@ const UserDashboard = () => {
                   
                   <Button 
                     variant="ghost" 
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://chat.whatsapp.com/Lrq6yGUjQp0KJSVrtfqIrN?mode=r_c', '_blank')}
                   >
                     <MessageCircle className="h-4 w-4 mr-3" />
@@ -835,7 +837,7 @@ const UserDashboard = () => {
                   
                   <Button 
                     variant="ghost" 
-                    className="w-full justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
                     onClick={() => window.open('https://discord.gg/uMQ8Vbp94q', '_blank')}
                   >
                     <MessageSquare className="h-4 w-4 mr-3" />
