@@ -1,18 +1,16 @@
 
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { lazy, Suspense } from "react";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { Button } from "@/components/ui/button";
 
 // Lazy load components for better performance
 const MySuppliers = lazy(() => import("./myarea/MySuppliers"));
-const MyProductsList = lazy(() => import("./myarea/MyProductsList"));
 const MyMaterials = lazy(() => import("./myarea/MyMaterials"));
 const MyBrands = lazy(() => import("./myarea/MyBrands"));
 
-const ProductDetail = lazy(() => import("./myarea/ProductDetail"));
-
-const ProductPricingForm = lazy(() => import("./myarea/ProductPricingForm"));
+// Legacy product components removed - now handled by PRODUTOS PRO
 const SupplierDetailRefactored = lazy(() => import("./myarea/SupplierDetailRefactored"));
 const MaterialDetail = lazy(() => import("./myarea/MaterialDetail"));
 const MaterialForm = lazy(() => import("./myarea/MaterialForm"));
@@ -56,26 +54,21 @@ const MyArea = () => {
       );
     case "produtos":
     case "products":
+      // Legacy products system removed - redirect to PRODUTOS PRO
       return (
-        <PermissionGuard featureCode="myarea.products">
-          {id === "novo" || id === "new" ? (
-            <Suspense fallback={<LoadingFallback />}>
-              <ProductPricingForm />
-            </Suspense>
-          ) : id && subId === "editar" ? (
-            <Suspense fallback={<LoadingFallback />}>
-              <ProductPricingForm />
-            </Suspense>
-          ) : id ? (
-            <Suspense fallback={<LoadingFallback />}>
-              <ProductDetail />
-            </Suspense>
-          ) : (
-            <Suspense fallback={<LoadingFallback />}>
-              <MyProductsList />
-            </Suspense>
-          )}
-        </PermissionGuard>
+        <div className="container mx-auto p-4">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold mb-4">Sistema de Produtos Atualizado</h2>
+            <p className="text-muted-foreground mb-6">
+              O sistema de produtos foi atualizado. Agora você pode gerenciar seus produtos através do <strong>PRODUTOS PRO</strong>.
+            </p>
+            <Button asChild>
+              <Link to="/produtos-pro">
+                Acessar PRODUTOS PRO
+              </Link>
+            </Button>
+          </div>
+        </div>
       );
     case "materiais":
     case "materials":

@@ -265,7 +265,7 @@ export class PermissionService {
       
       // Minha Área
       { code: 'myarea.suppliers', name: 'Meus Fornecedores', category: 'Minha Área', sortOrder: 1 },
-      { code: 'myarea.products', name: 'Meus Produtos', category: 'Minha Área', sortOrder: 2 },
+      { code: 'myarea.products.legacy', name: 'Produtos (Sistema Legado)', category: 'Minha Área', sortOrder: 2, deprecated: true },
       { code: 'myarea.materials', name: 'Meus Materiais', category: 'Minha Área', sortOrder: 3 },
       { code: 'myarea.brands', name: 'Minhas Marcas', category: 'Minha Área', sortOrder: 4 },
       { code: 'myarea.subscriptions', name: 'Minhas Assinaturas', category: 'Minha Área', sortOrder: 5 },

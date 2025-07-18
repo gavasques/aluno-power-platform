@@ -35,14 +35,6 @@ const minhaAreaItems: MinhaAreaItem[] = [
     isNew: true,
   },
   {
-    id: "produtos", 
-    title: "Meus Produtos",
-    description: "Controle seu catálogo de produtos, preços e canais de venda",
-    href: "/minha-area/produtos",
-    icon: Package,
-    category: "Produtos",
-  },
-  {
     id: "marcas",
     title: "Minhas Marcas", 
     description: "Organize e gerencie suas marcas registradas e genéricas",
