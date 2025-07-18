@@ -5,35 +5,42 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, CheckCircle } from 'lucide-react';
 import { AuthService } from '@/services/authService';
+import { useUnifiedFormValidation, commonValidationRules } from '@/hooks/useUnifiedFormValidation';
 
 interface ForgotPasswordFormProps {
   onBack?: () => void;
 }
 
+interface ForgotPasswordFormData {
+  email: string;
+}
+
 export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
-  const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      const result = await AuthService.forgotPassword({ email });
+  const {
+    formData,
+    isSubmitting,
+    globalError,
+    handleInputChange,
+    handleSubmit
+  } = useUnifiedFormValidation<ForgotPasswordFormData>({
+    initialData: {
+      email: ''
+    },
+    validationRules: {
+      email: commonValidationRules.email
+    },
+    onSubmit: async (data) => {
+      const result = await AuthService.forgotPassword({ email: data.email });
       if (result.success) {
         setIsSuccess(true);
-      } else {
-        setError(result.error || 'Erro ao enviar email');
       }
-    } catch (err) {
-      setError('Erro de conexão');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return result;
+    },
+    successMessage: 'Email de recuperação enviado!',
+    errorMessage: 'Erro ao enviar email'
+  });
 
   if (isSuccess) {
     return (
@@ -54,9 +61,9 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
+      {globalError && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{globalError}</AlertDescription>
         </Alert>
       )}
 
@@ -69,12 +76,9 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
             type="email"
             placeholder="seu@email.com"
             className="pl-10"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (error) setError('');
-            }}
-            disabled={isLoading}
+            value={formData.email}
+            onChange={handleInputChange('email')}
+            disabled={isSubmitting}
             required
           />
         </div>
@@ -84,8 +88,8 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? (
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Enviando...

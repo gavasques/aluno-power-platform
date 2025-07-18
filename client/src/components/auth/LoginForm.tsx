@@ -1,55 +1,54 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUnifiedFormValidation, commonValidationRules } from '@/hooks/useUnifiedFormValidation';
 
 interface LoginFormProps {
   onSuccess?: () => void;
 }
 
+interface LoginFormData {
+  email: string;
+  password: string;
+}
+
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const { login } = useAuth();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+
+  const {
+    formData,
+    isSubmitting,
+    globalError,
+    handleInputChange,
+    handleSubmit
+  } = useUnifiedFormValidation<LoginFormData>({
+    initialData: {
+      email: '',
+      password: ''
+    },
+    validationRules: {
+      email: commonValidationRules.email,
+      password: { required: true, message: 'Senha é obrigatória' }
+    },
+    onSubmit: async (data) => {
+      const result = await login(data.email, data.password);
+      return result;
+    },
+    onSuccess: () => {
+      onSuccess?.();
+    },
+    successMessage: 'Login realizado com sucesso!',
+    errorMessage: 'Erro no login'
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      const result = await login(formData.email, formData.password);
-      if (result.success) {
-        onSuccess?.();
-      } else {
-        setError(result.error || 'Erro no login');
-      }
-    } catch (err) {
-      setError('Erro de conexão');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleInputChange = (field: keyof typeof formData) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }));
-    if (error) setError('');
-  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
+      {globalError && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{globalError}</AlertDescription>
         </Alert>
       )}
 
@@ -64,7 +63,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             className="pl-10"
             value={formData.email}
             onChange={handleInputChange('email')}
-            disabled={isLoading}
+            disabled={isSubmitting}
             required
           />
         </div>
@@ -81,14 +80,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             className="pl-10"
             value={formData.password}
             onChange={handleInputChange('password')}
-            disabled={isLoading}
+            disabled={isSubmitting}
             required
           />
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Entrando...

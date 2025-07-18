@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useToast } from "@/hooks/use-toast";
+import { useUnifiedFormValidation } from './useUnifiedFormValidation';
 
 export interface ProductFormData {
   id?: number;
@@ -12,6 +11,17 @@ export interface ProductFormData {
   isActive: boolean;
   userId: number;
   sku: string;
+  photo?: string;
+  brand?: string;
+  internalCode?: string;
+  ean?: string;
+  ncm?: string;
+  observations?: string;
+  supplierId?: string;
+  weight?: number;
+  costItem?: number;
+  taxPercent?: number;
+  dimensions?: { length: number; width: number; height: number };
 }
 
 export interface UseProductFormProps {
@@ -27,9 +37,7 @@ export function useProductForm({
   onSuccess,
   onError
 }: UseProductFormProps = {}) {
-  const { toast } = useToast();
-  
-  const [formData, setFormData] = useState<ProductFormData>({
+  const defaultData: ProductFormData = {
     name: '',
     description: '',
     category: '',
@@ -51,144 +59,48 @@ export function useProductForm({
     taxPercent: 0,
     dimensions: { length: 0, width: 0, height: 0 },
     ...initialData
+  };
+
+  const {
+    formData,
+    updateField,
+    handleSubmit,
+    resetForm,
+    isSubmitting,
+    errors,
+    isValid,
+    validateForm
+  } = useUnifiedFormValidation<ProductFormData>({
+    initialData: defaultData,
+    validationRules: {
+      name: { required: true, message: 'Nome é obrigatório' },
+      sku: { required: true, message: 'SKU é obrigatório' }
+    },
+    onSubmit: async (data) => {
+      if (onSubmit) {
+        await onSubmit(data);
+      }
+      return { success: true };
+    },
+    onSuccess: (data) => {
+      onSuccess?.(data);
+    },
+    onError: (error) => {
+      onError?.(error);
+    },
+    successMessage: 'Produto salvo com sucesso!',
+    errorMessage: 'Erro ao salvar produto'
   });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (initialData && Object.keys(initialData).length > 0) {
-      setFormData(prev => {
-        // Only update if data actually changed to prevent loops
-        const hasChanges = Object.keys(initialData).some(key => 
-          JSON.stringify(prev[key]) !== JSON.stringify(initialData[key])
-        );
-        
-        if (hasChanges) {
-          return {
-            ...prev,
-            ...initialData
-          };
-        }
-        return prev;
-      });
-    }
-  }, [initialData]);
-
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    // Only Name and SKU are required
-    if (!formData.name.trim()) {
-      newErrors.name = 'Nome é obrigatório';
-    }
-
-    if (!formData.sku || !formData.sku.trim()) {
-      newErrors.sku = 'SKU é obrigatório';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const updateField = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-
-    // Clear field error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  };
 
   const addTag = (tag: string) => {
     if (tag.trim() && !formData.tags.includes(tag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, tag.trim()]
-      }));
+      updateField('tags', [...formData.tags, tag.trim()]);
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
+    updateField('tags', formData.tags.filter(tag => tag !== tagToRemove));
   };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      if (onSubmit) {
-        await onSubmit(formData);
-      }
-
-      toast({
-        title: "Sucesso",
-        description: "Produto salvo com sucesso!",
-      });
-
-      if (onSuccess) {
-        onSuccess(formData);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar produto';
-      
-      toast({
-        title: "Erro",
-        description: errorMessage,
-        variant: "destructive",
-      });
-
-      if (onError) {
-        onError(errorMessage);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      category: '',
-      price: 0,
-      imageUrl: '',
-      tags: [],
-      isActive: true,
-      userId: 0,
-      sku: '',
-      photo: '',
-      brand: '',
-      internalCode: '',
-      ean: '',
-      ncm: '',
-      observations: '',
-      supplierId: '',
-      weight: 0,
-      costItem: 0,
-      taxPercent: 0,
-      dimensions: { length: 0, width: 0, height: 0 },
-      ...initialData
-    });
-    setErrors({});
-  };
-
-  const isValid = formData.name.trim() && 
-                 formData.sku && formData.sku.trim();
 
   return {
     formData,

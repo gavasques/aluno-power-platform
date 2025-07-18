@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useUnifiedFormValidation } from './useUnifiedFormValidation';
 
 export interface EditProductFormData {
   id: number;
@@ -25,8 +26,8 @@ export function useEditProductForm({
   onCancel
 }: UseEditProductFormProps) {
   const { toast } = useToast();
-  
-  const [formData, setFormData] = useState<EditProductFormData>({
+  const [isLoading, setIsLoading] = useState(true);
+  const [initialData, setInitialData] = useState<EditProductFormData>({
     id: productId,
     name: '',
     description: '',
@@ -37,9 +38,39 @@ export function useEditProductForm({
     isActive: true
   });
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const {
+    formData,
+    isSubmitting,
+    errors,
+    isValid,
+    updateField,
+    handleSubmit,
+    validateForm
+  } = useUnifiedFormValidation<EditProductFormData>({
+    initialData,
+    validationRules: {
+      name: { required: true, message: 'Nome é obrigatório' },
+      description: { required: true, message: 'Descrição é obrigatória' },
+      category: { required: true, message: 'Categoria é obrigatória' },
+      price: { 
+        required: true, 
+        custom: (value) => value > 0,
+        message: 'Preço deve ser maior que zero' 
+      }
+    },
+    onSubmit: async (data) => {
+      await apiRequest(`/api/products/${productId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+      return { success: true };
+    },
+    onSuccess: (data) => {
+      onSuccess?.(data);
+    },
+    successMessage: 'Produto atualizado com sucesso!',
+    errorMessage: 'Erro ao atualizar produto'
+  });
 
   useEffect(() => {
     loadProduct();
@@ -51,7 +82,7 @@ export function useEditProductForm({
       const response = await fetch(`/api/products/${productId}`);
       if (response.ok) {
         const product = await response.json();
-        setFormData({
+        const productData = {
           id: product.id,
           name: product.name || '',
           description: product.description || '',
@@ -60,7 +91,8 @@ export function useEditProductForm({
           imageUrl: product.imageUrl || '',
           tags: product.tags || [],
           isActive: product.isActive !== false
-        });
+        };
+        setInitialData(productData);
       } else {
         throw new Error('Produto não encontrado');
       }
@@ -76,105 +108,19 @@ export function useEditProductForm({
     }
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Nome é obrigatório';
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = 'Descrição é obrigatória';
-    }
-
-    if (!formData.category.trim()) {
-      newErrors.category = 'Categoria é obrigatória';
-    }
-
-    if (formData.price <= 0) {
-      newErrors.price = 'Preço deve ser maior que zero';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const updateField = (field: keyof EditProductFormData, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-
-    // Clear field error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  };
-
   const addTag = (tag: string) => {
     if (tag.trim() && !formData.tags.includes(tag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, tag.trim()]
-      }));
+      updateField('tags', [...formData.tags, tag.trim()]);
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      await apiRequest(`/api/products/${productId}`, {
-        method: 'PATCH',
-        body: JSON.stringify(formData),
-      });
-
-      toast({
-        title: "Sucesso",
-        description: "Produto atualizado com sucesso!",
-      });
-
-      if (onSuccess) {
-        onSuccess(formData);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar produto';
-      
-      toast({
-        title: "Erro",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    updateField('tags', formData.tags.filter(tag => tag !== tagToRemove));
   };
 
   const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    }
+    onCancel?.();
   };
-
-  const isValid = formData.name.trim() && 
-                 formData.description.trim() && 
-                 formData.category.trim() && 
-                 formData.price > 0;
 
   return {
     formData,

@@ -1,89 +1,69 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, Lock, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUnifiedFormValidation, commonValidationRules, usePasswordValidation } from '@/hooks/useUnifiedFormValidation';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
 }
 
+interface RegisterFormData {
+  email: string;
+  name: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const { register } = useAuth();
-  const [formData, setFormData] = useState({
-    email: '',
-    name: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { validatePassword } = usePasswordValidation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('As senhas não coincidem');
-      return;
-    }
-
-    // Password strength validation (matching backend requirements)
-    if (formData.password.length < 12) {
-      setError('A senha deve ter pelo menos 12 caracteres');
-      return;
-    }
-
-    if (!/[A-Z]/.test(formData.password)) {
-      setError('A senha deve conter pelo menos uma letra maiúscula');
-      return;
-    }
-
-    if (!/[a-z]/.test(formData.password)) {
-      setError('A senha deve conter pelo menos uma letra minúscula');
-      return;
-    }
-
-    if (!/[0-9]/.test(formData.password)) {
-      setError('A senha deve conter pelo menos um número');
-      return;
-    }
-
-    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(formData.password)) {
-      setError('A senha deve conter pelo menos um caractere especial');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const result = await register(formData.email, formData.name, formData.password);
-      if (result.success) {
-        onSuccess?.();
-      } else {
-        setError(result.error || 'Erro no cadastro');
+  const {
+    formData,
+    isSubmitting,
+    globalError,
+    handleInputChange,
+    handleSubmit
+  } = useUnifiedFormValidation<RegisterFormData>({
+    initialData: {
+      email: '',
+      name: '',
+      password: '',
+      confirmPassword: ''
+    },
+    validationRules: {
+      email: commonValidationRules.email,
+      name: commonValidationRules.name,
+      password: {
+        required: true,
+        custom: (value) => validatePassword(value).length === 0,
+        message: 'Senha não atende aos requisitos de segurança'
+      },
+      confirmPassword: {
+        required: true,
+        custom: (value) => value === formData.password,
+        message: 'As senhas não coincidem'
       }
-    } catch (err) {
-      setError('Erro de conexão');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleInputChange = (field: keyof typeof formData) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }));
-    if (error) setError('');
-  };
+    },
+    onSubmit: async (data) => {
+      const result = await register(data.email, data.name, data.password);
+      return result;
+    },
+    onSuccess: () => {
+      onSuccess?.();
+    },
+    successMessage: 'Conta criada com sucesso!',
+    errorMessage: 'Erro no cadastro'
+  });
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
+      {globalError && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{globalError}</AlertDescription>
         </Alert>
       )}
 
@@ -98,7 +78,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             className="pl-10"
             value={formData.email}
             onChange={handleInputChange('email')}
-            disabled={isLoading}
+            disabled={isSubmitting}
             required
           />
         </div>
@@ -114,7 +94,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             className="pl-10"
             value={formData.name}
             onChange={handleInputChange('name')}
-            disabled={isLoading}
+            disabled={isSubmitting}
             required
           />
         </div>
@@ -131,7 +111,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             className="pl-10"
             value={formData.password}
             onChange={handleInputChange('password')}
-            disabled={isLoading}
+            disabled={isSubmitting}
             required
           />
         </div>
@@ -168,14 +148,14 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             className="pl-10"
             value={formData.confirmPassword}
             onChange={handleInputChange('confirmPassword')}
-            disabled={isLoading}
+            disabled={isSubmitting}
             required
           />
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Criando conta...
