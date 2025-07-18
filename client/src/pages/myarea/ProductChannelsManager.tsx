@@ -24,7 +24,7 @@ export const ProductChannelsManager: React.FC = () => {
   });
 
   const handleGoBack = () => {
-    setLocation('/minha-area/produtos');
+    setLocation('/produtos-pro');
   };
 
   if (isLoading) {

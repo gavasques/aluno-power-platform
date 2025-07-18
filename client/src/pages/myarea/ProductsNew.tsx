@@ -82,7 +82,7 @@ export const ProductsNew: React.FC = () => {
   };
 
   const handleViewChannels = (productId: number) => {
-    setLocation(`/minha-area/produtos/${productId}/canais`);
+    setLocation(`/produtos-pro/${productId}/canais`);
   };
 
   const handleEditProduct = (productId: number) => {
@@ -126,8 +126,8 @@ export const ProductsNew: React.FC = () => {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Produtos</h1>
-            <p className="text-gray-600">Gerencie seus produtos e canais de venda</p>
+            <h1 className="text-2xl font-bold text-gray-900">Produtos Pro</h1>
+            <p className="text-gray-600">Sistema avançado de multi-canais com cálculos Excel integrados</p>
           </div>
           <Button onClick={handleCreateProduct} className="gap-2">
             <Plus className="h-4 w-4" />

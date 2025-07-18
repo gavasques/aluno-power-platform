@@ -642,8 +642,8 @@ function App() {
 
 
 
-                          {/* NEW PARALLEL PRODUCTS & CHANNELS SYSTEM */}
-                          <Route path="/produtos-novo">
+                          {/* PRODUTOS PRO - ADVANCED MULTI-CHANNEL SYSTEM */}
+                          <Route path="/produtos-pro">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
@@ -653,7 +653,7 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          <Route path="/produtos-novo/:id/canais">
+                          <Route path="/produtos-pro/:id/canais">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>

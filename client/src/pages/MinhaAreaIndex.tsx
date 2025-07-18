@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet } from "lucide-react";
+import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet, Zap } from "lucide-react";
 
 interface MinhaAreaItem {
   id: string;
@@ -24,6 +24,15 @@ const minhaAreaItems: MinhaAreaItem[] = [
     href: "/minha-area/fornecedores",
     icon: Folder,
     category: "Gestão",
+  },
+  {
+    id: "produtos-pro", 
+    title: "Produtos Pro",
+    description: "Sistema avançado de multi-canais com cálculos Excel integrados e 18+ campos de custo",
+    href: "/produtos-pro",
+    icon: Zap,
+    category: "Produtos",
+    isNew: true,
   },
   {
     id: "produtos", 
@@ -165,37 +174,73 @@ export default function MinhaAreaIndex() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map((item) => {
           const IconComponent = item.icon;
+          const isProdutosPro = item.id === "produtos-pro";
           
           return (
-            <Card key={item.id} className="hover:shadow-lg transition-shadow">
+            <Card 
+              key={item.id} 
+              className={`hover:shadow-lg transition-all ${
+                isProdutosPro 
+                  ? "bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200 hover:shadow-blue-200/50" 
+                  : "hover:shadow-lg"
+              }`}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <IconComponent className="w-5 h-5 text-primary" />
+                    <div className={`p-2 rounded-lg ${
+                      isProdutosPro 
+                        ? "bg-gradient-to-br from-blue-500 to-indigo-600" 
+                        : "bg-primary/10"
+                    }`}>
+                      <IconComponent className={`w-5 h-5 ${
+                        isProdutosPro ? "text-white" : "text-primary"
+                      }`} />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{item.title}</CardTitle>
-                      <Badge variant="outline" className="text-xs mt-1">
+                      <CardTitle className={`text-lg ${
+                        isProdutosPro ? "text-blue-900" : ""
+                      }`}>
+                        {item.title}
+                      </CardTitle>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs mt-1 ${
+                          isProdutosPro ? "border-blue-300 text-blue-700" : ""
+                        }`}
+                      >
                         {item.category}
                       </Badge>
                     </div>
                   </div>
                   {item.isNew && (
-                    <Badge className="bg-green-100 text-green-800 text-xs">
-                      Novo!
+                    <Badge className={`text-xs ${
+                      isProdutosPro 
+                        ? "bg-gradient-to-r from-green-400 to-blue-500 text-white" 
+                        : "bg-green-100 text-green-800"
+                    }`}>
+                      {isProdutosPro ? "✨ Pro" : "Novo!"}
                     </Badge>
                   )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <CardDescription className="text-sm leading-relaxed">
+                <CardDescription className={`text-sm leading-relaxed ${
+                  isProdutosPro ? "text-blue-800" : ""
+                }`}>
                   {item.description}
                 </CardDescription>
                 
-                <Button asChild className="w-full">
+                <Button 
+                  asChild 
+                  className={`w-full ${
+                    isProdutosPro 
+                      ? "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700" 
+                      : ""
+                  }`}
+                >
                   <Link to={item.href}>
-                    Acessar
+                    {isProdutosPro ? "Acessar Pro" : "Acessar"}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </Button>
