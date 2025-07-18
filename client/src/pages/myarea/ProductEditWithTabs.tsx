@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Save, Loader2, Package, Upload, X, Users, DollarSign, BarChart3, Settings } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Package, Upload, X, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ProductSupplierManager } from '@/components/product/ProductSupplierManager';
@@ -286,7 +286,7 @@ const ProductEditWithTabs: React.FC = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="basic" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             Dados Básicos
@@ -294,14 +294,6 @@ const ProductEditWithTabs: React.FC = () => {
           <TabsTrigger value="suppliers" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Fornecedores
-          </TabsTrigger>
-          <TabsTrigger value="pricing" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Preços & Canais
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Análise
           </TabsTrigger>
         </TabsList>
 
@@ -393,6 +385,27 @@ const ProductEditWithTabs: React.FC = () => {
 
                   <FormField
                     control={form.control}
+                    name="bulletPoints"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bullet Points</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Digite os bullet points do produto..." 
+                            className="min-h-[100px]"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Use uma linha para cada bullet point
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="active"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -411,6 +424,178 @@ const ProductEditWithTabs: React.FC = () => {
                       </FormItem>
                     )}
                   />
+                </CardContent>
+              </Card>
+
+              {/* Codes and Technical Data */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Códigos e Dados Técnicos</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="freeCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Código Livre</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Digite o código livre" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="supplierCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Código do Fornecedor</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Digite o código do fornecedor" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="internalCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Código Interno</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Digite o código interno" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="ean"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>EAN/Código de Barras</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Digite o EAN" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="ncm"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>NCM</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Digite o NCM" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="weight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Peso (kg)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.001"
+                              placeholder="0.000" 
+                              {...field} 
+                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Cost and Tax Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Custos e Impostos</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="costItem"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Custo do Item (R$)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.01"
+                              placeholder="0.00" 
+                              {...field} 
+                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="packCost"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Custo da Embalagem (R$)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.01"
+                              placeholder="0.00" 
+                              {...field} 
+                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="taxPercent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Taxa de Imposto (%)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.01"
+                              min="0"
+                              max="100"
+                              placeholder="0.00" 
+                              {...field} 
+                              onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
@@ -480,52 +665,15 @@ const ProductEditWithTabs: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ProductSupplierManager productId={parseInt(id!)} />
+              <ProductSupplierManager 
+                productId={parseInt(id!)} 
+                productName={product?.name || ''} 
+              />
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Pricing & Channels Tab */}
-        <TabsContent value="pricing" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Preços e Canais de Venda
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Settings className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Sistema de preços e canais será implementado aqui</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Configuração de preços por canal de venda
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Análise de Desempenho
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <BarChart3 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Analytics do produto será implementado aqui</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Relatórios de vendas, margens e performance
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
