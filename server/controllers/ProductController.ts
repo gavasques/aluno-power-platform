@@ -128,6 +128,13 @@ export class ProductController extends BaseController {
       }
       
       console.log('🔍 [DEBUG GETPRODUCT] Before ResponseHandler.success - channels:', JSON.stringify(product.channels, null, 2));
+      
+      // CRITICAL DEBUG: Check exactly what ResponseHandler.success is sending
+      console.log('🔍 [CRITICAL DEBUG] About to send via ResponseHandler.success');
+      console.log('🔍 [CRITICAL DEBUG] Product channels being sent:', product.channels);
+      console.log('🔍 [CRITICAL DEBUG] SITE_PROPRIO channel:', product.channels?.find((ch: any) => ch.type === 'SITE_PROPRIO'));
+      console.log('🔍 [CRITICAL DEBUG] AMAZON_FBA channel:', product.channels?.find((ch: any) => ch.type === 'AMAZON_FBA'));
+      
       ResponseHandler.success(res, product);
     } catch (error) {
       this.handleError(res, error, 'Failed to fetch product');

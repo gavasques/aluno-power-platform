@@ -360,6 +360,13 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       // Check response structure and extract channels  
       console.log('🔍 [SERVER SUCCESS] Raw storage data shows SITE_PROPRIO isActive: true, AMAZON_FBA isActive: true');
       console.log('🔍 [FULL RESPONSE] Complete product response:', product);
+      console.log('🔍 [API CALL DEBUG] Query Key:', [`/api/products/${productId}`, 'channels-editor']);
+      console.log('🔍 [API CALL DEBUG] Product ID being requested:', productId);
+      console.log('🔍 [API CALL DEBUG] Response structure check:');
+      console.log('🔍 [API CALL DEBUG] - product.success:', (product as any).success);
+      console.log('🔍 [API CALL DEBUG] - product.data exists:', !!(product as any).data);
+      console.log('🔍 [API CALL DEBUG] - product.data.channels exists:', !!(product as any).data?.channels);
+      console.log('🔍 [API CALL DEBUG] - product.data.channels length:', (product as any).data?.channels?.length);
       
       // Handle both response formats: direct channels or nested in data
       let productChannels = [];
