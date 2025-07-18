@@ -400,85 +400,6 @@ const UserDashboard = () => {
           </div>
         </div>
 
-        {/* Seção de Promoções - Cards Principais */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {/* Venda Moda na Amazon */}
-          <Card className="bg-gradient-to-br from-purple-600 to-purple-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2">Venda Moda na Amazon</h3>
-                  <p className="text-purple-100 text-sm mb-3">0% de Comissão para novas contas</p>
-                  <Button 
-                    size="sm" 
-                    className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
-                    onClick={() => window.open('https://amazon.com.br', '_blank')}
-                  >
-                    Cadastre-se →
-                  </Button>
-                </div>
-                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Crown className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Venda na Amazon */}
-          <Card className="bg-gradient-to-br from-blue-600 to-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2">Venda na Amazon</h3>
-                  <p className="text-blue-100 text-sm mb-3">Tenha nossos benefícios exclusivos</p>
-                  <Button 
-                    size="sm" 
-                    className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
-                    onClick={() => window.open('https://amazon.com.br', '_blank')}
-                  >
-                    Cadastre-se →
-                  </Button>
-                </div>
-                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Star className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Melhor Software */}
-          <Card className="bg-gradient-to-br from-orange-600 to-orange-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2">Melhor Software</h3>
-                  <p className="text-orange-100 text-sm mb-3">Para encontrar produtos lucrativos</p>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      className="bg-white text-orange-600 hover:bg-orange-50 font-semibold"
-                      onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
-                    >
-                      Anual →
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="border-white text-white hover:bg-white/20"
-                      onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
-                    >
-                      Mensal →
-                    </Button>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Links Sociais e Comunidade */}
         <div className="mb-6">
           <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white border-0 shadow-lg">
@@ -559,6 +480,85 @@ const UserDashboard = () => {
                     <p className="text-xs text-gray-300">Comunidade oficial</p>
                   </div>
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Seção de Promoções - Cards Principais */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {/* Venda Moda na Amazon */}
+          <Card className="bg-gradient-to-br from-purple-600 to-purple-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-2">Venda Moda na Amazon</h3>
+                  <p className="text-purple-100 text-sm mb-3">0% de Comissão para novas contas</p>
+                  <Button 
+                    size="sm" 
+                    className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
+                    onClick={() => window.open('https://amazon.com.br', '_blank')}
+                  >
+                    Cadastre-se →
+                  </Button>
+                </div>
+                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                  <Crown className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Venda na Amazon */}
+          <Card className="bg-gradient-to-br from-blue-600 to-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-2">Venda na Amazon</h3>
+                  <p className="text-blue-100 text-sm mb-3">Tenha nossos benefícios exclusivos</p>
+                  <Button 
+                    size="sm" 
+                    className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+                    onClick={() => window.open('https://amazon.com.br', '_blank')}
+                  >
+                    Cadastre-se →
+                  </Button>
+                </div>
+                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                  <Star className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Melhor Software */}
+          <Card className="bg-gradient-to-br from-orange-600 to-orange-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-2">Melhor Software</h3>
+                  <p className="text-orange-100 text-sm mb-3">Para encontrar produtos lucrativos</p>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      className="bg-white text-orange-600 hover:bg-orange-50 font-semibold"
+                      onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
+                    >
+                      Anual →
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="border-white text-white hover:bg-white/20"
+                      onClick={() => window.open('https://portal.guilhermeavasques.club', '_blank')}
+                    >
+                      Mensal →
+                    </Button>
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                  <Zap className="h-6 w-6 text-white" />
+                </div>
               </div>
             </CardContent>
           </Card>
