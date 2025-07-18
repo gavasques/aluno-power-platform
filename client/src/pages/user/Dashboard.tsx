@@ -435,12 +435,12 @@ const UserDashboard = () => {
         {/* Promotional Banners */}
         <PromotionalBanners />
 
-        {/* Layout Principal - Grid 3x2 */}
+        {/* Layout Principal - Grid 2 colunas */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           
-          {/* Coluna 1: Vídeos do YouTube (Expandido) */}
+          {/* Coluna 1: Vídeos do YouTube (Expandido para preencher toda a área esquerda) */}
           <div className="lg:col-span-2">
-            <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg shadow-md border-0 overflow-hidden">
+            <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg shadow-md border-0 overflow-hidden h-full">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -493,10 +493,10 @@ const UserDashboard = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 pb-4">
                 {videosLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                    {[...Array(6)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                       <div key={i} className="animate-pulse">
                         <div className="bg-gray-700 rounded-md h-16 mb-1"></div>
                         <div className="bg-gray-700 h-2 rounded mb-1"></div>
@@ -508,7 +508,7 @@ const UserDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                     {youtubeVideos
                       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-                      .slice(0, 8).map((video) => (
+                      .slice(0, 12).map((video) => (
                       <div 
                         key={video.id} 
                         className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
@@ -543,7 +543,7 @@ const UserDashboard = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6">
+                  <div className="text-center py-12">
                     <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
                       <Youtube className="h-4 w-4 text-gray-400" />
                     </div>
@@ -555,7 +555,7 @@ const UserDashboard = () => {
             </Card>
           </div>
 
-          {/* Coluna 2: Sidebar com Notícias e Novidades */}
+          {/* Coluna 2: Sidebar com Notícias, Novidades e Estatísticas */}
           <div className="space-y-3">
             {/* News Section - Compacto */}
             <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-lg shadow-md border-0 text-white">
@@ -718,66 +718,64 @@ const UserDashboard = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Seção de Estatísticas Rápidas - Movida para sidebar */}
+            <Card className="bg-white rounded-lg shadow-sm border-0">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-bold text-gray-800">
+                  Estatísticas Rápidas
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 pt-0">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-blue-100 rounded-md flex items-center justify-center">
+                        <Activity className="h-3 w-3 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Uso Este Mês</p>
+                        <p className="text-sm font-bold">{creditsUsedThisMonth}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center">
+                        <TrendingUp className="h-3 w-3 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Próxima Cobrança</p>
+                        <p className="text-sm font-bold">{nextBilling}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-purple-100 rounded-md flex items-center justify-center">
+                        <BarChart3 className="h-3 w-3 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Créditos do Plano</p>
+                        <p className="text-sm font-bold">{planCredits}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-orange-100 rounded-md flex items-center justify-center">
+                        <Star className="h-3 w-3 text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Status</p>
+                        <p className="text-sm font-bold capitalize">{planStatus}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
-
-        {/* Seção de Estatísticas Rápidas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-0">
-          <Card className="bg-white rounded-lg shadow-sm border-0">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
-                  <Activity className="h-4 w-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Uso Este Mês</p>
-                  <p className="text-sm font-bold">{creditsUsedThisMonth}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white rounded-lg shadow-sm border-0">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Próxima Cobrança</p>
-                  <p className="text-sm font-bold">{nextBilling}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white rounded-lg shadow-sm border-0">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
-                  <BarChart3 className="h-4 w-4 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Créditos do Plano</p>
-                  <p className="text-sm font-bold">{planCredits}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white rounded-lg shadow-sm border-0">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-orange-100 rounded-md flex items-center justify-center">
-                  <Star className="h-4 w-4 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Status</p>
-                  <p className="text-sm font-bold capitalize">{planStatus}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
