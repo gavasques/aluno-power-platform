@@ -30,7 +30,9 @@ import {
   BarChart3,
   Instagram,
   MessageCircle,
-  MessageSquare
+  MessageSquare,
+  Bot,
+  Archive
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { News, Update } from '@shared/schema';
