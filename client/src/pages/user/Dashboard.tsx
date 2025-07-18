@@ -479,6 +479,91 @@ const UserDashboard = () => {
           </Card>
         </div>
 
+        {/* Links Sociais e Comunidade */}
+        <div className="mb-6">
+          <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white border-0 shadow-lg">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                  <Users className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold text-white">
+                    Conecte-se
+                  </CardTitle>
+                  <CardDescription className="text-gray-300 text-sm">
+                    Redes sociais e comunidade
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="pb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+                <Button 
+                  variant="ghost" 
+                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                  onClick={() => window.open('https://instagram.com/guilhermeavasques', '_blank')}
+                >
+                  <Instagram className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Instagram</p>
+                    <p className="text-xs text-gray-300">@guilhermeavasques</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                  onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
+                >
+                  <Youtube className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">YouTube</p>
+                    <p className="text-xs text-gray-300">@guilhermeavasques</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                  onClick={() => window.open('https://portal.guilhermevasques.club', '_blank')}
+                >
+                  <Star className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Plataforma Curso</p>
+                    <p className="text-xs text-gray-300">Portal exclusivo</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                  onClick={() => window.open('https://chat.whatsapp.com/Lrq6yGUjQp0KJSVrtfqIrN?mode=r_c', '_blank')}
+                >
+                  <MessageCircle className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">WhatsApp</p>
+                    <p className="text-xs text-gray-300">Grupo Amazon + Importação</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                  onClick={() => window.open('https://discord.gg/uMQ8Vbp94q', '_blank')}
+                >
+                  <MessageSquare className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Discord</p>
+                    <p className="text-xs text-gray-300">Comunidade oficial</p>
+                  </div>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Content Grid - 3 Colunas */}
         <div className="layout-grid-3 gap-6">
           
@@ -766,90 +851,7 @@ const UserDashboard = () => {
             </Card>
           </div>
 
-          {/* Links Sociais e Comunidade */}
-          <div className="mt-6">
-            <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white border-0 shadow-lg">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                    <Users className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-bold text-white">
-                      Conecte-se
-                    </CardTitle>
-                    <CardDescription className="text-gray-300 text-sm">
-                      Redes sociais e comunidade
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="pb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                    onClick={() => window.open('https://instagram.com/guilhermeavasques', '_blank')}
-                  >
-                    <Instagram className="h-4 w-4 mr-3" />
-                    <div className="text-left">
-                      <p className="font-medium">Instagram</p>
-                      <p className="text-xs text-gray-300">@guilhermeavasques</p>
-                    </div>
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                    onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
-                  >
-                    <Youtube className="h-4 w-4 mr-3" />
-                    <div className="text-left">
-                      <p className="font-medium">YouTube</p>
-                      <p className="text-xs text-gray-300">@guilhermeavasques</p>
-                    </div>
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                    onClick={() => window.open('https://portal.guilhermevasques.club', '_blank')}
-                  >
-                    <Star className="h-4 w-4 mr-3" />
-                    <div className="text-left">
-                      <p className="font-medium">Plataforma Curso</p>
-                      <p className="text-xs text-gray-300">Portal exclusivo</p>
-                    </div>
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                    onClick={() => window.open('https://chat.whatsapp.com/Lrq6yGUjQp0KJSVrtfqIrN?mode=r_c', '_blank')}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-3" />
-                    <div className="text-left">
-                      <p className="font-medium">WhatsApp</p>
-                      <p className="text-xs text-gray-300">Grupo Amazon + Importação</p>
-                    </div>
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                    onClick={() => window.open('https://discord.gg/uMQ8Vbp94q', '_blank')}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-3" />
-                    <div className="text-left">
-                      <p className="font-medium">Discord</p>
-                      <p className="text-xs text-gray-300">Comunidade oficial</p>
-                    </div>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+
         </div>
       </div>
 
