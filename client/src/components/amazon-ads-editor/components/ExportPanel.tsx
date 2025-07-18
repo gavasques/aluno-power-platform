@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Download, AlertTriangle, CheckCircle, FileText, Clock, Users } from 'lucide-react';
+import { ButtonLoader } from '@/components/common/LoadingSpinner';
 import { AmazonAdsRow, ValidationError, ChangeHistory, ValidationStats } from '../utils/types';
 import { AmazonAdsValidator } from '../utils/validation';
 import { AmazonAdsExporter } from '../utils/export';
@@ -218,7 +219,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           >
             {isExporting ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <ButtonLoader />
                 <span>Exportando...</span>
               </>
             ) : (

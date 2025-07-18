@@ -71,15 +71,14 @@ export function calculateChannelResults(
   };
 }
 
+import { formatCurrency as formatCurrencyUtil, formatPercentage as formatPercentageUtil } from '@/lib/utils/formatters';
+
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
+  return formatCurrencyUtil(value);
 }
 
 export function formatPercentage(value: number): string {
-  return `${value.toFixed(1)}%`;
+  return formatPercentageUtil(value);
 }
 
 export function getDefaultChannels() {

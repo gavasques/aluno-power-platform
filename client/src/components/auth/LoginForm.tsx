@@ -2,7 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, Lock } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
+import { ButtonLoader } from '@/components/common/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnifiedFormValidation, commonValidationRules } from '@/hooks/useUnifiedFormValidation';
 
@@ -89,7 +90,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <ButtonLoader className="mr-2" />
             Entrando...
           </>
         ) : (

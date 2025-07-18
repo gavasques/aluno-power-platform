@@ -5,6 +5,7 @@ import { usePrompts } from '@/contexts/PromptsContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { 
   Search, 
   BrainCircuit,
@@ -39,10 +40,11 @@ const PromptsIA = () => {
   if (loading) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Carregando prompts...</p>
-        </div>
+        <LoadingSpinner 
+          message="Carregando prompts..." 
+          size="xl" 
+          className="min-h-[400px]" 
+        />
       </div>
     );
   }

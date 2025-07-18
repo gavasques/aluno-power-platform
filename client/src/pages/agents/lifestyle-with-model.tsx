@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { ButtonLoader } from '@/components/common/LoadingSpinner';
 
 export default function LifestyleWithModel() {
   const [formData, setFormData] = useState({
@@ -414,7 +415,7 @@ export default function LifestyleWithModel() {
                   >
                     {isProcessing ? (
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <ButtonLoader size="sm" />
                         Processando... ({processingTime}s)
                       </div>
                     ) : (

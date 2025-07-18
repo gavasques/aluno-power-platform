@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { InlineLoader } from '@/components/common/LoadingSpinner';
 import { AmazonAdsRow, FileStats } from '../utils/types';
 import { validateFileStructure } from '../utils/validation';
 import { generateFileStats } from '../utils/export';
@@ -192,10 +193,10 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         
         {isLoading && (
           <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center rounded-lg">
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <span className="text-blue-600 font-medium">Carregando...</span>
-            </div>
+            <InlineLoader 
+              message="Carregando..." 
+              className="text-blue-600 font-medium"
+            />
           </div>
         )}
       </div>

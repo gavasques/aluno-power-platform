@@ -12,6 +12,7 @@ import { MaterialForm } from './MaterialForm';
 import { MaterialViewer } from '../../user/materials/MaterialViewer';
 import type { MaterialFormData } from './MaterialFormTypes';
 import type { Material as DbMaterial, MaterialType, InsertMaterial } from '@shared/schema';
+import { useMaterialForm } from '@/hooks/useMaterialForm';
 
 const MaterialsManagerRefactored = () => {
   const { user } = useAuth();
@@ -31,23 +32,62 @@ const MaterialsManagerRefactored = () => {
   const [viewingMaterial, setViewingMaterial] = useState<DbMaterial | null>(null);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   
-  // Form states
-  const [formData, setFormData] = useState<MaterialFormData>({
-    title: "",
-    description: "",
-    typeId: "",
-    accessLevel: "public",
-    fileUrl: "",
-    fileName: "",
-    fileSize: null,
-    fileType: "",
-    externalUrl: "",
-    embedCode: "",
-    embedUrl: "",
-    videoUrl: "",
-    videoDuration: null,
-    videoThumbnail: "",
-    tags: [],
+  // Form hook
+  const {
+    formData,
+    updateField,
+    addTag,
+    removeTag,
+    handleSubmit: handleFormSubmit,
+    resetForm,
+    isSubmitting,
+    errors,
+    isValid
+  } = useMaterialForm({
+    onSubmit: async (data) => {
+      if (!data.title || !data.typeId) {
+        return { success: false, error: "Título e tipo são obrigatórios." };
+      }
+
+      const materialData: InsertMaterial = {
+        title: data.title,
+        description: data.description,
+        typeId: parseInt(data.typeId),
+        accessLevel: data.accessLevel,
+        fileUrl: data.fileUrl || null,
+        fileName: data.fileName || null,
+        fileSize: data.fileSize,
+        fileType: data.fileType || null,
+        externalUrl: data.externalUrl || null,
+        embedCode: data.embedCode || null,
+        embedUrl: data.embedUrl || null,
+        videoUrl: data.videoUrl || null,
+        videoDuration: data.videoDuration,
+        videoThumbnail: data.videoThumbnail || null,
+        tags: data.tags.length > 0 ? data.tags : null,
+        uploadedBy: user?.id || 1,
+      };
+
+      if (editingMaterial) {
+        await updateMaterialMutation.mutateAsync({ id: editingMaterial.id, material: materialData });
+      } else {
+        await addMaterialMutation.mutateAsync(materialData);
+      }
+
+      return { success: true };
+    },
+    onSuccess: () => {
+      setIsDialogOpen(false);
+      resetForm();
+      setEditingMaterial(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: error,
+        variant: "destructive",
+      });
+    }
   });
 
   // Fetch materials
@@ -70,26 +110,7 @@ const MaterialsManagerRefactored = () => {
     return matchesSearch && matchesType && matchesAccess;
   });
 
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      description: "",
-      typeId: "",
-      accessLevel: "public",
-      fileUrl: "",
-      fileName: "",
-      fileSize: null,
-      fileType: "",
-      externalUrl: "",
-      embedCode: "",
-      embedUrl: "",
-      videoUrl: "",
-      videoDuration: null,
-      videoThumbnail: "",
-      tags: [],
-    });
-    setEditingMaterial(null);
-  };
+
 
   const addMaterialMutation = useMutation({
     mutationFn: (material: InsertMaterial) =>
@@ -160,60 +181,24 @@ const MaterialsManagerRefactored = () => {
     },
   });
 
-  const handleSubmit = async (data: MaterialFormData) => {
-    if (!data.title || !data.typeId) {
-      toast({
-        title: "Erro",
-        description: "Título e tipo são obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    const materialData: InsertMaterial = {
-      title: data.title,
-      description: data.description,
-      typeId: parseInt(data.typeId),
-      accessLevel: data.accessLevel,
-      fileUrl: data.fileUrl || null,
-      fileName: data.fileName || null,
-      fileSize: data.fileSize,
-      fileType: data.fileType || null,
-      externalUrl: data.externalUrl || null,
-      embedCode: data.embedCode || null,
-      embedUrl: data.embedUrl || null,
-      videoUrl: data.videoUrl || null,
-      videoDuration: data.videoDuration,
-      videoThumbnail: data.videoThumbnail || null,
-      tags: data.tags.length > 0 ? data.tags : null,
-      uploadedBy: user?.id || 1,
-    };
-
-    if (editingMaterial) {
-      updateMaterialMutation.mutate({ id: editingMaterial.id, material: materialData });
-    } else {
-      addMaterialMutation.mutate(materialData);
-    }
-  };
 
   const handleEdit = (material: DbMaterial) => {
-    setFormData({
-      title: material.title || "",
-      description: material.description || "",
-      typeId: material.typeId.toString(),
-      accessLevel: material.accessLevel as "public" | "restricted",
-      fileUrl: material.fileUrl || "",
-      fileName: material.fileName || "",
-      fileSize: material.fileSize,
-      fileType: material.fileType || "",
-      externalUrl: material.externalUrl || "",
-      embedCode: material.embedCode || "",
-      embedUrl: material.embedUrl || "",
-      videoUrl: material.videoUrl || "",
-      videoDuration: material.videoDuration,
-      videoThumbnail: material.videoThumbnail || "",
-      tags: material.tags || [],
-    });
+    updateField('title', material.title || "");
+    updateField('description', material.description || "");
+    updateField('typeId', material.typeId.toString());
+    updateField('accessLevel', material.accessLevel as "public" | "restricted");
+    updateField('fileUrl', material.fileUrl || "");
+    updateField('fileName', material.fileName || "");
+    updateField('fileSize', material.fileSize);
+    updateField('fileType', material.fileType || "");
+    updateField('externalUrl', material.externalUrl || "");
+    updateField('embedCode', material.embedCode || "");
+    updateField('embedUrl', material.embedUrl || "");
+    updateField('videoUrl', material.videoUrl || "");
+    updateField('videoDuration', material.videoDuration);
+    updateField('videoThumbnail', material.videoThumbnail || "");
+    updateField('tags', material.tags || []);
     setEditingMaterial(material);
     setIsDialogOpen(true);
   };

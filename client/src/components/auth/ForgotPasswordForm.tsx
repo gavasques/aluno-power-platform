@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, CheckCircle } from 'lucide-react';
+import { Mail, CheckCircle } from 'lucide-react';
 import { AuthService } from '@/services/authService';
 import { useUnifiedFormValidation, commonValidationRules } from '@/hooks/useUnifiedFormValidation';
+import { ButtonLoader } from '@/components/common/LoadingSpinner';
 
 interface ForgotPasswordFormProps {
   onBack?: () => void;
@@ -91,7 +92,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <ButtonLoader />
               Enviando...
             </>
           ) : (

@@ -217,27 +217,20 @@ export function calculateAllChannels(
   return results;
 }
 
+import { formatCurrency as formatCurrencyUtil, formatPercentage as formatPercentageUtil } from '@/lib/utils/formatters';
+
 /**
  * Format currency for display
  */
 export function formatCurrency(value: number | string | null | undefined): string {
-  const numValue = typeof value === 'number' ? value : parseFloat(String(value || 0));
-  if (isNaN(numValue)) return 'R$ 0,00';
-  
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(numValue);
+  return formatCurrencyUtil(value);
 }
 
 /**
  * Format percentage for display
  */
 export function formatPercentage(value: number | string | null | undefined): string {
-  const numValue = typeof value === 'number' ? value : parseFloat(String(value || 0));
-  if (isNaN(numValue)) return '0.0%';
-  
-  return `${numValue.toFixed(1)}%`;
+  return formatPercentageUtil(value);
 }
 
 /**

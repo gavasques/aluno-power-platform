@@ -1,4 +1,5 @@
 import { User } from '@shared/schema';
+import { apiRequest } from '@/lib/queryClient';
 
 export interface AuthResponse {
   success: boolean;
@@ -37,45 +38,9 @@ export class AuthService {
   private static userCache: { user: User | null; timestamp: number } | null = null;
   private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-  private static async makeRequest<T = any>(
-    url: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const token = localStorage.getItem('auth_token');
-    
-    const defaultHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      defaultHeaders['Authorization'] = `Bearer ${token}`;
-    }
-
-    const defaultOptions: RequestInit = {
-      headers: defaultHeaders,
-      credentials: 'include',
-    };
-
-    const response = await fetch(url, { 
-      ...defaultOptions, 
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...(options.headers || {})
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP ${response.status}`);
-    }
-
-    return response.json();
-  }
-
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const data = await AuthService.makeRequest(AuthService.ENDPOINTS.LOGIN, {
+      const data = await apiRequest<{ user: User; token: string }>(AuthService.ENDPOINTS.LOGIN, {
         method: 'POST',
         body: JSON.stringify(credentials),
       });
@@ -95,7 +60,7 @@ export class AuthService {
 
   static async register(userData: RegisterData): Promise<AuthResponse> {
     try {
-      const data = await AuthService.makeRequest(AuthService.ENDPOINTS.REGISTER, {
+      const data = await apiRequest<{ user: User; token: string }>(AuthService.ENDPOINTS.REGISTER, {
         method: 'POST',
         body: JSON.stringify(userData),
       });
@@ -114,14 +79,14 @@ export class AuthService {
   }
 
   static async logout(): Promise<void> {
-    await AuthService.makeRequest(AuthService.ENDPOINTS.LOGOUT, {
+    await apiRequest(AuthService.ENDPOINTS.LOGOUT, {
       method: 'POST',
     });
   }
 
   static async getCurrentUser(): Promise<User | null> {
     try {
-      const data = await AuthService.makeRequest(AuthService.ENDPOINTS.ME);
+      const data = await apiRequest<{ user: User }>(AuthService.ENDPOINTS.ME);
       return data.user;
     } catch (error) {
       return null;
@@ -130,7 +95,7 @@ export class AuthService {
 
   static async forgotPassword(emailData: EmailRequest): Promise<AuthResponse> {
     try {
-      await AuthService.makeRequest(AuthService.ENDPOINTS.FORGOT_PASSWORD, {
+      await apiRequest(AuthService.ENDPOINTS.FORGOT_PASSWORD, {
         method: 'POST',
         body: JSON.stringify(emailData),
       });
@@ -146,7 +111,7 @@ export class AuthService {
 
   static async sendMagicLink(emailData: EmailRequest): Promise<AuthResponse> {
     try {
-      await AuthService.makeRequest(AuthService.ENDPOINTS.MAGIC_LINK, {
+      await apiRequest(AuthService.ENDPOINTS.MAGIC_LINK, {
         method: 'POST',
         body: JSON.stringify(emailData),
       });

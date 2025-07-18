@@ -15,6 +15,7 @@ import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import Layout from '@/components/layout/Layout';
 import { Link } from 'wouter';
 import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { LoadingSpinner, ButtonLoader } from '@/components/common/LoadingSpinner';
 
 interface ProductData {
   name: string;
@@ -482,7 +483,7 @@ export default function AdvancedInfographicGenerator() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <ButtonLoader size="sm" />
                   Analisando produto...
                 </>
               ) : (
@@ -584,8 +585,12 @@ export default function AdvancedInfographicGenerator() {
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center py-12">
-            <Loader2 className="mx-auto h-16 w-16 animate-spin text-blue-600 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Criando seu infográfico...</h3>
+            <LoadingSpinner 
+              size="xl" 
+              variant="default" 
+              message="Criando seu infográfico..." 
+              className="mb-4"
+            />
             <p className="text-gray-600 mb-4">
               Este processo pode levar até 2 minutos para garantir a melhor qualidade
             </p>
@@ -640,7 +645,7 @@ export default function AdvancedInfographicGenerator() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <LoadingSpinner size="sm" variant="inline" showMessage={false} />
               Processando Conceito
             </DialogTitle>
             <DialogDescription>
@@ -648,11 +653,13 @@ export default function AdvancedInfographicGenerator() {
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center py-6">
-            <div className="relative w-16 h-16 mb-4">
-              <Loader2 className="w-16 h-16 animate-spin text-blue-600" />
-            </div>
+            <LoadingSpinner 
+              size="xl" 
+              variant="default" 
+              message="Analisando conceito selecionado..." 
+              className="mb-4"
+            />
             <div className="text-center space-y-2">
-              <p className="font-medium">Analisando conceito selecionado...</p>
               <p className="text-sm text-gray-600">Este processo pode levar alguns segundos</p>
             </div>
           </div>

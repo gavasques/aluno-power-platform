@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/queryClient";
+import { UnifiedApiService } from "@/lib/services/base/ApiService";
 import type { 
   ProcessedImage, 
   UploadedImage, 
@@ -7,16 +7,16 @@ import type {
   BackgroundRemovalOptions 
 } from "@/types/ai-image";
 
-export class AIImageService {
+export class AIImageService extends UnifiedApiService<any> {
+  constructor() {
+    super('/api');
+  }
   // Upload de imagem temporária
-  static async uploadImage(file: File): Promise<UploadedImage> {
+  async uploadImage(file: File): Promise<UploadedImage> {
     const formData = new FormData();
     formData.append('image', file);
 
-    const response: any = await apiRequest('/api/temp-image/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    const response: any = await this.post('/temp-image/upload', formData);
 
     if (!response.success) {
       throw new Error(response.error || 'Erro no upload da imagem');
@@ -36,14 +36,11 @@ export class AIImageService {
   }
 
   // Background removal
-  static async removeBackground(
+  async removeBackground(
     imageId: string, 
     options: BackgroundRemovalOptions = {}
   ): Promise<ProcessedImage> {
-    const response: any = await apiRequest('/api/background-removal/process', {
-      method: 'POST',
-      body: JSON.stringify({ imageId, ...options }),
-    });
+    const response: any = await this.post('/background-removal/process', { imageId, ...options });
 
     if (!response.success) {
       throw new Error(response.error || 'Erro no processamento da imagem');
@@ -59,14 +56,11 @@ export class AIImageService {
   }
 
   // Image upscale
-  static async upscaleImage(
+  async upscaleImage(
     imageId: string, 
     options: UpscaleOptions
   ): Promise<ProcessedImage> {
-    const response: any = await apiRequest('/api/image-upscale/process', {
-      method: 'POST',
-      body: JSON.stringify({ imageId, scale: options.scale }),
-    });
+    const response: any = await this.post('/image-upscale/process', { imageId, scale: options.scale });
 
     if (!response.success) {
       throw new Error(response.error || 'Erro no processamento da imagem');
@@ -85,7 +79,7 @@ export class AIImageService {
   }
 
   // Download de imagem processada
-  static async downloadProcessedImage(url: string, fileName: string): Promise<void> {
+  async downloadProcessedImage(url: string, fileName: string): Promise<void> {
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error('Falha no download');
@@ -108,7 +102,7 @@ export class AIImageService {
   }
 
   // Validação de arquivo
-  static validateImageFile(file: File, config: { maxFileSize: number; allowedFormats: string[] }): void {
+  validateImageFile(file: File, config: { maxFileSize: number; allowedFormats: string[] }): void {
     if (!config.allowedFormats.includes(file.type)) {
       throw new Error(`Formato não suportado. Use: ${config.allowedFormats.join(', ')}`);
     }
@@ -118,4 +112,7 @@ export class AIImageService {
       throw new Error(`Arquivo muito grande. Máximo: ${maxSizeMB}MB`);
     }
   }
+}
+
+export const aiImageService = new AIImageService();
 }

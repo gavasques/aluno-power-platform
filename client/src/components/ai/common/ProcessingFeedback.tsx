@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
+import { InlineLoader } from "@/components/common/LoadingSpinner";
 
 interface ProcessingFeedbackProps {
   isProcessing?: boolean;
@@ -43,7 +44,7 @@ export const ProcessingFeedback = ({
       <Card className={`border-${processingColor}-200 bg-${processingColor}-50 dark:border-${processingColor}-800 dark:bg-${processingColor}-950 mb-6`}>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3">
-            <div className={`h-5 w-5 animate-spin rounded-full border-4 border-${processingColor}-600 border-t-transparent`} />
+            <InlineLoader message="" showMessage={false} size="sm" />
             <div>
               <p className={`font-medium text-${processingColor}-900 dark:text-${processingColor}-100`}>
                 Carregando imagem...
@@ -63,7 +64,7 @@ export const ProcessingFeedback = ({
       <Card className={`border-${processingColor}-200 bg-${processingColor}-50 dark:border-${processingColor}-800 dark:bg-${processingColor}-950 mb-6`}>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3">
-            <div className={`h-5 w-5 animate-spin rounded-full border-4 border-${processingColor}-600 border-t-transparent`} />
+            <InlineLoader message="" showMessage={false} size="sm" />
             <div>
               <p className={`font-medium text-${processingColor}-900 dark:text-${processingColor}-100`}>
                 {step}

@@ -130,16 +130,15 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
   }
 ];
 
+import { formatCurrency, formatCredits as formatCreditsUtil } from '../client/src/lib/utils/formatters';
+
 // Utility functions
 export function formatPrice(price: number, currency: string = 'BRL'): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: currency,
-  }).format(price);
+  return formatCurrency(price, { currency });
 }
 
 export function formatCredits(credits: number): string {
-  return new Intl.NumberFormat('pt-BR').format(credits);
+  return formatCreditsUtil(credits);
 }
 
 export function getPlanById(planId: string): SubscriptionPlan | undefined {

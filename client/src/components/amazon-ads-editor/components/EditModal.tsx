@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { X, Save, AlertTriangle, Info } from 'lucide-react';
+import { Save, AlertTriangle, Info } from 'lucide-react';
 import { AmazonAdsRow, STATES, MATCH_TYPES, BIDDING_STRATEGIES } from '../utils/types';
 import { formatCurrency } from '../utils/validation';
+import { BaseModal } from '@/components/ui/BaseModal';
 
 interface EditModalProps {
   row: AmazonAdsRow;
@@ -118,32 +119,43 @@ export const EditModal: React.FC<EditModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
+  const title = `Editar: ${row.Entidade}`;
+  const subtitle = `${row['Nome da campanha']}${row['Texto de palavras-chave'] ? ` - ${row['Texto de palavras-chave']}` : ''}`;
+  
+  const footer = (
+    <>
+      <button
+        onClick={onClose}
+        className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+      >
+        Cancelar
+      </button>
+      <button
+        onClick={handleSave}
+        disabled={Object.keys(errors).length > 0}
+        className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+          Object.keys(errors).length === 0
+            ? 'bg-blue-600 text-white hover:bg-blue-700'
+            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+        }`}
+      >
+        <Save className="h-4 w-4" />
+        <span>Salvar Alterações</span>
+      </button>
+    </>
+  );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Editar: {row.Entidade}
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {row['Nome da campanha']}
-              {row['Texto de palavras-chave'] && ` - ${row['Texto de palavras-chave']}`}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
-
-        {/* Form */}
-        <div className="p-6 space-y-6">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      size="lg"
+      footer={footer}
+    >
+      <div className="space-y-6">
+        {/* Subtitle */}
+        <p className="text-sm text-gray-600 -mt-2">{subtitle}</p>
           {/* Estado */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -294,67 +306,44 @@ export const EditModal: React.FC<EditModalProps> = ({
             />
           </div>
 
-          {/* Informações de performance */}
-          {(row.Impressões || row.Cliques || row.Gastos) && (
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <div className="flex items-center space-x-2 mb-2">
-                <Info className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">Performance atual</span>
+        {/* Informações de performance */}
+        {(row.Impressões || row.Cliques || row.Gastos) && (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="flex items-center space-x-2 mb-2">
+              <Info className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">Performance atual</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div>
+                <span className="text-gray-600">Impressões:</span>
+                <span className="font-medium ml-1">{row.Impressões?.toLocaleString() || 0}</span>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-600">Impressões:</span>
-                  <span className="font-medium ml-1">{row.Impressões?.toLocaleString() || 0}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Cliques:</span>
-                  <span className="font-medium ml-1">{row.Cliques?.toLocaleString() || 0}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Gastos:</span>
-                  <span className="font-medium ml-1">{formatCurrency(row.Gastos || 0)}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">ACoS:</span>
-                  <span className="font-medium ml-1">{row.ACOS?.toFixed(1) || 0}%</span>
-                </div>
+              <div>
+                <span className="text-gray-600">Cliques:</span>
+                <span className="font-medium ml-1">{row.Cliques?.toLocaleString() || 0}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Gastos:</span>
+                <span className="font-medium ml-1">{formatCurrency(row.Gastos || 0)}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">ACoS:</span>
+                <span className="font-medium ml-1">{row.ACOS?.toFixed(1) || 0}%</span>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t bg-gray-50">
-          <div className="text-sm text-gray-600">
-            {Object.keys(errors).length > 0 && (
-              <span className="text-red-600">
-                <AlertTriangle className="h-4 w-4 inline mr-1" />
-                Corrija os erros antes de salvar
-              </span>
-            )}
           </div>
-          <div className="flex space-x-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={Object.keys(errors).length > 0}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                Object.keys(errors).length === 0
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              <Save className="h-4 w-4" />
-              <span>Salvar Alterações</span>
-            </button>
+        )}
+        
+        {/* Error Message */}
+        {Object.keys(errors).length > 0 && (
+          <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center text-red-600">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              <span className="text-sm">Corrija os erros antes de salvar</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
-    </div>
+    </BaseModal>
   );
 };
