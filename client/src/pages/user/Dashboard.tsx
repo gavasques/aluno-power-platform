@@ -347,8 +347,8 @@ const UserDashboard = () => {
   const planCredits = subscription?.planCredits || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/20">
-      <div className="w-full px-2 py-3 space-y-3">
+    <div className="bg-gradient-to-br from-slate-50 via-white to-blue-50/20">
+      <div className="w-full px-2 py-3 pb-2 space-y-3">
         
         {/* Header Compacto */}
         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-lg p-3 text-white shadow-md">
@@ -722,7 +722,7 @@ const UserDashboard = () => {
         </div>
 
         {/* Seção de Estatísticas Rápidas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-0">
           <Card className="bg-white rounded-lg shadow-sm border-0">
             <CardContent className="p-3">
               <div className="flex items-center gap-2">

@@ -115,4 +115,3 @@ export class AIImageService extends UnifiedApiService<any> {
 }
 
 export const aiImageService = new AIImageService();
-}
