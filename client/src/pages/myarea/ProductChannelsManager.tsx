@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ChannelManager } from '@/components/channels/ChannelManager';
 import { useQuery } from '@tanstack/react-query';
 
-export const ProductChannelsManager: React.FC = () => {
+const ProductChannelsManager: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   
@@ -79,7 +79,7 @@ export const ProductChannelsManager: React.FC = () => {
               Canais de Venda
             </h1>
             <p className="text-gray-600">
-              {productData.name} • ID: {productData.id}
+              {productData?.name || 'Produto'} • ID: {productData?.id || productId}
             </p>
           </div>
         </div>
@@ -88,10 +88,12 @@ export const ProductChannelsManager: React.FC = () => {
       {/* Channel Manager */}
       <ChannelManager
         productId={productId}
-        productCost={parseFloat(productData.costItem || '0')}
-        taxPercent={parseFloat(productData.taxPercent || '0')}
+        productCost={parseFloat(String(productData?.costItem || '0'))}
+        taxPercent={parseFloat(String(productData?.taxPercent || '0'))}
         onClose={handleGoBack}
       />
     </div>
   );
 };
+
+export default ProductChannelsManager;
