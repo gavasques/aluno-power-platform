@@ -483,7 +483,7 @@ const UserDashboard = () => {
         <div className="layout-grid-3 gap-6">
           
           {/* Vídeos do YouTube - Coluna Principal */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 mb-8">
             <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white border-0 shadow-lg">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
@@ -601,7 +601,7 @@ const UserDashboard = () => {
           </div>
 
           {/* Sidebar com Notícias e Novidades - 2 Colunas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             
             {/* Notícias */}
             <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white border-0 shadow-lg">
