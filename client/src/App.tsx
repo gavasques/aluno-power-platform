@@ -93,6 +93,10 @@ const ProductChannelsEditPage = lazy(() => import("./pages/myarea/ProductChannel
 const ProductPreview = lazy(() => import("./pages/myarea/ProductPreview"));
 const ProductImportExport = lazy(() => import("./pages/myarea/ProductImportExport"));
 
+// NEW PARALLEL PRODUCTS & CHANNELS SYSTEM
+const ProductsNew = lazy(() => import("./pages/myarea/ProductsNew"));
+const ProductChannelsManager = lazy(() => import("./pages/myarea/ProductChannelsManager"));
+
 
 // Keep Login as eager import for immediate authentication
 import Login from "./pages/Login";
@@ -637,6 +641,27 @@ function App() {
                           </Route>
 
 
+
+                          {/* NEW PARALLEL PRODUCTS & CHANNELS SYSTEM */}
+                          <Route path="/produtos-novo">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductsNew />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          <Route path="/produtos-novo/:id/canais">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ProductChannelsManager />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
 
                           {/* Minha Área Index - Protected */}
                           <Route path="/minha-area">

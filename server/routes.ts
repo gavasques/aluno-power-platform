@@ -7064,6 +7064,15 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Register Picsart integration routes
   app.use('/api/picsart', picsartRoutes);
   console.log('✅ [PICSART] Routes registered successfully');
+  
+  // PHASE 3: Product Channels Management - New Parallel System
+  try {
+    const { productChannelsRouter } = await import('./routes/productChannels');
+    app.use('/api/products', productChannelsRouter);
+    console.log('✅ [PRODUCT_CHANNELS] Routes registered successfully');
+  } catch (error) {
+    console.error('❌ Error registering product channels routes:', error);
+  }
 
   return httpServer;
 }
