@@ -48,7 +48,7 @@ import {
   AlertDialogTitle, 
   AlertDialogTrigger 
 } from '@/components/ui/alert-dialog';
-import { formatCurrency } from '@/shared/utils/formatters';
+import { ProductSupplierUtils } from '@/shared/utils/productSupplierUtils';
 import type { ProductSupplier } from '@/shared/types/productSupplier';
 
 interface ProductSupplierListProps {
@@ -221,7 +221,7 @@ export const ProductSupplierList: React.FC<ProductSupplierListProps> = ({
                     <div>
                       <p className="text-xs text-gray-500">Custo</p>
                       <p className="text-sm font-medium text-green-600">
-                        {formatCurrency(supplier.supplierCost)}
+                        {ProductSupplierUtils.formatCurrency(supplier.supplierCost)}
                       </p>
                     </div>
                   </div>

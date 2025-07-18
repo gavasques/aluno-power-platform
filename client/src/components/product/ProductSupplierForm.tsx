@@ -27,7 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useProductSuppliers, useSupplierSelection } from '@/hooks/useProductSuppliers';
-import { formatCurrency } from '@/shared/utils/formatters';
+import { ProductSupplierUtils } from '@/shared/utils/productSupplierUtils';
 import type { ProductSupplier } from '@/shared/types/productSupplier';
 
 // Form schema with validation
