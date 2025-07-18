@@ -543,7 +543,7 @@ const UserDashboard = () => {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="font-bold text-xl mb-2">Melhor Software - Helium 10</h3>
-                  <p className="text-orange-100 text-sm leading-relaxed">Para encontrar produtos lucrativos</p>
+                  <p className="text-orange-100 text-sm leading-relaxed">Para encontrar produtos lucrativos. APROVEITE! Nossos descontos EXCLUSIVOS! </p>
                 </div>
                 <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
                   <Zap className="h-6 w-6 text-white" />
