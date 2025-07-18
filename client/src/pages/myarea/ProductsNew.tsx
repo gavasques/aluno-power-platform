@@ -86,7 +86,7 @@ const ProductsNew: React.FC = () => {
   };
 
   const handleEditProduct = (productId: number) => {
-    setLocation(`/minha-area/produtos/${productId}/editar`);
+    setLocation(`/produtos-pro/${productId}/editar`);
   };
 
   const getActiveChannelsCount = (channels: any[]) => {
