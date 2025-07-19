@@ -3,7 +3,7 @@ import { db } from '../db';
 import { supplierProducts, products } from '../../shared/schema';
 import { eq, and, like, or, isNull, isNotNull } from 'drizzle-orm';
 import { z } from 'zod';
-import * as csv from 'csv-parser';
+import * as XLSX from 'xlsx';
 import { Readable } from 'stream';
 
 interface AuthenticatedRequest extends Request {
@@ -328,7 +328,7 @@ export class SupplierProductsController {
     }
   }
 
-  // Importar produtos via CSV
+  // Importar produtos via Excel
   static async importProducts(req: AuthenticatedRequest, res: Response) {
     try {
       const { supplierId } = req.params;
@@ -341,54 +341,40 @@ export class SupplierProductsController {
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message: 'Arquivo CSV é obrigatório',
+          message: 'Arquivo Excel é obrigatório',
         });
       }
 
-      const csvData: any[] = [];
-      const errors: string[] = [];
-      let lineNumber = 1;
+      // Ler arquivo Excel
+      const workbook = XLSX.read(req.file.buffer);
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet);
 
-      // Parse CSV
-      const stream = Readable.from(req.file.buffer);
-      await new Promise((resolve, reject) => {
-        stream
-          .pipe(csv())
-          .on('data', (row) => {
-            lineNumber++;
-            try {
-              const validatedRow = csvRowSchema.parse(row);
-              csvData.push(validatedRow);
-            } catch (error) {
-              if (error instanceof z.ZodError) {
-                errors.push(`Linha ${lineNumber}: ${error.errors.map(e => e.message).join(', ')}`);
-              }
-            }
-          })
-          .on('end', resolve)
-          .on('error', reject);
-      });
-
-      if (errors.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'Erros na validação do CSV',
-          errors,
+      if (!data || data.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Arquivo Excel vazio ou formato inválido' 
         });
       }
 
-      // Processar dados e inserir no banco
       const results = {
         created: 0,
         updated: 0,
-        skipped: 0,
         linked: 0,
+        errors: [] as string[]
       };
 
-      for (const row of csvData) {
+      for (const row of data as any[]) {
         try {
-          // Verificar se já existe
-          const existing = await db
+          // Validar campos obrigatórios
+          if (!row.supplierSku || !row.productName) {
+            results.errors.push(`Linha ignorada: SKU ou Nome do produto em branco`);
+            continue;
+          }
+
+          // Verificar se já existe um produto com este SKU para este fornecedor
+          const existingProduct = await db
             .select()
             .from(supplierProducts)
             .where(
@@ -400,41 +386,73 @@ export class SupplierProductsController {
             )
             .limit(1);
 
-          // Tentar encontrar produto vinculado
-          const linkedProduct = await this.findLinkedProduct(row);
+          const productData = {
+            supplierId: parseInt(supplierId),
+            userId,
+            supplierSku: row.supplierSku,
+            productName: row.productName,
+            description: row.description || null,
+            cost: row.cost ? parseFloat(row.cost.toString()) : null,
+            leadTime: row.leadTime ? parseInt(row.leadTime.toString()) : null,
+            minimumOrderQuantity: row.minimumOrderQuantity ? parseInt(row.minimumOrderQuantity.toString()) : null,
+            category: row.category || null,
+            brand: row.brand || null,
+            notes: row.notes || null,
+            linkStatus: 'pending' as const,
+            active: true
+          };
 
-          if (existing.length > 0) {
-            // Atualizar existente
+          if (existingProduct.length > 0) {
+            // Atualizar produto existente
             await db
               .update(supplierProducts)
               .set({
-                ...row,
-                productId: linkedProduct?.id || null,
-                linkStatus: linkedProduct ? 'linked' : 'pending',
-                updatedAt: new Date(),
+                ...productData,
+                updatedAt: new Date()
               })
-              .where(eq(supplierProducts.id, existing[0].id));
-            
+              .where(eq(supplierProducts.id, existingProduct[0].id));
             results.updated++;
-            if (linkedProduct) results.linked++;
           } else {
-            // Criar novo
-            await db
-              .insert(supplierProducts)
-              .values({
-                supplierId: parseInt(supplierId),
-                userId,
-                productId: linkedProduct?.id || null,
-                linkStatus: linkedProduct ? 'linked' : 'pending',
-                ...row,
-              });
-            
+            // Criar novo produto
+            await db.insert(supplierProducts).values(productData);
             results.created++;
-            if (linkedProduct) results.linked++;
           }
-        } catch (error) {
-          console.error(`Erro ao processar linha ${row.supplierSku}:`, error);
-          results.skipped++;
+
+          // Tentar vincular com produto existente no sistema
+          const systemProduct = await db
+            .select()
+            .from(products)
+            .where(
+              and(
+                eq(products.userId, userId),
+                or(
+                  eq(products.sku, row.supplierSku),
+                  like(products.name, `%${row.productName}%`)
+                )
+              )
+            )
+            .limit(1);
+
+          if (systemProduct.length > 0) {
+            // Vincular produto
+            await db
+              .update(supplierProducts)
+              .set({
+                productId: systemProduct[0].id,
+                linkStatus: 'linked'
+              })
+              .where(
+                and(
+                  eq(supplierProducts.supplierId, parseInt(supplierId)),
+                  eq(supplierProducts.supplierSku, row.supplierSku)
+                )
+              );
+            results.linked++;
+          }
+
+        } catch (rowError) {
+          console.error('Error processing row:', rowError);
+          results.errors.push(`Erro na linha com SKU ${row.supplierSku}: ${(rowError as Error).message}`);
         }
       }
 
