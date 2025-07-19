@@ -1,4 +1,4 @@
-import { Link } from 'wouter';
+// Footer component with legal links
 
 interface FooterProps {
   className?: string;
@@ -25,16 +25,18 @@ export function Footer({ className = '', variant = 'internal' }: FooterProps) {
               </p>
             </div>
             <div className="flex items-center space-x-6">
-              <Link href="/termos-de-uso">
-                <a className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                  Termos de Uso
-                </a>
-              </Link>
-              <Link href="/politica-de-privacidade">
-                <a className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                  Política de Privacidade
-                </a>
-              </Link>
+              <a 
+                href="/termos-de-uso" 
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+              >
+                Termos de Uso
+              </a>
+              <a 
+                href="/politica-de-privacidade" 
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+              >
+                Política de Privacidade
+              </a>
             </div>
           </div>
         )}
@@ -45,17 +47,19 @@ export function Footer({ className = '', variant = 'internal' }: FooterProps) {
               © 2025 Core Guilherme Vasques - Liberdade Virtual LTDA
             </p>
             <div className="flex justify-center space-x-4">
-              <Link href="/termos-de-uso">
-                <a className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm underline">
-                  Termos de Uso
-                </a>
-              </Link>
+              <a 
+                href="/termos-de-uso" 
+                className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm underline cursor-pointer"
+              >
+                Termos de Uso
+              </a>
               <span className="text-gray-400">•</span>
-              <Link href="/politica-de-privacidade">
-                <a className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm underline">
-                  Política de Privacidade
-                </a>
-              </Link>
+              <a 
+                href="/politica-de-privacidade" 
+                className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm underline cursor-pointer"
+              >
+                Política de Privacidade
+              </a>
             </div>
           </div>
         )}

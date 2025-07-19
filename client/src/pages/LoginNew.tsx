@@ -628,17 +628,23 @@ export default function LoginNew() {
                                 />
                                 <Label htmlFor="acceptedTerms" className="text-xs text-gray-600 leading-relaxed">
                                   Ao cadastrar-se na ferramenta, você aceita os{' '}
-                                  <Link href="/termos-de-uso">
-                                    <a className="text-blue-600 hover:text-blue-700 underline" target="_blank">
-                                      Termos de Uso
-                                    </a>
-                                  </Link>
+                                  <a 
+                                    href="/termos-de-uso" 
+                                    className="text-blue-600 hover:text-blue-700 underline cursor-pointer"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    Termos de Uso
+                                  </a>
                                   {' '}e a{' '}
-                                  <Link href="/politica-de-privacidade">
-                                    <a className="text-blue-600 hover:text-blue-700 underline" target="_blank">
-                                      Política de Privacidade
-                                    </a>
-                                  </Link>
+                                  <a 
+                                    href="/politica-de-privacidade" 
+                                    className="text-blue-600 hover:text-blue-700 underline cursor-pointer"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    Política de Privacidade
+                                  </a>
                                   <span className="text-red-500"> *</span>
                                 </Label>
                               </div>
