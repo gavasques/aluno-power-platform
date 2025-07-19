@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { db } from '../db';
 import { users, userSessions, userGroups, userGroupMembers } from '@shared/schema';
 import { eq, and, gt, sql } from 'drizzle-orm';
@@ -104,6 +105,23 @@ export class AuthService {
   // Generate reset token
   static generateResetToken(): string {
     return crypto.randomBytes(32).toString('hex');
+  }
+
+  // Generate JWT token
+  static generateToken(userId: number): string {
+    const secret = process.env.JWT_SECRET || 'your-secret-key';
+    return jwt.sign({ userId }, secret, { expiresIn: '7d' });
+  }
+
+  // Verify JWT token
+  static verifyToken(token: string): { userId: number } | null {
+    try {
+      const secret = process.env.JWT_SECRET || 'your-secret-key';
+      const decoded = jwt.verify(token, secret) as { userId: number };
+      return decoded;
+    } catch (error) {
+      return null;
+    }
   }
 
   // Create user

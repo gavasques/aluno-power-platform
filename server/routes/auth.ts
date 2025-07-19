@@ -396,7 +396,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate token
-    const token = authService.generateToken(user.id);
+    const token = AuthService.generateToken(user.id);
 
     // Update last login
     await db
@@ -453,7 +453,7 @@ router.get('/me', async (req: any, res) => {
       });
     }
 
-    const decoded = authService.verifyToken(token);
+    const decoded = AuthService.verifyToken(token);
     if (!decoded) {
       return res.status(401).json({
         success: false,
