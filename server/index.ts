@@ -219,7 +219,7 @@ app.use((req, res, next) => {
   const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
   server.listen({
     port,
-    host: "localhost",
+    host: "0.0.0.0",
   }, async () => {
     log(`serving on port ${port}`);
     

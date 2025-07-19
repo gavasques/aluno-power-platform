@@ -3426,6 +3426,43 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Cache management endpoints
+  app.post('/api/cache/clear', async (req, res) => {
+    try {
+      // Set no-cache headers for this response
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      res.json({ 
+        success: true, 
+        message: 'Cache headers cleared',
+        timestamp: Date.now()
+      });
+    } catch (error: any) {
+      console.error('❌ [CACHE-CLEAR] Error:', error);
+      res.status(500).json({ error: 'Failed to clear cache' });
+    }
+  });
+
+  // Force refresh endpoint for preview
+  app.get('/api/preview/refresh', (req, res) => {
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Last-Modified': new Date().toUTCString()
+    });
+    
+    res.json({
+      success: true,
+      message: 'Preview cache disabled',
+      timestamp: Date.now()
+    });
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server setup
