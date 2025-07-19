@@ -82,7 +82,7 @@ const LogoGeneratorPro = lazy(() => import("./pages/tools/LogoGeneratorPro"));
 const UltraMelhoradorPro = lazy(() => import("./pages/tools/UltraMelhoradorPro"));
 const UpscalePro = lazy(() => import("./pages/tools/UpscalePro"));
 const AmazonAdsEditor = lazy(() => import("./pages/tools/AmazonAdsEditor"));
-const UserDashboard = lazy(() => import("./pages/user/Dashboard"));
+const UserDashboard = lazy(() => import("./pages/user/DashboardSimple"));
 const UserUsage = lazy(() => import("./pages/user/Usage"));
 const SubscriptionPage = lazy(() => import("./pages/subscription/SubscriptionPage"));
 const UserProfile = lazy(() => import("./pages/myarea/UserProfile"));
