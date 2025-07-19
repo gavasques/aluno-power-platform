@@ -28,7 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ProductSupplierStatsUtils } from '@/shared/utils/productSupplierUtils';
+import { ProductSupplierUtils } from '@/shared/utils/productSupplierUtils';
 import type { ProductSupplierStats } from '@/shared/types/productSupplier';
 
 interface ProductSupplierStatsProps {

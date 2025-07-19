@@ -15,12 +15,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProductSuppliers } from '@/hooks/useProductSuppliers';
 import { ProductSupplierForm } from './ProductSupplierForm';
 import { ProductSupplierList } from './ProductSupplierList';
-import { ProductSupplierStats } from './ProductSupplierStats';
+
 import type { ProductSupplier } from '@/shared/types/productSupplier';
 
 interface ProductSupplierManagerProps {
@@ -38,11 +38,9 @@ export const ProductSupplierManager: React.FC<ProductSupplierManagerProps> = ({
   const [editingSupplier, setEditingSupplier] = useState<ProductSupplier | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSuppliers, setSelectedSuppliers] = useState<number[]>([]);
-  const [activeTab, setActiveTab] = useState('suppliers');
 
   const {
     suppliers,
-    supplierStats,
     isLoading,
     isError,
     error,
@@ -184,95 +182,77 @@ export const ProductSupplierManager: React.FC<ProductSupplierManagerProps> = ({
         </Button>
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="suppliers">
-            Fornecedores ({suppliers.length})
-          </TabsTrigger>
-          <TabsTrigger value="stats">
-            Estatísticas
-          </TabsTrigger>
-        </TabsList>
+      {/* Content */}
+      <div className="space-y-4">
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400 transform -translate-y-1/2" />
+            <Input
+              placeholder="Buscar fornecedores..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2">
+            {selectedSuppliers.length > 0 && (
+              <Button
+                variant="destructive"
+                onClick={handleBulkDelete}
+                disabled={isDeleting}
+                size="sm"
+              >
+                Remover Selecionados ({selectedSuppliers.length})
+              </Button>
+            )}
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              Filtros
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+          </div>
+        </div>
 
-        <TabsContent value="suppliers" className="space-y-4">
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400 transform -translate-y-1/2" />
-              <Input
-                placeholder="Buscar fornecedores..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex gap-2">
-              {selectedSuppliers.length > 0 && (
+        {/* Suppliers List */}
+        {filteredSuppliers.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <div className="text-gray-400 dark:text-gray-600 mb-4">
+                <Star className="h-12 w-12 mx-auto mb-4" />
+                {searchTerm ? (
+                  <p>Nenhum fornecedor encontrado para "{searchTerm}"</p>
+                ) : (
+                  <p>Nenhum fornecedor adicionado ainda</p>
+                )}
+              </div>
+              {!searchTerm && (
                 <Button
-                  variant="destructive"
-                  onClick={handleBulkDelete}
-                  disabled={isDeleting}
-                  size="sm"
+                  onClick={() => setIsFormOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  Remover Selecionados ({selectedSuppliers.length})
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Primeiro Fornecedor
                 </Button>
               )}
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Filtros
-              </Button>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
-              </Button>
-            </div>
-          </div>
-
-          {/* Suppliers List */}
-          {filteredSuppliers.length === 0 ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <div className="text-gray-400 dark:text-gray-600 mb-4">
-                  <Star className="h-12 w-12 mx-auto mb-4" />
-                  {searchTerm ? (
-                    <p>Nenhum fornecedor encontrado para "{searchTerm}"</p>
-                  ) : (
-                    <p>Nenhum fornecedor adicionado ainda</p>
-                  )}
-                </div>
-                {!searchTerm && (
-                  <Button
-                    onClick={() => setIsFormOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Primeiro Fornecedor
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <ProductSupplierList
-              suppliers={filteredSuppliers}
-              onEdit={handleEditSupplier}
-              onDelete={handleDeleteSupplier}
-              onSetPrimary={handleSetPrimarySupplier}
-              onSelectionChange={handleSelectionChange}
-              isDeleting={isDeleting}
-              isSettingPrimary={isSettingPrimary}
-              selectedSuppliers={selectedSuppliers}
-            />
-          )}
-        </TabsContent>
-
-        <TabsContent value="stats" className="space-y-4">
-          <ProductSupplierStats
-            stats={supplierStats}
-            productId={productId}
+            </CardContent>
+          </Card>
+        ) : (
+          <ProductSupplierList
+            suppliers={filteredSuppliers}
+            onEdit={handleEditSupplier}
+            onDelete={handleDeleteSupplier}
+            onSetPrimary={handleSetPrimarySupplier}
+            onSelectionChange={handleSelectionChange}
+            isDeleting={isDeleting}
+            isSettingPrimary={isSettingPrimary}
+            selectedSuppliers={selectedSuppliers}
           />
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
 
       {/* Supplier Form Modal */}
       <ProductSupplierForm
