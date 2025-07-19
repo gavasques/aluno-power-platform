@@ -101,6 +101,10 @@ const ProductEditWithTabs = lazy(() => import("./pages/myarea/ProductEditWithTab
 // Keep Login as eager import for immediate authentication
 import LoginNew from "./pages/LoginNew";
 
+// Password Recovery Pages
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+
 // Loading component for lazy-loaded routes
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -149,6 +153,19 @@ function App() {
               <CombinedProvider>
                             <Switch>
                           <Route path="/login" component={LoginNew} />
+                          
+                          {/* Password Recovery Routes */}
+                          <Route path="/forgot-password">
+                            <Suspense fallback={<PageLoader />}>
+                              <ForgotPassword />
+                            </Suspense>
+                          </Route>
+                          
+                          <Route path="/reset-password">
+                            <Suspense fallback={<PageLoader />}>
+                              <ResetPassword />
+                            </Suspense>
+                          </Route>
 
                           {/* Páginas principais de listagem */}
                           <Route path="/ferramentas">

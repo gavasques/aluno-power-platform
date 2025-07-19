@@ -26,6 +26,8 @@ import creditsRoutes from './credits';
 import investmentSimulationsRoutes from './investment-simulations';
 import simulatorsRoutes from './simulators';
 import aiProviderRoutes from './aiProviders';
+import passwordResetRoutes from './passwordReset';
+import emailRoutes from './email';
 
 /**
  * Register all modular routes
@@ -81,6 +83,10 @@ export function registerModularRoutes(app: Express): void {
   
   // AI Provider Routes - xAI/Grok Integration & Provider Testing
   app.use('/api/ai-providers', aiProviderRoutes);
+  
+  // Authentication & Email Routes - SMTP Integration
+  app.use('/api/auth', passwordResetRoutes);
+  app.use('/api/email', emailRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

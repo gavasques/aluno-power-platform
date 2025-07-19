@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +37,7 @@ function FeatureCard({ icon, title, description, color }: FeatureCardProps) {
 export default function LoginNew() {
   const { login, isLoading } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -230,13 +232,20 @@ export default function LoginNew() {
 
                   {/* Footer Links */}
                   <div className="mt-6 text-center space-y-3">
-                    <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    <button 
+                      type="button"
+                      onClick={() => setLocation('/forgot-password')}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline transition-all duration-200"
+                    >
                       Esqueci minha senha
                     </button>
                     <div className="text-gray-500 text-sm">
                       Ainda não tem acesso? {' '}
-                      <button className="text-blue-600 hover:text-blue-700 font-medium">
-                        Cadastre-se
+                      <button 
+                        type="button"
+                        className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-all duration-200"
+                      >
+                        Entre em contato
                       </button>
                     </div>
                   </div>
