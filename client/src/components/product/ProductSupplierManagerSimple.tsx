@@ -64,12 +64,6 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
     refetch();
   };
 
-  // Debug logging
-  console.log('🔍 ProductSupplierManager - ProductId:', productId);
-  console.log('🔍 ProductSupplierManager - Current suppliers:', suppliers);
-  console.log('🔍 ProductSupplierManager - Filtered suppliers:', filteredSuppliers);
-  console.log('🔍 ProductSupplierManager - IsLoading:', isLoading);
-
   // Filter suppliers based on search term
   const filteredSuppliers = useMemo(() => {
     if (!searchTerm) return suppliers;
@@ -80,6 +74,12 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
       supplier.supplier?.corporateName?.toLowerCase().includes(term)
     );
   }, [suppliers, searchTerm]);
+
+  // Debug logging
+  console.log('🔍 ProductSupplierManager - ProductId:', productId);
+  console.log('🔍 ProductSupplierManager - Current suppliers:', suppliers);
+  console.log('🔍 ProductSupplierManager - Filtered suppliers:', filteredSuppliers);
+  console.log('🔍 ProductSupplierManager - IsLoading:', isLoading);
 
   // Handle select all checkbox
   const handleSelectAll = (checked: boolean) => {
