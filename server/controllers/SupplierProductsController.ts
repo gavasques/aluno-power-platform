@@ -37,12 +37,12 @@ const excelRowSchema = z.object({
 });
 
 export class SupplierProductsController {
-  // Listar todos os produtos de um fornecedor
+  // Listar todos os produtos de um fornecedor com paginação
   static async getSupplierProducts(req: AuthenticatedRequest, res: Response) {
     try {
       const { supplierId } = req.params;
       const userId = req.user?.id;
-      const { search, status } = req.query;
+      const { search, status, page = '1', limit = '50' } = req.query;
 
       if (!userId) {
         return res.status(401).json({ success: false, message: 'Usuário não autenticado' });
@@ -94,19 +94,40 @@ export class SupplierProductsController {
         );
       }
 
-      // Separar por status para estatísticas
+      // Calcular totais antes da paginação
+      const totalItems = results.length;
+      const pageNum = parseInt(page as string, 10);
+      const limitNum = parseInt(limit as string, 10);
+      const totalPages = Math.ceil(totalItems / limitNum);
+      
+      // Aplicar paginação
+      const offset = (pageNum - 1) * limitNum;
+      const paginatedResults = results.slice(offset, offset + limitNum);
+
+      // Calcular estatísticas
       const stats = {
-        total: results.length,
+        total: totalItems,
         linked: results.filter(p => p.linkStatus === 'linked').length,
         pending: results.filter(p => p.linkStatus === 'pending').length,
         notFound: results.filter(p => p.linkStatus === 'not_found').length,
       };
 
+      // Metadados de paginação
+      const pagination = {
+        currentPage: pageNum,
+        totalPages,
+        totalItems,
+        itemsPerPage: limitNum,
+        hasNextPage: pageNum < totalPages,
+        hasPreviousPage: pageNum > 1
+      };
+
       res.json({
         success: true,
         message: 'Produtos do fornecedor listados com sucesso',
-        data: results,
+        data: paginatedResults,
         stats,
+        pagination
       });
     } catch (error) {
       console.error('Erro ao listar produtos do fornecedor:', error);

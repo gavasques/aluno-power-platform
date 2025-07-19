@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Package, Download, Plus } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Upload, Package, Download, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import * as XLSX from 'xlsx';
 
 interface SupplierProductsTabSimpleProps {
@@ -22,6 +24,19 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [addProductDialogOpen, setAddProductDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(50);
+
+  // Debounce do termo de busca para evitar muitas requisições
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
   const [newProduct, setNewProduct] = useState({
     supplierSku: '',
     productName: '',
@@ -30,6 +45,50 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     minimumOrderQuantity: '',
     masterBox: ''
   });
+
+  // Query para buscar produtos do fornecedor com paginação
+  const { data: productsData, isLoading, isFetching } = useQuery({
+    queryKey: ['supplier-products', supplierId, currentPage, debouncedSearchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: pageSize.toString(),
+        ...(debouncedSearchTerm && { search: debouncedSearchTerm })
+      });
+      
+      const response = await fetch(`/api/suppliers/${supplierId}/products?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erro ao carregar produtos');
+      }
+      
+      return response.json();
+    },
+    enabled: !!supplierId,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    keepPreviousData: true // Para lazy loading suave
+  });
+
+  const products = productsData?.data || [];
+  const stats = productsData?.stats || { total: 0, linked: 0, pending: 0, notFound: 0 };
+  const pagination = productsData?.pagination || { 
+    currentPage: 1, 
+    totalPages: 1, 
+    totalItems: 0, 
+    itemsPerPage: 50,
+    hasNextPage: false,
+    hasPreviousPage: false
+  };
+
+  // Reset para primeira página quando pesquisar
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset para primeira página
+  };
 
   // Mutation para importar XLSX
   const importMutation = useMutation({
@@ -53,7 +112,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['supplier-products'] });
+      queryClient.invalidateQueries({ queryKey: ['supplier-products', supplierId] });
       toast({
         title: 'Importação Concluída',
         description: `${data.data.created} criados, ${data.data.updated} atualizados, ${data.data.linked} vinculados`,
@@ -96,7 +155,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['supplier-products'] });
+      queryClient.invalidateQueries({ queryKey: ['supplier-products', supplierId] });
       toast({
         title: 'Produto Adicionado',
         description: 'Produto adicionado ao catálogo do fornecedor com sucesso',
@@ -207,22 +266,28 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12">
-            <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Nenhum produto cadastrado
-            </h3>
-            <p className="text-gray-500 mb-6">
-              Importe o catálogo de produtos do fornecedor ou adicione produtos manualmente.
-            </p>
-            
-            <div className="flex justify-center gap-3">
-              <Button 
-                onClick={() => setImportDialogOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                Importar Excel
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-500 mt-4">Carregando produtos...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-12">
+              <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Nenhum produto cadastrado
+              </h3>
+              <p className="text-gray-500 mb-6">
+                Importe o catálogo de produtos do fornecedor ou adicione produtos manualmente.
+              </p>
+              
+              <div className="flex justify-center gap-3">
+                <Button 
+                  onClick={() => setImportDialogOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Importar Excel
               </Button>
               
               <Button 
@@ -234,29 +299,194 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                 Adicionar Produto
               </Button>
             </div>
-          </div>
-          
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">Como funciona?</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Importe o catálogo completo via Excel (.xlsx) com todos os produtos do fornecedor</li>
-              <li>• O sistema tentará vincular automaticamente com produtos existentes</li>
-              <li>• Produtos não encontrados ficarão como "pendentes" até serem criados</li>
-              <li>• Use esta área para gerenciar preços, lead times e SKUs específicos do fornecedor</li>
-            </ul>
-            
-            <div className="mt-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={downloadTemplate}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Baixar Template Excel
-              </Button>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Header com estatísticas e ações */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-gray-500">
+                    Total: {stats.total} produtos
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="secondary">{stats.linked} vinculados</Badge>
+                    <Badge variant="outline">{stats.pending} pendentes</Badge>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setImportDialogOpen(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Importar Excel
+                  </Button>
+                  
+                  <Button 
+                    size="sm"
+                    onClick={() => setAddProductDialogOpen(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Adicionar Produto
+                  </Button>
+                </div>
+              </div>
+
+              {/* Campo de busca */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Buscar por SKU ou nome do produto..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Tabela de produtos */}
+              <div className="relative min-h-[400px] border border-gray-200 rounded-lg overflow-hidden">
+                {isFetching && (
+                  <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  </div>
+                )}
+                
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50">
+                      <TableHead className="font-medium">SKU</TableHead>
+                      <TableHead className="font-medium">Nome do Produto</TableHead>
+                      <TableHead className="font-medium">Custo</TableHead>
+                      <TableHead className="font-medium">Lead Time</TableHead>
+                      <TableHead className="font-medium">Qtd Mín.</TableHead>
+                      <TableHead className="font-medium">Cx Master</TableHead>
+                      <TableHead className="font-medium">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {products.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                          {isFetching ? 'Carregando produtos...' : 'Nenhum produto encontrado'}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      products.map((product: any) => (
+                        <TableRow key={product.id} className="hover:bg-gray-50">
+                          <TableCell className="font-mono text-sm">{product.supplierSku}</TableCell>
+                          <TableCell className="font-medium max-w-[200px] truncate" title={product.productName}>
+                            {product.productName}
+                          </TableCell>
+                          <TableCell>
+                            {product.cost ? `R$ ${parseFloat(product.cost).toFixed(2)}` : '-'}
+                          </TableCell>
+                          <TableCell>
+                            {product.leadTime ? `${product.leadTime} dias` : '-'}
+                          </TableCell>
+                          <TableCell>
+                            {product.minimumOrderQuantity || '-'}
+                          </TableCell>
+                          <TableCell>
+                            {product.masterBox || '-'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={product.linkStatus === 'linked' ? 'default' : 'outline'} className="text-xs">
+                              {product.linkStatus === 'linked' ? 'Vinculado' : 'Pendente'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Controles de Paginação */}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between border-t pt-4">
+                  <div className="text-sm text-gray-500">
+                    Página {pagination.currentPage} de {pagination.totalPages} • 
+                    {pagination.totalItems} produtos total
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(pagination.currentPage - 1)}
+                      disabled={!pagination.hasPreviousPage || isFetching}
+                      className="flex items-center gap-1"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Anterior
+                    </Button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                        const pageNum = Math.max(1, Math.min(
+                          pagination.totalPages - 4,
+                          pagination.currentPage - 2
+                        )) + i;
+                        
+                        if (pageNum > pagination.totalPages) return null;
+                        
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={pageNum === pagination.currentPage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(pageNum)}
+                            disabled={isFetching}
+                            className="w-8"
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(pagination.currentPage + 1)}
+                      disabled={!pagination.hasNextPage || isFetching}
+                      className="flex items-center gap-1"
+                    >
+                      Próxima
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Instruções */}
+              <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-medium text-blue-900 mb-2">Como funciona?</h4>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• Importe o catálogo completo via Excel (.xlsx) com todos os produtos do fornecedor</li>
+                  <li>• O sistema tentará vincular automaticamente com produtos existentes</li>
+                  <li>• Produtos não encontrados ficarão como "pendentes" até serem criados</li>
+                  <li>• Use esta área para gerenciar preços, lead times e SKUs específicos do fornecedor</li>
+                </ul>
+                
+                <div className="mt-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={downloadTemplate}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Baixar Template Excel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
