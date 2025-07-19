@@ -339,14 +339,32 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     // Import AuthService here to avoid circular dependency
     const { AuthService } = await import('./services/authService.js');
     
-    // Validate the session token
-    const user = await AuthService.validateSession(token);
+    // Validate the JWT token instead of session
+    const decoded = AuthService.verifyToken(token);
+    console.log('🔍 [AUTH] Token validation result:', decoded ? { tokenValid: true, userId: decoded.userId } : 'invalid');
     
-    console.log('🔍 [AUTH] User validation result:', user ? { userFound: true, userId: user.id, userRole: user.role } : 'null');
-    
-    if (!user) {
+    if (!decoded || !decoded.userId) {
       return res.status(401).json({ 
         error: 'Invalid or expired token',
+        details: 'Please login again'
+      });
+    }
+
+    // Get user from database using the userId from JWT
+    const { db } = await import('./db/index.js');
+    const { users } = await import('../shared/schema.js');
+    const { eq } = await import('drizzle-orm');
+    
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, decoded.userId));
+    
+    console.log('🔍 [AUTH] User found:', user ? { userFound: true, userId: user.id, userRole: user.role } : 'not found');
+    
+    if (!user || !user.isActive) {
+      return res.status(401).json({ 
+        error: 'User not found or inactive',
         details: 'Please login again'
       });
     }

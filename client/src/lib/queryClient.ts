@@ -91,21 +91,11 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
     (headers as any)['Content-Type'] = 'application/json';
   }
 
-  // Debug log for login requests
-  if (url.includes('/api/auth/login')) {
-    console.log('🔍 apiRequest - Login request:', { url, headers, body });
-  }
-  
   const response = await fetch(url, {
     headers,
     ...options,
     body,
   });
-
-  // Debug log for login responses
-  if (url.includes('/api/auth/login')) {
-    console.log('🔍 apiRequest - Login response status:', response.status);
-  }
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => '{}');
@@ -114,11 +104,6 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
       error = JSON.parse(errorText);
     } catch {
       error = { message: 'Request failed' };
-    }
-    
-    // Debug log for login errors
-    if (url.includes('/api/auth/login')) {
-      console.log('🔍 apiRequest - Login error:', error);
     }
     
     throw new Error(error.message || error.error || `HTTP ${response.status}`);
@@ -136,11 +121,6 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
 
   try {
     const data = JSON.parse(text);
-    
-    // Debug log for login success
-    if (url.includes('/api/auth/login')) {
-      console.log('🔍 apiRequest - Login response data:', data);
-    }
     
     // Debug log for product suppliers endpoint
     if (url.includes('/api/products/') && url.includes('/suppliers')) {

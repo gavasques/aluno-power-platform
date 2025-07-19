@@ -120,6 +120,7 @@ const PageLoader = () => (
   </div>
 );
 import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthenticatedPreloader } from "./components/AuthenticatedPreloader";
 
 function App() {
   // Initialize optimized loading systems
@@ -130,18 +131,8 @@ function App() {
   // useQueryMemoryOptimization();
   // useBackgroundSync();
 
-  // Preload critical routes
-  useComponentPreloader([
-    { path: '/dashboard', importFn: () => import('./pages/user/Dashboard'), priority: 'high' },
-    { path: '/agentes', importFn: () => import('./pages/agents'), priority: 'high' },
-    { path: '/ferramentas', importFn: () => import('./pages/Ferramentas'), priority: 'medium' },
-    { path: '/hub', importFn: () => import('./pages/Hub'), priority: 'medium' },
-    { path: '/minha-area', importFn: () => import('./pages/MyArea'), priority: 'low' }
-  ]);
-
   useEffect(() => {
-    // Initialize all performance optimizations
-    backgroundPrefetch();
+    // Initialize basic optimizations (not user-dependent)
     preloadCriticalIcons();
     
     // Load fonts based on current route
@@ -155,6 +146,7 @@ function App() {
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <HelmetProvider>
             <AuthProvider>
+              <AuthenticatedPreloader />
               <CombinedProvider>
                             <Switch>
                           <Route path="/login" component={LoginNew} />
