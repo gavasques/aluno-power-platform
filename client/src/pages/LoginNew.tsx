@@ -55,6 +55,20 @@ export default function LoginNew() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
+  const [forgotPasswordErrors, setForgotPasswordErrors] = useState<Record<string, string>>({});
+  const [forgotPasswordData, setForgotPasswordData] = useState({
+    identifier: '',
+    type: 'email' as 'email' | 'phone'
+  });
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [resetPasswordData, setResetPasswordData] = useState({
+    token: '',
+    newPassword: '',
+    confirmPassword: '',
+    type: 'email' as 'email' | 'phone'
+  });
+  const [resetPasswordErrors, setResetPasswordErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,6 +185,136 @@ export default function LoginNew() {
           [error.response.data.field]: error.response.data.message
         });
       }
+    }
+  };
+
+  // Handle forgot password
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordErrors({});
+
+    const newErrors: Record<string, string> = {};
+    if (!forgotPasswordData.identifier.trim()) {
+      newErrors.identifier = forgotPasswordData.type === 'email' ? 'Email é obrigatório' : 'Telefone é obrigatório';
+    } else if (forgotPasswordData.type === 'email' && !/\S+@\S+\.\S+/.test(forgotPasswordData.identifier)) {
+      newErrors.identifier = 'Email inválido';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setForgotPasswordErrors(newErrors);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(forgotPasswordData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setIsForgotPasswordModalOpen(false);
+        setIsResetPasswordModalOpen(true);
+        setResetPasswordData(prev => ({ ...prev, type: forgotPasswordData.type }));
+        
+        toast({
+          title: "Código enviado!",
+          description: data.message,
+        });
+      } else {
+        if (data.field && data.message) {
+          setForgotPasswordErrors({
+            [data.field]: data.message
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erro",
+            description: data.message || "Erro ao enviar código de recuperação",
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro de conexão. Tente novamente.",
+      });
+    }
+  };
+
+  // Handle reset password
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetPasswordErrors({});
+
+    const newErrors: Record<string, string> = {};
+    if (!resetPasswordData.token.trim()) {
+      newErrors.token = resetPasswordData.type === 'email' ? 'Token é obrigatório' : 'Código é obrigatório';
+    }
+    if (!resetPasswordData.newPassword.trim()) {
+      newErrors.newPassword = 'Nova senha é obrigatória';
+    } else if (resetPasswordData.newPassword.length < 8) {
+      newErrors.newPassword = 'Senha deve ter pelo menos 8 caracteres';
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(resetPasswordData.newPassword)) {
+      newErrors.newPassword = 'Senha deve conter maiúscula, minúscula e números';
+    }
+    if (resetPasswordData.newPassword !== resetPasswordData.confirmPassword) {
+      newErrors.confirmPassword = 'Senhas não conferem';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setResetPasswordErrors(newErrors);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: resetPasswordData.token,
+          newPassword: resetPasswordData.newPassword,
+          type: resetPasswordData.type
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setIsResetPasswordModalOpen(false);
+        setResetPasswordData({
+          token: '',
+          newPassword: '',
+          confirmPassword: '',
+          type: 'email'
+        });
+        
+        toast({
+          title: "Senha redefinida!",
+          description: "Sua senha foi alterada com sucesso. Faça login novamente.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: data.message || "Erro ao redefinir senha",
+        });
+      }
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro de conexão. Tente novamente.",
+      });
     }
   };
 
@@ -318,7 +462,7 @@ export default function LoginNew() {
                   <div className="mt-6 text-center space-y-3">
                     <button 
                       type="button"
-                      onClick={() => setLocation('/forgot-password')}
+                      onClick={() => setIsForgotPasswordModalOpen(true)}
                       className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline transition-all duration-200"
                     >
                       Esqueci minha senha
@@ -625,6 +769,193 @@ export default function LoginNew() {
             </div>
           </div>
         </div>
+
+        {/* Forgot Password Modal */}
+        <Dialog open={isForgotPasswordModalOpen} onOpenChange={setIsForgotPasswordModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold text-gray-900 flex items-center justify-center gap-2">
+                <Lock className="w-5 h-5" />
+                Recuperar Senha
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              {/* Recovery Type Selection */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Como você deseja receber o código?</label>
+                <div className="flex space-x-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="type"
+                      value="email"
+                      checked={forgotPasswordData.type === 'email'}
+                      onChange={(e) => setForgotPasswordData(prev => ({ ...prev, type: e.target.value as 'email' | 'phone' }))}
+                      className="mr-2"
+                    />
+                    <Mail className="w-4 h-4 mr-1" />
+                    Email
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="type"
+                      value="phone"
+                      checked={forgotPasswordData.type === 'phone'}
+                      onChange={(e) => setForgotPasswordData(prev => ({ ...prev, type: e.target.value as 'email' | 'phone' }))}
+                      className="mr-2"
+                    />
+                    <Phone className="w-4 h-4 mr-1" />
+                    WhatsApp
+                  </label>
+                </div>
+              </div>
+
+              {/* Identifier Field */}
+              <div className="space-y-2">
+                <Label htmlFor="identifier" className="text-sm font-medium text-gray-700">
+                  {forgotPasswordData.type === 'email' ? 'Email' : 'Telefone'}
+                </Label>
+                <Input
+                  id="identifier"
+                  name="identifier"
+                  type={forgotPasswordData.type === 'email' ? 'email' : 'tel'}
+                  placeholder={forgotPasswordData.type === 'email' ? 'seu@email.com' : '11999999999'}
+                  value={forgotPasswordData.identifier}
+                  onChange={(e) => setForgotPasswordData(prev => ({ ...prev, identifier: e.target.value }))}
+                  className={`h-10 ${forgotPasswordErrors.identifier ? 'border-red-500' : ''}`}
+                  disabled={isLoading}
+                />
+                {forgotPasswordErrors.identifier && (
+                  <p className="text-sm text-red-600">{forgotPasswordErrors.identifier}</p>
+                )}
+              </div>
+
+              <div className="flex space-x-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsForgotPasswordModalOpen(false)}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                      Enviando...
+                    </div>
+                  ) : (
+                    'Enviar Código'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Password Modal */}
+        <Dialog open={isResetPasswordModalOpen} onOpenChange={setIsResetPasswordModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold text-gray-900 flex items-center justify-center gap-2">
+                <Lock className="w-5 h-5" />
+                Nova Senha
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              {/* Token/Code Field */}
+              <div className="space-y-2">
+                <Label htmlFor="reset-token" className="text-sm font-medium text-gray-700">
+                  {resetPasswordData.type === 'email' ? 'Token do Email' : 'Código do WhatsApp'}
+                </Label>
+                <Input
+                  id="reset-token"
+                  name="token"
+                  type="text"
+                  placeholder={resetPasswordData.type === 'email' ? 'Token recebido no email' : '123456'}
+                  value={resetPasswordData.token}
+                  onChange={(e) => setResetPasswordData(prev => ({ ...prev, token: e.target.value }))}
+                  className={`h-10 ${resetPasswordErrors.token ? 'border-red-500' : ''}`}
+                  disabled={isLoading}
+                />
+                {resetPasswordErrors.token && (
+                  <p className="text-sm text-red-600">{resetPasswordErrors.token}</p>
+                )}
+              </div>
+
+              {/* New Password Field */}
+              <div className="space-y-2">
+                <Label htmlFor="reset-password" className="text-sm font-medium text-gray-700">
+                  Nova Senha
+                </Label>
+                <Input
+                  id="reset-password"
+                  name="newPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={resetPasswordData.newPassword}
+                  onChange={(e) => setResetPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  className={`h-10 ${resetPasswordErrors.newPassword ? 'border-red-500' : ''}`}
+                  disabled={isLoading}
+                />
+                {resetPasswordErrors.newPassword && (
+                  <p className="text-sm text-red-600">{resetPasswordErrors.newPassword}</p>
+                )}
+              </div>
+
+              {/* Confirm Password Field */}
+              <div className="space-y-2">
+                <Label htmlFor="reset-confirm-password" className="text-sm font-medium text-gray-700">
+                  Confirmar Nova Senha
+                </Label>
+                <Input
+                  id="reset-confirm-password"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={resetPasswordData.confirmPassword}
+                  onChange={(e) => setResetPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  className={`h-10 ${resetPasswordErrors.confirmPassword ? 'border-red-500' : ''}`}
+                  disabled={isLoading}
+                />
+                {resetPasswordErrors.confirmPassword && (
+                  <p className="text-sm text-red-600">{resetPasswordErrors.confirmPassword}</p>
+                )}
+              </div>
+
+              <div className="flex space-x-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsResetPasswordModalOpen(false)}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                      Alterando...
+                    </div>
+                  ) : (
+                    'Alterar Senha'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );
