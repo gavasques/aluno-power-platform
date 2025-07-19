@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -5,51 +6,42 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, Lock } from 'lucide-react';
 import { ButtonLoader } from '@/components/common/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUnifiedFormValidation, commonValidationRules } from '@/hooks/useUnifiedFormValidation';
 
 interface LoginFormProps {
   onSuccess?: () => void;
 }
 
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const {
-    formData,
-    isSubmitting,
-    globalError,
-    handleInputChange,
-    handleSubmit
-  } = useUnifiedFormValidation<LoginFormData>({
-    initialData: {
-      email: '',
-      password: ''
-    },
-    validationRules: {
-      email: commonValidationRules.email,
-      password: { required: true, message: 'Senha é obrigatória' }
-    },
-    onSubmit: async (data) => {
-      const result = await login(data.email, data.password);
-      return result;
-    },
-    onSuccess: () => {
-      onSuccess?.();
-    },
-    successMessage: 'Login realizado com sucesso!',
-    errorMessage: 'Erro no login'
-  });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        onSuccess?.();
+      } else {
+        setError(result.error || 'Erro ao fazer login');
+      }
+    } catch (err) {
+      setError('Erro de conexão. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {globalError && (
+      {error && (
         <Alert variant="destructive">
-          <AlertDescription>{globalError}</AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
@@ -62,8 +54,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             type="email"
             placeholder="seu@email.com"
             className="pl-10"
-            value={formData.email}
-            onChange={handleInputChange('email')}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
             required
           />
@@ -79,8 +71,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             type="password"
             placeholder="••••••••"
             className="pl-10"
-            value={formData.password}
-            onChange={handleInputChange('password')}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             disabled={isSubmitting}
             required
           />
