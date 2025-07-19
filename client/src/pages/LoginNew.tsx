@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Eye, EyeOff, Mail, Lock, Users, BarChart3, Zap, ShoppingBag, TrendingUp, Shield, Crown } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Eye, EyeOff, Mail, Lock, Users, BarChart3, Zap, ShoppingBag, TrendingUp, Shield, Crown, UserPlus, Phone } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import logoPath from '@assets/Asset 14-8_1752953662731.png';
 
@@ -35,15 +36,25 @@ function FeatureCard({ icon, title, description, color }: FeatureCardProps) {
 }
 
 export default function LoginNew() {
-  const { login, isLoading } = useAuth();
+  const { login, register, isLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [registerData, setRegisterData] = useState({
+    name: '',
+    email: '',
+    username: '',
+    password: '',
+    phone: ''
+  });
   const [showPassword, setShowPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +98,75 @@ export default function LoginNew() {
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setRegisterData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (registerErrors[name]) {
+      setRegisterErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegisterErrors({});
+
+    // Validation
+    const newErrors: Record<string, string> = {};
+    if (!registerData.name.trim()) {
+      newErrors.name = 'Nome é obrigatório';
+    }
+    if (!registerData.email.trim()) {
+      newErrors.email = 'Email é obrigatório';
+    } else if (!/\S+@\S+\.\S+/.test(registerData.email)) {
+      newErrors.email = 'Email inválido';
+    }
+    if (!registerData.username.trim()) {
+      newErrors.username = 'Username é obrigatório';
+    }
+    if (!registerData.password.trim()) {
+      newErrors.password = 'Senha é obrigatória';
+    } else if (registerData.password.length < 8) {
+      newErrors.password = 'Senha deve ter pelo menos 8 caracteres';
+    }
+    if (registerData.phone && !/^\(?[1-9]{2}\)?\s?[0-9]{4,5}-?[0-9]{4}$/.test(registerData.phone.replace(/\s+/g, ''))) {
+      newErrors.phone = 'Formato de telefone inválido (ex: 11999999999)';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setRegisterErrors(newErrors);
+      return;
+    }
+
+    try {
+      await register(registerData);
+      toast({
+        title: "Cadastro realizado com sucesso!",
+        description: registerData.phone 
+          ? "Agora você pode verificar seu telefone via WhatsApp" 
+          : "Bem-vindo à plataforma!",
+      });
+      setIsRegisterModalOpen(false);
+      
+      // If user provided phone, redirect to verification
+      if (registerData.phone) {
+        setLocation('/phone-verification');
+      }
+    } catch (error: any) {
+      console.error('Register error:', error);
+      toast({
+        title: "Erro no cadastro",
+        description: error.response?.data?.message || "Erro interno do servidor",
+        variant: "destructive",
+      });
+      if (error.response?.data?.field) {
+        setRegisterErrors({
+          [error.response.data.field]: error.response.data.message
+        });
+      }
     }
   };
 
@@ -241,12 +321,174 @@ export default function LoginNew() {
                     </button>
                     <div className="text-gray-500 text-sm">
                       Ainda não tem acesso? {' '}
-                      <button 
-                        type="button"
-                        className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-all duration-200"
-                      >
-                        Entre em contato
-                      </button>
+                      <Dialog open={isRegisterModalOpen} onOpenChange={setIsRegisterModalOpen}>
+                        <DialogTrigger asChild>
+                          <button 
+                            type="button"
+                            className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-all duration-200"
+                          >
+                            Cadastre-se aqui
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="text-center text-xl font-bold text-gray-900 flex items-center justify-center gap-2">
+                              <UserPlus className="w-5 h-5" />
+                              Criar Conta
+                            </DialogTitle>
+                          </DialogHeader>
+                          <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                            {/* Name Field */}
+                            <div className="space-y-2">
+                              <Label htmlFor="register-name" className="text-sm font-medium text-gray-700">
+                                Nome completo
+                              </Label>
+                              <Input
+                                id="register-name"
+                                name="name"
+                                type="text"
+                                placeholder="Seu nome completo"
+                                value={registerData.name}
+                                onChange={handleRegisterChange}
+                                className={`h-10 ${registerErrors.name ? 'border-red-500' : ''}`}
+                                disabled={isLoading}
+                              />
+                              {registerErrors.name && (
+                                <p className="text-sm text-red-600">{registerErrors.name}</p>
+                              )}
+                            </div>
+
+                            {/* Email Field */}
+                            <div className="space-y-2">
+                              <Label htmlFor="register-email" className="text-sm font-medium text-gray-700">
+                                Email
+                              </Label>
+                              <Input
+                                id="register-email"
+                                name="email"
+                                type="email"
+                                placeholder="seu@email.com"
+                                value={registerData.email}
+                                onChange={handleRegisterChange}
+                                className={`h-10 ${registerErrors.email ? 'border-red-500' : ''}`}
+                                disabled={isLoading}
+                              />
+                              {registerErrors.email && (
+                                <p className="text-sm text-red-600">{registerErrors.email}</p>
+                              )}
+                            </div>
+
+                            {/* Username Field */}
+                            <div className="space-y-2">
+                              <Label htmlFor="register-username" className="text-sm font-medium text-gray-700">
+                                Username
+                              </Label>
+                              <Input
+                                id="register-username"
+                                name="username"
+                                type="text"
+                                placeholder="seu_username"
+                                value={registerData.username}
+                                onChange={handleRegisterChange}
+                                className={`h-10 ${registerErrors.username ? 'border-red-500' : ''}`}
+                                disabled={isLoading}
+                              />
+                              {registerErrors.username && (
+                                <p className="text-sm text-red-600">{registerErrors.username}</p>
+                              )}
+                            </div>
+
+                            {/* Phone Field */}
+                            <div className="space-y-2">
+                              <Label htmlFor="register-phone" className="text-sm font-medium text-gray-700">
+                                Telefone (opcional)
+                              </Label>
+                              <div className="relative">
+                                <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                <Input
+                                  id="register-phone"
+                                  name="phone"
+                                  type="tel"
+                                  placeholder="11999999999"
+                                  value={registerData.phone}
+                                  onChange={handleRegisterChange}
+                                  className={`pl-10 h-10 ${registerErrors.phone ? 'border-red-500' : ''}`}
+                                  disabled={isLoading}
+                                />
+                              </div>
+                              {registerErrors.phone && (
+                                <p className="text-sm text-red-600">{registerErrors.phone}</p>
+                              )}
+                              <p className="text-xs text-gray-500">
+                                Informe seu WhatsApp para verificação via código
+                              </p>
+                            </div>
+
+                            {/* Password Field */}
+                            <div className="space-y-2">
+                              <Label htmlFor="register-password" className="text-sm font-medium text-gray-700">
+                                Senha
+                              </Label>
+                              <div className="relative">
+                                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                <Input
+                                  id="register-password"
+                                  name="password"
+                                  type={showRegisterPassword ? 'text' : 'password'}
+                                  placeholder="••••••••"
+                                  value={registerData.password}
+                                  onChange={handleRegisterChange}
+                                  className={`pl-10 pr-10 h-10 ${registerErrors.password ? 'border-red-500' : ''}`}
+                                  disabled={isLoading}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                                >
+                                  {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                              </div>
+                              {registerErrors.password && (
+                                <p className="text-sm text-red-600">{registerErrors.password}</p>
+                              )}
+                              <p className="text-xs text-gray-500">
+                                Mínimo 8 caracteres
+                              </p>
+                            </div>
+
+                            {/* Submit Button */}
+                            <div className="flex gap-3 pt-4">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => setIsRegisterModalOpen(false)}
+                                disabled={isLoading}
+                              >
+                                Cancelar
+                              </Button>
+                              <Button
+                                type="submit"
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                                disabled={isLoading}
+                              >
+                                {isLoading ? (
+                                  <div className="flex items-center">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                                    Criando...
+                                  </div>
+                                ) : (
+                                  <>
+                                    <UserPlus className="w-4 h-4 mr-2" />
+                                    Criar Conta
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </CardContent>
