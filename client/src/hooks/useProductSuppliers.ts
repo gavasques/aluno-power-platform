@@ -82,6 +82,8 @@ export const useProductSuppliers = (productId: number): UseProductSuppliersRetur
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['product-suppliers', productId] });
       queryClient.invalidateQueries({ queryKey: ['product-suppliers-stats', productId] });
+      // Invalidate supplier products cache for bidirectional sync
+      queryClient.invalidateQueries({ queryKey: ['supplier-products'] });
       toast({
         title: 'Fornecedor adicionado',
         description: 'Fornecedor foi adicionado com sucesso ao produto.',
@@ -108,6 +110,8 @@ export const useProductSuppliers = (productId: number): UseProductSuppliersRetur
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['product-suppliers', productId] });
       queryClient.invalidateQueries({ queryKey: ['product-suppliers-stats', productId] });
+      // Invalidate supplier products cache for bidirectional sync
+      queryClient.invalidateQueries({ queryKey: ['supplier-products'] });
       toast({
         title: 'Fornecedor atualizado',
         description: 'Fornecedor foi atualizado com sucesso.',
@@ -133,6 +137,8 @@ export const useProductSuppliers = (productId: number): UseProductSuppliersRetur
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['product-suppliers', productId] });
       queryClient.invalidateQueries({ queryKey: ['product-suppliers-stats', productId] });
+      // Invalidate supplier products cache for bidirectional sync
+      queryClient.invalidateQueries({ queryKey: ['supplier-products'] });
       toast({
         title: 'Fornecedor removido',
         description: 'Fornecedor foi removido com sucesso do produto.',
@@ -158,6 +164,8 @@ export const useProductSuppliers = (productId: number): UseProductSuppliersRetur
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['product-suppliers', productId] });
       queryClient.invalidateQueries({ queryKey: ['product-suppliers-stats', productId] });
+      // Invalidate supplier products cache for bidirectional sync
+      queryClient.invalidateQueries({ queryKey: ['supplier-products'] });
       toast({
         title: 'Fornecedor principal definido',
         description: 'Fornecedor foi definido como principal com sucesso.',
@@ -181,6 +189,7 @@ export const useProductSuppliers = (productId: number): UseProductSuppliersRetur
     // Data
     suppliers,
     supplierStats,
+    stats: supplierStats, // Alias for compatibility
     
     // Loading states
     isLoading,

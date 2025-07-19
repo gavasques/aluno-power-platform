@@ -198,7 +198,11 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       return response.json();
     },
     onSuccess: (data) => {
+      // Invalidate supplier products cache
       queryClient.invalidateQueries({ queryKey: ['supplier-products', supplierId] });
+      // Invalidate product suppliers cache for bidirectional sync
+      queryClient.invalidateQueries({ queryKey: ['product-suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['product-suppliers-stats'] });
       toast({
         title: 'Importação Concluída com Sucesso!',
         description: `✅ ${data.data.created} criados • 🔄 ${data.data.updated} atualizados • 🔗 ${data.data.linked} vinculados automaticamente`,
@@ -242,7 +246,11 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate supplier products cache
       queryClient.invalidateQueries({ queryKey: ['supplier-products', supplierId] });
+      // Invalidate product suppliers cache for bidirectional sync
+      queryClient.invalidateQueries({ queryKey: ['product-suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['product-suppliers-stats'] });
       toast({
         title: 'Produto Adicionado',
         description: 'Produto adicionado ao catálogo do fornecedor com sucesso',
@@ -295,7 +303,11 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate supplier products cache
       queryClient.invalidateQueries({ queryKey: ['supplier-products', supplierId] });
+      // Invalidate product suppliers cache for bidirectional sync
+      queryClient.invalidateQueries({ queryKey: ['product-suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['product-suppliers-stats'] });
       toast({
         title: 'Produto Atualizado',
         description: 'Produto atualizado com sucesso',
@@ -330,7 +342,11 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate supplier products cache
       queryClient.invalidateQueries({ queryKey: ['supplier-products', supplierId] });
+      // Invalidate product suppliers cache for bidirectional sync
+      queryClient.invalidateQueries({ queryKey: ['product-suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['product-suppliers-stats'] });
       toast({
         title: 'Produto Removido',
         description: 'Produto removido do catálogo com sucesso',

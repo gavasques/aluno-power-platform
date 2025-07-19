@@ -4,12 +4,18 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, Filter, Download, Star, Package } from 'lucide-react';
+import { Plus, Search, Filter, Download, Star, Package, Edit, Trash2, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { useProductSuppliers } from '@/hooks/useProductSuppliers';
 import { formatCurrency } from '@shared/utils/formatters';
 
@@ -24,11 +30,19 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSuppliers, setSelectedSuppliers] = useState<number[]>([]);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState<any>(null);
+  const [supplierToDelete, setSupplierToDelete] = useState<any>(null);
 
   const {
     suppliers,
     isLoading,
-    stats
+    stats,
+    updateSupplier,
+    deleteSupplier,
+    isUpdating,
+    isDeleting
   } = useProductSuppliers(productId);
 
   // Filter suppliers based on search term
@@ -57,6 +71,59 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
       setSelectedSuppliers(prev => [...prev, supplierId]);
     } else {
       setSelectedSuppliers(prev => prev.filter(id => id !== supplierId));
+    }
+  };
+
+  // Handle supplier edit
+  const handleEditSupplier = (supplier: any) => {
+    setEditingSupplier({
+      id: supplier.id,
+      supplierProductCode: supplier.supplierProductCode || '',
+      cost: supplier.cost || '',
+      leadTimeDays: supplier.leadTimeDays || '',
+      minimumOrderQuantity: supplier.minimumOrderQuantity || '',
+      notes: supplier.notes || '',
+      active: supplier.active
+    });
+    setEditDialogOpen(true);
+  };
+
+  // Handle supplier delete
+  const handleDeleteSupplier = (supplier: any) => {
+    setSupplierToDelete(supplier);
+    setDeleteConfirmOpen(true);
+  };
+
+  // Save supplier changes
+  const handleSaveSupplier = async () => {
+    if (!editingSupplier) return;
+
+    try {
+      await updateSupplier(editingSupplier.id, {
+        supplierProductCode: editingSupplier.supplierProductCode,
+        cost: editingSupplier.cost ? parseFloat(editingSupplier.cost) : undefined,
+        leadTimeDays: editingSupplier.leadTimeDays ? parseInt(editingSupplier.leadTimeDays) : undefined,
+        minimumOrderQuantity: editingSupplier.minimumOrderQuantity ? parseInt(editingSupplier.minimumOrderQuantity) : undefined,
+        notes: editingSupplier.notes,
+        active: editingSupplier.active
+      });
+      setEditDialogOpen(false);
+      setEditingSupplier(null);
+    } catch (error) {
+      console.error('Error updating supplier:', error);
+    }
+  };
+
+  // Confirm supplier deletion
+  const handleConfirmDelete = async () => {
+    if (!supplierToDelete) return;
+
+    try {
+      await deleteSupplier(supplierToDelete.id);
+      setDeleteConfirmOpen(false);
+      setSupplierToDelete(null);
+    } catch (error) {
+      console.error('Error deleting supplier:', error);
     }
   };
 
@@ -126,12 +193,13 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
               <TableHead className="w-20">Entrega</TableHead>
               <TableHead className="w-20">Qtd. Mín.</TableHead>
               <TableHead className="w-20">Status</TableHead>
+              <TableHead className="w-16">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredSuppliers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                   <div className="flex flex-col items-center gap-2">
                     <Package className="h-8 w-8 text-gray-400" />
                     <p>Nenhum fornecedor encontrado</p>
@@ -206,6 +274,28 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
                       {supplier.active ? 'Ativo' : 'Inativo'}
                     </Badge>
                   </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditSupplier(supplier)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteSupplier(supplier)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -230,6 +320,126 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
           </span>
         </div>
       </div>
+
+      {/* Edit Supplier Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Fornecedor</DialogTitle>
+          </DialogHeader>
+          {editingSupplier && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="supplierCode">Código do Produto no Fornecedor</Label>
+                <Input
+                  id="supplierCode"
+                  value={editingSupplier.supplierProductCode}
+                  onChange={(e) => setEditingSupplier(prev => ({
+                    ...prev,
+                    supplierProductCode: e.target.value
+                  }))}
+                  placeholder="Código do fornecedor"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cost">Custo (R$)</Label>
+                <Input
+                  id="cost"
+                  type="number"
+                  step="0.01"
+                  value={editingSupplier.cost}
+                  onChange={(e) => setEditingSupplier(prev => ({
+                    ...prev,
+                    cost: e.target.value
+                  }))}
+                  placeholder="0,00"
+                />
+              </div>
+              <div>
+                <Label htmlFor="leadTime">Prazo de Entrega (dias)</Label>
+                <Input
+                  id="leadTime"
+                  type="number"
+                  value={editingSupplier.leadTimeDays}
+                  onChange={(e) => setEditingSupplier(prev => ({
+                    ...prev,
+                    leadTimeDays: e.target.value
+                  }))}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label htmlFor="minQuantity">Quantidade Mínima</Label>
+                <Input
+                  id="minQuantity"
+                  type="number"
+                  value={editingSupplier.minimumOrderQuantity}
+                  onChange={(e) => setEditingSupplier(prev => ({
+                    ...prev,
+                    minimumOrderQuantity: e.target.value
+                  }))}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label htmlFor="notes">Observações</Label>
+                <Textarea
+                  id="notes"
+                  value={editingSupplier.notes}
+                  onChange={(e) => setEditingSupplier(prev => ({
+                    ...prev,
+                    notes: e.target.value
+                  }))}
+                  placeholder="Observações sobre este fornecedor"
+                  rows={3}
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="active"
+                  checked={editingSupplier.active}
+                  onCheckedChange={(checked) => setEditingSupplier(prev => ({
+                    ...prev,
+                    active: checked
+                  }))}
+                />
+                <Label htmlFor="active">Fornecedor ativo</Label>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveSupplier} disabled={isUpdating}>
+              {isUpdating ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza de que deseja remover o fornecedor "{supplierToDelete?.supplier?.tradeName}" deste produto?
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
