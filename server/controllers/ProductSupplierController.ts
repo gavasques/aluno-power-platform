@@ -33,6 +33,9 @@ export class ProductSupplierController {
       const productId = parseInt(req.params.productId);
       const userId = req.user.id;
 
+      console.log(`🔍 [PRODUCT_SUPPLIERS] ProductId: ${productId}, UserId: ${userId}`);
+      console.log(`🔍 [PRODUCT_SUPPLIERS] Full user object:`, JSON.stringify(req.user, null, 2));
+
       if (!productId || isNaN(productId)) {
         return res.status(400).json({
           success: false,
@@ -50,6 +53,11 @@ export class ProductSupplierController {
         ))
         .limit(1);
 
+      console.log(`🔍 [PRODUCT_SUPPLIERS] Product found: ${product.length > 0 ? 'Yes' : 'No'}`);
+      if (product.length > 0) {
+        console.log(`🔍 [PRODUCT_SUPPLIERS] Product: id=${product[0].id}, userId=${product[0].userId}, name=${product[0].name}`);
+      }
+
       if (!product.length) {
         return res.status(404).json({
           success: false,
@@ -63,11 +71,11 @@ export class ProductSupplierController {
           id: productSuppliers.id,
           productId: productSuppliers.productId,
           supplierId: productSuppliers.supplierId,
-          supplierProductCode: productSuppliers.supplierProductCode,
-          supplierCost: productSuppliers.supplierCost,
+          supplierCode: productSuppliers.supplierCode,
+          cost: productSuppliers.cost,
           isPrimary: productSuppliers.isPrimary,
-          leadTime: productSuppliers.leadTime,
-          minimumOrderQuantity: productSuppliers.minimumOrderQuantity,
+          
+          
           notes: productSuppliers.notes,
           active: productSuppliers.active,
           createdAt: productSuppliers.createdAt,
@@ -83,7 +91,7 @@ export class ProductSupplierController {
         .from(productSuppliers)
         .leftJoin(suppliers, eq(productSuppliers.supplierId, suppliers.id))
         .where(eq(productSuppliers.productId, productId))
-        .orderBy(desc(productSuppliers.isPrimary), asc(productSuppliers.supplierCost));
+        .orderBy(desc(productSuppliers.isPrimary), asc(productSuppliers.cost));
 
       return res.json({
         success: true,
@@ -173,11 +181,11 @@ export class ProductSupplierController {
           id: productSuppliers.id,
           productId: productSuppliers.productId,
           supplierId: productSuppliers.supplierId,
-          supplierProductCode: productSuppliers.supplierProductCode,
-          supplierCost: productSuppliers.supplierCost,
+          supplierCode: productSuppliers.supplierCode,
+          cost: productSuppliers.cost,
           isPrimary: productSuppliers.isPrimary,
-          leadTime: productSuppliers.leadTime,
-          minimumOrderQuantity: productSuppliers.minimumOrderQuantity,
+          
+          
           notes: productSuppliers.notes,
           active: productSuppliers.active,
           createdAt: productSuppliers.createdAt,
@@ -309,11 +317,11 @@ export class ProductSupplierController {
           id: productSuppliers.id,
           productId: productSuppliers.productId,
           supplierId: productSuppliers.supplierId,
-          supplierProductCode: productSuppliers.supplierProductCode,
-          supplierCost: productSuppliers.supplierCost,
+          supplierCode: productSuppliers.supplierCode,
+          cost: productSuppliers.cost,
           isPrimary: productSuppliers.isPrimary,
-          leadTime: productSuppliers.leadTime,
-          minimumOrderQuantity: productSuppliers.minimumOrderQuantity,
+          
+          
           notes: productSuppliers.notes,
           active: productSuppliers.active,
           createdAt: productSuppliers.createdAt,
@@ -550,9 +558,9 @@ export class ProductSupplierController {
       const suppliersList = await db
         .select({
           id: productSuppliers.id,
-          supplierCost: productSuppliers.supplierCost,
+          cost: productSuppliers.cost,
           isPrimary: productSuppliers.isPrimary,
-          leadTime: productSuppliers.leadTime,
+          
           active: productSuppliers.active,
           supplier: {
             id: suppliers.id,
@@ -570,13 +578,11 @@ export class ProductSupplierController {
       const inactiveSuppliers = totalSuppliers - activeSuppliers;
       const primarySupplier = suppliersList.find(s => s.isPrimary);
 
-      const costs = suppliersList.map(s => parseFloat(s.supplierCost.toString()));
+      const costs = suppliersList.map(s => parseFloat(s.cost.toString()));
       const avgCost = costs.length > 0 ? costs.reduce((a, b) => a + b, 0) / costs.length : 0;
       const lowestCost = costs.length > 0 ? Math.min(...costs) : 0;
       const highestCost = costs.length > 0 ? Math.max(...costs) : 0;
 
-      const leadTimes = suppliersList.map(s => s.leadTime).filter(t => t !== null);
-      const avgLeadTime = leadTimes.length > 0 ? leadTimes.reduce((a, b) => a + b, 0) / leadTimes.length : 0;
 
       return res.json({
         success: true,
@@ -588,7 +594,6 @@ export class ProductSupplierController {
           avgCost,
           lowestCost,
           highestCost,
-          avgLeadTime
         }
       });
     } catch (error) {

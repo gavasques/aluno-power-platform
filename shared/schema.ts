@@ -493,11 +493,10 @@ export const productSuppliers = pgTable("product_suppliers", {
   id: serial("id").primaryKey(),
   productId: integer("product_id").references(() => products.id, { onDelete: "cascade" }).notNull(),
   supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
-  supplierProductCode: text("supplier_product_code").notNull(), // Código do produto no fornecedor
-  supplierCost: decimal("supplier_cost", { precision: 10, scale: 2 }).notNull(), // Custo específico deste produto com este fornecedor
+  supplierCode: text("supplier_code"), // Código do produto no fornecedor
+  cost: decimal("cost", { precision: 10, scale: 2 }), // Custo específico deste produto com este fornecedor
   isPrimary: boolean("is_primary").notNull().default(false), // Indica se é o fornecedor principal
-  leadTime: integer("lead_time"), // Prazo de entrega em dias
-  minimumOrderQuantity: integer("minimum_order_quantity"), // Quantidade mínima de pedido
+
   notes: text("notes"), // Observações específicas desta relação
   active: boolean("active").notNull().default(true), // Status ativo/inativo
   createdAt: timestamp("created_at").notNull().defaultNow(),

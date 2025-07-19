@@ -11,7 +11,7 @@
 
 import { Router } from 'express';
 import { ProductSupplierController } from '../controllers/ProductSupplierController';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth } from '../security';
 
 const router = Router();
 

@@ -5,7 +5,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth } from '../security';
 // Simple validation middleware
 const validateRequest = (schema: any) => {
   return (req: any, res: any, next: any) => {
@@ -119,10 +119,12 @@ router.get(
       const userId = req.user!.id;
 
       console.log(`📊 [CHANNELS] Getting channels for product ${productId} by user ${userId}`);
+      console.log(`📊 [CHANNELS] Full URL path: ${req.path}`);
 
       // Get product with ownership verification
       const product = await storage.getProductById(productId);
       if (!product) {
+        console.log(`❌ [CHANNELS] Product ${productId} not found in storage`);
         return ResponseHandler.notFound(res, 'Product not found');
       }
 

@@ -7080,8 +7080,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     const { productSupplierRoutes } = await import('./routes/productSupplierRoutes');
     app.use('/api/products', productSupplierRoutes);
     console.log('✅ [PRODUCT_SUPPLIERS] Routes registered successfully');
+    console.log('✅ [PRODUCT_SUPPLIERS] Available routes:');
+    console.log('   - GET /:productId/suppliers');
+    console.log('   - POST /:productId/suppliers');
+    console.log('   - PUT /:productId/suppliers/:supplierId');
+    console.log('   - DELETE /:productId/suppliers/:supplierId');
   } catch (error) {
     console.error('❌ Error registering product supplier routes:', error);
+    console.error('❌ [PRODUCT_SUPPLIERS] Import failed:', error);
   }
 
   return httpServer;
