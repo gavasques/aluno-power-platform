@@ -12,7 +12,7 @@
 import { Request, Response } from 'express';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import { db } from '../db';
-import { productSuppliers, suppliers, products } from '../../shared/schema';
+import { productSuppliers, suppliers, products, supplierProducts } from '../../shared/schema';
 import { insertProductSupplierSchema } from '../../shared/schema';
 import { z } from 'zod';
 
@@ -174,6 +174,21 @@ export class ProductSupplierController {
         .insert(productSuppliers)
         .values(validatedData)
         .returning();
+
+      // Update supplierProducts table to reflect the link (bidirectional sync)
+      if (validatedData.supplierCode) {
+        await db
+          .update(supplierProducts)
+          .set({ 
+            productId: productId,
+            linkStatus: 'linked',
+            updatedAt: new Date()
+          })
+          .where(and(
+            eq(supplierProducts.supplierId, validatedData.supplierId),
+            eq(supplierProducts.supplierSku, validatedData.supplierCode)
+          ));
+      }
 
       // Get the complete supplier information
       const supplierWithInfo = await db
@@ -419,10 +434,39 @@ export class ProductSupplierController {
         });
       }
 
-      // Delete supplier
+      // Get supplier relationship details before deletion for synchronization
+      const supplierRelation = await db
+        .select({
+          supplierId: productSuppliers.supplierId,
+          productId: productSuppliers.productId,
+          supplierCode: productSuppliers.supplierCode
+        })
+        .from(productSuppliers)
+        .where(eq(productSuppliers.id, supplierId))
+        .limit(1);
+
+      // Delete supplier relationship
       await db
         .delete(productSuppliers)
         .where(eq(productSuppliers.id, supplierId));
+
+      // Update supplierProducts table to reflect the unlink (bidirectional sync)
+      if (supplierRelation.length > 0) {
+        const relation = supplierRelation[0];
+        
+        // Find corresponding supplier product and update link status to 'pending'
+        await db
+          .update(supplierProducts)
+          .set({ 
+            productId: null,
+            linkStatus: 'pending',
+            updatedAt: new Date()
+          })
+          .where(and(
+            eq(supplierProducts.supplierId, relation.supplierId),
+            eq(supplierProducts.productId, relation.productId)
+          ));
+      }
 
       return res.json({
         success: true,
