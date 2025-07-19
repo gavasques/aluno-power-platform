@@ -110,10 +110,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Login action seguindo Single Responsibility
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    console.log('🔍 AuthContext - Starting login process for:', email);
     const credentials: LoginCredentials = { email, password };
     const result = await AuthService.login(credentials);
 
+    console.log('🔍 AuthContext - Login result:', result);
+
     if (result.success && result.user && result.token) {
+      console.log('🔍 AuthContext - Login successful, setting token and state');
       TokenManager.setToken(result.token);
       setState({
         user: result.user,
@@ -121,6 +125,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading: false,
         isAuthenticated: true,
       });
+    } else {
+      console.log('🔍 AuthContext - Login failed:', result.error);
     }
 
     return result;

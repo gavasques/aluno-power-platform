@@ -41,17 +41,36 @@ export class AuthService {
 
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const data = await apiRequest<{ user: User; token: string }>(AuthService.ENDPOINTS.LOGIN, {
+      console.log('🔍 AuthService - Attempting login with:', { email: credentials.email });
+      const response = await apiRequest<any>(AuthService.ENDPOINTS.LOGIN, {
         method: 'POST',
         body: JSON.stringify(credentials),
       });
 
-      return {
-        success: true,
-        user: data.user,
-        token: data.token,
-      };
+      console.log('🔍 AuthService - Raw response:', response);
+
+      // Check if response has the expected structure
+      if (response.success && response.user && response.token) {
+        console.log('🔍 AuthService - Login successful, user:', response.user);
+        return {
+          success: true,
+          user: response.user,
+          token: response.token,
+        };
+      }
+
+      // Handle error response from server
+      if (!response.success) {
+        console.log('🔍 AuthService - Server returned error:', response.message);
+        return {
+          success: false,
+          error: response.message || 'Erro no login',
+        };
+      }
+
+      throw new Error('Formato de resposta inválido');
     } catch (error) {
+      console.error('🔍 AuthService - Login error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro no login',

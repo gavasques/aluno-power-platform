@@ -87,8 +87,13 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   if (body && !(body instanceof FormData) && typeof body === 'object') {
     body = JSON.stringify(body);
     (headers as any)['Content-Type'] = 'application/json';
-  } else if (!(body instanceof FormData)) {
+  } else if (!(body instanceof FormData) && options?.body) {
     (headers as any)['Content-Type'] = 'application/json';
+  }
+
+  // Debug log for login requests
+  if (url.includes('/api/auth/login')) {
+    console.log('🔍 apiRequest - Login request:', { url, headers, body });
   }
   
   const response = await fetch(url, {
@@ -97,9 +102,26 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
     body,
   });
 
+  // Debug log for login responses
+  if (url.includes('/api/auth/login')) {
+    console.log('🔍 apiRequest - Login response status:', response.status);
+  }
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || `HTTP ${response.status}`);
+    const errorText = await response.text().catch(() => '{}');
+    let error;
+    try {
+      error = JSON.parse(errorText);
+    } catch {
+      error = { message: 'Request failed' };
+    }
+    
+    // Debug log for login errors
+    if (url.includes('/api/auth/login')) {
+      console.log('🔍 apiRequest - Login error:', error);
+    }
+    
+    throw new Error(error.message || error.error || `HTTP ${response.status}`);
   }
 
   // Handle empty responses (like 204 No Content)
@@ -114,6 +136,11 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
 
   try {
     const data = JSON.parse(text);
+    
+    // Debug log for login success
+    if (url.includes('/api/auth/login')) {
+      console.log('🔍 apiRequest - Login response data:', data);
+    }
     
     // Debug log for product suppliers endpoint
     if (url.includes('/api/products/') && url.includes('/suppliers')) {
