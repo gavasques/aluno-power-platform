@@ -14,7 +14,7 @@ interface AuthState {
 
 interface AuthActions {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string, name: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (userData: RegisterData) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -127,8 +127,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Register action seguindo Single Responsibility
-  const register = async (email: string, name: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    const userData: RegisterData = { email, name, password };
+  const register = async (userData: RegisterData): Promise<{ success: boolean; error?: string }> => {
     const result = await AuthService.register(userData);
 
     if (result.success && result.user && result.token) {

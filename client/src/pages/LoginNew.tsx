@@ -46,8 +46,8 @@ export default function LoginNew() {
   const [registerData, setRegisterData] = useState({
     name: '',
     email: '',
-    username: '',
     password: '',
+    confirmPassword: '',
     phone: ''
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -124,15 +124,21 @@ export default function LoginNew() {
     } else if (!/\S+@\S+\.\S+/.test(registerData.email)) {
       newErrors.email = 'Email inválido';
     }
-    if (!registerData.username.trim()) {
-      newErrors.username = 'Username é obrigatório';
-    }
     if (!registerData.password.trim()) {
       newErrors.password = 'Senha é obrigatória';
     } else if (registerData.password.length < 8) {
       newErrors.password = 'Senha deve ter pelo menos 8 caracteres';
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(registerData.password)) {
+      newErrors.password = 'Senha deve conter ao menos uma letra maiúscula, uma minúscula e um número';
     }
-    if (registerData.phone && !/^\(?[1-9]{2}\)?\s?[0-9]{4,5}-?[0-9]{4}$/.test(registerData.phone.replace(/\s+/g, ''))) {
+    if (!registerData.confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Confirme sua senha';
+    } else if (registerData.password !== registerData.confirmPassword) {
+      newErrors.confirmPassword = 'Senhas não coincidem';
+    }
+    if (!registerData.phone.trim()) {
+      newErrors.phone = 'Telefone é obrigatório';
+    } else if (!/^\(?[1-9]{2}\)?\s?[0-9]{4,5}-?[0-9]{4}$/.test(registerData.phone.replace(/\s+/g, ''))) {
       newErrors.phone = 'Formato de telefone inválido (ex: 11999999999)';
     }
 
@@ -142,19 +148,17 @@ export default function LoginNew() {
     }
 
     try {
-      await register(registerData);
+      // Remove confirmPassword from data sent to server
+      const { confirmPassword, ...registrationData } = registerData;
+      await register(registrationData);
       toast({
         title: "Cadastro realizado com sucesso!",
-        description: registerData.phone 
-          ? "Agora você pode verificar seu telefone via WhatsApp" 
-          : "Bem-vindo à plataforma!",
+        description: "Agora você deve verificar seu telefone via WhatsApp",
       });
       setIsRegisterModalOpen(false);
       
-      // If user provided phone, redirect to verification
-      if (registerData.phone) {
-        setLocation('/phone-verification');
-      }
+      // Always redirect to verification since phone is mandatory
+      setLocation('/phone-verification');
     } catch (error: any) {
       console.error('Register error:', error);
       toast({
@@ -378,30 +382,10 @@ export default function LoginNew() {
                               )}
                             </div>
 
-                            {/* Username Field */}
-                            <div className="space-y-2">
-                              <Label htmlFor="register-username" className="text-sm font-medium text-gray-700">
-                                Username
-                              </Label>
-                              <Input
-                                id="register-username"
-                                name="username"
-                                type="text"
-                                placeholder="seu_username"
-                                value={registerData.username}
-                                onChange={handleRegisterChange}
-                                className={`h-10 ${registerErrors.username ? 'border-red-500' : ''}`}
-                                disabled={isLoading}
-                              />
-                              {registerErrors.username && (
-                                <p className="text-sm text-red-600">{registerErrors.username}</p>
-                              )}
-                            </div>
-
                             {/* Phone Field */}
                             <div className="space-y-2">
                               <Label htmlFor="register-phone" className="text-sm font-medium text-gray-700">
-                                Telefone (opcional)
+                                Telefone WhatsApp <span className="text-red-500">*</span>
                               </Label>
                               <div className="relative">
                                 <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -420,14 +404,14 @@ export default function LoginNew() {
                                 <p className="text-sm text-red-600">{registerErrors.phone}</p>
                               )}
                               <p className="text-xs text-gray-500">
-                                Informe seu WhatsApp para verificação via código
+                                Obrigatório para verificação via código WhatsApp
                               </p>
                             </div>
 
                             {/* Password Field */}
                             <div className="space-y-2">
                               <Label htmlFor="register-password" className="text-sm font-medium text-gray-700">
-                                Senha
+                                Senha <span className="text-red-500">*</span>
                               </Label>
                               <div className="relative">
                                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -453,8 +437,31 @@ export default function LoginNew() {
                                 <p className="text-sm text-red-600">{registerErrors.password}</p>
                               )}
                               <p className="text-xs text-gray-500">
-                                Mínimo 8 caracteres
+                                Mínimo 8 caracteres, com maiúscula, minúscula e número
                               </p>
+                            </div>
+
+                            {/* Confirm Password Field */}
+                            <div className="space-y-2">
+                              <Label htmlFor="register-confirm-password" className="text-sm font-medium text-gray-700">
+                                Repita a Senha <span className="text-red-500">*</span>
+                              </Label>
+                              <div className="relative">
+                                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                <Input
+                                  id="register-confirm-password"
+                                  name="confirmPassword"
+                                  type="password"
+                                  placeholder="••••••••"
+                                  value={registerData.confirmPassword}
+                                  onChange={handleRegisterChange}
+                                  className={`pl-10 h-10 ${registerErrors.confirmPassword ? 'border-red-500' : ''}`}
+                                  disabled={isLoading}
+                                />
+                              </div>
+                              {registerErrors.confirmPassword && (
+                                <p className="text-sm text-red-600">{registerErrors.confirmPassword}</p>
+                              )}
                             </div>
 
                             {/* Submit Button */}
