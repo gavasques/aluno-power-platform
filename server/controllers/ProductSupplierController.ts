@@ -66,6 +66,8 @@ export class ProductSupplierController {
       }
 
       // Get suppliers with supplier information
+      console.log(`🔍 [PRODUCT_SUPPLIERS] About to query database for productId: ${productId}`);
+      
       const productSuppliersList = await db
         .select({
           id: productSuppliers.id,
@@ -95,6 +97,12 @@ export class ProductSupplierController {
 
       console.log(`🔍 [PRODUCT_SUPPLIERS] Database result:`, JSON.stringify(productSuppliersList, null, 2));
       console.log(`🔍 [PRODUCT_SUPPLIERS] Number of suppliers found: ${productSuppliersList.length}`);
+      
+      // Check if result is actually from database
+      if (productSuppliersList.length > 0) {
+        console.warn(`⚠️  [PRODUCT_SUPPLIERS] Found ${productSuppliersList.length} suppliers in database - this should be 0 based on direct SQL query!`);
+        console.warn(`⚠️  [PRODUCT_SUPPLIERS] First supplier ID: ${productSuppliersList[0].id}, supplierId: ${productSuppliersList[0].supplierId}`);
+      }
 
       return res.json({
         success: true,
