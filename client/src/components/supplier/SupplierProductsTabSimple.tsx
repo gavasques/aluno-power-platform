@@ -13,6 +13,28 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import * as XLSX from 'xlsx';
 
+// Função para formatar valores monetários no padrão brasileiro
+const formatCurrency = (value: string | number | null | undefined): string => {
+  if (!value || value === '') return '-';
+  
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(numValue)) return '-';
+  
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(numValue);
+};
+
+// Função para converter valor formatado brasileiro de volta para número
+const parseBrazilianCurrency = (value: string): string => {
+  if (!value) return '';
+  // Remove R$, espaços, pontos (separadores de milhares) e substitui vírgula por ponto
+  return value.replace(/[R$\s.]/g, '').replace(',', '.');
+};
+
 interface SupplierProductsTabSimpleProps {
   supplierId: number;
 }
@@ -146,7 +168,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
         },
         body: JSON.stringify({
           ...productData,
-          cost: productData.cost ? parseFloat(productData.cost) : null,
+          cost: productData.cost ? parseFloat(parseBrazilianCurrency(productData.cost)) : null,
           leadTime: productData.leadTime ? parseInt(productData.leadTime) : null,
           minimumOrderQuantity: productData.minimumOrderQuantity ? parseInt(productData.minimumOrderQuantity) : null,
           masterBox: productData.masterBox ? parseInt(productData.masterBox) : null,
@@ -199,7 +221,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
         body: JSON.stringify({
           supplierSku: productData.supplierSku,
           productName: productData.productName,
-          cost: productData.cost ? parseFloat(productData.cost) : null,
+          cost: productData.cost ? parseFloat(parseBrazilianCurrency(productData.cost)) : null,
           leadTime: productData.leadTime ? parseInt(productData.leadTime) : null,
           minimumOrderQuantity: productData.minimumOrderQuantity ? parseInt(productData.minimumOrderQuantity) : null,
           masterBox: productData.masterBox ? parseInt(productData.masterBox) : null,
@@ -566,7 +588,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                             {product.productName}
                           </TableCell>
                           <TableCell>
-                            {product.cost ? `R$ ${parseFloat(product.cost).toFixed(2)}` : '-'}
+                            {formatCurrency(product.cost)}
                           </TableCell>
                           <TableCell>
                             {product.leadTime ? `${product.leadTime} dias` : '-'}
@@ -785,11 +807,18 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                 <Label htmlFor="cost">Custo (R$)</Label>
                 <Input
                   id="cost"
-                  type="number"
-                  step="0.01"
                   value={newProduct.cost}
-                  onChange={(e) => setNewProduct(prev => ({ ...prev, cost: e.target.value }))}
-                  placeholder="10.50"
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    // Permitir apenas números, vírgulas e pontos
+                    value = value.replace(/[^\d.,]/g, '');
+                    // Substituir pontos por vírgulas (padrão brasileiro)
+                    if (value.includes('.') && !value.includes(',')) {
+                      value = value.replace('.', ',');
+                    }
+                    setNewProduct(prev => ({ ...prev, cost: value }));
+                  }}
+                  placeholder="10,50"
                 />
               </div>
               <div>
@@ -886,11 +915,18 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                 <Label htmlFor="editCost">Custo (R$)</Label>
                 <Input
                   id="editCost"
-                  type="number"
-                  step="0.01"
                   value={editingProduct?.cost || ''}
-                  onChange={(e) => setEditingProduct(prev => ({ ...prev, cost: e.target.value }))}
-                  placeholder="10.50"
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    // Permitir apenas números, vírgulas e pontos
+                    value = value.replace(/[^\d.,]/g, '');
+                    // Substituir pontos por vírgulas (padrão brasileiro)
+                    if (value.includes('.') && !value.includes(',')) {
+                      value = value.replace('.', ',');
+                    }
+                    setEditingProduct(prev => ({ ...prev, cost: value }));
+                  }}
+                  placeholder="10,50"
                 />
               </div>
               <div>
