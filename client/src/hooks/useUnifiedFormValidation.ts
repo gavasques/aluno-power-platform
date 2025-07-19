@@ -101,18 +101,19 @@ export function useUnifiedFormValidation<T extends Record<string, any>>({
   }, [validationRules]);
 
   // Validação do formulário completo
-  const validateForm = useCallback((data: T = formData): ValidationErrors<T> => {
+  const validateForm = useCallback((data?: T): ValidationErrors<T> => {
+    const dataToValidate = data || formData;
     const newErrors: ValidationErrors<T> = {};
     
     Object.keys(validationRules).forEach(fieldName => {
-      const error = validateField(fieldName as keyof T, data[fieldName as keyof T]);
+      const error = validateField(fieldName as keyof T, dataToValidate[fieldName as keyof T]);
       if (error) {
         newErrors[fieldName as keyof T] = error;
       }
     });
 
     return newErrors;
-  }, [formData, validationRules, validateField]);
+  }, [validationRules, validateField]);
 
   // Atualização de campo único
   const updateField = useCallback((field: keyof T, value: any) => {
@@ -237,10 +238,10 @@ export function useUnifiedFormValidation<T extends Record<string, any>>({
 
   // Atualização do estado de validação
   useEffect(() => {
-    const validationErrors = validateForm();
+    const validationErrors = validateForm(formData);
     const valid = Object.keys(validationErrors).length === 0;
     setIsValid(valid);
-  }, [formData, validateForm]);
+  }, [formData, validationRules, validateForm]);
 
   // Atualização quando initialData mudar
   useEffect(() => {
