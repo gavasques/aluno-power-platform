@@ -19,9 +19,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Save, Loader2, Package, Upload, X } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Package, Upload, X, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { ProductSupplierManager } from '@/components/product/ProductSupplierManager';
 
 // Form schema
 const productFormSchema = z.object({
@@ -631,23 +632,41 @@ const ProductEditWithTabs: React.FC = () => {
                 </CardContent>
               </Card>
 
-              {/* Submit Button */}
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={updateMutation.isPending}
-                  className="gap-2"
-                >
-                  {updateMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                  Salvar Alterações
-                </Button>
-              </div>
+              {/* Suppliers Section - Outside of form */}
             </form>
           </Form>
+
+          {/* Suppliers Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Fornecedores do Produto
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProductSupplierManager 
+                productId={parseInt(id!)} 
+                productName={product?.name || ''} 
+              />
+            </CardContent>
+          </Card>
+
+          {/* Submit Button - Outside form but inside tab */}
+          <div className="flex justify-end">
+            <Button
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={updateMutation.isPending}
+              className="gap-2"
+            >
+              {updateMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Salvar Alterações
+            </Button>
+          </div>
         </TabsContent>
 
 
