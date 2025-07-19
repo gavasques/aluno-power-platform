@@ -113,7 +113,18 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   }
 
   try {
-    return JSON.parse(text);
+    const data = JSON.parse(text);
+    
+    // Debug log for product suppliers endpoint
+    if (url.includes('/api/products/') && url.includes('/suppliers')) {
+      console.log('🔍 apiRequest - Raw response text:', text);
+      console.log('🔍 apiRequest - Parsed data:', data);
+      if (data?.data && Array.isArray(data.data)) {
+        console.log('🔍 apiRequest - Supplier IDs in response:', data.data.map((s: any) => s.id));
+      }
+    }
+    
+    return data;
   } catch (error) {
     console.warn('Failed to parse JSON response:', text);
     return {} as T;

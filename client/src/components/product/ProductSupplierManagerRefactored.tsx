@@ -155,11 +155,12 @@ export default function ProductSupplierManagerRefactored({
   });
 
   // Force cache clear and refresh
-  const handleForceRefresh = () => {
+  const handleForceRefresh = async () => {
     console.log('🔄 Force refresh - clearing cache for productId:', productId);
     queryClient.removeQueries({ queryKey: [`/api/products/${productId}/suppliers`] });
     queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/suppliers`] });
-    refetch();
+    await refetch();
+    console.log('🔄 Force refresh - completed');
   };
 
   // Handle select all checkbox
