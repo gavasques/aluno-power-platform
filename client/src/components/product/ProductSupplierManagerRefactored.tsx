@@ -93,11 +93,18 @@ export default function ProductSupplierManagerRefactored({
   // Delete supplier mutation
   const deleteSupplierMutation = useMutation({
     mutationFn: async (supplierId: number) => {
-      return await apiRequest(`/api/products/${productId}/suppliers/${supplierId}`, {
+      console.log('🔍 ProductSupplierManagerRefactored - Delete mutation called with supplierId:', supplierId);
+      console.log('🔍 ProductSupplierManagerRefactored - Delete URL:', `/api/products/${productId}/suppliers/${supplierId}`);
+      
+      const response = await apiRequest(`/api/products/${productId}/suppliers/${supplierId}`, {
         method: 'DELETE'
       });
+      
+      console.log('🔍 ProductSupplierManagerRefactored - Delete response:', response);
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🔍 ProductSupplierManagerRefactored - Delete success:', data);
       queryClient.invalidateQueries({ queryKey: ['product-suppliers-refactored', productId] });
       toast({
         title: 'Fornecedor removido',
@@ -107,6 +114,7 @@ export default function ProductSupplierManagerRefactored({
       setSupplierToDelete(null);
     },
     onError: (error: any) => {
+      console.error('🔍 ProductSupplierManagerRefactored - Delete error:', error);
       toast({
         title: 'Erro ao remover fornecedor',
         description: error.message || 'Ocorreu um erro ao remover o fornecedor.',
@@ -181,6 +189,7 @@ export default function ProductSupplierManagerRefactored({
 
   // Handle supplier deletion
   const handleDeleteSupplier = (supplier: ProductSupplier) => {
+    console.log('🔍 ProductSupplierManagerRefactored - handleDeleteSupplier called with:', supplier);
     setSupplierToDelete(supplier);
     setDeleteConfirmOpen(true);
   };

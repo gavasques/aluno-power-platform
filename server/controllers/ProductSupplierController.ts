@@ -383,8 +383,10 @@ export class ProductSupplierController {
   static async deleteProductSupplier(req: AuthenticatedRequest, res: Response) {
     try {
       const productId = parseInt(req.params.productId);
-      const supplierId = parseInt(req.params.supplierId);
+      const relationshipId = parseInt(req.params.supplierId); // This is actually the product_suppliers.id
       const userId = req.user.id;
+
+      console.log('🔍 [DELETE] ProductId:', productId, 'RelationshipId:', relationshipId, 'UserId:', userId);
 
       if (!productId || isNaN(productId)) {
         return res.status(400).json({
@@ -393,10 +395,10 @@ export class ProductSupplierController {
         });
       }
 
-      if (!supplierId || isNaN(supplierId)) {
+      if (!relationshipId || isNaN(relationshipId)) {
         return res.status(400).json({
           success: false,
-          message: 'ID do fornecedor é obrigatório'
+          message: 'ID do relacionamento é obrigatório'
         });
       }
 
@@ -417,15 +419,20 @@ export class ProductSupplierController {
         });
       }
 
-      // Check if product supplier exists
+      // Check if product supplier relationship exists
       const existingSupplier = await db
         .select()
         .from(productSuppliers)
         .where(and(
           eq(productSuppliers.productId, productId),
-          eq(productSuppliers.id, supplierId)
+          eq(productSuppliers.id, relationshipId)
         ))
         .limit(1);
+
+      console.log('🔍 [DELETE] Existing supplier found:', existingSupplier.length > 0 ? 'YES' : 'NO');
+      if (existingSupplier.length > 0) {
+        console.log('🔍 [DELETE] Existing supplier:', existingSupplier[0]);
+      }
 
       if (!existingSupplier.length) {
         return res.status(404).json({
@@ -442,13 +449,18 @@ export class ProductSupplierController {
           supplierCode: productSuppliers.supplierCode
         })
         .from(productSuppliers)
-        .where(eq(productSuppliers.id, supplierId))
+        .where(eq(productSuppliers.id, relationshipId))
         .limit(1);
 
+      console.log('🔍 [DELETE] Supplier relation found:', supplierRelation);
+
       // Delete supplier relationship
-      await db
+      const deleteResult = await db
         .delete(productSuppliers)
-        .where(eq(productSuppliers.id, supplierId));
+        .where(eq(productSuppliers.id, relationshipId))
+        .returning();
+
+      console.log('🔍 [DELETE] Delete result:', deleteResult);
 
       // Update supplierProducts table to reflect the unlink (bidirectional sync)
       if (supplierRelation.length > 0) {
