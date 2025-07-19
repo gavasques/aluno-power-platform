@@ -24,6 +24,7 @@ const supplierProductSchema = z.object({
   leadTime: z.number().int().positive().nullable().optional(),
   minimumOrderQuantity: z.number().int().positive().nullable().optional(),
   masterBox: z.number().int().positive().nullable().optional(),
+  stock: z.number().int().min(0).nullable().optional(),
 });
 
 // Schema para importação Excel
@@ -34,6 +35,7 @@ const excelRowSchema = z.object({
   leadTime: z.string().transform(val => val ? parseInt(val) : null),
   minimumOrderQuantity: z.string().transform(val => val ? parseInt(val) : null),
   masterBox: z.string().transform(val => val ? parseInt(val) : null),
+  stock: z.string().transform(val => val ? parseInt(val) : null),
 });
 
 export class SupplierProductsController {
@@ -69,6 +71,7 @@ export class SupplierProductsController {
           leadTime: supplierProducts.leadTime,
           minimumOrderQuantity: supplierProducts.minimumOrderQuantity,
           masterBox: supplierProducts.masterBox,
+          stock: supplierProducts.stock,
           linkStatus: supplierProducts.linkStatus,
           createdAt: supplierProducts.createdAt,
           updatedAt: supplierProducts.updatedAt,

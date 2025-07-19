@@ -523,6 +523,7 @@ export const supplierProducts = pgTable("supplier_products", {
   leadTime: integer("lead_time"), // Tempo de entrega (dias)
   minimumOrderQuantity: integer("minimum_order_quantity"), // Quantidade mínima de pedido
   masterBox: integer("master_box"), // Caixa master - quantidade por caixa
+  stock: integer("stock"), // Estoque disponível no fornecedor
   
   // Status de vinculação
   productId: integer("product_id").references(() => products.id, { onDelete: "set null" }), // NULL se não existir no sistema

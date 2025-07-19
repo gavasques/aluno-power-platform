@@ -43,7 +43,8 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     cost: '',
     leadTime: '',
     minimumOrderQuantity: '',
-    masterBox: ''
+    masterBox: '',
+    stock: ''
   });
 
   // Query para buscar produtos do fornecedor com paginação
@@ -144,6 +145,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
           leadTime: productData.leadTime ? parseInt(productData.leadTime) : null,
           minimumOrderQuantity: productData.minimumOrderQuantity ? parseInt(productData.minimumOrderQuantity) : null,
           masterBox: productData.masterBox ? parseInt(productData.masterBox) : null,
+          stock: productData.stock ? parseInt(productData.stock) : null,
         }),
       });
 
@@ -166,7 +168,8 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
         cost: '',
         leadTime: '',
         minimumOrderQuantity: '',
-        masterBox: ''
+        masterBox: '',
+        stock: ''
       });
       setAddProductDialogOpen(false);
     },
@@ -221,7 +224,8 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
         cost: 10.50,
         leadTime: 30,
         minimumOrderQuantity: 1,
-        masterBox: 12
+        masterBox: 12,
+        stock: 100
       },
       {
         supplierSku: 'SKU002', 
@@ -229,7 +233,8 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
         cost: 25.00,
         leadTime: 15,
         minimumOrderQuantity: 5,
-        masterBox: 24
+        masterBox: 24,
+        stock: 250
       }
     ];
 
@@ -244,7 +249,8 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       { wch: 10 }, // cost
       { wch: 12 }, // leadTime
       { wch: 20 }, // minimumOrderQuantity
-      { wch: 15 }  // masterBox
+      { wch: 15 }, // masterBox
+      { wch: 12 }  // stock
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
@@ -364,13 +370,14 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                       <TableHead className="font-medium">Lead Time</TableHead>
                       <TableHead className="font-medium">Qtd Mín.</TableHead>
                       <TableHead className="font-medium">Cx Master</TableHead>
+                      <TableHead className="font-medium">Estoque</TableHead>
                       <TableHead className="font-medium">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {products.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                           {isFetching ? 'Carregando produtos...' : 'Nenhum produto encontrado'}
                         </TableCell>
                       </TableRow>
@@ -392,6 +399,9 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                           </TableCell>
                           <TableCell>
                             {product.masterBox || '-'}
+                          </TableCell>
+                          <TableCell>
+                            {product.stock !== null && product.stock !== undefined ? product.stock : '-'}
                           </TableCell>
                           <TableCell>
                             <Badge variant={product.linkStatus === 'linked' ? 'default' : 'outline'} className="text-xs">
@@ -592,7 +602,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="minimumOrderQuantity">Qtd. Mínima</Label>
                 <Input
@@ -611,6 +621,16 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                   value={newProduct.masterBox}
                   onChange={(e) => setNewProduct(prev => ({ ...prev, masterBox: e.target.value }))}
                   placeholder="12"
+                />
+              </div>
+              <div>
+                <Label htmlFor="stock">Estoque</Label>
+                <Input
+                  id="stock"
+                  type="number"
+                  value={newProduct.stock}
+                  onChange={(e) => setNewProduct(prev => ({ ...prev, stock: e.target.value }))}
+                  placeholder="100"
                 />
               </div>
             </div>
