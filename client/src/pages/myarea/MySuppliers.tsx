@@ -336,34 +336,34 @@ const MySuppliers = () => {
         <Card className="bg-white border border-gray-200">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Empresa & Categoria</TableHead>
-                <TableHead>Localização</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
+              <TableRow className="border-b border-gray-200">
+                <TableHead className="font-medium text-gray-700 py-3">Empresa & Categoria</TableHead>
+                <TableHead className="font-medium text-gray-700 py-3">Localização</TableHead>
+                <TableHead className="font-medium text-gray-700 py-3">Status</TableHead>
+                <TableHead className="font-medium text-gray-700 py-3 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedSuppliers.map((supplier) => (
-                <TableRow key={supplier.id} className="hover:bg-gray-50">
-                  <TableCell>
+                <TableRow key={supplier.id} className="hover:bg-gray-50 border-b border-gray-100">
+                  <TableCell className="py-3">
                     <div className="space-y-1">
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-gray-900 text-sm">
                         {supplier.tradeName}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
                         <Building className="h-3 w-3" />
                         {getCategoryName(supplier.categoryId)}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-3">
                     <div className="space-y-1">
-                      <div className="text-sm text-gray-900 flex items-center gap-1">
+                      <div className="text-xs text-gray-900 flex items-center gap-1">
                         <Globe className="h-3 w-3" />
                         {supplier.country || "Não informado"}
                       </div>
-                      <div className="text-sm text-gray-600 flex items-center gap-1">
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         {supplier.state && supplier.city 
                           ? `${supplier.city}, ${supplier.state}`
@@ -372,34 +372,29 @@ const MySuppliers = () => {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={supplier.status === 'ativo'}
-                          onCheckedChange={() => handleStatusToggle(supplier.id, supplier.status || 'ativo')}
-                          disabled={statusMutation.isPending}
-                          className="data-[state=checked]:bg-green-600"
-                        />
-                        <span className="text-sm">
-                          {supplier.status === 'ativo' ? (
-                            <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                              Ativo
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 text-xs">
-                              Inativo
-                            </Badge>
-                          )}
-                        </span>
-                      </div>
-
+                  <TableCell className="py-3">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={supplier.status === 'ativo'}
+                        onCheckedChange={() => handleStatusToggle(supplier.id, supplier.status || 'ativo')}
+                        disabled={statusMutation.isPending}
+                        className="data-[state=checked]:bg-green-600 scale-75"
+                      />
+                      {supplier.status === 'ativo' ? (
+                        <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs px-2 py-0.5">
+                          Ativo
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5">
+                          Inativo
+                        </Badge>
+                      )}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
+                  <TableCell className="py-3">
+                    <div className="flex items-center justify-end gap-2">
                       <Link href={`/minha-area/fornecedores/${supplier.id}`}>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" className="h-8 px-3 text-xs">
                           <Eye className="h-3 w-3 mr-1" />
                           Ver Detalhes
                         </Button>
@@ -410,7 +405,7 @@ const MySuppliers = () => {
                           <Button 
                             size="sm" 
                             variant="outline" 
-                            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                            className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                             disabled={deleteMutation.isPending}
                           >
                             <Trash2 className="h-3 w-3 mr-1" />
