@@ -14,6 +14,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Eye, EyeOff, Mail, Lock, Users, BarChart3, Zap, ShoppingBag, TrendingUp, Shield, Crown, UserPlus, Phone } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { Footer } from '@/components/layout/Footer';
+import { Link } from 'wouter';
+import { Checkbox } from '@/components/ui/checkbox';
 import logoPath from '@assets/Asset 14-8_1752953662731.png';
 
 interface FeatureCardProps {
@@ -48,7 +51,8 @@ export default function LoginNew() {
     email: '',
     password: '',
     confirmPassword: '',
-    phone: ''
+    phone: '',
+    acceptedTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
@@ -154,6 +158,9 @@ export default function LoginNew() {
       newErrors.phone = 'Telefone é obrigatório';
     } else if (!/^\(?[1-9]{2}\)?\s?[0-9]{4,5}-?[0-9]{4}$/.test(registerData.phone.replace(/\s+/g, ''))) {
       newErrors.phone = 'Formato de telefone inválido (ex: 11999999999)';
+    }
+    if (!registerData.acceptedTerms) {
+      newErrors.acceptedTerms = 'Você deve aceitar os Termos de Uso e Política de Privacidade';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -608,6 +615,38 @@ export default function LoginNew() {
                               )}
                             </div>
 
+                            {/* Terms Acceptance */}
+                            <div className="space-y-3 pt-2">
+                              <div className="flex items-start space-x-2">
+                                <Checkbox 
+                                  id="acceptedTerms"
+                                  checked={registerData.acceptedTerms}
+                                  onCheckedChange={(checked) => 
+                                    setRegisterData(prev => ({ ...prev, acceptedTerms: !!checked }))
+                                  }
+                                  className="mt-0.5"
+                                />
+                                <Label htmlFor="acceptedTerms" className="text-xs text-gray-600 leading-relaxed">
+                                  Ao cadastrar-se na ferramenta, você aceita os{' '}
+                                  <Link href="/termos-de-uso">
+                                    <a className="text-blue-600 hover:text-blue-700 underline" target="_blank">
+                                      Termos de Uso
+                                    </a>
+                                  </Link>
+                                  {' '}e a{' '}
+                                  <Link href="/politica-de-privacidade">
+                                    <a className="text-blue-600 hover:text-blue-700 underline" target="_blank">
+                                      Política de Privacidade
+                                    </a>
+                                  </Link>
+                                  <span className="text-red-500"> *</span>
+                                </Label>
+                              </div>
+                              {registerErrors.acceptedTerms && (
+                                <p className="text-sm text-red-600">{registerErrors.acceptedTerms}</p>
+                              )}
+                            </div>
+
                             {/* Submit Button */}
                             <div className="flex gap-3 pt-4">
                               <Button
@@ -956,6 +995,9 @@ export default function LoginNew() {
             </form>
           </DialogContent>
         </Dialog>
+        
+        {/* Footer with legal links */}
+        <Footer variant="login" />
       </div>
     </>
   );

@@ -106,6 +106,10 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PhoneVerification = lazy(() => import("./pages/PhoneVerification"));
 
+// Legal Pages
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+
 // Loading component for lazy-loaded routes
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -171,6 +175,19 @@ function App() {
                           <Route path="/phone-verification">
                             <Suspense fallback={<PageLoader />}>
                               <PhoneVerification />
+                            </Suspense>
+                          </Route>
+
+                          {/* Legal Pages - Public Access */}
+                          <Route path="/termos-de-uso">
+                            <Suspense fallback={<PageLoader />}>
+                              <TermsOfService />
+                            </Suspense>
+                          </Route>
+                          
+                          <Route path="/politica-de-privacidade">
+                            <Suspense fallback={<PageLoader />}>
+                              <PrivacyPolicy />
                             </Suspense>
                           </Route>
 
