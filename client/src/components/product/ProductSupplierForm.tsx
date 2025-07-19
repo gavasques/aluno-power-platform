@@ -9,11 +9,11 @@
  * - DIP: Depends on abstractions through hooks
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Save, AlertCircle, Building, DollarSign, Package, Clock, FileText, Star } from 'lucide-react';
+import { X, Save, AlertCircle, Building, DollarSign, Package, Clock, FileText, Star, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -60,6 +60,7 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
   isOpen
 }) => {
   const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const isEditing = !!supplier;
 
   const {
@@ -116,6 +117,7 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
         active: true,
       });
       setSelectedSupplier(null);
+      setSearchTerm('');
     }
   }, [supplier, form]);
 
@@ -154,6 +156,7 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
   const handleCancel = () => {
     form.reset();
     setSelectedSupplier(null);
+    setSearchTerm('');
     onCancel();
   };
 
@@ -161,6 +164,20 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
   const availableSuppliers = suppliers.filter(s => 
     isEditing || !hasSupplier(s.id)
   );
+
+  // Filtered suppliers based on search term
+  const filteredSuppliers = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return availableSuppliers;
+    }
+    
+    const searchLower = searchTerm.toLowerCase();
+    return availableSuppliers.filter(supplier => 
+      supplier.tradeName.toLowerCase().includes(searchLower) ||
+      supplier.corporateName.toLowerCase().includes(searchLower) ||
+      (supplier.description && supplier.description.toLowerCase().includes(searchLower))
+    );
+  }, [availableSuppliers, searchTerm]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
@@ -189,6 +206,28 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Search Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="supplier-search">Buscar Fornecedor</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400 transform -translate-y-1/2" />
+                    <Input
+                      id="supplier-search"
+                      type="text"
+                      placeholder="Digite o nome do fornecedor para buscar..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-white dark:bg-gray-800"
+                      disabled={isEditing}
+                    />
+                  </div>
+                  {searchTerm && (
+                    <div className="text-sm text-gray-500">
+                      {filteredSuppliers.length} fornecedor(es) encontrado(s)
+                    </div>
+                  )}
+                </div>
+
                 <FormField
                   control={form.control}
                   name="supplierId"
@@ -206,23 +245,31 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {availableSuppliers.map((supplier) => (
-                            <SelectItem key={supplier.id} value={supplier.id.toString()}>
-                              <div className="flex items-center gap-2">
-                                {supplier.logo && (
-                                  <img 
-                                    src={supplier.logo} 
-                                    alt={supplier.tradeName}
-                                    className="w-6 h-6 rounded object-cover"
-                                  />
-                                )}
-                                <div>
-                                  <div className="font-medium">{supplier.tradeName}</div>
-                                  <div className="text-xs text-gray-500">{supplier.corporateName}</div>
+                          {filteredSuppliers.length > 0 ? (
+                            filteredSuppliers.map((supplier) => (
+                              <SelectItem key={supplier.id} value={supplier.id.toString()}>
+                                <div className="flex items-center gap-2">
+                                  {supplier.logo && (
+                                    <img 
+                                      src={supplier.logo} 
+                                      alt={supplier.tradeName}
+                                      className="w-6 h-6 rounded object-cover"
+                                    />
+                                  )}
+                                  <div>
+                                    <div className="font-medium">{supplier.tradeName}</div>
+                                    <div className="text-xs text-gray-500">{supplier.corporateName}</div>
+                                  </div>
                                 </div>
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="no-results" disabled>
+                              <div className="text-gray-500 italic">
+                                {searchTerm ? 'Nenhum fornecedor encontrado' : 'Nenhum fornecedor disponível'}
                               </div>
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
