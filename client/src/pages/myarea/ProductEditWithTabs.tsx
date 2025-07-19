@@ -22,7 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Save, Loader2, Package, Upload, X, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { ProductSupplierManager } from '@/components/product/ProductSupplierManager';
+import { ProductSupplierManagerSimple } from '@/components/product/ProductSupplierManagerSimple';
 
 // Form schema
 const productFormSchema = z.object({
@@ -645,7 +645,7 @@ const ProductEditWithTabs: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ProductSupplierManager 
+              <ProductSupplierManagerSimple 
                 productId={parseInt(id!)} 
                 productName={product?.name || ''} 
               />
