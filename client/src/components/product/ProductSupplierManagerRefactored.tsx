@@ -77,8 +77,8 @@ export default function ProductSupplierManagerRefactored({
       }
       return response;
     },
-    staleTime: 1 * 60 * 1000, // 1 minute
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0 // No cache
   });
 
   const suppliers: ProductSupplier[] = suppliersResponse?.data || [];
