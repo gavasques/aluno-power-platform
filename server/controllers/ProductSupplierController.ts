@@ -93,6 +93,9 @@ export class ProductSupplierController {
         .where(eq(productSuppliers.productId, productId))
         .orderBy(desc(productSuppliers.isPrimary), asc(productSuppliers.cost));
 
+      console.log(`🔍 [PRODUCT_SUPPLIERS] Database result:`, JSON.stringify(productSuppliersList, null, 2));
+      console.log(`🔍 [PRODUCT_SUPPLIERS] Number of suppliers found: ${productSuppliersList.length}`);
+
       return res.json({
         success: true,
         data: productSuppliersList
