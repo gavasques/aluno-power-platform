@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Eye, EyeOff, Mail, Lock, Users, BarChart3, Zap, ShoppingBag, TrendingUp, Shield } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Users, BarChart3, Zap, ShoppingBag, TrendingUp, Shield, Crown } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import logoPath from '@assets/Asset 14-8_1752953662731.png';
 
@@ -259,69 +259,109 @@ export default function LoginNew() {
           </div>
 
           {/* Right Column - Features Showcase */}
-          <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-white/40 to-blue-50/60 backdrop-blur-sm border-l border-white/20 p-12 items-center">
+          <div className="hidden lg:flex lg:w-1/2 p-12 items-center relative">
             <div className="w-full max-w-2xl">
-              {/* Main Title */}
+              {/* Premium Badge - Floating */}
+              <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-8 shadow-lg">
+                <Crown className="w-4 h-4 mr-2" />
+                Plataforma Premium
+              </div>
+
+              {/* Main Title - No background */}
               <div className="mb-12">
-                <h2 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
-                  Transforme seu negócio na{' '}
-                  <span className="text-blue-600">Amazon</span>
-                </h2>
+                <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                  Transforme seu negócio na <span className="text-blue-600">Amazon</span>
+                </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
                   Mais de 10 agentes de IA especializados para otimizar suas vendas, 
                   criar conteúdo profissional e automatizar processos complexos.
                 </p>
               </div>
 
-              {/* Features Grid */}
-              <div className="grid grid-cols-2 gap-6 mb-10">
-                <FeatureCard
-                  icon={<Users className="w-6 h-6 text-blue-600" />}
-                  title="10+ Agentes de IA"
-                  description="Agentes especializados em Amazon FBA, SEO e e-commerce"
-                  color="bg-blue-50"
-                />
-                <FeatureCard
-                  icon={<Zap className="w-6 h-6 text-green-600" />}
-                  title="Geração de Imagens"
-                  description="Crie fotografias profissionais e infográficos"
-                  color="bg-green-50"
-                />
-                <FeatureCard
-                  icon={<BarChart3 className="w-6 h-6 text-orange-600" />}
-                  title="Análise de Keywords"
-                  description="Pesquisa e otimização de palavras-chave"
-                  color="bg-orange-50"
-                />
-                <FeatureCard
-                  icon={<ShoppingBag className="w-6 h-6 text-purple-600" />}
-                  title="Otimização de Listagens"
-                  description="Títulos, bullet points e descrições otimizadas"
-                  color="bg-purple-50"
-                />
-                <FeatureCard
-                  icon={<TrendingUp className="w-6 h-6 text-red-600" />}
-                  title="Atendimento ao Cliente"
-                  description="Respostas inteligentes para avaliações e emails"
-                  color="bg-red-50"
-                />
-                <FeatureCard
-                  icon={<BarChart3 className="w-6 h-6 text-indigo-600" />}
-                  title="Simuladores Financeiros"
-                  description="Cálculos de ROI, impostos e custos"
-                  color="bg-indigo-50"
-                />
+              {/* Features Grid - Floating Cards */}
+              <div className="grid grid-cols-2 gap-6 mb-12">
+                <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/30 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-4">
+                      <Users className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">10+ Agentes de IA</h3>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">Agentes especializados em Amazon FBA, SEO e e-commerce</p>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/30 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mr-4">
+                      <Zap className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Geração de Imagens</h3>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">Crie fotografias profissionais e infográficos</p>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/30 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mr-4">
+                      <BarChart3 className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Análise de Keywords</h3>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">Pesquisa e otimização de palavras-chave</p>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/30 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mr-4">
+                      <ShoppingBag className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Otimização de Listagens</h3>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">Títulos, bullet points e descrições otimizadas</p>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/30 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mr-4">
+                      <TrendingUp className="w-6 h-6 text-red-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Atendimento ao Cliente</h3>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">Respostas inteligentes para avaliações e emails</p>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/30 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mr-4">
+                      <BarChart3 className="w-6 h-6 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Simuladores Financeiros</h3>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">Cálculos de ROI, impostos e custos</p>
+                </div>
               </div>
 
-              {/* CTA Section */}
-              <div className="bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-sm rounded-2xl p-8 text-white border border-blue-500/20 shadow-xl">
+              {/* CTA Section - Floating */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white shadow-2xl border border-blue-500/20">
                 <div className="flex items-center mb-4">
                   <Zap className="w-6 h-6 mr-3" />
                   <h3 className="text-xl font-semibold">Pronto para começar?</h3>
                 </div>
                 <p className="text-blue-100 mb-0">
-                  Junte-se a centenas de vendedores que já estão usando 
-                  nossa plataforma para escalar seus negócios na Amazon.
+                  Junte-se a centenas de vendedores que já estão usando nossa 
+                  plataforma para escalar seus negócios na Amazon.
                 </p>
               </div>
             </div>
