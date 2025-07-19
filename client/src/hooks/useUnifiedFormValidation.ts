@@ -11,11 +11,11 @@ export interface ValidationRule {
   message?: string;
 }
 
-export type ValidationRules<T> = {
+export interface ValidationRules<T> {
   [K in keyof T]?: ValidationRule;
 }
 
-export type ValidationErrors<T> = {
+export interface ValidationErrors<T> {
   [K in keyof T]?: string;
 }
 

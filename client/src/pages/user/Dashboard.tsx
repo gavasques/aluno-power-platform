@@ -37,7 +37,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import type { News, Update } from '@shared/schema';
 import { PromotionalBanners } from '@/components/banners/PromotionalBanners';
-import { CacheClearButton } from '@/components/common/CacheClearButton';
 import { logger } from '@/utils/logger';
 
 interface DashboardData {
@@ -397,16 +396,6 @@ const UserDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Cache Control Button */}
-              <div className="flex flex-col justify-center">
-                <CacheClearButton 
-                  variant="outline" 
-                  size="default" 
-                  showText={true}
-                  className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                />
-              </div>
             </div>
           </div>
         </div>

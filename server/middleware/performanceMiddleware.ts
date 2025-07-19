@@ -30,21 +30,6 @@ export const cacheHeaders = (req: Request, res: Response, next: NextFunction) =>
   // Different cache strategies based on route
   const path = req.path;
   
-  // Disable cache for preview/development mode or specific no-cache routes
-  if (path.includes('/preview') || 
-      path.includes('/dashboard') ||
-      path.includes('/published/preview') ||
-      req.headers['cache-control'] === 'no-cache' ||
-      req.query.nocache === '1') {
-    // No cache for preview routes and development
-    res.set({
-      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    });
-    return next();
-  }
-  
   if (path.includes('/api/products')) {
     // Products API - short cache for dynamic data
     res.set({
