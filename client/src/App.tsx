@@ -104,6 +104,7 @@ import LoginNew from "./pages/LoginNew";
 // Password Recovery Pages
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const PhoneVerification = lazy(() => import("./pages/PhoneVerification"));
 
 // Loading component for lazy-loaded routes
 const PageLoader = () => (
@@ -164,6 +165,12 @@ function App() {
                           <Route path="/reset-password">
                             <Suspense fallback={<PageLoader />}>
                               <ResetPassword />
+                            </Suspense>
+                          </Route>
+                          
+                          <Route path="/phone-verification">
+                            <Suspense fallback={<PageLoader />}>
+                              <PhoneVerification />
                             </Suspense>
                           </Route>
 

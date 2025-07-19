@@ -28,6 +28,7 @@ import simulatorsRoutes from './simulators';
 import aiProviderRoutes from './aiProviders';
 import passwordResetRoutes from './passwordReset';
 import emailRoutes from './email';
+import phoneVerificationRoutes from './phoneVerification';
 
 /**
  * Register all modular routes
@@ -87,6 +88,9 @@ export function registerModularRoutes(app: Express): void {
   // Authentication & Email Routes - SMTP Integration
   app.use('/api/auth', passwordResetRoutes);
   app.use('/api/email', emailRoutes);
+  
+  // Phone Verification Routes - Evolution API Integration
+  app.use('/api/phone', phoneVerificationRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);
