@@ -24,7 +24,7 @@ import {
   AlertCircle, 
   XCircle,
   Download,
-  Sync
+  RefreshCw
 } from 'lucide-react';
 import { SupplierProductsImport } from './SupplierProductsImport';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -394,7 +394,7 @@ export const SupplierProductsTab: React.FC<SupplierProductsTabProps> = ({ suppli
             disabled={syncProductsMutation.isPending}
             className="flex items-center gap-2"
           >
-            <Sync className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4" />
             {syncProductsMutation.isPending ? 'Sincronizando...' : 'Sincronizar'}
           </Button>
           

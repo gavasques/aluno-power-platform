@@ -13,7 +13,7 @@ import {
   ConversationList, 
   FileList 
 } from '@/components/supplier/SupplierTabsManager';
-import { SupplierProductsTab } from '@/components/supplier/SupplierProductsTab';
+import { SupplierProductsTabSimple } from '@/components/supplier/SupplierProductsTabSimple';
 import { BrandDialog, ContactDialog, ConversationDialog } from '@/components/supplier/SupplierDialogs';
 // SupplierEditDialog removido - agora usando edição inline
 import { FileUploadDialog } from '@/components/supplier/FileUploadDialog';
@@ -183,7 +183,7 @@ const SupplierDetailRefactored = () => {
 
             {/* Products Tab */}
             <TabsContent value="products" className="mt-6">
-              <SupplierProductsTab supplierId={parseInt(supplierId)} />
+              <SupplierProductsTabSimple supplierId={parseInt(supplierId)} />
             </TabsContent>
 
             {/* Conversations Tab */}
