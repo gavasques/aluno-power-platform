@@ -95,11 +95,23 @@ export default function LoginNew() {
     }
 
     try {
-      await login(formData.email, formData.password);
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo de volta.",
-      });
+      const result = await login(formData.email, formData.password);
+      
+      if (result.success) {
+        toast({
+          title: "Login realizado com sucesso!",
+          description: "Bem-vindo de volta.",
+        });
+        
+        // Redirect to dashboard after successful login
+        setLocation('/');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro no login",
+          description: result.error || "Credenciais inválidas. Tente novamente.",
+        });
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
