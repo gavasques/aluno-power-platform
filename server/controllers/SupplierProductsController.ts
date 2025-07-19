@@ -412,6 +412,7 @@ export class SupplierProductsController {
           const minimumOrderQuantity = row.quantidade_minima || row.minimumOrderQuantity;
           const masterBox = row.caixa_master || row.masterBox;
           const stock = row.estoque || row.stock;
+          const linkedSku = row.sku_vinculado || row.linkedSku; // NOVO CAMPO para vinculação automática
 
           // Validar campos obrigatórios
           if (!supplierSku || !productName) {
@@ -432,6 +433,57 @@ export class SupplierProductsController {
             )
             .limit(1);
 
+          // VINCULAÇÃO AUTOMÁTICA BASEADA EM sku_vinculado do Excel
+          let systemProduct = null;
+          let linkStatusResult = 'pending';
+          let productIdResult = null;
+
+          if (linkedSku && linkedSku.trim()) {
+            // 1. PRIORIDADE: Se fornecido sku_vinculado, buscar exatamente por esse SKU
+            systemProduct = await db
+              .select()
+              .from(products)
+              .where(
+                and(
+                  eq(products.userId, userId),
+                  eq(products.sku, linkedSku.trim())
+                )
+              )
+              .limit(1);
+
+            if (systemProduct.length > 0) {
+              linkStatusResult = 'linked';
+              productIdResult = systemProduct[0].id;
+              results.linked++;
+            } else {
+              // SKU fornecido mas não encontrado no sistema
+              results.errors.push(`SKU vinculado '${linkedSku}' não encontrado no sistema para produto '${supplierSku}'`);
+              linkStatusResult = 'not_found';
+            }
+          } else {
+            // 2. FALLBACK: Tentar vinculação automática por SKU ou nome similar
+            systemProduct = await db
+              .select()
+              .from(products)
+              .where(
+                and(
+                  eq(products.userId, userId),
+                  or(
+                    eq(products.sku, supplierSku),
+                    like(products.name, `%${productName}%`)
+                  )
+                )
+              )
+              .limit(1);
+
+            if (systemProduct.length > 0) {
+              linkStatusResult = 'linked';
+              productIdResult = systemProduct[0].id;
+              results.linked++;
+            }
+          }
+
+          // Preparar dados do produto com resultado da vinculação
           const productData = {
             supplierId: parseInt(supplierId),
             userId,
@@ -442,7 +494,8 @@ export class SupplierProductsController {
             minimumOrderQuantity,
             masterBox,
             stock,
-            linkStatus: 'pending' as const,
+            linkStatus: linkStatusResult,
+            productId: productIdResult,
             active: true
           };
 
@@ -460,38 +513,6 @@ export class SupplierProductsController {
             // Criar novo produto
             await db.insert(supplierProducts).values(productData);
             results.created++;
-          }
-
-          // Tentar vincular com produto existente no sistema
-          const systemProduct = await db
-            .select()
-            .from(products)
-            .where(
-              and(
-                eq(products.userId, userId),
-                or(
-                  eq(products.sku, supplierSku),
-                  like(products.name, `%${productName}%`)
-                )
-              )
-            )
-            .limit(1);
-
-          if (systemProduct.length > 0) {
-            // Vincular produto
-            await db
-              .update(supplierProducts)
-              .set({
-                productId: systemProduct[0].id,
-                linkStatus: 'linked'
-              })
-              .where(
-                and(
-                  eq(supplierProducts.supplierId, parseInt(supplierId)),
-                  eq(supplierProducts.supplierSku, supplierSku)
-                )
-              );
-            results.linked++;
           }
 
         } catch (rowError) {

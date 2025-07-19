@@ -200,8 +200,8 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['supplier-products', supplierId] });
       toast({
-        title: 'Importação Concluída',
-        description: `${data.data.created} criados, ${data.data.updated} atualizados, ${data.data.linked} vinculados`,
+        title: 'Importação Concluída com Sucesso!',
+        description: `✅ ${data.data.created} criados • 🔄 ${data.data.updated} atualizados • 🔗 ${data.data.linked} vinculados automaticamente`,
       });
       setSelectedFile(null);
       setImportDialogOpen(false);
@@ -431,7 +431,8 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
         lead_time: 30,
         quantidade_minima: 1,
         caixa_master: 12,
-        estoque: 100
+        estoque: 100,
+        sku_vinculado: 'PROD001'
       },
       {
         cod_prod_fornecedor: 'COD002', 
@@ -440,7 +441,8 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
         lead_time: 15,
         quantidade_minima: 5,
         caixa_master: 24,
-        estoque: 250
+        estoque: 250,
+        sku_vinculado: ''
       }
     ];
 
@@ -456,7 +458,8 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       { wch: 12 }, // lead_time
       { wch: 20 }, // quantidade_minima
       { wch: 15 }, // caixa_master
-      { wch: 12 }  // estoque
+      { wch: 12 }, // estoque
+      { wch: 20 }  // sku_vinculado
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
@@ -464,7 +467,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     
     toast({
       title: 'Template Baixado',
-      description: 'Template Excel baixado com sucesso. Use-o como modelo para importar seus produtos.',
+      description: 'Template baixado! Preencha o campo "sku_vinculado" para vincular automaticamente com produtos existentes.',
     });
   };
 
@@ -761,6 +764,28 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
           </DialogHeader>
           
           <div className="space-y-6">
+            {/* Instruções de Vinculação Automática */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <h4 className="font-medium text-gray-900">✨ Nova Funcionalidade: Vinculação Automática</h4>
+                  </div>
+                  <div className="pl-4 space-y-2">
+                    <p className="text-sm text-gray-600">
+                      <strong>Campo "sku_vinculado":</strong> Preencha com o SKU de produtos já existentes no seu catálogo para vinculação automática.
+                    </p>
+                    <div className="flex gap-4 text-xs">
+                      <span className="text-green-600">✅ Vinculado: SKU encontrado</span>
+                      <span className="text-yellow-600">⚠️ Pendente: Campo vazio</span>
+                      <span className="text-red-600">❌ Não encontrado: SKU inválido</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardContent className="p-4">
                 <div className="space-y-4">

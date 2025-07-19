@@ -604,6 +604,32 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 19, 2025 - 3:00 AM**: ✅ AUTOMATIC PRODUCT LINKING SYSTEM IMPLEMENTED - SKU_VINCULADO FIELD ADDED TO EXCEL IMPORT
+  - **Objective Achieved**: Complete automatic product linking system through Excel import with sku_vinculado field
+  - **New Field Implementation**:
+    - ✅ **sku_vinculado Field**: Added to Excel template and import processing for automatic product linking
+    - ✅ **Priority-Based Linking**: Primary linking by sku_vinculado field, fallback to SKU/name matching
+    - ✅ **Template Enhancement**: Updated Excel template to include sku_vinculado column with example data
+    - ✅ **Column Width Optimization**: Proper spacing for new sku_vinculado field in Excel export/import
+  - **Backend Logic Implementation**:
+    - ✅ **Automatic Linking**: System searches user's product catalog by exact SKU match from sku_vinculado field
+    - ✅ **Status Management**: Proper handling of 'linked', 'pending', 'not_found' statuses based on linking success
+    - ✅ **Error Reporting**: Detailed error messages when provided SKU is not found in user's catalog
+    - ✅ **Fallback Logic**: If sku_vinculado empty, attempts automatic linking by supplier SKU or product name
+    - ✅ **Database Integration**: Direct productId linking during import with proper status tracking
+  - **User Interface Enhancements**:
+    - ✅ **Visual Tutorial**: Added instructional card explaining sku_vinculado functionality with status indicators
+    - ✅ **Success Feedback**: Enhanced import success message with emoji indicators for created/updated/linked counts
+    - ✅ **Template Download**: Updated template download message to mention sku_vinculado linking capability
+    - ✅ **Status Legend**: Clear visual indicators for linked/pending/not_found statuses in import dialog
+  - **Technical Implementation**: 
+    - Backend processes sku_vinculado field with exact SKU matching against user's products table
+    - Frontend displays comprehensive linking instructions and status feedback
+    - Excel template includes example sku_vinculado data to guide users
+    - Error handling provides specific feedback for invalid SKUs during import
+  - **User Workflow Optimization**: Users can now link products during import instead of manual linking afterward, significantly improving efficiency
+  - **Status**: Complete automatic linking system ready for production use with sku_vinculado field functionality
+
 - **January 19, 2025 - 1:55 AM**: ✅ SUPPLIER PRODUCTS EXPORT FUNCTIONALITY ADDED - COMPLETE DATA DOWNLOAD CAPABILITY
   - **Objective Achieved**: Added comprehensive export functionality for supplier product data with Excel format output
   - **Export Features Implemented**:
