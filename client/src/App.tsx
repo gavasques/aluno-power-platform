@@ -10,6 +10,8 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { CombinedProvider } from "./contexts/CombinedProvider";
 import { Suspense, lazy, useEffect } from 'react';
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { LazyLoader, useComponentPreloader } from "@/components/common/LazyLoader";
+import { useQueryMemoryOptimization, useBackgroundSync } from '@/lib/queryOptimizations';
 import { backgroundPrefetch } from '@/lib/prefetch';
 import { useFontLoader } from '@/lib/fontLoader';
 import { useOptimizedIcons } from '@/components/IconLoader';
@@ -114,6 +116,19 @@ function App() {
   // Initialize optimized loading systems
   const { loadRouteSpecificFonts } = useFontLoader();
   const { preloadCriticalIcons } = useOptimizedIcons();
+  
+  // Phase 2 Performance Optimizations
+  useQueryMemoryOptimization();
+  useBackgroundSync();
+
+  // Preload critical routes
+  useComponentPreloader([
+    { path: '/dashboard', importFn: () => import('./pages/user/Dashboard'), priority: 'high' },
+    { path: '/agentes', importFn: () => import('./pages/agents'), priority: 'high' },
+    { path: '/ferramentas', importFn: () => import('./pages/Ferramentas'), priority: 'medium' },
+    { path: '/hub', importFn: () => import('./pages/Hub'), priority: 'medium' },
+    { path: '/minha-area', importFn: () => import('./pages/MyArea'), priority: 'low' }
+  ]);
 
   useEffect(() => {
     // Initialize all performance optimizations

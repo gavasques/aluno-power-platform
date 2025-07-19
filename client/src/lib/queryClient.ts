@@ -3,15 +3,15 @@ import { QueryClient } from '@tanstack/react-query';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 10 * 60 * 1000, // 10 minutes - longer cache for better performance
-      gcTime: 30 * 60 * 1000, // 30 minutes - keep data in cache longer
+      staleTime: 5 * 60 * 1000, // 5 minutes - optimized for performance
+      gcTime: 15 * 60 * 1000, // 15 minutes - memory optimized
       refetchOnWindowFocus: false,
-      refetchOnReconnect: 'always',
-      refetchOnMount: false, // Prevent duplicate requests on mount
+      refetchOnReconnect: false, // Reduced for performance
+      refetchOnMount: false,
       networkMode: 'online',
-      // Enable query deduplication and performance optimizations
+      // Enhanced performance optimizations
       structuralSharing: true,
-      notifyOnChangeProps: 'all', // Fine-grained re-render control
+      notifyOnChangeProps: 'tracked', // Only notify when specific props change
       // Optimize retry logic for better performance
       retry: (failureCount, error) => {
         // Don't retry 4xx errors (client errors)

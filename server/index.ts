@@ -6,6 +6,9 @@ import { setupVite, serveStatic, log } from "./vite";
 import { scheduler } from "./services/scheduler";
 import { compressionMiddleware, cacheHeaders, performanceMetrics, memoryMonitor } from "./middleware/performanceMiddleware";
 import { optimizedProductService } from "./services/OptimizedProductService";
+import { connectionPoolService } from "./services/ConnectionPoolService";
+import { responseCompressionService } from "./services/ResponseCompressionService";
+import { performanceMonitoringService } from "./middleware/performanceMonitoringMiddleware";
 import { 
   securityHeaders, 
   apiLimiter, 
@@ -26,8 +29,10 @@ app.use(helmet({
 app.use(securityHeaders); // Custom security headers including CSP
 // Rate limiting disabled for development - app.use('/api', apiLimiter);
 
-// PHASE 1 PERFORMANCE OPTIMIZATIONS
+// PHASE 1-4 PERFORMANCE OPTIMIZATIONS
 app.use(compressionMiddleware); // Enhanced compression
+app.use(responseCompressionService.compressionMiddleware()); // Advanced response compression
+app.use(performanceMonitoringService.middleware()); // Real-time performance monitoring
 app.use(performanceMetrics); // Performance tracking
 app.use(cacheHeaders); // Intelligent caching
 app.use(memoryMonitor); // Memory monitoring
