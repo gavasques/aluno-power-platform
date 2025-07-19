@@ -56,10 +56,19 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
 
   // Force cache clear and refresh
   const handleForceRefresh = () => {
+    console.log('🔄 Force refresh - clearing cache for productId:', productId);
     queryClient.removeQueries({ queryKey: ['product-suppliers', productId] });
     queryClient.removeQueries({ queryKey: ['product-suppliers-stats', productId] });
+    queryClient.invalidateQueries({ queryKey: ['product-suppliers', productId] });
+    queryClient.invalidateQueries({ queryKey: ['product-suppliers-stats', productId] });
     refetch();
   };
+
+  // Debug logging
+  console.log('🔍 ProductSupplierManager - ProductId:', productId);
+  console.log('🔍 ProductSupplierManager - Current suppliers:', suppliers);
+  console.log('🔍 ProductSupplierManager - Filtered suppliers:', filteredSuppliers);
+  console.log('🔍 ProductSupplierManager - IsLoading:', isLoading);
 
   // Filter suppliers based on search term
   const filteredSuppliers = useMemo(() => {
