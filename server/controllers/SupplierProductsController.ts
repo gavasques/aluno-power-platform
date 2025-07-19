@@ -170,7 +170,7 @@ export class SupplierProductsController {
       if (existing.length > 0) {
         return res.status(409).json({
           success: false,
-          message: 'Já existe um produto com este SKU para este fornecedor',
+          message: 'Já existe um produto com este código para este fornecedor',
         });
       }
 
@@ -378,20 +378,29 @@ export class SupplierProductsController {
 
       for (const row of data as any[]) {
         try {
+          // Mapear campos do Excel (aceitar tanto formato antigo quanto novo)
+          const supplierSku = row.cod_prod_fornecedor || row.supplierSku;
+          const productName = row.nome || row.productName;
+          const cost = row.custo || row.cost;
+          const leadTime = row.lead_time || row.leadTime;
+          const minimumOrderQuantity = row.quantidade_minima || row.minimumOrderQuantity;
+          const masterBox = row.caixa_master || row.masterBox;
+          const stock = row.estoque || row.stock;
+
           // Validar campos obrigatórios
-          if (!row.supplierSku || !row.productName) {
-            results.errors.push(`Linha ignorada: SKU ou Nome do produto em branco`);
+          if (!supplierSku || !productName) {
+            results.errors.push(`Linha ignorada: Código ou Nome do produto em branco`);
             continue;
           }
 
-          // Verificar se já existe um produto com este SKU para este fornecedor
+          // Verificar se já existe um produto com este código para este fornecedor
           const existingProduct = await db
             .select()
             .from(supplierProducts)
             .where(
               and(
                 eq(supplierProducts.supplierId, parseInt(supplierId)),
-                eq(supplierProducts.supplierSku, row.supplierSku),
+                eq(supplierProducts.supplierSku, supplierSku),
                 eq(supplierProducts.active, true)
               )
             )
@@ -400,12 +409,13 @@ export class SupplierProductsController {
           const productData = {
             supplierId: parseInt(supplierId),
             userId,
-            supplierSku: row.supplierSku,
-            productName: row.productName,
-            cost: row.cost,
-            leadTime: row.leadTime,
-            minimumOrderQuantity: row.minimumOrderQuantity,
-            masterBox: row.masterBox,
+            supplierSku,
+            productName,
+            cost,
+            leadTime,
+            minimumOrderQuantity,
+            masterBox,
+            stock,
             linkStatus: 'pending' as const,
             active: true
           };
@@ -434,8 +444,8 @@ export class SupplierProductsController {
               and(
                 eq(products.userId, userId),
                 or(
-                  eq(products.sku, row.supplierSku),
-                  like(products.name, `%${row.productName}%`)
+                  eq(products.sku, supplierSku),
+                  like(products.name, `%${productName}%`)
                 )
               )
             )
@@ -452,7 +462,7 @@ export class SupplierProductsController {
               .where(
                 and(
                   eq(supplierProducts.supplierId, parseInt(supplierId)),
-                  eq(supplierProducts.supplierSku, row.supplierSku)
+                  eq(supplierProducts.supplierSku, supplierSku)
                 )
               );
             results.linked++;

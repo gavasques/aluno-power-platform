@@ -292,7 +292,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     if (!newProduct.supplierSku || !newProduct.productName) {
       toast({
         title: 'Campos Obrigatórios',
-        description: 'SKU do Fornecedor e Nome do Produto são obrigatórios',
+        description: 'Código do Fornecedor e Nome do Produto são obrigatórios',
         variant: 'destructive',
       });
       return;
@@ -304,7 +304,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     if (!editingProduct?.supplierSku || !editingProduct?.productName) {
       toast({
         title: 'Campos Obrigatórios',
-        description: 'SKU do Fornecedor e Nome do Produto são obrigatórios',
+        description: 'Código do Fornecedor e Nome do Produto são obrigatórios',
         variant: 'destructive',
       });
       return;
@@ -322,22 +322,22 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     // Criar planilha modelo
     const templateData = [
       {
-        supplierSku: 'SKU001',
-        productName: 'Produto Exemplo',
-        cost: 10.50,
-        leadTime: 30,
-        minimumOrderQuantity: 1,
-        masterBox: 12,
-        stock: 100
+        cod_prod_fornecedor: 'COD001',
+        nome: 'Produto Exemplo',
+        custo: 10.50,
+        lead_time: 30,
+        quantidade_minima: 1,
+        caixa_master: 12,
+        estoque: 100
       },
       {
-        supplierSku: 'SKU002', 
-        productName: 'Outro Produto',
-        cost: 25.00,
-        leadTime: 15,
-        minimumOrderQuantity: 5,
-        masterBox: 24,
-        stock: 250
+        cod_prod_fornecedor: 'COD002', 
+        nome: 'Outro Produto',
+        custo: 25.00,
+        lead_time: 15,
+        quantidade_minima: 5,
+        caixa_master: 24,
+        estoque: 250
       }
     ];
 
@@ -347,13 +347,13 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
 
     // Definir larguras das colunas
     ws['!cols'] = [
-      { wch: 15 }, // supplierSku
-      { wch: 30 }, // productName
-      { wch: 10 }, // cost
-      { wch: 12 }, // leadTime
-      { wch: 20 }, // minimumOrderQuantity
-      { wch: 15 }, // masterBox
-      { wch: 12 }  // stock
+      { wch: 20 }, // cod_prod_fornecedor
+      { wch: 30 }, // nome
+      { wch: 10 }, // custo
+      { wch: 12 }, // lead_time
+      { wch: 20 }, // quantidade_minima
+      { wch: 15 }, // caixa_master
+      { wch: 12 }  // estoque
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
@@ -449,7 +449,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  placeholder="Buscar por SKU ou nome do produto..."
+                  placeholder="Buscar por código ou nome do produto..."
                   value={searchTerm}
                   onChange={handleSearchChange}
                   className="pl-10"
@@ -467,7 +467,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-50">
-                      <TableHead className="font-medium">SKU</TableHead>
+                      <TableHead className="font-medium">Código</TableHead>
                       <TableHead className="font-medium">Nome do Produto</TableHead>
                       <TableHead className="font-medium">Custo</TableHead>
                       <TableHead className="font-medium">Lead Time</TableHead>
@@ -609,7 +609,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                   <li>• Importe o catálogo completo via Excel (.xlsx) com todos os produtos do fornecedor</li>
                   <li>• O sistema tentará vincular automaticamente com produtos existentes</li>
                   <li>• Produtos não encontrados ficarão como "pendentes" até serem criados</li>
-                  <li>• Use esta área para gerenciar preços, lead times e SKUs específicos do fornecedor</li>
+                  <li>• Use esta área para gerenciar preços, lead times e códigos específicos do fornecedor</li>
                 </ul>
                 
                 <div className="mt-3">
@@ -688,12 +688,12 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
           <div className="space-y-4 max-h-96 overflow-y-auto">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="supplierSku">SKU do Fornecedor*</Label>
+                <Label htmlFor="supplierSku">Código do Fornecedor*</Label>
                 <Input
                   id="supplierSku"
                   value={newProduct.supplierSku}
                   onChange={(e) => setNewProduct(prev => ({ ...prev, supplierSku: e.target.value }))}
-                  placeholder="SKU001"
+                  placeholder="COD001"
                 />
               </div>
               <div>
@@ -789,12 +789,12 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="editSupplierSku">SKU do Fornecedor*</Label>
+                <Label htmlFor="editSupplierSku">Código do Fornecedor*</Label>
                 <Input
                   id="editSupplierSku"
                   value={editingProduct?.supplierSku || ''}
                   onChange={(e) => setEditingProduct(prev => ({ ...prev, supplierSku: e.target.value }))}
-                  placeholder="SKU001"
+                  placeholder="COD001"
                 />
               </div>
               <div>
@@ -886,7 +886,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Remoção</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja remover o produto "{productToDelete?.productName}" (SKU: {productToDelete?.supplierSku}) do catálogo do fornecedor?
+              Tem certeza que deseja remover o produto "{productToDelete?.productName}" (Código: {productToDelete?.supplierSku}) do catálogo do fornecedor?
               <br /><br />
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
