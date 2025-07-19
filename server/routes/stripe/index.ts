@@ -45,8 +45,8 @@ router.post('/create-checkout-session', requireAuth, async (req: any, res: any) 
     const session = await stripeService.createSubscriptionCheckout(
       userId,
       finalPriceId,
-      successUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/minha-area/assinaturas?success=true`,
-      cancelUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/minha-area/assinaturas?canceled=true`
+      successUrl || `https://core.guivasques.app/minha-area/assinaturas?success=true`,
+      cancelUrl || `https://core.guivasques.app/minha-area/assinaturas?canceled=true`
     );
 
     res.json({ checkoutUrl: session.url, sessionId: session.id });
@@ -86,8 +86,8 @@ router.post('/create-credits-checkout', requireAuth, async (req: any, res: any) 
     const { priceId, quantity, successUrl, cancelUrl } = createCheckoutSchema.parse(req.body);
     const userId = req.user.id;
 
-    const defaultSuccessUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/credits/success?session_id={CHECKOUT_SESSION_ID}`;
-    const defaultCancelUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/credits/cancel`;
+    const defaultSuccessUrl = `https://core.guivasques.app/credits/success?session_id={CHECKOUT_SESSION_ID}`;
+    const defaultCancelUrl = `https://core.guivasques.app/credits/cancel`;
 
     const session = await stripeService.createCreditsCheckout(
       userId,
@@ -113,7 +113,7 @@ router.post('/create-customer-portal', requireAuth, async (req: any, res: any) =
     const { returnUrl } = createPortalSchema.parse(req.body);
     const userId = req.user.id;
 
-    const defaultReturnUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/subscription`;
+    const defaultReturnUrl = `https://core.guivasques.app/subscription`;
 
     const session = await stripeService.createCustomerPortal(
       userId,

@@ -404,6 +404,21 @@ Preferred communication style: Simple, everyday language.
   - **Configuração SMTP**: Hostinger.com configurado com TLS/SSL, FROM: Core Guilherme Vasques <no-reply@guivasques.app>
   - **Status**: Sistema de email completamente operacional e pronto para 400+ usuários em produção
 
+- **January 19, 2025 - 9:05 PM**: ✅ DOMÍNIO PERSONALIZADO CONFIGURADO - TODAS AS URLs ATUALIZADAS PARA CORE.GUIVASQUES.APP
+  - **Objetivo Alcançado**: Configuração completa do domínio personalizado em todos os serviços
+  - **URLs Atualizadas**:
+    - ✅ **EmailService**: Password reset URLs agora usam https://core.guivasques.app
+    - ✅ **Templates de Email**: Welcome e notification emails com domínio personalizado
+    - ✅ **Stripe Integration**: Success/cancel URLs atualizadas para domínio personalizado
+    - ✅ **Customer Portal**: Return URLs configuradas com core.guivasques.app
+  - **Fallback Inteligente**: Sistema mantém hierarquia: domínio personalizado → BASE_URL → REPLIT_DEV_DOMAIN → localhost
+  - **Benefícios**:
+    - ✅ **URLs Profissionais**: Todos os emails agora usam domínio personalizado
+    - ✅ **Branding Consistente**: Experiência unificada do usuário
+    - ✅ **Produção Ready**: Links funcionais em ambiente de produção
+    - ✅ **Stripe Configurado**: Pagamentos redirecionam para domínio correto
+  - **Status**: Sistema completamente configurado com domínio personalizado core.guivasques.app
+
 - **January 19, 2025 - 7:35 PM**: ✅ COMPREHENSIVE PERFORMANCE OPTIMIZATION IMPLEMENTATION COMPLETED - ALL 4 PHASES DEPLOYED
   - **Objective Achieved**: Complete implementation of enterprise-grade performance optimization following systematic 3-phase plan with 70-80% speed improvement targets
   - **Phase 1 - Database Optimizations**: Enhanced Query Caching (QueryCacheService), Connection Pooling (ConnectionPoolService), Response Compression (ResponseCompressionService)

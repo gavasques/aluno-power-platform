@@ -100,8 +100,9 @@ class EmailService {
   }
 
   public async sendPasswordResetEmail(email: string, resetToken: string, userName?: string): Promise<boolean> {
-    // Use BASE_URL if set, otherwise fallback to REPLIT_DEV_DOMAIN or localhost
-    const baseUrl = process.env.BASE_URL || 
+    // Use custom domain as primary, then BASE_URL, then REPLIT_DEV_DOMAIN fallback
+    const baseUrl = 'https://core.guivasques.app' || 
+                   process.env.BASE_URL || 
                    (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000');
     const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
     
@@ -264,7 +265,7 @@ class EmailService {
               </div>
               
               <div style="text-align: center;">
-                <a href="${process.env.BASE_URL || 'http://localhost:5000'}" class="button">Acessar Plataforma</a>
+                <a href="https://core.guivasques.app" class="button">Acessar Plataforma</a>
               </div>
               
               <p>Se tiver dúvidas, nossa equipe de suporte está sempre disponível para ajudar!</p>
@@ -288,7 +289,7 @@ class EmailService {
         - Simuladores financeiros e análise de ROI
         - Hub de recursos, materiais e fornecedores
         
-        Acesse: ${process.env.BASE_URL || 'http://localhost:5000'}
+        Acesse: https://core.guivasques.app
         
         ---
         Core Guilherme Vasques
