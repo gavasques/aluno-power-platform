@@ -316,8 +316,7 @@ export default function ProductSupplierManagerRefactored({
               <TableHead>Fornecedor</TableHead>
               <TableHead className="w-20">Código</TableHead>
               <TableHead className="w-24">Custo</TableHead>
-              <TableHead className="w-20">Entrega</TableHead>
-              <TableHead className="w-20">Qtd. Mín.</TableHead>
+              <TableHead className="w-32">Observações</TableHead>
               <TableHead className="w-20">Status</TableHead>
               <TableHead className="w-16">Ações</TableHead>
             </TableRow>
@@ -325,7 +324,7 @@ export default function ProductSupplierManagerRefactored({
           <TableBody>
             {filteredSuppliers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                   <div className="flex flex-col items-center gap-2">
                     <Package className="h-8 w-8 text-gray-400" />
                     <p>Nenhum fornecedor encontrado</p>
@@ -383,8 +382,11 @@ export default function ProductSupplierManagerRefactored({
                   <TableCell className="text-center">
                     {supplier.cost ? formatCurrency(supplier.cost) : 'R$ NaN'}
                   </TableCell>
-                  <TableCell className="text-center">N/A</TableCell>
-                  <TableCell className="text-center">N/A</TableCell>
+                  <TableCell className="text-left">
+                    <span className="text-sm text-gray-600">
+                      {supplier.notes || '-'}
+                    </span>
+                  </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={supplier.active ? 'default' : 'secondary'}>
                       {supplier.active ? 'Ativo' : 'Inativo'}
