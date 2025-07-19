@@ -35,42 +35,27 @@ const DashboardSimple: React.FC = () => {
 
 
   // Fetch published news preview
-  const { data: newsData = [], isLoading: newsLoading, error: newsError } = useQuery({
+  const { data: newsData = [] } = useQuery({
     queryKey: ['/api/news/published/preview'],
     queryFn: async () => {
-      console.log('🔥 Buscando notícias...');
       const response = await fetch('/api/news/published/preview');
       if (!response.ok) throw new Error('Failed to fetch news');
-      const data = await response.json();
-      console.log('📰 Dados de notícias recebidos:', data);
-      return data;
+      return response.json();
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
 
   // Fetch published updates preview
-  const { data: updatesData = [], isLoading: updatesLoading, error: updatesError } = useQuery({
+  const { data: updatesData = [] } = useQuery({
     queryKey: ['/api/updates/published/preview'],
     queryFn: async () => {
-      console.log('🔥 Buscando novidades...');
       const response = await fetch('/api/updates/published/preview');
       if (!response.ok) throw new Error('Failed to fetch updates');
-      const data = await response.json();
-      console.log('🚀 Dados de novidades recebidos:', data);
-      return data;
+      return response.json();
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
-  });
-
-  console.log('📊 Estado das queries:', { 
-    newsData: newsData?.length, 
-    updatesData: updatesData?.length,
-    newsLoading,
-    updatesLoading,
-    newsError: newsError?.message,
-    updatesError: updatesError?.message
   });
 
   // Função para buscar dados completos de uma notícia
@@ -323,7 +308,7 @@ const DashboardSimple: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3 max-h-80 overflow-y-auto">
-                {newsData && newsData.length > 0 ? (
+                {newsData.length > 0 ? (
                   newsData.slice(0, 3).map((news: any) => (
                     <div
                       key={news.id}
@@ -371,7 +356,7 @@ const DashboardSimple: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3 max-h-80 overflow-y-auto">
-                {updatesData && updatesData.length > 0 ? (
+                {updatesData.length > 0 ? (
                   updatesData.slice(0, 3).map((update: any) => (
                     <div
                       key={update.id}
@@ -385,7 +370,7 @@ const DashboardSimple: React.FC = () => {
                       }}
                     >
                       <h4 className="font-medium text-sm mb-1 line-clamp-2">{update.title}</h4>
-                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">{update.summary}</p>
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">{update.summary || 'Sem descrição disponível'}</p>
                       <div className="flex items-center justify-between">
                         <Badge 
                           variant={update.type === 'feature' ? 'default' : update.type === 'improvement' ? 'secondary' : 'outline'}
