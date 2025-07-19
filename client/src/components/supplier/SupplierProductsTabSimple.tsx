@@ -2,12 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Upload, Package, Download, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, Package, Download, Plus, Search, ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import * as XLSX from 'xlsx';
@@ -23,11 +24,15 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
   const queryClient = useQueryClient();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [addProductDialogOpen, setAddProductDialogOpen] = useState(false);
+  const [editProductDialogOpen, setEditProductDialogOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(50);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [productToDelete, setProductToDelete] = useState<any>(null);
 
   // Debounce do termo de busca para evitar muitas requisições
   useEffect(() => {
@@ -182,6 +187,86 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     },
   });
 
+  // Mutation para editar produto
+  const updateProductMutation = useMutation({
+    mutationFn: async (productData: any) => {
+      const response = await fetch(`/api/suppliers/${supplierId}/products/${productData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          supplierSku: productData.supplierSku,
+          productName: productData.productName,
+          cost: productData.cost ? parseFloat(productData.cost) : null,
+          leadTime: productData.leadTime ? parseInt(productData.leadTime) : null,
+          minimumOrderQuantity: productData.minimumOrderQuantity ? parseInt(productData.minimumOrderQuantity) : null,
+          masterBox: productData.masterBox ? parseInt(productData.masterBox) : null,
+          stock: productData.stock ? parseInt(productData.stock) : null,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao atualizar produto');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supplier-products', supplierId] });
+      toast({
+        title: 'Produto Atualizado',
+        description: 'Produto atualizado com sucesso',
+      });
+      setEditProductDialogOpen(false);
+      setEditingProduct(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Mutation para remover produto
+  const deleteProductMutation = useMutation({
+    mutationFn: async (productId: number) => {
+      const response = await fetch(`/api/suppliers/${supplierId}/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao remover produto');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supplier-products', supplierId] });
+      toast({
+        title: 'Produto Removido',
+        description: 'Produto removido do catálogo com sucesso',
+      });
+      setDeleteConfirmOpen(false);
+      setProductToDelete(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -213,6 +298,24 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       return;
     }
     addProductMutation.mutate(newProduct);
+  };
+
+  const handleUpdateProduct = () => {
+    if (!editingProduct?.supplierSku || !editingProduct?.productName) {
+      toast({
+        title: 'Campos Obrigatórios',
+        description: 'SKU do Fornecedor e Nome do Produto são obrigatórios',
+        variant: 'destructive',
+      });
+      return;
+    }
+    updateProductMutation.mutate(editingProduct);
+  };
+
+  const handleDeleteProduct = () => {
+    if (productToDelete) {
+      deleteProductMutation.mutate(productToDelete.id);
+    }
   };
 
   const downloadTemplate = () => {
@@ -372,12 +475,13 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                       <TableHead className="font-medium">Cx Master</TableHead>
                       <TableHead className="font-medium">Estoque</TableHead>
                       <TableHead className="font-medium">Status</TableHead>
+                      <TableHead className="font-medium">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {products.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={9} className="text-center py-8 text-gray-500">
                           {isFetching ? 'Carregando produtos...' : 'Nenhum produto encontrado'}
                         </TableCell>
                       </TableRow>
@@ -407,6 +511,31 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                             <Badge variant={product.linkStatus === 'linked' ? 'default' : 'outline'} className="text-xs">
                               {product.linkStatus === 'linked' ? 'Vinculado' : 'Pendente'}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingProduct(product);
+                                  setEditProductDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setProductToDelete(product);
+                                  setDeleteConfirmOpen(true);
+                                }}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
@@ -649,6 +778,131 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog para Editar Produto */}
+      <Dialog open={editProductDialogOpen} onOpenChange={setEditProductDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar Produto</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="editSupplierSku">SKU do Fornecedor*</Label>
+                <Input
+                  id="editSupplierSku"
+                  value={editingProduct?.supplierSku || ''}
+                  onChange={(e) => setEditingProduct(prev => ({ ...prev, supplierSku: e.target.value }))}
+                  placeholder="SKU001"
+                />
+              </div>
+              <div>
+                <Label htmlFor="editProductName">Nome do Produto*</Label>
+                <Input
+                  id="editProductName"
+                  value={editingProduct?.productName || ''}
+                  onChange={(e) => setEditingProduct(prev => ({ ...prev, productName: e.target.value }))}
+                  placeholder="Nome do produto"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="editCost">Custo (R$)</Label>
+                <Input
+                  id="editCost"
+                  type="number"
+                  step="0.01"
+                  value={editingProduct?.cost || ''}
+                  onChange={(e) => setEditingProduct(prev => ({ ...prev, cost: e.target.value }))}
+                  placeholder="10.50"
+                />
+              </div>
+              <div>
+                <Label htmlFor="editLeadTime">Lead Time (dias)</Label>
+                <Input
+                  id="editLeadTime"
+                  type="number"
+                  value={editingProduct?.leadTime || ''}
+                  onChange={(e) => setEditingProduct(prev => ({ ...prev, leadTime: e.target.value }))}
+                  placeholder="30"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="editMinimumOrderQuantity">Qtd. Mínima</Label>
+                <Input
+                  id="editMinimumOrderQuantity"
+                  type="number"
+                  value={editingProduct?.minimumOrderQuantity || ''}
+                  onChange={(e) => setEditingProduct(prev => ({ ...prev, minimumOrderQuantity: e.target.value }))}
+                  placeholder="1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="editMasterBox">Caixa Master</Label>
+                <Input
+                  id="editMasterBox"
+                  type="number"
+                  value={editingProduct?.masterBox || ''}
+                  onChange={(e) => setEditingProduct(prev => ({ ...prev, masterBox: e.target.value }))}
+                  placeholder="12"
+                />
+              </div>
+              <div>
+                <Label htmlFor="editStock">Estoque</Label>
+                <Input
+                  id="editStock"
+                  type="number"
+                  value={editingProduct?.stock || ''}
+                  onChange={(e) => setEditingProduct(prev => ({ ...prev, stock: e.target.value }))}
+                  placeholder="100"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => setEditProductDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleUpdateProduct}
+              disabled={updateProductMutation.isPending}
+            >
+              {updateProductMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Confirmação de Remoção */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Remoção</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover o produto "{productToDelete?.productName}" (SKU: {productToDelete?.supplierSku}) do catálogo do fornecedor?
+              <br /><br />
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProduct}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteProductMutation.isPending}
+            >
+              {deleteProductMutation.isPending ? 'Removendo...' : 'Remover'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
