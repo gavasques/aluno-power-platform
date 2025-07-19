@@ -33,18 +33,18 @@ class EmailService {
       const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
       
       if (missingVars.length > 0) {
-        console.warn(`[EMAIL_SERVICE] Missing environment variables: ${missingVars.join(', ')}`);
+        console.error(`[EMAIL_SERVICE] Missing environment variables: ${missingVars.join(', ')}`);
         this.isConfigured = false;
         return;
       }
-
+      
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
+        host: process.env.SMTP_HOST?.trim(),
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
         auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
+          user: process.env.SMTP_USER?.trim(),
+          pass: process.env.SMTP_PASS?.trim(),
         },
         tls: {
           rejectUnauthorized: false // Allow self-signed certificates
