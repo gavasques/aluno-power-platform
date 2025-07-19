@@ -95,9 +95,25 @@ export default function LoginNew() {
         <meta name="description" content="Acesse a plataforma completa de inteligência artificial para Amazon FBA e e-commerce. Transforme seu negócio na Amazon." />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-        {/* Header with subtle pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.03),rgba(255,255,255,0))]" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+        {/* Animated background glow effects */}
+        <div className="absolute inset-0">
+          {/* Main glow orb - animated */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl animate-pulse-slow" />
+          
+          {/* Secondary glow orb - animated */}
+          <div className="absolute bottom-1/4 right-1/3 w-80 h-80 bg-gradient-to-r from-purple-400/15 to-pink-400/15 rounded-full blur-3xl animate-float" />
+          
+          {/* Tertiary small glow */}
+          <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full blur-2xl animate-pulse-slow" style={{animationDelay: '2s'}} />
+          
+          {/* Subtle grid pattern overlay */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_70%)]" />
+          <div className="absolute inset-0 opacity-30" style={{
+            backgroundImage: `radial-gradient(circle at 25px 25px, rgba(59, 130, 246, 0.1) 2px, transparent 0)`,
+            backgroundSize: '50px 50px'
+          }} />
+        </div>
         
         <div className="relative z-10 flex">
           {/* Left Column - Login Form */}
@@ -129,7 +145,7 @@ export default function LoginNew() {
               </div>
 
               {/* Login Card */}
-              <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+              <Card className="shadow-2xl border border-white/30 bg-white/90 backdrop-blur-md">
                 <CardHeader className="pb-4">
                   <div className="text-center">
                     <h2 className="text-xl font-semibold text-gray-900">Fazer Login</h2>
@@ -243,7 +259,7 @@ export default function LoginNew() {
           </div>
 
           {/* Right Column - Features Showcase */}
-          <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-50 to-blue-50 p-12 items-center">
+          <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-white/40 to-blue-50/60 backdrop-blur-sm border-l border-white/20 p-12 items-center">
             <div className="w-full max-w-2xl">
               {/* Main Title */}
               <div className="mb-12">
@@ -298,7 +314,7 @@ export default function LoginNew() {
               </div>
 
               {/* CTA Section */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
+              <div className="bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-sm rounded-2xl p-8 text-white border border-blue-500/20 shadow-xl">
                 <div className="flex items-center mb-4">
                   <Zap className="w-6 h-6 mr-3" />
                   <h3 className="text-xl font-semibold">Pronto para começar?</h3>
