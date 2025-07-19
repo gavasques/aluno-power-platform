@@ -19,9 +19,12 @@ const router = Router();
 const registerSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  username: z.string().min(3, 'Username deve ter pelo menos 3 caracteres'),
-  password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres'),
-  phone: z.string().optional()
+  password: z.string()
+    .min(8, 'Senha deve ter pelo menos 8 caracteres')
+    .regex(/(?=.*[a-z])/, 'Senha deve conter pelo menos uma letra minúscula')
+    .regex(/(?=.*[A-Z])/, 'Senha deve conter pelo menos uma letra maiúscula')
+    .regex(/(?=.*\d)/, 'Senha deve conter pelo menos um número'),
+  phone: z.string().min(1, 'Telefone é obrigatório')
 });
 
 // Login schema
@@ -33,28 +36,29 @@ const loginSchema = z.object({
 // POST /api/auth/register - Enhanced with phone support
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, username, password, phone } = registerSchema.parse(req.body);
+    const { name, email, password, phone } = registerSchema.parse(req.body);
 
     // Check if user already exists
     const existingUser = await db
       .select()
       .from(users)
-      .where(or(eq(users.email, email), eq(users.username, username)))
+      .where(eq(users.email, email))
       .limit(1);
 
     if (existingUser.length > 0) {
-      const field = existingUser[0].email === email ? 'email' : 'username';
       return res.status(400).json({
         success: false,
-        message: `${field === 'email' ? 'Email' : 'Username'} já está em uso`,
-        field
+        message: 'Email já está em uso',
+        field: 'email'
       });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user with phone field
+    // Create user with phone field - generate username from email
+    const username = email.split('@')[0];
+    
     const [newUser] = await db
       .insert(users)
       .values({

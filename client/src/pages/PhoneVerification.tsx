@@ -202,12 +202,22 @@ export default function PhoneVerification() {
                   </p>
                 </div>
 
-                <Button
-                  onClick={() => setLocation('/user/dashboard')}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12"
-                >
-                  Ir para Dashboard
-                </Button>
+                <div className="flex flex-col gap-3">
+                  <Button
+                    onClick={() => setLocation('/user/dashboard')}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12"
+                  >
+                    Ir para Dashboard
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setLocation('/login')}
+                    className="w-full h-12 text-gray-600 dark:text-gray-400"
+                  >
+                    Voltar para Login
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -283,23 +293,35 @@ export default function PhoneVerification() {
                   </ul>
                 </div>
 
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12"
-                >
-                  {isLoading ? (
-                    <>
-                      <Clock className="w-4 h-4 mr-2 animate-spin" />
-                      Enviando código...
-                    </>
-                  ) : (
-                    <>
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Enviar Código via WhatsApp
-                    </>
-                  )}
-                </Button>
+                <div className="flex flex-col gap-3">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Clock className="w-4 h-4 mr-2 animate-spin" />
+                        Enviando código...
+                      </>
+                    ) : (
+                      <>
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        Enviar Código via WhatsApp
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setLocation('/login')}
+                    disabled={isLoading}
+                    className="w-full h-12 text-gray-600 dark:text-gray-400"
+                  >
+                    Voltar para Login
+                  </Button>
+                </div>
               </form>
             ) : (
               <form onSubmit={handleVerifyCode} className="space-y-6">
@@ -365,6 +387,16 @@ export default function PhoneVerification() {
                     className="w-full h-12"
                   >
                     Alterar Telefone
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setLocation('/login')}
+                    disabled={isLoading}
+                    className="w-full h-12 text-gray-600 dark:text-gray-400"
+                  >
+                    Voltar para Login
                   </Button>
                 </div>
               </form>
