@@ -99,7 +99,7 @@ const ProductEditWithTabs = lazy(() => import("./pages/myarea/ProductEditWithTab
 
 
 // Keep Login as eager import for immediate authentication
-import Login from "./pages/Login";
+import LoginNew from "./pages/LoginNew";
 
 // Loading component for lazy-loaded routes
 const PageLoader = () => (
@@ -117,9 +117,9 @@ function App() {
   const { loadRouteSpecificFonts } = useFontLoader();
   const { preloadCriticalIcons } = useOptimizedIcons();
   
-  // Phase 2 Performance Optimizations
-  useQueryMemoryOptimization();
-  useBackgroundSync();
+  // Phase 2 Performance Optimizations - moved inside CombinedProvider
+  // useQueryMemoryOptimization();
+  // useBackgroundSync();
 
   // Preload critical routes
   useComponentPreloader([
@@ -148,7 +148,7 @@ function App() {
             <AuthProvider>
               <CombinedProvider>
                             <Switch>
-                          <Route path="/login" component={Login} />
+                          <Route path="/login" component={LoginNew} />
 
                           {/* Páginas principais de listagem */}
                           <Route path="/ferramentas">
