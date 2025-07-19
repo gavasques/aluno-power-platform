@@ -4596,47 +4596,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // Password reset request
-  app.post('/api/auth/forgot-password', async (req, res) => {
-    try {
-      const { email } = z.object({ email: z.string().email() }).parse(req.body);
-      
-      const resetToken = await AuthService.generatePasswordResetToken(email);
-      if (!resetToken) {
-        return res.status(404).json({ error: 'Email não encontrado' });
-      }
-
-      // In production, send email here
-      res.json({ 
-        success: true, 
-        message: 'Token de reset enviado por email',
-        resetToken // Remove this in production
-      });
-    } catch (error: any) {
-      console.error('Forgot password error:', error);
-      res.status(400).json({ error: 'Dados inválidos' });
-    }
-  });
-
-  // Password reset
-  app.post('/api/auth/reset-password', async (req, res) => {
-    try {
-      const { resetToken, newPassword } = z.object({
-        resetToken: z.string(),
-        newPassword: z.string().min(6)
-      }).parse(req.body);
-      
-      const success = await AuthService.resetPassword(resetToken, newPassword);
-      if (!success) {
-        return res.status(400).json({ error: 'Token inválido ou expirado' });
-      }
-
-      res.json({ success: true, message: 'Senha alterada com sucesso' });
-    } catch (error: any) {
-      console.error('Reset password error:', error);
-      res.status(400).json({ error: 'Dados inválidos' });
-    }
-  });
+  // LEGACY PASSWORD RESET ROUTES REMOVED
+  // Now handled by server/routes/auth.ts with enhanced dual recovery system (email + WhatsApp)
+  // Routes moved to modular auth system to prevent conflicts
 
   // Magic link request
   app.post('/api/auth/magic-link', async (req, res) => {

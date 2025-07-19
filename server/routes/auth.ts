@@ -6,10 +6,11 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { db } from '../db.js';
 import { users } from '../../shared/schema.js';
 import { eq, or } from 'drizzle-orm';
-import { authService } from '../services/authService.js';
+import { AuthService } from '../services/authService.js';
 import emailService from '../services/emailService.js';
 import evolutionAPI from '../services/evolutionAPI.js';
 
@@ -158,6 +159,9 @@ const resetPasswordSchema = z.object({
 // POST /api/auth/forgot-password - Dual recovery (email/phone)
 router.post('/forgot-password', async (req, res) => {
   try {
+    console.log('🔐 [AUTH_ROUTE] /forgot-password endpoint reached');
+    console.log('🔐 [AUTH_ROUTE] Request body:', JSON.stringify(req.body));
+    
     const { identifier, type } = forgotPasswordSchema.parse(req.body);
 
     let user;
@@ -184,9 +188,12 @@ router.post('/forgot-password', async (req, res) => {
 
     // Generate reset token/code
     if (type === 'email') {
+      console.log('🔐 [AUTH_ROUTE] Starting email reset flow...');
+      
       // Generate email reset token (long)
-      const resetToken = require('crypto').randomBytes(32).toString('hex');
+      const resetToken = crypto.randomBytes(32).toString('hex');
       const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+      console.log('🔐 [AUTH_ROUTE] Token generated for user:', user.id);
 
       await db
         .update(users)
@@ -199,7 +206,13 @@ router.post('/forgot-password', async (req, res) => {
       // Send email
       try {
         await emailService.sendPasswordResetEmail(user.email, user.name, resetToken);
-        console.log(`[AUTH] Password reset email sent to: ${user.email}`);
+        console.log(`🔐 [AUTH_ROUTE] Password reset email sent to: ${user.email}`);
+        
+        return res.json({
+          success: true,
+          message: 'Email de recuperação enviado com sucesso!',
+          type: 'email'
+        });
       } catch (emailError) {
         console.error('[AUTH] Error sending password reset email:', emailError);
         return res.status(500).json({
@@ -207,12 +220,6 @@ router.post('/forgot-password', async (req, res) => {
           message: 'Erro ao enviar email de recuperação'
         });
       }
-
-      res.json({
-        success: true,
-        message: 'Email de recuperação enviado com sucesso!',
-        type: 'email'
-      });
 
     } else {
       // Generate phone verification code (6 digits)

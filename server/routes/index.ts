@@ -26,9 +26,10 @@ import creditsRoutes from './credits';
 import investmentSimulationsRoutes from './investment-simulations';
 import simulatorsRoutes from './simulators';
 import aiProviderRoutes from './aiProviders';
-import passwordResetRoutes from './passwordReset';
+// import passwordResetRoutes from './passwordReset'; // Disabled - replaced by auth.ts dual system
 import emailRoutes from './email';
 import phoneVerificationRoutes from './phoneVerification';
+import authRoutes from './auth';
 
 /**
  * Register all modular routes
@@ -85,8 +86,10 @@ export function registerModularRoutes(app: Express): void {
   // AI Provider Routes - xAI/Grok Integration & Provider Testing
   app.use('/api/ai-providers', aiProviderRoutes);
   
-  // Authentication & Email Routes - SMTP Integration
-  app.use('/api/auth', passwordResetRoutes);
+  // Authentication Routes - Enhanced with dual recovery system (email + WhatsApp)
+  app.use('/api/auth', authRoutes);
+  
+  // Email Routes - SMTP Integration
   app.use('/api/email', emailRoutes);
   
   // Phone Verification Routes - Evolution API Integration
