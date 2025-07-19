@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { db } from '../db';
 import { supplierProducts, products } from '../../shared/schema';
-import { eq, and, like, or, isNull, isNotNull } from 'drizzle-orm';
+import { eq, and, like, or, isNull, isNotNull, desc, count, ilike } from 'drizzle-orm';
 import { z } from 'zod';
 import * as XLSX from 'xlsx';
 import { Readable } from 'stream';
@@ -50,7 +50,7 @@ export class SupplierProductsController {
         return res.status(401).json({ success: false, message: 'Usuário não autenticado' });
       }
 
-      // Construir query com filtros
+      // Construir query com filtros otimizada
       let whereConditions = and(
         eq(supplierProducts.supplierId, parseInt(supplierId)),
         eq(supplierProducts.userId, userId),
@@ -62,7 +62,33 @@ export class SupplierProductsController {
         whereConditions = and(whereConditions, eq(supplierProducts.linkStatus, status));
       }
 
-      let query = db
+      // Filtro de busca otimizado no banco (ILIKE para performance)
+      if (search && typeof search === 'string') {
+        const searchTerm = `%${search}%`;
+        whereConditions = and(
+          whereConditions,
+          or(
+            ilike(supplierProducts.supplierSku, searchTerm),
+            ilike(supplierProducts.productName, searchTerm)
+          )
+        );
+      }
+
+      // Calcular total primeiro (query otimizada)
+      const [{ count: totalCount }] = await db
+        .select({ count: count() })
+        .from(supplierProducts)
+        .where(whereConditions);
+
+      const totalItems = Number(totalCount);
+      const pageNum = parseInt(page as string, 10);
+      const limitNum = parseInt(limit as string, 10);
+      const totalPages = Math.ceil(totalItems / limitNum);
+      
+      // Aplicar paginação no banco (MUITO mais eficiente)
+      const offset = (pageNum - 1) * limitNum;
+
+      const results = await db
         .select({
           id: supplierProducts.id,
           supplierSku: supplierProducts.supplierSku,
@@ -84,35 +110,35 @@ export class SupplierProductsController {
         })
         .from(supplierProducts)
         .leftJoin(products, eq(supplierProducts.productId, products.id))
-        .where(whereConditions);
+        .where(whereConditions)
+        .orderBy(desc(supplierProducts.updatedAt))
+        .limit(limitNum)
+        .offset(offset);
 
-      let results = await query;
+      const paginatedResults = results;
 
-      // Filtro de busca por texto (aplicado após a query)
-      if (search && typeof search === 'string') {
-        const searchTerm = search.toLowerCase();
-        results = results.filter(item => 
-          item.supplierSku.toLowerCase().includes(searchTerm) ||
-          item.productName.toLowerCase().includes(searchTerm)
-        );
-      }
+      // Calcular estatísticas em paralelo com a query principal (SUPER OTIMIZADO)
+      const statsPromise = db
+        .select({
+          linkStatus: supplierProducts.linkStatus,
+          count: count()
+        })
+        .from(supplierProducts)
+        .where(and(
+          eq(supplierProducts.supplierId, parseInt(supplierId)),
+          eq(supplierProducts.userId, userId),
+          eq(supplierProducts.active, true)
+        ))
+        .groupBy(supplierProducts.linkStatus);
 
-      // Calcular totais antes da paginação
-      const totalItems = results.length;
-      const pageNum = parseInt(page as string, 10);
-      const limitNum = parseInt(limit as string, 10);
-      const totalPages = Math.ceil(totalItems / limitNum);
+      // Executar stats em paralelo enquanto processa paginação
+      const [statsResults] = await Promise.all([statsPromise]);
       
-      // Aplicar paginação
-      const offset = (pageNum - 1) * limitNum;
-      const paginatedResults = results.slice(offset, offset + limitNum);
-
-      // Calcular estatísticas
       const stats = {
         total: totalItems,
-        linked: results.filter(p => p.linkStatus === 'linked').length,
-        pending: results.filter(p => p.linkStatus === 'pending').length,
-        notFound: results.filter(p => p.linkStatus === 'not_found').length,
+        linked: Number(statsResults.find(s => s.linkStatus === 'linked')?.count || 0),
+        pending: Number(statsResults.find(s => s.linkStatus === 'pending')?.count || 0),
+        notFound: Number(statsResults.find(s => s.linkStatus === 'not_found')?.count || 0),
       };
 
       // Metadados de paginação

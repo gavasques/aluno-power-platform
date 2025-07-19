@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -35,6 +35,59 @@ const parseBrazilianCurrency = (value: string): string => {
   return value.replace(/[R$\s.]/g, '').replace(',', '.');
 };
 
+// Componente memoizado para linha de produto (OTIMIZAÇÃO CRÍTICA)
+const ProductRow = React.memo(({ 
+  product, 
+  onEdit, 
+  onDelete 
+}: { 
+  product: any; 
+  onEdit: (product: any) => void; 
+  onDelete: (product: any) => void; 
+}) => {
+  const handleEdit = useCallback(() => onEdit(product), [product, onEdit]);
+  const handleDelete = useCallback(() => onDelete(product), [product, onDelete]);
+
+  return (
+    <TableRow key={product.id} className="hover:bg-gray-50">
+      <TableCell className="font-medium">{product.supplierSku}</TableCell>
+      <TableCell>{product.productName}</TableCell>
+      <TableCell>{formatCurrency(product.cost)}</TableCell>
+      <TableCell>{product.leadTime ? `${product.leadTime} dias` : '-'}</TableCell>
+      <TableCell>{product.minimumOrderQuantity || '-'}</TableCell>
+      <TableCell>{product.masterBox || '-'}</TableCell>
+      <TableCell>{product.stock || '-'}</TableCell>
+      <TableCell>
+        <Badge variant={product.linkStatus === 'linked' ? 'default' : 
+                      product.linkStatus === 'pending' ? 'secondary' : 'destructive'}>
+          {product.linkStatus === 'linked' ? '✅ Vinculado' :
+           product.linkStatus === 'pending' ? '⚠️ Pendente' : '❌ Não encontrado'}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleEdit}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDelete}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
+
 interface SupplierProductsTabSimpleProps {
   supplierId: number;
 }
@@ -56,11 +109,11 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [productToDelete, setProductToDelete] = useState<any>(null);
 
-  // Debounce do termo de busca para evitar muitas requisições
+  // Debounce AGRESSIVO do termo de busca para evitar muitas requisições
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 500);
+    }, 800); // Aumentado para 800ms
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
@@ -74,7 +127,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     stock: ''
   });
 
-  // Query para buscar produtos do fornecedor com paginação
+  // Query para buscar produtos do fornecedor com paginação OTIMIZADA
   const { data: productsData, isLoading, isFetching } = useQuery({
     queryKey: ['supplier-products', supplierId, currentPage, debouncedSearchTerm],
     queryFn: async () => {
@@ -97,8 +150,13 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       return response.json();
     },
     enabled: !!supplierId,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    keepPreviousData: true // Para lazy loading suave
+    staleTime: 1000 * 60 * 15, // 15 minutos (cache SUPER agressivo)
+    cacheTime: 1000 * 60 * 60, // 1 hora cache
+    keepPreviousData: true, // Para lazy loading suave
+    refetchOnWindowFocus: false, // Evita requisições desnecessárias
+    refetchOnMount: false, // Evita refetch desnecessário no mount
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Retry exponencial
+    networkMode: 'online', // Só executa se online
   });
 
   const products = productsData?.data || [];
@@ -339,6 +397,29 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       deleteProductMutation.mutate(productToDelete.id);
     }
   };
+
+  // Callbacks memoizados para performance CRÍTICA
+  const handleEdit = useCallback((product: any) => {
+    setEditingProduct(product);
+    setEditProductDialogOpen(true);
+  }, []);
+
+  const handleDelete = useCallback((product: any) => {
+    setProductToDelete(product);
+    setDeleteConfirmOpen(true);
+  }, []);
+
+  // Memoizar produtos renderizados para evitar re-renders desnecessários
+  const renderedProducts = useMemo(() => {
+    return products.map((product: any) => (
+      <ProductRow
+        key={product.id}
+        product={product}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+    ));
+  }, [products, handleEdit, handleDelete]);
 
   const downloadTemplate = () => {
     // Criar planilha modelo
@@ -581,59 +662,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                         </TableCell>
                       </TableRow>
                     ) : (
-                      products.map((product: any) => (
-                        <TableRow key={product.id} className="hover:bg-gray-50">
-                          <TableCell className="font-mono text-sm">{product.supplierSku}</TableCell>
-                          <TableCell className="font-medium max-w-[200px] truncate" title={product.productName}>
-                            {product.productName}
-                          </TableCell>
-                          <TableCell>
-                            {formatCurrency(product.cost)}
-                          </TableCell>
-                          <TableCell>
-                            {product.leadTime ? `${product.leadTime} dias` : '-'}
-                          </TableCell>
-                          <TableCell>
-                            {product.minimumOrderQuantity || '-'}
-                          </TableCell>
-                          <TableCell>
-                            {product.masterBox || '-'}
-                          </TableCell>
-                          <TableCell>
-                            {product.stock !== null && product.stock !== undefined ? product.stock : '-'}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={product.linkStatus === 'linked' ? 'default' : 'outline'} className="text-xs">
-                              {product.linkStatus === 'linked' ? 'Vinculado' : 'Pendente'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setEditingProduct(product);
-                                  setEditProductDialogOpen(true);
-                                }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setProductToDelete(product);
-                                  setDeleteConfirmOpen(true);
-                                }}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      renderedProducts
                     )}
                   </TableBody>
                 </Table>
