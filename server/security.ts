@@ -351,7 +351,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Get user from database using the userId from JWT
-    const { db } = await import('./db/index.js');
+    const { db } = await import('./db.js');
     const { users } = await import('../shared/schema.js');
     const { eq } = await import('drizzle-orm');
     
