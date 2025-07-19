@@ -20,11 +20,13 @@ import {
   Barcode,
   Building,
   Factory,
-  Save
+  Save,
+  Users
 } from "lucide-react";
 import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { formatBRL } from "@/utils/pricingCalculations";
 import { useState } from "react";
+import { ProductSupplierManager } from "@/components/product/ProductSupplierManager";
 
 interface ProductBasicDataTabProps {
   form: UseFormReturn<any>;
@@ -720,6 +722,24 @@ export default function ProductBasicDataTab({
           )}
         </CardContent>
       </Card>
+
+      {/* Suppliers Section */}
+      {isEditing && productId && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Fornecedores
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProductSupplierManager 
+              productId={parseInt(productId)}
+              productName={form.getValues("name") || "Produto"}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Save Button for Basic Information */}
       <div className="flex justify-end pt-4">

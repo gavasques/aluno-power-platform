@@ -578,7 +578,10 @@ export class ProductSupplierController {
       const inactiveSuppliers = totalSuppliers - activeSuppliers;
       const primarySupplier = suppliersList.find(s => s.isPrimary);
 
-      const costs = suppliersList.map(s => parseFloat(s.cost.toString()));
+      const costs = suppliersList
+        .filter(s => s.cost !== null && s.cost !== undefined)
+        .map(s => parseFloat(s.cost.toString()))
+        .filter(cost => !isNaN(cost));
       const avgCost = costs.length > 0 ? costs.reduce((a, b) => a + b, 0) / costs.length : 0;
       const lowestCost = costs.length > 0 ? Math.min(...costs) : 0;
       const highestCost = costs.length > 0 ? Math.max(...costs) : 0;
