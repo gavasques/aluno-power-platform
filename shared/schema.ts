@@ -516,22 +516,19 @@ export const supplierProducts = pgTable("supplier_products", {
   supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   
-  // Dados do produto no fornecedor
+  // Dados do produto no fornecedor (campos simplificados conforme solicitado)
   supplierSku: text("supplier_sku").notNull(), // SKU no fornecedor
   productName: text("product_name").notNull(), // Nome do produto
-  description: text("description"), // Descrição do produto
   cost: decimal("cost", { precision: 10, scale: 2 }), // Custo
   leadTime: integer("lead_time"), // Tempo de entrega (dias)
   minimumOrderQuantity: integer("minimum_order_quantity"), // Quantidade mínima de pedido
-  category: text("category"), // Categoria do produto
-  brand: text("brand"), // Marca
+  masterBox: integer("master_box"), // Caixa master - quantidade por caixa
   
   // Status de vinculação
   productId: integer("product_id").references(() => products.id, { onDelete: "set null" }), // NULL se não existir no sistema
   linkStatus: text("link_status").notNull().default("pending"), // 'linked', 'pending', 'not_found'
   
   // Metadados
-  notes: text("notes"), // Observações
   active: boolean("active").notNull().default(true), // Status ativo/inativo
   
   // Auditoria
@@ -1591,6 +1588,9 @@ export type ProductSupplier = typeof productSuppliers.$inferSelect;
 
 export const insertSupplierProductSchema = createInsertSchema(supplierProducts).omit({
   id: true,
+  productId: true,
+  linkStatus: true,
+  active: true,
   createdAt: true,
   updatedAt: true,
 });

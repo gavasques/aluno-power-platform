@@ -25,13 +25,10 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
   const [newProduct, setNewProduct] = useState({
     supplierSku: '',
     productName: '',
-    description: '',
     cost: '',
     leadTime: '',
     minimumOrderQuantity: '',
-    category: '',
-    brand: '',
-    notes: ''
+    masterBox: ''
   });
 
   // Mutation para importar XLSX
@@ -87,6 +84,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
           cost: productData.cost ? parseFloat(productData.cost) : null,
           leadTime: productData.leadTime ? parseInt(productData.leadTime) : null,
           minimumOrderQuantity: productData.minimumOrderQuantity ? parseInt(productData.minimumOrderQuantity) : null,
+          masterBox: productData.masterBox ? parseInt(productData.masterBox) : null,
         }),
       });
 
@@ -106,13 +104,10 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       setNewProduct({
         supplierSku: '',
         productName: '',
-        description: '',
         cost: '',
         leadTime: '',
         minimumOrderQuantity: '',
-        category: '',
-        brand: '',
-        notes: ''
+        masterBox: ''
       });
       setAddProductDialogOpen(false);
     },
@@ -164,24 +159,18 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
       {
         supplierSku: 'SKU001',
         productName: 'Produto Exemplo',
-        description: 'Descrição detalhada do produto',
         cost: 10.50,
         leadTime: 30,
         minimumOrderQuantity: 1,
-        category: 'Categoria Exemplo',
-        brand: 'Marca Exemplo',
-        notes: 'Observações importantes sobre o produto'
+        masterBox: 12
       },
       {
-        supplierSku: 'SKU002',
+        supplierSku: 'SKU002', 
         productName: 'Outro Produto',
-        description: 'Outra descrição detalhada',
         cost: 25.00,
         leadTime: 15,
         minimumOrderQuantity: 5,
-        category: 'Outra Categoria',
-        brand: 'Outra Marca',
-        notes: 'Outras observações relevantes'
+        masterBox: 24
       }
     ];
 
@@ -193,13 +182,10 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     ws['!cols'] = [
       { wch: 15 }, // supplierSku
       { wch: 30 }, // productName
-      { wch: 40 }, // description
       { wch: 10 }, // cost
       { wch: 12 }, // leadTime
       { wch: 20 }, // minimumOrderQuantity
-      { wch: 20 }, // category
-      { wch: 15 }, // brand
-      { wch: 30 }  // notes
+      { wch: 15 }  // masterBox
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
@@ -352,17 +338,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                value={newProduct.description}
-                onChange={(e) => setNewProduct(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Descrição detalhada do produto"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="cost">Custo (R$)</Label>
                 <Input
@@ -384,6 +360,9 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                   placeholder="30"
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="minimumOrderQuantity">Qtd. Mínima</Label>
                 <Input
@@ -394,37 +373,16 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                   placeholder="1"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="category">Categoria</Label>
+                <Label htmlFor="masterBox">Caixa Master</Label>
                 <Input
-                  id="category"
-                  value={newProduct.category}
-                  onChange={(e) => setNewProduct(prev => ({ ...prev, category: e.target.value }))}
-                  placeholder="Categoria do produto"
+                  id="masterBox"
+                  type="number"
+                  value={newProduct.masterBox}
+                  onChange={(e) => setNewProduct(prev => ({ ...prev, masterBox: e.target.value }))}
+                  placeholder="12"
                 />
               </div>
-              <div>
-                <Label htmlFor="brand">Marca</Label>
-                <Input
-                  id="brand"
-                  value={newProduct.brand}
-                  onChange={(e) => setNewProduct(prev => ({ ...prev, brand: e.target.value }))}
-                  placeholder="Marca do produto"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="notes">Observações</Label>
-              <Textarea
-                id="notes"
-                value={newProduct.notes}
-                onChange={(e) => setNewProduct(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Observações sobre o produto"
-              />
             </div>
           </div>
 

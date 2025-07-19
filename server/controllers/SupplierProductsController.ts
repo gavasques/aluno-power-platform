@@ -391,13 +391,10 @@ export class SupplierProductsController {
             userId,
             supplierSku: row.supplierSku,
             productName: row.productName,
-            description: row.description || null,
             cost: row.cost ? parseFloat(row.cost.toString()) : null,
             leadTime: row.leadTime ? parseInt(row.leadTime.toString()) : null,
             minimumOrderQuantity: row.minimumOrderQuantity ? parseInt(row.minimumOrderQuantity.toString()) : null,
-            category: row.category || null,
-            brand: row.brand || null,
-            notes: row.notes || null,
+            masterBox: row.masterBox ? parseInt(row.masterBox.toString()) : null,
             linkStatus: 'pending' as const,
             active: true
           };
