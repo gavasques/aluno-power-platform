@@ -100,7 +100,10 @@ class EmailService {
   }
 
   public async sendPasswordResetEmail(email: string, resetToken: string, userName?: string): Promise<boolean> {
-    const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+    // Use BASE_URL if set, otherwise fallback to REPLIT_DEV_DOMAIN or localhost
+    const baseUrl = process.env.BASE_URL || 
+                   (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000');
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
     
     const template = this.getPasswordResetTemplate(resetUrl, userName);
     
