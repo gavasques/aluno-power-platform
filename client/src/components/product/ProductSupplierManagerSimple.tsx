@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useProductSuppliers } from '@/hooks/useProductSuppliers';
-import { formatCurrency } from '@/shared/utils/formatters';
+import { formatCurrency } from '@shared/utils/formatters';
 
 interface ProductSupplierManagerSimpleProps {
   productId: number;
@@ -115,6 +115,9 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
                 <Checkbox
                   checked={selectedSuppliers.length === filteredSuppliers.length && filteredSuppliers.length > 0}
                   onCheckedChange={handleSelectAll}
+                  {...(selectedSuppliers.length > 0 && selectedSuppliers.length < filteredSuppliers.length 
+                    ? { "data-indeterminate": "true" } 
+                    : {})}
                 />
               </TableHead>
               <TableHead>Fornecedor</TableHead>
@@ -216,7 +219,7 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
           <span>
             {selectedSuppliers.length > 0 && (
               <Checkbox
-                checked={selectedSuppliers.length > 0}
+                checked={true}
                 onCheckedChange={() => setSelectedSuppliers([])}
                 className="mr-2"
               />
