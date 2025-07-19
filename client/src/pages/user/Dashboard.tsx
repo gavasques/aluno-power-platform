@@ -321,31 +321,33 @@ const UserDashboard = () => {
               </p>
             </div>
             
-            {/* Quick Stats Cards */}
+            {/* Quick Stats Cards - Minimalista */}
             <div className="mt-4 lg:mt-0 flex gap-4">
-              <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
+              <Card className="bg-white border border-gray-200 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                      <Coins className="h-5 w-5" />
+                    <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+                      <Coins className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
-                      <p className="text-blue-100 text-sm">Créditos</p>
-                      <p className="text-xl font-bold">{creditBalance.toLocaleString()}</p>
+                      <p className="text-gray-600 text-sm">Créditos</p>
+                      <p className="text-xl font-semibold text-gray-900">{creditBalance.toLocaleString()}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">
+              <Card className="bg-white border border-gray-200 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                      {getPlanIcon(planName)}
+                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                      <div className="text-blue-600">
+                        {getPlanIcon(planName)}
+                      </div>
                     </div>
                     <div>
-                      <p className="text-purple-100 text-sm">Plano</p>
-                      <p className="text-lg font-bold">{planName}</p>
+                      <p className="text-gray-600 text-sm">Plano</p>
+                      <p className="text-lg font-semibold text-gray-900">{planName}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -354,84 +356,72 @@ const UserDashboard = () => {
           </div>
         </div>
 
-        {/* Links Sociais e Comunidade */}
+        {/* Links Sociais e Comunidade - Minimalista */}
         <div className="mb-6">
-          <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white border-0 shadow-lg">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <Users className="h-4 w-4 text-white" />
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <Users className="h-4 w-4 text-gray-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold text-white">
-                    Conecte-se
+                  <CardTitle className="text-lg font-semibold text-gray-900">
+                    Conecte-se Conosco
                   </CardTitle>
-                  <CardDescription className="text-gray-300 text-sm">
-                    Redes sociais e comunidade
+                  <CardDescription className="text-gray-600 text-sm">
+                    Siga nossas redes sociais e participe da nossa comunidade
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             
             <CardContent className="pb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <Button 
-                  variant="ghost" 
-                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                  onClick={() => window.open('https://instagram.com/guilhermeavasques', '_blank')}
-                >
-                  <Instagram className="h-4 w-4 mr-3" />
-                  <div className="text-left">
-                    <p className="font-medium">Instagram</p>
-                    <p className="text-xs text-gray-300">@guilhermeavasques</p>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
+                  variant="outline" 
+                  className="justify-start bg-pink-50 hover:bg-pink-100 text-gray-700 border-pink-200 hover:border-pink-300 h-12"
                   onClick={() => window.open('https://instagram.com/guivasques_', '_blank')}
                 >
-                  <Instagram className="h-4 w-4 mr-3" />
+                  <Instagram className="h-4 w-4 mr-3 text-pink-500" />
                   <div className="text-left">
                     <p className="font-medium">Instagram</p>
-                    <p className="text-xs text-gray-300">@guivasques_</p>
+                    <p className="text-xs text-gray-500">Dicas diárias</p>
                   </div>
                 </Button>
                 
                 <Button 
-                  variant="ghost" 
-                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                  onClick={() => window.open('https://portal.guilhermevasques.club', '_blank')}
+                  variant="outline" 
+                  className="justify-start bg-green-50 hover:bg-green-100 text-gray-700 border-green-200 hover:border-green-300 h-12"
+                  onClick={() => window.open('https://wa.me/5545999858475', '_blank')}
                 >
-                  <Star className="h-4 w-4 mr-3" />
-                  <div className="text-left">
-                    <p className="font-medium">Plataforma Curso</p>
-                    <p className="text-xs text-gray-300">Portal exclusivo</p>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                  onClick={() => window.open('https://chat.whatsapp.com/Lrq6yGUjQp0KJSVrtfqIrN?mode=r_c', '_blank')}
-                >
-                  <MessageCircle className="h-4 w-4 mr-3" />
+                  <MessageCircle className="h-4 w-4 mr-3 text-green-600" />
                   <div className="text-left">
                     <p className="font-medium">WhatsApp</p>
-                    <p className="text-xs text-gray-300">Grupo Amazon + Importação</p>
+                    <p className="text-xs text-gray-500">Contato direto</p>
                   </div>
                 </Button>
                 
                 <Button 
-                  variant="ghost" 
-                  className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                  onClick={() => window.open('https://discord.gg/uMQ8Vbp94q', '_blank')}
+                  variant="outline" 
+                  className="justify-start bg-blue-50 hover:bg-blue-100 text-gray-700 border-blue-200 hover:border-blue-300 h-12"
+                  onClick={() => window.open('https://discord.gg/guilhermevasques', '_blank')}
                 >
-                  <MessageSquare className="h-4 w-4 mr-3" />
+                  <MessageSquare className="h-4 w-4 mr-3 text-blue-600" />
                   <div className="text-left">
                     <p className="font-medium">Discord</p>
-                    <p className="text-xs text-gray-300">Comunidade oficial</p>
+                    <p className="text-xs text-gray-500">Comunidade oficial</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="justify-start bg-purple-50 hover:bg-purple-100 text-gray-700 border-purple-200 hover:border-purple-300 h-12"
+                  onClick={() => window.open('https://portal.guilhermevasques.club', '_blank')}
+                >
+                  <Star className="h-4 w-4 mr-3 text-purple-600" />
+                  <div className="text-left">
+                    <p className="font-medium">Portal do Curso</p>
+                    <p className="text-xs text-gray-500">Acesso exclusivo</p>
                   </div>
                 </Button>
               </div>
@@ -439,25 +429,25 @@ const UserDashboard = () => {
           </Card>
         </div>
 
-        {/* Seção de Promoções - Cards Principais */}
+        {/* Seção de Promoções - Minimalista */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Venda Moda na Amazon */}
-          <Card className="bg-gradient-to-br from-purple-600 to-purple-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative overflow-hidden">
-            <CardContent className="p-6 relative z-10">
+          <Card className="bg-purple-50 border border-purple-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="font-bold text-xl mb-2">Venda Moda na Amazon</h3>
-                  <p className="text-purple-100 text-sm leading-relaxed">0% de Comissão para novas contas</p>
+                  <h3 className="font-semibold text-lg text-purple-900 mb-2">Venda Moda na Amazon</h3>
+                  <p className="text-purple-700 text-sm leading-relaxed">0% de Comissão para novas contas</p>
                 </div>
-                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <Crown className="h-6 w-6 text-white" />
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Crown className="h-5 w-5 text-purple-600" />
                 </div>
               </div>
               
               <div className="mt-4">
                 <Button 
                   size="sm" 
-                  className="bg-white text-purple-700 hover:bg-purple-50 font-semibold px-4 py-2 rounded-md shadow-md"
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-md"
                   onClick={() => window.open('https://venda.amazon.com.br/?ld=elbrsoa_atesliberdade_virtualsoftsrp2025na', '_blank')}
                 >
                   Cadastre-se →
@@ -467,22 +457,22 @@ const UserDashboard = () => {
           </Card>
 
           {/* Venda na Amazon */}
-          <Card className="bg-gradient-to-br from-blue-600 to-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative overflow-hidden">
-            <CardContent className="p-6 relative z-10">
+          <Card className="bg-blue-50 border border-blue-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="font-bold text-xl mb-2">Venda na Amazon</h3>
-                  <p className="text-blue-100 text-sm leading-relaxed">Tenha nossos benefícios exclusivos</p>
+                  <h3 className="font-semibold text-lg text-blue-900 mb-2">Venda na Amazon</h3>
+                  <p className="text-blue-700 text-sm leading-relaxed">Tenha nossos benefícios exclusivos</p>
                 </div>
-                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <Star className="h-6 w-6 text-white" />
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Star className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
               
               <div className="mt-4">
                 <Button 
                   size="sm" 
-                  className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-4 py-2 rounded-md shadow-md"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md"
                   onClick={() => window.open('https://amzn.to/3RTu5Sk', '_blank')}
                 >
                   Cadastre-se →
@@ -491,33 +481,34 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Melhor Software */}
-          <Card className="bg-gradient-to-br from-orange-600 to-orange-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative overflow-hidden">
-            <CardContent className="p-6 relative z-10">
+          {/* Helium 10 */}
+          <Card className="bg-orange-50 border border-orange-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="font-bold text-xl mb-2">Melhor Software - Helium 10</h3>
-                  <p className="text-orange-100 text-sm leading-relaxed">Para encontrar produtos lucrativos. APROVEITE! Nossos descontos EXCLUSIVOS! </p>
+                  <h3 className="font-semibold text-lg text-orange-900 mb-2">Helium 10</h3>
+                  <p className="text-orange-700 text-sm leading-relaxed">Software para encontrar produtos</p>
                 </div>
-                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <Zap className="h-6 w-6 text-white" />
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-orange-600" />
                 </div>
               </div>
               
               <div className="mt-4 flex gap-2">
                 <Button 
                   size="sm" 
-                  className="bg-white text-orange-700 hover:bg-orange-50 font-semibold px-4 py-2 rounded-md shadow-md"
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-medium px-3 py-1 rounded text-xs"
                   onClick={() => window.open('https://helium10.com/go/guilherme74', '_blank')}
                 >
-                  Anual →
+                  Anual
                 </Button>
                 <Button 
                   size="sm" 
-                  className="bg-white/10 text-white hover:bg-white/20 font-semibold px-4 py-2 rounded-md border-2 border-white backdrop-blur-sm"
+                  variant="outline"
+                  className="border-orange-300 text-orange-700 hover:bg-orange-50 font-medium px-3 py-1 rounded text-xs"
                   onClick={() => window.open('https://helium10.com/go/guilherme20', '_blank')}
                 >
-                  Mensal →
+                  Mensal
                 </Button>
               </div>
             </CardContent>
@@ -529,19 +520,19 @@ const UserDashboard = () => {
           {/* Notícias e Novidades - Full Width */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 col-span-3">
             
-            {/* Notícias */}
-            <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white border-0 shadow-lg">
+            {/* Notícias - Minimalista */}
+            <Card className="bg-white border border-gray-200 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                    <Rss className="h-4 w-4 text-white" />
+                  <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <Rss className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-bold text-white">
+                    <CardTitle className="text-lg font-semibold text-gray-900">
                       Notícias
                     </CardTitle>
-                    <CardDescription className="text-blue-100 text-sm">
-                      Últimas novidades do mercado
+                    <CardDescription className="text-gray-600 text-sm">
+                      Últimas atualizações da plataforma
                     </CardDescription>
                   </div>
                 </div>
@@ -552,9 +543,9 @@ const UserDashboard = () => {
                   <div className="space-y-3">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="bg-white/20 h-4 rounded mb-2"></div>
-                        <div className="bg-white/20 h-3 rounded w-3/4 mb-2"></div>
-                        <div className="bg-white/20 h-3 rounded w-1/2"></div>
+                        <div className="bg-gray-200 h-4 rounded mb-2"></div>
+                        <div className="bg-gray-200 h-3 rounded w-3/4 mb-2"></div>
+                        <div className="bg-gray-200 h-3 rounded w-1/2"></div>
                       </div>
                     ))}
                   </div>
@@ -563,27 +554,27 @@ const UserDashboard = () => {
                     {newsData.slice(0, 3).map((news) => (
                       <div 
                         key={news.id} 
-                        className="bg-white/10 rounded-lg p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
+                        className="bg-gray-50 rounded-lg p-4 border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer"
                         onClick={() => openNewsModal(news)}
                       >
-                        <h3 className="font-semibold text-white text-sm mb-2 line-clamp-2">
+                        <h3 className="font-medium text-gray-900 text-sm mb-2 line-clamp-2">
                           {news.title}
                         </h3>
-                        <p className="text-blue-100 text-xs mb-3 line-clamp-2">
+                        <p className="text-gray-600 text-xs mb-3 line-clamp-2">
                           {news.summary || news.content?.substring(0, 100) + '...'}
                         </p>
                         <div className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="bg-white/20 text-blue-100 text-xs">
+                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 border border-blue-200 text-xs">
                               {news.category || 'Geral'}
                             </Badge>
                             {(news as any).featured && (
-                              <Badge variant="secondary" className="bg-yellow-400/20 text-yellow-200 border border-yellow-400/30 text-xs">
+                              <Badge variant="secondary" className="bg-yellow-50 text-yellow-700 border border-yellow-200 text-xs">
                                 Destaque
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-1 text-blue-200 text-xs">
+                          <div className="flex items-center gap-1 text-gray-500 text-xs">
                             <Clock className="h-3 w-3" />
                             {formatCreatedDate(String(news.createdAt || ''))}
                           </div>
@@ -591,8 +582,8 @@ const UserDashboard = () => {
                       </div>
                     ))}
                     <Button 
-                      variant="secondary" 
-                      className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border-0"
+                      variant="outline" 
+                      className="w-full mt-4 border-gray-200 text-gray-700 hover:bg-gray-50"
                       onClick={() => window.location.href = '/noticias'}
                     >
                       Ver Todas as Notícias
@@ -601,29 +592,29 @@ const UserDashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Rss className="h-5 w-5 text-white" />
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Rss className="h-5 w-5 text-gray-400" />
                     </div>
-                    <h3 className="text-sm font-semibold text-white mb-2">Nenhuma notícia</h3>
-                    <p className="text-blue-200 text-xs">As últimas notícias aparecerão aqui</p>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">Nenhuma notícia</h3>
+                    <p className="text-gray-500 text-xs">As últimas notícias aparecerão aqui</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Novidades */}
-            <Card className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white border-0 shadow-lg">
+            {/* Novidades - Minimalista */}
+            <Card className="bg-white border border-gray-200 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                    <TrendingUp className="h-4 w-4 text-white" />
+                  <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-green-600" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-bold text-white">
+                    <CardTitle className="text-lg font-semibold text-gray-900">
                       Novidades
                     </CardTitle>
-                    <CardDescription className="text-emerald-100 text-sm">
-                      Atualizações do sistema
+                    <CardDescription className="text-gray-600 text-sm">
+                      Recursos e melhorias recentes
                     </CardDescription>
                   </div>
                 </div>
@@ -634,9 +625,9 @@ const UserDashboard = () => {
                   <div className="space-y-3">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="bg-white/20 h-4 rounded mb-2"></div>
-                        <div className="bg-white/20 h-3 rounded w-3/4 mb-2"></div>
-                        <div className="bg-white/20 h-3 rounded w-1/2"></div>
+                        <div className="bg-gray-200 h-4 rounded mb-2"></div>
+                        <div className="bg-gray-200 h-3 rounded w-3/4 mb-2"></div>
+                        <div className="bg-gray-200 h-3 rounded w-1/2"></div>
                       </div>
                     ))}
                   </div>
@@ -645,25 +636,25 @@ const UserDashboard = () => {
                     {updatesData.slice(0, 3).map((update) => (
                       <div 
                         key={update.id} 
-                        className="bg-white/10 rounded-lg p-4 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
+                        className="bg-green-50 rounded-lg p-4 border border-green-100 hover:bg-green-100 transition-colors cursor-pointer"
                         onClick={() => openUpdateModal(update)}
                       >
-                        <h3 className="font-semibold text-white text-sm mb-2 line-clamp-2">
+                        <h3 className="font-medium text-gray-900 text-sm mb-2 line-clamp-2">
                           {update.title}
                         </h3>
-                        <p className="text-emerald-100 text-xs mb-3 line-clamp-2">
+                        <p className="text-gray-600 text-xs mb-3 line-clamp-2">
                           {update.summary || update.content?.substring(0, 100) + '...'}
                         </p>
                         <div className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="bg-white/20 text-emerald-100 text-xs">
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 border border-green-200 text-xs">
                               {update.version || 'v1.0'}
                             </Badge>
-                            <Badge variant="secondary" className="bg-white/20 text-emerald-100 text-xs">
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 border border-green-200 text-xs">
                               {update.type || 'Feature'}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-1 text-xs">
+                          <div className="flex items-center gap-1 text-gray-500 text-xs">
                             <Clock className="h-3 w-3" />
                             {formatCreatedDate(String(update.createdAt || ''))}
                           </div>
@@ -671,8 +662,8 @@ const UserDashboard = () => {
                       </div>
                     ))}
                     <Button 
-                      variant="secondary" 
-                      className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border-0"
+                      variant="outline" 
+                      className="w-full mt-4 border-gray-200 text-gray-700 hover:bg-gray-50"
                       onClick={() => window.location.href = '/novidades'}
                     >
                       Ver Todas as Novidades
@@ -681,11 +672,11 @@ const UserDashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <TrendingUp className="h-5 w-5 text-white" />
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <TrendingUp className="h-5 w-5 text-gray-400" />
                     </div>
-                    <h3 className="text-sm font-semibold text-white mb-2">Nenhuma novidade</h3>
-                    <p className="text-emerald-200 text-xs">As últimas atualizações aparecerão aqui</p>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">Nenhuma novidade</h3>
+                    <p className="text-gray-500 text-xs">As últimas atualizações aparecerão aqui</p>
                   </div>
                 )}
               </CardContent>
