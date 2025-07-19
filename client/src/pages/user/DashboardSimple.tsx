@@ -35,27 +35,42 @@ const DashboardSimple: React.FC = () => {
 
 
   // Fetch published news preview
-  const { data: newsData = [] } = useQuery({
+  const { data: newsData = [], isLoading: newsLoading, error: newsError } = useQuery({
     queryKey: ['/api/news/published/preview'],
     queryFn: async () => {
+      console.log('🔥 Buscando notícias...');
       const response = await fetch('/api/news/published/preview');
       if (!response.ok) throw new Error('Failed to fetch news');
-      return response.json();
+      const data = await response.json();
+      console.log('📰 Dados de notícias recebidos:', data);
+      return data;
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
 
   // Fetch published updates preview
-  const { data: updatesData = [] } = useQuery({
+  const { data: updatesData = [], isLoading: updatesLoading, error: updatesError } = useQuery({
     queryKey: ['/api/updates/published/preview'],
     queryFn: async () => {
+      console.log('🔥 Buscando novidades...');
       const response = await fetch('/api/updates/published/preview');
       if (!response.ok) throw new Error('Failed to fetch updates');
-      return response.json();
+      const data = await response.json();
+      console.log('🚀 Dados de novidades recebidos:', data);
+      return data;
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
+  });
+
+  console.log('📊 Estado das queries:', { 
+    newsData: newsData?.length, 
+    updatesData: updatesData?.length,
+    newsLoading,
+    updatesLoading,
+    newsError: newsError?.message,
+    updatesError: updatesError?.message
   });
 
   // Função para buscar dados completos de uma notícia
@@ -193,7 +208,7 @@ const DashboardSimple: React.FC = () => {
                   <MessageSquare className="h-4 w-4 mr-3 text-green-600" />
                   <div className="text-left">
                     <p className="font-medium">WhatsApp</p>
-                    <p className="text-xs text-gray-500">Contato direto</p>
+                    <p className="text-xs text-gray-500">nosso Grupo Aberto</p>
                   </div>
                 </Button>
 
@@ -292,25 +307,24 @@ const DashboardSimple: React.FC = () => {
           </Card>
         </div>
 
-        {/* Grid Principal - 2 colunas */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Grid Principal - Notícias e Novidades lado a lado */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           
-          {/* Sidebar - Notícias e Novidades */}
-          <div className="space-y-6">
-            {/* Notícias */}
-            <Card className="bg-white border border-gray-200 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
-                  <Rss className="h-5 w-5 text-green-600" />
-                  Notícias
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Últimas atualizações da plataforma
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {newsData.slice(0, 3).map((news: any) => (
+          {/* Notícias */}
+          <Card className="bg-white border border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
+                <Rss className="h-5 w-5 text-green-600" />
+                Notícias
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Últimas atualizações da plataforma
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {newsData && newsData.length > 0 ? (
+                  newsData.slice(0, 3).map((news: any) => (
                     <div
                       key={news.id}
                       className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
@@ -333,25 +347,32 @@ const DashboardSimple: React.FC = () => {
                         </span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Rss className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                    <p>Nenhuma notícia disponível</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Novidades */}
-            <Card className="bg-white border border-gray-200 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
-                  Novidades
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Recursos e melhorias recentes
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {updatesData.slice(0, 3).map((update: any) => (
+          {/* Novidades */}
+          <Card className="bg-white border border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
+                <TrendingUp className="h-5 w-5 text-blue-600" />
+                Novidades
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Recursos e melhorias recentes
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {updatesData && updatesData.length > 0 ? (
+                  updatesData.slice(0, 3).map((update: any) => (
                     <div
                       key={update.id}
                       className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
@@ -377,11 +398,16 @@ const DashboardSimple: React.FC = () => {
                         </span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <TrendingUp className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                    <p>Nenhuma novidade disponível</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Ações Rápidas */}
