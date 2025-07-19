@@ -65,7 +65,6 @@ export function useUnifiedFormValidation<T extends Record<string, any>>({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors<T>>({});
   const [globalError, setGlobalError] = useState<string>('');
-  const [isValid, setIsValid] = useState(false);
 
   // Validação de campo único
   const validateField = useCallback((fieldName: keyof T, value: any): string => {
@@ -123,19 +122,18 @@ export function useUnifiedFormValidation<T extends Record<string, any>>({
     }));
 
     // Limpar erro do campo quando o usuário começar a digitar
-    if (errors[field]) {
-      setErrors(prev => {
+    setErrors(prev => {
+      if (prev[field]) {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
-      });
-    }
+      }
+      return prev;
+    });
 
     // Limpar erro global se existir
-    if (globalError) {
-      setGlobalError('');
-    }
-  }, [errors, globalError]);
+    setGlobalError('');
+  }, []);
 
   // Handler de mudança de input unificado
   const handleInputChange = useCallback((field: keyof T) => (
@@ -159,7 +157,6 @@ export function useUnifiedFormValidation<T extends Record<string, any>>({
   const clearErrors = useCallback(() => {
     setErrors({});
     setGlobalError('');
-    setIsValid(false);
   }, []);
 
   const clearFieldError = useCallback((fieldName: keyof T) => {
@@ -233,15 +230,10 @@ export function useUnifiedFormValidation<T extends Record<string, any>>({
     setFormData(initialData);
     setErrors({});
     setGlobalError('');
-    setIsValid(false);
   }, [initialData]);
 
-  // Atualização do estado de validação
-  useEffect(() => {
-    const validationErrors = validateForm(formData);
-    const valid = Object.keys(validationErrors).length === 0;
-    setIsValid(valid);
-  }, [formData, validationRules, validateForm]);
+  // Calcular se é válido sem useEffect para evitar loops
+  const isFormValid = Object.keys(validateForm(formData)).length === 0;
 
   // Atualização quando initialData mudar
   useEffect(() => {
@@ -257,7 +249,7 @@ export function useUnifiedFormValidation<T extends Record<string, any>>({
     isSubmitting,
     errors,
     globalError,
-    isValid,
+    isValid: isFormValid,
 
     // Handlers
     updateField,
