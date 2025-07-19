@@ -30,7 +30,7 @@ import {
   toolReviewReplies,
   toolDiscounts,
   toolVideos,
-  youtubeVideos,
+
   news,
   updates,
 
@@ -100,8 +100,7 @@ import {
   type InsertToolDiscount,
   type ToolVideo,
   type InsertToolVideo,
-  type YoutubeVideo,
-  type InsertYoutubeVideo,
+
   type News,
   type InsertNews,
   type Update,
@@ -330,15 +329,7 @@ export interface IStorage {
   updateToolVideo(id: number, video: Partial<InsertToolVideo>): Promise<ToolVideo>;
   deleteToolVideo(id: number): Promise<void>;
 
-  // YouTube Videos
-  getYoutubeVideos(): Promise<YoutubeVideo[]>;
-  getYoutubeVideo(id: number): Promise<YoutubeVideo | undefined>;
-  getYoutubeVideoByVideoId(videoId: string): Promise<YoutubeVideo | undefined>;
-  createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo>;
-  updateYoutubeVideo(id: number, video: Partial<InsertYoutubeVideo>): Promise<YoutubeVideo>;
-  deleteYoutubeVideo(id: number): Promise<void>;
-  getActiveYoutubeVideos(): Promise<YoutubeVideo[]>;
-  deactivateOldVideos(): Promise<void>;
+
 
   // News
   getNews(): Promise<News[]>;
@@ -1808,67 +1799,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(partnerReviewReplies).where(eq(partnerReviewReplies.id, id));
   }
 
-  // YouTube Videos
-  async getYoutubeVideos(): Promise<YoutubeVideo[]> {
-    return await db
-      .select()
-      .from(youtubeVideos)
-      .where(eq(youtubeVideos.isActive, true))
-      .orderBy(desc(youtubeVideos.publishedAt));
-  }
 
-  async getYoutubeVideo(id: number): Promise<YoutubeVideo | undefined> {
-    const [video] = await db.select().from(youtubeVideos).where(eq(youtubeVideos.id, id));
-    return video || undefined;
-  }
-
-  async getYoutubeVideoByVideoId(videoId: string): Promise<YoutubeVideo | undefined> {
-    const [video] = await db.select().from(youtubeVideos).where(eq(youtubeVideos.videoId, videoId));
-    return video || undefined;
-  }
-
-  async createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo> {
-    const [created] = await db
-      .insert(youtubeVideos)
-      .values({
-        ...video,
-        createdAt: new Date(),
-        fetchedAt: new Date(),
-      })
-      .returning();
-    return created;
-  }
-
-  async updateYoutubeVideo(id: number, video: Partial<InsertYoutubeVideo>): Promise<YoutubeVideo> {
-    const [updated] = await db
-      .update(youtubeVideos)
-      .set({
-        ...video,
-        fetchedAt: new Date(),
-      })
-      .where(eq(youtubeVideos.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteYoutubeVideo(id: number): Promise<void> {
-    await db.delete(youtubeVideos).where(eq(youtubeVideos.id, id));
-  }
-
-  async getActiveYoutubeVideos(): Promise<YoutubeVideo[]> {
-    return await db
-      .select()
-      .from(youtubeVideos)
-      .where(eq(youtubeVideos.isActive, true))
-      .orderBy(desc(youtubeVideos.publishedAt));
-  }
-
-  async deactivateOldVideos(): Promise<void> {
-    await db
-      .update(youtubeVideos)
-      .set({ isActive: false })
-      .where(eq(youtubeVideos.isActive, true));
-  }
 
   // News methods
   async getNews(): Promise<News[]> {

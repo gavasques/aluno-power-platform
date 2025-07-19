@@ -18,7 +18,6 @@ import { useOptimizedIcons } from '@/components/IconLoader';
 import { HelmetProvider } from 'react-helmet-async';
 
 // Lazy load pages for better performance
-const Videos = lazy(() => import("./pages/Videos"));
 const News = lazy(() => import("./pages/News"));
 const Updates = lazy(() => import("./pages/Updates"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -985,15 +984,6 @@ function App() {
                           </Route>
 
                           {/* Main user routes - Protected with permissions */}
-                          <Route path="/videos">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <Videos />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
                           
                           <Route path="/noticias">
                             <ProtectedRoute>

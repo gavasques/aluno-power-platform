@@ -12,29 +12,15 @@ import {
   Zap,
   Youtube,
   ExternalLink,
-  Play,
   Instagram,
   MessageSquare,
-  Calendar,
   ArrowRight,
   TrendingUp,
-  Rss,
-  Eye
+  Rss
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-interface YouTubeVideo {
-  id: number;
-  videoId: string;
-  title: string;
-  description: string;
-  thumbnailUrl: string;
-  publishedAt: string;
-  duration: string;
-  viewCount: number;
-  likeCount: number;
-  commentCount: number;
-}
+
 
 const DashboardSimple: React.FC = () => {
   const { user } = useAuth();
@@ -46,17 +32,7 @@ const DashboardSimple: React.FC = () => {
   const [newsModalOpen, setNewsModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
 
-  // Fetch YouTube videos
-  const { data: videosData = [], isLoading: videosLoading } = useQuery<YouTubeVideo[]>({
-    queryKey: ['/api/youtube-videos'],
-    queryFn: async () => {
-      const response = await fetch('/api/youtube-videos');
-      if (!response.ok) throw new Error('Failed to fetch videos');
-      return response.json();
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
-    gcTime: 15 * 60 * 1000,
-  });
+
 
   // Fetch published news preview
   const { data: newsData = [] } = useQuery({
@@ -116,14 +92,7 @@ const DashboardSimple: React.FC = () => {
     return null;
   };
 
-  const formatViewCount = (count: number) => {
-    if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M`;
-    } else if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}K`;
-    }
-    return count.toString();
-  };
+
 
   const formatPublishedDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -305,97 +274,9 @@ const DashboardSimple: React.FC = () => {
           </Card>
         </div>
 
-        {/* Grid Principal - 3 colunas */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Grid Principal - 2 colunas */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Vídeos do YouTube - Coluna Principal (2 colunas) */}
-          <div className="lg:col-span-2">
-            <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white border-0 shadow-lg">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                      <Youtube className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg font-bold text-white">
-                        Últimos Vídeos do Canal
-                      </CardTitle>
-                      <CardDescription className="text-gray-400 text-sm">
-                        Conteúdo sobre Amazon FBA e e-commerce
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                      onClick={() => window.location.href = '/videos'}
-                    >
-                      <Play className="h-4 w-4 mr-2" />
-                      Ver Todos
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                      onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Canal
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {videosLoading ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="flex gap-4 animate-pulse">
-                        <div className="w-32 h-20 bg-gray-700 rounded-lg"></div>
-                        <div className="flex-1">
-                          <div className="h-4 bg-gray-700 rounded mb-2"></div>
-                          <div className="h-3 bg-gray-700 rounded w-2/3"></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {videosData.slice(0, 3).map((video) => (
-                      <div key={video.id} className="flex gap-4 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-colors cursor-pointer"
-                           onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}>
-                        <div className="relative">
-                          <img 
-                            src={video.thumbnailUrl} 
-                            alt={video.title}
-                            className="w-32 h-20 object-cover rounded-lg"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg opacity-0 hover:opacity-100 transition-opacity">
-                            <Play className="h-8 w-8 text-white" />
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium text-white text-sm leading-tight mb-2 line-clamp-2">
-                            {video.title}
-                          </h3>
-                          <div className="flex items-center gap-4 text-xs text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3 w-3" />
-                              {formatViewCount(video.viewCount)} visualizações
-                            </span>
-                            <span>{formatPublishedDate(video.publishedAt)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Sidebar - Notícias e Novidades */}
           <div className="space-y-6">
             {/* Notícias */}

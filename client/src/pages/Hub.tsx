@@ -1,5 +1,4 @@
 import { 
-  Youtube, 
   Users, 
   Truck, 
   Wrench, 
@@ -13,14 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { PermissionGuard } from "@/components/guards";
 
 const hubItems = [
-  {
-    title: "Vídeos",
-    description: "Biblioteca de vídeos educativos e tutoriais sobre e-commerce",
-    href: "/videos",
-    icon: Youtube,
-    category: "Conteúdo",
-    permission: "hub.videos"
-  },
   {
     title: "Parceiros",
     description: "Rede de parceiros e colaboradores da plataforma",

@@ -16,14 +16,10 @@ import {
   ArrowRight,
   Star,
   CheckCircle,
-  Youtube,
-  ExternalLink,
   AlertTriangle,
-  Play,
   Rss,
   Users,
   Clock,
-  Eye,
   X,
   TrendingUp,
   Activity,
@@ -85,18 +81,7 @@ interface DashboardData {
   };
 }
 
-interface YouTubeVideo {
-  id: number;
-  videoId: string;
-  title: string;
-  description: string;
-  thumbnailUrl: string;
-  publishedAt: string;
-  duration: string;
-  viewCount: number;
-  likeCount: number;
-  commentCount: number;
-}
+
 
 const UserDashboard = () => {
   const { toast } = useToast();
@@ -169,16 +154,7 @@ const UserDashboard = () => {
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 
-  // Log para debug
-  const { data: youtubeVideos, isLoading: videosLoading, refetch: refetchVideos } = useQuery<YouTubeVideo[]>({
-    queryKey: ['/api/youtube-videos'],
-    enabled: true,
-    retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutos de cache normal
-    gcTime: 15 * 60 * 1000, // 15 minutos
-    refetchOnWindowFocus: false, // Sem refetch automático
-    refetchOnMount: false, // Cache normal
-  });
+
 
   // Fetch published news preview (lightweight)
   const { data: newsData = [], isLoading: newsLoading } = useQuery<Partial<News>[]>({
@@ -223,9 +199,7 @@ const UserDashboard = () => {
         case 'upgrade':
           window.location.href = '/subscription';
           break;
-        case 'videos':
-          window.location.href = '/videos';
-          break;
+
         default:
           console.log('Ação não implementada:', action);
       }
@@ -239,27 +213,7 @@ const UserDashboard = () => {
     }
   };
 
-  const formatViewCount = (count: number) => {
-    if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M`;
-    } else if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}K`;
-    }
-    return count.toString();
-  };
 
-  const formatPublishedDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return '1 dia atrás';
-    if (diffDays < 7) return `${diffDays} dias atrás`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} semanas atrás`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} meses atrás`;
-    return `${Math.floor(diffDays / 365)} anos atrás`;
-  };
 
   const formatCreatedDate = (dateString: string) => {
     if (!dateString) return '';
@@ -436,12 +390,12 @@ const UserDashboard = () => {
                 <Button 
                   variant="ghost" 
                   className="justify-start bg-white/10 hover:bg-white/20 text-white border-0 h-12"
-                  onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
+                  onClick={() => window.open('https://instagram.com/guivasques_', '_blank')}
                 >
-                  <Youtube className="h-4 w-4 mr-3" />
+                  <Instagram className="h-4 w-4 mr-3" />
                   <div className="text-left">
-                    <p className="font-medium">YouTube</p>
-                    <p className="text-xs text-gray-300">@guilhermeavasques</p>
+                    <p className="font-medium">Instagram</p>
+                    <p className="text-xs text-gray-300">@guivasques_</p>
                   </div>
                 </Button>
                 
@@ -570,129 +524,10 @@ const UserDashboard = () => {
           </Card>
         </div>
 
-        {/* Content Grid - 3 Colunas */}
+        {/* Content Grid - Notícias e Novidades */}
         <div className="layout-grid-3 gap-6">
-          
-          {/* Vídeos do YouTube - Coluna Principal */}
-          <div className="lg:col-span-2 mb-8">
-            <Card className="bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white border-0 shadow-lg">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                      <Youtube className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg font-bold text-white">
-                        Últimos Vídeos do Canal
-                      </CardTitle>
-                      <CardDescription className="text-gray-400 text-sm">
-                        Conteúdo sobre Amazon FBA e e-commerce atualizado
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                      onClick={() => handleQuickAction('videos')}
-                    >
-                      <Play className="h-4 w-4 mr-2" />
-                      Ver Todos
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                      onClick={() => window.open('https://youtube.com/@guilhermeavasques', '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Canal
-                    </Button>
-                    {(userSummary as any)?.user?.role === 'admin' && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={async () => {
-                          logger.debug('🔄 Invalidating cache and refreshing videos...');
-                          await queryClient.invalidateQueries({ queryKey: ['/api/youtube-videos'] });
-                          await refetchVideos();
-                          logger.debug('✅ Videos refreshed!');
-                        }}
-                        className="text-gray-400 hover:text-white"
-                      >
-                        🔄
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="pb-6">
-                {videosLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="bg-gray-700 rounded-lg h-32 mb-3"></div>
-                        <div className="bg-gray-700 h-4 rounded mb-2"></div>
-                        <div className="bg-gray-700 h-3 rounded w-3/4"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : youtubeVideos && youtubeVideos.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {youtubeVideos
-                      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-                      .slice(0, 6).map((video) => (
-                      <div 
-                        key={video.id} 
-                        className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
-                        onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
-                      >
-                        <div className="relative bg-gray-700 rounded-lg overflow-hidden mb-3 aspect-video">
-                          <img 
-                            src={video.thumbnailUrl} 
-                            alt={video.title}
-                            className="w-full h-full object-cover transition-opacity group-hover:opacity-80"
-                          />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
-                              <Play className="h-5 w-5 text-white ml-1" />
-                            </div>
-                          </div>
-                          <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                            {video.duration}
-                          </div>
-                        </div>
-                        <h3 className="text-white font-semibold text-sm mb-2 line-clamp-2 group-hover:text-red-400 transition-colors">
-                          {video.title}
-                        </h3>
-                        <div className="flex items-center justify-between text-gray-400 text-xs">
-                          <div className="flex items-center gap-2">
-                            <Eye className="h-3 w-3" />
-                            {formatViewCount(video.viewCount)}
-                          </div>
-                          <span>{formatPublishedDate(video.publishedAt)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Youtube className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-300 mb-2">Nenhum vídeo disponível</h3>
-                    <p className="text-gray-500">Os últimos vídeos do YouTube aparecerão aqui</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar com Notícias e Novidades - 2 Colunas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          {/* Notícias e Novidades - Full Width */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 col-span-3">
             
             {/* Notícias */}
             <Card className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white border-0 shadow-lg">

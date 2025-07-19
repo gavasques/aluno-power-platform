@@ -66,7 +66,7 @@ import {
   insertToolReviewReplySchema,
   insertToolDiscountSchema,
   insertToolVideoSchema,
-  insertYoutubeVideoSchema,
+
   insertNewsSchema,
   insertAiGenerationLogSchema,
   aiGenerationLogs,
@@ -85,7 +85,7 @@ import {
 import { AuthService } from "./services/authService";
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-import { youtubeService } from "./services/youtubeService";
+
 import { openaiService } from "./services/openaiService";
 
 // 🏗️  [PHASE_3] MATERIAL DOMAIN MODULAR INTEGRATION
@@ -101,7 +101,7 @@ import { amazonListingService as amazonService } from "./services/amazonListingS
 import { requireAuth, requireRole } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, isNotNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, youtubeVideos, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs, categories } from '@shared/schema';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs, categories } from '@shared/schema';
 
 // PHASE 2: SOLID/DRY/KISS Modular Architecture Integration
 import { registerModularRoutes } from './routes/index';
@@ -1141,85 +1141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // YouTube Videos
-  app.get('/api/youtube-videos', async (req, res) => {
-    try {
-      const videos = await storage.getActiveYoutubeVideos();
-      res.json(videos);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch YouTube videos' });
-    }
-  });
 
-  app.get('/api/youtube-videos/:id', async (req, res) => {
-    try {
-      const video = await storage.getYoutubeVideo(parseInt(req.params.id));
-      if (!video) {
-        return res.status(404).json({ error: 'Video not found' });
-      }
-      res.json(video);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch video' });
-    }
-  });
-
-  app.post('/api/youtube-videos/sync', async (req, res) => {
-    try {
-      console.log('🎬 [MANUAL SYNC] Manual RapidAPI sync requested');
-      const startTime = Date.now();
-      
-      const result = await youtubeService.syncVideosFromRapidAPI();
-      
-      const duration = Date.now() - startTime;
-      console.log(`✅ [MANUAL SYNC] RapidAPI sync completed in ${duration}ms`);
-      
-      res.json({ 
-        message: 'YouTube videos sync completed with RapidAPI',
-        timestamp: new Date().toISOString(),
-        duration: `${duration}ms`,
-        newVideos: result.newVideos,
-        totalVideos: result.totalVideos
-      });
-    } catch (error) {
-      console.error('❌ [MANUAL SYNC] Failed to sync YouTube videos:', error);
-      res.status(500).json({ 
-        error: 'Failed to sync YouTube videos',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
-
-  // YouTube channel info endpoint
-  app.get('/api/youtube-channel-info', async (req, res) => {
-    try {
-      // Check if YouTube API is available
-      if (!process.env.YOUTUBE_API_KEY) {
-        return res.status(503).json({ 
-          error: 'YouTube service unavailable', 
-          message: 'YouTube API key not configured' 
-        });
-      }
-
-      const channelInfo = await youtubeService.fetchChannelInfo('@guilhermeavasques');
-      if (channelInfo) {
-        res.json({
-          title: channelInfo.snippet.title,
-          subscriberCount: channelInfo.statistics.subscriberCount,
-          videoCount: channelInfo.statistics.videoCount,
-          viewCount: channelInfo.statistics.viewCount,
-          customUrl: channelInfo.snippet.customUrl,
-          thumbnails: channelInfo.snippet.thumbnails,
-          description: channelInfo.snippet.description,
-          channelId: channelInfo.id
-        });
-      } else {
-        res.status(404).json({ error: 'Channel not found' });
-      }
-    } catch (error) {
-      console.error('Error fetching channel info:', error);
-      res.status(500).json({ error: 'Failed to fetch channel info' });
-    }
-  });
 
   // Amazon Listing Optimizer Routes
 
@@ -1409,14 +1331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/youtube-videos/:id', async (req, res) => {
-    try {
-      await storage.deleteYoutubeVideo(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete video' });
-    }
-  });
+
 
   // News routes
   app.get('/api/news', async (req, res) => {
