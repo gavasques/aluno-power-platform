@@ -67,9 +67,14 @@ export default function ProductSupplierManagerRefactored({
     error,
     refetch
   } = useQuery({
-    queryKey: ['product-suppliers-refactored', productId],
+    queryKey: [`/api/products/${productId}/suppliers`],
     queryFn: async () => {
+      console.log('🔍 ProductSupplierManagerRefactored - Fetching suppliers for productId:', productId);
       const response = await apiRequest(`/api/products/${productId}/suppliers`);
+      console.log('🔍 ProductSupplierManagerRefactored - Raw API response:', response);
+      if (response?.data) {
+        console.log('🔍 ProductSupplierManagerRefactored - API returned suppliers with IDs:', response.data.map((s: any) => s.id));
+      }
       return response;
     },
     staleTime: 1 * 60 * 1000, // 1 minute
@@ -105,7 +110,7 @@ export default function ProductSupplierManagerRefactored({
     },
     onSuccess: (data) => {
       console.log('🔍 ProductSupplierManagerRefactored - Delete success:', data);
-      queryClient.invalidateQueries({ queryKey: ['product-suppliers-refactored', productId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/suppliers`] });
       toast({
         title: 'Fornecedor removido',
         description: 'Fornecedor foi removido do produto com sucesso.',
@@ -132,7 +137,7 @@ export default function ProductSupplierManagerRefactored({
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['product-suppliers-refactored', productId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/suppliers`] });
       toast({
         title: 'Fornecedor atualizado',
         description: 'Dados do fornecedor foram atualizados com sucesso.',
@@ -152,8 +157,8 @@ export default function ProductSupplierManagerRefactored({
   // Force cache clear and refresh
   const handleForceRefresh = () => {
     console.log('🔄 Force refresh - clearing cache for productId:', productId);
-    queryClient.removeQueries({ queryKey: ['product-suppliers-refactored', productId] });
-    queryClient.invalidateQueries({ queryKey: ['product-suppliers-refactored', productId] });
+    queryClient.removeQueries({ queryKey: [`/api/products/${productId}/suppliers`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/suppliers`] });
     refetch();
   };
 
