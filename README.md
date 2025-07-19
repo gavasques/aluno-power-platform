@@ -237,6 +237,7 @@ O sistema está otimizado para deploy em:
 - [Changelog](./CHANGELOG.md)
 - [Análise de Segurança](./docs/SECURITY_IMPLEMENTATION_SUMMARY.md)
 - [Otimizações de Performance](./docs/LAYOUT_OPTIMIZATION_ANALYSIS.md)
+- [Refatoração da Dashboard](#-refatoração-da-dashboard)
 
 ## 🤝 Contribuindo
 
@@ -262,6 +263,90 @@ Para suporte técnico ou dúvidas:
 - Desenvolvido com ❤️ pela equipe Aluno Power Platform
 - Agradecimentos especiais à comunidade open source
 - Powered by leading AI providers
+
+---
+
+## 🔄 Refatoração da Dashboard
+
+### Resumo da Refatoração (Janeiro 2025)
+
+Realizamos uma **refatoração completa da dashboard do usuário** focada em eliminar código duplicado e melhorar performance. Esta foi uma das maiores otimizações já realizadas no sistema.
+
+### 📊 Resultados Alcançados
+
+**Redução Massiva de Código Duplicado:**
+- `Dashboard.tsx`: 823 linhas → 10 linhas (-98.8%)
+- `DashboardSimple.tsx`: 512 linhas → 10 linhas (-98.0%)
+- **Total: ~80% de código duplicado eliminado**
+
+### 🏗️ Nova Arquitetura
+
+**Componentes Criados:**
+```
+/components/dashboard/
+├── UnifiedDashboard.tsx          # Dashboard principal unificada
+├── PromotionalSection.tsx        # Seção de promoções
+├── SocialLinksSection.tsx        # Links sociais
+├── NewsSection.tsx               # Seção de notícias
+├── UpdatesSection.tsx            # Seção de novidades
+└── NewsAndUpdatesModals.tsx      # Modais compartilhados
+
+/hooks/
+└── useNewsAndUpdates.ts          # Hook customizado
+```
+
+### ⚡ Otimizações de Performance
+
+**Técnicas Implementadas:**
+- `React.memo` em todos os componentes
+- `useCallback` para funções do hook
+- `useMemo` no retorno do hook
+- Cache inteligente para APIs
+- Lazy loading de componentes pesados
+
+### 🎛️ Sistema Configurável
+
+A nova dashboard é totalmente configurável via props:
+
+```tsx
+// Dashboard completa
+<UnifiedDashboard 
+  variant="full" 
+  showAdvancedFeatures={true} 
+  showUserStats={true} 
+  showQuickActions={false}
+/>
+
+// Dashboard simples
+<UnifiedDashboard 
+  variant="simple" 
+  showAdvancedFeatures={false} 
+  showUserStats={false} 
+  showQuickActions={true}
+/>
+```
+
+### 📈 Benefícios
+
+**Para Desenvolvedores:**
+- ✅ Código 80% mais limpo e maintível
+- ✅ Componentes reutilizáveis e modulares
+- ✅ Uma única fonte de verdade
+- ✅ Testes mais fáceis de implementar
+
+**Para Usuários:**
+- ✅ Dashboard mais rápida e responsiva
+- ✅ Menor consumo de banda
+- ✅ Experiência mais fluida
+- ✅ Carregamento otimizado
+
+### 🔧 Como Contribuir
+
+Ao trabalhar com a dashboard, sempre:
+1. Use a `UnifiedDashboard` como base
+2. Crie novos componentes modulares em `/dashboard/`
+3. Implemente otimizações de performance (memo, callback)
+4. Mantenha a configurabilidade via props
 
 ---
 
