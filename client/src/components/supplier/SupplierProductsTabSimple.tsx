@@ -365,6 +365,68 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
     });
   };
 
+  // Função para exportar produtos para Excel
+  const exportProducts = () => {
+    if (!products || products.length === 0) {
+      toast({
+        title: 'Nenhum Produto',
+        description: 'Não há produtos para exportar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Preparar dados para exportação
+    const exportData = products.map(product => ({
+      cod_prod_fornecedor: product.supplierSku,
+      nome: product.productName,
+      custo: product.cost || '',
+      lead_time: product.leadTime || '',
+      quantidade_minima: product.minimumOrderQuantity || '',
+      caixa_master: product.masterBox || '',
+      estoque: product.stock || '',
+      status: product.linkStatus === 'linked' ? 'Vinculado' : 
+              product.linkStatus === 'pending' ? 'Pendente' : 'Não Encontrado',
+      produto_vinculado: product.linkedProduct?.name || '',
+      sku_vinculado: product.linkedProduct?.sku || '',
+      data_criacao: new Date(product.createdAt).toLocaleDateString('pt-BR'),
+      data_atualizacao: new Date(product.updatedAt).toLocaleDateString('pt-BR')
+    }));
+
+    // Criar workbook
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Definir larguras das colunas
+    ws['!cols'] = [
+      { wch: 20 }, // cod_prod_fornecedor
+      { wch: 30 }, // nome
+      { wch: 12 }, // custo
+      { wch: 12 }, // lead_time
+      { wch: 18 }, // quantidade_minima
+      { wch: 15 }, // caixa_master
+      { wch: 12 }, // estoque
+      { wch: 15 }, // status
+      { wch: 30 }, // produto_vinculado
+      { wch: 20 }, // sku_vinculado
+      { wch: 15 }, // data_criacao
+      { wch: 15 }  // data_atualizacao
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Produtos do Fornecedor');
+    
+    // Gerar nome do arquivo com data atual
+    const today = new Date().toISOString().split('T')[0];
+    const filename = `produtos_fornecedor_${supplierId}_${today}.xlsx`;
+    
+    XLSX.writeFile(wb, filename);
+    
+    toast({
+      title: 'Exportação Concluída',
+      description: `${products.length} produtos exportados para ${filename}`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -424,6 +486,17 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
                 </div>
                 
                 <div className="flex gap-2">
+                  <Button 
+                    size="sm"
+                    variant="outline"
+                    onClick={exportProducts}
+                    disabled={products.length === 0}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Exportar Dados
+                  </Button>
+                  
                   <Button 
                     size="sm"
                     variant="outline"
