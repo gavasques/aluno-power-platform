@@ -13,6 +13,7 @@ import {
   ConversationList, 
   FileList 
 } from '@/components/supplier/SupplierTabsManager';
+import { SupplierProductsTab } from '@/components/supplier/SupplierProductsTab';
 import { BrandDialog, ContactDialog, ConversationDialog } from '@/components/supplier/SupplierDialogs';
 // SupplierEditDialog removido - agora usando edição inline
 import { FileUploadDialog } from '@/components/supplier/FileUploadDialog';
@@ -157,8 +158,9 @@ const SupplierDetailRefactored = () => {
       <Card>
         <CardContent className="p-6">
           <Tabs defaultValue="info" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="info">Informações</TabsTrigger>
+              <TabsTrigger value="products">Produtos</TabsTrigger>
               <TabsTrigger value="conversations">
                 Conversas ({conversations.length})
               </TabsTrigger>
@@ -177,6 +179,11 @@ const SupplierDetailRefactored = () => {
             <TabsContent value="info" className="mt-6">
               {/* Sempre usa SupplierInfoDisplay com edição inline */}
               <SupplierInfoDisplay supplier={supplier} />
+            </TabsContent>
+
+            {/* Products Tab */}
+            <TabsContent value="products" className="mt-6">
+              <SupplierProductsTab supplierId={parseInt(supplierId)} />
             </TabsContent>
 
             {/* Conversations Tab */}

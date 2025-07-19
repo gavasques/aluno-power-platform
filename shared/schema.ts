@@ -510,6 +510,45 @@ export const productSuppliers = pgTable("product_suppliers", {
   activeIdx: index("product_suppliers_active_idx").on(table.active),
 }));
 
+// Supplier Products - Tabela para produtos do fornecedor (existam ou não no sistema)
+export const supplierProducts = pgTable("supplier_products", {
+  id: serial("id").primaryKey(),
+  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  
+  // Dados do produto no fornecedor
+  supplierSku: text("supplier_sku").notNull(), // SKU no fornecedor
+  productName: text("product_name").notNull(), // Nome do produto
+  description: text("description"), // Descrição do produto
+  cost: decimal("cost", { precision: 10, scale: 2 }), // Custo
+  leadTime: integer("lead_time"), // Tempo de entrega (dias)
+  minimumOrderQuantity: integer("minimum_order_quantity"), // Quantidade mínima de pedido
+  category: text("category"), // Categoria do produto
+  brand: text("brand"), // Marca
+  
+  // Status de vinculação
+  productId: integer("product_id").references(() => products.id, { onDelete: "set null" }), // NULL se não existir no sistema
+  linkStatus: text("link_status").notNull().default("pending"), // 'linked', 'pending', 'not_found'
+  
+  // Metadados
+  notes: text("notes"), // Observações
+  active: boolean("active").notNull().default(true), // Status ativo/inativo
+  
+  // Auditoria
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  // Índices para performance
+  supplierIdx: index("supplier_products_supplier_idx").on(table.supplierId),
+  userIdx: index("supplier_products_user_idx").on(table.userId),
+  productIdx: index("supplier_products_product_idx").on(table.productId),
+  statusIdx: index("supplier_products_status_idx").on(table.linkStatus),
+  skuIdx: index("supplier_products_sku_idx").on(table.supplierSku),
+  
+  // Constraint único para evitar duplicatas
+  supplierSkuUnique: unique("supplier_sku_unique").on(table.supplierId, table.supplierSku),
+}));
+
 // Product Cost History
 export const productCostHistory = pgTable("product_cost_history", {
   id: serial("id").primaryKey(),
@@ -1549,6 +1588,14 @@ export const insertProductSupplierSchema = createInsertSchema(productSuppliers).
 });
 export type InsertProductSupplier = z.infer<typeof insertProductSupplierSchema>;
 export type ProductSupplier = typeof productSuppliers.$inferSelect;
+
+export const insertSupplierProductSchema = createInsertSchema(supplierProducts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSupplierProduct = z.infer<typeof insertSupplierProductSchema>;
+export type SupplierProduct = typeof supplierProducts.$inferSelect;
 
 // Knowledge Base schemas
 export const insertKnowledgeBaseDocSchema = createInsertSchema(knowledgeBaseDocs).omit({

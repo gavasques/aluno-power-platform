@@ -18,6 +18,7 @@ import { LoggingService } from "./services/loggingService";
 import userProfileRoutes from "./routes/user/profile";
 import picsartRoutes from "./routes/picsart";
 import { productSupplierRoutes } from "./routes/productSupplierRoutes";
+import supplierProductsRoutes from "./routes/supplierProductsRoutes";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -7088,6 +7089,21 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   } catch (error) {
     console.error('❌ Error registering product supplier routes:', error);
     console.error('❌ [PRODUCT_SUPPLIERS] Import failed:', error);
+  }
+
+  // Supplier Products Management Routes
+  try {
+    app.use('/api/suppliers', supplierProductsRoutes);
+    console.log('✅ [SUPPLIER_PRODUCTS] Routes registered successfully');
+    console.log('✅ [SUPPLIER_PRODUCTS] Available routes:');
+    console.log('   - GET /:supplierId/products');
+    console.log('   - POST /:supplierId/products');
+    console.log('   - PUT /:supplierId/products/:productId');
+    console.log('   - DELETE /:supplierId/products/:productId');
+    console.log('   - POST /:supplierId/products/import');
+    console.log('   - POST /:supplierId/products/sync');
+  } catch (error) {
+    console.error('❌ Error registering supplier products routes:', error);
   }
 
   return httpServer;
