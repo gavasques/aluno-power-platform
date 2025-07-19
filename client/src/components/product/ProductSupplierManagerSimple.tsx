@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, Filter, Download, Star, Package, Edit, Trash2, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, Filter, Download, Star, Package, Edit, Trash2, MoreHorizontal, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useProductSuppliers } from '@/hooks/useProductSuppliers';
+import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency } from '@shared/utils/formatters';
 
 interface ProductSupplierManagerSimpleProps {
@@ -34,6 +35,8 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<any>(null);
   const [supplierToDelete, setSupplierToDelete] = useState<any>(null);
+  
+  const queryClient = useQueryClient();
 
   const {
     suppliers,
@@ -42,8 +45,21 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
     updateSupplier,
     deleteSupplier,
     isUpdating,
-    isDeleting
+    isDeleting,
+    refetch
   } = useProductSuppliers(productId);
+
+  // Force refresh on mount to ensure fresh data
+  React.useEffect(() => {
+    refetch();
+  }, [productId, refetch]);
+
+  // Force cache clear and refresh
+  const handleForceRefresh = () => {
+    queryClient.removeQueries({ queryKey: ['product-suppliers', productId] });
+    queryClient.removeQueries({ queryKey: ['product-suppliers-stats', productId] });
+    refetch();
+  };
 
   // Filter suppliers based on search term
   const filteredSuppliers = useMemo(() => {
@@ -162,6 +178,10 @@ export const ProductSupplierManagerSimple: React.FC<ProductSupplierManagerSimple
           />
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={handleForceRefresh}>
+            <RefreshCw className="h-4 w-4" />
+            Atualizar
+          </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <Filter className="h-4 w-4" />
             Filtros
