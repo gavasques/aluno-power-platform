@@ -20,26 +20,20 @@ interface AuthenticatedRequest extends Request {
 const supplierProductSchema = z.object({
   supplierSku: z.string().min(1, 'SKU é obrigatório'),
   productName: z.string().min(1, 'Nome do produto é obrigatório'),
-  description: z.string().optional(),
-  cost: z.number().positive().optional(),
-  leadTime: z.number().int().positive().optional(),
-  minimumOrderQuantity: z.number().int().positive().optional(),
-  category: z.string().optional(),
-  brand: z.string().optional(),
-  notes: z.string().optional(),
+  cost: z.number().positive().nullable().optional(),
+  leadTime: z.number().int().positive().nullable().optional(),
+  minimumOrderQuantity: z.number().int().positive().nullable().optional(),
+  masterBox: z.number().int().positive().nullable().optional(),
 });
 
-// Schema para importação CSV
-const csvRowSchema = z.object({
+// Schema para importação Excel
+const excelRowSchema = z.object({
   supplierSku: z.string().min(1),
   productName: z.string().min(1),
-  description: z.string().optional(),
-  cost: z.string().transform(val => val ? parseFloat(val) : undefined),
-  leadTime: z.string().transform(val => val ? parseInt(val) : undefined),
-  minimumOrderQuantity: z.string().transform(val => val ? parseInt(val) : undefined),
-  category: z.string().optional(),
-  brand: z.string().optional(),
-  notes: z.string().optional(),
+  cost: z.string().transform(val => val ? parseFloat(val) : null),
+  leadTime: z.string().transform(val => val ? parseInt(val) : null),
+  minimumOrderQuantity: z.string().transform(val => val ? parseInt(val) : null),
+  masterBox: z.string().transform(val => val ? parseInt(val) : null),
 });
 
 export class SupplierProductsController {
@@ -71,14 +65,11 @@ export class SupplierProductsController {
           id: supplierProducts.id,
           supplierSku: supplierProducts.supplierSku,
           productName: supplierProducts.productName,
-          description: supplierProducts.description,
           cost: supplierProducts.cost,
           leadTime: supplierProducts.leadTime,
           minimumOrderQuantity: supplierProducts.minimumOrderQuantity,
-          category: supplierProducts.category,
-          brand: supplierProducts.brand,
+          masterBox: supplierProducts.masterBox,
           linkStatus: supplierProducts.linkStatus,
-          notes: supplierProducts.notes,
           createdAt: supplierProducts.createdAt,
           updatedAt: supplierProducts.updatedAt,
           // Dados do produto vinculado (se existir)
@@ -99,9 +90,7 @@ export class SupplierProductsController {
         const searchTerm = search.toLowerCase();
         results = results.filter(item => 
           item.supplierSku.toLowerCase().includes(searchTerm) ||
-          item.productName.toLowerCase().includes(searchTerm) ||
-          (item.description && item.description.toLowerCase().includes(searchTerm)) ||
-          (item.brand && item.brand.toLowerCase().includes(searchTerm))
+          item.productName.toLowerCase().includes(searchTerm)
         );
       }
 
@@ -161,17 +150,19 @@ export class SupplierProductsController {
         });
       }
 
-      // Tentar encontrar produto existente no sistema
-      const linkedProduct = await this.findLinkedProduct(validatedData);
-
       const newProduct = await db
         .insert(supplierProducts)
         .values({
           supplierId: parseInt(supplierId),
           userId,
-          productId: linkedProduct?.id || null,
-          linkStatus: linkedProduct ? 'linked' : 'pending',
-          ...validatedData,
+          productId: null,
+          linkStatus: 'pending',
+          supplierSku: validatedData.supplierSku,
+          productName: validatedData.productName,
+          cost: validatedData.cost,
+          leadTime: validatedData.leadTime,
+          minimumOrderQuantity: validatedData.minimumOrderQuantity,
+          masterBox: validatedData.masterBox,
         })
         .returning();
 
@@ -391,10 +382,10 @@ export class SupplierProductsController {
             userId,
             supplierSku: row.supplierSku,
             productName: row.productName,
-            cost: row.cost ? parseFloat(row.cost.toString()) : null,
-            leadTime: row.leadTime ? parseInt(row.leadTime.toString()) : null,
-            minimumOrderQuantity: row.minimumOrderQuantity ? parseInt(row.minimumOrderQuantity.toString()) : null,
-            masterBox: row.masterBox ? parseInt(row.masterBox.toString()) : null,
+            cost: row.cost,
+            leadTime: row.leadTime,
+            minimumOrderQuantity: row.minimumOrderQuantity,
+            masterBox: row.masterBox,
             linkStatus: 'pending' as const,
             active: true
           };
