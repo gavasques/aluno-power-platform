@@ -267,17 +267,13 @@ export class SupplierProductsController {
         }
       }
 
-      // Tentar encontrar produto vinculado se dados mudaram
-      let updateData = { ...validatedData, updatedAt: new Date() };
-      if (validatedData.supplierSku || validatedData.productName) {
-        const linkedProduct = await this.findLinkedProduct({
-          ...existing[0],
-          ...validatedData,
-        });
-        
-        updateData.productId = linkedProduct?.id || null;
-        updateData.linkStatus = linkedProduct ? 'linked' : 'pending';
-      }
+      // Atualizar produto mantendo status atual de link
+      let updateData = { 
+        ...validatedData, 
+        updatedAt: new Date(),
+        // Manter linkStatus atual se não foi especificado
+        linkStatus: existing[0].linkStatus || 'pending'
+      };
 
       const updated = await db
         .update(supplierProducts)
