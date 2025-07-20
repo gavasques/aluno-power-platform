@@ -40,14 +40,18 @@ const InformalImportSimulationsList: React.FC = () => {
   const ITEMS_PER_PAGE = 15;
   const MAX_ITEMS = 100;
 
-  // Fetch simulations with pagination
+  // Fetch simulations with pagination - Fixed version
   const { data: apiResponse, isLoading, error } = useQuery({
     queryKey: ['/api/simulations/import', currentPage],
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       console.log('🔍 FRONTEND - Fazendo requisição para API de simulações');
       const response = await apiRequest(`/api/simulations/import?page=${currentPage}&limit=${ITEMS_PER_PAGE}&maxItems=${MAX_ITEMS}`);
-      console.log('🔍 FRONTEND - Resposta da API:', response);
+      console.log('🔍 FRONTEND - Resposta da API (RAW):', response);
+      console.log('🔍 FRONTEND - Tipo da resposta:', typeof response);
+      console.log('🔍 FRONTEND - Propriedades da resposta:', Object.keys(response || {}));
       return response;
     }
   });
@@ -62,7 +66,17 @@ const InformalImportSimulationsList: React.FC = () => {
     simulations,
     totalItems,
     isLoading,
-    error
+    error,
+    rawApiResponse: apiResponse
+  });
+  
+  // Additional debug for data extraction
+  console.log('🔍 FRONTEND - Detalhes da resposta:', {
+    hasApiResponse: !!apiResponse,
+    apiResponseType: typeof apiResponse,
+    apiResponseKeys: apiResponse ? Object.keys(apiResponse) : 'none',
+    dataProperty: apiResponse?.data,
+    dataLength: apiResponse?.data?.length
   });
 
   // Log results
