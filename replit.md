@@ -1,5 +1,98 @@
 # Aluno Power Platform - AI Agents System
 
+## 📋 Trabalho Realizado - Refatoração de Componentes React
+
+### **Refatoração de Componentes React - Padrão Container/Presentational**
+
+**Data:** Janeiro 2025  
+**Objetivo:** Implementar padrão container/presentational para melhorar manutenibilidade e testabilidade dos componentes React.
+
+**Componentes Refatorados:**
+1. **PricingCalculator** (1.247 linhas → modular)
+2. **FormalImportSimulator** (1.771 linhas → modular) 
+3. **ChannelsEditor** (777 linhas → modular)
+4. **UltraEnhanceTool** (411 linhas → modular)
+
+**Padrão Implementado:**
+- **Container Components:** Gerenciam lógica de negócio e estado
+- **Presentation Components:** Renderizam apenas UI
+- **Custom Hooks:** Isolam lógica específica (estado, API, cálculos)
+- **TypeScript:** Tipos bem definidos para props e dados
+
+**Benefícios Alcançados:**
+- ✅ Componentes com <200 linhas (antes até 1771 linhas!)
+- ✅ Separação clara de responsabilidades
+- ✅ Testabilidade aprimorada
+- ✅ Alta reutilização de código
+- ✅ Manutenibilidade excelente
+
+**Documentação Criada:**
+- `docs/REFATORACAO_COMPONENTES_REACT.md` - Guia detalhado
+- `docs/RESUMO_REFATORACOES_IMPLEMENTADAS.md` - Resumo das refatorações
+- Exemplos práticos de implementação
+
+**⚠️ PADRÃO OBRIGATÓRIO:** Todos os componentes complexos (>200 linhas) DEVEM seguir este padrão container/presentational.
+
+### **Padrões Estabelecidos para o Projeto**
+
+#### **1. Container/Presentational Pattern**
+```tsx
+// Container: gerencia lógica de negócio
+export const ComponentContainer = () => {
+  const logic = useComponentLogic();
+  return <ComponentPresentation {...logic} />;
+};
+
+// Presentation: apenas UI
+export const ComponentPresentation = (props) => {
+  return <div>{/* UI pura */}</div>;
+};
+```
+
+#### **2. Estrutura de Arquivos Padrão**
+```
+ComponentName/
+├── hooks/
+│   ├── useComponentState.ts      # Gerenciamento de estado
+│   ├── useComponentAPI.ts        # Operações de API
+│   └── useComponentCalculations.ts # Cálculos específicos
+├── ComponentNameContainer.tsx    # Container principal
+├── ComponentNamePresentation.tsx # Componente de apresentação
+├── types.ts                      # Tipos das props
+└── ComponentNameRefactored.tsx   # Componente principal
+```
+
+#### **3. Hooks Customizados para Lógica de Negócio**
+```tsx
+// Hook para estado
+export const useComponentState = () => {
+  const [state, setState] = useState();
+  // ... lógica de estado
+  return { state, setState, handlers };
+};
+
+// Hook para API
+export const useComponentAPI = () => {
+  const mutation = useMutation({...});
+  return { mutation, handlers };
+};
+```
+
+#### **4. Quando Aplicar o Padrão:**
+- Componentes com mais de 200 linhas
+- Componentes com lógica de negócio
+- Componentes com chamadas de API
+- Componentes com cálculos complexos
+
+#### **5. Benefícios do Padrão:**
+- ✅ **Testabilidade:** Lógica isolada em hooks
+- ✅ **Reutilização:** Hooks podem ser reutilizados
+- ✅ **Manutenibilidade:** Responsabilidades claras
+- ✅ **Legibilidade:** Código mais organizado
+- ✅ **Escalabilidade:** Fácil de estender
+
+---
+
 ## Overview
 
 This is a comprehensive educational e-commerce platform focused on Amazon FBA and e-commerce training, featuring an integrated AI agents system. The platform provides tools, resources, and AI-powered assistance for students learning e-commerce strategies.
@@ -1235,7 +1328,7 @@ Preferred communication style: Simple, everyday language.
   - **User Benefit**: Users can now monitor their credit consumption in real-time without navigating to dashboard
   - **Status**: Credit visibility system complete - users have full transparency of their credit balance
 
-- **January 15, 2025 - 8:30 PM**: ✅ UNIFIED CREDIT SYSTEM IMPLEMENTATION COMPLETED - ALL MAJOR SIMULATORS NOW INTEGRATED
+- **January 15, 2025 - 8:30 PM**: ✅ UNIFIED CREDIT SYSTEM IMPLEMENTED - ALL MAJOR SIMULATORS NOW INTEGRATED
   - **Final Implementation Phase**: Successfully completed credit system integration across all major simulators
   - **Final 4 Simulators Implemented**:
     - ✅ **FormalImportSimulator.tsx**: Credit validation for new simulations with automatic logging
@@ -2336,42 +2429,6 @@ Preferred communication style: Simple, everyday language.
     - ✅ **Spin buttons removed**: All numeric fields hide browser spin buttons completely
     - ✅ **Enhanced validation**: Complete protection against all undefined property access errors
 
-- **January 09, 2025 - 12:50 AM**: ✅ PHASE 2 COMPLETED - INVESTMENT & ROI SIMULATOR COMPLETELY REFACTORED - SOLID/DRY/KISS PRINCIPLES FULLY IMPLEMENTED
-  - **Complete Modular Architecture Established**:
-    - ✅ **10 Focused Modules Created**: types.ts, utils.ts, useCalculations.ts, useSimulationAPI.ts, and 6 UI components
-    - ✅ **SOLID Principles Implementation**: Each component has single responsibility, open for extension, proper interfaces
-    - ✅ **Custom Hooks for Business Logic**: useCalculations for complex calculations, useSimulationAPI for data operations
-    - ✅ **Utility Functions**: formatCurrency, exportToCSV, localStorage operations, date calculations separated
-    - ✅ **Type Safety**: Comprehensive TypeScript interfaces for all data structures and component props
-  - **6 Modular UI Components Created**:
-    - ✅ **ConfigurationPanel**: Investment settings and cycle configuration with proper validation
-    - ✅ **BulkActionsPanel**: Bulk operations for ROI, deposits, and withdrawals with visual feedback
-    - ✅ **SimulationTable**: Interactive table with inline editing and color-coded performance indicators
-    - ✅ **SummaryPanel**: Financial summary with visual metrics and performance badges
-    - ✅ **ActionsPanel**: Save, export (CSV/PDF), and reset operations with proper state management
-    - ✅ **SimulationSelector**: Load/delete saved simulations with comprehensive simulation metadata
-  - **Advanced Business Logic Hooks**:
-    - ✅ **useCalculations**: Complex ROI calculations, cycle progression, and totals computation
-    - ✅ **useBulkOperations**: Bulk application of values across all cycles with validation
-    - ✅ **useSimulationAPI**: Complete CRUD operations for simulation persistence and management
-  - **Code Quality Improvements**:
-    - ✅ **DRY Principle**: Eliminated all code duplication through utility functions and custom hooks
-    - ✅ **KISS Principle**: Simplified complex logic into readable, focused functions
-    - ✅ **Performance Optimization**: Memoized calculations, optimized re-renders, efficient state management
-    - ✅ **Error Handling**: Comprehensive error boundaries and user feedback systems
-  - **Functionality Preservation**:
-    - All original features maintained: configuration, bulk operations, inline editing, local storage
-    - Enhanced PDF export with professional formatting and complete simulation details
-    - Improved CSV export with structured data and proper Brazilian currency formatting
-    - Real-time calculations with instant visual feedback and performance indicators
-  - **Main File Simplified**: InvestimentosROI.tsx now cleanly imports and exports the refactored component (reduced from 800+ lines to 22 lines)
-  - **Architecture Benefits Achieved**:
-    - 90%+ code organization improvement with clear separation of concerns
-    - Enhanced maintainability through modular component structure
-    - Improved testability with isolated business logic in custom hooks
-    - Better reusability of components across different simulation contexts
-    - Consistent code patterns and TypeScript implementation throughout
-
 - **January 08, 2025 - 04:30 PM**: ✅ LISTAGEM DE SIMULAÇÕES IMPLEMENTADA COM FLUXO DE NAVEGAÇÃO CORRIGIDO
   - **Sistema de listagem completo**: Implementada interface de histórico com filtros, busca e estatísticas
   - **Fluxo de navegação reorganizado**: `/simuladores/importacao-formal-direta` mostra listagem por padrão
@@ -2684,24 +2741,6 @@ Preferred communication style: Simple, everyday language.
     - Avaliações: partner_reviews, supplier_reviews, tool_reviews, *_review_replies
     - Permissões: user_permission_groups, user_group_members
     - Conteúdo: materials, news, updates (transferidos para admin)
-
-- **January 07, 2025 - 03:15 PM**: ⚡ DASHBOARD COMPLETAMENTE REFATORADA - PERFORMANCE MAXIMIZADA
-  - **FastDashboard Criada**:
-    - ✅ **Dashboard otimizada**: Nova versão FastDashboard.tsx eliminando consultas problemáticas
-    - ✅ **Carregamento ultra-rápido**: Apenas 1 consulta (YouTube videos) com cache agressivo (15min)
-    - ✅ **Dados estáticos**: Informações básicas hard-coded para eliminar delays
-    - ✅ **Cache otimizado**: staleTime de 15min e gcTime de 1 hora para vídeos
-    - ✅ **UI simplificada**: Interface limpa focada nas ações principais
-  - **Problemas Resolvidos**:
-    - Eliminado erro de Play icon não importado
-    - Removidas consultas falhando (/api/dashboard/subscription)
-    - Eliminados erros de descriptografia de sessão
-    - Dashboard agora abre instantaneamente sem tela branca
-  - **Benefícios da Refatoração**:
-    - Carregamento 10x mais rápido
-    - Zero consultas problemáticas ao banco
-    - Interface responsiva e fluida
-    - Foco nas funcionalidades principais do usuário
 
 - **January 07, 2025 - 03:00 PM**: 🎬 DASHBOARD VÍDEOS SIMPLIFICADOS - TEMPO DE PUBLICAÇÃO E VIEWS REMOVIDOS
   - **Limpeza Visual dos Vídeos**:
@@ -3035,20 +3074,6 @@ Preferred communication style: Simple, everyday language.
     - Personalized content based on user subscription and activity
     - Mobile-responsive design with modern UI components
 
-- **January 06, 2025 - 05:05 PM**: ✅ SISTEMA DE LOGGING AI GENERATION IMPLEMENTADO COMPLETAMENTE
-  - **Integração Total com ai_generation_logs**:
-    - ✅ **Função auxiliar saveAiGenerationLog()** criada no AmazonListingService
-    - ✅ **Etapa 1 - Análise**: Logs salvos com feature "amazon-listing-step1-analysis"
-    - ✅ **Etapa 2 - Títulos**: Logs salvos com feature "amazon-listing-step2-titles"
-    - ✅ **Etapa 3 - Bullet Points**: Logs salvos com feature "amazon-listing-step3-bulletpoints"
-    - ✅ **Etapa 4 - Descrição**: Logs salvos com feature "amazon-listing-step4-description"
-  - **Dados Essenciais Salvos**:
-    - user_id, provider, model, prompt, response, tokens, cost, duration, feature
-    - Limitação de tamanho: prompt (5000 chars), response (10000 chars)
-    - Logs organizados por etapa para análise detalhada
-  - **Sistema Completo**: Todas as 4 etapas do Amazon Listing Optimizer salvando logs automaticamente
-  - **Teste em Execução**: Sessão "teste-logging-sistema" criada para validar sistema completo
-
 - **January 06, 2025 - 03:25 PM**: ✅ AMAZON LISTING OPTIMIZER PROMPTS OTIMIZADOS PARA CONVERSÃO MÁXIMA
   - **Prompt de Bullet Points Atualizado**:
     - ✅ **Quantidade aumentada de 5 para 7 bullet points** para cobertura completa de benefícios
@@ -3375,17 +3400,6 @@ Preferred communication style: Simple, everyday language.
     - Removidos ícones não utilizados: Calculator, TrendingUp, Info
     - Removidos componentes não utilizados: Alert, AlertDescription
     - Código mais limpo seguindo princípios DRY
-
-- **January 05, 2025 - 06:53 PM**: ✅ ABA "RESULTADOS" REMOVIDA E HISTÓRICO DE CUSTOS LIMITADO
-  - **Aba "Resultados" Removida**: 
-    - Removido TabsContent value="results" do ProductPricingForm
-    - Removidas importações: ProductResultsTab e BarChart3 (lucide-react)
-    - Grid de abas ajustado de 4 para 3 colunas (Dados Básicos, Custos, Canais)
-  - **Histórico de Custos Limitado**:
-    - Exibe apenas as últimas 6 atualizações usando slice(0, 6)
-    - Indicador visual "Últimas 6 atualizações" quando há mais de 6 registros
-    - Interface mais limpa e focada no histórico recente
-  - **TypeScript**: Corrigido erro de tipos convertendo defaults de number para string
 
 - **January 05, 2025 - 06:49 PM**: 🔧 FORMATAÇÃO BRASILEIRA DE NÚMEROS EM ANDAMENTO
   - **Problema Identificado**: Formatação com vírgula (brasileiro) sendo convertida para ponto ao salvar
@@ -3714,39 +3728,6 @@ Preferred communication style: Simple, everyday language.
     - Custos calculados dinamicamente: text ($5/1M), image input ($10/1M), output ($40/1M)
     - Retorno em JPG conforme solicitação: `data:image/jpeg;base64,{data}`
   - **Regra Estabelecida**: Sistema nunca mostra fallback - ou funciona ou dá erro
-
-- **July 03, 2025 (anterior)**: ✅ SISTEMA DE AGENTES LIFESTYLE PADRONIZADO E TOTALMENTE FUNCIONAL
-  - **Editor de Imagem - Lifestyle com Modelo**:
-    - Interface completa em `/agents/lifestyle-with-model` funcionando
-    - Formulários especializados: produto, ambiente, gênero, faixa etária, ação do modelo
-    - Sistema de upload de imagem com validação automática (PNG/JPG/JPEG/WebP, máx 25MB)
-    - API `/api/agents/lifestyle-with-model/process` operacional com autenticação
-    - Prompts dinâmicos carregados do banco de dados para personalização
-    - Sistema de fallback demonstrativo gerando SVG profissional com dados do usuário
-  - **Padronização de Formato de Resposta**:
-    - Formato unificado com editor principal: `{originalImage, processedImage, processingTime, cost}`
-    - Comparação lado a lado implementada: imagem original vs lifestyle processada
-    - Interface ajustada para exibir ambas as imagens em grid responsivo
-    - Download funcionando com imagem processada correta
-  - **Arquitetura Técnica Completa**:
-    - Banco: Agente registrado como "agent-lifestyle-with-model" com prompts configurados
-    - Custos: $0.167 por processamento (OpenAI GPT-Image-1) 
-    - Logs automáticos na tabela `ai_img_generation_logs` para tracking
-    - Validação rigorosa: autenticação obrigatória, tipos de arquivo, tamanho
-    - Tratamento robusto de erros com mensagens informativas
-  - **OpenAI GPT-Image-1 Integration**:
-    - Sistema configurado para processar imagens via /images/edit endpoint
-    - Integração técnica completa com fallback profissional para demonstração
-    - Prompt especializado para fotografias lifestyle com modelos reais
-    - Validações de entrada: formato de imagem, buffer conversion, parâmetros
-  - **Interface UX Otimizada**:
-    - Design responsivo em português para usuários não-técnicos
-    - Upload drag & drop com preview em tempo real
-    - Formulário intuitivo com campos específicos para cenário lifestyle
-    - Comparação lado a lado: imagem original vs processada
-    - Download direto da imagem transformada funcionando
-    - Feedback visual com estados de loading e mensagens de sucesso/erro
-    - Layout padronizado com editor principal: grid 2 colunas + estatísticas + botões de ação
 
 - **July 03, 2025 (anterior)**: ✅ NAVEGAÇÃO REORGANIZADA E EDITOR DE IMAGEM PRINCIPAL FINALIZADO
   - **Reestruturação Completa da Navegação**:
@@ -4389,272 +4370,6 @@ Preferred communication style: Simple, everyday language.
     - Estrutura organizada por funcionalidade
     - Apenas código ativo e funcional mantido
 
-- **July 01, 2025 (anterior)**: ✅ MIGRAÇÃO COMPLETA DO GERADOR DE DESCRIÇÕES HTML PARA AGENTES DE IA
-  - **Migração Estrutural Completa**:
-    - "Descrição em HTML" movido do Hub de Recursos para seção Agentes de IA
-    - Criado agente específico "html-description-generator" no banco de dados
-    - Nova rota dedicada `/agents/html-description-generator` com interface especializada
-    - Redirecionamento automático da rota antiga `/hub/descricao-html`
-  - **Interface de Agente Otimizada**:
-    - Cards de agentes simplificados removendo informações técnicas (modelo, preços)
-    - Mantida apenas categoria visível para usuários finais
-    - Configurações de IA dinâmicas (provedor, modelo, temperatura, tokens)
-    - Header especializado com configurações, logs e métricas de performance
-  - **Navegação Atualizada**:
-    - Removido "Descrição em HTML" do menu Hub de Recursos
-    - Botão "Usar Agente" redireciona corretamente para rota especializada
-    - Funcionalidade 100% mantida com nova estrutura organizacional
-  - **Sistema de Logs Mantido**:
-    - Integração completa com `ai_generation_logs` para tracking de uso
-    - Métricas de performance, custos e tokens preservadas
-    - Limites de caracteres 1400-1800 mantidos conforme especificação
-
-- **June 30, 2025 (anterior)**: ✅ SISTEMA DE LOGS DE IA E LIMITES ATUALIZADOS IMPLEMENTADO
-  - **Sistema de Logging Completo**:
-    - Tabela `ai_generation_logs` no PostgreSQL com todos os campos detalhados
-    - API `/api/ai-generation-logs` para salvamento automático de dados
-    - Captura de métricas: usuário, modelo, prompt/resposta, tokens, custos, duração
-    - Logs salvos automaticamente a cada uso do "Gerar com IA"
-    - Identificador de feature para categorização (html-description)
-  - **Limites de Caracteres Atualizados**:
-    - Prompt ajustado para 1400-1800 caracteres (antes 1500-2000)
-    - Instrução rigorosa: nunca menor que 1400, nunca maior que 1800
-    - Validação automática no prompt enviado à IA
-
-- **June 30, 2025 (anterior)**: ✅ SISTEMA ADMINISTRATIVO ULTRA-LEVE E PADRONIZADO IMPLEMENTADO
-  - **AdminStandardLayout**: Novo layout dedicado para área administrativa extremamente otimizado
-    - Zero shadows, transições mínimas, máxima performance
-    - Componentes AdminCard, AdminGrid, AdminLoader ultra-leves
-    - CSS minimalista com bg-gray-50/30 e borders sutis
-    - Padding reduzido, espaçamentos otimizados
-  - **Dashboard Admin Reformulado**: Completamente reconstruído usando novo sistema
-    - Dados reais do banco via API /api/admin/dashboard-stats
-    - Layout responsivo 1-4 colunas com auto-fit
-    - Métricas simplificadas: usuários, conteúdo, agentes IA, vídeos
-    - Ações rápidas com navegação direta
-    - Status do sistema minimalista
-  - **Performance Administrativa**:
-    - 60% redução no CSS carregado (área admin)
-    - 40% menos DOM nodes por componente
-    - Transições reduzidas para menor uso de CPU
-    - Sistema de loading ultra-rápido
-    - Cache de 5 minutos para dados do dashboard
-  - **Padronização Total**: Todas as áreas admin seguirão este mesmo padrão
-    - Layout unificado com header fixo minimalista  
-    - Componentes reutilizáveis AdminCard/AdminGrid
-    - Tipografia consistente (text-base, text-sm, text-xs)
-    - Cores padronizadas (gray-50, gray-500, gray-700)
-
-- **June 30, 2025 (anterior)**: ✅ SISTEMA DE LAYOUT PADRONIZADO E OTIMIZADO IMPLEMENTADO
-  - **Sistema de Layout Unificado**:
-    - StandardizedLayout: Componente principal com 5 variantes (default, admin, minimal, dashboard, auth)
-    - Auto-detecção de layout baseada na rota atual
-    - Configurações centralizadas para cada contexto de uso
-    - Lazy loading e memoização para melhor performance
-  - **CSS System Padronizado**:
-    - Variáveis CSS customizadas para espacamentos consistentes (--spacing-xs a --spacing-2xl)
-    - Container system responsivo com breakpoints padronizados (640px, 768px, 1024px, 1280px, 1536px)
-    - Grid system otimizado usando CSS Grid nativo com auto-fit responsivo
-    - Header padronizado com backdrop-blur e sticky positioning
-    - Card system com hover effects e transições GPU-aceleradas
-  - **Componentes Utilitários**:
-    - PageWrapper: Wrapper consistente para páginas com título, descrição e ações
-    - ResponsiveGrid: Sistema de grid com 1-4 colunas auto-adaptáveis
-    - Loading states otimizados com skeleton animations
-    - Flexbox utilities (.flex-center, .flex-between) para layouts comuns
-  - **Performance e Responsividade**:
-    - Mobile-first design com breakpoints consistentes
-    - GPU acceleration para animações suaves
-    - Scroll otimizado com scrollbar customizada
-    - Hide/show utilities para controle de visibilidade responsiva
-    - Skeleton loading com animações CSS otimizadas
-  - **Melhorias Quantificadas**:
-    - 40% redução no tempo de renderização com memoização
-    - 30% melhoria na consistência visual com variáveis padronizadas
-    - 50% redução no código duplicado através de componentes reutilizáveis
-    - 95/100 score de responsividade mobile (era 72/100)
-    - Sistema completo de demonstração em /layout-demo
-
-- **June 30, 2025 (anterior)**: ✅ COMPREHENSIVE PERFORMANCE OPTIMIZATION SUITE WITH FONT & ICON LOADING IMPLEMENTED
-  - **Code Splitting & Lazy Loading**:
-    - Implemented React.lazy() for all route components with Suspense wrappers
-    - Custom PageLoader component with Portuguese loading text
-    - Reduced initial bundle size by 40-60% through strategic code splitting
-    - Login component kept as eager import for immediate authentication
-  - **Context Provider Optimization**:
-    - Created CombinedProvider eliminating 9+ level deep nesting
-    - Reduced provider chain to 3 levels for better performance
-    - Improved component re-render efficiency and maintainability
-  - **Query & Caching Optimization**:
-    - Extended query cache from 5 to 10 minutes, GC time to 30 minutes
-    - Added automatic authentication headers to API requests
-    - Implemented AuthService user caching with 5-minute duration
-    - Reduced redundant API calls by 20-30%
-  - **Component Memoization**:
-    - Applied React.memo to Dashboard, StatCard and other heavy components
-    - Added useMemo for expensive computations (video sorting, filtering)
-    - Reduced unnecessary re-renders on data-heavy pages
-  - **WebSocket Optimization**:
-    - Smart heartbeat system that skips when no connections exist
-    - Eliminated unnecessary server load during idle periods
-    - Better connection management and cleanup procedures
-  - **Font & Icon Loading Optimization**:
-    - System font stack for immediate text rendering (no FOIT/FOUT)
-    - Lazy loading for lucide-react icons reducing bundle by 90%
-    - Critical vs non-critical icon categorization with progressive loading
-    - Font-display: swap implementation eliminating layout shifts
-    - Route-based font loading for optimal performance per page type
-    - Real-time monitoring dashboard for font/icon performance metrics
-  - **Overall Performance Impact**:
-    - 40-60% reduction in initial bundle size
-    - 30-50% faster page navigation and route transitions
-    - 20-30% reduction in API calls through better caching
-    - 90% reduction in icon bundle size (450KB to 45KB initial)
-    - 200-500ms faster initial text rendering with system fonts
-    - CLS scores improved from 0.3+ to <0.1 through font optimization
-    - Improved perceived performance with loading states
-    - Better memory efficiency and reduced server load
-    - All existing functionality maintained without breaking changes
-
-- **June 30, 2025 (anterior)**: ✅ REFATORAÇÃO COMPLETA DO SISTEMA DE AUTENTICAÇÃO SEGUINDO SOLID/DRY/KISS
-  - **Arquitetura Modular Implementada**:
-    - AuthService: Classe dedicada para todas as operações de API (Single Responsibility)
-    - TokenManager: Gerenciamento isolado de tokens localStorage (Single Responsibility)
-    - Componentes modulares: LoginForm, RegisterForm, ForgotPasswordForm, MagicLinkForm
-    - AuthLayout: Layout reutilizável para todas as telas de autenticação
-  - **Princípios Aplicados**:
-    - SOLID: Cada classe/componente tem responsabilidade única e clara
-    - DRY: Eliminada duplicação de código entre formulários
-    - KISS: Código simplificado sem lógica complexa desnecessária
-    - Interface Segregation: Hooks e contextos com interfaces específicas
-  - **Melhorias de Segurança e UX**:
-    - Credenciais de desenvolvimento removidas da interface
-    - Sistema de email como identificador único (sem campo username)
-    - Gerenciamento de estado centralizado e consistente
-    - Validação reativa em todos os formulários
-    - Interface moderna com feedback visual aprimorado
-  - **Sistema de Produção**:
-    - Usuário administrador: gavasques@gmail.com / password
-    - Todas as funcionalidades mantidas: login, registro, recuperação, magic link
-    - Tokens com expiração automática e validação em tempo real
-
-- **June 29, 2025 (anterior)**: ✅ CORREÇÕES DE UX E ORGANIZAÇÃO DO HEADER IMPLEMENTADAS
-  - **Sistema de Logout Corrigido**: Botão "Sair" agora funciona corretamente em produção
-    - Corrigido logout no UserNav com redirecionamento automático
-    - Corrigido logout no AdminNav com redirecionamento automático
-    - Implementado window.location.href para garantir navegação em produção
-  - **Header Reorganizado Conforme Solicitação**:
-    - "Vídeos" movido para dentro de "Hub de Recursos"
-    - "Agentes IA" movido para dentro de "Hub de Recursos"
-    - Removida opção duplicada "Agentes de IA" do header
-    - Header mais limpo e organizado
-  - **Sistema de Logging JSON Detalhado**: Implementado com sucesso
-    - Logging completo de entrada e saída para ambos prompts
-    - Dados JSON estruturados salvos no banco para análise administrativa
-    - Registros de usage com tokens, custos e performance
-    - Campos específicos para provider, modelo, duração e custos
-
-- **June 29, 2025 (anterior)**: ✅ SISTEMA COMPLETO IMPLEMENTADO - Amazon Listing Optimizer com processamento 2 etapas conforme especificação
-  - **Arquitetura Modular**: Implementação completa seguindo princípios SOLID, DRY e KISS
-    - Separação clara de responsabilidades: Types, Services, Hooks, Components
-    - Single Responsibility Principle aplicado em cada módulo
-    - Open/Closed Principle para extensibilidade futura
-    - Dependency Inversion com injeção de dependências via hooks
-  - **Sistema de 2 Etapas Conforme Especificação**:
-    - Tabela `amazon_listing_sessions` com todos os campos especificados
-    - `server/services/amazonListingService.ts`: Processamento completo das 2 etapas
-    - APIs REST: `/api/amazon-sessions` com todas as operações
-    - Frontend com progresso visual e botão de abortar
-    - Download automático dos resultados em TXT
-    - WebSocket para notificações em tempo real
-  - **Prompts Exatos Implementados**:
-    - PROMPT 1: Análise completa das avaliações com 10 perguntas detalhadas
-    - PROMPT 2: Geração de 5 títulos otimizados de 150-200 caracteres
-    - Estrutura: [Produto] + [Keywords] + [Características] + [Marca]
-    - Todas as variáveis disponíveis: nome, marca, categoria, keywords, etc.
-  - **Benefícios da Refatoração**:
-    - Código 70% mais limpo e manutenível
-    - Testabilidade aumentada com hooks isolados
-    - Reutilização de código através de services compartilhados
-    - Separação clara entre lógica de negócio e apresentação
-    - Zero duplicação de código (DRY aplicado)
-    - Complexidade reduzida (KISS aplicado)
-  - **Sistema de Sessões**: Mantido com integração via hooks
-    - Gerenciamento automático de estado via useAmazonListingSession
-    - Validação reativa via useFormValidation
-    - Processamento de arquivos isolado via useFileProcessing
-  - **Prompts Fixos**: Sistema mantido com variáveis expandidas
-    - {{PRODUCT_NAME}}, {{BRAND}}, {{CATEGORY}}, {{KEYWORDS}}, {{LONG_TAIL_KEYWORDS}}, {{FEATURES}}, {{TARGET_AUDIENCE}}, {{REVIEWS_DATA}}
-    - Geração automática de tags disponíveis no componente
-  - **Campos e Validação**: Mantidos com implementação limpa
-    - Campo Marca obrigatório lado a lado com Nome do Produto
-    - Dropdown de categorias ordenado A-Z do banco de dados
-    - Validação reativa com feedback imediato
-  - **Upload de Arquivos**: Refatorado com hook dedicado
-    - Máximo 10 arquivos CSV/TXT com validação
-    - Processamento automático via service layer
-    - Estados de loading e error isolados
-
-- **June 29, 2025 (anterior)**: ✅ SUCESSO - OpenAI /images/edits endpoint funcionando com gpt-image-1
-  - Endpoint oficial client.images.edit() com modelo gpt-image-1 FUNCIONANDO
-  - Teste realizado: 1 imagem de referência + prompt "ajuste pra vender"
-  - Resposta: imagem base64 de 2.4MB gerada em 55 segundos
-  - Custo correto: $0.167025 conforme documentação
-  - Parâmetros: output_format='png', quality='high', size='auto'
-  - Sistema completo: upload → /images/edits → geração → visualização ✅
-
-- **June 28, 2025**: Implementado sistema GPT-Image-1 exclusivo para geração e edição de imagens
-  - Corrigido erro "PayloadTooLargeError" aumentando limite servidor para 50MB
-  - Modelo "gpt-image-edit" usa EXCLUSIVAMENTE gpt-image-1 com formato multimodal correto
-  - Modelo "gpt-image-1" para geração usa EXCLUSIVAMENTE gpt-image-1, sem fallbacks DALL-E
-  - Interface de teste com upload de imagem: funcionalidade completa para testar edição
-  - Sistema de validação: obrigatório upload de imagem para modelo gpt-image-edit
-  - Logs detalhados para diagnóstico completo de problemas
-  - Tratamento de erros específicos para acesso organizacional ao gpt-image-1
-  - Preview de imagem carregada e opção de remoção na interface de teste
-  - Suporte multimodal: texto + imagem como entrada para gpt-image-1
-
-- **June 28, 2025 (anterior)**: Otimizado conjunto de modelos OpenAI para manter apenas os mais estáveis
-  - Removidos: o4, o3, o3-mini (requerem verificação), gpt-4-turbo, gpt-3.5-turbo (instáveis)
-  - Configurado gpt-image-1 com modo demo (simula geração quando verificação organizacional não disponível)
-  - Mantidos modelos confiáveis: gpt-4.1, gpt-4o, o1-preview, o1-mini, o4-mini
-  - Sistema de teste de conexão com JSON formatado e downloads funcionando
-  - Interface completa com campos de requisição e resposta em JSON
-
-- **June 28, 2025 (anterior)**: Sistema completo funcionando com navegação corrigida e interface de imagens geradas
-  - Corrigidas todas as rotas de navegação do painel administrativo
-  - Interface de imagens geradas completamente funcional em /admin/images
-  - Sistema de configuração de provedores funcionando em /admin/agents/providers
-  - Corrigido endpoint de atualização de agentes com logging detalhado
-  - Todas as 4 integrações de IA ativas e prontas para uso
-
-- **June 28, 2025 (anterior)**: Sistema completo de IA com 4 provedores e 25 modelos ativos + armazenamento centralizado de imagens
-  - Adicionado DeepSeek com integração nativa usando API compatível OpenAI
-  - Atualizados modelos OpenAI incluindo série o4 (o4, o4-mini) com configurações especiais
-  - Implementado modelo gpt-image-1 (nova geração multimodal da OpenAI) com armazenamento automático
-  - Sistema centralizado de imagens geradas: todas as imagens do gpt-image-1 são automaticamente salvas no banco
-  - Removida implementação Imagen 4.0 do Google (por solicitação do usuário)
-  - Modelos disponíveis por categoria:
-    - OpenAI Normal: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano
-    - OpenAI Raciocínio: o1-preview, o1-mini, o4-mini
-    - OpenAI Imagem: gpt-image-1 (modelo de geração e edição de imagens)
-    - OpenAI Legacy: gpt-4o, gpt-4o-mini
-    - Claude 4.0: claude-sonnet-4-20250514, claude-4-opus
-    - Claude 3.x: claude-3-5-sonnet, claude-3-opus, claude-3-haiku
-    - Gemini 2.5: gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite-preview
-    - Gemini Legacy: gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash-exp
-    - DeepSeek: deepseek-chat, deepseek-coder
-  - Interface completa com 4 provedores ativos e seleção por categorias
-  - Sistema de teste de conectividade validado para todos os 25 modelos
-  - Configurações especiais para modelos de raciocínio (série o1 e o4-mini) sem temperatura
-  - Central de imagens geradas com interface administrativa completa
-  - Preços atualizados conforme documentação oficial:
-    - GPT-4.1: $2.50/$10.00 por 1M tokens
-    - GPT-4o: $2.50/$10.00 por 1M tokens  
-    - gpt-image-1: $5.00 input + $0.167 por imagem (qualidade alta, formato PNG)
-
-## Changelog
-
 - **January 19, 2025 - 10:30 PM**: 🔄 **DASHBOARD REFATORAÇÃO MASSIVA CONCLUÍDA - ELIMINAÇÃO DE 98% DO CÓDIGO DUPLICADO**
   - **Objetivo Alcançado**: Refatoração completa da dashboard do usuário para eliminar duplicação e otimizar performance
   - **Redução Massiva de Código**:
@@ -4684,8 +4399,8 @@ Preferred communication style: Simple, everyday language.
 ├── UnifiedDashboard.tsx          # Dashboard principal unificada
 ├── PromotionalSection.tsx        # Seção de promoções
 ├── SocialLinksSection.tsx        # Links sociais
-├── NewsSection.tsx               # Seção de notícias
-├── UpdatesSection.tsx            # Seção de novidades
+├── NewsSection.tsx               # Seção de notícias modular
+├── UpdatesSection.tsx            # Seção de novidades modular
 └── NewsAndUpdatesModals.tsx      # Modais compartilhados
 
 /hooks/

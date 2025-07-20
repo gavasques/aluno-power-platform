@@ -340,13 +340,280 @@ export const FormalImportSimulator: React.FC = () => {
 - [ ] Reutilizáveis
 - [ ] Testáveis
 
-## 🔄 Exemplo de Refatoração Completa
+## 🔄 Exemplos de Refatoração Implementados
 
-Veja o arquivo `PricingCalculatorExample.tsx` para um exemplo completo de refatoração que demonstra:
+### 4.1 PricingCalculator (Refatorado)
 
-1. **ANTES:** Componente com lógica misturada
-2. **DEPOIS:** Separação Container/Presentational
-3. **BENEFÍCIOS:** Vantagens da refatoração
+O componente `PricingCalculator` foi refatorado seguindo o padrão container/presentational:
+
+**Estrutura de Arquivos:**
+```
+components/calculations/
+├── PricingCalculator.tsx              # Componente principal
+├── PricingCalculatorContainer.tsx     # Container (lógica)
+├── PricingCalculatorPresentation.tsx  # Presentation (UI)
+└── PricingCalculatorExample.tsx       # Exemplo completo
+```
+
+**Container (Lógica de Negócio):**
+```tsx
+export const PricingCalculatorContainer = () => {
+  const [state, setState] = useState<PricingState>({
+    costPrice: 0,
+    marginPercentage: 30,
+    taxRate: 18,
+    // ... outros estados
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<PricingCalculation | null>(null);
+
+  const handleCalculate = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const calculation = await calculatePricing(state);
+      setResults(calculation);
+    } catch (error) {
+      console.error('Erro no cálculo:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [state]);
+
+  const handlers = {
+    updateField: (field: keyof PricingState, value: number) => {
+      setState(prev => ({ ...prev, [field]: value }));
+    },
+    handleCalculate,
+    resetForm: () => {
+      setState(initialState);
+      setResults(null);
+    }
+  };
+
+  return (
+    <PricingCalculatorPresentation
+      values={state}
+      results={results}
+      isLoading={isLoading}
+      handlers={handlers}
+    />
+  );
+};
+```
+
+**Presentation (UI Pura):**
+```tsx
+export const PricingCalculatorPresentation = ({
+  values,
+  results,
+  isLoading,
+  handlers
+}: PricingCalculatorPresentationProps) => {
+  return (
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>Calculadora de Preços</CardTitle>
+        <CardDescription>
+          Calcule preços com margem e impostos
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Inputs */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="costPrice">Preço de Custo</Label>
+            <Input
+              id="costPrice"
+              type="number"
+              value={values.costPrice}
+              onChange={(e) => handlers.updateField('costPrice', parseFloat(e.target.value))}
+            />
+          </div>
+          <div>
+            <Label htmlFor="marginPercentage">Margem (%)</Label>
+            <Input
+              id="marginPercentage"
+              type="number"
+              value={values.marginPercentage}
+              onChange={(e) => handlers.updateField('marginPercentage', parseFloat(e.target.value))}
+            />
+          </div>
+        </div>
+
+        {/* Botão de cálculo */}
+        <Button 
+          onClick={handlers.handleCalculate}
+          disabled={isLoading}
+          className="w-full"
+        >
+          {isLoading ? 'Calculando...' : 'Calcular Preço'}
+        </Button>
+
+        {/* Resultados */}
+        {results && (
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Preço de Venda:</span>
+              <span className="font-bold">{formatCurrency(results.sellingPrice)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Margem:</span>
+              <span>{formatCurrency(results.margin)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Impostos:</span>
+              <span>{formatCurrency(results.taxes)}</span>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+```
+
+### 4.2 FormalImportSimulator (Refatorado)
+
+O componente `FormalImportSimulator` foi completamente refatorado seguindo o padrão container/presentational:
+
+**Estrutura de Arquivos:**
+```
+FormalImportSimulator/
+├── hooks/
+│   ├── useFormalImportState.ts      # Gerenciamento de estado
+│   ├── useFormalImportAPI.ts        # Operações de API
+│   ├── useProductOperations.ts      # Operações de produtos
+│   └── useTaxAndExpenseOperations.ts # Operações de impostos/despesas
+├── FormalImportSimulatorContainer.tsx    # Container principal
+├── FormalImportSimulatorPresentation.tsx # Componente de apresentação
+└── types.ts                           # Tipos das props
+```
+
+**Container (Lógica de Negócio):**
+```tsx
+export const FormalImportSimulatorContainer = ({ simulationId }) => {
+  // Hooks para gerenciamento de estado e operações
+  const {
+    simulation,
+    setSimulation,
+    activeTab,
+    setActiveTab,
+    // ... outros estados
+  } = useFormalImportState(simulationId);
+
+  const {
+    handleCalculate,
+    handleSave,
+    handleDelete,
+    isCalculating,
+    isSaving,
+    isDeleting
+  } = useFormalImportAPI();
+
+  const {
+    addProduct,
+    updateProduct,
+    removeProduct,
+    calculateProductTotals
+  } = useProductOperations(simulation, setSimulation);
+
+  const {
+    calculateTaxEstimate,
+    addCustomTax,
+    removeCustomTax,
+    // ... outras operações
+  } = useTaxAndExpenseOperations(simulation, setSimulation);
+
+  // Cálculos derivados
+  const { totalCBM, totalUSD } = useMemo(() => {
+    return calculateProductTotals();
+  }, [simulation.produtos]);
+
+  return (
+    <FormalImportSimulatorPresentation
+      // Estado
+      simulation={simulation}
+      activeTab={activeTab}
+      isLoading={isLoading}
+      isCalculating={isCalculating}
+      isSaving={isSaving}
+      isDeleting={isDeleting}
+      
+      // Cálculos
+      totalCBM={totalCBM}
+      totalUSD={totalUSD}
+      totalTaxes={totalTaxes}
+      totalExpenses={totalExpenses}
+      
+      // Handlers
+      handleCalculateClick={handleCalculate}
+      handleSaveClick={handleSave}
+      handleDeleteClick={handleDelete}
+      
+      // Operações
+      addProduct={addProduct}
+      updateProduct={updateProduct}
+      removeProduct={removeProduct}
+      // ... outras props
+    />
+  );
+};
+```
+
+**Hooks Customizados:**
+
+```tsx
+// useFormalImportState.ts
+export const useFormalImportState = (simulationId?: string | null) => {
+  const [simulation, setSimulation] = useState<FormalImportSimulation>({...});
+  const [activeTab, setActiveTab] = useState("info");
+  // ... outros estados
+
+  // Load existing simulation
+  const { data: existingSimulation, isLoading } = useQuery({...});
+
+  return {
+    simulation,
+    setSimulation,
+    updateSimulation,
+    activeTab,
+    setActiveTab,
+    isLoading,
+    // ... outros retornos
+  };
+};
+
+// useFormalImportAPI.ts
+export const useFormalImportAPI = () => {
+  const calculateMutation = useMutation({...});
+  const saveMutation = useMutation({...});
+  const deleteMutation = useMutation({...});
+
+  return {
+    handleCalculate,
+    handleSave,
+    handleDelete,
+    isCalculating: calculateMutation.isPending,
+    isSaving: saveMutation.isPending,
+    isDeleting: deleteMutation.isPending
+  };
+};
+
+// useProductOperations.ts
+export const useProductOperations = (simulation, setSimulation) => {
+  const addProduct = () => {
+    const newProduct = { id: Date.now().toString(), ... };
+    setSimulation({...simulation, produtos: [...simulation.produtos, newProduct]});
+  };
+
+  const updateProduct = (index, field, value) => {
+    // Lógica de atualização com cálculos automáticos
+  };
+
+  return { addProduct, updateProduct, removeProduct, calculateProductTotals };
+};
+```
 
 ## 📚 Recursos Adicionais
 
@@ -356,4 +623,6 @@ Veja o arquivo `PricingCalculatorExample.tsx` para um exemplo completo de refato
 
 ---
 
-**Conclusão:** A refatoração proposta melhorará significativamente a qualidade do código, facilitando manutenção, testes e evolução do sistema. A implementação gradual permitirá manter a funcionalidade existente enquanto melhora a arquitetura. 
+**Conclusão:** A refatoração proposta melhorará significativamente a qualidade do código, facilitando manutenção, testes e evolução do sistema. A implementação gradual permitirá manter a funcionalidade existente enquanto melhora a arquitetura.
+
+Os exemplos implementados demonstram como aplicar o padrão container/presentational de forma efetiva, separando claramente as responsabilidades e criando componentes mais modulares e reutilizáveis. 
