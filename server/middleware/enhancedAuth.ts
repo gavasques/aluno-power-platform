@@ -168,3 +168,26 @@ export const anonymousRateLimiter = (maxRequests: number = 10, windowMinutes: nu
     next();
   };
 };
+
+// Simple admin authentication middleware
+export const authenticateAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // First apply regular authentication
+    await requireAuth(req, res, (authError: any) => {
+      if (authError) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is admin
+      const user = (req as any).user;
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      next();
+    });
+  } catch (error) {
+    console.error("❌ Admin auth error:", error);
+    res.status(500).json({ error: "Authentication error" });
+  }
+};

@@ -30,6 +30,8 @@ import aiProviderRoutes from './aiProviders';
 import emailRoutes from './email';
 import phoneVerificationRoutes from './phoneVerification';
 import authRoutes from './auth';
+import adminDashboardRoutes from './admin/dashboard';
+import adminUsersRoutes from './admin/users';
 
 /**
  * Register all modular routes
@@ -95,9 +97,14 @@ export function registerModularRoutes(app: Express): void {
   // Phone Verification Routes - Evolution API Integration
   app.use('/api/phone', phoneVerificationRoutes);
   
+  // Admin Dashboard Routes - Ultra Lightweight
+  app.use('/api/admin', adminDashboardRoutes);
+  
+  // Admin Users Management Routes
+  app.use('/api', adminUsersRoutes);
+  
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);
-  // app.use('/api/users', userRoutes);
 }
 
 /**

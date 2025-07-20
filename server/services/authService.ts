@@ -385,8 +385,6 @@ export class AuthService {
       }
 
       console.log('🔍 VALIDATE SESSION - Starting validation for token:', sessionToken.substring(0, 10) + '...');
-    
-    try {
       // Get all active sessions
       const sessions = await db
         .select({
