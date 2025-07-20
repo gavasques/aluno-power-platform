@@ -17,7 +17,7 @@ import { Helmet } from 'react-helmet-async';
 import { Footer } from '@/components/layout/Footer';
 import { Link } from 'wouter';
 import { Checkbox } from '@/components/ui/checkbox';
-// import logoPath from '@assets/Asset 14-8_1752953662731.png';
+import logoPath from '@assets/Asset 14-8_1752953662731.png';
 
 interface FeatureCardProps {
   icon: React.ReactNode;

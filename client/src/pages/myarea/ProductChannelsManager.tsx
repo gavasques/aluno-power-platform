@@ -11,6 +11,15 @@ import { Button } from '@/components/ui/button';
 import { ChannelManager } from '@/components/channels/ChannelManager';
 import { useQuery } from '@tanstack/react-query';
 
+// Define the product type
+interface Product {
+  id: number;
+  name: string;
+  costItem?: number;
+  taxPercent?: number;
+  channels?: any[];
+}
+
 const ProductChannelsManager: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
@@ -18,8 +27,8 @@ const ProductChannelsManager: React.FC = () => {
   const productId = parseInt(id || '0');
 
   // Get product basic data for cost calculations
-  const { data: product, isLoading, error } = useQuery({
-    queryKey: [`/api/products/${productId}`, 'basic-data'],
+  const { data: product, isLoading, error } = useQuery<Product>({
+    queryKey: [`/api/products/${productId}`],
     enabled: !!productId,
   });
 
@@ -40,7 +49,7 @@ const ProductChannelsManager: React.FC = () => {
     );
   }
 
-  if (error || !product?.data) {
+  if (error || !product) {
     return (
       <div className="container mx-auto px-4 py-6">
         <div className="text-center py-12">
@@ -57,7 +66,7 @@ const ProductChannelsManager: React.FC = () => {
     );
   }
 
-  const productData = product.data;
+  const productData = product;
 
   return (
     <div className="container mx-auto px-4 py-6">
