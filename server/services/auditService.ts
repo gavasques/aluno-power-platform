@@ -23,8 +23,6 @@ export class AuditService {
         userId: entry.userId,
         action: entry.action,
         resource: entry.resource,
-        feature: entry.feature,
-        success: entry.success,
         ipAddress: entry.ipAddress,
         userAgent: entry.userAgent,
         metadata: entry.metadata,

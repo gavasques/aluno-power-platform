@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from './auth';
 import { PermissionService } from '../services/permissionService';
-import { AuditService } from '../services/auditService';
+import { AuditService } from '../services/auditServiceSimple';
 
 // Permission middleware factory
 export const requirePermission = (feature: string) => {

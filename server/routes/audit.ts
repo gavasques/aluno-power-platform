@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../security';
 import { requireAdmin, requireAdminAccess } from '../middleware/permissions';
-import { AuditService } from '../services/auditService';
+import { AuditService } from '../services/auditServiceSimple';
 
 const router = Router();
 

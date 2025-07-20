@@ -51,7 +51,7 @@ export default function ImportacaoSimplificadaRefactored() {
     activeSimulation,
     setActiveSimulation,
     setUIState,
-    uiActions.setSelectedSimulationId,
+    setSelectedSimulationId,
     saveMutation,
     calculatedResults
   );
@@ -62,7 +62,7 @@ export default function ImportacaoSimplificadaRefactored() {
     const simulationId = searchParams.get('id');
     
     if (simulationId && simulations.length > 0) {
-      const simulation = simulations.find(s => s.id === parseInt(simulationId));
+      const simulation = simulations.find((s: any) => s.id === parseInt(simulationId));
       if (simulation) {
         setActiveSimulation(simulation);
         setSelectedSimulationId(simulation.id);
@@ -74,14 +74,15 @@ export default function ImportacaoSimplificadaRefactored() {
   const handleConfirmSave = useMemo(() => {
     return () => {
       saveMutation.mutate(activeSimulation, {
-        onSuccess: (savedSimulation) => {
+        onSuccess: (savedSimulation: any) => {
           if (savedSimulation) {
             setActiveSimulation({
+              ...activeSimulation,
               ...savedSimulation,
               nomeFornecedor: savedSimulation.nomeFornecedor || "",
               observacoes: savedSimulation.observacoes || "",
             });
-            uiActions.setSelectedSimulationId(savedSimulation.id);
+            setSelectedSimulationId(savedSimulation.id);
           }
           uiActions.closeSaveDialog();
         },
@@ -141,7 +142,6 @@ export default function ImportacaoSimplificadaRefactored() {
       <ConfigurationPanel
         config={componentProps.simulation.configuracoesGerais}
         onConfigChange={eventHandlers.onConfigChange}
-        validation={validation}
       />
 
       <ProductTable
@@ -149,12 +149,10 @@ export default function ImportacaoSimplificadaRefactored() {
         onAddProduct={eventHandlers.onProductAdd}
         onUpdateProduct={eventHandlers.onProductUpdate}
         onRemoveProduct={eventHandlers.onProductRemove}
-        validation={validation}
       />
 
       <SummaryPanel 
         totals={componentProps.calculatedResults.totals} 
-        validation={validation}
       />
 
       {/* Enhanced Save Dialog with validation feedback */}
