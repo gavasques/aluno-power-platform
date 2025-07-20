@@ -12,8 +12,8 @@ import { apiRequest } from '@/lib/queryClient';
 const InformalImportSimulationsListSimple: React.FC = () => {
   const [, setLocation] = useLocation();
 
-  // Simple query without complex logic
-  const { data, isLoading, error } = useQuery({
+  // Simple query without complex logic - FIXED
+  const { data, isLoading, error, isFetching } = useQuery({
     queryKey: ['simulations-import-simple'],
     queryFn: async () => {
       console.log('🔍 SIMPLE - Fazendo requisição...');
@@ -21,16 +21,25 @@ const InformalImportSimulationsListSimple: React.FC = () => {
       console.log('🔍 SIMPLE - Resposta recebida:', response);
       return response;
     },
-    refetchOnMount: true
+    staleTime: 0, // Force fresh data
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
   });
 
   // Extract simulations data
   const simulations = data?.data || [];
   const simulationCount = simulations.length;
 
+  // Check if we actually have finished loading
+  const actuallyLoading = isLoading || isFetching;
+  const hasFinishedLoading = !actuallyLoading && data;
+
   console.log('🔍 SIMPLE - Estado do componente:', { 
     data, 
     isLoading, 
+    isFetching,
+    actuallyLoading,
+    hasFinishedLoading,
     error, 
     simulations, 
     simulationCount,
@@ -88,7 +97,7 @@ const InformalImportSimulationsListSimple: React.FC = () => {
         </Card>
 
         {/* Loading State */}
-        {isLoading && (
+        {actuallyLoading && (
           <Card>
             <CardContent className="p-6 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -98,7 +107,7 @@ const InformalImportSimulationsListSimple: React.FC = () => {
         )}
 
         {/* Error State */}
-        {error && !isLoading && (
+        {error && !actuallyLoading && (
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-6 text-center">
               <h3 className="text-lg font-semibold text-red-800 mb-2">Erro ao carregar</h3>
@@ -107,8 +116,8 @@ const InformalImportSimulationsListSimple: React.FC = () => {
           </Card>
         )}
 
-        {/* Success State - Show Simulations */}
-        {!isLoading && !error && simulationCount === 0 && (
+        {/* Success State - Show Empty */}
+        {hasFinishedLoading && simulationCount === 0 && (
           <Card>
             <CardContent className="p-6 text-center">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -123,7 +132,7 @@ const InformalImportSimulationsListSimple: React.FC = () => {
         )}
 
         {/* Success State - Show List */}
-        {!isLoading && !error && simulationCount > 0 && (
+        {hasFinishedLoading && simulationCount > 0 && (
           <div className="space-y-4">
             {simulations.map((simulation: any, index: number) => (
               <Card key={simulation.id || index} className="hover:shadow-md transition-shadow border-green-200">

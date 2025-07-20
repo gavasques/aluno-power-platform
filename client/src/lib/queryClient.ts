@@ -7,7 +7,7 @@ export const queryClient = new QueryClient({
       gcTime: 15 * 60 * 1000, // 15 minutes - memory optimized
       refetchOnWindowFocus: false,
       refetchOnReconnect: false, // Reduced for performance
-      refetchOnMount: false,
+      refetchOnMount: true,
       networkMode: 'online',
       // Enhanced performance optimizations
       structuralSharing: true,
