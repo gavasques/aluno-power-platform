@@ -32,6 +32,7 @@ import phoneVerificationRoutes from './phoneVerification';
 import authRoutes from './auth';
 import adminDashboardRoutes from './admin/dashboard';
 import adminUsersRoutes from './admin/users';
+import auditRoutes from './audit';
 
 /**
  * Register all modular routes
@@ -102,6 +103,9 @@ export function registerModularRoutes(app: Express): void {
   
   // Admin Users Management Routes
   app.use('/api', adminUsersRoutes);
+
+  // Audit Routes - Security Logging and Monitoring
+  app.use('/api/audit', auditRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

@@ -11,6 +11,10 @@ import {
   insertInvestmentSimulationSchema
 } from '../../shared/schema';
 import { requireAuth } from '../security';
+import { 
+  requireSimulatorAccess,
+  requireDataExport 
+} from '../middleware/permissions';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -27,7 +31,7 @@ function generateSimulationCode(): string {
 const router = Router();
 
 // Get import simulations for user with pagination
-router.get('/import', requireAuth, async (req, res) => {
+router.get('/import', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
@@ -80,7 +84,7 @@ router.get('/import', requireAuth, async (req, res) => {
 });
 
 // Get specific import simulation
-router.get('/import/:id', requireAuth, async (req, res) => {
+router.get('/import/:id', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -103,7 +107,7 @@ router.get('/import/:id', requireAuth, async (req, res) => {
 });
 
 // Create new import simulation
-router.post('/import', requireAuth, async (req, res) => {
+router.post('/import', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
@@ -144,7 +148,7 @@ router.post('/import', requireAuth, async (req, res) => {
 });
 
 // Update import simulation
-router.put('/import/:id', requireAuth, async (req, res) => {
+router.put('/import/:id', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -182,7 +186,7 @@ router.put('/import/:id', requireAuth, async (req, res) => {
 });
 
 // Delete import simulation
-router.delete('/import/:id', requireAuth, async (req, res) => {
+router.delete('/import/:id', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -319,7 +323,7 @@ function calcularTarifaSimples(faturamento12Meses: number, faturamentoSemST: num
 }
 
 // Get last 30 Simples Nacional simulations for user
-router.get('/simples-nacional', requireAuth, async (req, res) => {
+router.get('/simples-nacional', requireAuth, requireSimulatorAccess('simples_nacional'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
@@ -338,7 +342,7 @@ router.get('/simples-nacional', requireAuth, async (req, res) => {
 });
 
 // Get specific Simples Nacional simulation
-router.get('/simples-nacional/:id', requireAuth, async (req, res) => {
+router.get('/simples-nacional/:id', requireAuth, requireSimulatorAccess('simples_nacional'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -361,7 +365,7 @@ router.get('/simples-nacional/:id', requireAuth, async (req, res) => {
 });
 
 // Create new Simples Nacional simulation
-router.post('/simples-nacional', requireAuth, async (req, res) => {
+router.post('/simples-nacional', requireAuth, requireSimulatorAccess('simples_nacional'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     

@@ -16,6 +16,7 @@ import {
   sanitizeBody,
   sanitizeError 
 } from "./security";
+import rateLimit from 'express-rate-limit';
 import { enhancedAuth, enhancedCSRF, anonymousRateLimiter } from "./middleware/enhancedAuth";
 import path from "path";
 
@@ -71,8 +72,32 @@ app.use(enhancedAuth);
 // CSRF protection disabled for development
 // app.use(enhancedCSRF);
 
-// Rate limiting disabled for development
-// app.use('/api/auth/login', anonymousRateLimiter(5, 15)); // 5 attempts per 15 minutes
+// Enhanced rate limiting for security
+import rateLimit from 'express-rate-limit';
+
+// Enhanced rate limiting for authentication endpoints
+const authRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 auth requests per windowMs
+  message: {
+    error: 'Muitas tentativas de autenticação. Tente novamente em 15 minutos.',
+    status: 429
+  }
+});
+
+// Enhanced rate limiting for simulator endpoints  
+const simulatorRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 simulator requests per windowMs
+  message: {
+    error: 'Muitas tentativas de simulação. Tente novamente em 15 minutos.',
+    status: 429
+  }
+});
+
+app.use('/api/auth/', authRateLimit);
+app.use('/api/simulations/', simulatorRateLimit);
+app.use('/api/investment-simulations/', simulatorRateLimit);
 // app.use('/api/auth/register', anonymousRateLimiter(3, 60)); // 3 registrations per hour
 
 app.use((req, res, next) => {

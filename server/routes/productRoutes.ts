@@ -12,6 +12,12 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/ProductController';
 import { requireAuth } from '../security';
+import { 
+  requireProductAccess, 
+  requireDataExport, 
+  requireDataImport,
+  requireRole 
+} from '../middleware/permissions';
 
 const router = Router();
 const productController = new ProductController();
@@ -28,21 +34,41 @@ router.get('/:id', productController.getById.bind(productController));
 // GET /api/products/:id/cost-history - Get product cost history
 router.get('/:id/cost-history', productController.getCostHistory.bind(productController));
 
-// POST /api/products - Create new product (requires auth and file upload)
+// POST /api/products - Create new product (requires auth, permissions, and file upload)
 router.post('/', 
   requireAuth, 
+  requireProductAccess,
   ProductController.getUploadMiddleware(), 
   productController.create.bind(productController)
 );
 
-// PUT /api/products/:id - Update product (requires auth and file upload)
+// PUT /api/products/:id - Update product (requires auth, permissions, and file upload)
 router.put('/:id', 
   requireAuth, 
+  requireProductAccess,
   ProductController.getUploadMiddleware(), 
   productController.update.bind(productController)
 );
 
-// DELETE /api/products/:id - Delete product
-router.delete('/:id', productController.delete.bind(productController));
+// DELETE /api/products/:id - Delete product (requires auth and permissions)
+router.delete('/:id', 
+  requireAuth, 
+  requireProductAccess,
+  productController.delete.bind(productController)
+);
+
+// POST /api/products/export - Export products data (requires special permission)
+router.post('/export', 
+  requireAuth, 
+  requireDataExport,
+  productController.export?.bind(productController) || ((req, res) => res.status(501).json({ error: 'Export not implemented' }))
+);
+
+// POST /api/products/import - Import products data (requires special permission)
+router.post('/import', 
+  requireAuth, 
+  requireDataImport,
+  productController.import?.bind(productController) || ((req, res) => res.status(501).json({ error: 'Import not implemented' }))
+);
 
 export default router;
