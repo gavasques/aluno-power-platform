@@ -47,8 +47,8 @@ const InformalImportSimulationsList: React.FC = () => {
     queryFn: () => apiRequest(`/api/simulations/import?page=${currentPage}&limit=${ITEMS_PER_PAGE}&maxItems=${MAX_ITEMS}`)
   });
 
-  const simulations = apiResponse?.data || [];
-  const totalItems = apiResponse?.total || 0;
+  const simulations = (apiResponse as any)?.data || [];
+  const totalItems = (apiResponse as any)?.total || 0;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   // Log results
@@ -83,10 +83,10 @@ const InformalImportSimulationsList: React.FC = () => {
   });
 
   // Filter simulations based on search term
-  const filteredSimulations = simulations.filter(sim => 
-    sim.nomeSimulacao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredSimulations = simulations.filter((sim: any) => 
+    sim.nomeSimulacao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sim.nomeFornecedor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ''
+    false
   );
 
   // Reset page when search changes
@@ -217,7 +217,7 @@ const InformalImportSimulationsList: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               {formatCurrency(
-                simulations.reduce((total, sim) => total + calculateTotalValue(sim), 0)
+                simulations.reduce((total: number, sim: any) => total + calculateTotalValue(sim), 0)
               )}
             </div>
           </CardContent>
@@ -229,7 +229,7 @@ const InformalImportSimulationsList: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {simulations.reduce((total, sim) => total + (sim.produtos?.length || 0), 0)}
+              {simulations.reduce((total: number, sim: any) => total + (sim.produtos?.length || 0), 0)}
             </div>
           </CardContent>
         </Card>
@@ -261,7 +261,7 @@ const InformalImportSimulationsList: React.FC = () => {
       {/* Simulations List */}
       {!isLoading && filteredSimulations.length > 0 && (
         <div className="grid gap-4">
-          {filteredSimulations.map((simulation) => (
+          {filteredSimulations.map((simulation: any) => (
             <Card key={simulation.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">

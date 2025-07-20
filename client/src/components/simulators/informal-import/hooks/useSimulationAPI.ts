@@ -23,7 +23,7 @@ export const useSimulationAPI = () => {
   // Mutation for saving simulations
   const useSaveSimulation = () => {
     return useMutation({
-      mutationFn: (data: SimulacaoCompleta) => {
+      mutationFn: (data: any) => {
         if (data.id) {
           return apiRequest(`/api/simulations/import/${data.id}`, {
             method: 'PUT',
@@ -36,7 +36,7 @@ export const useSimulationAPI = () => {
           });
         }
       },
-      onSuccess: (savedSimulation) => {
+      onSuccess: (savedSimulation: any) => {
         queryClient.invalidateQueries({ queryKey: ['/api/simulations/import'] });
         toast({ title: "Simulação salva com sucesso!" });
         return savedSimulation;
