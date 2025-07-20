@@ -719,6 +719,266 @@ import novaFerramentaRoutes from './novaFerramentaRoutes';
 router.use('/api/nova-ferramenta', novaFerramentaRoutes);
 ```
 
+## 9.4 Documentação Completa de Endpoints
+
+### Estrutura Base de Endpoints
+
+Todos os endpoints seguem o padrão REST e incluem autenticação JWT:
+
+```
+Base URL: https://api.alunopowerplatform.com
+Authentication: Bearer Token (JWT)
+Content-Type: application/json
+```
+
+### Endpoints de Ferramentas
+
+#### 1. Processamento Principal
+```
+POST /api/nova-ferramenta/process
+Content-Type: application/json
+Authorization: Bearer <jwt_token>
+
+Request Body:
+{
+  "inputData": "dados de entrada",
+  "parameters": {
+    "option1": "valor1",
+    "option2": 123,
+    "option3": true
+  }
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "sessionId": "uuid-session",
+    "result": {
+      "processedData": "resultado processado",
+      "metadata": {
+        "processingTime": 1500,
+        "model": "gpt-4o-mini",
+        "tokensUsed": 250
+      }
+    },
+    "usage": {
+      "inputTokens": 100,
+      "outputTokens": 150,
+      "totalTokens": 250
+    },
+    "cost": 0.0025
+  }
+}
+```
+
+#### 2. Consulta de Sessão
+```
+GET /api/nova-ferramenta/session/:sessionId
+Authorization: Bearer <jwt_token>
+
+Response:
+{
+  "id": "uuid-session",
+  "userId": 123,
+  "status": "completed",
+  "inputData": { ... },
+  "result": { ... },
+  "createdAt": "2024-01-01T00:00:00Z",
+  "completedAt": "2024-01-01T00:00:01Z"
+}
+```
+
+### Endpoints de Sistema
+
+#### 1. Autenticação
+```
+POST /api/auth/login
+POST /api/auth/register
+POST /api/auth/logout
+POST /api/auth/refresh
+POST /api/auth/forgot-password
+POST /api/auth/reset-password
+```
+
+#### 2. Créditos
+```
+GET /api/credits/balance
+GET /api/credits/history
+POST /api/credits/purchase
+```
+
+#### 3. Permissões
+```
+GET /api/permissions/user
+GET /api/permissions/groups
+POST /api/permissions/check
+```
+
+#### 4. Dashboard
+```
+GET /api/dashboard/stats
+GET /api/dashboard/recent-activity
+GET /api/dashboard/usage-analytics
+```
+
+### Endpoints de IA
+
+#### 1. Provedores de IA
+```
+GET /api/ai-providers/status
+POST /api/ai-providers/test
+GET /api/ai-providers/config
+```
+
+#### 2. Geração de Conteúdo
+```
+POST /api/ai/generate
+POST /api/ai/analyze
+POST /api/ai/optimize
+```
+
+### Endpoints de Ferramentas Específicas
+
+#### 1. Background Removal
+```
+POST /api/background-removal/process
+GET /api/background-removal/session/:id
+POST /api/background-removal/download/:id
+```
+
+#### 2. Amazon Tools
+```
+POST /api/amazon/ads-editor/optimize
+POST /api/amazon/reviews/extract
+POST /api/amazon/keywords/research
+```
+
+#### 3. Simuladores
+```
+GET /api/simulations/simples-nacional
+POST /api/simulations/simples-nacional
+PUT /api/simulations/simples-nacional/:id
+DELETE /api/simulations/simples-nacional/:id
+
+GET /api/simulations/import
+POST /api/simulations/import
+PUT /api/simulations/import/:id
+DELETE /api/simulations/import/:id
+
+GET /api/investment-simulations
+POST /api/investment-simulations
+PUT /api/investment-simulations/:id
+DELETE /api/investment-simulations/:id
+```
+
+### Códigos de Status HTTP
+
+```
+200 - Sucesso
+201 - Criado com sucesso
+400 - Dados inválidos
+401 - Não autenticado
+403 - Acesso negado
+404 - Não encontrado
+429 - Rate limit excedido
+500 - Erro interno do servidor
+```
+
+### Headers de Resposta
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1640995200
+X-Request-ID: uuid-request
+X-Processing-Time: 1500ms
+```
+
+### Tratamento de Erros
+
+```json
+{
+  "error": "Descrição do erro",
+  "message": "Detalhes técnicos (apenas em desenvolvimento)",
+  "code": "ERROR_CODE",
+  "timestamp": "2024-01-01T00:00:00Z",
+  "requestId": "uuid-request"
+}
+```
+
+### Rate Limiting
+
+- **Autenticação**: 10 requests por 15 minutos
+- **Ferramentas**: 100 requests por 15 minutos
+- **Simuladores**: 100 requests por 15 minutos
+- **Uploads**: 50 requests por 15 minutos
+
+### Webhooks (se aplicável)
+
+```
+POST /webhook/nova-ferramenta/status
+Content-Type: application/json
+
+{
+  "sessionId": "uuid-session",
+  "status": "completed",
+  "result": { ... },
+  "timestamp": "2024-01-01T00:00:00Z"
+}
+```
+
+### Exemplo de Integração Completa
+
+```typescript
+// Cliente JavaScript/TypeScript
+class NovaFerramentaAPI {
+  private baseURL = 'https://api.alunopowerplatform.com';
+  private token: string;
+
+  constructor(token: string) {
+    this.token = token;
+  }
+
+  async process(inputData: any, parameters: any = {}) {
+    const response = await fetch(`${this.baseURL}/api/nova-ferramenta/process`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`
+      },
+      body: JSON.stringify({ inputData, parameters })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro na requisição');
+    }
+
+    return response.json();
+  }
+
+  async getSession(sessionId: string) {
+    const response = await fetch(`${this.baseURL}/api/nova-ferramenta/session/${sessionId}`, {
+      headers: {
+        'Authorization': `Bearer ${this.token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Sessão não encontrada');
+    }
+
+    return response.json();
+  }
+}
+
+// Uso
+const api = new NovaFerramentaAPI('jwt-token');
+const result = await api.process('dados de entrada', { option1: 'valor' });
+console.log(result.data);
+```
+
 ---
 
 ## 10. Guia Passo a Passo
