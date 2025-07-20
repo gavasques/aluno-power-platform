@@ -11,6 +11,7 @@ import { db } from '../db.js';
 import { users } from '../../shared/schema.js';
 import { eq, or } from 'drizzle-orm';
 import { AuthService } from '../services/authService.js';
+import { handleAuthError } from '../utils/authErrors.js';
 import emailService from '../services/emailService.js';
 import evolutionAPI from '../services/evolutionAPI.js';
 
@@ -359,50 +360,19 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-// POST /api/auth/login - Enhanced with phone verification check
+// POST /api/auth/login - Clean implementation using AuthService
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
+    
+    // Use standardized authentication service
+    const authResult = await AuthService.authenticate({ email, password });
 
-    // Find user by email
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Email ou senha incorretos'
-      });
+    if (!authResult.success) {
+      return res.status(authResult.error.code).json(authResult);
     }
 
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      return res.status(401).json({
-        success: false,
-        message: 'Email ou senha incorretos'
-      });
-    }
-
-    // Check if account is active
-    if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Conta desativada. Entre em contato com o suporte.'
-      });
-    }
-
-    // Generate token
-    const token = AuthService.generateToken(user.id);
-
-    // Update last login
-    await db
-      .update(users)
-      .set({ lastLogin: new Date() })
-      .where(eq(users.id, user.id));
+    const { user, token } = authResult.data;
 
     console.log(`[AUTH] User logged in successfully: ${user.email}`);
 
@@ -434,10 +404,9 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: 'Erro interno do servidor'
-    });
+    // Use handleAuthError for consistent error handling
+    const errorResponse = handleAuthError(error);
+    res.status(errorResponse.error.code).json(errorResponse);
   }
 });
 

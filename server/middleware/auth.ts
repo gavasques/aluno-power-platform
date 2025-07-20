@@ -8,6 +8,8 @@ export interface AuthRequest extends Request {
   };
 }
 
+import { AuthService } from '../services/authService';
+
 export const requireAuth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
@@ -18,17 +20,22 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
 
     const token = authHeader.substring(7);
     
-    // For now, we'll use a simple validation
-    // In production, this should validate JWT tokens properly
     if (!token || token === 'null' || token === 'undefined') {
       return res.status(401).json({ error: 'Token inválido' });
     }
 
-    // Mock user data - in production this would decode the JWT
+    // Validate session token with database
+    const user = await AuthService.validateSession(token);
+    
+    if (!user || !user.isActive) {
+      return res.status(401).json({ error: 'Sessão inválida ou expirada' });
+    }
+
+    // Attach sanitized user to request
     req.user = {
-      id: 1,
-      email: 'admin@example.com',
-      role: 'admin'
+      id: user.id,
+      email: user.email,
+      role: user.role
     };
 
     next();

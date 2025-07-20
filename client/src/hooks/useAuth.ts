@@ -1,23 +1,29 @@
+import { useAuth as useAuthContext } from '@/contexts/AuthContext';
 
-import { useState } from "react";
-
-// Simulação de usuário logado - em produção seria de um contexto de autenticação
-const getCurrentUser = () => ({
-  id: "1",
-  name: "Guilherme Vasques",
-  email: "aluno@lvbrasil.com",
-  role: "admin" // admin | support | user
-});
-
+/**
+ * Enhanced useAuth hook that provides authentication state and helper methods
+ * Replaces the previous mock implementation with proper authentication
+ */
 export const useAuth = () => {
-  const [user] = useState(getCurrentUser());
-
-  const isAdmin = user.role === "admin";
-  const isSupport = user.role === "support";
+  const auth = useAuthContext();
+  
+  const isAdmin = auth.user?.role === "admin";
+  const isSupport = auth.user?.role === "support";
   const hasAdminAccess = isAdmin || isSupport;
 
   return {
-    user,
+    // Core auth state
+    user: auth.user,
+    token: auth.token,
+    isLoading: auth.isLoading,
+    isAuthenticated: auth.isAuthenticated,
+    
+    // Actions
+    login: auth.login,
+    register: auth.register,
+    logout: auth.logout,
+    
+    // Helper methods
     isAdmin,
     isSupport,
     hasAdminAccess

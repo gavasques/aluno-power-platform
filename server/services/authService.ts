@@ -3,11 +3,18 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { db } from '../db';
 import { users, userSessions, userGroups, userGroupMembers } from '@shared/schema';
-import { eq, and, gt, sql } from 'drizzle-orm';
+import { eq, and, gt, sql, lt } from 'drizzle-orm';
 import type { User, InsertUser, UserWithGroups } from '@shared/schema';
 import { EncryptionService } from '../utils/encryption';
+import { AuthError, AuthResponse, handleAuthError } from '../utils/authErrors';
 
-// In-memory store for failed login attempts (in production, use Redis or database)
+// Enhanced interfaces
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+// In-memory store for failed login attempts (TODO: Move to database for production)
 const failedAttempts = new Map<string, { count: number; lastAttempt: Date; lockoutUntil?: Date }>();
 
 export class AuthService {
@@ -60,24 +67,66 @@ export class AuthService {
   static clearFailedAttempts(email: string): void {
     failedAttempts.delete(email);
   }
-  // Password strength requirements
+
+  // Enhanced email validation
+  static isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) && email.length <= 254;
+  }
+
+  // Data sanitization methods
+  static sanitizeUser(user: User): User {
+    const { password, resetToken, magicLinkToken, ...sanitizedUser } = user;
+    return sanitizedUser as User;
+  }
+
+  static maskEmail(email: string): string {
+    const [username, domain] = email.split('@');
+    const maskedUsername = username.length > 2 
+      ? username.substring(0, 2) + '***' 
+      : '***';
+    return `${maskedUsername}@${domain}`;
+  }
+
+  static sanitizeError(error: any): string {
+    if (typeof error === 'string') {
+      return error.replace(/password|token|key/gi, '***');
+    }
+    return error?.message?.replace(/password|token|key/gi, '***') || 'Unknown error';
+  }
+
+  // Enhanced password strength requirements
   static validatePasswordStrength(password: string): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
     
     if (password.length < 12) {
       errors.push('Password must be at least 12 characters long');
     }
+    
+    if (password.length > 128) {
+      errors.push('Password must be less than 128 characters');
+    }
+    
     if (!/[A-Z]/.test(password)) {
       errors.push('Password must contain at least one uppercase letter');
     }
+    
     if (!/[a-z]/.test(password)) {
       errors.push('Password must contain at least one lowercase letter');
     }
+    
     if (!/[0-9]/.test(password)) {
       errors.push('Password must contain at least one number');
     }
+    
     if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
       errors.push('Password must contain at least one special character');
+    }
+
+    // Check for common weak passwords
+    const commonPasswords = ['password', '123456', 'qwerty', 'admin'];
+    if (commonPasswords.some(weak => password.toLowerCase().includes(weak))) {
+      errors.push('Cannot contain common weak patterns');
     }
     
     return {
@@ -170,7 +219,84 @@ export class AuthService {
     return user;
   }
 
-  // Authenticate by email
+  // Enhanced authenticate method with standardized error handling
+  static async authenticate(credentials: LoginCredentials): Promise<AuthResponse<{ user: User; token: string }>> {
+    try {
+      // Input validation
+      if (!this.isValidEmail(credentials.email)) {
+        throw AuthError.emailInvalid();
+      }
+
+      if (!credentials.password || credentials.password.length < 6) {
+        throw AuthError.passwordWeak(['Password must be at least 6 characters']);
+      }
+
+      const user = await this.authenticateUserByEmail(credentials.email, credentials.password);
+      
+      if (!user) {
+        throw AuthError.invalidCredentials();
+      }
+
+      // Create session
+      const sessionToken = await this.createSession(user.id);
+
+      console.log('AUTH - Successful login for:', this.maskEmail(credentials.email));
+      
+      return AuthError.createResponse({
+        user: this.sanitizeUser(user),
+        token: sessionToken
+      }, 'Login successful');
+
+    } catch (error) {
+      console.error('AUTH - Authentication error:', this.sanitizeError(error));
+      return handleAuthError(error);
+    }
+  }
+
+  // Enhanced register method with standardized error handling
+  static async register(userData: InsertUser): Promise<AuthResponse<{ user: User; token: string }>> {
+    try {
+      // Input validation
+      if (!this.isValidEmail(userData.email)) {
+        throw AuthError.emailInvalid();
+      }
+
+      const passwordValidation = this.validatePasswordStrength(userData.password);
+      if (!passwordValidation.valid) {
+        throw AuthError.passwordWeak(passwordValidation.errors);
+      }
+
+      // Check if user already exists
+      const existingUser = await this.getUserByEmail(userData.email);
+      
+      if (existingUser) {
+        throw AuthError.userExists();
+      }
+
+      // Create user
+      const user = await this.createUser({
+        ...userData,
+        emailVerified: false, // Require email verification
+        isActive: true
+      });
+
+      // Create session
+      const sessionToken = await this.createSession(user.id);
+
+      console.log('AUTH - New user registered:', this.maskEmail(userData.email));
+
+      return AuthError.createResponse({
+        user: this.sanitizeUser(user),
+        token: sessionToken
+      }, 'Registration successful');
+
+    } catch (error) {
+      console.error('AUTH - Registration error:', this.sanitizeError(error));
+      return handleAuthError(error);
+    }
+  }
+
+  // Legacy method - kept for backward compatibility
   static async authenticateUserByEmail(email: string, password: string): Promise<User | null> {
     console.log('🔍 AUTH SERVICE - Searching for user by email:', email);
     
@@ -178,7 +304,7 @@ export class AuthService {
     const lockStatus = this.isAccountLocked(email);
     if (lockStatus.locked) {
       console.log('🔍 AUTH SERVICE - Account locked', { email, minutesRemaining: lockStatus.minutesRemaining });
-      throw new Error(`Account locked due to too many failed login attempts. Try again in ${lockStatus.minutesRemaining} minutes.`);
+      throw AuthError.accountLocked(lockStatus.minutesRemaining);
     }
     
     const [user] = await db
@@ -251,9 +377,14 @@ export class AuthService {
     return sessionToken;
   }
 
-  // Validate session
+  // Enhanced session validation with better security
   static async validateSession(sessionToken: string): Promise<User | null> {
-    console.log('🔍 VALIDATE SESSION - Starting validation for token:', sessionToken.substring(0, 10) + '...');
+    try {
+      if (!sessionToken || sessionToken.length !== 64) {
+        return null;
+      }
+
+      console.log('🔍 VALIDATE SESSION - Starting validation for token:', sessionToken.substring(0, 10) + '...');
     
     try {
       // Get all active sessions
@@ -305,8 +436,19 @@ export class AuthService {
       console.log('🔍 VALIDATE SESSION - No matching session found');
       return null;
     } catch (error) {
-      console.error('🔍 VALIDATE SESSION - Error:', error);
+      console.error('🔍 VALIDATE SESSION - Error:', this.sanitizeError(error));
       return null;
+    }
+  }
+
+  // Enhanced logout method
+  static async logout(token: string): Promise<boolean> {
+    try {
+      await this.revokeSession(token);
+      return true;
+    } catch (error) {
+      console.error('AUTH - Logout error:', this.sanitizeError(error));
+      return false;
     }
   }
 
