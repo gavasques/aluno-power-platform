@@ -47,6 +47,16 @@ const simuladorItems: SimuladorItem[] = [
     isAvailable: true,
   },
   {
+    id: "simulador-simplificado",
+    title: "Simulador Simplificado",
+    description: "Simulador simplificado e rápido para cálculos básicos de importação",
+    href: "/simuladores/simplificado",
+    icon: Calculator,
+    category: "Importação",
+    isAvailable: true,
+    isNew: true,
+  },
+  {
     id: "importacao-formal-direta",
     title: "Importação Formal Direta",
     description: "Simulador completo com rateio por CBM e cálculo detalhado de impostos de importação",
