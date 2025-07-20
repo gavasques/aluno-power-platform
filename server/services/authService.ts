@@ -237,14 +237,14 @@ export class AuthService {
         throw AuthError.invalidCredentials();
       }
 
-      // Create session
-      const sessionToken = await this.createSession(user.id);
+      // Create JWT token instead of session
+      const jwtToken = this.generateToken(user.id);
 
       console.log('AUTH - Successful login for:', this.maskEmail(credentials.email));
       
       return AuthError.createResponse({
         user: this.sanitizeUser(user),
-        token: sessionToken
+        token: jwtToken
       }, 'Login successful');
 
     } catch (error) {
@@ -280,14 +280,14 @@ export class AuthService {
         isActive: true
       });
 
-      // Create session
-      const sessionToken = await this.createSession(user.id);
+      // Create JWT token instead of session
+      const jwtToken = this.generateToken(user.id);
 
       console.log('AUTH - New user registered:', this.maskEmail(userData.email));
 
       return AuthError.createResponse({
         user: this.sanitizeUser(user),
-        token: sessionToken
+        token: jwtToken
       }, 'Registration successful');
 
     } catch (error) {
@@ -355,6 +355,21 @@ export class AuthService {
       .where(eq(users.id, user.id));
 
     return user;
+  }
+
+  // Get user by ID
+  static async getUserById(userId: number): Promise<User | null> {
+    try {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId));
+
+      return user || null;
+    } catch (error) {
+      console.error('🔍 AUTH SERVICE - Error getting user by ID:', this.sanitizeError(error));
+      return null;
+    }
   }
 
   // Create session
