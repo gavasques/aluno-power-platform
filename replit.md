@@ -53,11 +53,12 @@ The system uses PostgreSQL with the following core tables:
   - **Hub de Recursos / Fornecedores**: Public supplier directory for general reference
   - **Minha Área / Meus Fornecedores**: Personal supplier management with user-specific data, brands, contacts, and files
 
-### Admin Panel
-- **Dashboard**: Analytics and system overview
+### Admin Panel  
+- **Dashboard**: Ultra-lightweight analytics and system overview (optimized July 2025)
 - **User Management**: Role-based access control (admin, support, user)
 - **Content Administration**: Full CRUD operations for all resource types
 - **System Configuration**: Platform settings and AI credit management
+- **Credentials**: Admin user: gavasques@gmail.com / Password: admin123!
 
 ## Data Flow
 
@@ -73,6 +74,16 @@ The system uses PostgreSQL with the following core tables:
 1. YouTube service runs scheduled sync (1x daily at 9:00 AM)
 2. Fetches latest videos from @guilhermeavasques channel (last 30 days)
 3. Stores metadata and thumbnails in database with enhanced statistics tracking
+
+## Recent Changes
+
+### July 20, 2025 - Admin Dashboard Optimization
+- ✅ **Completed**: Ultra-lightweight admin dashboard implementation
+- ✅ **Backend**: Created essential admin API routes (`/api/admin/dashboard-stats`, `/api/users`, `/api/permissions/groups`)
+- ✅ **Frontend**: Removed status monitoring and recent activity features for faster loading
+- ✅ **Code Cleanup**: Eliminated legacy and orphaned code from admin area
+- ✅ **Performance**: Dashboard now loads completely optimized with minimal queries
+- ✅ **Authentication Fix**: Resolved bcrypt password comparison issue, updated admin credentials
 4. WebSocket notifications for real-time updates
 5. Content categorization and search indexing
 6. Manual sync endpoint available at /api/youtube-videos/sync for testing
