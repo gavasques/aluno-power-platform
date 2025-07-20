@@ -44,19 +44,37 @@ const InformalImportSimulationsList: React.FC = () => {
   const { data: apiResponse, isLoading, error } = useQuery({
     queryKey: ['/api/simulations/import', currentPage],
     staleTime: 5 * 60 * 1000, // 5 minutes
-    queryFn: () => apiRequest(`/api/simulations/import?page=${currentPage}&limit=${ITEMS_PER_PAGE}&maxItems=${MAX_ITEMS}`)
+    queryFn: async () => {
+      console.log('🔍 FRONTEND - Fazendo requisição para API de simulações');
+      const response = await apiRequest(`/api/simulations/import?page=${currentPage}&limit=${ITEMS_PER_PAGE}&maxItems=${MAX_ITEMS}`);
+      console.log('🔍 FRONTEND - Resposta da API:', response);
+      return response;
+    }
   });
 
   const simulations = (apiResponse as any)?.data || [];
   const totalItems = (apiResponse as any)?.total || 0;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
+  // Debug logs
+  console.log('🔍 FRONTEND - Estado atual:', {
+    apiResponse,
+    simulations,
+    totalItems,
+    isLoading,
+    error
+  });
+
   // Log results
   if (error) {
+    console.error('❌ FRONTEND - Erro ao carregar simulações:', error);
     logger.error('❌ FRONTEND - Erro ao carregar simulações de importação simplificada:', error);
   }
   if (simulations.length > 0) {
+    console.log('✅ FRONTEND - Simulações carregadas:', simulations.length);
     logger.debug('✅ FRONTEND - Simulações de importação simplificada carregadas:', simulations.length);
+  } else {
+    console.log('⚠️ FRONTEND - Nenhuma simulação encontrada');
   }
 
   // Delete simulation mutation
