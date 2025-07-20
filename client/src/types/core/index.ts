@@ -1,131 +1,40 @@
 /**
- * Unified Core Types - Central export for all consolidated types
- * Eliminates duplicate type definitions across the codebase
+ * Tipos Core - Exportações centralizadas de todos os tipos do sistema
+ * Organiza e exporta todos os tipos principais do sistema
  */
 
-// Product types
-export * from './product';
-export * from './channel';
-export * from './forms';
+// ============================================================================
+// TIPOS DE DOMÍNIO
+// ============================================================================
 
-// Re-export commonly used types with aliases for backward compatibility
-export type {
-  Product,
-  ProductFormData,
-  ProductListItem,
-  ProductDimensions,
-  ProductDescriptions,
-  BaseProduct,
-  InsertProduct,
-  CostCalculation,
-  ProductEditMode
-} from './product';
+export * from './domain';
 
-export type {
-  ChannelType,
-  SalesChannel,
-  BaseChannel,
-  ChannelCostData,
-  ChannelCalculationResult,
-  ChannelFormData,
-  ChannelEditorProps,
-  ChannelCalculatorProps,
-  ChannelUpdateRequest,
-  ChannelUpdateResponse,
-  ProductChannels,
-  ChannelFees
-} from './channel';
+// ============================================================================
+// TIPOS DE VALIDAÇÃO
+// ============================================================================
 
-export type {
-  BaseFormData,
-  ProductFormData as FormProductData,
-  EditProductFormData,
-  AgentFormData,
-  LoginFormData,
-  RegisterFormData,
-  ForgotPasswordFormData,
-  ResetPasswordFormData,
-  SupplierFormData,
-  FormValidationResult,
-  FormState,
-  FormFieldConfig,
-  FormConfig,
-  FormProps
-} from './forms';
+export * from './validations';
 
-// Common utility types
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
+// ============================================================================
+// TIPOS DE CÁLCULOS
+// ============================================================================
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  totalCount: number;
-  currentPage: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-}
+export * from './calculations';
 
-export interface SelectOption {
-  value: string | number;
-  label: string;
-  disabled?: boolean;
-}
+// ============================================================================
+// TIPOS DE COMPONENTES
+// ============================================================================
 
-export interface TableColumn<T = any> {
-  key: string;
-  label: string;
-  sortable?: boolean;
-  render?: (value: any, row: T) => React.ReactNode;
-  className?: string;
-}
+export * from './components';
 
-export interface FilterOptions {
-  search?: string;
-  category?: string;
-  brand?: string;
-  status?: string;
-  dateRange?: {
-    start: Date;
-    end: Date;
-  };
-}
+// ============================================================================
+// TIPOS DE HOOKS
+// ============================================================================
 
-export interface SortOptions {
-  field: string;
-  direction: 'asc' | 'desc';
-}
+export * from './hooks';
 
-// Loading and error states
-export interface LoadingState {
-  isLoading: boolean;
-  error: string | null;
-  data: any;
-}
+// ============================================================================
+// TIPOS DE CONTEXTOS
+// ============================================================================
 
-export interface AsyncState<T> {
-  data: T | null;
-  isLoading: boolean;
-  error: string | null;
-  lastUpdated?: Date;
-}
-
-// Navigation and routing
-export interface NavigationItem {
-  id: string;
-  label: string;
-  path: string;
-  icon?: string;
-  children?: NavigationItem[];
-  permissions?: string[];
-}
-
-export interface BreadcrumbItem {
-  label: string;
-  path?: string;
-  isActive?: boolean;
-}
+export * from './contexts';

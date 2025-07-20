@@ -7,11 +7,38 @@ import { ArrowLeft, Package, Ruler, DollarSign, Edit, ExternalLink, Building2, H
 import { useLocation } from "wouter";
 import { formatCurrency } from "@/utils/productCalculations";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { ProductPageProps, Product } from "@/types/core";
 
-export default function ProductPreview() {
+interface ProductPreviewProps extends ProductPageProps {
+  showActions?: boolean;
+  onEdit?: (productId: string) => void;
+  onDelete?: (productId: string) => void;
+  showMetrics?: boolean;
+}
+
+export default function ProductPreview({ 
+  showActions = true, 
+  onEdit, 
+  onDelete,
+  showMetrics = true 
+}: ProductPreviewProps) {
   const [, setLocation] = useLocation();
   const params = useParams();
   const productId = params.id;
+
+  const handleEdit = () => {
+    if (onEdit && productId) {
+      onEdit(productId);
+    } else {
+      setLocation(`/minha-area/produtos/${productId}/editar`);
+    }
+  };
+
+  const handleDelete = () => {
+    if (onDelete && productId) {
+      onDelete(productId);
+    }
+  };
 
   const { data: productData, isLoading } = useQuery({
     queryKey: ['/api/products', productId],
@@ -70,13 +97,15 @@ export default function ProductPreview() {
             Voltar para Produtos
           </Button>
           
-          <Button
-            onClick={() => setLocation(`/minha-area/produtos/${productId}/editar`)}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Editar Produto
-          </Button>
+          {showActions && (
+            <Button
+              onClick={handleEdit}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Editar Produto
+            </Button>
+          )}
         </div>
 
         {/* Product Header */}

@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Material } from '@/types/material';
+import { SelectValueChangeHandler } from '@/types/core';
 
 const getIcon = (iconName: string) => {
   const icons: Record<string, React.ComponentType> = {
@@ -175,7 +176,7 @@ const MyMaterials = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={filters.accessLevel} onValueChange={(value: any) => setFilters({ accessLevel: value })}>
+            <Select value={filters.accessLevel} onValueChange={(value: string) => setFilters({ accessLevel: value })}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Acesso" />
               </SelectTrigger>

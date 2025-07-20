@@ -177,6 +177,38 @@ export interface ChannelUpdateResponse {
   message: string;
 }
 
+// NEW: Specific types to replace 'any' usage
+export interface ChannelUpdateData {
+  channels: SalesChannel[];
+}
+
+export interface ChannelFilterData {
+  type?: ChannelType;
+  isActive?: boolean;
+  priceRange?: {
+    min: number;
+    max: number;
+  };
+}
+
+export interface ChannelSortData {
+  field: 'type' | 'price' | 'isActive' | 'marginPercent';
+  direction: 'asc' | 'desc';
+}
+
+export interface ChannelBulkUpdateData {
+  productIds: number[];
+  channels: SalesChannel[];
+  updateType: 'add' | 'remove' | 'replace';
+}
+
+export interface ChannelValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  suggestions: string[];
+}
+
 // Legacy aliases for backward compatibility
 export type Channel = SalesChannel;
 export type ChannelData = ChannelCostData;

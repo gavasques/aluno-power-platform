@@ -3,99 +3,173 @@
  * Eliminates duplicate interfaces across the codebase
  */
 
-// Base product dimensions (consolidated from multiple definitions)
-export interface ProductDimensions {
-  length?: number;
-  width?: number;
-  height?: number;
-}
+import { SalesChannel } from './channel';
 
-// Base product descriptions
-export interface ProductDescriptions {
-  description?: string;
-  htmlDescription?: string;
-  bulletPoints?: string[];
-  technicalSpecs?: Record<string, string>;
-}
-
-// Base product interface with common fields
-export interface BaseProduct {
+// Base product interface
+export interface Product {
+  id: number;
   name: string;
   sku?: string;
   internalCode?: string;
+  freeCode?: string;
+  supplierCode?: string;
   ean?: string;
-  dimensions?: ProductDimensions;
-  weight?: number;
-  brand?: string;
-  category?: string;
-  supplierId?: number;
   ncm?: string;
   photo?: string;
-  descriptions?: ProductDescriptions;
+  costItem: number;
+  taxPercent: number;
+  weight?: number;
+  dimensions?: ProductDimensions;
+  brandName?: string;
   observations?: string;
-}
-
-// Complete product interface for database entities
-export interface Product extends BaseProduct {
-  id: number;
-  costItem?: number;
-  packCost?: number;
-  taxPercent?: number;
-  channels: Record<string, any>; // Using generic type for now
   active: boolean;
+  channels?: SalesChannel[];
   createdAt: string;
-  updatedAt?: string;
-  
-  // Computed fields for backward compatibility
-  costPrice?: number;
-  salePrice?: number;
+  updatedAt: string;
 }
 
-// Product form data for creating/editing products
-export interface ProductFormData extends BaseProduct {
-  brandId?: string;
-  costItem?: number;
-  packCost?: number;
-  taxPercent?: number;
-  channels?: any[];
+// Product dimensions
+export interface ProductDimensions {
+  length: number;
+  width: number;
+  height: number;
+}
+
+// Product descriptions for different channels
+export interface ProductDescriptions {
+  short?: string;
+  long?: string;
+  technical?: string;
+  marketing?: string;
+  seo?: string;
+}
+
+// Product form data for creation/editing
+export interface ProductFormData {
+  name: string;
+  sku?: string;
+  internalCode?: string;
+  freeCode?: string;
+  supplierCode?: string;
+  ean?: string;
+  ncm?: string;
+  costItem: number;
+  taxPercent: number;
+  weight?: number;
+  dimensions?: ProductDimensions;
+  brandName?: string;
+  observations?: string;
   active?: boolean;
 }
 
-// Product data for inserting new products
-export interface InsertProduct extends BaseProduct {
-  costItem?: number;
-  packCost?: number;
-  taxPercent?: number;
-  channels?: Record<string, any>;
-  active?: boolean;
-}
-
-// Simplified product interface for lists
+// Product list item (simplified for lists)
 export interface ProductListItem {
   id: number;
   name: string;
-  photo?: string;
   sku?: string;
-  brand?: string;
-  costItem?: number;
-  channels?: any[];
+  costItem: number;
+  brandName?: string;
+  active: boolean;
+  channelsCount?: number;
+  createdAt: string;
+}
+
+// Base product for inheritance
+export interface BaseProduct {
+  name: string;
+  costItem: number;
+  taxPercent: number;
   active: boolean;
 }
 
-// Cost calculation interface
+// Product for insertion (without id and timestamps)
+export interface InsertProduct extends Omit<Product, 'id' | 'createdAt' | 'updatedAt'> {
+  // Inherits all fields except id and timestamps
+}
+
+// Cost calculation result
 export interface CostCalculation {
-  baseWithTax: number;
+  productCost: number;
+  taxCost: number;
   totalCost: number;
-  suggestedPrices: {
-    margin20: number;
-    margin30: number;
-    margin40: number;
+  marginPercent: number;
+}
+
+// Product edit mode
+export type ProductEditMode = 'create' | 'edit' | 'view';
+
+// NEW: Specific types to replace 'any' usage
+export interface ProductUpdateData {
+  name?: string;
+  sku?: string;
+  internalCode?: string;
+  freeCode?: string;
+  supplierCode?: string;
+  ean?: string;
+  ncm?: string;
+  costItem?: number;
+  taxPercent?: number;
+  weight?: number;
+  dimensions?: ProductDimensions;
+  brandName?: string;
+  observations?: string;
+  active?: boolean;
+}
+
+export interface ProductFilterData {
+  search?: string;
+  brandName?: string;
+  active?: boolean;
+  costRange?: {
+    min: number;
+    max: number;
+  };
+  hasChannels?: boolean;
+  dateRange?: {
+    start: Date;
+    end: Date;
   };
 }
 
-// Product editing modes
-export type ProductEditMode = 'basic' | 'costs' | 'channels';
+export interface ProductSortData {
+  field: 'name' | 'costItem' | 'brandName' | 'active' | 'createdAt';
+  direction: 'asc' | 'desc';
+}
+
+export interface ProductBulkUpdateData {
+  productIds: number[];
+  updates: ProductUpdateData;
+}
+
+export interface ProductValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  suggestions: string[];
+}
+
+export interface ProductImportData {
+  products: InsertProduct[];
+  options: {
+    skipDuplicates?: boolean;
+    updateExisting?: boolean;
+    validateOnly?: boolean;
+  };
+}
+
+export interface ProductExportData {
+  format: 'csv' | 'excel' | 'json';
+  filters?: ProductFilterData;
+  fields?: (keyof Product)[];
+}
+
+export interface ProductMetrics {
+  totalProducts: number;
+  activeProducts: number;
+  productsWithChannels: number;
+  averageCost: number;
+  totalValue: number;
+}
 
 // Legacy aliases for backward compatibility
 export type ProductItem = Product;
-export type ProductData = ProductFormData;
