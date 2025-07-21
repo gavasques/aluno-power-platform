@@ -56,6 +56,8 @@ const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacoesIndex = lazy(() => import("./pages/myarea/ImportacoesIndex"));
+const SupplierCRM = lazy(() => import("./pages/myarea/SupplierCRM"));
+const SupplierDetailCRM = lazy(() => import("./pages/myarea/SupplierDetail"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
 const SimuladorSimplificado = lazy(() => import("./pages/simuladores/SimuladorSimplificado"));
 const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsListSimple"));
@@ -748,6 +750,28 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <ImportacoesIndex />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Supplier CRM - Protected */}
+                          <Route path="/minha-area/importacoes/fornecedores">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <SupplierCRM />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Supplier Detail - Protected */}
+                          <Route path="/minha-area/importacoes/fornecedores/:id">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <SupplierDetailCRM />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

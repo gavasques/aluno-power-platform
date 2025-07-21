@@ -3085,6 +3085,291 @@ export const insertSimplesNacionalSimulationSchema = createInsertSchema(simplesN
 export type InsertSimplesNacionalSimulation = z.infer<typeof insertSimplesNacionalSimulationSchema>;
 export type SimplesNacionalSimulation = typeof simplesNacionalSimulations.$inferSelect;
 
+// =============================================================================
+// SUPPLIER CRM SYSTEM - COMPLETE IMPORT MANAGEMENT TABLES
+// =============================================================================
+
+// Supplier Contracts - Different types of contracts
+export const supplierContracts = pgTable("supplier_contracts", {
+  id: serial("id").primaryKey(),
+  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  
+  // Contract Details
+  contractNumber: text("contract_number").notNull(),
+  contractType: text("contract_type").notNull(), // exclusive, non_exclusive, framework, oem, distribution
+  title: text("title").notNull(),
+  description: text("description"),
+  
+  // Dates and Status
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  renewalDate: timestamp("renewal_date"),
+  status: text("status").notNull().default("active"), // active, expired, cancelled, suspended, draft
+  
+  // Terms
+  currency: text("currency").notNull().default("USD"),
+  paymentTerms: text("payment_terms"), // Net 30, prepaid, L/C, etc.
+  incoterms: text("incoterms"), // FOB, CIF, EXW, etc.
+  minimumOrder: decimal("minimum_order", { precision: 15, scale: 2 }),
+  maximumOrder: decimal("maximum_order", { precision: 15, scale: 2 }),
+  
+  // Documents
+  fileUrl: text("file_url"), // Uploaded contract file
+  signedFileUrl: text("signed_file_url"), // Signed contract
+  
+  // Additional Terms
+  exclusivityRegions: jsonb("exclusivity_regions"), // Array of regions if exclusive
+  productCategories: jsonb("product_categories"), // Array of product categories covered
+  
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  supplierIdx: index("supplier_contracts_supplier_idx").on(table.supplierId),
+  userIdx: index("supplier_contracts_user_idx").on(table.userId),
+  statusIdx: index("supplier_contracts_status_idx").on(table.status),
+  renewalIdx: index("supplier_contracts_renewal_idx").on(table.renewalDate),
+  typeIdx: index("supplier_contracts_type_idx").on(table.contractType),
+}));
+
+// Supplier Banking - International transfer information
+export const supplierBanking = pgTable("supplier_banking", {
+  id: serial("id").primaryKey(),
+  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  
+  // Bank Information
+  bankName: text("bank_name").notNull(),
+  bankAddress: text("bank_address"),
+  swiftCode: text("swift_code"), // SWIFT/BIC code for international transfers
+  iban: text("iban"), // International Bank Account Number
+  accountNumber: text("account_number").notNull(),
+  accountName: text("account_name").notNull(), // Beneficiary name
+  
+  // Routing Information
+  routingNumber: text("routing_number"), // For US banks
+  sortCode: text("sort_code"), // For UK banks
+  
+  // Intermediary Bank (if required)
+  intermediaryBankName: text("intermediary_bank_name"),
+  intermediarySwiftCode: text("intermediary_swift_code"),
+  
+  // Additional Details
+  currency: text("currency").notNull().default("USD"),
+  accountType: text("account_type").notNull().default("business"), // business, personal
+  isPrimary: boolean("is_primary").notNull().default(false),
+  
+  // Wire Transfer Information
+  wireInstructions: text("wire_instructions"), // Special instructions
+  
+  notes: text("notes"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  supplierIdx: index("supplier_banking_supplier_idx").on(table.supplierId),
+  userIdx: index("supplier_banking_user_idx").on(table.userId),
+  primaryIdx: index("supplier_banking_primary_idx").on(table.supplierId, table.isPrimary),
+  activeIdx: index("supplier_banking_active_idx").on(table.isActive),
+}));
+
+// Supplier Commercial Terms - Payment and commercial conditions
+export const supplierTerms = pgTable("supplier_terms", {
+  id: serial("id").primaryKey(),
+  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  
+  // Payment Terms
+  paymentMethod: text("payment_method").notNull().default("wire_transfer"), // wire_transfer, letter_of_credit, tt, paypal, etc.
+  paymentTerms: text("payment_terms").notNull().default("net_30"), // prepaid, net_30, net_60, 30_70, etc.
+  currency: text("currency").notNull().default("USD"),
+  
+  // Order Terms
+  minimumOrderQty: integer("minimum_order_qty"),
+  minimumOrderValue: decimal("minimum_order_value", { precision: 15, scale: 2 }),
+  leadTime: integer("lead_time"), // Days
+  productionTime: integer("production_time"), // Days
+  
+  // Shipping Terms
+  incoterms: text("incoterms").notNull().default("FOB"), // FOB, CIF, EXW, FCA, etc.
+  shippingPort: text("shipping_port"),
+  packagingRequirements: text("packaging_requirements"),
+  
+  // Discounts and Pricing
+  volumeDiscounts: jsonb("volume_discounts"), // Array of {qty: number, discount: percentage}
+  seasonalPricing: jsonb("seasonal_pricing"), // Special pricing periods
+  priceValidityDays: integer("price_validity_days").notNull().default(30),
+  
+  // Quality and Compliance
+  qualityStandards: text("quality_standards"), // ISO, CE, FDA, etc.
+  inspectionRequirements: text("inspection_requirements"),
+  warrantyTerms: text("warranty_terms"),
+  
+  // Additional Terms
+  returnPolicy: text("return_policy"),
+  cancellationPolicy: text("cancellation_policy"),
+  
+  notes: text("notes"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  supplierIdx: index("supplier_terms_supplier_idx").on(table.supplierId),
+  userIdx: index("supplier_terms_user_idx").on(table.userId),
+  activeIdx: index("supplier_terms_active_idx").on(table.isActive),
+}));
+
+// Supplier Documents - Certificates and compliance documents
+export const supplierDocuments = pgTable("supplier_documents", {
+  id: serial("id").primaryKey(),
+  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  
+  // Document Information
+  title: text("title").notNull(),
+  documentType: text("document_type").notNull(), // certificate, license, insurance, tax, audit, compliance
+  category: text("category").notNull(), // quality, legal, financial, operational, compliance
+  
+  // File Information
+  fileName: text("file_name").notNull(),
+  fileUrl: text("file_url").notNull(),
+  fileSize: integer("file_size"), // bytes
+  mimeType: text("mime_type"),
+  
+  // Validity
+  issueDate: timestamp("issue_date"),
+  expiryDate: timestamp("expiry_date"),
+  issuingAuthority: text("issuing_authority"),
+  
+  // Status and Alerts
+  status: text("status").notNull().default("valid"), // valid, expired, pending_renewal, under_review
+  alertDaysBefore: integer("alert_days_before").notNull().default(30), // Days before expiry to alert
+  
+  // Additional Info
+  documentNumber: text("document_number"),
+  description: text("description"),
+  tags: jsonb("tags"), // Array of tags for categorization
+  
+  isRequired: boolean("is_required").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  supplierIdx: index("supplier_documents_supplier_idx").on(table.supplierId),
+  userIdx: index("supplier_documents_user_idx").on(table.userId),
+  typeIdx: index("supplier_documents_type_idx").on(table.documentType),
+  statusIdx: index("supplier_documents_status_idx").on(table.status),
+  expiryIdx: index("supplier_documents_expiry_idx").on(table.expiryDate),
+  activeIdx: index("supplier_documents_active_idx").on(table.isActive),
+}));
+
+// Supplier Communications - Timeline of messages and notes
+export const supplierCommunications = pgTable("supplier_communications", {
+  id: serial("id").primaryKey(),
+  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  contactId: integer("contact_id").references(() => supplierContacts.id),
+  
+  // Communication Details
+  type: text("type").notNull(), // email, phone, meeting, note, whatsapp, wechat, internal_note
+  direction: text("direction").notNull(), // inbound, outbound, internal
+  subject: text("subject"),
+  content: text("content").notNull(),
+  
+  // Metadata
+  communicationDate: timestamp("communication_date").notNull().defaultNow(),
+  method: text("method"), // email, phone, in_person, video_call, chat
+  priority: text("priority").notNull().default("normal"), // low, normal, high, urgent
+  
+  // Status and Follow-up
+  status: text("status").notNull().default("completed"), // pending, completed, requires_follow_up
+  followUpDate: timestamp("follow_up_date"),
+  isFollowedUp: boolean("is_followed_up").notNull().default(false),
+  
+  // Attachments and References
+  attachments: jsonb("attachments"), // Array of file URLs
+  relatedOrderId: text("related_order_id"), // Reference to order if related
+  
+  // Classification
+  tags: jsonb("tags"), // Array of tags
+  category: text("category"), // pricing, quality, shipping, general, complaint, etc.
+  
+  notes: text("notes"), // Internal notes about the communication
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  supplierIdx: index("supplier_communications_supplier_idx").on(table.supplierId),
+  userIdx: index("supplier_communications_user_idx").on(table.userId),
+  contactIdx: index("supplier_communications_contact_idx").on(table.contactId),
+  typeIdx: index("supplier_communications_type_idx").on(table.type),
+  dateIdx: index("supplier_communications_date_idx").on(table.communicationDate),
+  statusIdx: index("supplier_communications_status_idx").on(table.status),
+  followUpIdx: index("supplier_communications_followup_idx").on(table.followUpDate),
+  createdByIdx: index("supplier_communications_created_by_idx").on(table.createdBy),
+}));
+
+// Supplier Performance - KPIs and evaluation metrics
+export const supplierPerformance = pgTable("supplier_performance", {
+  id: serial("id").primaryKey(),
+  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  
+  // Evaluation Period
+  evaluationPeriod: text("evaluation_period").notNull(), // Q1_2025, monthly_2025_01, yearly_2025
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  
+  // Quality Metrics
+  qualityScore: decimal("quality_score", { precision: 5, scale: 2 }), // 0-100
+  defectRate: decimal("defect_rate", { precision: 8, scale: 4 }), // Percentage
+  returnRate: decimal("return_rate", { precision: 8, scale: 4 }), // Percentage
+  
+  // Delivery Metrics
+  onTimeDeliveryRate: decimal("on_time_delivery_rate", { precision: 8, scale: 4 }), // Percentage
+  averageLeadTime: integer("average_lead_time"), // Days
+  deliveryAccuracy: decimal("delivery_accuracy", { precision: 8, scale: 4 }), // Percentage
+  
+  // Communication Metrics
+  responseTime: decimal("response_time", { precision: 10, scale: 2 }), // Hours
+  communicationRating: decimal("communication_rating", { precision: 5, scale: 2 }), // 0-10
+  
+  // Financial Metrics
+  totalOrderValue: decimal("total_order_value", { precision: 15, scale: 2 }),
+  averageOrderValue: decimal("average_order_value", { precision: 15, scale: 2 }),
+  paymentTermsCompliance: decimal("payment_terms_compliance", { precision: 8, scale: 4 }), // Percentage
+  
+  // Order Statistics
+  totalOrders: integer("total_orders").notNull().default(0),
+  completedOrders: integer("completed_orders").notNull().default(0),
+  cancelledOrders: integer("cancelled_orders").notNull().default(0),
+  
+  // Overall Rating
+  overallRating: decimal("overall_rating", { precision: 5, scale: 2 }), // 0-10
+  ratingCategory: text("rating_category"), // excellent, good, average, poor, unacceptable
+  
+  // Comments and Actions
+  comments: text("comments"),
+  improvementActions: jsonb("improvement_actions"), // Array of action items
+  strengths: jsonb("strengths"), // Array of strengths
+  weaknesses: jsonb("weaknesses"), // Array of areas for improvement
+  
+  // Review Status
+  reviewStatus: text("review_status").notNull().default("draft"), // draft, completed, approved
+  reviewedBy: integer("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  supplierIdx: index("supplier_performance_supplier_idx").on(table.supplierId),
+  userIdx: index("supplier_performance_user_idx").on(table.userId),
+  periodIdx: index("supplier_performance_period_idx").on(table.evaluationPeriod),
+  ratingIdx: index("supplier_performance_rating_idx").on(table.overallRating),
+  statusIdx: index("supplier_performance_status_idx").on(table.reviewStatus),
+}));
+
 // Simples Nacional Simulations Relations
 export const simplesNacionalSimulationsRelations = relations(simplesNacionalSimulations, ({ one }) => ({
   user: one(users, {
@@ -3092,3 +3377,135 @@ export const simplesNacionalSimulationsRelations = relations(simplesNacionalSimu
     references: [users.id],
   }),
 }));
+
+// Supplier CRM Relations
+
+export const supplierContractsRelations = relations(supplierContracts, ({ one }) => ({
+  supplier: one(suppliers, {
+    fields: [supplierContracts.supplierId],
+    references: [suppliers.id],
+  }),
+  user: one(users, {
+    fields: [supplierContracts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const supplierBankingRelations = relations(supplierBanking, ({ one }) => ({
+  supplier: one(suppliers, {
+    fields: [supplierBanking.supplierId],
+    references: [suppliers.id],
+  }),
+  user: one(users, {
+    fields: [supplierBanking.userId],
+    references: [users.id],
+  }),
+}));
+
+export const supplierTermsRelations = relations(supplierTerms, ({ one }) => ({
+  supplier: one(suppliers, {
+    fields: [supplierTerms.supplierId],
+    references: [suppliers.id],
+  }),
+  user: one(users, {
+    fields: [supplierTerms.userId],
+    references: [users.id],
+  }),
+}));
+
+export const supplierDocumentsRelations = relations(supplierDocuments, ({ one }) => ({
+  supplier: one(suppliers, {
+    fields: [supplierDocuments.supplierId],
+    references: [suppliers.id],
+  }),
+  user: one(users, {
+    fields: [supplierDocuments.userId],
+    references: [users.id],
+  }),
+}));
+
+export const supplierCommunicationsRelations = relations(supplierCommunications, ({ one }) => ({
+  supplier: one(suppliers, {
+    fields: [supplierCommunications.supplierId],
+    references: [suppliers.id],
+  }),
+  user: one(users, {
+    fields: [supplierCommunications.userId],
+    references: [users.id],
+  }),
+  // contact: one(supplierContacts, { // Commented out until we enhance existing supplierContacts table
+  //   fields: [supplierCommunications.contactId],
+  //   references: [supplierContacts.id],
+  // }),
+  createdByUser: one(users, {
+    fields: [supplierCommunications.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const supplierPerformanceRelations = relations(supplierPerformance, ({ one }) => ({
+  supplier: one(suppliers, {
+    fields: [supplierPerformance.supplierId],
+    references: [suppliers.id],
+  }),
+  user: one(users, {
+    fields: [supplierPerformance.userId],
+    references: [users.id],
+  }),
+  reviewedByUser: one(users, {
+    fields: [supplierPerformance.reviewedBy],
+    references: [users.id],
+  }),
+}));
+
+// Insert Schemas for new CRM tables
+
+export const insertSupplierContractSchema = createInsertSchema(supplierContracts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSupplierContract = z.infer<typeof insertSupplierContractSchema>;
+export type SupplierContract = typeof supplierContracts.$inferSelect;
+
+export const insertSupplierBankingSchema = createInsertSchema(supplierBanking).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSupplierBanking = z.infer<typeof insertSupplierBankingSchema>;
+export type SupplierBanking = typeof supplierBanking.$inferSelect;
+
+export const insertSupplierTermsSchema = createInsertSchema(supplierTerms).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSupplierTerms = z.infer<typeof insertSupplierTermsSchema>;
+export type SupplierTerms = typeof supplierTerms.$inferSelect;
+
+export const insertSupplierDocumentSchema = createInsertSchema(supplierDocuments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSupplierDocument = z.infer<typeof insertSupplierDocumentSchema>;
+export type SupplierDocument = typeof supplierDocuments.$inferSelect;
+
+export const insertSupplierCommunicationSchema = createInsertSchema(supplierCommunications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSupplierCommunication = z.infer<typeof insertSupplierCommunicationSchema>;
+export type SupplierCommunication = typeof supplierCommunications.$inferSelect;
+
+export const insertSupplierPerformanceSchema = createInsertSchema(supplierPerformance).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSupplierPerformance = z.infer<typeof insertSupplierPerformanceSchema>;
+export type SupplierPerformance = typeof supplierPerformance.$inferSelect;
+
+

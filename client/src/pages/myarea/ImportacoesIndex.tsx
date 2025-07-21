@@ -30,12 +30,13 @@ const importacaoItems: ImportacaoItem[] = [
   },
   {
     id: "gestao-fornecedores",
-    title: "Gestão de Fornecedores",
-    description: "Gerencie informações completas dos seus fornecedores internacionais",
-    href: "/importacoes/gestao-fornecedores",
+    title: "CRM de Fornecedores",
+    description: "Sistema completo de gestão de fornecedores com contratos, contatos, performance e comunicação",
+    href: "/minha-area/importacoes/fornecedores",
     icon: Users,
     category: "Fornecedores",
-    isAvailable: false,
+    isAvailable: true,
+    isNew: true,
   },
   {
     id: "calculadora-frete",
