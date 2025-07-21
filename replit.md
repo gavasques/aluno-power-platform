@@ -768,6 +768,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 21, 2025 - 9:18 PM**: ✅ SIMULATORS MIGRATION AND CLEANUP COMPLETED - IMPORTAÇÃO SECTION REORGANIZED
+  - **Objective Achieved**: Complete migration of specific simulators from "Simuladores" to "Importação" section as requested by user
+  - **Simulators Migrated to Importação Section**:
+    - ✅ **Simulador Simplificado**: Moved from Simuladores to Importação → Simuladores category
+    - ✅ **Importação Formal Direta**: Moved from Simuladores to Importação → Simuladores category
+    - ✅ **New Category Created**: "Simuladores" category added to Importação section
+  - **Simulator Completely Removed**:
+    - ✅ **Importação Simplificada**: File `ImportacaoSimplificada.tsx` deleted
+    - ✅ **Routes Cleaned**: Removed all routes and references from App.tsx
+    - ✅ **Import References**: Cleaned lazy loading imports
+  - **Importação Section Cleaned**:
+    - ✅ **Removed 4 Placeholder Items**: Calculadora de Frete, Checklist de Importação, Gestão de Containers, Compliance Aduaneiro
+    - ✅ **Categories Updated**: Removed empty categories (Logística, Processos, Compliance)
+    - ✅ **Imports Optimized**: Removed unused icon imports
+  - **Final Structure**:
+    - **Simuladores Section**: Simples Nacional, Simples Nacional Completo, Simulador de Investimentos e ROI
+    - **Importação Section**: 2 Simuladores + Gerador PO/Proforma + CRM Fornecedores
+  - **User Experience**: Clean, organized sections with simulators properly categorized in Importação
+  - **Status**: Migration completed successfully - all requested changes implemented
+
 - **January 21, 2025 - 12:35 PM**: ✅ DUAL SUPPLIER MANAGEMENT SYSTEMS COMPLETELY DOCUMENTED - CRITICAL SEPARATION IMPLEMENTED
   - **Objective Achieved**: Complete documentation and separation of two distinct supplier management systems to avoid conflicts
   - **System Architecture Clarification**:

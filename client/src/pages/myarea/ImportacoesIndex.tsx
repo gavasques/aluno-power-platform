@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, FileText, Package, Truck, Building, Users, ClipboardList, Calculator } from "lucide-react";
+import { Search, X, FileText, Building, Users, Calculator } from "lucide-react";
 
 interface ImportacaoItem {
   id: string;
@@ -58,42 +58,6 @@ const importacaoItems: ImportacaoItem[] = [
     isAvailable: true,
     isNew: true,
   },
-  {
-    id: "calculadora-frete",
-    title: "Calculadora de Frete Internacional",
-    description: "Calcule custos de frete marítimo, aéreo e expresso para importações",
-    href: "/importacoes/calculadora-frete",
-    icon: Truck,
-    category: "Logística",
-    isAvailable: false,
-  },
-  {
-    id: "checklist-importacao",
-    title: "Checklist de Importação",
-    description: "Acompanhe todas as etapas do processo de importação passo a passo",
-    href: "/importacoes/checklist-importacao",
-    icon: ClipboardList,
-    category: "Processos",
-    isAvailable: false,
-  },
-  {
-    id: "gestao-containers",
-    title: "Gestão de Containers",
-    description: "Controle cargas, containers e embarques de forma organizada",
-    href: "/importacoes/gestao-containers",
-    icon: Package,
-    category: "Logística",
-    isAvailable: false,
-  },
-  {
-    id: "compliance-aduaneiro",
-    title: "Compliance Aduaneiro",
-    description: "Verifique conformidade com regulamentações de importação",
-    href: "/importacoes/compliance-aduaneiro",
-    icon: Building,
-    category: "Compliance",
-    isAvailable: false,
-  },
 ];
 
 const categories = [
@@ -101,9 +65,6 @@ const categories = [
   { name: "Simuladores", count: importacaoItems.filter(item => item.category === "Simuladores").length },
   { name: "Documentos", count: importacaoItems.filter(item => item.category === "Documentos").length },
   { name: "Fornecedores", count: importacaoItems.filter(item => item.category === "Fornecedores").length },
-  { name: "Logística", count: importacaoItems.filter(item => item.category === "Logística").length },
-  { name: "Processos", count: importacaoItems.filter(item => item.category === "Processos").length },
-  { name: "Compliance", count: importacaoItems.filter(item => item.category === "Compliance").length },
 ];
 
 export default function ImportacoesIndex() {
