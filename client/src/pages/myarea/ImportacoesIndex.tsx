@@ -199,7 +199,7 @@ export default function ImportacoesIndex() {
       {/* Estado vazio */}
       {filteredItems.length === 0 && (
         <div className="text-center py-12">
-          <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <h3 className="text-lg font-semibold mb-2">
             Nenhuma ferramenta encontrada
           </h3>
@@ -214,7 +214,7 @@ export default function ImportacoesIndex() {
               onClick={clearFilters}
               variant="outline"
             >
-              <Package className="w-4 h-4 mr-2" />
+              <X className="w-4 h-4 mr-2" />
               Limpar Filtros
             </Button>
           )}
@@ -225,7 +225,7 @@ export default function ImportacoesIndex() {
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="p-6">
           <div className="flex items-start space-x-3">
-            <Package className="w-6 h-6 text-blue-600 mt-1" />
+            <Building className="w-6 h-6 text-blue-600 mt-1" />
             <div>
               <h3 className="text-lg font-semibold text-blue-900 mb-2">
                 Ferramentas de Importação em Desenvolvimento
