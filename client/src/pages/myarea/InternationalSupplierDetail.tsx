@@ -7,21 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
   Building2, 
-  Users, 
   FileText, 
   CreditCard, 
-  Handshake, 
   Shield, 
   MessageSquare, 
-  TrendingUp,
-  Package,
   Mail,
   Phone,
   Globe,
   MapPin,
   Edit,
-  Plus,
-  Star
+  Plus
 } from "lucide-react";
 
 interface Supplier {
@@ -173,21 +168,7 @@ export default function InternationalSupplierDetail() {
     );
   };
 
-  const getRatingStars = (rating: number) => {
-    return (
-      <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`w-4 h-4 ${
-              star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-            }`}
-          />
-        ))}
-        <span className="text-sm text-gray-600 ml-1">({rating.toFixed(1)})</span>
-      </div>
-    );
-  };
+
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -226,68 +207,17 @@ export default function InternationalSupplierDetail() {
         </Button>
       </div>
 
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avaliação</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {getRatingStars(supplier.rating)}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Pedidos</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{supplier.totalOrders}</div>
-            <p className="text-xs text-muted-foreground">Desde 2024</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Contatos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{contacts.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {contacts.filter(c => c.isMainContact).length} principal
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Contratos</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{contracts.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {contracts.filter(c => c.status === 'active').length} ativo(s)
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="contacts">Contatos</TabsTrigger>
           <TabsTrigger value="contracts">Contratos</TabsTrigger>
           <TabsTrigger value="banking">Bancário</TabsTrigger>
-          <TabsTrigger value="terms">Termos</TabsTrigger>
           <TabsTrigger value="documents">Documentos</TabsTrigger>
           <TabsTrigger value="communication">Comunicação</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="products">Produtos</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -491,13 +421,7 @@ export default function InternationalSupplierDetail() {
           </div>
         </TabsContent>
 
-        <TabsContent value="terms">
-          <div className="text-center py-12">
-            <Handshake className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Termos Comerciais</h3>
-            <p className="text-gray-600">Em desenvolvimento</p>
-          </div>
-        </TabsContent>
+
 
         <TabsContent value="documents">
           <div className="text-center py-12">
@@ -515,21 +439,9 @@ export default function InternationalSupplierDetail() {
           </div>
         </TabsContent>
 
-        <TabsContent value="performance">
-          <div className="text-center py-12">
-            <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Análise de Performance</h3>
-            <p className="text-gray-600">Em desenvolvimento</p>
-          </div>
-        </TabsContent>
 
-        <TabsContent value="products">
-          <div className="text-center py-12">
-            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Produtos do Fornecedor</h3>
-            <p className="text-gray-600">Em desenvolvimento</p>
-          </div>
-        </TabsContent>
+
+
       </Tabs>
     </div>
   );
