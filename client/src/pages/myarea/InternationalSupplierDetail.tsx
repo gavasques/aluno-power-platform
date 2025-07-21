@@ -146,7 +146,7 @@ const mockCommunications: Communication[] = [
   }
 ];
 
-export default function SupplierDetail() {
+export default function InternationalSupplierDetail() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
 

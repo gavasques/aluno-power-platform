@@ -768,6 +768,30 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 21, 2025 - 12:35 PM**: ✅ DUAL SUPPLIER MANAGEMENT SYSTEMS COMPLETELY DOCUMENTED - CRITICAL SEPARATION IMPLEMENTED
+  - **Objective Achieved**: Complete documentation and separation of two distinct supplier management systems to avoid conflicts
+  - **System Architecture Clarification**:
+    - ✅ **National Suppliers CRM**: `/minha-area/fornecedores` (MySuppliers.tsx → SupplierDetailRefactored.tsx)
+      - Purpose: Domestic suppliers management
+      - Features: National contacts, local contracts, domestic communication
+      - Category: "Gestão" in Minha Área
+    - ✅ **International Suppliers CRM**: `/minha-area/importacoes/fornecedores` (InternationalSupplierCRM.tsx → InternationalSupplierDetail.tsx)
+      - Purpose: Import suppliers management specialized for international trade
+      - Features: International compliance, Incoterms, import contracts, timezone management, certification tracking
+      - Category: "Fornecedores" within Importações section
+  - **Component Renaming for Clarity**:
+    - ✅ Renamed SupplierCRM.tsx → InternationalSupplierCRM.tsx
+    - ✅ Renamed SupplierDetail.tsx → InternationalSupplierDetail.tsx
+    - ✅ Updated all route references in App.tsx
+    - ✅ Added comprehensive documentation comments in all components
+  - **Technical Benefits**:
+    - Zero naming conflicts between the two CRM systems
+    - Clear separation of domestic vs international supplier management
+    - Specialized features for each supplier type
+    - Proper routing architecture preventing confusion
+  - **User Experience**: Each CRM serves distinct purposes - national for domestic operations, international for import management
+  - **Status**: Dual supplier management systems properly separated and documented
+
 - **January 21, 2025 - 11:57 AM**: ✅ IMPORTAÇÕES SECTION MOVED TO MINHA ÁREA - COMPLETE ARCHITECTURAL REORGANIZATION
   - **Objective Achieved**: Moved "Importações" section from main menu to inside "Minha Área" as requested by user
   - **Structural Changes**:

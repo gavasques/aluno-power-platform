@@ -56,8 +56,8 @@ const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacoesIndex = lazy(() => import("./pages/myarea/ImportacoesIndex"));
-const SupplierCRM = lazy(() => import("./pages/myarea/SupplierCRM"));
-const SupplierDetailCRM = lazy(() => import("./pages/myarea/SupplierDetail"));
+const InternationalSupplierCRM = lazy(() => import("./pages/myarea/InternationalSupplierCRM"));
+const InternationalSupplierDetail = lazy(() => import("./pages/myarea/InternationalSupplierDetail"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
 const SimuladorSimplificado = lazy(() => import("./pages/simuladores/SimuladorSimplificado"));
 const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsListSimple"));
@@ -755,23 +755,23 @@ function App() {
                             </ProtectedRoute>
                           </Route>
 
-                          {/* Supplier CRM - Protected */}
+                          {/* International Supplier CRM - Protected */}
                           <Route path="/minha-area/importacoes/fornecedores">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <SupplierCRM />
+                                  <InternationalSupplierCRM />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
                           </Route>
 
-                          {/* Supplier Detail - Protected */}
+                          {/* International Supplier Detail - Protected */}
                           <Route path="/minha-area/importacoes/fornecedores/:id">
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <SupplierDetailCRM />
+                                  <InternationalSupplierDetail />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
