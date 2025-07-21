@@ -300,7 +300,7 @@ export default function InternationalSupplierDetail() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
+                  <MessageSquare className="w-5 h-5" />
                   Atividade Recente
                 </CardTitle>
               </CardHeader>
