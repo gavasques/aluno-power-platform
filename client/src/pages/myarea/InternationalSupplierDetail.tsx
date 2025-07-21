@@ -30,7 +30,9 @@ import {
   Clock,
   X,
   Upload,
-  Save
+  Save,
+  Users,
+  TrendingUp
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -92,15 +94,7 @@ interface Contact {
   isMainContact: boolean;
 }
 
-interface Contract {
-  id: number;
-  type: string;
-  startDate: string;
-  endDate?: string;
-  status: 'active' | 'expired' | 'draft';
-  value?: number;
-  currency?: string;
-}
+
 
 interface Communication {
   id: number;
@@ -152,18 +146,37 @@ const mockContacts: Contact[] = [
 const mockContracts: Contract[] = [
   {
     id: 1,
-    type: "Acordo de Fornecimento",
+    supplierId: 1,
+    contractNumber: "CONTR-2024-001",
+    title: "Acordo de Fornecimento Principal",
+    description: "Contrato principal para fornecimento de componentes eletrônicos",
+    contractType: "Acordo de Fornecimento",
+    status: "active",
     startDate: "2024-01-15",
     endDate: "2025-01-15",
-    status: "active",
     value: 150000,
-    currency: "USD"
+    currency: "USD",
+    paymentTerms: "Net 30",
+    deliveryTerms: "FOB Shenzhen",
+    incoterms: "FOB",
+    documents: [],
+    notes: "Renovação automática por 12 meses",
+    createdAt: "2024-01-10",
+    updatedAt: "2024-01-15"
   },
   {
     id: 2,
-    type: "NDA",
+    supplierId: 1,
+    contractNumber: "NDA-2023-012",
+    title: "Acordo de Confidencialidade",
+    description: "NDA para proteção de informações comerciais",
+    contractType: "NDA",
+    status: "active",
     startDate: "2023-12-01",
-    status: "active"
+    currency: "USD",
+    documents: [],
+    createdAt: "2023-11-28",
+    updatedAt: "2023-12-01"
   }
 ];
 
@@ -186,7 +199,7 @@ const mockCommunications: Communication[] = [
   }
 ];
 
-export default function InternationalSupplierDetail() {
+function InternationalSupplierDetail() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -917,7 +930,7 @@ const ContractForm = ({
 
       <div>
         <Label htmlFor="status">Status</Label>
-        <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+        <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as 'draft' | 'active' | 'expired' | 'terminated'})}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
