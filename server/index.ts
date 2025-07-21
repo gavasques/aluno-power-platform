@@ -73,7 +73,6 @@ app.use(enhancedAuth);
 // app.use(enhancedCSRF);
 
 // Enhanced rate limiting for security
-import rateLimit from 'express-rate-limit';
 
 // Enhanced rate limiting for authentication endpoints
 const authRateLimit = rateLimit({
