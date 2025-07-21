@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, FileText, Package, Truck, Building, Users, ClipboardList } from "lucide-react";
+import { Search, X, FileText, Package, Truck, Building, Users, ClipboardList, Calculator } from "lucide-react";
 
 interface ImportacaoItem {
   id: string;
@@ -18,6 +18,26 @@ interface ImportacaoItem {
 }
 
 const importacaoItems: ImportacaoItem[] = [
+  {
+    id: "simulador-simplificado",
+    title: "Simulador Simplificado",
+    description: "Simulador simplificado e rápido para cálculos básicos de importação",
+    href: "/simuladores/simplificado",
+    icon: Calculator,
+    category: "Simuladores",
+    isAvailable: true,
+    isNew: true,
+  },
+  {
+    id: "importacao-formal-direta",
+    title: "Importação Formal Direta",
+    description: "Simulador completo com rateio por CBM e cálculo detalhado de impostos de importação",
+    href: "/simuladores/importacao-formal-direta",
+    icon: Building,
+    category: "Simuladores",
+    isAvailable: true,
+    isNew: true,
+  },
   {
     id: "gerador-po-proforma",
     title: "Gerador de PO, Proforma Invoice",
@@ -78,6 +98,7 @@ const importacaoItems: ImportacaoItem[] = [
 
 const categories = [
   { name: "Todos", count: importacaoItems.length },
+  { name: "Simuladores", count: importacaoItems.filter(item => item.category === "Simuladores").length },
   { name: "Documentos", count: importacaoItems.filter(item => item.category === "Documentos").length },
   { name: "Fornecedores", count: importacaoItems.filter(item => item.category === "Fornecedores").length },
   { name: "Logística", count: importacaoItems.filter(item => item.category === "Logística").length },

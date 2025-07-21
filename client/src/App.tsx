@@ -58,7 +58,7 @@ const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacoesIndex = lazy(() => import("./pages/myarea/ImportacoesIndex"));
 const InternationalSupplierCRM = lazy(() => import("./pages/myarea/InternationalSupplierCRM"));
 const InternationalSupplierDetail = lazy(() => import("./pages/myarea/InternationalSupplierDetail"));
-const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
+
 const SimuladorSimplificado = lazy(() => import("./pages/simuladores/SimuladorSimplificado"));
 const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsListSimple"));
 const InformalImportSimulator = lazy(() => import("./pages/InformalImportSimulator"));
@@ -772,28 +772,6 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <InternationalSupplierDetail />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          {/* Informal Import Simulations List - Main Page */}
-                          <Route path="/simuladores/importacao-simplificada">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <InformalImportSimulationsList />
-                                </Suspense>
-                              </Layout>
-                            </ProtectedRoute>
-                          </Route>
-
-                          {/* Informal Import Simulator - New/Edit */}
-                          <Route path="/simuladores/importacao-simplificada/nova">
-                            <ProtectedRoute>
-                              <Layout>
-                                <Suspense fallback={<PageLoader />}>
-                                  <InformalImportSimulator />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
