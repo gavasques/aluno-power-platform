@@ -105,6 +105,19 @@ interface Communication {
   summary: string;
 }
 
+interface SupplierDocument {
+  id: string;
+  supplierId: number;
+  name: string;
+  originalName: string;
+  type: string;
+  size: number;
+  url: string;
+  category: 'certificate' | 'license' | 'contract' | 'quality' | 'other';
+  uploadedAt: string;
+  description?: string;
+}
+
 // Mock data
 const mockSupplier: Supplier = {
   id: 1,
@@ -199,6 +212,45 @@ const mockCommunications: Communication[] = [
   }
 ];
 
+const mockDocuments: SupplierDocument[] = [
+  {
+    id: "doc-1",
+    supplierId: 1,
+    name: "Certificado ISO 9001",
+    originalName: "ISO_9001_Certificate_2024.pdf",
+    type: "application/pdf",
+    size: 1024000, // 1MB
+    url: "/api/documents/doc-1/download",
+    category: "certificate",
+    uploadedAt: "2024-01-15T10:30:00Z",
+    description: "Certificado ISO 9001:2015 válido até dezembro 2024"
+  },
+  {
+    id: "doc-2",
+    supplierId: 1,
+    name: "Licença de Exportação",
+    originalName: "Export_License_CN_2024.pdf", 
+    type: "application/pdf",
+    size: 756000, // 756KB
+    url: "/api/documents/doc-2/download",
+    category: "license",
+    uploadedAt: "2024-02-01T14:20:00Z",
+    description: "Licença de exportação válida para produtos eletrônicos"
+  },
+  {
+    id: "doc-3",
+    supplierId: 1,
+    name: "Relatório de Qualidade Q1 2024",
+    originalName: "Quality_Report_Q1_2024.xlsx",
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    size: 2048000, // 2MB
+    url: "/api/documents/doc-3/download", 
+    category: "quality",
+    uploadedAt: "2024-04-15T09:15:00Z",
+    description: "Relatório detalhado de controle de qualidade do primeiro trimestre"
+  }
+];
+
 function InternationalSupplierDetail() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
@@ -208,6 +260,8 @@ function InternationalSupplierDetail() {
   const contacts = mockContacts;
   const contracts = mockContracts;
   const communications = mockCommunications;
+  const documents = mockDocuments;
+  const documents = mockDocuments;
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -475,11 +529,7 @@ function InternationalSupplierDetail() {
 
 
         <TabsContent value="documents">
-          <div className="text-center py-12">
-            <Shield className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Documentos e Compliance</h3>
-            <p className="text-gray-600">Em desenvolvimento</p>
-          </div>
+          <DocumentManagement supplierId={supplier.id} documents={documents} />
         </TabsContent>
 
         <TabsContent value="communication">
@@ -494,6 +544,306 @@ function InternationalSupplierDetail() {
 
 
       </Tabs>
+    </div>
+  );
+};
+
+// Document Management Component
+const DocumentManagement = ({ 
+  supplierId, 
+  documents: initialDocuments 
+}: { 
+  supplierId: number;
+  documents: SupplierDocument[];
+}) => {
+  const [documents, setDocuments] = useState<SupplierDocument[]>(initialDocuments);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const { toast } = useToast();
+
+  // File upload handler
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > maxSize) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "O arquivo deve ter no máximo 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'text/plain'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Tipo de arquivo não suportado",
+        description: "Formatos aceitos: PDF, Word, Excel, imagens (JPG, PNG, GIF) e arquivos de texto",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
+      // Create new document object
+      const newDocument: SupplierDocument = {
+        id: `doc-${Date.now()}`,
+        supplierId: supplierId,
+        name: file.name.replace(/\.[^/.]+$/, ""), // Remove extension for display name
+        originalName: file.name,
+        type: file.type,
+        size: file.size,
+        url: `/api/documents/doc-${Date.now()}/download`,
+        category: 'other',
+        uploadedAt: new Date().toISOString(),
+        description: ""
+      };
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      // Add to documents list
+      setDocuments(prev => [newDocument, ...prev]);
+
+      toast({
+        title: "Documento enviado com sucesso",
+        description: `${file.name} foi adicionado aos documentos do fornecedor`,
+      });
+
+      // Reset form
+      event.target.value = '';
+    } catch (error) {
+      toast({
+        title: "Erro no upload",
+        description: "Não foi possível enviar o arquivo. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  // Delete document
+  const handleDeleteDocument = async (documentId: string) => {
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      
+      setDocuments(prev => prev.filter(doc => doc.id !== documentId));
+      
+      toast({
+        title: "Documento removido",
+        description: "O documento foi removido com sucesso",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao remover",
+        description: "Não foi possível remover o documento. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Format file size
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Get category badge
+  const getCategoryBadge = (category: string) => {
+    const variants = {
+      certificate: "bg-green-100 text-green-700 border-green-200",
+      license: "bg-blue-100 text-blue-700 border-blue-200",
+      contract: "bg-purple-100 text-purple-700 border-purple-200",
+      quality: "bg-orange-100 text-orange-700 border-orange-200",
+      other: "bg-gray-100 text-gray-700 border-gray-200"
+    };
+    const labels = {
+      certificate: "Certificado",
+      license: "Licença",
+      contract: "Contrato", 
+      quality: "Qualidade",
+      other: "Outros"
+    };
+    return (
+      <Badge className={variants[category as keyof typeof variants]}>
+        {labels[category as keyof typeof labels]}
+      </Badge>
+    );
+  };
+
+  // Get file icon based on type
+  const getFileIcon = (type: string) => {
+    if (type.includes('pdf')) return <FileText className="w-5 h-5 text-red-500" />;
+    if (type.includes('image')) return <Eye className="w-5 h-5 text-green-500" />;
+    if (type.includes('spreadsheet') || type.includes('excel')) return <FileText className="w-5 h-5 text-green-600" />;
+    if (type.includes('word')) return <FileText className="w-5 h-5 text-blue-600" />;
+    return <FileText className="w-5 h-5 text-gray-500" />;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Upload Area */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="w-5 h-5" />
+            Enviar Novo Documento
+          </CardTitle>
+          <CardDescription>
+            Adicione documentos importantes do fornecedor (máximo 10MB por arquivo)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+            <input
+              type="file"
+              id="fileUpload"
+              className="hidden"
+              onChange={handleFileUpload}
+              disabled={uploading}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt"
+            />
+            <label htmlFor="fileUpload" className="cursor-pointer">
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-lg font-medium text-gray-900 mb-2">
+                {uploading ? "Enviando arquivo..." : "Clique para selecionar arquivo"}
+              </p>
+              <p className="text-sm text-gray-600 mb-4">
+                ou arraste e solte aqui
+              </p>
+              <p className="text-xs text-gray-500">
+                Formatos aceitos: PDF, Word, Excel, imagens (JPG, PNG, GIF), texto
+              </p>
+              <p className="text-xs text-gray-500">
+                Tamanho máximo: 10MB
+              </p>
+            </label>
+            
+            {uploading && (
+              <div className="mt-4">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+                <p className="text-sm text-gray-600 mt-2">{uploadProgress}% enviado</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Documents List */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Documentos ({documents.length})
+          </CardTitle>
+          <CardDescription>
+            Documentos e certificados do fornecedor
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {documents.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum documento cadastrado</h3>
+              <p className="text-gray-600">Faça o upload do primeiro documento deste fornecedor</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {documents.map((document) => (
+                <div key={document.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="flex-shrink-0">
+                      {getFileIcon(document.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-sm font-medium text-gray-900 truncate">
+                          {document.name}
+                        </h4>
+                        {getCategoryBadge(document.category)}
+                      </div>
+                      <p className="text-sm text-gray-500 truncate mb-1">
+                        {document.originalName}
+                      </p>
+                      {document.description && (
+                        <p className="text-xs text-gray-600 truncate mb-1">
+                          {document.description}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <span>{formatFileSize(document.size)}</span>
+                        <span>Enviado em {new Date(document.uploadedAt).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(document.url, '_blank')}
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      Download
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDeleteDocument(document.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
