@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,8 +29,10 @@ import {
   CheckCircle,
   Clock,
   X,
-  Upload
+  Upload,
+  Save
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Supplier {
   id: number;
@@ -454,11 +456,7 @@ export default function InternationalSupplierDetail() {
         </TabsContent>
 
         <TabsContent value="banking">
-          <div className="text-center py-12">
-            <CreditCard className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Informações Bancárias</h3>
-            <p className="text-gray-600">Em desenvolvimento</p>
-          </div>
+          <BankingInformation supplierId={supplier.id} />
         </TabsContent>
 
 
@@ -955,4 +953,164 @@ const ContractForm = ({
   );
 };
 
-// Remove duplicate export
+// Banking Information Component
+const BankingInformation = ({ supplierId }: { supplierId: number }) => {
+  const [bankingData, setBankingData] = useState<string>("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  // Fetch banking information on component mount
+  useEffect(() => {
+    fetchBankingData();
+  }, [supplierId]);
+
+  const fetchBankingData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/international-suppliers/${supplierId}/banking`);
+      if (response.ok) {
+        const data = await response.json();
+        setBankingData(data.bankingData || "");
+      }
+    } catch (error) {
+      console.error("Error fetching banking data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/international-suppliers/${supplierId}/banking`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ bankingData }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Informações bancárias salvas com sucesso.",
+        });
+        setIsEditing(false);
+      } else {
+        throw new Error("Failed to save banking data");
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar informações bancárias.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading && !isEditing) {
+    return (
+      <div className="text-center py-12">
+        <CreditCard className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Carregando...</h3>
+        <p className="text-gray-600">Buscando informações bancárias</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Informações Bancárias</h3>
+          <p className="text-gray-600">Dados bancários para transferências e pagamentos</p>
+        </div>
+        <div className="flex gap-2">
+          {isEditing ? (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsEditing(false);
+                  fetchBankingData(); // Reset to original data
+                }}
+                disabled={isLoading}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleSave}
+                disabled={isLoading}
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isLoading ? "Salvando..." : "Salvar"}
+              </Button>
+            </>
+          ) : (
+            <Button 
+              onClick={() => setIsEditing(true)}
+              variant="outline"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Editar
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <Card>
+        <CardContent className="pt-6">
+          {isEditing ? (
+            <div className="space-y-4">
+              <Label htmlFor="banking-data">Dados Bancários</Label>
+              <Textarea
+                id="banking-data"
+                placeholder="Digite as informações bancárias completas:&#10;&#10;Banco: &#10;Agência: &#10;Conta: &#10;Titular: &#10;SWIFT/IBAN: &#10;Endereço do banco: &#10;Observações:"
+                value={bankingData}
+                onChange={(e) => setBankingData(e.target.value)}
+                className="min-h-[300px] resize-none"
+                disabled={isLoading}
+              />
+              <div className="text-sm text-gray-500">
+                <p>Inclua todas as informações necessárias para transferências internacionais:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Nome completo do banco</li>
+                  <li>Código SWIFT/BIC</li>
+                  <li>IBAN (se aplicável)</li>
+                  <li>Endereço completo do banco</li>
+                  <li>Nome completo do titular da conta</li>
+                  <li>Número da conta e agência</li>
+                  <li>Instruções especiais para transferência</li>
+                </ul>
+              </div>
+            </div>
+          ) : (
+            <div>
+              {bankingData ? (
+                <div className="whitespace-pre-wrap p-4 bg-gray-50 rounded-lg">
+                  {bankingData}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <CreditCard className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhuma informação bancária</h3>
+                  <p className="text-gray-600 mb-4">Adicione as informações bancárias deste fornecedor</p>
+                  <Button onClick={() => setIsEditing(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Informações
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default InternationalSupplierDetail;
