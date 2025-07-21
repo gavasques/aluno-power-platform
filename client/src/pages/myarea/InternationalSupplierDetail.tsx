@@ -453,10 +453,6 @@ export default function InternationalSupplierDetail() {
           <ContractManagement supplierId={supplier.id} />
         </TabsContent>
 
-        <TabsContent value="contracts">
-          <ContractManagement supplierId={supplierId} />
-        </TabsContent>
-
         <TabsContent value="banking">
           <div className="text-center py-12">
             <CreditCard className="w-16 h-16 text-gray-400 mx-auto mb-4" />
