@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -102,20 +101,16 @@ export default function InternationalSupplierCRM() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
-  // Em implementação real, esta seria uma chamada de API para fornecedores internacionais
-  const { data: suppliers = [], isLoading } = useQuery({
-    queryKey: ['/api/international-suppliers', searchTerm, selectedStatus],
-    queryFn: async () => {
-      // Simula chamada de API
-      return mockInternationalSuppliers.filter(supplier => {
-        const matchesSearch = supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            supplier.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            supplier.category.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = selectedStatus === "all" || supplier.status === selectedStatus;
-        return matchesSearch && matchesStatus;
-      });
-    }
+  // Mock data local - sem query para evitar loading infinito
+  const suppliers = mockInternationalSuppliers.filter(supplier => {
+    const matchesSearch = supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        supplier.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        supplier.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = selectedStatus === "all" || supplier.status === selectedStatus;
+    return matchesSearch && matchesStatus;
   });
+  
+  const isLoading = false;
 
   const getStatusBadge = (status: string) => {
     const variants = {
