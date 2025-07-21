@@ -263,97 +263,102 @@ export default function InternationalSupplierCRM() {
         </Button>
       </div>
 
-      {/* Suppliers Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {isLoading ? (
-          <div className="col-span-full text-center py-12">
-            <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="mt-4 text-gray-600">Carregando fornecedores internacionais...</p>
-          </div>
-        ) : suppliers.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <Globe className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum fornecedor internacional encontrado</h3>
-            <p className="text-gray-600 mb-4">
-              {searchTerm ? "Tente ajustar sua busca ou filtros" : "Comece adicionando seu primeiro fornecedor internacional"}
-            </p>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Fornecedor Internacional
-            </Button>
-          </div>
-        ) : (
-          suppliers.map((supplier) => (
-            <Card key={supplier.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg mb-1 flex items-center gap-2">
-                      <Globe className="w-4 h-4 text-blue-500" />
-                      {supplier.name}
-                    </CardTitle>
-                    <CardDescription className="text-sm">
-                      {supplier.country} • {supplier.category}
-                    </CardDescription>
-                  </div>
-                  {getStatusBadge(supplier.status)}
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                {/* Rating */}
-                {supplier.rating > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Avaliação:</span>
-                    {getRatingStars(supplier.rating)}
-                  </div>
-                )}
-                
-                {/* Quick Stats */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Contatos:</span>
-                      <span className="font-medium">{supplier.contactsCount || 0}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Contratos:</span>
-                      <span className="font-medium">{supplier.contractsCount || 0}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Produtos:</span>
-                      <span className="font-medium">{supplier.productsCount || 0}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Importações:</span>
-                      <span className="font-medium">{supplier.totalOrders}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Last Contact */}
-                <div className="text-sm text-gray-600">
-                  Último contato: {new Date(supplier.lastContact).toLocaleDateString('pt-BR')}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center gap-2 pt-2">
-                  <Link href={`/minha-area/importacoes/fornecedores/${supplier.id}`}>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 flex-1">
-                      Gerenciar
-                    </Button>
-                  </Link>
-                  <Button size="sm" variant="outline">
-                    <MessageSquare className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+      {/* Suppliers Table */}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="mt-4 text-gray-600">Carregando fornecedores internacionais...</p>
+            </div>
+          ) : suppliers.length === 0 ? (
+            <div className="text-center py-12">
+              <Globe className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum fornecedor internacional encontrado</h3>
+              <p className="text-gray-600 mb-4">
+                {searchTerm ? "Tente ajustar sua busca ou filtros" : "Comece adicionando seu primeiro fornecedor internacional"}
+              </p>
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Fornecedor Internacional
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="text-left p-4 font-medium text-gray-700">Fornecedor</th>
+                    <th className="text-left p-4 font-medium text-gray-700">País</th>
+                    <th className="text-left p-4 font-medium text-gray-700">Categoria</th>
+                    <th className="text-left p-4 font-medium text-gray-700">Status</th>
+                    <th className="text-left p-4 font-medium text-gray-700">Avaliação</th>
+                    <th className="text-left p-4 font-medium text-gray-700">Contatos</th>
+                    <th className="text-left p-4 font-medium text-gray-700">Produtos</th>
+                    <th className="text-left p-4 font-medium text-gray-700">Importações</th>
+                    <th className="text-left p-4 font-medium text-gray-700">Último Contato</th>
+                    <th className="text-left p-4 font-medium text-gray-700">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {suppliers.map((supplier) => (
+                    <tr key={supplier.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <Globe className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <div className="font-medium text-gray-900">{supplier.name}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4 text-gray-600">{supplier.country}</td>
+                      <td className="p-4 text-gray-600">{supplier.category}</td>
+                      <td className="p-4">{getStatusBadge(supplier.status)}</td>
+                      <td className="p-4">
+                        {supplier.rating > 0 ? (
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <div
+                                key={star}
+                                className={`w-4 h-4 ${
+                                  star <= supplier.rating ? 'text-yellow-400' : 'text-gray-300'
+                                }`}
+                              >
+                                ⭐
+                              </div>
+                            ))}
+                            <span className="text-sm text-gray-600 ml-1">({supplier.rating.toFixed(1)})</span>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="p-4 text-gray-600">{supplier.contactsCount || 0}</td>
+                      <td className="p-4 text-gray-600">{supplier.productsCount || 0}</td>
+                      <td className="p-4 text-gray-600">{supplier.totalOrders}</td>
+                      <td className="p-4 text-gray-600 text-sm">
+                        {new Date(supplier.lastContact).toLocaleDateString('pt-BR')}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Link href={`/minha-area/importacoes/fornecedores/${supplier.id}`}>
+                            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                              Gerenciar
+                            </Button>
+                          </Link>
+                          <Button size="sm" variant="outline">
+                            <MessageSquare className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Quick Actions - Specialized for International Trade */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
