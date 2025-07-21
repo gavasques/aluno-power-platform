@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet, Zap } from "lucide-react";
+import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet, Zap, Ship } from "lucide-react";
 
 interface MinhaAreaItem {
   id: string;
@@ -65,6 +65,15 @@ const minhaAreaItems: MinhaAreaItem[] = [
     href: "/minha-area/importacao-exportacao",
     icon: FileSpreadsheet,
     category: "Produtos",
+    isNew: true,
+  },
+  {
+    id: "importacoes",
+    title: "Importações",
+    description: "Ferramentas completas para gestão de importações, PO, documentos e compliance",
+    href: "/minha-area/importacoes",
+    icon: Ship,
+    category: "Gestão",
     isNew: true,
   },
 ];

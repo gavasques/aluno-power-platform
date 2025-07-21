@@ -98,13 +98,6 @@ export function Header() {
                 </Link>
               </NavigationMenuItem>
               
-              <NavigationMenuItem>
-                <Link to="/importacoes" className={navigationMenuTriggerStyle()}>
-                  <Ship className="mr-2 h-4 w-4" />
-                  Importações
-                </Link>
-              </NavigationMenuItem>
-              
               {menuItems.map((section) => (
                 <NavigationMenuItem key={section.title}>
                   <NavigationMenuTrigger>
