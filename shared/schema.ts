@@ -66,6 +66,33 @@ export const categories = pgTable("categories", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// International Supplier Contracts table
+export const internationalSupplierContracts = pgTable("international_supplier_contracts", {
+  id: serial("id").primaryKey(),
+  supplierId: integer("supplier_id").notNull(), // Foreign key to supplier
+  userId: integer("user_id").references(() => users.id).notNull(),
+  contractNumber: text("contract_number").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  contractType: text("contract_type").notNull(), // purchase, supply, service, etc.
+  status: text("status").notNull().default("draft"), // draft, active, expired, terminated
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  value: decimal("value", { precision: 15, scale: 2 }),
+  currency: text("currency").notNull().default("USD"),
+  paymentTerms: text("payment_terms"),
+  deliveryTerms: text("delivery_terms"),
+  incoterms: text("incoterms"), // FOB, CIF, EXW, etc.
+  documents: jsonb("documents").notNull().default([]), // Array of document objects
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("international_contracts_user_idx").on(table.userId),
+  supplierIdx: index("international_contracts_supplier_idx").on(table.supplierId),
+  statusIdx: index("international_contracts_status_idx").on(table.status),
+}));
+
 // Partner Types - Separate table for partner types
 export const partnerTypes = pgTable("partner_types", {
   id: serial("id").primaryKey(),
@@ -811,6 +838,13 @@ export const investmentSimulations = pgTable("investment_simulations", {
   userIdx: index("investment_simulations_user_idx").on(table.userId),
   createdIdx: index("investment_simulations_created_idx").on(table.createdAt),
 }));
+
+// Contract schemas
+export const contractInsertSchema = createInsertSchema(internationalSupplierContracts);
+export const contractSelectSchema = internationalSupplierContracts;
+
+export type InsertContract = z.infer<typeof contractInsertSchema>;
+export type SelectContract = typeof internationalSupplierContracts.$inferSelect;
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({

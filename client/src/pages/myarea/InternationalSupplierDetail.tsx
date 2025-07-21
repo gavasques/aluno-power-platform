@@ -1,5 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useParams } from "wouter";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +21,15 @@ import {
   Globe,
   MapPin,
   Edit,
-  Plus
+  Plus,
+  Trash2,
+  Download,
+  Eye,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  X,
+  Upload
 } from "lucide-react";
 
 interface Supplier {
@@ -33,6 +46,37 @@ interface Supplier {
   totalOrders: number;
   lastContact: string;
   establishedYear?: number;
+  description?: string;
+}
+
+interface Contract {
+  id: number;
+  supplierId: number;
+  contractNumber: string;
+  title: string;
+  description?: string;
+  contractType: string;
+  status: 'draft' | 'active' | 'expired' | 'terminated';
+  startDate?: string;
+  endDate?: string;
+  value?: number;
+  currency: string;
+  paymentTerms?: string;
+  deliveryTerms?: string;
+  incoterms?: string;
+  documents: ContractDocument[];
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ContractDocument {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  uploadedAt: string;
   description?: string;
 }
 
@@ -406,11 +450,11 @@ export default function InternationalSupplierDetail() {
 
         {/* Other tabs would be implemented here */}
         <TabsContent value="contracts">
-          <div className="text-center py-12">
-            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Gestão de Contratos</h3>
-            <p className="text-gray-600">Em desenvolvimento</p>
-          </div>
+          <ContractManagement supplierId={supplier.id} />
+        </TabsContent>
+
+        <TabsContent value="contracts">
+          <ContractManagement supplierId={supplierId} />
         </TabsContent>
 
         <TabsContent value="banking">
@@ -445,4 +489,474 @@ export default function InternationalSupplierDetail() {
       </Tabs>
     </div>
   );
-}
+};
+
+// Contract Management Component
+const ContractManagement = ({ supplierId }: { supplierId: number }) => {
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingContract, setEditingContract] = useState<Contract | null>(null);
+
+  // Mock data for development
+  const mockContracts: Contract[] = [
+    {
+      id: 1,
+      supplierId: supplierId,
+      contractNumber: "CNT-2024-001",
+      title: "Contrato de Fornecimento de Eletrônicos",
+      description: "Fornecimento mensal de componentes eletrônicos e dispositivos móveis",
+      contractType: "purchase",
+      status: "active",
+      startDate: "2024-01-15",
+      endDate: "2024-12-31",
+      value: 250000,
+      currency: "USD",
+      paymentTerms: "30 dias após entrega",
+      deliveryTerms: "FOB Shanghai",
+      incoterms: "FOB",
+      documents: [
+        {
+          id: "doc1",
+          name: "Contrato Principal.pdf",
+          type: "application/pdf",
+          size: 2048576,
+          url: "/documents/contract1.pdf",
+          uploadedAt: "2024-01-10"
+        }
+      ],
+      notes: "Contrato principal para fornecimento de eletrônicos",
+      createdAt: "2024-01-10",
+      updatedAt: "2024-01-10"
+    },
+    {
+      id: 2,
+      supplierId: supplierId,
+      contractNumber: "CNT-2024-002",
+      title: "Contrato de Serviços de Desenvolvimento",
+      description: "Desenvolvimento customizado de produtos eletrônicos",
+      contractType: "service",
+      status: "draft",
+      startDate: "2024-03-01",
+      value: 80000,
+      currency: "USD",
+      paymentTerms: "50% antecipado, 50% na entrega",
+      deliveryTerms: "CIF Santos",
+      incoterms: "CIF",
+      documents: [],
+      createdAt: "2024-02-15",
+      updatedAt: "2024-02-15"
+    }
+  ];
+
+  React.useEffect(() => {
+    setContracts(mockContracts);
+  }, []);
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      draft: { color: "bg-gray-100 text-gray-800", icon: Edit, label: "Rascunho" },
+      active: { color: "bg-green-100 text-green-800", icon: CheckCircle, label: "Ativo" },
+      expired: { color: "bg-yellow-100 text-yellow-800", icon: Clock, label: "Expirado" },
+      terminated: { color: "bg-red-100 text-red-800", icon: AlertCircle, label: "Terminado" }
+    };
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+    const Icon = config.icon;
+    
+    return (
+      <Badge className={`${config.color} flex items-center gap-1`}>
+        <Icon className="w-3 h-3" />
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const formatCurrency = (value: number | undefined, currency: string) => {
+    if (!value) return "-";
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: currency === 'USD' ? 'USD' : 'BRL'
+    }).format(value);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const handleEdit = (contract: Contract) => {
+    setEditingContract(contract);
+    setShowForm(true);
+  };
+
+  const handleDelete = (contractId: number) => {
+    if (confirm("Tem certeza que deseja excluir este contrato?")) {
+      setContracts(contracts.filter(c => c.id !== contractId));
+    }
+  };
+
+  const handleSave = (contractData: Partial<Contract>) => {
+    if (editingContract) {
+      // Update existing
+      setContracts(contracts.map(c => 
+        c.id === editingContract.id 
+          ? { ...c, ...contractData, updatedAt: new Date().toISOString() }
+          : c
+      ));
+    } else {
+      // Create new
+      const newContract: Contract = {
+        id: Date.now(),
+        supplierId,
+        contractNumber: contractData.contractNumber || `CNT-${Date.now()}`,
+        title: contractData.title || "",
+        description: contractData.description,
+        contractType: contractData.contractType || "purchase",
+        status: contractData.status || "draft",
+        startDate: contractData.startDate,
+        endDate: contractData.endDate,
+        value: contractData.value,
+        currency: contractData.currency || "USD",
+        paymentTerms: contractData.paymentTerms,
+        deliveryTerms: contractData.deliveryTerms,
+        incoterms: contractData.incoterms,
+        documents: [],
+        notes: contractData.notes,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      setContracts([...contracts, newContract]);
+    }
+    setShowForm(false);
+    setEditingContract(null);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-semibold">Contratos</h3>
+          <p className="text-sm text-gray-600">Gerencie os contratos com este fornecedor</p>
+        </div>
+        <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          Novo Contrato
+        </Button>
+      </div>
+
+      {/* Contracts List */}
+      <div className="space-y-4">
+        {contracts.map((contract) => (
+          <Card key={contract.id}>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-lg">{contract.title}</CardTitle>
+                  <CardDescription className="mt-1">
+                    {contract.contractNumber} • {contract.description}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  {getStatusBadge(contract.status)}
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(contract)}>
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(contract.id)}>
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Tipo</p>
+                  <p className="text-sm">{contract.contractType === 'purchase' ? 'Compra' : 'Serviço'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Valor</p>
+                  <p className="text-sm">{formatCurrency(contract.value, contract.currency)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Início</p>
+                  <p className="text-sm">{contract.startDate ? new Date(contract.startDate).toLocaleDateString('pt-BR') : '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Fim</p>
+                  <p className="text-sm">{contract.endDate ? new Date(contract.endDate).toLocaleDateString('pt-BR') : '-'}</p>
+                </div>
+              </div>
+
+              {/* Documents */}
+              {contract.documents.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-2">Documentos ({contract.documents.length})</p>
+                  <div className="flex flex-wrap gap-2">
+                    {contract.documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center gap-2 bg-gray-50 rounded px-2 py-1">
+                        <FileText className="w-4 h-4 text-blue-500" />
+                        <span className="text-sm">{doc.name}</span>
+                        <span className="text-xs text-gray-500">({formatFileSize(doc.size)})</span>
+                        <Button variant="ghost" size="sm">
+                          <Download className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+
+        {contracts.length === 0 && (
+          <div className="text-center py-12">
+            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum contrato</h3>
+            <p className="text-gray-600 mb-4">Comece criando seu primeiro contrato com este fornecedor</p>
+            <Button onClick={() => setShowForm(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Primeiro Contrato
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Contract Form Dialog */}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingContract ? 'Editar Contrato' : 'Novo Contrato'}
+            </DialogTitle>
+            <DialogDescription>
+              Preencha as informações do contrato abaixo
+            </DialogDescription>
+          </DialogHeader>
+          <ContractForm
+            contract={editingContract}
+            onSave={handleSave}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingContract(null);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+// Contract Form Component
+const ContractForm = ({ 
+  contract, 
+  onSave, 
+  onCancel 
+}: { 
+  contract: Contract | null;
+  onSave: (data: Partial<Contract>) => void;
+  onCancel: () => void;
+}) => {
+  const [formData, setFormData] = useState({
+    contractNumber: contract?.contractNumber || '',
+    title: contract?.title || '',
+    description: contract?.description || '',
+    contractType: contract?.contractType || 'purchase',
+    status: contract?.status || 'draft',
+    startDate: contract?.startDate || '',
+    endDate: contract?.endDate || '',
+    value: contract?.value?.toString() || '',
+    currency: contract?.currency || 'USD',
+    paymentTerms: contract?.paymentTerms || '',
+    deliveryTerms: contract?.deliveryTerms || '',
+    incoterms: contract?.incoterms || '',
+    notes: contract?.notes || ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({
+      ...formData,
+      value: formData.value ? parseFloat(formData.value) : undefined
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="contractNumber">Número do Contrato</Label>
+          <Input
+            id="contractNumber"
+            value={formData.contractNumber}
+            onChange={(e) => setFormData({...formData, contractNumber: e.target.value})}
+            placeholder="CNT-2024-001"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="contractType">Tipo de Contrato</Label>
+          <Select value={formData.contractType} onValueChange={(value) => setFormData({...formData, contractType: value})}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="purchase">Compra</SelectItem>
+              <SelectItem value="service">Serviço</SelectItem>
+              <SelectItem value="supply">Fornecimento</SelectItem>
+              <SelectItem value="partnership">Parceria</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="title">Título do Contrato</Label>
+        <Input
+          id="title"
+          value={formData.title}
+          onChange={(e) => setFormData({...formData, title: e.target.value})}
+          placeholder="Nome do contrato"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="description">Descrição</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          placeholder="Descrição detalhada do contrato"
+          rows={3}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="startDate">Data de Início</Label>
+          <Input
+            id="startDate"
+            type="date"
+            value={formData.startDate}
+            onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+          />
+        </div>
+        <div>
+          <Label htmlFor="endDate">Data de Fim</Label>
+          <Input
+            id="endDate"
+            type="date"
+            value={formData.endDate}
+            onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="value">Valor</Label>
+          <Input
+            id="value"
+            type="number"
+            step="0.01"
+            value={formData.value}
+            onChange={(e) => setFormData({...formData, value: e.target.value})}
+            placeholder="0.00"
+          />
+        </div>
+        <div>
+          <Label htmlFor="currency">Moeda</Label>
+          <Select value={formData.currency} onValueChange={(value) => setFormData({...formData, currency: value})}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="USD">USD - Dólar</SelectItem>
+              <SelectItem value="BRL">BRL - Real</SelectItem>
+              <SelectItem value="EUR">EUR - Euro</SelectItem>
+              <SelectItem value="CNY">CNY - Yuan</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="paymentTerms">Condições de Pagamento</Label>
+        <Input
+          id="paymentTerms"
+          value={formData.paymentTerms}
+          onChange={(e) => setFormData({...formData, paymentTerms: e.target.value})}
+          placeholder="Ex: 30 dias após entrega"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="deliveryTerms">Condições de Entrega</Label>
+          <Input
+            id="deliveryTerms"
+            value={formData.deliveryTerms}
+            onChange={(e) => setFormData({...formData, deliveryTerms: e.target.value})}
+            placeholder="Ex: FOB Shanghai"
+          />
+        </div>
+        <div>
+          <Label htmlFor="incoterms">Incoterms</Label>
+          <Select value={formData.incoterms} onValueChange={(value) => setFormData({...formData, incoterms: value})}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="FOB">FOB - Free On Board</SelectItem>
+              <SelectItem value="CIF">CIF - Cost, Insurance & Freight</SelectItem>
+              <SelectItem value="EXW">EXW - Ex Works</SelectItem>
+              <SelectItem value="DDP">DDP - Delivered Duty Paid</SelectItem>
+              <SelectItem value="FCA">FCA - Free Carrier</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="status">Status</Label>
+        <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="draft">Rascunho</SelectItem>
+            <SelectItem value="active">Ativo</SelectItem>
+            <SelectItem value="expired">Expirado</SelectItem>
+            <SelectItem value="terminated">Terminado</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="notes">Observações</Label>
+        <Textarea
+          id="notes"
+          value={formData.notes}
+          onChange={(e) => setFormData({...formData, notes: e.target.value})}
+          placeholder="Observações adicionais"
+          rows={3}
+        />
+      </div>
+
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button type="submit">
+          {contract ? 'Atualizar' : 'Criar'} Contrato
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+};
+
+// Remove duplicate export

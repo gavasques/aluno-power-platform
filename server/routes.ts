@@ -20,6 +20,7 @@ import picsartRoutes from "./routes/picsart";
 import { productSupplierRoutes } from "./routes/productSupplierRoutes";
 import supplierProductsRoutes from "./routes/supplierProductsRoutes";
 import performanceRoutes from "./routes/performance";
+import internationalContractsRoutes from "./routes/internationalContracts";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -6987,6 +6988,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Performance Monitoring Routes
   try {
     app.use('/api/performance', performanceRoutes);
+    app.use('/api/international-contracts', internationalContractsRoutes);
     console.log('✅ [PERFORMANCE] Performance monitoring routes registered');
   } catch (error) {
     console.error('❌ [PERFORMANCE] Performance routes failed:', error);
