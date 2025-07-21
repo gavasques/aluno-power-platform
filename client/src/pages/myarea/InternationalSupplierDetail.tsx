@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -150,49 +149,11 @@ export default function InternationalSupplierDetail() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
 
-  const { data: supplier, isLoading } = useQuery({
-    queryKey: ['/api/suppliers', id],
-    queryFn: async () => mockSupplier // In real app, fetch from API
-  });
-
-  const { data: contacts = [] } = useQuery({
-    queryKey: ['/api/suppliers', id, 'contacts'],
-    queryFn: async () => mockContacts
-  });
-
-  const { data: contracts = [] } = useQuery({
-    queryKey: ['/api/suppliers', id, 'contracts'],
-    queryFn: async () => mockContracts
-  });
-
-  const { data: communications = [] } = useQuery({
-    queryKey: ['/api/suppliers', id, 'communications'],
-    queryFn: async () => mockCommunications
-  });
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-6 max-w-7xl">
-        <div className="flex items-center justify-center py-12">
-          <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="ml-4 text-gray-600">Carregando fornecedor...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!supplier) {
-    return (
-      <div className="container mx-auto p-6 max-w-7xl">
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Fornecedor não encontrado</h2>
-          <Link href="/minha-area/importacoes/fornecedores">
-            <Button>Voltar à lista de fornecedores</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Using mock data directly to avoid loading issues
+  const supplier = mockSupplier;
+  const contacts = mockContacts;
+  const contracts = mockContracts;
+  const communications = mockCommunications;
 
   const getStatusBadge = (status: string) => {
     const variants = {
