@@ -55,6 +55,7 @@ const Ferramentas = lazy(() => import("./pages/Ferramentas"));
 const MyArea = lazy(() => import("./pages/MyArea"));
 const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
+const ImportacoesIndex = lazy(() => import("./pages/ImportacoesIndex"));
 const ImportacaoSimplificada = lazy(() => import("./pages/simuladores/ImportacaoSimplificada"));
 const SimuladorSimplificado = lazy(() => import("./pages/simuladores/SimuladorSimplificado"));
 const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsListSimple"));
@@ -736,6 +737,17 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <SimuladoresIndex />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Importações Index - Protected */}
+                          <Route path="/importacoes">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ImportacoesIndex />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
