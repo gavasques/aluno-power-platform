@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, FileText, Building, Users, Calculator } from "lucide-react";
+import { Search, X, FileText, Building, Users, Calculator, Ship } from "lucide-react";
 
 interface ImportacaoItem {
   id: string;
@@ -20,7 +20,7 @@ interface ImportacaoItem {
 const importacaoItems: ImportacaoItem[] = [
   {
     id: "simulador-simplificado",
-    title: "Simulador Simplificado",
+    title: "Simulador de Importação Simplificada",
     description: "Simulador simplificado e rápido para cálculos básicos de importação",
     href: "/simuladores/simplificado",
     icon: Calculator,
@@ -30,10 +30,10 @@ const importacaoItems: ImportacaoItem[] = [
   },
   {
     id: "importacao-formal-direta",
-    title: "Importação Formal Direta",
+    title: "Simulador de Importação Formal Direta",
     description: "Simulador completo com rateio por CBM e cálculo detalhado de impostos de importação",
     href: "/simuladores/importacao-formal-direta",
-    icon: Building,
+    icon: Ship,
     category: "Simuladores",
     isAvailable: true,
     isNew: true,
@@ -157,13 +157,51 @@ export default function ImportacoesIndex() {
         {filteredItems.map((item) => {
           const IconComponent = item.icon;
           
+          // Definir cores específicas por ferramenta para diferenciação
+          const getIconColors = (id: string) => {
+            switch (id) {
+              case "simulador-simplificado":
+                return {
+                  bgColor: "bg-blue-100",
+                  iconColor: "text-blue-600",
+                  buttonIconColor: "text-blue-600"
+                };
+              case "importacao-formal-direta":
+                return {
+                  bgColor: "bg-purple-100",
+                  iconColor: "text-purple-600",
+                  buttonIconColor: "text-purple-600"
+                };
+              case "gerador-po-proforma":
+                return {
+                  bgColor: "bg-green-100",
+                  iconColor: "text-green-600",
+                  buttonIconColor: "text-green-600"
+                };
+              case "gestao-fornecedores":
+                return {
+                  bgColor: "bg-orange-100",
+                  iconColor: "text-orange-600",
+                  buttonIconColor: "text-orange-600"
+                };
+              default:
+                return {
+                  bgColor: "bg-primary/10",
+                  iconColor: "text-primary",
+                  buttonIconColor: "text-primary"
+                };
+            }
+          };
+
+          const colors = getIconColors(item.id);
+          
           return (
             <Card key={item.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <IconComponent className="w-5 h-5 text-primary" />
+                    <div className={`p-2 ${colors.bgColor} rounded-lg`}>
+                      <IconComponent className={`w-5 h-5 ${colors.iconColor}`} />
                     </div>
                     <div>
                       <CardTitle className="text-lg">{item.title}</CardTitle>
