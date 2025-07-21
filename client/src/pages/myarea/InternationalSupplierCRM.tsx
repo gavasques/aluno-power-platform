@@ -292,10 +292,6 @@ export default function InternationalSupplierCRM() {
                     <th className="text-left p-4 font-medium text-gray-700">País</th>
                     <th className="text-left p-4 font-medium text-gray-700">Categoria</th>
                     <th className="text-left p-4 font-medium text-gray-700">Status</th>
-                    <th className="text-left p-4 font-medium text-gray-700">Avaliação</th>
-                    <th className="text-left p-4 font-medium text-gray-700">Contatos</th>
-                    <th className="text-left p-4 font-medium text-gray-700">Produtos</th>
-                    <th className="text-left p-4 font-medium text-gray-700">Importações</th>
                     <th className="text-left p-4 font-medium text-gray-700">Último Contato</th>
                     <th className="text-left p-4 font-medium text-gray-700">Ações</th>
                   </tr>
@@ -314,28 +310,6 @@ export default function InternationalSupplierCRM() {
                       <td className="p-4 text-gray-600">{supplier.country}</td>
                       <td className="p-4 text-gray-600">{supplier.category}</td>
                       <td className="p-4">{getStatusBadge(supplier.status)}</td>
-                      <td className="p-4">
-                        {supplier.rating > 0 ? (
-                          <div className="flex items-center gap-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <div
-                                key={star}
-                                className={`w-4 h-4 ${
-                                  star <= supplier.rating ? 'text-yellow-400' : 'text-gray-300'
-                                }`}
-                              >
-                                ⭐
-                              </div>
-                            ))}
-                            <span className="text-sm text-gray-600 ml-1">({supplier.rating.toFixed(1)})</span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-gray-600">{supplier.contactsCount || 0}</td>
-                      <td className="p-4 text-gray-600">{supplier.productsCount || 0}</td>
-                      <td className="p-4 text-gray-600">{supplier.totalOrders}</td>
                       <td className="p-4 text-gray-600 text-sm">
                         {new Date(supplier.lastContact).toLocaleDateString('pt-BR')}
                       </td>
@@ -360,40 +334,7 @@ export default function InternationalSupplierCRM() {
         </CardContent>
       </Card>
 
-      {/* Quick Actions - Specialized for International Trade */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="p-6 text-center">
-            <Users className="w-8 h-8 text-blue-600 mx-auto mb-3" />
-            <h3 className="font-medium mb-1">Contatos Internacionais</h3>
-            <p className="text-sm text-gray-600">Gestão de fuso horário e idiomas</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="p-6 text-center">
-            <FileText className="w-8 h-8 text-green-600 mx-auto mb-3" />
-            <h3 className="font-medium mb-1">Contratos de Importação</h3>
-            <p className="text-sm text-gray-600">Incoterms e termos comerciais</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="p-6 text-center">
-            <Shield className="w-8 h-8 text-purple-600 mx-auto mb-3" />
-            <h3 className="font-medium mb-1">Compliance Internacional</h3>
-            <p className="text-sm text-gray-600">Certificados e documentação</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="p-6 text-center">
-            <TrendingUp className="w-8 h-8 text-orange-600 mx-auto mb-3" />
-            <h3 className="font-medium mb-1">Performance de Importação</h3>
-            <p className="text-sm text-gray-600">Análises e relatórios</p>
-          </CardContent>
-        </Card>
-      </div>
+
 
       {/* Warning Note */}
       <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
