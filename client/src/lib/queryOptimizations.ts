@@ -16,27 +16,31 @@ import { performance } from 'perf_hooks';
 
 /**
  * Background sync hook for preloading critical data
+ * Only prefetches authenticated data if user is logged in
  */
-export function useBackgroundSync() {
+export function useBackgroundSync(isAuthenticated: boolean = false) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     const prefetchCriticalData = async () => {
       console.log('🚀 [BACKGROUND_SYNC] Starting background data prefetch...');
 
-      // Prefetch user profile data
-      queryClient.prefetchQuery({
-        queryKey: ['/api/auth/me'],
-        staleTime: 10 * 60 * 1000, // 10 minutes
-      });
+      // Only prefetch authenticated data if user is logged in
+      if (isAuthenticated) {
+        // Prefetch user profile data
+        queryClient.prefetchQuery({
+          queryKey: ['/api/auth/me'],
+          staleTime: 10 * 60 * 1000, // 10 minutes
+        });
 
-      // Prefetch dashboard data
-      queryClient.prefetchQuery({
-        queryKey: ['/api/dashboard/stats'],
-        staleTime: 5 * 60 * 1000, // 5 minutes
-      });
+        // Prefetch dashboard data
+        queryClient.prefetchQuery({
+          queryKey: ['/api/dashboard/stats'],
+          staleTime: 5 * 60 * 1000, // 5 minutes
+        });
+      }
 
-      // Prefetch frequently accessed data
+      // Prefetch public data that's always available
       queryClient.prefetchQuery({
         queryKey: ['/api/news/published/preview'],
         staleTime: 15 * 60 * 1000, // 15 minutes
@@ -49,7 +53,7 @@ export function useBackgroundSync() {
     const timer = setTimeout(prefetchCriticalData, 1000);
 
     return () => clearTimeout(timer);
-  }, [queryClient]);
+  }, [queryClient, isAuthenticated]);
 }
 
 /**
@@ -75,12 +79,11 @@ export function useOptimizedQuery<T>(
     refetchOnMount: false,
     // Performance optimizations
     structuralSharing: true,
-    notifyOnChangeProps: 'tracked',
     // Custom performance tracking
-    onSuccess: performanceTracking ? (data) => {
+    onSuccess: performanceTracking ? (data: any) => {
       console.log(`⚡ [QUERY_SUCCESS] ${String(queryKey[0])} - ${JSON.stringify(data).length} bytes`);
     } : undefined,
-    onError: performanceTracking ? (error) => {
+    onError: performanceTracking ? (error: any) => {
       console.error(`💥 [QUERY_ERROR] ${String(queryKey[0])}:`, error);
     } : undefined,
   });
@@ -167,8 +170,8 @@ export function useQueryPerformanceMonitor() {
         console.log(`📊 [QUERY_MONITOR] New observer added: ${String(event.query.queryKey[0])}`);
       }
       
-      if (event?.type === 'queryUpdated') {
-        const query = event.query;
+      if (event?.type === 'observerUpdated') {
+        const query = event.observer.getCurrentQuery();
         const state = query.state;
         
         if (state.status === 'success') {

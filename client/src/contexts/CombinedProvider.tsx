@@ -12,6 +12,7 @@ import { YoutubeProvider } from "./YoutubeContext";
 import { AgentsProvider } from "./AgentsContext";
 import { PermissionProvider } from "./PermissionContext";
 import { useBackgroundSync } from "@/lib/queryOptimizations";
+import { useAuth } from "./AuthContext";
 
 interface CombinedProviderProps {
   children: ReactNode;
@@ -53,7 +54,10 @@ export function CombinedProvider({ children }: CombinedProviderProps) {
 
 // Wrapper component to initialize background sync after QueryClient is available
 function BackgroundSyncWrapper({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  
   // Re-enable background sync now that QueryClient is available
-  useBackgroundSync();
+  // Only pass true for isAuthenticated if user is actually logged in
+  useBackgroundSync(!!user);
   return <>{children}</>;
 }
