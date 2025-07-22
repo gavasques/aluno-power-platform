@@ -365,17 +365,18 @@ export default function FormalImportSimulator() {
   });
 
   useEffect(() => {
-    if (existingSimulation) {
+    if (existingSimulation && typeof existingSimulation === 'object') {
       // Ensure all required arrays are properly initialized and convert strings to numbers
       const processedSimulation = {
+        ...simulation, // Start with current simulation to preserve structure
         ...existingSimulation,
-        taxaDolar: parseFloat(existingSimulation.taxaDolar) || 5.50,
-        valorFobDolar: parseFloat(existingSimulation.valorFobDolar) || 0,
-        valorFreteDolar: parseFloat(existingSimulation.valorFreteDolar) || 0,
-        percentualSeguro: parseFloat(existingSimulation.percentualSeguro) || 0.18,
-        impostos: existingSimulation.impostos || defaultTaxes,
-        despesasAdicionais: existingSimulation.despesasAdicionais || defaultExpenses,
-        produtos: existingSimulation.produtos || []
+        taxaDolar: parseFloat((existingSimulation as any).taxaDolar) || 5.50,
+        valorFobDolar: parseFloat((existingSimulation as any).valorFobDolar) || 0,
+        valorFreteDolar: parseFloat((existingSimulation as any).valorFreteDolar) || 0,
+        percentualSeguro: parseFloat((existingSimulation as any).percentualSeguro) || 0.18,
+        impostos: (existingSimulation as any).impostos || defaultTaxes,
+        despesasAdicionais: (existingSimulation as any).despesasAdicionais || defaultExpenses,
+        produtos: (existingSimulation as any).produtos || []
       };
       setSimulation(processedSimulation);
     }
