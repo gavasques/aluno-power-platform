@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, FileText, Building, Users, Calculator, Ship } from "lucide-react";
+import { Search, X, FileText, Building, Users, Calculator, Ship, Package } from "lucide-react";
 
 interface ImportacaoItem {
   id: string;
@@ -58,6 +58,16 @@ const importacaoItems: ImportacaoItem[] = [
     isAvailable: true,
     isNew: true,
   },
+  {
+    id: "produtos-importados",
+    title: "Gestão de Produtos Importados",
+    description: "Sistema completo para gerenciar produtos em processo de importação, do projeto à chegada",
+    href: "/minha-area/importacoes/produtos",
+    icon: Package,
+    category: "Gestão",
+    isAvailable: true,
+    isNew: true,
+  },
 ];
 
 const categories = [
@@ -65,6 +75,7 @@ const categories = [
   { name: "Simuladores", count: importacaoItems.filter(item => item.category === "Simuladores").length },
   { name: "Documentos", count: importacaoItems.filter(item => item.category === "Documentos").length },
   { name: "Fornecedores", count: importacaoItems.filter(item => item.category === "Fornecedores").length },
+  { name: "Gestão", count: importacaoItems.filter(item => item.category === "Gestão").length },
 ];
 
 export default function ImportacoesIndex() {

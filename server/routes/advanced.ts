@@ -2,7 +2,7 @@ import { Express, Request, Response } from 'express';
 import { requireAuth } from '../security';
 import { couponService } from '../services/couponService';
 import { trialService } from '../services/trialService';
-import { abandonedCartService } from '../services/abandonedCartService';
+// import { abandonedCartService } from '../services/abandonedCartService'; // Temporarily disabled
 import { analyticsService } from '../services/analyticsService';
 
 export function registerAdvancedRoutes(app: Express) {

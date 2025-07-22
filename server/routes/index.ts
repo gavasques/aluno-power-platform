@@ -33,6 +33,7 @@ import authRoutes from './auth';
 import adminDashboardRoutes from './admin/dashboard';
 import adminUsersRoutes from './admin/users';
 import auditRoutes from './audit';
+import { registerImportedProductsRoutes } from './importedProducts';
 
 /**
  * Register all modular routes
@@ -106,6 +107,9 @@ export function registerModularRoutes(app: Express): void {
 
   // Audit Routes - Security Logging and Monitoring
   app.use('/api/audit', auditRoutes);
+  
+  // Imported Products Management Routes - PHASE 2: Backend APIs
+  registerImportedProductsRoutes(app);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

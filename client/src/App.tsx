@@ -59,6 +59,11 @@ const ImportacoesIndex = lazy(() => import("./pages/myarea/ImportacoesIndex"));
 const InternationalSupplierCRM = lazy(() => import("./pages/myarea/InternationalSupplierCRM"));
 const InternationalSupplierDetail = lazy(() => import("./pages/myarea/InternationalSupplierDetail"));
 
+// Imported Products Management
+const ImportedProductsIndex = lazy(() => import("./pages/myarea/importacoes/produtos/ImportedProductsIndex"));
+const ImportedProductForm = lazy(() => import("./pages/myarea/importacoes/produtos/ImportedProductForm"));
+const ImportedProductDetail = lazy(() => import("./pages/myarea/importacoes/produtos/ImportedProductDetail"));
+
 const SimuladorSimplificado = lazy(() => import("./pages/simuladores/SimuladorSimplificado"));
 const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsListSimple"));
 const InformalImportSimulator = lazy(() => import("./pages/InformalImportSimulator"));
@@ -772,6 +777,47 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <InternationalSupplierDetail />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Imported Products Management - Protected */}
+                          <Route path="/minha-area/importacoes/produtos">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ImportedProductsIndex />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          <Route path="/minha-area/importacoes/produtos/novo">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ImportedProductForm />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          <Route path="/minha-area/importacoes/produtos/:id">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ImportedProductDetail />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          <Route path="/minha-area/importacoes/produtos/:id/editar">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <ImportedProductForm />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

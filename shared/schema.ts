@@ -2544,39 +2544,8 @@ export const userTrials = pgTable("user_trials", {
   convertedIdx: index("user_trials_converted_idx").on(table.convertedAt),
 }));
 
-// Abandoned Carts Table - Sistema de Recuperação de Carrinho Abandonado
-export const abandonedCarts = pgTable("abandoned_carts", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id),
-  sessionId: text("session_id").notNull(),
-  email: text("email"),
-  planId: integer("plan_id").references(() => userPlans.id),
-  billingCycle: text("billing_cycle"), // 'monthly', 'yearly'
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  currency: text("currency").notNull().default("BRL"),
-  paymentMethod: text("payment_method"),
-  cartData: jsonb("cart_data").notNull(),
-  checkoutUrl: text("checkout_url"),
-  lastActivityAt: timestamp("last_activity_at").notNull().defaultNow(),
-  emailsSent: integer("emails_sent").notNull().default(0),
-  emailSent: boolean("email_sent").notNull().default(false),
-  emailType: text("email_type"), // 'immediate', 'reminder_24h', 'reminder_7d'
-  lastEmailSent: timestamp("last_email_sent"),
-  converted: boolean("converted").notNull().default(false),
-  convertedAt: timestamp("converted_at"),
-  conversionAmount: decimal("conversion_amount", { precision: 10, scale: 2 }),
-  discountOffered: decimal("discount_offered", { precision: 10, scale: 2 }),
-  metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  userIdx: index("abandoned_carts_user_idx").on(table.userId),
-  sessionIdx: index("abandoned_carts_session_idx").on(table.sessionId),
-  emailIdx: index("abandoned_carts_email_idx").on(table.email),
-  activityIdx: index("abandoned_carts_activity_idx").on(table.lastActivityAt),
-  convertedIdx: index("abandoned_carts_converted_idx").on(table.converted),
-  emailSentIdx: index("abandoned_carts_email_sent_idx").on(table.emailSent),
-}));
+// Abandoned Carts Table temporarily commented out due to migration conflict
+// Will be re-added after imported products system is complete
 
 // Conversion Events Table - Analytics de Conversão
 export const conversionEvents = pgTable("conversion_events", {
@@ -2616,13 +2585,7 @@ export const insertUserTrialSchema = createInsertSchema(userTrials).omit({
 export type InsertUserTrial = z.infer<typeof insertUserTrialSchema>;
 export type UserTrial = typeof userTrials.$inferSelect;
 
-export const insertAbandonedCartSchema = createInsertSchema(abandonedCarts).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertAbandonedCart = z.infer<typeof insertAbandonedCartSchema>;
-export type AbandonedCart = typeof abandonedCarts.$inferSelect;
+// AbandonedCart schema temporarily removed due to migration conflict
 
 export const insertConversionEventSchema = createInsertSchema(conversionEvents);
 export type InsertConversionEvent = z.infer<typeof insertConversionEventSchema>;
@@ -2732,16 +2695,7 @@ export const userTrialsRelations = relations(userTrials, ({ one }) => ({
   }),
 }));
 
-export const abandonedCartsRelations = relations(abandonedCarts, ({ one }) => ({
-  user: one(users, {
-    fields: [abandonedCarts.userId],
-    references: [users.id],
-  }),
-  plan: one(userPlans, {
-    fields: [abandonedCarts.planId],
-    references: [userPlans.id],
-  }),
-}));
+// AbandonedCarts relations temporarily removed due to migration conflict
 
 export const conversionEventsRelations = relations(conversionEvents, ({ one }) => ({
   user: one(users, {
@@ -3541,5 +3495,173 @@ export const insertSupplierPerformanceSchema = createInsertSchema(supplierPerfor
 });
 export type InsertSupplierPerformance = z.infer<typeof insertSupplierPerformanceSchema>;
 export type SupplierPerformance = typeof supplierPerformance.$inferSelect;
+
+// =============================================================================
+// IMPORTED PRODUCTS MANAGEMENT SYSTEM
+// =============================================================================
+
+// Imported Products - Main table for products being imported
+export const importedProducts = pgTable("imported_products", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  name: text("name").notNull(),
+  internalCode: text("internal_code").notNull(),
+  status: text("status").notNull().default("research"), // research, analysis, negotiation, ordered, shipped, arrived, cancelled
+  description: text("description"),
+  detailedDescription: text("detailed_description"),
+  category: text("category"),
+  brand: text("brand"),
+  model: text("model"),
+  color: text("color"),
+  material: text("material"),
+  technicalSpecifications: text("technical_specifications"),
+  hasMultiplePackages: boolean("has_multiple_packages").notNull().default(false),
+  totalPackages: integer("total_packages").notNull().default(1),
+  hsCode: text("hs_code"), // NCM/HS Code
+  ipiPercentage: decimal("ipi_percentage", { precision: 5, scale: 2 }),
+  productEan: text("product_ean"),
+  productUpc: text("product_upc"),
+  internalBarcode: text("internal_barcode"),
+  customsDescription: text("customs_description"),
+  supplierId: integer("supplier_id").references(() => suppliers.id),
+  supplierProductCode: text("supplier_product_code"),
+  supplierProductName: text("supplier_product_name"),
+  supplierDescription: text("supplier_description"),
+  moq: integer("moq"), // Minimum Order Quantity
+  leadTimeDays: integer("lead_time_days"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("imported_products_user_idx").on(table.userId),
+  statusIdx: index("imported_products_status_idx").on(table.status),
+  supplierIdx: index("imported_products_supplier_idx").on(table.supplierId),
+  nameIdx: index("imported_products_name_idx").on(table.name),
+  codeIdx: index("imported_products_code_idx").on(table.internalCode),
+  createdIdx: index("imported_products_created_idx").on(table.createdAt),
+}));
+
+// Product Packages - System for managing multiple packaging of a product
+export const productPackages = pgTable("product_packages", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  productId: text("product_id").references(() => importedProducts.id).notNull(),
+  packageNumber: integer("package_number").notNull(),
+  packageType: text("package_type").notNull(), // caixa, saco, pallet, etc.
+  contentsDescription: text("contents_description"),
+  packageEan: text("package_ean"),
+  dimensionsLength: decimal("dimensions_length", { precision: 10, scale: 2 }), // Comprimento em cm
+  dimensionsWidth: decimal("dimensions_width", { precision: 10, scale: 2 }), // Largura em cm
+  dimensionsHeight: decimal("dimensions_height", { precision: 10, scale: 2 }), // Altura em cm
+  weightGross: decimal("weight_gross", { precision: 10, scale: 3 }), // Peso bruto em kg
+  weightNet: decimal("weight_net", { precision: 10, scale: 3 }), // Peso líquido em kg
+  volumeCbm: decimal("volume_cbm", { precision: 10, scale: 4 }), // Volume em m³
+  unitsInPackage: integer("units_in_package").notNull().default(1),
+  packagingMaterial: text("packaging_material"),
+  specialHandling: text("special_handling"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  productIdx: index("product_packages_product_idx").on(table.productId),
+  packageNumIdx: index("product_packages_number_idx").on(table.packageNumber),
+}));
+
+// Product Files - Storage for images, documents and certificates
+export const productFiles = pgTable("product_files", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  productId: text("product_id").references(() => importedProducts.id).notNull(),
+  fileType: text("file_type").notNull(), // image, document, certificate, manual, other
+  fileName: text("file_name").notNull(),
+  filePath: text("file_path").notNull(),
+  fileSize: integer("file_size").notNull(), // bytes
+  description: text("description"),
+  isMainImage: boolean("is_main_image").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+}, (table) => ({
+  productIdx: index("product_files_product_idx").on(table.productId),
+  typeIdx: index("product_files_type_idx").on(table.fileType),
+  mainImageIdx: index("product_files_main_image_idx").on(table.isMainImage),
+}));
+
+// Product Notes - System for annotations and important notes
+export const productNotes = pgTable("product_notes", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  productId: text("product_id").references(() => importedProducts.id).notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  isImportant: boolean("is_important").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  productIdx: index("product_notes_product_idx").on(table.productId),
+  importantIdx: index("product_notes_important_idx").on(table.isImportant),
+  createdIdx: index("product_notes_created_idx").on(table.createdAt),
+}));
+
+// Relations for Imported Products System
+export const importedProductsRelations = relations(importedProducts, ({ one, many }) => ({
+  user: one(users, {
+    fields: [importedProducts.userId],
+    references: [users.id],
+  }),
+  supplier: one(suppliers, {
+    fields: [importedProducts.supplierId],
+    references: [suppliers.id],
+  }),
+  packages: many(productPackages),
+  files: many(productFiles),
+  notes: many(productNotes),
+}));
+
+export const productPackagesRelations = relations(productPackages, ({ one }) => ({
+  product: one(importedProducts, {
+    fields: [productPackages.productId],
+    references: [importedProducts.id],
+  }),
+}));
+
+export const productFilesRelations = relations(productFiles, ({ one }) => ({
+  product: one(importedProducts, {
+    fields: [productFiles.productId],
+    references: [importedProducts.id],
+  }),
+}));
+
+export const productNotesRelations = relations(productNotes, ({ one }) => ({
+  product: one(importedProducts, {
+    fields: [productNotes.productId],
+    references: [importedProducts.id],
+  }),
+}));
+
+// Insert Schemas for Imported Products System
+export const insertImportedProductSchema = createInsertSchema(importedProducts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertImportedProduct = z.infer<typeof insertImportedProductSchema>;
+export type ImportedProduct = typeof importedProducts.$inferSelect;
+
+export const insertProductPackageSchema = createInsertSchema(productPackages).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertProductPackage = z.infer<typeof insertProductPackageSchema>;
+export type ProductPackage = typeof productPackages.$inferSelect;
+
+export const insertProductFileSchema = createInsertSchema(productFiles).omit({
+  id: true,
+  uploadedAt: true,
+});
+export type InsertProductFile = z.infer<typeof insertProductFileSchema>;
+export type ProductFile = typeof productFiles.$inferSelect;
+
+export const insertProductNoteSchema = createInsertSchema(productNotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertProductNote = z.infer<typeof insertProductNoteSchema>;
+export type ProductNote = typeof productNotes.$inferSelect;
 
 
