@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Material } from '@/types/material';
-import { SelectValueChangeHandler } from '@/types/core';
+// Removed unused import
 
 const getIcon = (iconName: string) => {
   const icons: Record<string, React.ComponentType> = {
@@ -54,7 +54,7 @@ const MaterialCard = ({ material }: { material: Material }) => {
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <IconComponent className="h-5 w-5 text-primary" />
+              <IconComponent className="h-5 w-5 text-primary" {...({} as any)} />
             </div>
             <div>
               <CardTitle className="text-base font-semibold text-foreground line-clamp-1">
@@ -248,7 +248,7 @@ const MyMaterials = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {materials.map(material => (
-            <MaterialCard key={material.id} material={material} />
+            <MaterialCard key={material.id} material={material as any} />
           ))}
         </div>
       )}

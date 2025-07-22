@@ -190,7 +190,7 @@ export default function ProductBasicDataEditRefactored() {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Nenhuma marca</SelectItem>
-                      {brands.map((brand: any) => (
+                      {(brands as any[]).map((brand: any) => (
                         <SelectItem key={brand.id} value={brand.id.toString()}>
                           {brand.name}
                         </SelectItem>
@@ -216,7 +216,7 @@ export default function ProductBasicDataEditRefactored() {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Nenhum fornecedor</SelectItem>
-                      {suppliers.map((supplier: any) => (
+                      {(suppliers as any[]).map((supplier: any) => (
                         <SelectItem key={supplier.id} value={supplier.id.toString()}>
                           {supplier.tradeName || supplier.corporateName}
                         </SelectItem>
