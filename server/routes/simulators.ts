@@ -13,7 +13,8 @@ import {
 import { requireAuth } from '../security';
 import { 
   requireSimulatorAccess,
-  requireDataExport 
+  requireDataExport,
+  requirePermission 
 } from '../middleware/permissions';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
@@ -31,7 +32,7 @@ function generateSimulationCode(): string {
 const router = Router();
 
 // Get import simulations for user with pagination
-router.get('/import', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
+router.get('/import', requireAuth, requirePermission('simulators.importacao_simples'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
@@ -84,7 +85,7 @@ router.get('/import', requireAuth, requireSimulatorAccess('import_calculator'), 
 });
 
 // Get specific import simulation
-router.get('/import/:id', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
+router.get('/import/:id', requireAuth, requirePermission('simulators.importacao_simples'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -107,7 +108,7 @@ router.get('/import/:id', requireAuth, requireSimulatorAccess('import_calculator
 });
 
 // Create new import simulation
-router.post('/import', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
+router.post('/import', requireAuth, requirePermission('simulators.importacao_simples'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
@@ -148,7 +149,7 @@ router.post('/import', requireAuth, requireSimulatorAccess('import_calculator'),
 });
 
 // Update import simulation
-router.put('/import/:id', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
+router.put('/import/:id', requireAuth, requirePermission('simulators.importacao_simples'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -186,7 +187,7 @@ router.put('/import/:id', requireAuth, requireSimulatorAccess('import_calculator
 });
 
 // Delete import simulation
-router.delete('/import/:id', requireAuth, requireSimulatorAccess('import_calculator'), async (req, res) => {
+router.delete('/import/:id', requireAuth, requirePermission('simulators.importacao_simples'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -215,7 +216,7 @@ router.delete('/import/:id', requireAuth, requireSimulatorAccess('import_calcula
 });
 
 // Duplicate import simulation
-router.post('/import/:id/duplicate', requireAuth, async (req, res) => {
+router.post('/import/:id/duplicate', requireAuth, requirePermission('simulators.importacao_simples'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -323,7 +324,7 @@ function calcularTarifaSimples(faturamento12Meses: number, faturamentoSemST: num
 }
 
 // Get last 30 Simples Nacional simulations for user
-router.get('/simples-nacional', requireAuth, requireSimulatorAccess('simples_nacional'), async (req, res) => {
+router.get('/simples-nacional', requireAuth, requirePermission('simulators.simples_nacional'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
@@ -342,7 +343,7 @@ router.get('/simples-nacional', requireAuth, requireSimulatorAccess('simples_nac
 });
 
 // Get specific Simples Nacional simulation
-router.get('/simples-nacional/:id', requireAuth, requireSimulatorAccess('simples_nacional'), async (req, res) => {
+router.get('/simples-nacional/:id', requireAuth, requirePermission('simulators.simples_nacional'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -365,7 +366,7 @@ router.get('/simples-nacional/:id', requireAuth, requireSimulatorAccess('simples
 });
 
 // Create new Simples Nacional simulation
-router.post('/simples-nacional', requireAuth, requireSimulatorAccess('simples_nacional'), async (req, res) => {
+router.post('/simples-nacional', requireAuth, requirePermission('simulators.simples_nacional'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
@@ -417,7 +418,7 @@ router.post('/simples-nacional', requireAuth, requireSimulatorAccess('simples_na
 });
 
 // Update Simples Nacional simulation
-router.put('/simples-nacional/:id', requireAuth, async (req, res) => {
+router.put('/simples-nacional/:id', requireAuth, requirePermission('simulators.simples_nacional'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -479,7 +480,7 @@ router.put('/simples-nacional/:id', requireAuth, async (req, res) => {
 });
 
 // Delete Simples Nacional simulation
-router.delete('/simples-nacional/:id', requireAuth, async (req, res) => {
+router.delete('/simples-nacional/:id', requireAuth, requirePermission('simulators.simples_nacional'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -705,7 +706,7 @@ function calcularSimulacaoCompleta(simulacao: any): any {
 // ===== FORMAL IMPORT SIMULATION ROUTES =====
 
 // Get formal import simulations for user
-router.get('/formal-import', requireAuth, async (req, res) => {
+router.get('/formal-import', requireAuth, requirePermission('simulators.importacao_formal'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
@@ -724,7 +725,7 @@ router.get('/formal-import', requireAuth, async (req, res) => {
 });
 
 // Get specific formal import simulation
-router.get('/formal-import/:id', requireAuth, async (req, res) => {
+router.get('/formal-import/:id', requireAuth, requirePermission('simulators.importacao_formal'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -747,7 +748,7 @@ router.get('/formal-import/:id', requireAuth, async (req, res) => {
 });
 
 // Create new formal import simulation
-router.post('/formal-import', requireAuth, async (req, res) => {
+router.post('/formal-import', requireAuth, requirePermission('simulators.importacao_formal'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     
@@ -786,7 +787,7 @@ router.post('/formal-import', requireAuth, async (req, res) => {
 });
 
 // Update formal import simulation
-router.put('/formal-import/:id', requireAuth, async (req, res) => {
+router.put('/formal-import/:id', requireAuth, requirePermission('simulators.importacao_formal'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -836,7 +837,7 @@ router.put('/formal-import/:id', requireAuth, async (req, res) => {
 });
 
 // Delete formal import simulation
-router.delete('/formal-import/:id', requireAuth, async (req, res) => {
+router.delete('/formal-import/:id', requireAuth, requirePermission('simulators.importacao_formal'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -865,7 +866,7 @@ router.delete('/formal-import/:id', requireAuth, async (req, res) => {
 });
 
 // Duplicate formal import simulation
-router.post('/formal-import/:id/duplicate', requireAuth, async (req, res) => {
+router.post('/formal-import/:id/duplicate', requireAuth, requirePermission('simulators.importacao_formal'), async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -914,7 +915,7 @@ router.post('/formal-import/:id/duplicate', requireAuth, async (req, res) => {
 });
 
 // Get calculation results for a simulation (real-time calculation endpoint)
-router.post('/formal-import/calculate', requireAuth, async (req, res) => {
+router.post('/formal-import/calculate', requireAuth, requirePermission('simulators.importacao_formal'), async (req, res) => {
   try {
     console.log('🔥 CALCULATE API - Dados recebidos:');
     console.log('- FOB Dólar:', req.body.valorFobDolar);
@@ -942,119 +943,6 @@ router.post('/formal-import/calculate', requireAuth, async (req, res) => {
   }
 });
 
-// Get all formal import simulations for the current user
-router.get('/formal-import', requireAuth, async (req, res) => {
-  try {
-    const user = req.user as { id: number };
-    console.log('🔥 LISTAGEM - Buscando simulações para usuário:', user.id);
-    
-    const simulations = await db.query.formalImportSimulations.findMany({
-      where: eq(formalImportSimulations.userId, user.id),
-      orderBy: desc(formalImportSimulations.dataModificacao)
-    });
-    
-    console.log('🔥 LISTAGEM - Simulações encontradas:', simulations.length);
-    console.log('🔥 LISTAGEM - Dados:', simulations.map(s => ({ id: s.id, nome: s.nome, status: s.status })));
-    
-    res.json(simulations);
-  } catch (error) {
-    console.error('❌ LISTAGEM - Erro ao buscar simulações:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
 
-// Get a specific formal import simulation
-router.get('/formal-import/:id', requireAuth, async (req, res) => {
-  try {
-    const user = req.user as { id: number };
-    const simulationId = parseInt(req.params.id);
-    
-    const simulation = await db.query.formalImportSimulations.findFirst({
-      where: and(
-        eq(formalImportSimulations.id, simulationId),
-        eq(formalImportSimulations.userId, user.id)
-      )
-    });
-    
-    if (!simulation) {
-      return res.status(404).json({ error: 'Simulação não encontrada' });
-    }
-    
-    res.json(simulation);
-  } catch (error) {
-    console.error('Error fetching formal import simulation:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
-
-// Delete a formal import simulation
-router.delete('/formal-import/:id', requireAuth, async (req, res) => {
-  try {
-    const user = req.user as { id: number };
-    const simulationId = parseInt(req.params.id);
-    
-    // Check if simulation exists and belongs to user
-    const simulation = await db.query.formalImportSimulations.findFirst({
-      where: and(
-        eq(formalImportSimulations.id, simulationId),
-        eq(formalImportSimulations.userId, user.id)
-      )
-    });
-    
-    if (!simulation) {
-      return res.status(404).json({ error: 'Simulação não encontrada' });
-    }
-    
-    await db.delete(formalImportSimulations).where(eq(formalImportSimulations.id, simulationId));
-    
-    res.json({ message: 'Simulação excluída com sucesso' });
-  } catch (error) {
-    console.error('Error deleting formal import simulation:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
-
-// Duplicate a formal import simulation
-router.post('/formal-import/:id/duplicate', requireAuth, async (req, res) => {
-  try {
-    const user = req.user as { id: number };
-    const simulationId = parseInt(req.params.id);
-    
-    // Get the original simulation
-    const originalSimulation = await db.query.formalImportSimulations.findFirst({
-      where: and(
-        eq(formalImportSimulations.id, simulationId),
-        eq(formalImportSimulations.userId, user.id)
-      )
-    });
-    
-    if (!originalSimulation) {
-      return res.status(404).json({ error: 'Simulação não encontrada' });
-    }
-    
-    // Create a new simulation based on the original
-    const newSimulation = {
-      ...originalSimulation,
-      id: undefined,
-      nome: `${originalSimulation.nome} (Cópia)`,
-      codigoSimulacao: `SIM-${Date.now().toString().slice(-8)}`,
-      dataCriacao: new Date().toISOString(),
-      dataModificacao: new Date().toISOString(),
-      userId: user.id
-    };
-    
-    delete newSimulation.id;
-    
-    const [duplicatedSimulation] = await db
-      .insert(formalImportSimulations)
-      .values(newSimulation)
-      .returning();
-    
-    res.json(duplicatedSimulation);
-  } catch (error) {
-    console.error('Error duplicating formal import simulation:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
 
 export default router;

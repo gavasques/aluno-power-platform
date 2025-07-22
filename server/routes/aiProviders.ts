@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { aiProviderService } from '../services/aiProviderService';
 import { requireAuth } from '../security';
+import { requirePermission } from '../middleware/permissions';
 import { z } from 'zod';
 
 const router = Router();
@@ -38,7 +39,7 @@ const testRequestSchema = z.object({
   selectedCollections: z.array(z.number()).optional()
 });
 
-router.post('/test', requireAuth, async (req, res) => {
+router.post('/test', requireAuth, requirePermission('agents.access'), async (req, res) => {
   try {
     const validatedData = testRequestSchema.parse(req.body);
     
@@ -159,7 +160,7 @@ router.get('/status', requireAuth, async (req, res) => {
 });
 
 // Get All Available Models
-router.get('/models', requireAuth, async (req, res) => {
+router.get('/models', requireAuth, requirePermission('agents.access'), async (req, res) => {
   try {
     const models = await aiProviderService.getAllModels();
     res.json(models);
@@ -170,7 +171,7 @@ router.get('/models', requireAuth, async (req, res) => {
 });
 
 // Get Models by Provider
-router.get('/models/:provider', requireAuth, async (req, res) => {
+router.get('/models/:provider', requireAuth, requirePermission('agents.access'), async (req, res) => {
   try {
     const { provider } = req.params;
     const models = aiProviderService.getModelsByProvider(provider);

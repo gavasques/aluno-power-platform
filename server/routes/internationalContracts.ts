@@ -4,6 +4,7 @@ import { db } from "../db";
 import { internationalSupplierContracts } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth";
+import { requirePermission } from "../middleware/permissions";
 import multer from "multer";
 import path from "path";
 
@@ -53,7 +54,7 @@ const contractSchema = z.object({
 });
 
 // Get contracts for a supplier
-router.get("/supplier/:supplierId", requireAuth, async (req: Request, res: Response) => {
+router.get("/supplier/:supplierId", requireAuth, requirePermission('importacao.manage_contracts'), async (req: Request, res: Response) => {
   try {
     const supplierId = parseInt(req.params.supplierId);
     const userId = (req as any).user.id;
@@ -77,7 +78,7 @@ router.get("/supplier/:supplierId", requireAuth, async (req: Request, res: Respo
 });
 
 // Create new contract
-router.post("/", requireAuth, async (req: Request, res: Response) => {
+router.post("/", requireAuth, requirePermission('importacao.manage_contracts'), async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
     const validatedData = contractSchema.parse({...req.body, userId});
@@ -102,7 +103,7 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
 });
 
 // Update contract
-router.put("/:id", requireAuth, async (req: Request, res: Response) => {
+router.put("/:id", requireAuth, requirePermission('importacao.manage_contracts'), async (req: Request, res: Response) => {
   try {
     const contractId = parseInt(req.params.id);
     const userId = (req as any).user.id;
@@ -137,7 +138,7 @@ router.put("/:id", requireAuth, async (req: Request, res: Response) => {
 });
 
 // Delete contract
-router.delete("/:id", requireAuth, async (req: Request, res: Response) => {
+router.delete("/:id", requireAuth, requirePermission('importacao.manage_contracts'), async (req: Request, res: Response) => {
   try {
     const contractId = parseInt(req.params.id);
     const userId = (req as any).user.id;
@@ -164,7 +165,7 @@ router.delete("/:id", requireAuth, async (req: Request, res: Response) => {
 });
 
 // Upload document to contract
-router.post("/:id/documents", requireAuth, upload.single('document'), async (req: Request, res: Response) => {
+router.post("/:id/documents", requireAuth, requirePermission('importacao.manage_contracts'), upload.single('document'), async (req: Request, res: Response) => {
   try {
     const contractId = parseInt(req.params.id);
     const userId = (req as any).user.id;
@@ -218,7 +219,7 @@ router.post("/:id/documents", requireAuth, upload.single('document'), async (req
 });
 
 // Remove document from contract
-router.delete("/:id/documents/:documentId", requireAuth, async (req: Request, res: Response) => {
+router.delete("/:id/documents/:documentId", requireAuth, requirePermission('importacao.manage_contracts'), async (req: Request, res: Response) => {
   try {
     const contractId = parseInt(req.params.id);
     const documentId = req.params.documentId;

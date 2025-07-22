@@ -3,11 +3,12 @@ import { db } from "../db";
 import { investmentSimulations, type InsertInvestmentSimulation } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "../security";
+import { requirePermission } from "../middleware/permissions";
 
 const router = Router();
 
 // Get all investment simulations for a user
-router.get('/', requireAuth, async (req: Request, res: Response) => {
+router.get('/', requireAuth, requirePermission('simulators.investimentos_roi'), async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
     
@@ -25,7 +26,7 @@ router.get('/', requireAuth, async (req: Request, res: Response) => {
 });
 
 // Get a specific investment simulation
-router.get('/:id', requireAuth, async (req: Request, res: Response) => {
+router.get('/:id', requireAuth, requirePermission('simulators.investimentos_roi'), async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -47,7 +48,7 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
 });
 
 // Create a new investment simulation
-router.post('/', requireAuth, async (req: Request, res: Response) => {
+router.post('/', requireAuth, requirePermission('simulators.investimentos_roi'), async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
     
@@ -69,7 +70,7 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
 });
 
 // Update an investment simulation
-router.put('/:id', requireAuth, async (req: Request, res: Response) => {
+router.put('/:id', requireAuth, requirePermission('simulators.investimentos_roi'), async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);
@@ -101,7 +102,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 });
 
 // Delete an investment simulation
-router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
+router.delete('/:id', requireAuth, requirePermission('simulators.investimentos_roi'), async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
     const simulationId = parseInt(req.params.id);

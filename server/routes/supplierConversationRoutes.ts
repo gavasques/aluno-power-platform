@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { SupplierController } from '../controllers/SupplierController';
 import { requireAuth } from '../security';
+import { requirePermission } from '../middleware/permissions';
 
 /**
  * Supplier Conversation Routes - Additional endpoints for conversation management
@@ -16,7 +17,7 @@ const bindMethod = (method: Function) => method.bind(supplierController);
 /**
  * Conversation Management Routes
  */
-router.put('/:id', requireAuth, bindMethod(supplierController.updateConversation));
-router.delete('/:id', requireAuth, bindMethod(supplierController.deleteConversation));
+router.put('/:id', requireAuth, requirePermission('suppliers.manage'), bindMethod(supplierController.updateConversation));
+router.delete('/:id', requireAuth, requirePermission('suppliers.manage'), bindMethod(supplierController.deleteConversation));
 
 export { router as supplierConversationRoutes };

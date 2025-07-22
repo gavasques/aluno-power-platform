@@ -1,10 +1,11 @@
 import express from 'express';
 import { requireAuth } from '../security';
+import { requirePermission } from '../middleware/permissions';
 
 const router = express.Router();
 
 // GET - Listar produtos importados
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requirePermission('importacao.manage_products'), async (req, res) => {
   try {
     // Mock data for initial implementation
     const products = [];
@@ -32,7 +33,7 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // GET - Buscar produto por ID
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requirePermission('importacao.manage_products'), async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -51,7 +52,7 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 // POST - Criar novo produto
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requirePermission('importacao.manage_products'), async (req, res) => {
   try {
     // Mock creation for now
     res.status(201).json({
@@ -72,7 +73,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // PUT - Atualizar produto
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requirePermission('importacao.manage_products'), async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -95,7 +96,7 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE - Deletar produto
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requireAuth, requirePermission('importacao.manage_products'), async (req, res) => {
   try {
     const { id } = req.params;
     

@@ -1215,6 +1215,23 @@ Preferred communication style: Simple, everyday language.
     - Sistema de login simplificado com uma única rota de entrada
   - **Status**: Sistema de login limpo e otimizado - todas as páginas inativas removidas
 
+- **January 22, 2025 - 7:25 PM**: ✅ COMPREHENSIVE GRANULAR PERMISSIONS SYSTEM COMPLETED - ALL CRITICAL ROUTES PROTECTED
+  - **Objective Achieved**: Complete implementation of granular permission system across all critical system routes
+  - **Routes Protected with Specific Permissions**:
+    - ✅ **Simulators**: `simulators.simples_nacional`, `simulators.importacao_formal`, `simulators.investimentos_roi`
+    - ✅ **Product Management**: `products.manage` for all product channel operations
+    - ✅ **Supplier Management**: `suppliers.manage` for product suppliers and conversations
+    - ✅ **International Contracts**: `importacao.manage_contracts` for all contract operations
+    - ✅ **Imported Products**: `importacao.manage_products` for imported product management
+  - **Security Enhancement**: All CRUD operations now require specific permission codes
+  - **Files Updated**: 
+    - `server/routes/internationalContracts.ts` - Complete contract management protection
+    - `server/routes/importedProducts.ts` - Full imported products protection
+    - `server/routes/supplierConversationRoutes.ts` - Supplier conversation protection
+    - `docs/AUDITORIA_PERMISSOES_GRANULARES.md` - Complete implementation documentation
+  - **System Benefits**: Enterprise-grade access control with granular permission verification
+  - **Status**: Complete granular permission system operational across entire platform
+
 - **January 17, 2025 - 3:10 PM**: ✅ CREDIT SYSTEM UNIFIED & LEGACY TABLE REMOVED - SISTEMA COMPLETAMENTE CORRIGIDO
   - **Root Cause Fixed**: Dashboard API was reading from wrong table (`user_credit_balance` with stale 976 credits) instead of actual `users.credits` field (26 credits)
   - **Database Cleanup**: Removed unused `user_credit_balance` table completely from system

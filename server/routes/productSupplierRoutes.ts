@@ -12,6 +12,7 @@
 import { Router } from 'express';
 import { ProductSupplierController } from '../controllers/ProductSupplierController';
 import { requireAuth } from '../security';
+import { requirePermission } from '../middleware/permissions';
 
 const router = Router();
 
@@ -23,41 +24,41 @@ router.use(requireAuth);
  * @desc    Get all suppliers for a product
  * @access  Private
  */
-router.get('/:productId/suppliers', ProductSupplierController.getProductSuppliers);
+router.get('/:productId/suppliers', requirePermission('products.view_suppliers'), ProductSupplierController.getProductSuppliers);
 
 /**
  * @route   POST /api/products/:productId/suppliers
  * @desc    Add a supplier to a product
  * @access  Private
  */
-router.post('/:productId/suppliers', ProductSupplierController.addProductSupplier);
+router.post('/:productId/suppliers', requirePermission('products.manage_suppliers'), ProductSupplierController.addProductSupplier);
 
 /**
  * @route   PUT /api/products/:productId/suppliers/:supplierId
  * @desc    Update a product supplier
  * @access  Private
  */
-router.put('/:productId/suppliers/:supplierId', ProductSupplierController.updateProductSupplier);
+router.put('/:productId/suppliers/:supplierId', requirePermission('products.manage_suppliers'), ProductSupplierController.updateProductSupplier);
 
 /**
  * @route   DELETE /api/products/:productId/suppliers/:supplierId
  * @desc    Delete a product supplier
  * @access  Private
  */
-router.delete('/:productId/suppliers/:supplierId', ProductSupplierController.deleteProductSupplier);
+router.delete('/:productId/suppliers/:supplierId', requirePermission('products.manage_suppliers'), ProductSupplierController.deleteProductSupplier);
 
 /**
  * @route   PUT /api/products/:productId/suppliers/:supplierId/set-primary
  * @desc    Set a supplier as primary for a product
  * @access  Private
  */
-router.put('/:productId/suppliers/:supplierId/set-primary', ProductSupplierController.setPrimarySupplier);
+router.put('/:productId/suppliers/:supplierId/set-primary', requirePermission('products.manage_suppliers'), ProductSupplierController.setPrimarySupplier);
 
 /**
  * @route   GET /api/products/:productId/suppliers/stats
  * @desc    Get supplier statistics for a product
  * @access  Private
  */
-router.get('/:productId/suppliers/stats', ProductSupplierController.getSupplierStats);
+router.get('/:productId/suppliers/stats', requirePermission('products.view_suppliers'), ProductSupplierController.getSupplierStats);
 
 export { router as productSupplierRoutes };

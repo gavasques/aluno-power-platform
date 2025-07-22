@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { requireAuth } from '../security';
+import { requirePermission } from '../middleware/permissions';
 // Simple validation middleware
 const validateRequest = (schema: any) => {
   return (req: any, res: any, next: any) => {
@@ -70,6 +71,7 @@ const channelUpdateSchema = z.object({
 router.put(
   '/:id/channels',
   requireAuth,
+  requirePermission('products.manage_channels'),
   validateRequest(channelUpdateSchema),
   async (req, res) => {
     try {
@@ -113,6 +115,7 @@ router.put(
 router.get(
   '/:id/channels',
   requireAuth,
+  requirePermission('products.view_channels'),
   async (req, res) => {
     try {
       const productId = parseInt(req.params.id);
