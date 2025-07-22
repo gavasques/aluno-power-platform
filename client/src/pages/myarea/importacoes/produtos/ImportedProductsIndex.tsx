@@ -70,7 +70,7 @@ export default function ImportedProductsIndex() {
   
   const limit = 10;
 
-  // Fetch products
+  // Fetch products using real API
   const { data, isLoading, error, refetch } = useQuery<ImportedProductsResponse>({
     queryKey: ['imported-products', page, search, statusFilter, categoryFilter, sortBy, sortOrder],
     queryFn: async () => {
@@ -85,7 +85,9 @@ export default function ImportedProductsIndex() {
       if (statusFilter) params.append('status', statusFilter);
       if (categoryFilter) params.append('category', categoryFilter);
       
-      const response = await fetch(`/api/imported-products?${params}`);
+      const response = await fetch(`/api/imported-products?${params}`, {
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('Erro ao carregar produtos');
       }
@@ -185,59 +187,7 @@ export default function ImportedProductsIndex() {
         </Link>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm font-medium">Total de Produtos</p>
-                <p className="text-2xl font-bold">{pagination?.total || 0}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-yellow-600" />
-              <div>
-                <p className="text-sm font-medium">Em Processo</p>
-                <p className="text-2xl font-bold">
-                  {products.filter(p => !['arrived', 'cancelled'].includes(p.status)).length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm font-medium">Fornecedores</p>
-                <p className="text-2xl font-bold">
-                  {new Set(products.map(p => p.supplierId).filter(Boolean)).size}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm font-medium">Finalizados</p>
-                <p className="text-2xl font-bold">
-                  {products.filter(p => p.status === 'arrived').length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+
 
       {/* Filters */}
       <Card>
@@ -283,7 +233,7 @@ export default function ImportedProductsIndex() {
               <SelectContent>
                 <SelectItem value="all">Todas as Categorias</SelectItem>
                 {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
+                  <SelectItem key={category} value={category || ''}>
                     {category}
                   </SelectItem>
                 ))}
