@@ -261,7 +261,6 @@ function InternationalSupplierDetail() {
   const contracts = mockContracts;
   const communications = mockCommunications;
   const documents = mockDocuments;
-  const documents = mockDocuments;
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -927,20 +926,20 @@ const ContractManagement = ({ supplierId }: { supplierId: number }) => {
     );
   };
 
-  const formatCurrency = (value: number | undefined, currency: string) => {
-    if (!value) return "-";
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: currency === 'USD' ? 'USD' : 'BRL'
-    }).format(value);
-  };
-
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatCurrency = (value: number | undefined, currency: string) => {
+    if (!value) return "-";
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: currency === 'USD' ? 'USD' : 'BRL'
+    }).format(value);
   };
 
   const handleEdit = (contract: Contract) => {
