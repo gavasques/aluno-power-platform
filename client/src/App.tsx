@@ -68,6 +68,7 @@ const SimuladorSimplificado = lazy(() => import("./pages/simuladores/SimuladorSi
 const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportSimulationsListSimple"));
 const InformalImportSimulator = lazy(() => import("./pages/InformalImportSimulator"));
 const FormalImportSimulator = lazy(() => import("./pages/FormalImportSimulator"));
+const FormalImportSimulatorFixed = lazy(() => import("./pages/FormalImportSimulatorFixed"));
 const FormalImportSimulationsList = lazy(() => import("./pages/FormalImportSimulationsListSimple"));
 const FormalImportSimulationsFixed = lazy(() => import("./pages/FormalImportSimulationsFixed"));
 const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
@@ -840,7 +841,17 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <FormalImportSimulator />
+                                  <FormalImportSimulatorFixed />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          <Route path="/simuladores/importacao-formal-direta/editar/:id">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <FormalImportSimulatorFixed />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

@@ -146,7 +146,7 @@ export default function FormalImportSimulationsFixed() {
           <p className="text-xs text-green-600 mt-1">✅ FIXED VERSION - {simulations.length} simulações carregadas</p>
         </div>
         <Button 
-          onClick={() => setLocation('/simuladores/importacao-formal-direta/novo')}
+          onClick={() => setLocation('/simuladores/importacao-formal-direta/nova')}
           className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
         >
           <PlusIcon className="h-4 w-4" />
@@ -209,7 +209,7 @@ export default function FormalImportSimulationsFixed() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma simulação encontrada</h3>
             <p className="text-gray-500 mb-6">Comece criando sua primeira simulação de importação formal.</p>
             <Button 
-              onClick={() => setLocation('/simuladores/importacao-formal-direta/novo')}
+              onClick={() => setLocation('/simuladores/importacao-formal-direta/nova')}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
@@ -239,7 +239,7 @@ export default function FormalImportSimulationsFixed() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setLocation(`/simuladores/importacao-formal-direta/${simulation.id}`)}
+                    onClick={() => setLocation(`/simuladores/importacao-formal-direta/editar/${simulation.id}`)}
                   >
                     <EditIcon className="h-4 w-4 mr-1" />
                     Editar
