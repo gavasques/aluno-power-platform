@@ -39,14 +39,19 @@ export default function FormalImportSimulationsListSimple() {
       const data = await response.json();
       console.log('✅ API Success - Data received:', data?.length || 0, 'items');
       return data;
-    },
-    onError: (error: any) => {
-      console.error('❌ Query Error:', error);
-    },
-    onSuccess: (data: any) => {
-      console.log('✅ Query Success:', data?.length || 0, 'simulations loaded');
     }
   });
+
+  // Add effect to track query state changes
+  React.useEffect(() => {
+    console.log('🔄 Query state changed:', { isLoading, isError, dataLength: simulations?.length });
+    if (!isLoading && !isError && simulations?.length >= 0) {
+      console.log('✅ Query completed successfully with data:', simulations?.length, 'simulations');
+    }
+    if (isError) {
+      console.error('❌ Query error detected:', error);
+    }
+  }, [isLoading, isError, simulations, error]);
 
   const formatDate = (date: string) => {
     try {
