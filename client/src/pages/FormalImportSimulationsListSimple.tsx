@@ -8,49 +8,25 @@ import { Plus, Package, Calendar } from 'lucide-react';
 export default function FormalImportSimulationsListSimple() {
   const [, setLocation] = useLocation();
 
-  // Fetch simulations with detailed debugging
-  const { data: simulations = [], isLoading, error, isError } = useQuery<any[]>({
+  // Direct fetch with React Query - simplified approach
+  const { data: simulations = [], isLoading, error, isError } = useQuery({
     queryKey: ['/api/simulators/formal-import'],
-    staleTime: 0, // No cache for testing
-    retry: 1,
-    refetchOnMount: true,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
     refetchOnWindowFocus: false,
-    queryFn: async () => {
-      console.log('🚀 QUERY: Starting API call to /api/simulators/formal-import');
-      const token = localStorage.getItem('auth_token');
-      console.log('🔑 TOKEN:', token ? 'Present' : 'Missing');
-      
-      const response = await fetch('/api/simulators/formal-import', {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-      });
-      
-      console.log('📡 RESPONSE Status:', response.status);
-      console.log('📡 RESPONSE OK:', response.ok);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ API Error:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-      
-      const data = await response.json();
-      console.log('✅ API Success - Data received:', data?.length || 0, 'items');
-      return data;
-    }
+    enabled: true,
   });
 
-  // Add effect to track query state changes
+  // Debug logging
   React.useEffect(() => {
-    console.log('🔄 Query state changed:', { isLoading, isError, dataLength: simulations?.length });
-    if (!isLoading && !isError && simulations?.length >= 0) {
-      console.log('✅ Query completed successfully with data:', simulations?.length, 'simulations');
-    }
-    if (isError) {
-      console.error('❌ Query error detected:', error);
-    }
+    console.log('🔄 SIMPLIFIED Query state:', { 
+      isLoading, 
+      isError, 
+      dataLength: simulations?.length,
+      hasData: !!simulations?.length,
+      errorMessage: error?.message
+    });
   }, [isLoading, isError, simulations, error]);
 
   const formatDate = (date: string) => {
