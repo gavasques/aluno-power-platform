@@ -8,12 +8,44 @@ import { Plus, Package, Calendar } from 'lucide-react';
 export default function FormalImportSimulationsListSimple() {
   const [, setLocation] = useLocation();
 
-  // Fetch simulations with simplified query
-  const { data: simulations = [], isLoading, error } = useQuery<any[]>({
+  // Fetch simulations with detailed debugging
+  const { data: simulations = [], isLoading, error, isError } = useQuery<any[]>({
     queryKey: ['/api/simulators/formal-import'],
-    staleTime: 10000,
-    retry: 3,
-
+    staleTime: 0, // No cache for testing
+    retry: 1,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      console.log('🚀 QUERY: Starting API call to /api/simulators/formal-import');
+      const token = localStorage.getItem('auth_token');
+      console.log('🔑 TOKEN:', token ? 'Present' : 'Missing');
+      
+      const response = await fetch('/api/simulators/formal-import', {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+      
+      console.log('📡 RESPONSE Status:', response.status);
+      console.log('📡 RESPONSE OK:', response.ok);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ API Success - Data received:', data?.length || 0, 'items');
+      return data;
+    },
+    onError: (error: any) => {
+      console.error('❌ Query Error:', error);
+    },
+    onSuccess: (data: any) => {
+      console.log('✅ Query Success:', data?.length || 0, 'simulations loaded');
+    }
   });
 
   const formatDate = (date: string) => {
@@ -35,7 +67,13 @@ export default function FormalImportSimulationsListSimple() {
     }
   };
 
-  console.log('🔍 Component state:', { isLoading, error, simulationsCount: simulations?.length });
+  console.log('🔍 Component state:', { 
+    isLoading, 
+    isError,
+    error: error?.message || null, 
+    simulationsCount: simulations?.length,
+    hasToken: !!localStorage.getItem('auth_token')
+  });
 
   if (isLoading) {
     return (
