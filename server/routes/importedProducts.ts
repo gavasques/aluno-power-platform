@@ -114,3 +114,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
 });
 
 export default router;
+
+export function registerImportedProductsRoutes(app: any) {
+  app.use('/api/imported-products', router);
+}

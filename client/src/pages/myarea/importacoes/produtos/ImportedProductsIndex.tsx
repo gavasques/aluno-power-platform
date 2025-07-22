@@ -86,13 +86,10 @@ export default function ImportedProductsIndex() {
       if (statusFilter) params.append('status', statusFilter);
       if (categoryFilter) params.append('category', categoryFilter);
       
-      const token = localStorage.getItem('token');
-      console.log('[IMPORTED_PRODUCTS] Token exists:', !!token);
-      
       const response = await fetch(`/api/imported-products?${params}`, {
+        method: 'GET',
         credentials: 'include',
         headers: {
-          'Authorization': token ? `Bearer ${token}` : '',
           'Content-Type': 'application/json'
         }
       });
@@ -146,12 +143,10 @@ export default function ImportedProductsIndex() {
     }
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/imported-products/${id}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
-          'Authorization': token ? `Bearer ${token}` : '',
           'Content-Type': 'application/json'
         }
       });
