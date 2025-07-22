@@ -69,6 +69,7 @@ const InformalImportSimulationsList = lazy(() => import("./pages/InformalImportS
 const InformalImportSimulator = lazy(() => import("./pages/InformalImportSimulator"));
 const FormalImportSimulator = lazy(() => import("./pages/FormalImportSimulator"));
 const FormalImportSimulationsList = lazy(() => import("./pages/FormalImportSimulationsListSimple"));
+const FormalImportSimulationsFixed = lazy(() => import("./pages/FormalImportSimulationsFixed"));
 const SimplesNacional = lazy(() => import("./pages/simuladores/SimplesNacional"));
 const SimplesNacionalCompleto = lazy(() => import("./pages/simuladores/SimplesNacionalCompleto"));
 const InvestimentosROI = lazy(() => import("./pages/simuladores/InvestimentosROI"));
@@ -828,7 +829,7 @@ function App() {
                             <ProtectedRoute>
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
-                                  <FormalImportSimulationsList />
+                                  <FormalImportSimulationsFixed />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>
