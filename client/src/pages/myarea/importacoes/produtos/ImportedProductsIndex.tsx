@@ -74,6 +74,7 @@ export default function ImportedProductsIndex() {
   const { data, isLoading, error, refetch } = useQuery<ImportedProductsResponse>({
     queryKey: ['imported-products', page, search, statusFilter, categoryFilter, sortBy, sortOrder],
     queryFn: async () => {
+      console.log('[IMPORTED_PRODUCTS] Starting API call...');
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -85,15 +86,32 @@ export default function ImportedProductsIndex() {
       if (statusFilter) params.append('status', statusFilter);
       if (categoryFilter) params.append('category', categoryFilter);
       
+      const token = localStorage.getItem('token');
+      console.log('[IMPORTED_PRODUCTS] Token exists:', !!token);
+      
       const response = await fetch(`/api/imported-products?${params}`, {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json'
+        }
       });
+      
+      console.log('[IMPORTED_PRODUCTS] Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Erro ao carregar produtos');
+        const errorText = await response.text();
+        console.error('[IMPORTED_PRODUCTS] Error response:', errorText);
+        throw new Error(`Erro ${response.status}: ${errorText}`);
       }
-      return response.json();
+      
+      const result = await response.json();
+      console.log('[IMPORTED_PRODUCTS] Success:', result);
+      return result;
     },
     staleTime: 30000, // 30 seconds
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   const products = data?.data?.products || [];
@@ -128,8 +146,14 @@ export default function ImportedProductsIndex() {
     }
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/imported-products/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -155,11 +179,13 @@ export default function ImportedProductsIndex() {
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
 
   if (error) {
+    console.error('[IMPORTED_PRODUCTS] Render error:', error);
     return (
       <div className="container mx-auto py-8">
         <Card>
           <CardContent className="p-8 text-center">
             <p className="text-red-600">Erro ao carregar produtos importados</p>
+            <p className="text-sm text-gray-500 mt-2">{error.message}</p>
             <Button onClick={() => refetch()} className="mt-4">
               Tentar Novamente
             </Button>
