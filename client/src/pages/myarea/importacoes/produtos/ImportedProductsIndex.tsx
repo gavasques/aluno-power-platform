@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Edit, Eye, Trash2, Package, Building2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,14 +66,19 @@ export default function ImportedProductsIndex() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [data, setData] = useState<ImportedProductsResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   
   const limit = 10;
 
-  // Fetch products using real API
-  const { data, isLoading, error, refetch } = useQuery<ImportedProductsResponse>({
-    queryKey: ['imported-products', page, search, statusFilter, categoryFilter, sortBy, sortOrder],
-    queryFn: async () => {
+  // Fetch products using native fetch with authentication
+  const fetchProducts = async () => {
+    try {
       console.log('[IMPORTED_PRODUCTS] Starting API call...');
+      setIsLoading(true);
+      setError(null);
+
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -86,12 +90,13 @@ export default function ImportedProductsIndex() {
       if (statusFilter) params.append('status', statusFilter);
       if (categoryFilter) params.append('category', categoryFilter);
       
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(`/api/imported-products?${params}`, {
         method: 'GET',
-        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
       });
       
       console.log('[IMPORTED_PRODUCTS] Response status:', response.status);
@@ -104,12 +109,19 @@ export default function ImportedProductsIndex() {
       
       const result = await response.json();
       console.log('[IMPORTED_PRODUCTS] Success:', result);
-      return result;
-    },
-    staleTime: 30000, // 30 seconds
-    retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-  });
+      setData(result);
+      setIsLoading(false);
+    } catch (err: any) {
+      console.error('[IMPORTED_PRODUCTS] Error:', err);
+      setError(err);
+      setIsLoading(false);
+    }
+  };
+
+  // Load data on component mount and when dependencies change
+  useEffect(() => {
+    fetchProducts();
+  }, [page, search, statusFilter, categoryFilter, sortBy, sortOrder]);
 
   const products = data?.data?.products || [];
   const pagination = data?.data?.pagination;
@@ -143,12 +155,13 @@ export default function ImportedProductsIndex() {
     }
 
     try {
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(`/api/imported-products/${id}`, {
         method: 'DELETE',
-        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
       });
 
       if (!response.ok) {
@@ -160,7 +173,7 @@ export default function ImportedProductsIndex() {
         description: 'Produto deletado com sucesso',
       });
 
-      refetch();
+      fetchProducts();
     } catch (error) {
       toast({
         title: 'Erro',
@@ -181,7 +194,7 @@ export default function ImportedProductsIndex() {
           <CardContent className="p-8 text-center">
             <p className="text-red-600">Erro ao carregar produtos importados</p>
             <p className="text-sm text-gray-500 mt-2">{error.message}</p>
-            <Button onClick={() => refetch()} className="mt-4">
+            <Button onClick={() => fetchProducts()} className="mt-4">
               Tentar Novamente
             </Button>
           </CardContent>
