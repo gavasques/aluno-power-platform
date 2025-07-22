@@ -189,7 +189,7 @@ export default function ProductBasicDataEditRefactored() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Nenhuma marca</SelectItem>
+                      <SelectItem value="none">Nenhuma marca</SelectItem>
                       {brands.map((brand: any) => (
                         <SelectItem key={brand.id} value={brand.id.toString()}>
                           {brand.name}
@@ -215,7 +215,7 @@ export default function ProductBasicDataEditRefactored() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Nenhum fornecedor</SelectItem>
+                      <SelectItem value="none">Nenhum fornecedor</SelectItem>
                       {suppliers.map((supplier: any) => (
                         <SelectItem key={supplier.id} value={supplier.id.toString()}>
                           {supplier.tradeName || supplier.corporateName}

@@ -770,7 +770,7 @@ export function KnowledgeBaseManager() {
                     <SelectValue placeholder="Selecione uma coleção" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">
+                    <SelectItem value="none">
                       <span className="text-muted-foreground">Nenhuma coleção</span>
                     </SelectItem>
                     {collections.map(collection => (

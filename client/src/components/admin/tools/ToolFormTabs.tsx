@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Trash2 } from 'lucide-react';
-import { ToolVideoManager } from '@/components/videos/ToolVideoManager';
+import { ToolVideoManager } from '@/components/videos/ToolVideoManager.tsx';
 import { ToolDiscounts } from '@/components/discounts/ToolDiscounts';
 import type { ToolFormData } from './ToolFormTypes';
 import type { Tool as DbTool } from '@shared/schema';

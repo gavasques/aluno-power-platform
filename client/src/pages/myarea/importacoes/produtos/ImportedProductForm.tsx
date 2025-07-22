@@ -610,7 +610,7 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Nenhum fornecedor</SelectItem>
+                        <SelectItem value="none">Nenhum fornecedor</SelectItem>
                         {suppliers?.map((supplier: any) => (
                           <SelectItem key={supplier.id} value={supplier.id.toString()}>
                             {supplier.name} - {supplier.country}

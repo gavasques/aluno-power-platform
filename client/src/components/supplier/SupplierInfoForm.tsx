@@ -113,7 +113,7 @@ export const SupplierInfoForm: React.FC<SupplierInfoFormProps> = ({
                 <SelectValue placeholder={departmentsLoading ? "Carregando..." : "Selecione uma categoria"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sem categoria</SelectItem>
+                <SelectItem value="none">Sem categoria</SelectItem>
                 {departments.map((department) => (
                   <SelectItem key={department.id} value={department.id.toString()}>
                     {department.name}
