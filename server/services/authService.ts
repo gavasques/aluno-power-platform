@@ -530,6 +530,36 @@ export class AuthService {
     return resetToken;
   }
 
+  // Generate password reset code (6 digits)
+  static generateResetCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  // Generate password reset code and store in database
+  static async generatePasswordResetCode(email: string): Promise<string | null> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+
+    if (!user) {
+      return null;
+    }
+
+    const resetCode = this.generateResetCode();
+    const resetCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await db
+      .update(users)
+      .set({
+        passwordResetCode: resetCode,
+        passwordResetCodeExpiry: resetCodeExpiry,
+      })
+      .where(eq(users.id, user.id));
+
+    return resetCode;
+  }
+
   // Reset password
   static async resetPassword(resetToken: string, newPassword: string): Promise<boolean> {
     const [user] = await db
@@ -558,6 +588,53 @@ export class AuthService {
       .where(eq(users.id, user.id));
 
     return true;
+  }
+
+  // Reset password with code
+  static async resetPasswordWithCode(email: string, resetCode: string, newPassword: string): Promise<boolean> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.email, email),
+          eq(users.passwordResetCode, resetCode),
+          gt(users.passwordResetCodeExpiry, new Date())
+        )
+      );
+
+    if (!user) {
+      return false;
+    }
+
+    const hashedPassword = await this.hashPassword(newPassword);
+
+    await db
+      .update(users)
+      .set({
+        password: hashedPassword,
+        passwordResetCode: null,
+        passwordResetCodeExpiry: null,
+      })
+      .where(eq(users.id, user.id));
+
+    return true;
+  }
+
+  // Verify reset code
+  static async verifyResetCode(email: string, resetCode: string): Promise<boolean> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.email, email),
+          eq(users.passwordResetCode, resetCode),
+          gt(users.passwordResetCodeExpiry, new Date())
+        )
+      );
+
+    return !!user;
   }
 
   // Get user by email

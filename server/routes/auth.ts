@@ -157,6 +157,152 @@ const resetPasswordSchema = z.object({
   type: z.enum(['email', 'phone'])
 });
 
+// POST /api/auth/forgot-password-code - Send verification code via email
+router.post('/forgot-password-code', async (req, res) => {
+  try {
+    const { email } = z.object({
+      email: z.string().email('Email inválido')
+    }).parse(req.body);
+
+    console.log('🔐 [AUTH_ROUTE] /forgot-password-code endpoint reached for:', email);
+
+    const resetCode = await AuthService.generatePasswordResetCode(email);
+    
+    if (!resetCode) {
+      return res.status(404).json({
+        success: false,
+        message: 'Email não encontrado'
+      });
+    }
+
+    // Send email with code
+    try {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      await emailService.sendPasswordResetCodeEmail(email, resetCode, user?.name);
+      console.log(`🔐 [AUTH_ROUTE] Password reset code sent to: ${email}`);
+      
+      return res.json({
+        success: true,
+        message: 'Código de verificação enviado para o seu email!'
+      });
+    } catch (emailError) {
+      console.error('[AUTH] Error sending password reset code email:', emailError);
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao enviar email de recuperação'
+      });
+    }
+
+  } catch (error) {
+    console.error('[AUTH] Error in forgot-password-code:', error);
+    
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: error.errors[0].message,
+        errors: error.errors
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno do servidor'
+    });
+  }
+});
+
+// POST /api/auth/verify-reset-code - Verify reset code
+router.post('/verify-reset-code', async (req, res) => {
+  try {
+    const { email, code } = z.object({
+      email: z.string().email('Email inválido'),
+      code: z.string().min(6, 'Código deve ter 6 dígitos')
+    }).parse(req.body);
+
+    const isValid = await AuthService.verifyResetCode(email, code);
+    
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Código inválido ou expirado'
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Código verificado com sucesso!'
+    });
+
+  } catch (error) {
+    console.error('[AUTH] Error in verify-reset-code:', error);
+    
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: error.errors[0].message,
+        errors: error.errors
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno do servidor'
+    });
+  }
+});
+
+// POST /api/auth/reset-password-with-code - Reset password using code
+router.post('/reset-password-with-code', async (req, res) => {
+  try {
+    const { email, code, newPassword } = z.object({
+      email: z.string().email('Email inválido'),
+      code: z.string().min(6, 'Código deve ter 6 dígitos'),
+      newPassword: z.string()
+        .min(8, 'Senha deve ter pelo menos 8 caracteres')
+        .regex(/(?=.*[a-z])/, 'Senha deve conter pelo menos uma letra minúscula')
+        .regex(/(?=.*[A-Z])/, 'Senha deve conter pelo menos uma letra maiúscula')
+        .regex(/(?=.*\d)/, 'Senha deve conter pelo menos um número')
+    }).parse(req.body);
+
+    const success = await AuthService.resetPasswordWithCode(email, code, newPassword);
+    
+    if (!success) {
+      return res.status(400).json({
+        success: false,
+        message: 'Código inválido ou expirado'
+      });
+    }
+
+    console.log(`[AUTH] Password reset successfully using code for: ${email}`);
+
+    return res.json({
+      success: true,
+      message: 'Senha redefinida com sucesso!'
+    });
+
+  } catch (error) {
+    console.error('[AUTH] Error in reset-password-with-code:', error);
+    
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: error.errors[0].message,
+        errors: error.errors
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno do servidor'
+    });
+  }
+});
+
 // POST /api/auth/forgot-password - Dual recovery (email/phone)
 router.post('/forgot-password', async (req, res) => {
   try {

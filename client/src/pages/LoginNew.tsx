@@ -17,6 +17,7 @@ import { Helmet } from 'react-helmet-async';
 import { Footer } from '@/components/layout/Footer';
 import { Link } from 'wouter';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ForgotPasswordCodeForm } from '@/components/auth/ForgotPasswordCodeForm';
 import logoPath from '@assets/Asset 14-8_1752953662731.png';
 
 interface FeatureCardProps {
@@ -60,6 +61,7 @@ export default function LoginNew() {
   const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
+  const [isForgotPasswordCodeModalOpen, setIsForgotPasswordCodeModalOpen] = useState(false);
   const [forgotPasswordErrors, setForgotPasswordErrors] = useState<Record<string, string>>({});
   const [forgotPasswordData, setForgotPasswordData] = useState({
     identifier: '',
@@ -479,13 +481,22 @@ export default function LoginNew() {
 
                   {/* Footer Links */}
                   <div className="mt-6 text-center space-y-3">
-                    <button 
-                      type="button"
-                      onClick={() => setIsForgotPasswordModalOpen(true)}
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline transition-all duration-200"
-                    >
-                      Esqueci minha senha
-                    </button>
+                    <div className="flex flex-col gap-2">
+                      <button 
+                        type="button"
+                        onClick={() => setIsForgotPasswordCodeModalOpen(true)}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline transition-all duration-200"
+                      >
+                        Esqueci minha senha (Código por Email)
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setIsForgotPasswordModalOpen(true)}
+                        className="text-gray-500 hover:text-gray-700 text-xs font-medium hover:underline transition-all duration-200"
+                      >
+                        Outras opções de recuperação
+                      </button>
+                    </div>
                     <div className="text-gray-500 text-sm">
                       Ainda não tem acesso? {' '}
                       <Dialog open={isRegisterModalOpen} onOpenChange={setIsRegisterModalOpen}>
@@ -1011,6 +1022,15 @@ export default function LoginNew() {
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Forgot Password Code Modal */}
+        <Dialog open={isForgotPasswordCodeModalOpen} onOpenChange={setIsForgotPasswordCodeModalOpen}>
+          <DialogContent className="sm:max-w-md p-0">
+            <ForgotPasswordCodeForm 
+              onBack={() => setIsForgotPasswordCodeModalOpen(false)}
+            />
           </DialogContent>
         </Dialog>
         

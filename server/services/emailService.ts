@@ -116,6 +116,17 @@ class EmailService {
     });
   }
 
+  public async sendPasswordResetCodeEmail(email: string, resetCode: string, userName?: string): Promise<boolean> {
+    const template = this.getPasswordResetCodeTemplate(resetCode, userName);
+    
+    return await this.sendEmail({
+      to: email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text
+    });
+  }
+
   public async sendWelcomeEmail(email: string, userName: string): Promise<boolean> {
     const template = this.getWelcomeTemplate(userName);
     
@@ -213,6 +224,86 @@ class EmailService {
         - Este link expira em 1 hora
         - Use apenas se você solicitou a redefinição
         - Nunca compartilhe este link
+        
+        Se você não fez esta solicitação, ignore este email.
+        
+        ---
+        Core Guilherme Vasques
+      `
+    };
+  }
+
+  private getPasswordResetCodeTemplate(resetCode: string, userName?: string): EmailTemplate {
+    const displayName = userName || 'Usuário';
+    
+    return {
+      subject: 'Código de verificação - Core Guilherme Vasques',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Código de Verificação</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+            .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+            .header { text-align: center; padding: 20px 0; border-bottom: 2px solid #3b82f6; margin-bottom: 30px; }
+            .logo { font-size: 24px; font-weight: bold; color: #3b82f6; }
+            .content { padding: 20px 0; }
+            .code-box { background: #f8f9fa; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+            .code { font-size: 32px; font-weight: bold; color: #3b82f6; letter-spacing: 8px; font-family: monospace; }
+            .footer { text-align: center; padding: 20px 0; border-top: 1px solid #eee; margin-top: 30px; color: #666; font-size: 14px; }
+            .warning { background: #fef3cd; border: 1px solid #fecaca; padding: 15px; border-radius: 6px; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">Core Guilherme Vasques</div>
+            </div>
+            
+            <div class="content">
+              <h2>Olá, ${displayName}!</h2>
+              
+              <p>Recebemos uma solicitação para redefinir sua senha. Use o código abaixo para continuar:</p>
+              
+              <div class="code-box">
+                <div class="code">${resetCode}</div>
+              </div>
+              
+              <div class="warning">
+                <strong>⚠️ Importante:</strong>
+                <ul>
+                  <li>Este código expira em 10 minutos por segurança</li>
+                  <li>Use apenas se você solicitou a redefinição</li>
+                  <li>Nunca compartilhe este código com outras pessoas</li>
+                </ul>
+              </div>
+              
+              <p>Se você não fez esta solicitação, ignore este email e seu acesso permanecerá seguro.</p>
+            </div>
+            
+            <div class="footer">
+              <p>Esta é uma mensagem automática, não responda este email.</p>
+              <p>© ${new Date().getFullYear()} Core Guilherme Vasques - Todos os direitos reservados</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+        Olá, ${displayName}!
+        
+        Recebemos uma solicitação para redefinir sua senha.
+        
+        Use este código para continuar:
+        ${resetCode}
+        
+        IMPORTANTE:
+        - Este código expira em 10 minutos
+        - Use apenas se você solicitou a redefinição
+        - Nunca compartilhe este código
         
         Se você não fez esta solicitação, ignore este email.
         
