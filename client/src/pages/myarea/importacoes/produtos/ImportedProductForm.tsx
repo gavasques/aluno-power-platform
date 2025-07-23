@@ -129,6 +129,8 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
       return Array.isArray(result) ? result : (result.data || []);
     },
     enabled: !!token, // Only run query when token is available
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
   
   // Fetch user brands for selection
@@ -152,16 +154,20 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
       return Array.isArray(result) ? result : (result.data || []);
     },
     enabled: !!token, // Only run query when token is available
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Ensure data is always an array (fallback for React Query timing issues)
+  const departmentsArray = Array.isArray(departments) ? departments : [];
+  const brandsArray = Array.isArray(brands) ? brands : [];
 
   // Debug logs for rendering (after all queries are declared)
   console.log('[DEBUG] Token:', !!token);
   console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'error:', departmentsError, 'data:', departments, 'length:', departments?.length);
   console.log('[DEBUG] Brands loading:', isBrandsLoading, 'error:', brandsError, 'data:', brands, 'length:', brands?.length);
-  
-  // Additional debug for React Query state
-  console.log('[DEBUG] Departments actual data structure:', JSON.stringify(departments));
-  console.log('[DEBUG] Brands actual data structure:', JSON.stringify(brands));
+  console.log('[DEBUG] Departments fallback array:', departmentsArray, 'length:', departmentsArray.length);
+  console.log('[DEBUG] Brands fallback array:', brandsArray, 'length:', brandsArray.length);
 
   // Fill form with existing data
   useEffect(() => {
@@ -387,14 +393,14 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                               Erro ao carregar categorias
                             </div>
                           )}
-                          {Array.isArray(departments) ? departments.map((department: any) => {
+                          {departmentsArray.map((department: any) => {
                             console.log('[DEBUG] Rendering department:', department);
                             return (
                               <SelectItem key={department.id} value={department.name || `dept-${department.id}`}>
                                 {department.name || 'Nome não disponível'}
                               </SelectItem>
                             );
-                          }) : null}
+                          })}
                           {!isDepartmentsLoading && !departmentsError && (!departments || departments.length === 0) && (
                             <div className="p-2 text-center text-sm text-gray-500">
                               Nenhuma categoria disponível
@@ -430,14 +436,14 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                               Erro ao carregar marcas
                             </div>
                           )}
-                          {Array.isArray(brands) ? brands.map((brand: any) => {
+                          {brandsArray.map((brand: any) => {
                             console.log('[DEBUG] Rendering brand:', brand);
                             return (
                               <SelectItem key={brand.id} value={brand.name || `brand-${brand.id}`}>
                                 {brand.name || 'Nome não disponível'}
                               </SelectItem>
                             );
-                          }) : null}
+                          })}
                           {!isBrandsLoading && !brandsError && (!brands || brands.length === 0) && (
                             <div className="p-2 text-center text-sm text-gray-500">
                               Nenhuma marca disponível
