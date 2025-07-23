@@ -145,10 +145,6 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     enabled: !!token, // Only run query when token is available
   });
   
-  // Debug logs for rendering
-  console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'data:', departments);
-  console.log('[DEBUG] Brands loading:', isBrandsLoading, 'data:', brands);
-
   // Fetch user brands for selection
   const { data: brands, isLoading: isBrandsLoading, error: brandsError } = useQuery({
     queryKey: ['brands-list-user'],
@@ -171,6 +167,10 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     },
     enabled: !!token, // Only run query when token is available
   });
+
+  // Debug logs for rendering (after all queries are declared)
+  console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'data:', departments);
+  console.log('[DEBUG] Brands loading:', isBrandsLoading, 'data:', brands);
 
   // Fill form with existing data
   useEffect(() => {
