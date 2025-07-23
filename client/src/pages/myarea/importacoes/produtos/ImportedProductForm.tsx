@@ -343,7 +343,7 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Nome do Produto *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Maca Portátil Dobrável" {...field} />
+                        <Input placeholder="Digite o nome do produto" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
