@@ -331,7 +331,8 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Primeira linha: Nome do Produto, Código Interno, Status */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="name"
@@ -384,7 +385,10 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     </FormItem>
                   )}
                 />
+              </div>
 
+              {/* Segunda linha: Categoria, Marca, Modelo, Referência */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
                   name="category"
@@ -538,8 +542,8 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                 )}
               />
 
-              {/* Linha 1: Cor, Tamanho, Variação 1, Variação 2 */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {/* Terceira linha: Cor, Tamanho, Variação 1, Variação 2 */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
                   name="color"
@@ -597,8 +601,8 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                 />
               </div>
 
-              {/* Linha 2: Material, Código HS, NCM */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Quarta linha: Material, Código HS, NCM */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="material"
@@ -642,8 +646,8 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                 />
               </div>
 
-              {/* Linha 3: Percentual de IPI e Descrição para Alfândega */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Quinta linha: Percentual de IPI e Descrição para Alfândega */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="ipiPercentage"
@@ -681,8 +685,8 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                 />
               </div>
 
-              {/* Linha 4: Códigos EAN, UPC, Código de Barras Interno */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Sexta linha: Códigos EAN, UPC, Código de Barras Interno */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="productEan"
