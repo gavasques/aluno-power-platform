@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Plus, Edit, Save, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Supplier {
   id: number;
@@ -47,6 +48,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
   const [showAddForm, setShowAddForm] = useState(false);
   const [isTemporaryMode, setIsTemporaryMode] = useState(!productId || productId === '');
   const { toast } = useToast();
+  const { token } = useAuth();
 
   // Estados para o formulário de adição/edição
   const [formData, setFormData] = useState({
@@ -59,8 +61,10 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
 
   // Carregar dados inicial
   useEffect(() => {
-    loadData();
-  }, [productId]);
+    if (token) {
+      loadData();
+    }
+  }, [productId, token]);
 
   useEffect(() => {
     setIsTemporaryMode(!productId || productId === '');
@@ -70,12 +74,22 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
     try {
       setLoading(true);
       
+      console.error('🔍 [DEBUG] LoadData iniciado - token:', !!token, 'productId:', productId);
+      
+      if (!token) {
+        console.error('❌ [ERROR] Token não disponível');
+        return;
+      }
+      
       // Carregar fornecedores do CRM
       const suppliersResponse = await fetch('/api/suppliers', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+      
+      console.error('🔍 [DEBUG] Resposta suppliers:', suppliersResponse.status);
       
       if (suppliersResponse.ok) {
         const suppliersData = await suppliersResponse.json();
@@ -86,7 +100,8 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
       if (productId && productId !== '') {
         const productSuppliersResponse = await fetch(`/api/imported-products/${productId}/suppliers`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         });
 
@@ -147,7 +162,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(formData)
         });
@@ -193,7 +208,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formData)
       });
@@ -241,7 +256,8 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
         const response = await fetch(`/api/imported-products/${productId}/suppliers/${supplierIdOrTempId}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         });
 
@@ -310,7 +326,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(supplierData)
         });
