@@ -3671,4 +3671,29 @@ export const insertProductNoteSchema = createInsertSchema(productNotes).omit({
 export type InsertProductNote = z.infer<typeof insertProductNoteSchema>;
 export type ProductNote = typeof productNotes.$inferSelect;
 
+// Product Suppliers - System for managing multiple suppliers per product
+export const productSuppliers = pgTable("product_suppliers", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  productId: text("product_id").references(() => importedProducts.id).notNull(),
+  supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
+  supplierProductCode: text("supplier_product_code"), // Código do Produto no Fornecedor
+  supplierProductName: text("supplier_product_name"), // Nome do Produto no Fornecedor
+  moq: integer("moq"), // MOQ (Quantidade Mínima)
+  leadTimeDays: integer("lead_time_days"), // Lead Time (dias)
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  productIdx: index("product_suppliers_product_idx").on(table.productId),
+  supplierIdx: index("product_suppliers_supplier_idx").on(table.supplierId),
+  uniqueProductSupplier: unique().on(table.productId, table.supplierId),
+}));
+
+export const insertProductSupplierSchema = createInsertSchema(productSuppliers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertProductSupplier = z.infer<typeof insertProductSupplierSchema>;
+export type ProductSupplier = typeof productSuppliers.$inferSelect;
+
 
