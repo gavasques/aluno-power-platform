@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Package, Plus, Edit, Trash2, Save, X, Box } from 'lucide-react';
+import { Package, Plus, Edit, Trash2, Save, X, Box, AlertTriangle } from 'lucide-react';
 
 interface ProductPackage {
   id: string;
@@ -40,6 +41,8 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
   const [loading, setLoading] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [packageToDelete, setPackageToDelete] = useState<ProductPackage | null>(null);
   
   const [formData, setFormData] = useState<Partial<ProductPackage>>({
     packageNumber: 1,
@@ -169,13 +172,16 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
     }
   };
 
-  const handleDeletePackage = async (packageId: string) => {
-    if (!token) return;
-    
-    if (!confirm('Tem certeza que deseja excluir esta embalagem?')) return;
+  const handleDeleteClick = (pkg: ProductPackage) => {
+    setPackageToDelete(pkg);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!token || !packageToDelete) return;
     
     try {
-      const response = await fetch(`/api/product-packages/${packageId}`, {
+      const response = await fetch(`/api/product-packages/${packageToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -189,6 +195,8 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
           description: "Embalagem removida com sucesso",
         });
         loadPackages();
+        setShowDeleteModal(false);
+        setPackageToDelete(null);
       } else {
         throw new Error('Erro ao remover embalagem');
       }
@@ -199,6 +207,11 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
         variant: "destructive",
       });
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setPackageToDelete(null);
   };
 
   const startEdit = (pkg: ProductPackage) => {
@@ -532,7 +545,7 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeletePackage(pkg.id)}
+                          onClick={() => handleDeleteClick(pkg)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -597,6 +610,45 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
           </CardContent>
         </Card>
       )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center pb-4">
+            <div className="mx-auto mb-4 w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-white" />
+            </div>
+            <DialogTitle className="text-lg font-semibold text-gray-900">
+              Uma página incorporada em
+            </DialogTitle>
+            <p className="text-sm text-gray-600 font-mono bg-gray-100 px-2 py-1 rounded mt-2">
+              {packageToDelete?.id?.substring(0, 8)}...
+            </p>
+            <p className="text-sm text-gray-700 mt-3">
+              Tem certeza que deseja excluir<br />
+              <strong>esta embalagem?</strong>
+            </p>
+          </DialogHeader>
+          
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline" 
+              onClick={handleDeleteCancel}
+              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleDeleteConfirm}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              OK
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
