@@ -110,6 +110,32 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     },
   });
 
+  // Fetch departments (categories) for selection
+  const { data: departments } = useQuery({
+    queryKey: ['departments-list'],
+    queryFn: async () => {
+      const response = await fetch('/api/departments');
+      if (!response.ok) {
+        throw new Error('Erro ao carregar categorias');
+      }
+      const result = await response.json();
+      return result.data || [];
+    },
+  });
+
+  // Fetch user brands for selection
+  const { data: brands } = useQuery({
+    queryKey: ['brands-list-user'],
+    queryFn: async () => {
+      const response = await fetch('/api/brands');
+      if (!response.ok) {
+        throw new Error('Erro ao carregar marcas');
+      }
+      const result = await response.json();
+      return result.data || [];
+    },
+  });
+
   // Fill form with existing data
   useEffect(() => {
     if (existingProduct?.data && isEditing) {
@@ -312,9 +338,20 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: Eletrônicos" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a categoria" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {departments?.map((department: any) => (
+                            <SelectItem key={department.id} value={department.name}>
+                              {department.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -326,9 +363,20 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Marca</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: BKZA" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a marca" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {brands?.map((brand: any) => (
+                            <SelectItem key={brand.id} value={brand.name}>
+                              {brand.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

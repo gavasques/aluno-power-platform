@@ -1325,6 +1325,25 @@ Preferred communication style: Simple, everyday language.
   - **User Workflow Optimization**: Users can now link products during import instead of manual linking afterward, significantly improving efficiency
   - **Status**: Complete automatic linking system ready for production use with sku_vinculado field functionality
 
+- **January 23, 2025 - 12:22 AM**: ✅ IMPORTED PRODUCT FORM ENHANCED - DATA-DRIVEN SELECT FIELDS FOR CATEGORY AND BRAND
+  - **Objective Achieved**: Converted text input fields to proper data-driven select components for better UX and data consistency
+  - **Category Field Enhancement**:
+    - ✅ **Data Source**: Now pulls from `departments` table (name column) via `/api/departments` endpoint
+    - ✅ **UI Component**: Converted from Input to Select component with proper placeholder
+    - ✅ **User Experience**: Dropdown selection prevents typos and ensures data consistency
+  - **Brand Field Enhancement**:
+    - ✅ **Data Source**: Now pulls from `brands` table filtered by user via `/api/brands` endpoint
+    - ✅ **User Context**: Shows only brands that belong to the logged user (from "Minha Área / Minhas Marcas")
+    - ✅ **UI Component**: Converted from Input to Select component with proper placeholder
+  - **System Benefits**:
+    - Eliminates manual text entry errors
+    - Ensures data consistency across the system
+    - Provides better autocomplete and validation
+    - Integrates with existing brand and department management
+  - **Technical Implementation**: Added `useQuery` hooks for departments and user brands data fetching with proper error handling
+  - **Build Status**: Successful build in 39.07s with no TypeScript errors
+  - **User Experience**: Clean select dropdowns with "Selecione a categoria" and "Selecione a marca" placeholders
+
 - **January 19, 2025 - 1:55 AM**: ✅ SUPPLIER PRODUCTS EXPORT FUNCTIONALITY ADDED - COMPLETE DATA DOWNLOAD CAPABILITY
   - **Objective Achieved**: Added comprehensive export functionality for supplier product data with Excel format output
   - **Export Features Implemented**:
