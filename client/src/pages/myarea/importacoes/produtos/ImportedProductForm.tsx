@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'wouter';
 
 // Validation schema
@@ -65,6 +66,7 @@ interface ImportedProductFormProps {
 
 export default function ImportedProductForm({ productId }: ImportedProductFormProps) {
   const { toast } = useToast();
+  const { token } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,7 +90,6 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     queryKey: ['imported-product', productId],
     queryFn: async () => {
       if (!productId) return null;
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/imported-products/${productId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -107,7 +108,6 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
   const { data: suppliers } = useQuery({
     queryKey: ['suppliers-list'],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/suppliers/search?limit=100', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -127,7 +127,6 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     queryKey: ['departments-list'],
     queryFn: async () => {
       console.log('[DEPARTMENTS] Starting API call...');
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/departments', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,7 +149,6 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     queryKey: ['brands-list-user'],
     queryFn: async () => {
       console.log('[BRANDS] Starting API call...');
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/brands', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -212,7 +210,6 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
       
       const method = isEditing ? 'PUT' : 'POST';
       
-      const token = localStorage.getItem('token');
       const response = await fetch(url, {
         method,
         headers: {
