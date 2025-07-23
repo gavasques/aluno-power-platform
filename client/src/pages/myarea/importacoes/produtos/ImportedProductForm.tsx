@@ -183,8 +183,18 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
 
   // Fill form with existing data
   useEffect(() => {
+    console.error('🔍 [DEBUG] useEffect executado:', { existingProduct, isEditing, hasData: !!existingProduct?.data });
+    
     if (existingProduct?.data && isEditing) {
+      // A API retorna {success: true, data: produto}, então existingProduct.data é o produto
       const product = existingProduct.data;
+      
+      console.error('🔍 [DEBUG] Dados do produto carregados:', {
+        productName: product.name,
+        productCode: product.internalCode,
+        productStatus: product.status,
+        productKeys: Object.keys(product)
+      });
       
       // Mapear status da API para valores do formulário
       const statusMapping: Record<string, string> = {
@@ -194,6 +204,7 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
       };
       
       const mappedStatus = statusMapping[product.status] || 'Em Desenvolvimento';
+      console.error('🔍 [DEBUG] Status mapeado:', mappedStatus);
       
       form.reset({
         name: product.name || '',
