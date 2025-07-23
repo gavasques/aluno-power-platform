@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,12 +31,21 @@ interface ImportedProductSuppliersTabProps {
   productId: string;
 }
 
-export default function ImportedProductSuppliersTab({ productId }: ImportedProductSuppliersTabProps) {
+interface ImportedProductSuppliersTabRef {
+  getTempSuppliers: () => ProductSupplier[];
+  clearTempSuppliers: () => void;
+  saveTempSuppliersToDatabase: (newProductId: string) => Promise<boolean>;
+}
+
+const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, ImportedProductSuppliersTabProps>(
+  ({ productId }, ref) => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [productSuppliers, setProductSuppliers] = useState<ProductSupplier[]>([]);
+  const [tempSuppliers, setTempSuppliers] = useState<ProductSupplier[]>([]); // Para modo temporário
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [isTemporaryMode, setIsTemporaryMode] = useState(!productId || productId === '');
   const { toast } = useToast();
 
   // Estados para o formulário de adição/edição
@@ -51,6 +60,10 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
   // Carregar dados inicial
   useEffect(() => {
     loadData();
+  }, [productId]);
+
+  useEffect(() => {
+    setIsTemporaryMode(!productId || productId === '');
   }, [productId]);
 
   const loadData = async () => {
@@ -69,16 +82,18 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
         setSuppliers(suppliersData || []);
       }
 
-      // Carregar fornecedores do produto
-      const productSuppliersResponse = await fetch(`/api/imported-products/${productId}/suppliers`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      });
+      // Carregar fornecedores do produto apenas se não estiver em modo temporário
+      if (productId && productId !== '') {
+        const productSuppliersResponse = await fetch(`/api/imported-products/${productId}/suppliers`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
 
-      if (productSuppliersResponse.ok) {
-        const productSuppliersData = await productSuppliersResponse.json();
-        setProductSuppliers(productSuppliersData.data || []);
+        if (productSuppliersResponse.ok) {
+          const productSuppliersData = await productSuppliersResponse.json();
+          setProductSuppliers(productSuppliersData.data || []);
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -103,37 +118,65 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
         return;
       }
 
-      const response = await fetch(`/api/imported-products/${productId}/suppliers`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        toast({
-          title: "Sucesso",
-          description: "Fornecedor adicionado com sucesso",
-        });
-        setShowAddForm(false);
-        setFormData({
-          supplierId: 0,
-          supplierProductCode: '',
-          supplierProductName: '',
-          moq: 0,
-          leadTimeDays: 0
-        });
-        loadData();
+      if (isTemporaryMode) {
+        // Modo temporário - adicionar à lista local
+        const selectedSupplier = suppliers.find(s => s.id === formData.supplierId);
+        if (selectedSupplier) {
+          const newTempSupplier: ProductSupplier = {
+            id: `temp-${Date.now()}`, // ID temporário
+            supplierId: formData.supplierId,
+            supplierProductCode: formData.supplierProductCode,
+            supplierProductName: formData.supplierProductName,
+            moq: formData.moq,
+            leadTimeDays: formData.leadTimeDays,
+            supplierTradeName: selectedSupplier.tradeName,
+            supplierCorporateName: selectedSupplier.corporateName,
+            supplierEmail: selectedSupplier.commercialEmail
+          };
+          
+          setTempSuppliers(prev => [...prev, newTempSupplier]);
+          
+          toast({
+            title: "Sucesso",
+            description: "Fornecedor adicionado temporariamente. Salve o produto para confirmar.",
+          });
+        }
       } else {
-        const errorData = await response.json();
-        toast({
-          title: "Erro",
-          description: errorData.error || "Erro ao adicionar fornecedor",
-          variant: "destructive",
+        // Modo normal - enviar para API
+        const response = await fetch(`/api/imported-products/${productId}/suppliers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify(formData)
         });
+
+        if (response.ok) {
+          toast({
+            title: "Sucesso",
+            description: "Fornecedor adicionado com sucesso",
+          });
+          loadData();
+        } else {
+          const errorData = await response.json();
+          toast({
+            title: "Erro",
+            description: errorData.error || "Erro ao adicionar fornecedor",
+            variant: "destructive",
+          });
+        }
       }
+
+      setShowAddForm(false);
+      setFormData({
+        supplierId: 0,
+        supplierProductCode: '',
+        supplierProductName: '',
+        moq: 0,
+        leadTimeDays: 0
+      });
+      
     } catch (error) {
       console.error('Erro ao adicionar fornecedor:', error);
       toast({
@@ -180,32 +223,42 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
     }
   };
 
-  const handleDeleteSupplier = async (supplierId: number) => {
+  const handleDeleteSupplier = async (supplierIdOrTempId: string | number) => {
     if (!confirm('Tem certeza que deseja remover este fornecedor do produto?')) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/imported-products/${productId}/suppliers/${supplierId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      });
-
-      if (response.ok) {
+      if (isTemporaryMode || String(supplierIdOrTempId).startsWith('temp-')) {
+        // Modo temporário - remover da lista local
+        setTempSuppliers(prev => prev.filter(s => s.id !== supplierIdOrTempId));
         toast({
           title: "Sucesso",
-          description: "Fornecedor removido com sucesso",
+          description: "Fornecedor removido temporariamente",
         });
-        loadData();
       } else {
-        const errorData = await response.json();
-        toast({
-          title: "Erro",
-          description: errorData.error || "Erro ao remover fornecedor",
-          variant: "destructive",
+        // Modo normal - remover via API
+        const response = await fetch(`/api/imported-products/${productId}/suppliers/${supplierIdOrTempId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
         });
+
+        if (response.ok) {
+          toast({
+            title: "Sucesso",
+            description: "Fornecedor removido com sucesso",
+          });
+          loadData();
+        } else {
+          const errorData = await response.json();
+          toast({
+            title: "Erro",
+            description: errorData.error || "Erro ao remover fornecedor",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error('Erro ao remover fornecedor:', error);
@@ -239,6 +292,50 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
     });
   };
 
+  // Função para salvar fornecedores temporários no banco quando o produto for salvo
+  const saveTempSuppliersToDatabase = async (newProductId: string): Promise<boolean> => {
+    if (tempSuppliers.length === 0) return true;
+
+    try {
+      for (const supplier of tempSuppliers) {
+        const supplierData = {
+          supplierId: supplier.supplierId,
+          supplierProductCode: supplier.supplierProductCode,
+          supplierProductName: supplier.supplierProductName,
+          moq: supplier.moq,
+          leadTimeDays: supplier.leadTimeDays
+        };
+
+        const response = await fetch(`/api/imported-products/${newProductId}/suppliers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify(supplierData)
+        });
+
+        if (!response.ok) {
+          console.error(`Erro ao salvar fornecedor ${supplier.supplierTradeName}`);
+          return false;
+        }
+      }
+      
+      setTempSuppliers([]);
+      return true;
+    } catch (error) {
+      console.error('Erro ao salvar fornecedores temporários:', error);
+      return false;
+    }
+  };
+
+  // Expor funções via ref
+  useImperativeHandle(ref, () => ({
+    getTempSuppliers: () => tempSuppliers,
+    clearTempSuppliers: () => setTempSuppliers([]),
+    saveTempSuppliersToDatabase
+  }));
+
   if (loading) {
     return (
       <Card>
@@ -248,6 +345,9 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
       </Card>
     );
   }
+
+  // Lista unificada de fornecedores (temporários + persistidos)
+  const displaySuppliers = isTemporaryMode ? tempSuppliers : productSuppliers;
 
   return (
     <div className="space-y-6">
@@ -353,7 +453,7 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
 
       {/* Lista de fornecedores */}
       <div className="space-y-4">
-        {productSuppliers.length === 0 ? (
+        {displaySuppliers.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center text-gray-500">
               Nenhum fornecedor adicionado ainda.
@@ -362,7 +462,7 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
             </CardContent>
           </Card>
         ) : (
-          productSuppliers.map((productSupplier) => (
+          displaySuppliers.map((productSupplier) => (
             <Card key={productSupplier.id}>
               <CardContent className="p-6">
                 {editingId === productSupplier.id ? (
@@ -441,7 +541,7 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeleteSupplier(productSupplier.supplierId)}
+                          onClick={() => handleDeleteSupplier(productSupplier.id)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -484,4 +584,9 @@ export default function ImportedProductSuppliersTab({ productId }: ImportedProdu
       </div>
     </div>
   );
-}
+});
+
+ImportedProductSuppliersTab.displayName = 'ImportedProductSuppliersTab';
+
+export default ImportedProductSuppliersTab;
+export type { ImportedProductSuppliersTabRef };
