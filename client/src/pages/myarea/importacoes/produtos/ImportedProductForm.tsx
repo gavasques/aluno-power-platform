@@ -104,6 +104,10 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     enabled: isEditing,
   });
 
+  // Empty suppliers array to prevent "suppliers is not defined" error
+  // TODO: Implement supplier selection if needed
+  const suppliers: any[] = [];
+
   // Fetch departments (categories) for selection
   const { data: departments, isLoading: isDepartmentsLoading, error: departmentsError } = useQuery({
     queryKey: ['departments-list'],
