@@ -398,8 +398,9 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                 <Input
                   id="supplierProductCode"
                   value={formData.supplierProductCode}
-                  onChange={(e) => setFormData(prev => ({ ...prev, supplierProductCode: e.target.value }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, supplierProductCode: e.target.value.toUpperCase() }))}
                   placeholder="Código no fornecedor"
+                  className="uppercase"
                 />
               </div>
 
@@ -408,8 +409,9 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                 <Input
                   id="supplierProductName"
                   value={formData.supplierProductName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, supplierProductName: e.target.value }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, supplierProductName: e.target.value.toUpperCase() }))}
                   placeholder="Nome no fornecedor"
+                  className="uppercase"
                 />
               </div>
 
@@ -473,8 +475,9 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                         <Label>Código do Produto no Fornecedor</Label>
                         <Input
                           value={formData.supplierProductCode}
-                          onChange={(e) => setFormData(prev => ({ ...prev, supplierProductCode: e.target.value }))}
+                          onChange={(e) => setFormData(prev => ({ ...prev, supplierProductCode: e.target.value.toUpperCase() }))}
                           placeholder="Código no fornecedor"
+                          className="uppercase"
                         />
                       </div>
 
@@ -482,8 +485,9 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                         <Label>Nome do Produto no Fornecedor</Label>
                         <Input
                           value={formData.supplierProductName}
-                          onChange={(e) => setFormData(prev => ({ ...prev, supplierProductName: e.target.value }))}
+                          onChange={(e) => setFormData(prev => ({ ...prev, supplierProductName: e.target.value.toUpperCase() }))}
                           placeholder="Nome no fornecedor"
+                          className="uppercase"
                         />
                       </div>
 
