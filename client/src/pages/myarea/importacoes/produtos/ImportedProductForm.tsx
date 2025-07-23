@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'wouter';
 import ImportedProductSuppliersTab from '@/components/imported-products/ImportedProductSuppliersTab';
+import { PackageManager } from '@/components/imported-products/PackageManager';
 
 // Validation schema
 const importedProductSchema = z.object({
@@ -830,48 +831,18 @@ export default function ImportedProductForm() {
           {/* Packaging Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Informações de Embalagem</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Informações de Embalagem
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center space-x-2">
-                <FormField
-                  control={form.control}
-                  name="hasMultiplePackages"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel>Produto com múltiplas embalagens</FormLabel>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="totalPackages"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Total de Embalagens</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="text" 
-                        placeholder="1"
-                        value={field.value?.toString() || ''}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9]/g, '');
-                          field.onChange(parseInt(value) || 1);
-                        }}
-                        inputMode="numeric"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <CardContent>
+              <PackageManager
+                productId={productId || ''}
+                hasMultiplePackages={form.watch('hasMultiplePackages')}
+                totalPackages={form.watch('totalPackages')}
+                onHasMultiplePackagesChange={(value) => form.setValue('hasMultiplePackages', value)}
+                onTotalPackagesChange={(value) => form.setValue('totalPackages', value)}
               />
             </CardContent>
           </Card>

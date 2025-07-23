@@ -19,23 +19,9 @@ router.get("/", requireAuth, async (req, res) => {
 
     // Get all suppliers for this user
     const userSuppliers = await db
-      .select({
-        id: suppliers.id,
-        tradeName: suppliers.tradeName,
-        corporateName: suppliers.corporateName,
-        email: suppliers.email,
-        phone: suppliers.phone,
-        country: suppliers.country,
-        status: suppliers.status,
-        categoryId: suppliers.categoryId,
-        logo: suppliers.logo,
-        description: suppliers.description,
-        createdAt: suppliers.createdAt,
-        updatedAt: suppliers.updatedAt,
-      })
+      .select()
       .from(suppliers)
-      .where(eq(suppliers.userId, userId))
-      .orderBy(suppliers.tradeName);
+      .where(eq(suppliers.userId, userId));
 
     res.json({
       success: true,
