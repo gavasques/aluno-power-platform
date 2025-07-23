@@ -304,9 +304,7 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     }
   };
 
-  // Debug logs for checking data loading
-  console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'data:', departments);
-  console.log('[DEBUG] Brands loading:', isBrandsLoading, 'data:', brands);
+
 
   if (isEditing && isLoadingProduct) {
     return (
