@@ -111,28 +111,36 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
   });
 
   // Fetch departments (categories) for selection
-  const { data: departments } = useQuery({
+  const { data: departments, isLoading: isDepartmentsLoading, error: departmentsError } = useQuery({
     queryKey: ['departments-list'],
     queryFn: async () => {
+      console.log('[DEPARTMENTS] Starting API call...');
       const response = await fetch('/api/departments');
+      console.log('[DEPARTMENTS] Response status:', response.status);
       if (!response.ok) {
         throw new Error('Erro ao carregar categorias');
       }
       const result = await response.json();
-      return result.data || [];
+      console.log('[DEPARTMENTS] Success:', result);
+      // The API returns the data directly as an array, not wrapped in result.data
+      return Array.isArray(result) ? result : (result.data || []);
     },
   });
 
   // Fetch user brands for selection
-  const { data: brands } = useQuery({
+  const { data: brands, isLoading: isBrandsLoading, error: brandsError } = useQuery({
     queryKey: ['brands-list-user'],
     queryFn: async () => {
+      console.log('[BRANDS] Starting API call...');
       const response = await fetch('/api/brands');
+      console.log('[BRANDS] Response status:', response.status);
       if (!response.ok) {
         throw new Error('Erro ao carregar marcas');
       }
       const result = await response.json();
-      return result.data || [];
+      console.log('[BRANDS] Success:', result);
+      // The API returns the data directly as an array, not wrapped in result.data
+      return Array.isArray(result) ? result : (result.data || []);
     },
   });
 
@@ -230,6 +238,10 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
       setIsSubmitting(false);
     }
   };
+
+  // Debug logs for checking data loading
+  console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'data:', departments);
+  console.log('[DEBUG] Brands loading:', isBrandsLoading, 'data:', brands);
 
   if (isEditing && isLoadingProduct) {
     return (
@@ -345,11 +357,26 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          {isDepartmentsLoading && (
+                            <div className="p-2 text-center text-sm text-gray-500">
+                              Carregando categorias...
+                            </div>
+                          )}
+                          {departmentsError && (
+                            <div className="p-2 text-center text-sm text-red-500">
+                              Erro ao carregar categorias
+                            </div>
+                          )}
                           {departments?.map((department: any) => (
                             <SelectItem key={department.id} value={department.name}>
                               {department.name}
                             </SelectItem>
                           ))}
+                          {!isDepartmentsLoading && !departmentsError && (!departments || departments.length === 0) && (
+                            <div className="p-2 text-center text-sm text-gray-500">
+                              Nenhuma categoria disponível
+                            </div>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -370,11 +397,26 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          {isBrandsLoading && (
+                            <div className="p-2 text-center text-sm text-gray-500">
+                              Carregando marcas...
+                            </div>
+                          )}
+                          {brandsError && (
+                            <div className="p-2 text-center text-sm text-red-500">
+                              Erro ao carregar marcas
+                            </div>
+                          )}
                           {brands?.map((brand: any) => (
                             <SelectItem key={brand.id} value={brand.name}>
                               {brand.name}
                             </SelectItem>
                           ))}
+                          {!isBrandsLoading && !brandsError && (!brands || brands.length === 0) && (
+                            <div className="p-2 text-center text-sm text-gray-500">
+                              Nenhuma marca disponível
+                            </div>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
