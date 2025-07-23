@@ -21,7 +21,7 @@ import { Link } from 'wouter';
 const importedProductSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   internalCode: z.string().min(1, 'Código interno é obrigatório'),
-  status: z.enum(['research', 'analysis', 'negotiation', 'ordered', 'shipped', 'arrived', 'cancelled']).default('research'),
+  status: z.enum(['Em Desenvolvimento', 'Ativo', 'Inativo']).default('Em Desenvolvimento'),
   description: z.string().optional(),
   detailedDescription: z.string().optional(),
   category: z.string().optional(),
@@ -56,13 +56,9 @@ type ImportedProductFormData = z.infer<typeof importedProductSchema>;
 
 // Status options
 const statusOptions = [
-  { value: 'research', label: 'Pesquisa' },
-  { value: 'analysis', label: 'Análise' },
-  { value: 'negotiation', label: 'Negociação' },
-  { value: 'ordered', label: 'Pedido Feito' },
-  { value: 'shipped', label: 'Enviado' },
-  { value: 'arrived', label: 'Chegou' },
-  { value: 'cancelled', label: 'Cancelado' },
+  { value: 'Em Desenvolvimento', label: 'Em Desenvolvimento' },
+  { value: 'Ativo', label: 'Ativo' },
+  { value: 'Inativo', label: 'Inativo' },
 ];
 
 interface ImportedProductFormProps {
@@ -84,7 +80,7 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     defaultValues: {
       name: '',
       internalCode: '',
-      status: 'research',
+      status: 'Em Desenvolvimento',
       description: '',
       detailedDescription: '',
       category: '',
