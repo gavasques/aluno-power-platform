@@ -589,6 +589,24 @@ export default function ImportedProductForm() {
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notas e Observações</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Notas gerais, observações importantes, histórico de negociações..."
+                        rows={3}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Terceira linha: Cor, Tamanho, Variação 1, Variação 2 */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <FormField
@@ -839,35 +857,6 @@ export default function ImportedProductForm() {
             </CardHeader>
             <CardContent>
               <ImportedProductSuppliersTab productId={productId || ''} />
-            </CardContent>
-          </Card>
-
-          {/* Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Observações
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notas e Observações</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Notas gerais, observações importantes, histórico de negociações..."
-                        rows={4}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </CardContent>
           </Card>
 
