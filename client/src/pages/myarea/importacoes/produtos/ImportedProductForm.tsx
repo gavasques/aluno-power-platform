@@ -88,7 +88,13 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     queryKey: ['imported-product', productId],
     queryFn: async () => {
       if (!productId) return null;
-      const response = await fetch(`/api/imported-products/${productId}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/imported-products/${productId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (!response.ok) {
         throw new Error('Erro ao carregar produto');
       }
@@ -101,7 +107,13 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
   const { data: suppliers } = useQuery({
     queryKey: ['suppliers-list'],
     queryFn: async () => {
-      const response = await fetch('/api/suppliers/search?limit=100');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/suppliers/search?limit=100', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (!response.ok) {
         throw new Error('Erro ao carregar fornecedores');
       }
@@ -115,7 +127,13 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     queryKey: ['departments-list'],
     queryFn: async () => {
       console.log('[DEPARTMENTS] Starting API call...');
-      const response = await fetch('/api/departments');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/departments', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       console.log('[DEPARTMENTS] Response status:', response.status);
       if (!response.ok) {
         throw new Error('Erro ao carregar categorias');
@@ -132,7 +150,13 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     queryKey: ['brands-list-user'],
     queryFn: async () => {
       console.log('[BRANDS] Starting API call...');
-      const response = await fetch('/api/brands');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/brands', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       console.log('[BRANDS] Response status:', response.status);
       if (!response.ok) {
         throw new Error('Erro ao carregar marcas');
@@ -188,9 +212,11 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
       
       const method = isEditing ? 'PUT' : 'POST';
       
+      const token = localStorage.getItem('token');
       const response = await fetch(url, {
         method,
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
