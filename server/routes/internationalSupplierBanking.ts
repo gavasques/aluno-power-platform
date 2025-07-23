@@ -12,6 +12,44 @@ const bankingDataSchema = z.object({
   bankingData: z.string().optional(),
 });
 
+// GET /api/international-suppliers - Get all suppliers for the authenticated user
+router.get("/", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+
+    // Get all suppliers for this user
+    const userSuppliers = await db
+      .select({
+        id: suppliers.id,
+        tradeName: suppliers.tradeName,
+        corporateName: suppliers.corporateName,
+        email: suppliers.email,
+        phone: suppliers.phone,
+        country: suppliers.country,
+        status: suppliers.status,
+        categoryId: suppliers.categoryId,
+        logo: suppliers.logo,
+        description: suppliers.description,
+        createdAt: suppliers.createdAt,
+        updatedAt: suppliers.updatedAt,
+      })
+      .from(suppliers)
+      .where(eq(suppliers.userId, userId))
+      .orderBy(suppliers.tradeName);
+
+    res.json({
+      success: true,
+      data: userSuppliers,
+    });
+  } catch (error) {
+    console.error("Error fetching suppliers:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+    });
+  }
+});
+
 // GET /api/international-suppliers/:id/banking - Get banking information for a supplier
 router.get("/:id/banking", requireAuth, async (req, res) => {
   try {

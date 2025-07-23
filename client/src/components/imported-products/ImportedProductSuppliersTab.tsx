@@ -78,8 +78,8 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
         return;
       }
       
-      // Carregar fornecedores do CRM
-      const suppliersResponse = await fetch('/api/suppliers', {
+      // Carregar fornecedores do CRM de importação
+      const suppliersResponse = await fetch('/api/international-suppliers', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
