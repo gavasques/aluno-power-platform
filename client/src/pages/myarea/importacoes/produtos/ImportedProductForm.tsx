@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -38,8 +38,7 @@ const importedProductSchema = z.object({
   material: z.string().optional(),
   technicalSpecifications: z.string().optional(),
   ncmCode: z.string().optional(),
-  hasMultiplePackages: z.boolean().default(false),
-  totalPackages: z.number().int().min(1).default(1),
+
   hsCode: z.string().optional(),
   ipiPercentage: z.number().optional(),
   productEan: z.string().optional(),
@@ -97,8 +96,7 @@ export default function ImportedProductForm() {
       material: '',
       technicalSpecifications: '',
       ncmCode: '',
-      hasMultiplePackages: false,
-      totalPackages: 1,
+
       hsCode: '',
       ipiPercentage: undefined,
       customsDescription: '',
@@ -839,10 +837,6 @@ export default function ImportedProductForm() {
             <CardContent>
               <PackageManager
                 productId={productId || ''}
-                hasMultiplePackages={form.watch('hasMultiplePackages')}
-                totalPackages={form.watch('totalPackages')}
-                onHasMultiplePackagesChange={(value) => form.setValue('hasMultiplePackages', value)}
-                onTotalPackagesChange={(value) => form.setValue('totalPackages', value)}
               />
             </CardContent>
           </Card>

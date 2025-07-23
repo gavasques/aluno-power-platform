@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,18 +28,10 @@ interface ProductPackage {
 
 interface PackageManagerProps {
   productId: string;
-  hasMultiplePackages: boolean;
-  totalPackages: number;
-  onHasMultiplePackagesChange: (value: boolean) => void;
-  onTotalPackagesChange: (value: number) => void;
 }
 
 export const PackageManager: React.FC<PackageManagerProps> = ({
   productId,
-  hasMultiplePackages,
-  totalPackages,
-  onHasMultiplePackagesChange,
-  onTotalPackagesChange,
 }) => {
   const { token } = useAuth();
   const { toast } = useToast();
@@ -66,10 +58,10 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
 
   // Carregar pacotes existentes
   useEffect(() => {
-    if (productId && productId !== '' && hasMultiplePackages) {
+    if (productId && productId !== '') {
       loadPackages();
     }
-  }, [productId, hasMultiplePackages]);
+  }, [productId]);
 
   // Calcular número da próxima embalagem
   useEffect(() => {
@@ -259,48 +251,20 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Controles principais */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Switch
-            checked={hasMultiplePackages}
-            onCheckedChange={onHasMultiplePackagesChange}
-          />
-          <Label>Produto com múltiplas embalagens</Label>
-        </div>
-        
-        {hasMultiplePackages && (
-          <Button
-            type="button"
-            onClick={() => setShowAddForm(true)}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Embalagem
-          </Button>
-        )}
-      </div>
-
-      {/* Campo total de embalagens */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <Label htmlFor="totalPackages">Total de Embalagens</Label>
-          <Input
-            id="totalPackages"
-            type="text"
-            value={totalPackages.toString()}
-            onChange={(e) => {
-              const value = e.target.value.replace(/[^0-9]/g, '');
-              onTotalPackagesChange(parseInt(value) || 1);
-            }}
-            placeholder="1"
-            inputMode="numeric"
-          />
-        </div>
+      {/* Botão para adicionar embalagem */}
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          onClick={() => setShowAddForm(true)}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Adicionar Embalagem
+        </Button>
       </div>
 
       {/* Formulário de adicionar/editar embalagem */}
-      {(showAddForm || editingId) && hasMultiplePackages && (
+      {(showAddForm || editingId) && (
         <Card className="border-green-200">
           <CardHeader>
             <CardTitle className="text-lg">
@@ -524,7 +488,7 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
       )}
 
       {/* Lista de embalagens */}
-      {hasMultiplePackages && packages.length > 0 && (
+      {packages.length > 0 && (
         <div className="space-y-4">
           <h4 className="font-semibold flex items-center gap-2">
             <Box className="w-4 h-4" />
@@ -546,7 +510,7 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
                       <div>
                         <h5 className="font-semibold text-lg">
                           <Badge variant="secondary" className="mr-2">
-                            {pkg.packageNumber}/{totalPackages}
+                            Embalagem {pkg.packageNumber}
                           </Badge>
                           {pkg.packageType}
                         </h5>
@@ -624,7 +588,7 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
       )}
 
       {/* Estado vazio */}
-      {hasMultiplePackages && packages.length === 0 && !showAddForm && (
+      {packages.length === 0 && !showAddForm && (
         <Card>
           <CardContent className="p-6 text-center text-gray-500">
             <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
