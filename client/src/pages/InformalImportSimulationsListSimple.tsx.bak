@@ -16,7 +16,9 @@ const InformalImportSimulationsListSimple: React.FC = () => {
   const { data, isLoading, error, isFetching } = useQuery({
     queryKey: ['simulations-import-simple'],
     queryFn: async () => {
+      console.log('🔍 SIMPLE - Fazendo requisição...');
       const response = await apiRequest('/api/simulations/import');
+      console.log('🔍 SIMPLE - Resposta recebida:', response);
       return response;
     },
     staleTime: 0, // Force fresh data
@@ -32,6 +34,7 @@ const InformalImportSimulationsListSimple: React.FC = () => {
   const actuallyLoading = isLoading || isFetching;
   const hasFinishedLoading = !actuallyLoading && data;
 
+  console.log('🔍 SIMPLE - Estado do componente:', { 
     data, 
     isLoading, 
     isFetching,

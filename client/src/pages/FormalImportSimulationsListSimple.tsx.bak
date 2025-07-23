@@ -20,6 +20,7 @@ export default function FormalImportSimulationsListSimple() {
 
   // Debug logging
   React.useEffect(() => {
+    console.log('🔄 SIMPLIFIED Query state:', { 
       isLoading, 
       isError, 
       dataLength: simulations?.length,
@@ -47,6 +48,7 @@ export default function FormalImportSimulationsListSimple() {
     }
   };
 
+  console.log('🔍 Component state:', { 
     isLoading, 
     isError,
     error: error?.message || null, 

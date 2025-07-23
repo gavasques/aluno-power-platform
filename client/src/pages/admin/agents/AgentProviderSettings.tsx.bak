@@ -239,6 +239,7 @@ export default function AgentProviderSettings() {
       return response.json();
     },
     onSuccess: (data) => {
+      console.log('Full response data:', data);
       setTestResponse(data.response || 'Teste realizado com sucesso!');
       setRequestSent(data.requestSent || '');
       setResponseReceived(data.responseReceived || '');
@@ -1694,6 +1695,7 @@ export default function AgentProviderSettings() {
                                           onError={(e) => {
                                             const img = e.target as HTMLImageElement;
                                             img.style.display = 'none';
+                                            console.log('Erro ao carregar imagem:', imageUrl.substring(0, 100) + '...');
                                           }}
                                         />
                                       </div>

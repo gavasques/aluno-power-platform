@@ -47,7 +47,11 @@ const InformalImportSimulationsList: React.FC = () => {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     queryFn: async () => {
+      console.log('🔍 FRONTEND - Fazendo requisição para API de simulações');
       const response = await apiRequest(`/api/simulations/import?page=${currentPage}&limit=${ITEMS_PER_PAGE}&maxItems=${MAX_ITEMS}`);
+      console.log('🔍 FRONTEND - Resposta da API (RAW):', response);
+      console.log('🔍 FRONTEND - Tipo da resposta:', typeof response);
+      console.log('🔍 FRONTEND - Propriedades da resposta:', Object.keys(response || {}));
       return response;
     }
   });
@@ -57,6 +61,7 @@ const InformalImportSimulationsList: React.FC = () => {
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   // Debug logs
+  console.log('🔍 FRONTEND - Estado atual:', {
     apiResponse,
     simulations,
     totalItems,
@@ -66,6 +71,7 @@ const InformalImportSimulationsList: React.FC = () => {
   });
   
   // Additional debug for data extraction
+  console.log('🔍 FRONTEND - Detalhes da resposta:', {
     hasApiResponse: !!apiResponse,
     apiResponseType: typeof apiResponse,
     apiResponseKeys: apiResponse ? Object.keys(apiResponse) : 'none',
@@ -79,8 +85,10 @@ const InformalImportSimulationsList: React.FC = () => {
     logger.error('❌ FRONTEND - Erro ao carregar simulações de importação simplificada:', error);
   }
   if (simulations.length > 0) {
+    console.log('✅ FRONTEND - Simulações carregadas:', simulations.length);
     logger.debug('✅ FRONTEND - Simulações de importação simplificada carregadas:', simulations.length);
   } else {
+    console.log('⚠️ FRONTEND - Nenhuma simulação encontrada');
   }
 
   // Delete simulation mutation

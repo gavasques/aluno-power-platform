@@ -70,6 +70,7 @@ export function LazyLoader({
           });
 
           if (enablePerformanceTracking) {
+            console.log(`📦 [LAZY_LOAD] Component loaded in ${loadTime.toFixed(2)}ms`);
           }
         }
       } catch (error) {
@@ -198,6 +199,7 @@ export function useComponentPreloader(routes: Array<{
         setTimeout(async () => {
           try {
             await route.importFn();
+            console.log(`🚀 [PRELOAD] ${route.path} preloaded successfully`);
           } catch (error) {
             console.warn(`⚠️ [PRELOAD_WARN] Failed to preload ${route.path}:`, error);
           }
@@ -222,6 +224,7 @@ export function useBundleAnalyzer() {
       const originalImport = window.__webpack_require__;
       if (originalImport) {
         window.__webpack_require__ = function(...args) {
+          console.log('📦 [BUNDLE_ANALYSIS] Dynamic import:', args);
           return originalImport.apply(this, args);
         };
       }
@@ -231,6 +234,7 @@ export function useBundleAnalyzer() {
   return {
     analyzeChunks: () => {
       if (import.meta.env.DEV) {
+        console.log('📊 [BUNDLE_ANALYSIS] Analyzing chunk sizes...');
         // This would integrate with webpack-bundle-analyzer in a real setup
       }
     }

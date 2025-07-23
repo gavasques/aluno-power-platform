@@ -23,6 +23,7 @@ export function useBackgroundSync(isAuthenticated: boolean = false) {
 
   useEffect(() => {
     const prefetchCriticalData = async () => {
+      console.log('🚀 [BACKGROUND_SYNC] Starting background data prefetch...');
 
       // Only prefetch authenticated data if user is logged in
       if (isAuthenticated) {
@@ -45,6 +46,7 @@ export function useBackgroundSync(isAuthenticated: boolean = false) {
         staleTime: 15 * 60 * 1000, // 15 minutes
       });
 
+      console.log('✅ [BACKGROUND_SYNC] Critical data prefetched');
     };
 
     // Prefetch after a short delay to avoid blocking initial render
@@ -79,6 +81,7 @@ export function useOptimizedQuery<T>(
     structuralSharing: true,
     // Custom performance tracking
     onSuccess: performanceTracking ? (data: any) => {
+      console.log(`⚡ [QUERY_SUCCESS] ${String(queryKey[0])} - ${JSON.stringify(data).length} bytes`);
     } : undefined,
     onError: performanceTracking ? (error: any) => {
       console.error(`💥 [QUERY_ERROR] ${String(queryKey[0])}:`, error);
@@ -142,6 +145,7 @@ export function useSmartInvalidation() {
         }
       });
 
+      console.log(`🔄 [CACHE_INVALIDATION] Invalidated patterns: ${patterns.join(', ')}`);
     };
 
     if (delay > 0) {
@@ -163,6 +167,7 @@ export function useQueryPerformanceMonitor() {
     
     const unsubscribe = cache.subscribe((event) => {
       if (event?.type === 'observerAdded') {
+        console.log(`📊 [QUERY_MONITOR] New observer added: ${String(event.query.queryKey[0])}`);
       }
       
       if (event?.type === 'observerUpdated') {
@@ -171,6 +176,7 @@ export function useQueryPerformanceMonitor() {
         
         if (state.status === 'success') {
           const dataSize = JSON.stringify(state.data).length;
+          console.log(`📈 [QUERY_PERFORMANCE] ${String(query.queryKey[0])}: ${dataSize} bytes, ${state.dataUpdatedAt - state.fetchStatus} ms`);
         }
       }
     });
@@ -195,6 +201,7 @@ export function useQueryPerformanceMonitor() {
       }, 0)
     };
 
+    console.log('📊 [QUERY_STATS]', stats);
     return stats;
   }, [queryClient]);
 }
@@ -244,6 +251,7 @@ export function useQueryMemoryOptimization() {
         }
       });
       
+      console.log(`🧹 [MEMORY_CLEANUP] Query cache cleaned. Current queries: ${cache.getAll().length}`);
     }, 10 * 60 * 1000); // Every 10 minutes
 
     return () => clearInterval(interval);
@@ -258,6 +266,7 @@ export class QueryDeduplicator {
 
   static async deduplicate<T>(key: string, queryFn: () => Promise<T>): Promise<T> {
     if (this.pendingQueries.has(key)) {
+      console.log(`🔄 [DEDUPLICATION] Reusing pending query: ${key}`);
       return this.pendingQueries.get(key)!;
     }
 
@@ -285,6 +294,7 @@ export function useBackgroundRefresh(queryKeys: QueryKey[], interval: number = 5
         });
       });
       
+      console.log(`🔄 [BACKGROUND_REFRESH] Refreshed ${queryKeys.length} queries`);
     }, interval);
 
     return () => clearInterval(refresh);

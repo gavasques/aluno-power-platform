@@ -189,6 +189,7 @@ export default function FormalImportSimulatorFixed() {
 
   const fetchSimulation = async (id: string) => {
     try {
+      console.log('🚀 SIMULATOR: Loading simulation', id);
       setIsLoading(true);
       setError(null);
 
@@ -205,6 +206,7 @@ export default function FormalImportSimulatorFixed() {
       }
 
       const data = await response.json();
+      console.log('✅ SIMULATOR: Data loaded:', data);
       
       // Processar dados recebidos para garantir tipos corretos
       const processedSimulation = {
@@ -231,6 +233,7 @@ export default function FormalImportSimulatorFixed() {
 
   const saveSimulation = async () => {
     try {
+      console.log('💾 SIMULATOR: Saving simulation...');
       setIsSaving(true);
       setError(null);
 
@@ -255,6 +258,7 @@ export default function FormalImportSimulatorFixed() {
       }
 
       const savedData = await response.json();
+      console.log('✅ SIMULATOR: Saved successfully:', savedData);
       
       // Update local state with saved data
       setSimulation(savedData);

@@ -139,6 +139,7 @@ export function MaterialsProvider({ children }: { children: React.ReactNode }) {
 
   const incrementDownload = (id: number) => {
     // This would typically update the download count in the database
+    console.log(`Incrementing download count for material ${id}`);
   };
 
   const value: MaterialsContextType = {

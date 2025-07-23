@@ -70,6 +70,7 @@ export function PerformanceOptimizedComponent<T extends Record<string, any>>({
       }
 
       if (enableMemoProfiling && metrics.renderCount % 10 === 0) {
+        console.log(`📊 [RENDER_METRICS]`, {
           renders: metrics.renderCount,
           avgTime: metrics.averageRenderTime.toFixed(2) + 'ms',
           memoEfficiency: ((metrics.memoHits / (metrics.memoHits + metrics.memoMisses)) * 100).toFixed(1) + '%'
@@ -102,6 +103,7 @@ export function createSmartMemo<P extends Record<string, any>>(
     if (customCompare) {
       const result = customCompare(prevProps, nextProps);
       if (enableProfiling) {
+        console.log(`⚡ [MEMO_CUSTOM] Comparison took ${(performance.now() - startTime).toFixed(2)}ms`);
       }
       return result;
     }
@@ -137,6 +139,7 @@ export function createSmartMemo<P extends Record<string, any>>(
     }
 
     if (enableProfiling) {
+      console.log(`⚡ [MEMO_COMPARE] Comparison took ${(performance.now() - startTime).toFixed(2)}ms`);
     }
 
     return true;
@@ -174,6 +177,7 @@ export function VirtualizedList<T>({
     );
 
     if (enableProfiling) {
+      console.log(`📊 [VIRTUALIZATION] Rendering items ${startIndex}-${endIndex} of ${items.length}`);
     }
 
     return { startIndex, endIndex };
@@ -229,6 +233,7 @@ export function useRenderProfiler(componentName: string, enabled: boolean = fals
         }
 
         if (renderCount.current % 5 === 0) {
+          console.log(`📊 [${componentName}] Avg render: ${(totalRenderTime.current / renderCount.current).toFixed(2)}ms`);
         }
       };
     }

@@ -69,6 +69,7 @@ const SupplierDetailRefactored = () => {
 
   // Dialog handlers
   const handleAddBrand = () => setBrandDialogOpen(true);
+  const handleEditBrand = (brand: any) => console.log('Edit brand:', brand);
   const handleDeleteBrand = async (brandId: number) => {
     try {
       await deleteBrand(brandId);
@@ -78,6 +79,7 @@ const SupplierDetailRefactored = () => {
   };
 
   const handleAddContact = () => setContactDialogOpen(true);
+  const handleEditContact = (contact: any) => console.log('Edit contact:', contact);
   const handleDeleteContact = async (contactId: number) => {
     try {
       await deleteContact(contactId);
@@ -88,6 +90,7 @@ const SupplierDetailRefactored = () => {
 
   const handleAddConversation = () => setConversationDialogOpen(true);
   const handleEditConversation = (conversation: any) => {
+    console.log('🔥 Edit conversation clicked:', conversation);
     setEditingConversation(conversation);
     setDialogStates(prev => ({ ...prev, editConversation: true }));
     setConversationDialogOpen(true);

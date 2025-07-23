@@ -104,6 +104,7 @@ const FormalImportSimulationsList: React.FC = () => {
       console.error('❌ FRONTEND - Erro ao carregar simulações:', error);
     },
     onSuccess: (data) => {
+      console.log('✅ FRONTEND - Simulações carregadas:', data?.length || 0);
     }
   });
 

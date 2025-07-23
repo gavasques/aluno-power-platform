@@ -103,6 +103,7 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
       const base64Data = await fileToBase64(file);
       onImageSelect(base64Data, file.name);
       
+      console.log(`📤 [IMAGE_UPLOAD] File selected: ${file.name} (${(file.size / 1024).toFixed(1)}KB)`);
     } catch (error) {
       console.error('❌ [IMAGE_UPLOAD] Error processing file:', error);
       setUploadError('Erro ao processar arquivo. Tente novamente.');

@@ -357,24 +357,8 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
   // Update form when product loads
   React.useEffect(() => {
     if (product && isOpen) {
-      console.log('📊 CHANNELS MODAL OPENED - Product ID:', productId);
-      
-      // Check response structure and extract channels  
-      console.log('🔍 [SERVER SUCCESS] Raw storage data shows SITE_PROPRIO isActive: true, AMAZON_FBA isActive: true');
-      console.log('🔍 [FULL RESPONSE] Complete product response:', product);
-      console.log('🔍 [API CALL DEBUG] Query Key:', [`/api/products/${productId}`, 'channels-editor', Date.now()]);
-      console.log('🔍 [API CALL DEBUG] Product ID being requested:', productId);
-      console.log('🔍 [API CALL DEBUG] Response structure check:');
-      console.log('🔍 [API CALL DEBUG] - product.success:', (product as any).success);
-      console.log('🔍 [API CALL DEBUG] - product.data exists:', !!(product as any).data);
-      console.log('🔍 [API CALL DEBUG] - product.data.channels exists:', !!(product as any).data?.channels);
-      console.log('🔍 [API CALL DEBUG] - product.data.channels length:', (product as any).data?.channels?.length);
-      console.log('🔍 [CACHE ISSUE] Response timestamp:', (product as any).timestamp);
-      console.log('🔍 [CACHE ISSUE] Should see fresh server logs with CRITICAL DEBUG if not cached');
-      
       // Manually invalidate cache and force fresh data
       if ((product as any).data?.channels?.every((ch: any) => !ch.isActive)) {
-        console.log('🚨 [CACHE DETECTED] All channels inactive - forcing cache refresh');
         queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}`] });
         queryClient.removeQueries({ queryKey: [`/api/products/${productId}`] });
       }
@@ -385,35 +369,23 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
         // First check if it's the list format: product.data.channels
         if ((product as any).data?.channels) {
           productChannels = (product as any).data.channels;
-          console.log('🔍 [STRUCTURE] Using product.data.channels (list endpoint format)');
         } 
         // Then check if it's the individual format: product.channels
         else if ((product as any).channels) {
           productChannels = (product as any).channels;
-          console.log('🔍 [STRUCTURE] Using product.channels (individual endpoint format)');
         }
         // Finally check if response is wrapped in data: product.data (API response format)
         else if ((product as any).data) {
           const productData = (product as any).data;
           if (productData.channels) {
             productChannels = productData.channels;
-            console.log('🔍 [STRUCTURE] Using product.data.channels (API response format)');
           }
         }
       }
       
-      console.log('🔍 [FINAL CHANNELS] Selected channels:', productChannels);
-      console.log('🔍 [COMPARISON] Should be isActive true, getting:', productChannels.find((ch: any) => ch.type === 'SITE_PROPRIO')?.isActive);
-      
       // Verificar especificamente SITE_PROPRIO e AMAZON_FBA
       const siteProprio = productChannels.find((ch: any) => ch.type === 'SITE_PROPRIO');
       const amazonFBA = productChannels.find((ch: any) => ch.type === 'AMAZON_FBA');
-      
-      console.log('📊 Raw channel data - SITE_PROPRIO:', siteProprio);
-      console.log('📊 Raw channel data - AMAZON_FBA:', amazonFBA);
-      console.log('📊 Product channels array:', productChannels);
-      console.log('📊 Product.data:', (product as any).data);
-      console.log('📊 Product.channels direct:', (product as any).channels);
       
       // Create a map of existing channels
       const channelMap = new Map(productChannels.map((ch: any) => [ch.type, ch]));
@@ -422,11 +394,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
       const formChannels = Object.keys(CHANNEL_FIELDS).map(channelType => {
         const existingChannel = channelMap.get(channelType) as any;
         
-        if (channelType === 'SITE_PROPRIO' || channelType === 'AMAZON_FBA') {
-          console.log(`🔍 [CHANNEL MAPPING] Channel: ${channelType}`);
-          console.log(`🔍 [CHANNEL MAPPING] existingChannel:`, existingChannel);
-          console.log(`🔍 [CHANNEL MAPPING] existingChannel?.isActive:`, existingChannel?.isActive);
-        }
+
         
         // Convert string values to numbers for all channel data with safe type handling
         const convertedData: Record<string, any> = {};
@@ -443,16 +411,7 @@ export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpe
           data: convertedData,
         };
         
-        if (channelType === 'SITE_PROPRIO' || channelType === 'AMAZON_FBA') {
-          console.log(`📊 Form value for ${channelType}:`, result);
-        }
-
         return result;
-      });
-      
-      console.log('📊 Final form data:', {
-        siteProprio: formChannels.find(ch => ch.type === 'SITE_PROPRIO'),
-        amazonFBA: formChannels.find(ch => ch.type === 'AMAZON_FBA')
       });
 
       form.reset({ channels: formChannels });

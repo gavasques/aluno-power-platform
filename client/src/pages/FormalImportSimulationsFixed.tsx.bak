@@ -26,10 +26,12 @@ export default function FormalImportSimulationsFixed() {
   useEffect(() => {
     const fetchSimulations = async () => {
       try {
+        console.log('🚀 FIXED: Starting fetch...');
         setIsLoading(true);
         setError(null);
 
         const token = localStorage.getItem('auth_token');
+        console.log('🔑 FIXED: Token', token ? 'found' : 'missing');
 
         const response = await fetch('/api/simulators/formal-import', {
           headers: {
@@ -38,16 +40,20 @@ export default function FormalImportSimulationsFixed() {
           },
         });
 
+        console.log('📡 FIXED: Response status:', response.status);
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
+        console.log('✅ FIXED: Data received:', data);
+        console.log('✅ FIXED: Count:', data?.length || 0);
 
         setSimulations(data || []);
         setIsLoading(false);
 
+        console.log('🎉 FIXED: State updated successfully!');
       } catch (err: any) {
         console.error('❌ FIXED: Error:', err);
         setError(err.message);
@@ -58,6 +64,7 @@ export default function FormalImportSimulationsFixed() {
     fetchSimulations();
   }, []);
 
+  console.log('🔍 FIXED: Component render state:', {
     isLoading,
     error,
     simulationsCount: simulations.length,

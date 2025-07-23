@@ -282,6 +282,7 @@ export default function ProductPricingForm() {
   };
 
   const handleSaveAndContinue = (data: ProductFormData) => {
+    console.log("🔄 [handleSaveAndContinue] Iniciado com dados:", {
       hasData: !!data,
       productName: data?.name,
       sku: data?.sku,
@@ -291,6 +292,7 @@ export default function ProductPricingForm() {
     
     const saveData = async () => {
       try {
+        console.log("💾 [saveData] Iniciando salvamento assíncrono...");
         const formData = new FormData();
         
         // Add basic fields
@@ -330,7 +332,9 @@ export default function ProductPricingForm() {
         const url = isEditing ? `/api/products/${id}` : "/api/products";
         const method = isEditing ? "PUT" : "POST";
         
+        console.log("📤 Enviando para:", url, "Método:", method);
         const currentToken = localStorage.getItem("auth_token");
+        console.log("🔑 Token atual:", !!currentToken, currentToken ? currentToken.substring(0, 20) + "..." : "Sem token");
         
         const response = await fetch(url, {
           method,
@@ -340,6 +344,7 @@ export default function ProductPricingForm() {
           body: formData,
         });
         
+        console.log("📨 Resposta recebida:", {
           status: response.status,
           statusText: response.statusText,
           ok: response.ok
@@ -351,6 +356,7 @@ export default function ProductPricingForm() {
         }
         
         const savedProduct = await response.json();
+        console.log("✅ Produto salvo:", savedProduct);
         
         toast({
           title: "Produto salvo com sucesso",
@@ -386,6 +392,7 @@ export default function ProductPricingForm() {
       }
     };
     
+    console.log("🚀 [handleSaveAndContinue] Chamando saveData()...");
     saveData();
   };
 

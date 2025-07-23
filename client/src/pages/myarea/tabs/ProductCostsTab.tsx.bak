@@ -103,11 +103,13 @@ export default function ProductCostsTab({ form, isEditing, productId }: ProductC
   React.useEffect(() => {
     // Use productId from props if available, otherwise use formProductId
     const idToUse = productId || formProductId;
+    console.log('📊 [COST HISTORY] Using ID:', idToUse);
     
     if (idToUse) {
       fetch(`/api/products/${idToUse}/cost-history?limit=6`)
         .then(res => res.json())
         .then(data => {
+          console.log('📊 [COST HISTORY] Loaded:', data);
           setCostHistory(data);
         })
         .catch(err => console.error('Error fetching cost history:', err));

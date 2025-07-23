@@ -75,6 +75,7 @@ export default function ImportedProductsIndex() {
   // Fetch products using native fetch with authentication
   const fetchProducts = async () => {
     try {
+      console.log('[IMPORTED_PRODUCTS] Starting API call...');
       setIsLoading(true);
       setError(null);
 
@@ -98,6 +99,7 @@ export default function ImportedProductsIndex() {
         },
       });
       
+      console.log('[IMPORTED_PRODUCTS] Response status:', response.status);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -106,6 +108,7 @@ export default function ImportedProductsIndex() {
       }
       
       const result = await response.json();
+      console.log('[IMPORTED_PRODUCTS] Success:', result);
       setData(result);
       setIsLoading(false);
     } catch (err: any) {

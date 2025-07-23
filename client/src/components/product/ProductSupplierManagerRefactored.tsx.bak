@@ -69,8 +69,11 @@ export default function ProductSupplierManagerRefactored({
   } = useQuery({
     queryKey: [`/api/products/${productId}/suppliers`],
     queryFn: async () => {
+      console.log('🔍 ProductSupplierManagerRefactored - Fetching suppliers for productId:', productId);
       const response = await apiRequest(`/api/products/${productId}/suppliers`);
+      console.log('🔍 ProductSupplierManagerRefactored - Raw API response:', response);
       if (response?.data) {
+        console.log('🔍 ProductSupplierManagerRefactored - API returned suppliers with IDs:', response.data.map((s: any) => s.id));
       }
       return response;
     },
@@ -95,14 +98,18 @@ export default function ProductSupplierManagerRefactored({
   // Delete supplier mutation
   const deleteSupplierMutation = useMutation({
     mutationFn: async (supplierId: number) => {
+      console.log('🔍 ProductSupplierManagerRefactored - Delete mutation called with supplierId:', supplierId);
+      console.log('🔍 ProductSupplierManagerRefactored - Delete URL:', `/api/products/${productId}/suppliers/${supplierId}`);
       
       const response = await apiRequest(`/api/products/${productId}/suppliers/${supplierId}`, {
         method: 'DELETE'
       });
       
+      console.log('🔍 ProductSupplierManagerRefactored - Delete response:', response);
       return response;
     },
     onSuccess: (data) => {
+      console.log('🔍 ProductSupplierManagerRefactored - Delete success:', data);
       queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/suppliers`] });
       toast({
         title: 'Fornecedor removido',
@@ -149,9 +156,11 @@ export default function ProductSupplierManagerRefactored({
 
   // Force cache clear and refresh
   const handleForceRefresh = async () => {
+    console.log('🔄 Force refresh - clearing cache for productId:', productId);
     queryClient.removeQueries({ queryKey: [`/api/products/${productId}/suppliers`] });
     queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/suppliers`] });
     await refetch();
+    console.log('🔄 Force refresh - completed');
   };
 
   // Handle select all checkbox
@@ -186,6 +195,7 @@ export default function ProductSupplierManagerRefactored({
 
   // Handle supplier deletion
   const handleDeleteSupplier = (supplier: ProductSupplier) => {
+    console.log('🔍 ProductSupplierManagerRefactored - handleDeleteSupplier called with:', supplier);
     setSupplierToDelete(supplier);
     setDeleteConfirmOpen(true);
   };
@@ -219,6 +229,12 @@ export default function ProductSupplierManagerRefactored({
   };
 
   // Debug logging
+  console.log('🔍 ProductSupplierManagerRefactored - ProductId:', productId);
+  console.log('🔍 ProductSupplierManagerRefactored - Response:', suppliersResponse);
+  console.log('🔍 ProductSupplierManagerRefactored - Suppliers:', suppliers);
+  console.log('🔍 ProductSupplierManagerRefactored - Filtered suppliers:', filteredSuppliers);
+  console.log('🔍 ProductSupplierManagerRefactored - IsLoading:', isLoading);
+  console.log('🔍 ProductSupplierManagerRefactored - Error:', error);
 
   if (isLoading) {
     return (

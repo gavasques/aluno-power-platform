@@ -93,6 +93,7 @@ interface SupplierProductsTabSimpleProps {
 }
 
 export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps> = ({ supplierId }) => {
+  console.log('SupplierProductsTabSimple renderizando com supplierId:', supplierId);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
