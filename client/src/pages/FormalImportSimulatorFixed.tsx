@@ -586,6 +586,7 @@ export default function FormalImportSimulatorFixed() {
                     value={simulation.taxaDolar}
                     onChange={(e) => handleInputChange('taxaDolar', parseFloat(e.target.value) || 0)}
                     placeholder="5.5000"
+                    className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                   />
                 </div>
                 <div>
@@ -597,6 +598,7 @@ export default function FormalImportSimulatorFixed() {
                     value={simulation.valorFobDolar}
                     onChange={(e) => handleInputChange('valorFobDolar', parseFloat(e.target.value) || 0)}
                     placeholder="20940.00"
+                    className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                   />
                 </div>
                 <div>
@@ -608,6 +610,7 @@ export default function FormalImportSimulatorFixed() {
                     value={simulation.valorFreteDolar}
                     onChange={(e) => handleInputChange('valorFreteDolar', parseFloat(e.target.value) || 0)}
                     placeholder="3750.00"
+                    className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                   />
                 </div>
                 <div>
@@ -619,6 +622,7 @@ export default function FormalImportSimulatorFixed() {
                     value={simulation.percentualSeguro}
                     onChange={(e) => handleInputChange('percentualSeguro', parseFloat(e.target.value) || 0)}
                     placeholder="0.18"
+                    className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                   />
                 </div>
               </div>
@@ -680,6 +684,7 @@ export default function FormalImportSimulatorFixed() {
                               value={produto.quantidade}
                               onChange={(e) => updateProduct(index, 'quantidade', parseInt(e.target.value) || 0)}
                               placeholder="1"
+                              className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                             />
                           </div>
                           <div>
@@ -690,6 +695,7 @@ export default function FormalImportSimulatorFixed() {
                               value={produto.valorUnitarioUsd}
                               onChange={(e) => updateProduct(index, 'valorUnitarioUsd', parseFloat(e.target.value) || 0)}
                               placeholder="100.00"
+                              className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                             />
                           </div>
                           <div>
@@ -699,6 +705,7 @@ export default function FormalImportSimulatorFixed() {
                               value={produto.comprimento}
                               onChange={(e) => updateProduct(index, 'comprimento', parseFloat(e.target.value) || 0)}
                               placeholder="30"
+                              className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                             />
                           </div>
                           <div>
@@ -708,6 +715,7 @@ export default function FormalImportSimulatorFixed() {
                               value={produto.largura}
                               onChange={(e) => updateProduct(index, 'largura', parseFloat(e.target.value) || 0)}
                               placeholder="20"
+                              className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                             />
                           </div>
                           <div>
@@ -717,6 +725,7 @@ export default function FormalImportSimulatorFixed() {
                               value={produto.altura}
                               onChange={(e) => updateProduct(index, 'altura', parseFloat(e.target.value) || 0)}
                               placeholder="15"
+                              className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                             />
                           </div>
                           <div>
@@ -787,6 +796,7 @@ export default function FormalImportSimulatorFixed() {
                           value={newTax.aliquota}
                           onChange={(e) => setNewTax({...newTax, aliquota: parseFloat(e.target.value) || 0})}
                           placeholder="5.00"
+                          className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                         />
                       </div>
                     </div>
@@ -822,7 +832,7 @@ export default function FormalImportSimulatorFixed() {
                           step="0.01"
                           value={imposto.aliquota}
                           onChange={(e) => updateTax(index, 'aliquota', parseFloat(e.target.value) || 0)}
-                          className="w-24"
+                          className="w-24 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                         />
                       </TableCell>
                       <TableCell>
@@ -883,6 +893,7 @@ export default function FormalImportSimulatorFixed() {
                             value={newExpense.valorDolar}
                             onChange={(e) => setNewExpense({...newExpense, valorDolar: parseFloat(e.target.value) || 0})}
                             placeholder="100.00"
+                            className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                           />
                         </div>
                         <div>
@@ -893,6 +904,7 @@ export default function FormalImportSimulatorFixed() {
                             value={newExpense.valorReal}
                             onChange={(e) => setNewExpense({...newExpense, valorReal: parseFloat(e.target.value) || 0})}
                             placeholder="550.00"
+                            className="[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                           />
                         </div>
                       </div>
@@ -929,7 +941,7 @@ export default function FormalImportSimulatorFixed() {
                           step="0.01"
                           value={despesa.valorDolar}
                           onChange={(e) => updateExpense(index, 'valorDolar', parseFloat(e.target.value) || 0)}
-                          className="w-32"
+                          className="w-32 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                         />
                       </TableCell>
                       <TableCell>
@@ -938,7 +950,7 @@ export default function FormalImportSimulatorFixed() {
                           step="0.01"
                           value={despesa.valorReal}
                           onChange={(e) => updateExpense(index, 'valorReal', parseFloat(e.target.value) || 0)}
-                          className="w-32"
+                          className="w-32 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                         />
                       </TableCell>
                       <TableCell>
