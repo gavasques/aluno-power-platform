@@ -108,66 +108,59 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
   // TODO: Implement supplier selection if needed
   const suppliers: any[] = [];
 
-  // Fetch departments (categories) for selection
-  const { data: departments, isLoading: isDepartmentsLoading, error: departmentsError } = useQuery({
-    queryKey: ['departments-list'],
-    queryFn: async () => {
-      console.log('[DEPARTMENTS] Starting API call...');
-      const response = await fetch('/api/departments', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log('[DEPARTMENTS] Response status:', response.status);
-      if (!response.ok) {
-        throw new Error('Erro ao carregar categorias');
-      }
-      const result = await response.json();
-      console.log('[DEPARTMENTS] Success:', result);
-      // The API returns the data directly as an array, not wrapped in result.data
-      return Array.isArray(result) ? result : (result.data || []);
-    },
-    enabled: !!token, // Only run query when token is available
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-  
-  // Fetch user brands for selection
-  const { data: brands, isLoading: isBrandsLoading, error: brandsError } = useQuery({
-    queryKey: ['brands-list-user'],
-    queryFn: async () => {
-      console.log('[BRANDS] Starting API call...');
-      const response = await fetch('/api/brands', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log('[BRANDS] Response status:', response.status);
-      if (!response.ok) {
-        throw new Error('Erro ao carregar marcas');
-      }
-      const result = await response.json();
-      console.log('[BRANDS] Success:', result);
-      // The API returns the data directly as an array, not wrapped in result.data
-      return Array.isArray(result) ? result : (result.data || []);
-    },
-    enabled: !!token, // Only run query when token is available
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  // State para departments e brands
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
+  const [isDepartmentsLoading, setIsDepartmentsLoading] = useState(false);
+  const [isBrandsLoading, setIsBrandsLoading] = useState(false);
 
-  // Ensure data is always an array (fallback for React Query timing issues)
-  const departmentsArray = Array.isArray(departments) ? departments : [];
-  const brandsArray = Array.isArray(brands) ? brands : [];
+  // Fetch departments diretamente
+  useEffect(() => {
+    if (!token) return;
+    
+    setIsDepartmentsLoading(true);
+    fetch('/api/departments', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      setDepartments(Array.isArray(data) ? data : []);
+    })
+    .catch(error => {
+      console.error('Erro ao carregar departments:', error);
+      setDepartments([]);
+    })
+    .finally(() => {
+      setIsDepartmentsLoading(false);
+    });
+  }, [token]);
 
-  // Debug logs for rendering (after all queries are declared)
-  console.log('[DEBUG] Token:', !!token);
-  console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'error:', departmentsError, 'data:', departments, 'length:', departments?.length);
-  console.log('[DEBUG] Brands loading:', isBrandsLoading, 'error:', brandsError, 'data:', brands, 'length:', brands?.length);
-  console.log('[DEBUG] Departments fallback array:', departmentsArray, 'length:', departmentsArray.length);
-  console.log('[DEBUG] Brands fallback array:', brandsArray, 'length:', brandsArray.length);
+  // Fetch brands diretamente
+  useEffect(() => {
+    if (!token) return;
+    
+    setIsBrandsLoading(true);
+    fetch('/api/brands', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      setBrands(Array.isArray(data) ? data : []);
+    })
+    .catch(error => {
+      console.error('Erro ao carregar brands:', error);
+      setBrands([]);
+    })
+    .finally(() => {
+      setIsBrandsLoading(false);
+    });
+  }, [token]);
 
   // Fill form with existing data
   useEffect(() => {
@@ -388,20 +381,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                               Carregando categorias...
                             </div>
                           )}
-                          {departmentsError && (
-                            <div className="p-2 text-center text-sm text-red-500">
-                              Erro ao carregar categorias
-                            </div>
-                          )}
-                          {departmentsArray.map((department: any) => {
-                            console.log('[DEBUG] Rendering department:', department);
-                            return (
-                              <SelectItem key={department.id} value={department.name || `dept-${department.id}`}>
-                                {department.name || 'Nome não disponível'}
-                              </SelectItem>
-                            );
-                          })}
-                          {!isDepartmentsLoading && !departmentsError && (!departments || departments.length === 0) && (
+                          {departments.map((department: any) => (
+                            <SelectItem key={department.id} value={department.name}>
+                              {department.name}
+                            </SelectItem>
+                          ))}
+                          {!isDepartmentsLoading && departments.length === 0 && (
                             <div className="p-2 text-center text-sm text-gray-500">
                               Nenhuma categoria disponível
                             </div>
@@ -431,20 +416,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                               Carregando marcas...
                             </div>
                           )}
-                          {brandsError && (
-                            <div className="p-2 text-center text-sm text-red-500">
-                              Erro ao carregar marcas
-                            </div>
-                          )}
-                          {brandsArray.map((brand: any) => {
-                            console.log('[DEBUG] Rendering brand:', brand);
-                            return (
-                              <SelectItem key={brand.id} value={brand.name || `brand-${brand.id}`}>
-                                {brand.name || 'Nome não disponível'}
-                              </SelectItem>
-                            );
-                          })}
-                          {!isBrandsLoading && !brandsError && (!brands || brands.length === 0) && (
+                          {brands.map((brand: any) => (
+                            <SelectItem key={brand.id} value={brand.name}>
+                              {brand.name}
+                            </SelectItem>
+                          ))}
+                          {!isBrandsLoading && brands.length === 0 && (
                             <div className="p-2 text-center text-sm text-gray-500">
                               Nenhuma marca disponível
                             </div>
