@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useParams } from 'wouter';
 import { ArrowLeft, Save, Package, Building2, FileText, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -104,24 +104,34 @@ export default function ImportedProductForm() {
     },
   });
 
-  // Fetch existing product for editing
-  const { data: existingProduct, isLoading: isLoadingProduct } = useQuery({
-    queryKey: ['imported-product', productId],
-    queryFn: async () => {
-      if (!productId) return null;
-      const response = await fetch(`/api/imported-products/${productId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Erro ao carregar produto');
+  // State para produto existente (usando useState em vez de React Query)
+  const [existingProduct, setExistingProduct] = useState<any>(null);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
+
+  // Fetch existing product para edição usando useState + useEffect
+  useEffect(() => {
+    if (!isEditing || !productId || !token) return;
+
+    setIsLoadingProduct(true);
+    fetch(`/api/imported-products/${productId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
-      return response.json();
-    },
-    enabled: isEditing,
-  });
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.error('🔍 [DEBUG] Produto carregado:', data);
+      setExistingProduct(data);
+    })
+    .catch(error => {
+      console.error('Erro ao carregar produto:', error);
+      setExistingProduct(null);
+    })
+    .finally(() => {
+      setIsLoadingProduct(false);
+    });
+  }, [isEditing, productId, token]);
 
   // Empty suppliers array to prevent "suppliers is not defined" error
   // TODO: Implement supplier selection if needed
