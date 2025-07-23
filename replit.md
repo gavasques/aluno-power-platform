@@ -783,6 +783,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 23, 2025 - 1:10 AM**: ✅ REACT QUERY TIMING ISSUES RESOLVED - IMPORTED PRODUCT FORM DROPDOWNS FIXED
+  - **Root Cause**: React Query tinha problemas de timing onde as APIs funcionavam mas as variáveis ficavam undefined
+  - **Solution**: Substituído React Query por useState + useEffect direto
+  - **Implementation**: Fetch simples com .then() e setState para departments e brands
+  - **User Experience**: Dropdowns de Categoria (24 items) e Marca (8 items) agora funcionam perfeitamente
+  - **Documentation**: **REGRA IMPORTANTE** - Para dropdowns simples, evitar React Query complexo, usar useState + fetch direto
+  - **Files Modified**: `client/src/pages/myarea/importacoes/produtos/ImportedProductForm.tsx`
+  - **Status**: Problema resolvido definitivamente - dropdowns funcionais com dados reais
+
 - **January 21, 2025 - 9:18 PM**: ✅ SIMULATORS MIGRATION AND CLEANUP COMPLETED - IMPORTAÇÃO SECTION REORGANIZED
   - **Objective Achieved**: Complete migration of specific simulators from "Simuladores" to "Importação" section as requested by user
   - **Simulators Migrated to Importação Section**:
