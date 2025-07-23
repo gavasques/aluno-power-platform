@@ -156,8 +156,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
 
   // Debug logs for rendering (after all queries are declared)
   console.log('[DEBUG] Token:', !!token);
-  console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'data:', departments, 'length:', departments?.length);
-  console.log('[DEBUG] Brands loading:', isBrandsLoading, 'data:', brands, 'length:', brands?.length);
+  console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'error:', departmentsError, 'data:', departments, 'length:', departments?.length);
+  console.log('[DEBUG] Brands loading:', isBrandsLoading, 'error:', brandsError, 'data:', brands, 'length:', brands?.length);
+  
+  // Additional debug for React Query state
+  console.log('[DEBUG] Departments actual data structure:', JSON.stringify(departments));
+  console.log('[DEBUG] Brands actual data structure:', JSON.stringify(brands));
 
   // Fill form with existing data
   useEffect(() => {
@@ -383,14 +387,14 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                               Erro ao carregar categorias
                             </div>
                           )}
-                          {departments?.map((department: any) => {
+                          {Array.isArray(departments) ? departments.map((department: any) => {
                             console.log('[DEBUG] Rendering department:', department);
                             return (
                               <SelectItem key={department.id} value={department.name || `dept-${department.id}`}>
                                 {department.name || 'Nome não disponível'}
                               </SelectItem>
                             );
-                          })}
+                          }) : null}
                           {!isDepartmentsLoading && !departmentsError && (!departments || departments.length === 0) && (
                             <div className="p-2 text-center text-sm text-gray-500">
                               Nenhuma categoria disponível
@@ -426,14 +430,14 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                               Erro ao carregar marcas
                             </div>
                           )}
-                          {brands?.map((brand: any) => {
+                          {Array.isArray(brands) ? brands.map((brand: any) => {
                             console.log('[DEBUG] Rendering brand:', brand);
                             return (
                               <SelectItem key={brand.id} value={brand.name || `brand-${brand.id}`}>
                                 {brand.name || 'Nome não disponível'}
                               </SelectItem>
                             );
-                          })}
+                          }) : null}
                           {!isBrandsLoading && !brandsError && (!brands || brands.length === 0) && (
                             <div className="p-2 text-center text-sm text-gray-500">
                               Nenhuma marca disponível
