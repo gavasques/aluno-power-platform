@@ -698,13 +698,14 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                       <FormLabel>Percentual IPI (%)</FormLabel>
                       <FormControl>
                         <Input 
-                          type="number" 
-                          step="0.01"
-                          min="0"
-                          max="100"
+                          type="text" 
                           placeholder="0.00"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                          value={field.value?.toString() || ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                            field.onChange(parseFloat(value) || undefined);
+                          }}
+                          inputMode="decimal"
                         />
                       </FormControl>
                       <FormMessage />
@@ -811,11 +812,14 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormLabel>Total de Embalagens</FormLabel>
                     <FormControl>
                       <Input 
-                        type="number" 
-                        min="1"
+                        type="text" 
                         placeholder="1"
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        value={field.value?.toString() || ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          field.onChange(parseInt(value) || 1);
+                        }}
+                        inputMode="numeric"
                       />
                     </FormControl>
                     <FormMessage />

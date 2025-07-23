@@ -419,10 +419,14 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                 <Label htmlFor="moq">MOQ (Quantidade Mínima)</Label>
                 <Input
                   id="moq"
-                  type="number"
-                  value={formData.moq}
-                  onChange={(e) => setFormData(prev => ({ ...prev, moq: parseInt(e.target.value) || 0 }))}
+                  type="text"
+                  value={formData.moq.toString()}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setFormData(prev => ({ ...prev, moq: parseInt(value) || 0 }));
+                  }}
                   placeholder="MOQ"
+                  inputMode="numeric"
                 />
               </div>
 
@@ -430,10 +434,14 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                 <Label htmlFor="leadTimeDays">Lead Time (dias)</Label>
                 <Input
                   id="leadTimeDays"
-                  type="number"
-                  value={formData.leadTimeDays}
-                  onChange={(e) => setFormData(prev => ({ ...prev, leadTimeDays: parseInt(e.target.value) || 0 }))}
+                  type="text"
+                  value={formData.leadTimeDays.toString()}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setFormData(prev => ({ ...prev, leadTimeDays: parseInt(value) || 0 }));
+                  }}
                   placeholder="Lead time em dias"
+                  inputMode="numeric"
                 />
               </div>
             </div>
@@ -494,20 +502,28 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                       <div>
                         <Label>MOQ (Quantidade Mínima)</Label>
                         <Input
-                          type="number"
-                          value={formData.moq}
-                          onChange={(e) => setFormData(prev => ({ ...prev, moq: parseInt(e.target.value) || 0 }))}
+                          type="text"
+                          value={formData.moq.toString()}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            setFormData(prev => ({ ...prev, moq: parseInt(value) || 0 }));
+                          }}
                           placeholder="MOQ"
+                          inputMode="numeric"
                         />
                       </div>
 
                       <div>
                         <Label>Lead Time (dias)</Label>
                         <Input
-                          type="number"
-                          value={formData.leadTimeDays}
-                          onChange={(e) => setFormData(prev => ({ ...prev, leadTimeDays: parseInt(e.target.value) || 0 }))}
+                          type="text"
+                          value={formData.leadTimeDays.toString()}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            setFormData(prev => ({ ...prev, leadTimeDays: parseInt(value) || 0 }));
+                          }}
                           placeholder="Lead time em dias"
+                          inputMode="numeric"
                         />
                       </div>
                     </div>
