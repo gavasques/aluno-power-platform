@@ -356,7 +356,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Código Interno *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: IMP-001" {...field} />
+                        <Input 
+                          placeholder="Ex: IMP-001" 
+                          {...field}
+                          className="uppercase"
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -468,7 +473,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Modelo</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: MP-2024" {...field} />
+                        <Input 
+                          placeholder="Ex: MP-2024" 
+                          {...field}
+                          className="uppercase"
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -482,7 +492,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Referência</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: REF-001" {...field} />
+                        <Input 
+                          placeholder="Ex: REF-001" 
+                          {...field}
+                          className="uppercase"
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -553,7 +568,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Cor</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Preto" {...field} />
+                        <Input 
+                          placeholder="Ex: Preto" 
+                          {...field}
+                          className="uppercase"
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -567,7 +587,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Tamanho</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: M, 42, 15cm" {...field} />
+                        <Input 
+                          placeholder="Ex: M, 42, 15cm" 
+                          {...field}
+                          className="uppercase"
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -581,7 +606,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Variação 1</FormLabel>
                       <FormControl>
-                        <Input placeholder="Campo livre" {...field} />
+                        <Input 
+                          placeholder="Campo livre" 
+                          {...field}
+                          className="uppercase"
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -595,7 +625,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Variação 2</FormLabel>
                       <FormControl>
-                        <Input placeholder="Campo livre" {...field} />
+                        <Input 
+                          placeholder="Campo livre" 
+                          {...field}
+                          className="uppercase"
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -612,7 +647,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Material</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Alumínio" {...field} />
+                        <Input 
+                          placeholder="Ex: Alumínio" 
+                          {...field}
+                          className="uppercase"
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -679,7 +719,12 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     <FormItem>
                       <FormLabel>Descrição para Alfândega</FormLabel>
                       <FormControl>
-                        <Input placeholder="Descrição para documentos aduaneiros" {...field} />
+                        <Input 
+                          placeholder="Descrição para documentos aduaneiros" 
+                          {...field}
+                          className="uppercase"
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
