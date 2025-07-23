@@ -122,7 +122,6 @@ export default function ImportedProductForm() {
     })
     .then(response => response.json())
     .then(data => {
-      console.error('🔍 [DEBUG] Produto carregado:', data);
       setExistingProduct(data);
     })
     .catch(error => {
@@ -194,24 +193,8 @@ export default function ImportedProductForm() {
 
   // Fill form with existing data
   useEffect(() => {
-    console.error('🔍 [DEBUG] useEffect executado:', { 
-      params, 
-      productId, 
-      isEditing, 
-      existingProduct, 
-      hasData: !!existingProduct?.data 
-    });
-    
     if (existingProduct?.data && isEditing) {
-      // A API retorna {success: true, data: produto}, então existingProduct.data é o produto
       const product = existingProduct.data;
-      
-      console.error('🔍 [DEBUG] Dados do produto carregados:', {
-        productName: product.name,
-        productCode: product.internalCode,
-        productStatus: product.status,
-        productKeys: Object.keys(product)
-      });
       
       // Mapear status da API para valores do formulário
       const statusMapping: Record<string, string> = {
@@ -221,12 +204,11 @@ export default function ImportedProductForm() {
       };
       
       const mappedStatus = statusMapping[product.status] || 'Em Desenvolvimento';
-      console.error('🔍 [DEBUG] Status mapeado:', mappedStatus);
       
       form.reset({
         name: product.name || '',
         internalCode: product.internalCode || '',
-        status: mappedStatus,
+        status: mappedStatus as 'Em Desenvolvimento' | 'Ativo' | 'Inativo',
         description: product.description || '',
         detailedDescription: product.detailedDescription || '',
         category: product.category || '',
@@ -322,7 +304,7 @@ export default function ImportedProductForm() {
       const dataToSend = {
         ...data,
         status: reverseStatusMapping[data.status] || 'research'
-      };
+      } as any; // Type assertion para contornar o tipo específico
       
       await saveMutation.mutateAsync(dataToSend);
     } catch (error) {
