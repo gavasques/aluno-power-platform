@@ -74,10 +74,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
     try {
       setLoading(true);
       
-      console.error('🔍 [DEBUG] LoadData iniciado - token:', !!token, 'productId:', productId);
-      
       if (!token) {
-        console.error('❌ [ERROR] Token não disponível');
         return;
       }
       
@@ -89,11 +86,10 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
         }
       });
       
-      console.error('🔍 [DEBUG] Resposta suppliers:', suppliersResponse.status);
-      
       if (suppliersResponse.ok) {
         const suppliersData = await suppliersResponse.json();
-        setSuppliers(suppliersData || []);
+        // A API retorna {success: true, data: [...]}
+        setSuppliers(suppliersData?.data || []);
       }
 
       // Carregar fornecedores do produto apenas se não estiver em modo temporário
