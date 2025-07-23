@@ -348,7 +348,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
     saveTempSuppliersToDatabase
   }));
 
-  if (loading) {
+  if (loading && suppliers.length === 0) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -370,6 +370,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
           <p className="text-sm text-gray-600">Gerencie os fornecedores deste produto importado</p>
         </div>
         <Button
+          type="button"
           onClick={() => setShowAddForm(true)}
           className="bg-green-600 hover:bg-green-700"
         >
@@ -396,11 +397,15 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                     <SelectValue placeholder="Selecione um fornecedor" />
                   </SelectTrigger>
                   <SelectContent>
-                    {suppliers.map((supplier) => (
+                    {suppliers && suppliers.length > 0 ? suppliers.map((supplier) => (
                       <SelectItem key={supplier.id} value={supplier.id.toString()}>
                         {supplier.tradeName}
                       </SelectItem>
-                    ))}
+                    )) : (
+                      <SelectItem value="no-suppliers" disabled>
+                        Nenhum fornecedor encontrado
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -460,12 +465,16 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
 
             <div className="flex justify-end space-x-2">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => setShowAddForm(false)}
               >
                 Cancelar
               </Button>
-              <Button onClick={handleAddSupplier}>
+              <Button 
+                type="button"
+                onClick={handleAddSupplier}
+              >
                 Adicionar
               </Button>
             </div>
@@ -541,11 +550,18 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                     </div>
 
                     <div className="flex justify-end space-x-2">
-                      <Button variant="outline" onClick={cancelEdit}>
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        onClick={cancelEdit}
+                      >
                         <X className="w-4 h-4 mr-2" />
                         Cancelar
                       </Button>
-                      <Button onClick={() => handleUpdateSupplier(productSupplier.id, productSupplier.supplierId)}>
+                      <Button 
+                        type="button"
+                        onClick={() => handleUpdateSupplier(productSupplier.id, productSupplier.supplierId)}
+                      >
                         <Save className="w-4 h-4 mr-2" />
                         Salvar
                       </Button>
@@ -564,6 +580,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                       </div>
                       <div className="flex space-x-2">
                         <Button
+                          type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => startEdit(productSupplier)}
@@ -571,6 +588,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
+                          type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => handleDeleteSupplier(productSupplier.id)}
