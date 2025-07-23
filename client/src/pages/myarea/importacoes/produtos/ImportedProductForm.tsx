@@ -27,9 +27,14 @@ const importedProductSchema = z.object({
   category: z.string().optional(),
   brand: z.string().optional(),
   model: z.string().optional(),
+  reference: z.string().optional(),
   color: z.string().optional(),
+  size: z.string().optional(),
+  variation1: z.string().optional(),
+  variation2: z.string().optional(),
   material: z.string().optional(),
   technicalSpecifications: z.string().optional(),
+  ncmCode: z.string().optional(),
   hasMultiplePackages: z.boolean().default(false),
   totalPackages: z.number().int().min(1).default(1),
   hsCode: z.string().optional(),
@@ -80,8 +85,24 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
       name: '',
       internalCode: '',
       status: 'research',
+      description: '',
+      detailedDescription: '',
+      category: '',
+      brand: '',
+      model: '',
+      reference: '',
+      color: '',
+      size: '',
+      variation1: '',
+      variation2: '',
+      material: '',
+      technicalSpecifications: '',
+      ncmCode: '',
       hasMultiplePackages: false,
       totalPackages: 1,
+      hsCode: '',
+      ipiPercentage: undefined,
+      customsDescription: '',
     },
   });
 
@@ -175,9 +196,14 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
         category: product.category || '',
         brand: product.brand || '',
         model: product.model || '',
+        reference: product.reference || '',
         color: product.color || '',
+        size: product.size || '',
+        variation1: product.variation1 || '',
+        variation2: product.variation2 || '',
         material: product.material || '',
         technicalSpecifications: product.technicalSpecifications || '',
+        ncmCode: product.ncmCode || '',
         hasMultiplePackages: product.hasMultiplePackages || false,
         totalPackages: product.totalPackages || 1,
         hsCode: product.hsCode || '',
@@ -446,6 +472,20 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="reference"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Referência</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: REF-001" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <FormField
@@ -483,16 +523,27 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                   </FormItem>
                 )}
               />
-            </CardContent>
-          </Card>
 
-          {/* Product Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Detalhes do Produto</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FormField
+                control={form.control}
+                name="technicalSpecifications"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Especificações Técnicas</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Dimensões, peso, capacidades, características técnicas..."
+                        rows={4}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Linha 1: Cor, Tamanho, Variação 1, Variação 2 */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <FormField
                   control={form.control}
                   name="color"
@@ -507,6 +558,51 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="size"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tamanho</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: M, 42, 15cm" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="variation1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Variação 1</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Campo livre" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="variation2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Variação 2</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Campo livre" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Linha 2: Material, Código HS, NCM */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
                   name="material"
@@ -534,26 +630,62 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="ncmCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>NCM</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: 9403.20.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              <FormField
-                control={form.control}
-                name="technicalSpecifications"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Especificações Técnicas</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Dimensões, peso, capacidades, características técnicas..."
-                        rows={4}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Linha 3: Percentual de IPI e Descrição para Alfândega */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="ipiPercentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Percentual IPI (%)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          placeholder="0.00"
+                          {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                <FormField
+                  control={form.control}
+                  name="customsDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição para Alfândega</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Descrição para documentos aduaneiros" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Linha 4: Códigos EAN, UPC, Código de Barras Interno */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
@@ -643,44 +775,6 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
                   </FormItem>
                 )}
               />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="ipiPercentage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Percentual IPI (%)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.01"
-                          min="0"
-                          max="100"
-                          placeholder="0.00"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="customsDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição para Alfândega</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Descrição para documentos aduaneiros" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
             </CardContent>
           </Card>
 

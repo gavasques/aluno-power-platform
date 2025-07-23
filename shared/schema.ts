@@ -3512,12 +3512,17 @@ export const importedProducts = pgTable("imported_products", {
   category: text("category"),
   brand: text("brand"),
   model: text("model"),
+  reference: text("reference"), // Referência
   color: text("color"),
+  size: text("size"), // Tamanho
+  variation1: text("variation1"), // Variação 1 (campo livre)
+  variation2: text("variation2"), // Variação 2 (campo livre)
   material: text("material"),
   technicalSpecifications: text("technical_specifications"),
   hasMultiplePackages: boolean("has_multiple_packages").notNull().default(false),
   totalPackages: integer("total_packages").notNull().default(1),
   hsCode: text("hs_code"), // NCM/HS Code
+  ncmCode: text("ncm_code"), // NCM específico
   ipiPercentage: decimal("ipi_percentage", { precision: 5, scale: 2 }),
   productEan: text("product_ean"),
   productUpc: text("product_upc"),
