@@ -104,24 +104,6 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
     enabled: isEditing,
   });
 
-  // Fetch suppliers for selection
-  const { data: suppliers } = useQuery({
-    queryKey: ['suppliers-list'],
-    queryFn: async () => {
-      const response = await fetch('/api/suppliers/search?limit=100', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Erro ao carregar fornecedores');
-      }
-      const result = await response.json();
-      return result.data || [];
-    },
-  });
-
   // Fetch departments (categories) for selection
   const { data: departments, isLoading: isDepartmentsLoading, error: departmentsError } = useQuery({
     queryKey: ['departments-list'],
@@ -169,8 +151,9 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
   });
 
   // Debug logs for rendering (after all queries are declared)
-  console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'data:', departments);
-  console.log('[DEBUG] Brands loading:', isBrandsLoading, 'data:', brands);
+  console.log('[DEBUG] Token:', !!token);
+  console.log('[DEBUG] Departments loading:', isDepartmentsLoading, 'data:', departments, 'length:', departments?.length);
+  console.log('[DEBUG] Brands loading:', isBrandsLoading, 'data:', brands, 'length:', brands?.length);
 
   // Fill form with existing data
   useEffect(() => {
