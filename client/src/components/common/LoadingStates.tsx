@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from './LoadingSpinner';
+import { LoadingCoordinator } from '@/utils/loadingDebounce';
 
 interface LoadingStateProps {
   className?: string;
@@ -16,8 +17,26 @@ interface LoadingStateProps {
 // Page-level loading state - replaces full-page loading patterns
 export function PageLoadingState({ 
   message = "Carregando...", 
-  className = "" 
-}: { message?: string; className?: string }) {
+  className = "",
+  loadingKey = "page-loading" 
+}: { message?: string; className?: string; loadingKey?: string }) {
+  const [shouldShow, setShouldShow] = useState(false);
+  const coordinator = LoadingCoordinator.getInstance();
+  
+  useEffect(() => {
+    coordinator.setLoading(loadingKey, true);
+    
+    // Debounce to prevent flash of loading state
+    const timer = setTimeout(() => setShouldShow(true), 100);
+    
+    return () => {
+      coordinator.setLoading(loadingKey, false);
+      clearTimeout(timer);
+    };
+  }, [coordinator, loadingKey]);
+  
+  if (!shouldShow) return null;
+  
   return (
     <div className={cn("container mx-auto px-4 py-6", className)}>
       <div className="flex items-center justify-center min-h-[400px]">
@@ -177,23 +196,26 @@ export function SkeletonTable({ rows = 5, className = "" }: { rows?: number; cla
   );
 }
 
-// Hook for loading states management
+// Hook for loading states management - now with global coordination
 export function useLoadingStates() {
   const [loadingStates, setLoadingStates] = React.useState<Record<string, boolean>>({});
+  const coordinator = LoadingCoordinator.getInstance();
 
   const setLoading = (key: string, loading: boolean) => {
     setLoadingStates(prev => ({ ...prev, [key]: loading }));
+    coordinator.setLoading(`local-${key}`, loading);
   };
 
   const isLoading = (key: string) => !!loadingStates[key];
 
-  const isAnyLoading = () => Object.values(loadingStates).some(Boolean);
+  const isAnyLoading = () => Object.values(loadingStates).some(Boolean) || coordinator.isAnyLoading();
 
   return {
     setLoading,
     isLoading,
     isAnyLoading,
     loadingStates,
+    globalActiveStates: coordinator.getActiveStates(),
   };
 }
 

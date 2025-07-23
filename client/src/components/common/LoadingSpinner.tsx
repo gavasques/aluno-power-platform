@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LoadingCoordinator } from '@/utils/loadingDebounce';
 
 interface LoadingSpinnerProps {
   message?: string;
@@ -8,6 +9,8 @@ interface LoadingSpinnerProps {
   variant?: 'default' | 'inline' | 'button';
   className?: string;
   showMessage?: boolean;
+  loadingKey?: string;
+  preventDuplicate?: boolean;
 }
 
 const sizeClasses = {
@@ -29,8 +32,31 @@ export function LoadingSpinner({
   size = 'md',
   variant = 'default',
   className = '',
-  showMessage = true
+  showMessage = true,
+  loadingKey,
+  preventDuplicate = false
 }: LoadingSpinnerProps) {
+  const [shouldShow, setShouldShow] = useState(!preventDuplicate);
+  const coordinator = LoadingCoordinator.getInstance();
+  
+  useEffect(() => {
+    if (preventDuplicate && loadingKey) {
+      // Check if there's already an active loading state
+      const hasOtherLoading = coordinator.getActiveStates().some(key => key !== loadingKey);
+      setShouldShow(!hasOtherLoading);
+      
+      coordinator.setLoading(loadingKey, true);
+      
+      return () => {
+        coordinator.setLoading(loadingKey, false);
+      };
+    }
+  }, [preventDuplicate, loadingKey, coordinator]);
+  
+  if (preventDuplicate && !shouldShow) {
+    return null;
+  }
+  
   const containerClasses = cn(variantClasses[variant], className);
   const spinnerClasses = cn('animate-spin', sizeClasses[size]);
 

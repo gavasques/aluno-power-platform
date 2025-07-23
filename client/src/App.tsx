@@ -120,12 +120,12 @@ const PhoneVerification = lazy(() => import("./pages/PhoneVerification"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 
-// Loading component for lazy-loaded routes
+// Loading component for lazy-loaded routes - optimized to avoid duplications
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="flex items-center gap-3">
-      <LoadingSpinner size="md" />
-      <span className="text-sm text-muted-foreground">Carregando...</span>
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="flex items-center gap-3 p-6 rounded-lg bg-card shadow-sm">
+      <LoadingSpinner size="md" showMessage={false} />
+      <span className="text-sm text-muted-foreground">Carregando página...</span>
     </div>
   </div>
 );

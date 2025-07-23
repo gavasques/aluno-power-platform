@@ -1,46 +1,65 @@
-/**
- * Phase 2 Performance Hook - Optimized Query Hook
- * 
- * This hook provides automatic query optimization based on data type
- */
-
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { getOptimizedQueryOptions } from '@/lib/queryOptimizations';
-
-interface OptimizedQueryOptions<T> extends Omit<UseQueryOptions<T>, 'queryKey'> {
-  queryKey: readonly unknown[];
-  dataType?: 'static' | 'semi_static' | 'dynamic' | 'real_time';
-}
+import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { LoadingCoordinator } from '@/utils/loadingDebounce';
 
 /**
- * Enhanced useQuery hook with automatic performance optimizations
+ * Optimized version of useQuery that coordinates loading states
+ * to prevent duplicate loading messages across the system
  */
-export function useOptimizedQuery<T = unknown>(options: OptimizedQueryOptions<T>) {
-  const optimizedOptions = getOptimizedQueryOptions(options.queryKey);
+export function useOptimizedQuery<T>(
+  options: UseQueryOptions<T> & { loadingKey?: string }
+): UseQueryResult<T> & { isOptimizedLoading: boolean } {
+  const { loadingKey, ...queryOptions } = options;
+  const result = useQuery<T>(queryOptions);
+  const coordinator = LoadingCoordinator.getInstance();
   
-  return useQuery<T>({
-    ...options,
-    ...optimizedOptions,
-    // Allow manual overrides while keeping optimization defaults
-    ...(options.staleTime !== undefined && { staleTime: options.staleTime }),
-    ...(options.gcTime !== undefined && { gcTime: options.gcTime }),
-    ...(options.refetchOnWindowFocus !== undefined && { refetchOnWindowFocus: options.refetchOnWindowFocus }),
-    ...(options.refetchOnMount !== undefined && { refetchOnMount: options.refetchOnMount }),
-    ...(options.refetchOnReconnect !== undefined && { refetchOnReconnect: options.refetchOnReconnect }),
-  });
+  const key = loadingKey || `query-${JSON.stringify(options.queryKey)}`;
+  
+  useEffect(() => {
+    if (result.isLoading || result.isFetching) {
+      coordinator.setLoading(key, true);
+    } else {
+      coordinator.setLoading(key, false);
+    }
+    
+    return () => {
+      coordinator.setLoading(key, false);
+    };
+  }, [result.isLoading, result.isFetching, coordinator, key]);
+  
+  // Return a custom isLoading that considers global state
+  const isOptimizedLoading = result.isLoading && !coordinator.isAnyLoading();
+  
+  return {
+    ...result,
+    isOptimizedLoading
+  };
 }
 
 /**
- * Pre-configured hooks for common data types
+ * Smart loading component that only shows if no other loading is active
  */
-export const useStaticQuery = <T = unknown>(options: Omit<OptimizedQueryOptions<T>, 'dataType'>) =>
-  useOptimizedQuery<T>({ ...options, dataType: 'static' });
-
-export const useSemiStaticQuery = <T = unknown>(options: Omit<OptimizedQueryOptions<T>, 'dataType'>) =>
-  useOptimizedQuery<T>({ ...options, dataType: 'semi_static' });
-
-export const useDynamicQuery = <T = unknown>(options: Omit<OptimizedQueryOptions<T>, 'dataType'>) =>
-  useOptimizedQuery<T>({ ...options, dataType: 'dynamic' });
-
-export const useRealTimeQuery = <T = unknown>(options: Omit<OptimizedQueryOptions<T>, 'dataType'>) =>
-  useOptimizedQuery<T>({ ...options, dataType: 'real_time' });
+export function SmartLoadingWrapper({ 
+  isLoading, 
+  children, 
+  loadingComponent,
+  loadingKey = 'smart-loading'
+}: {
+  isLoading: boolean;
+  children: React.ReactNode;
+  loadingComponent?: React.ReactNode;
+  loadingKey?: string;
+}) {
+  const coordinator = LoadingCoordinator.getInstance();
+  
+  useEffect(() => {
+    coordinator.setLoading(loadingKey, isLoading);
+    return () => coordinator.setLoading(loadingKey, false);
+  }, [isLoading, coordinator, loadingKey]);
+  
+  if (isLoading) {
+    return loadingComponent || <div>Carregando...</div>;
+  }
+  
+  return <>{children}</>;
+}
