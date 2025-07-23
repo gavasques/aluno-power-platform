@@ -1,0 +1,487 @@
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Plus, Edit, Save, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface Supplier {
+  id: number;
+  tradeName: string;
+  corporateName: string;
+  commercialEmail: string;
+}
+
+interface ProductSupplier {
+  id: string;
+  supplierId: number;
+  supplierProductCode: string;
+  supplierProductName: string;
+  moq: number;
+  leadTimeDays: number;
+  supplierTradeName: string;
+  supplierCorporateName: string;
+  supplierEmail: string;
+}
+
+interface ImportedProductSuppliersTabProps {
+  productId: string;
+}
+
+export default function ImportedProductSuppliersTab({ productId }: ImportedProductSuppliersTabProps) {
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [productSuppliers, setProductSuppliers] = useState<ProductSupplier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const { toast } = useToast();
+
+  // Estados para o formulário de adição/edição
+  const [formData, setFormData] = useState({
+    supplierId: 0,
+    supplierProductCode: '',
+    supplierProductName: '',
+    moq: 0,
+    leadTimeDays: 0
+  });
+
+  // Carregar dados inicial
+  useEffect(() => {
+    loadData();
+  }, [productId]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Carregar fornecedores do CRM
+      const suppliersResponse = await fetch('/api/suppliers', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      
+      if (suppliersResponse.ok) {
+        const suppliersData = await suppliersResponse.json();
+        setSuppliers(suppliersData || []);
+      }
+
+      // Carregar fornecedores do produto
+      const productSuppliersResponse = await fetch(`/api/imported-products/${productId}/suppliers`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      if (productSuppliersResponse.ok) {
+        const productSuppliersData = await productSuppliersResponse.json();
+        setProductSuppliers(productSuppliersData.data || []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar dados dos fornecedores",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddSupplier = async () => {
+    try {
+      if (!formData.supplierId) {
+        toast({
+          title: "Erro",
+          description: "Selecione um fornecedor",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await fetch(`/api/imported-products/${productId}/suppliers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Fornecedor adicionado com sucesso",
+        });
+        setShowAddForm(false);
+        setFormData({
+          supplierId: 0,
+          supplierProductCode: '',
+          supplierProductName: '',
+          moq: 0,
+          leadTimeDays: 0
+        });
+        loadData();
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Erro",
+          description: errorData.error || "Erro ao adicionar fornecedor",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar fornecedor:', error);
+      toast({
+        title: "Erro",
+        description: "Erro interno do servidor",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateSupplier = async (productSupplierId: string, supplierId: number) => {
+    try {
+      const response = await fetch(`/api/imported-products/${productId}/suppliers/${supplierId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Fornecedor atualizado com sucesso",
+        });
+        setEditingId(null);
+        loadData();
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Erro",
+          description: errorData.error || "Erro ao atualizar fornecedor",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar fornecedor:', error);
+      toast({
+        title: "Erro",
+        description: "Erro interno do servidor",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteSupplier = async (supplierId: number) => {
+    if (!confirm('Tem certeza que deseja remover este fornecedor do produto?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/imported-products/${productId}/suppliers/${supplierId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Fornecedor removido com sucesso",
+        });
+        loadData();
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Erro",
+          description: errorData.error || "Erro ao remover fornecedor",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao remover fornecedor:', error);
+      toast({
+        title: "Erro",
+        description: "Erro interno do servidor",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const startEdit = (productSupplier: ProductSupplier) => {
+    setEditingId(productSupplier.id);
+    setFormData({
+      supplierId: productSupplier.supplierId,
+      supplierProductCode: productSupplier.supplierProductCode || '',
+      supplierProductName: productSupplier.supplierProductName || '',
+      moq: productSupplier.moq || 0,
+      leadTimeDays: productSupplier.leadTimeDays || 0
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setFormData({
+      supplierId: 0,
+      supplierProductCode: '',
+      supplierProductName: '',
+      moq: 0,
+      leadTimeDays: 0
+    });
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-gray-500">Carregando fornecedores...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header com botão de adicionar */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-semibold">Fornecedores do Produto</h3>
+          <p className="text-sm text-gray-600">Gerencie os fornecedores deste produto importado</p>
+        </div>
+        <Button
+          onClick={() => setShowAddForm(true)}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Adicionar Fornecedor
+        </Button>
+      </div>
+
+      {/* Formulário de adição */}
+      {showAddForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Adicionar Fornecedor</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <Label htmlFor="supplier">Fornecedor</Label>
+                <Select
+                  value={formData.supplierId.toString()}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, supplierId: parseInt(value) }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um fornecedor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id.toString()}>
+                        {supplier.tradeName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="supplierProductCode">Código do Produto no Fornecedor</Label>
+                <Input
+                  id="supplierProductCode"
+                  value={formData.supplierProductCode}
+                  onChange={(e) => setFormData(prev => ({ ...prev, supplierProductCode: e.target.value }))}
+                  placeholder="Código no fornecedor"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="supplierProductName">Nome do Produto no Fornecedor</Label>
+                <Input
+                  id="supplierProductName"
+                  value={formData.supplierProductName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, supplierProductName: e.target.value }))}
+                  placeholder="Nome no fornecedor"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="moq">MOQ (Quantidade Mínima)</Label>
+                <Input
+                  id="moq"
+                  type="number"
+                  value={formData.moq}
+                  onChange={(e) => setFormData(prev => ({ ...prev, moq: parseInt(e.target.value) || 0 }))}
+                  placeholder="MOQ"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="leadTimeDays">Lead Time (dias)</Label>
+                <Input
+                  id="leadTimeDays"
+                  type="number"
+                  value={formData.leadTimeDays}
+                  onChange={(e) => setFormData(prev => ({ ...prev, leadTimeDays: parseInt(e.target.value) || 0 }))}
+                  placeholder="Lead time em dias"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowAddForm(false)}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={handleAddSupplier}>
+                Adicionar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Lista de fornecedores */}
+      <div className="space-y-4">
+        {productSuppliers.length === 0 ? (
+          <Card>
+            <CardContent className="p-6 text-center text-gray-500">
+              Nenhum fornecedor adicionado ainda.
+              <br />
+              Clique em "Adicionar Fornecedor" para começar.
+            </CardContent>
+          </Card>
+        ) : (
+          productSuppliers.map((productSupplier) => (
+            <Card key={productSupplier.id}>
+              <CardContent className="p-6">
+                {editingId === productSupplier.id ? (
+                  // Modo de edição
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div>
+                        <Label>Código do Produto no Fornecedor</Label>
+                        <Input
+                          value={formData.supplierProductCode}
+                          onChange={(e) => setFormData(prev => ({ ...prev, supplierProductCode: e.target.value }))}
+                          placeholder="Código no fornecedor"
+                        />
+                      </div>
+
+                      <div>
+                        <Label>Nome do Produto no Fornecedor</Label>
+                        <Input
+                          value={formData.supplierProductName}
+                          onChange={(e) => setFormData(prev => ({ ...prev, supplierProductName: e.target.value }))}
+                          placeholder="Nome no fornecedor"
+                        />
+                      </div>
+
+                      <div>
+                        <Label>MOQ (Quantidade Mínima)</Label>
+                        <Input
+                          type="number"
+                          value={formData.moq}
+                          onChange={(e) => setFormData(prev => ({ ...prev, moq: parseInt(e.target.value) || 0 }))}
+                          placeholder="MOQ"
+                        />
+                      </div>
+
+                      <div>
+                        <Label>Lead Time (dias)</Label>
+                        <Input
+                          type="number"
+                          value={formData.leadTimeDays}
+                          onChange={(e) => setFormData(prev => ({ ...prev, leadTimeDays: parseInt(e.target.value) || 0 }))}
+                          placeholder="Lead time em dias"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={cancelEdit}>
+                        <X className="w-4 h-4 mr-2" />
+                        Cancelar
+                      </Button>
+                      <Button onClick={() => handleUpdateSupplier(productSupplier.id, productSupplier.supplierId)}>
+                        <Save className="w-4 h-4 mr-2" />
+                        Salvar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  // Modo de visualização
+                  <div>
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h4 className="font-semibold text-lg">{productSupplier.supplierTradeName}</h4>
+                        <p className="text-sm text-gray-600">{productSupplier.supplierCorporateName}</p>
+                        {productSupplier.supplierEmail && (
+                          <p className="text-sm text-blue-600">{productSupplier.supplierEmail}</p>
+                        )}
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => startEdit(productSupplier)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteSupplier(productSupplier.supplierId)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <Label className="text-xs text-gray-500">Código no Fornecedor</Label>
+                        <p className="font-medium">{productSupplier.supplierProductCode || '-'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-500">Nome no Fornecedor</Label>
+                        <p className="font-medium">{productSupplier.supplierProductName || '-'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-500">MOQ</Label>
+                        <p className="font-medium">
+                          {productSupplier.moq ? (
+                            <Badge variant="secondary">{productSupplier.moq} unidades</Badge>
+                          ) : '-'}
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-500">Lead Time</Label>
+                        <p className="font-medium">
+                          {productSupplier.leadTimeDays ? (
+                            <Badge variant="outline">{productSupplier.leadTimeDays} dias</Badge>
+                          ) : '-'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

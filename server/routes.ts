@@ -21,6 +21,7 @@ import performanceRoutes from "./routes/performance";
 import internationalContractsRoutes from "./routes/internationalContracts";
 import internationalSupplierBankingRoutes from "./routes/internationalSupplierBanking";
 import importedProductsRoutes from "./routes/importedProducts";
+import importedProductSuppliersRoutes from "./routes/importedProductSuppliers";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -6994,7 +6995,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     app.use('/api/international-contracts', internationalContractsRoutes);
     app.use('/api/international-suppliers', internationalSupplierBankingRoutes);
     app.use('/api/imported-products', importedProductsRoutes);
+    app.use('/api/imported-products', importedProductSuppliersRoutes);
     console.log('✅ [PERFORMANCE] Performance monitoring routes registered');
+    console.log('✅ [IMPORTED_PRODUCT_SUPPLIERS] Routes registered successfully');
   } catch (error) {
     console.error('❌ [PERFORMANCE] Performance routes failed:', error);
   }

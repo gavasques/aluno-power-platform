@@ -3617,6 +3617,7 @@ export const importedProductsRelations = relations(importedProducts, ({ one, man
   packages: many(productPackages),
   files: many(productFiles),
   notes: many(productNotes),
+  productSuppliers: many(importedProductSuppliers),
 }));
 
 export const productPackagesRelations = relations(productPackages, ({ one }) => ({
@@ -3639,6 +3640,8 @@ export const productNotesRelations = relations(productNotes, ({ one }) => ({
     references: [importedProducts.id],
   }),
 }));
+
+
 
 // Insert Schemas for Imported Products System
 export const insertImportedProductSchema = createInsertSchema(importedProducts).omit({
@@ -3671,8 +3674,8 @@ export const insertProductNoteSchema = createInsertSchema(productNotes).omit({
 export type InsertProductNote = z.infer<typeof insertProductNoteSchema>;
 export type ProductNote = typeof productNotes.$inferSelect;
 
-// Product Suppliers - System for managing multiple suppliers per product
-export const productSuppliers = pgTable("product_suppliers", {
+// Imported Product Suppliers - Sistema para múltiplos fornecedores por produto importado
+export const importedProductSuppliers = pgTable("imported_product_suppliers", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   productId: text("product_id").references(() => importedProducts.id).notNull(),
   supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
@@ -3683,17 +3686,28 @@ export const productSuppliers = pgTable("product_suppliers", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => ({
-  productIdx: index("product_suppliers_product_idx").on(table.productId),
-  supplierIdx: index("product_suppliers_supplier_idx").on(table.supplierId),
+  productIdx: index("imported_product_suppliers_product_idx").on(table.productId),
+  supplierIdx: index("imported_product_suppliers_supplier_idx").on(table.supplierId),
   uniqueProductSupplier: unique().on(table.productId, table.supplierId),
 }));
 
-export const insertProductSupplierSchema = createInsertSchema(productSuppliers).omit({
+export const insertImportedProductSupplierSchema = createInsertSchema(importedProductSuppliers).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export type InsertProductSupplier = z.infer<typeof insertProductSupplierSchema>;
-export type ProductSupplier = typeof productSuppliers.$inferSelect;
+export type InsertImportedProductSupplier = z.infer<typeof insertImportedProductSupplierSchema>;
+export type ImportedProductSupplier = typeof importedProductSuppliers.$inferSelect;
+
+export const importedProductSuppliersRelations = relations(importedProductSuppliers, ({ one }) => ({
+  product: one(importedProducts, {
+    fields: [importedProductSuppliers.productId],
+    references: [importedProducts.id],
+  }),
+  supplier: one(suppliers, {
+    fields: [importedProductSuppliers.supplierId],
+    references: [suppliers.id],
+  }),
+}));
 
 
