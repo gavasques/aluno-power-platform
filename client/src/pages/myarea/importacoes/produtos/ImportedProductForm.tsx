@@ -185,10 +185,20 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
   useEffect(() => {
     if (existingProduct?.data && isEditing) {
       const product = existingProduct.data;
+      
+      // Mapear status da API para valores do formulário
+      const statusMapping: Record<string, string> = {
+        'research': 'Em Desenvolvimento',
+        'active': 'Ativo',
+        'inactive': 'Inativo'
+      };
+      
+      const mappedStatus = statusMapping[product.status] || 'Em Desenvolvimento';
+      
       form.reset({
         name: product.name || '',
         internalCode: product.internalCode || '',
-        status: product.status || 'research',
+        status: mappedStatus,
         description: product.description || '',
         detailedDescription: product.detailedDescription || '',
         category: product.category || '',
@@ -274,7 +284,19 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
   const onSubmit = async (data: ImportedProductFormData) => {
     setIsSubmitting(true);
     try {
-      await saveMutation.mutateAsync(data);
+      // Mapear status do formulário para valores da API
+      const reverseStatusMapping: Record<string, string> = {
+        'Em Desenvolvimento': 'research',
+        'Ativo': 'active',
+        'Inativo': 'inactive'
+      };
+      
+      const dataToSend = {
+        ...data,
+        status: reverseStatusMapping[data.status] || 'research'
+      };
+      
+      await saveMutation.mutateAsync(dataToSend);
     } catch (error) {
       // Error handling is done in the mutation
     } finally {
