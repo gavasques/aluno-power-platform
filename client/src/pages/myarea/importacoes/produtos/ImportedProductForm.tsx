@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
+import { useLocation, useParams } from 'wouter';
 import { ArrowLeft, Save, Package, Building2, FileText, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,16 +63,16 @@ const statusOptions = [
   { value: 'Inativo', label: 'Inativo' },
 ];
 
-interface ImportedProductFormProps {
-  productId?: string;
-}
-
-export default function ImportedProductForm({ productId }: ImportedProductFormProps) {
+export default function ImportedProductForm() {
   const { toast } = useToast();
   const { token } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Extrair o id da URL usando useParams do wouter
+  const params = useParams() as { id?: string };
+  const productId = params.id;
 
   const isEditing = !!productId;
 
@@ -183,7 +183,13 @@ export default function ImportedProductForm({ productId }: ImportedProductFormPr
 
   // Fill form with existing data
   useEffect(() => {
-    console.error('🔍 [DEBUG] useEffect executado:', { existingProduct, isEditing, hasData: !!existingProduct?.data });
+    console.error('🔍 [DEBUG] useEffect executado:', { 
+      params, 
+      productId, 
+      isEditing, 
+      existingProduct, 
+      hasData: !!existingProduct?.data 
+    });
     
     if (existingProduct?.data && isEditing) {
       // A API retorna {success: true, data: produto}, então existingProduct.data é o produto
