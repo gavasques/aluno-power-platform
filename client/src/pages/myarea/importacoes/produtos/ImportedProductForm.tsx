@@ -221,8 +221,6 @@ export default function ImportedProductForm() {
         material: product.material || '',
         technicalSpecifications: product.technicalSpecifications || '',
         ncmCode: product.ncmCode || '',
-        hasMultiplePackages: product.hasMultiplePackages || false,
-        totalPackages: product.totalPackages || 1,
         hsCode: product.hsCode || '',
         ipiPercentage: product.ipiPercentage || undefined,
         productEan: product.productEan || '',
@@ -277,8 +275,31 @@ export default function ImportedProductForm() {
       queryClient.invalidateQueries({ queryKey: ['imported-products'] });
       queryClient.invalidateQueries({ queryKey: ['imported-product', productId] });
 
-      // Redirect to product detail
-      setLocation(`/minha-area/importacoes/produtos/${data.data.id}`);
+      // Permanecer na mesma página após update se editando, ou ir para lista se criando
+      if (!isEditing) {
+        setLocation('/minha-area/importacoes/produtos');
+      } else {
+        // Recarregar dados do produto atual
+        if (productId && token) {
+          setIsLoadingProduct(true);
+          fetch(`/api/imported-products/${productId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            setExistingProduct(data);
+          })
+          .catch(error => {
+            console.error('Erro ao recarregar produto:', error);
+          })
+          .finally(() => {
+            setIsLoadingProduct(false);
+          });
+        }
+      }
     },
     onError: (error) => {
       toast({
