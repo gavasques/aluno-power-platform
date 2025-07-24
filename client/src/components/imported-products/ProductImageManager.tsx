@@ -33,12 +33,15 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
 
   // Carregar imagens do produto
   const loadImages = async () => {
-    if (!productId || !user?.authToken) return;
+    if (!productId) return;
 
     try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+
       const response = await fetch(`/api/product-images/product/${productId}`, {
         headers: {
-          'Authorization': `Bearer ${user.authToken}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -53,11 +56,16 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
 
   useEffect(() => {
     loadImages();
-  }, [productId, user?.authToken]);
+  }, [productId]);
 
   // Upload de nova imagem
   const handleUpload = async (file: File) => {
-    if (!user?.authToken) return;
+    console.log('🚀 Iniciando upload para produto:', productId);
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      console.error('❌ Token não encontrado');
+      return;
+    }
 
     // Validações no frontend
     if (file.size > 2 * 1024 * 1024) {
@@ -96,23 +104,27 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
       formData.append('productId', productId);
       formData.append('position', (images.length + 1).toString());
 
+      console.log('📡 Enviando requisição para /api/product-images');
       const response = await fetch('/api/product-images', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user.authToken}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: formData,
       });
 
+      console.log('📨 Resposta recebida:', response.status);
       const data = await response.json();
+      console.log('📄 Dados da resposta:', data);
 
       if (response.ok) {
         toast({
           title: "Sucesso",
-          description: "Imagem enviada com sucesso",
+          description: `Imagem enviada com sucesso! Compressão: ${data.compressionRatio || 'N/A'}`,
         });
         await loadImages();
       } else {
+        console.error('❌ Erro no upload:', data);
         throw new Error(data.message || 'Erro no upload');
       }
     } catch (error: any) {
@@ -129,13 +141,14 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
 
   // Mover imagem (reordenar)
   const handleMove = async (imageId: string, direction: 'up' | 'down') => {
-    if (!user?.authToken) return;
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
 
     try {
       const response = await fetch(`/api/product-images/${imageId}/move`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${user.authToken}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ direction }),
@@ -163,7 +176,8 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
 
   // Excluir imagem
   const handleDelete = async (imageId: string, imageName: string) => {
-    if (!user?.authToken) return;
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
 
     if (!confirm(`Tem certeza que deseja excluir a imagem "${imageName}"?`)) {
       return;
@@ -173,7 +187,7 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
       const response = await fetch(`/api/product-images/${imageId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${user.authToken}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -199,12 +213,13 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
 
   // Download de imagem
   const handleDownload = async (imageId: string, imageName: string) => {
-    if (!user?.authToken) return;
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
 
     try {
       const response = await fetch(`/api/product-images/${imageId}/download`, {
         headers: {
-          'Authorization': `Bearer ${user.authToken}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -240,14 +255,19 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
 
   // Trigger file input
   const triggerFileInput = () => {
+    console.log('🖱️ Triggerando input de arquivo...');
     fileInputRef.current?.click();
   };
 
   // Handle file selection
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      handleUpload(file);
+    const files = event.target.files;
+    console.log('📁 Arquivos selecionados:', files?.length || 0);
+    if (files && files.length > 0) {
+      Array.from(files).forEach(file => {
+        console.log('📤 Iniciando upload de:', file.name, 'Tamanho:', file.size);
+        handleUpload(file);
+      });
     }
     // Clear input for next selection
     if (fileInputRef.current) {
