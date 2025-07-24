@@ -204,6 +204,25 @@ export default function ImportedProductDetail() {
       // Configurar fonte
       pdf.setFont('helvetica');
 
+      // Função para converter imagem para base64
+      const getImageAsBase64 = (url: string): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx?.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+            resolve(dataURL);
+          };
+          img.onerror = () => reject('Erro ao carregar imagem');
+          img.src = url;
+        });
+      };
+
       // Cabeçalho
       pdf.setFontSize(18);
       pdf.setFont('helvetica', 'bold');
@@ -226,12 +245,23 @@ export default function ImportedProductDetail() {
       pdf.line(margin, yPosition, pageWidth - margin, yPosition);
       yPosition += 10;
 
-      // Função auxiliar para adicionar seção
-      const addSection = (title: string, content: Array<{ label: string; value: string }>) => {
-        if (yPosition > pageHeight - 40) {
+      // Função auxiliar para verificar espaço na página
+      const checkNewPage = (requiredSpace: number = 15) => {
+        if (yPosition > pageHeight - requiredSpace) {
           pdf.addPage();
           yPosition = margin;
+          return true;
         }
+        return false;
+      };
+
+      // Função auxiliar para adicionar seção
+      const addSection = (title: string, content: Array<{ label: string; value: string }>) => {
+        // Filtrar apenas campos preenchidos
+        const filledContent = content.filter(item => item.value && item.value.trim());
+        if (filledContent.length === 0) return;
+
+        checkNewPage(20);
 
         pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
@@ -241,24 +271,19 @@ export default function ImportedProductDetail() {
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
 
-        content.forEach(item => {
-          if (item.value && item.value.trim()) {
-            if (yPosition > pageHeight - 15) {
-              pdf.addPage();
-              yPosition = margin;
-            }
-            
-            pdf.setFont('helvetica', 'bold');
-            pdf.text(`${item.label}:`, margin, yPosition);
-            pdf.setFont('helvetica', 'normal');
-            
-            const lines = pdf.splitTextToSize(item.value, contentWidth - 40);
-            pdf.text(lines, margin + 40, yPosition);
-            yPosition += lines.length * 4 + 2;
-          }
+        filledContent.forEach(item => {
+          checkNewPage();
+          
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(`${item.label}:`, margin, yPosition);
+          pdf.setFont('helvetica', 'normal');
+          
+          const lines = pdf.splitTextToSize(item.value, contentWidth - 40);
+          pdf.text(lines, margin + 40, yPosition);
+          yPosition += lines.length * 4 + 2;
         });
 
-        yPosition += 5;
+        yPosition += 8;
       };
 
       // Informações Principais
@@ -310,40 +335,180 @@ export default function ImportedProductDetail() {
         { label: 'Código de Barras Interno', value: product.internalBarcode || '' }
       ]);
 
-      // Informações do Fornecedor
-      addSection('INFORMAÇÕES DO FORNECEDOR', [
-        { label: 'Nome do Fornecedor', value: product.supplierName || '' },
-        { label: 'Código no Fornecedor', value: product.supplierProductCode || '' },
-        { label: 'Nome no Fornecedor', value: product.supplierProductName || '' },
-        { label: 'MOQ', value: product.moq ? `${product.moq} unidades` : '' },
-        { label: 'Lead Time', value: product.leadTimeDays ? `${product.leadTimeDays} dias` : '' },
-        { label: 'Descrição do Fornecedor', value: product.supplierDescription || '' }
-      ]);
-
-      // Embalagens
-      if (product.hasMultiplePackages) {
-        addSection('SISTEMA DE EMBALAGENS', [
-          { label: 'Total de Volumes', value: `${product.totalPackages} volumes` },
-          { label: 'Informações', value: packages.length > 0 ? 
-            packages.map(pkg => `Volume ${pkg.packageNumber}: ${pkg.description || 'Sem descrição'}`).join('; ') :
-            'Informações de embalagem serão adicionadas posteriormente.'
-          }
+      // Informações do Fornecedor Principal
+      if (product.supplierName || product.supplierProductCode || product.supplierProductName || 
+          product.moq || product.leadTimeDays || product.supplierDescription) {
+        addSection('FORNECEDOR PRINCIPAL', [
+          { label: 'Nome do Fornecedor', value: product.supplierName || '' },
+          { label: 'Código no Fornecedor', value: product.supplierProductCode || '' },
+          { label: 'Nome no Fornecedor', value: product.supplierProductName || '' },
+          { label: 'MOQ', value: product.moq ? `${product.moq} unidades` : '' },
+          { label: 'Lead Time', value: product.leadTimeDays ? `${product.leadTimeDays} dias` : '' },
+          { label: 'Descrição do Fornecedor', value: product.supplierDescription || '' }
         ]);
+      }
+
+      // Fornecedores Adicionais
+      if (suppliers.length > 0) {
+        checkNewPage(30);
+        
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('FORNECEDORES ADICIONAIS', margin, yPosition);
+        yPosition += 10;
+
+        suppliers.forEach((supplier, index) => {
+          checkNewPage(25);
+          
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(`Fornecedor ${index + 1}:`, margin, yPosition);
+          yPosition += 6;
+
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'normal');
+
+          const supplierData = [
+            { label: 'Nome', value: supplier.supplierName || '' },
+            { label: 'Código do Produto', value: supplier.supplierProductCode || '' },
+            { label: 'Nome do Produto', value: supplier.supplierProductName || '' },
+            { label: 'MOQ', value: supplier.moq ? `${supplier.moq} unidades` : '' },
+            { label: 'Lead Time', value: supplier.leadTimeDays ? `${supplier.leadTimeDays} dias` : '' }
+          ].filter(item => item.value.trim());
+
+          supplierData.forEach(item => {
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`${item.label}:`, margin + 5, yPosition);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(item.value, margin + 40, yPosition);
+            yPosition += 4;
+          });
+
+          yPosition += 5;
+        });
+      }
+
+      // Sistema de Embalagens
+      if (product.hasMultiplePackages && packages.length > 0) {
+        checkNewPage(30);
+        
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`SISTEMA DE EMBALAGENS (${product.totalPackages} volumes)`, margin, yPosition);
+        yPosition += 10;
+
+        packages.forEach((pkg) => {
+          checkNewPage(20);
+          
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(`Volume ${pkg.packageNumber}:`, margin, yPosition);
+          yPosition += 6;
+
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'normal');
+
+          const packageData = [
+            { label: 'Descrição', value: pkg.description || '' },
+            { label: 'Peso', value: pkg.weight ? `${pkg.weight} kg` : '' },
+            { label: 'Dimensões', value: pkg.length && pkg.width && pkg.height ? 
+              `${pkg.length} x ${pkg.width} x ${pkg.height} cm` : '' },
+            { label: 'Observações', value: pkg.notes || '' }
+          ].filter(item => item.value.trim());
+
+          packageData.forEach(item => {
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`${item.label}:`, margin + 5, yPosition);
+            pdf.setFont('helvetica', 'normal');
+            const lines = pdf.splitTextToSize(item.value, contentWidth - 45);
+            pdf.text(lines, margin + 40, yPosition);
+            yPosition += lines.length * 4 + 2;
+          });
+
+          yPosition += 5;
+        });
+      }
+
+      // Imagens do Produto
+      if (images.length > 0) {
+        pdf.addPage();
+        yPosition = margin;
+        
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`FOTOS DO PRODUTO (${images.length} imagens)`, margin, yPosition);
+        yPosition += 15;
+
+        let imagesPerRow = 2;
+        let imageWidth = (contentWidth - 10) / imagesPerRow;
+        let imageHeight = imageWidth * 0.75; // Proporção 4:3
+        let currentCol = 0;
+        let startX = margin;
+        let startY = yPosition;
+
+        for (let i = 0; i < images.length; i++) {
+          try {
+            // Verificar se precisa de nova página
+            if (startY + imageHeight + 20 > pageHeight - margin) {
+              pdf.addPage();
+              yPosition = margin;
+              startY = yPosition;
+              currentCol = 0;
+              
+              // Repetir título na nova página
+              pdf.setFontSize(14);
+              pdf.setFont('helvetica', 'bold');
+              pdf.text('FOTOS DO PRODUTO (continuação)', margin, yPosition);
+              yPosition += 15;
+              startY = yPosition;
+            }
+
+            const imageBase64 = await getImageAsBase64(images[i].url);
+            
+            let xPos = startX + (currentCol * (imageWidth + 10));
+            let yPos = startY;
+
+            // Adicionar imagem
+            pdf.addImage(imageBase64, 'JPEG', xPos, yPos, imageWidth, imageHeight);
+            
+            // Adicionar legenda
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'normal');
+            const caption = `Foto ${images[i].position} - ${images[i].originalName}`;
+            const captionLines = pdf.splitTextToSize(caption, imageWidth);
+            pdf.text(captionLines, xPos, yPos + imageHeight + 4);
+
+            currentCol++;
+            
+            // Nova linha após 2 imagens
+            if (currentCol >= imagesPerRow) {
+              currentCol = 0;
+              startY += imageHeight + 20;
+            }
+          } catch (error) {
+            console.warn(`Erro ao adicionar imagem ${i + 1}:`, error);
+            // Continuar sem a imagem em caso de erro
+          }
+        }
+
+        yPosition = startY + (currentCol > 0 ? imageHeight + 20 : 0);
       }
 
       // Observações
       if (product.notes) {
+        checkNewPage(30);
         addSection('OBSERVAÇÕES IMPORTANTES', [
           { label: 'Notas', value: product.notes }
         ]);
       }
 
-      // Rodapé
-      if (yPosition > pageHeight - 30) {
+      // Rodapé - sempre na última página
+      if (yPosition > pageHeight - 40) {
         pdf.addPage();
         yPosition = margin;
       }
 
+      // Posicionar rodapé no final da página
       yPosition = pageHeight - 30;
       pdf.line(margin, yPosition, pageWidth - margin, yPosition);
       yPosition += 5;
@@ -364,7 +529,7 @@ export default function ImportedProductDetail() {
 
       toast({
         title: 'PDF gerado com sucesso!',
-        description: `O arquivo ${fileName} foi baixado.`,
+        description: `O arquivo ${fileName} foi baixado com ${images.length} foto(s) incluída(s).`,
       });
 
     } catch (error) {
