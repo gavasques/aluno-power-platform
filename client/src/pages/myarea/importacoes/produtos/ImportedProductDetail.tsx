@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'wouter';
-import { ArrowLeft, Edit, Trash2, Package, Building2, FileText, Calendar, Tag, Barcode, Globe } from 'lucide-react';
+import { ArrowLeft, Printer, Download, Package, Building2, FileText, Calendar, Tag, Barcode, Globe, Image as ImageIcon, Truck, Clock, Star, Hash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 
 interface ImportedProduct {
   id: string;
@@ -19,12 +18,17 @@ interface ImportedProduct {
   category?: string;
   brand?: string;
   model?: string;
+  reference?: string;
   color?: string;
+  size?: string;
+  variation1?: string;
+  variation2?: string;
   material?: string;
   technicalSpecifications?: string;
   hasMultiplePackages: boolean;
   totalPackages: number;
   hsCode?: string;
+  ncmCode?: string;
   ipiPercentage?: number;
   productEan?: string;
   productUpc?: string;
@@ -42,51 +46,136 @@ interface ImportedProduct {
   updatedAt: string;
 }
 
+interface ProductImage {
+  id: string;
+  productId: string;
+  filename: string;
+  originalName: string;
+  url: string;
+  position: number;
+  size: number;
+  mimeType: string;
+  width: number;
+  height: number;
+  createdAt: string;
+}
+
+interface ProductSupplier {
+  id: string;
+  supplierId: number;
+  supplierName?: string;
+  supplierProductCode?: string;
+  supplierProductName?: string;
+  moq?: number;
+  leadTimeDays?: number;
+}
+
+interface ProductPackage {
+  id: string;
+  packageNumber: number;
+  description?: string;
+  weight?: number;
+  length?: number;
+  width?: number;
+  height?: number;
+  notes?: string;
+}
+
 // Status mapping
 const statusConfig = {
-  research: { label: 'Pesquisa', color: 'bg-gray-100 text-gray-800' },
-  analysis: { label: 'Análise', color: 'bg-blue-100 text-blue-800' },
-  negotiation: { label: 'Negociação', color: 'bg-yellow-100 text-yellow-800' },
-  ordered: { label: 'Pedido', color: 'bg-purple-100 text-purple-800' },
-  shipped: { label: 'Enviado', color: 'bg-orange-100 text-orange-800' },
-  arrived: { label: 'Chegou', color: 'bg-green-100 text-green-800' },
-  cancelled: { label: 'Cancelado', color: 'bg-red-100 text-red-800' },
+  research: { label: 'Pesquisa', color: 'bg-gray-100 text-gray-800', icon: '🔍' },
+  analysis: { label: 'Análise', color: 'bg-blue-100 text-blue-800', icon: '📊' },
+  negotiation: { label: 'Negociação', color: 'bg-yellow-100 text-yellow-800', icon: '💬' },
+  ordered: { label: 'Pedido', color: 'bg-purple-100 text-purple-800', icon: '📋' },
+  shipped: { label: 'Enviado', color: 'bg-orange-100 text-orange-800', icon: '🚚' },
+  arrived: { label: 'Chegou', color: 'bg-green-100 text-green-800', icon: '✅' },
+  cancelled: { label: 'Cancelado', color: 'bg-red-100 text-red-800', icon: '❌' },
 };
 
 export default function ImportedProductDetail() {
-  const { toast } = useToast();
   const { token } = useAuth();
-  const [, setLocation] = useLocation();
   const params = useParams();
   const productId = params.id;
 
   // States
   const [product, setProduct] = useState<ImportedProduct | null>(null);
+  const [images, setImages] = useState<ProductImage[]>([]);
+  const [suppliers, setSuppliers] = useState<ProductSupplier[]>([]);
+  const [packages, setPackages] = useState<ProductPackage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch product data usando useState + useEffect
+  // Fetch all product data
   useEffect(() => {
     if (!productId || !token) return;
 
-    const fetchProduct = async () => {
+    const fetchAllData = async () => {
       try {
         setIsLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/imported-products/${productId}`, {
+        // Buscar dados do produto
+        const productResponse = await fetch(`/api/imported-products/${productId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
         
-        if (!response.ok) {
-          throw new Error(`Erro ${response.status}: ${response.statusText}`);
+        if (!productResponse.ok) {
+          throw new Error(`Erro ${productResponse.status}: ${productResponse.statusText}`);
         }
         
-        const result = await response.json();
-        setProduct(result.data);
+        const productResult = await productResponse.json();
+        setProduct(productResult.data);
+
+        // Buscar imagens do produto
+        const imagesResponse = await fetch(`/api/product-images/product/${productId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (imagesResponse.ok) {
+          const imagesResult = await imagesResponse.json();
+          setImages(imagesResult.data?.sort((a: ProductImage, b: ProductImage) => a.position - b.position) || []);
+        }
+
+        // Buscar fornecedores do produto (se existir endpoint)
+        try {
+          const suppliersResponse = await fetch(`/api/imported-product-suppliers/${productId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (suppliersResponse.ok) {
+            const suppliersResult = await suppliersResponse.json();
+            setSuppliers(suppliersResult.data || []);
+          }
+        } catch (e) {
+          // Endpoint pode não existir ainda
+        }
+
+        // Buscar embalagens do produto (se existir endpoint)
+        try {
+          const packagesResponse = await fetch(`/api/product-packages/${productId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (packagesResponse.ok) {
+            const packagesResult = await packagesResponse.json();
+            setPackages(packagesResult.data || []);
+          }
+        } catch (e) {
+          // Endpoint pode não existir ainda
+        }
+        
       } catch (err: any) {
         console.error('[PRODUCT_DETAIL] Error:', err);
         setError(err.message);
@@ -95,76 +184,17 @@ export default function ImportedProductDetail() {
       }
     };
 
-    fetchProduct();
+    fetchAllData();
   }, [productId, token]);
 
-  // Handle delete
-  const handleDelete = async () => {
-    if (!product || !token) return;
-    
-    if (!confirm(`Tem certeza que deseja deletar o produto "${product.name}"?`)) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/imported-products/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao deletar produto');
-      }
-
-      toast({
-        title: 'Sucesso',
-        description: 'Produto deletado com sucesso',
-      });
-
-      setLocation('/minha-area/importacoes/produtos');
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao deletar produto',
-        variant: 'destructive',
-      });
-    }
+  // Função para imprimir
+  const handlePrint = () => {
+    window.print();
   };
 
-  // Função para recarregar dados em caso de erro
-  const handleRetry = () => {
-    if (!productId || !token) return;
-    
-    const fetchProduct = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const response = await fetch(`/api/imported-products/${productId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Erro ${response.status}: ${response.statusText}`);
-        }
-        
-        const result = await response.json();
-        setProduct(result.data);
-      } catch (err: any) {
-        console.error('[PRODUCT_DETAIL] Error:', err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProduct();
+  // Função para gerar PDF (futura implementação)
+  const handleDownloadPDF = () => {
+    alert('Funcionalidade de PDF será implementada em breve!');
   };
 
   if (error) {
@@ -173,9 +203,9 @@ export default function ImportedProductDetail() {
         <Card>
           <CardContent className="p-8 text-center">
             <p className="text-red-600">Erro ao carregar produto: {error}</p>
-            <Button onClick={handleRetry} className="mt-4">
-              Tentar Novamente
-            </Button>
+            <Link href="/minha-area/importacoes/produtos">
+              <Button className="mt-4">Voltar à Lista</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -188,7 +218,7 @@ export default function ImportedProductDetail() {
         <Card>
           <CardContent className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600 mt-2">Carregando produto...</p>
+            <p className="text-gray-600 mt-2">Carregando ficha completa do produto...</p>
           </CardContent>
         </Card>
       </div>
@@ -210,315 +240,467 @@ export default function ImportedProductDetail() {
     );
   }
 
+  const statusInfo = statusConfig[product.status];
+
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div className="flex items-center gap-4">
+    <>
+      {/* Botões de ação - não aparecem na impressão */}
+      <div className="print:hidden bg-white border-b sticky top-0 z-10">
+        <div className="container mx-auto py-4 flex justify-between items-center">
           <Link href="/minha-area/importacoes/produtos">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
+              Voltar à Lista
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold">{product.name}</h1>
-            <div className="flex items-center gap-4 mt-2">
-              <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                {product.internalCode}
-              </code>
-              <Badge className={statusConfig[product.status].color}>
-                {statusConfig[product.status].label}
-              </Badge>
-              {product.brand && (
-                <Badge variant="outline">{product.brand}</Badge>
-              )}
-            </div>
+          
+          <div className="flex gap-2">
+            <Link href={`/minha-area/importacoes/produtos/${productId}/editar`}>
+              <Button variant="outline" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Editar
+              </Button>
+            </Link>
+            <Button onClick={handlePrint} variant="outline" size="sm">
+              <Printer className="h-4 w-4 mr-2" />
+              Imprimir
+            </Button>
+            <Button onClick={handleDownloadPDF} variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              PDF
+            </Button>
           </div>
-        </div>
-        
-        <div className="flex gap-2">
-          <Link href={`/minha-area/importacoes/produtos/${productId}/editar`}>
-            <Button variant="outline" size="sm">
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
-            </Button>
-          </Link>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleDelete}
-            className="text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Deletar
-          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Main Information */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Informações do Produto
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {product.description && (
-                <div>
-                  <h4 className="font-medium mb-2">Descrição</h4>
-                  <p className="text-gray-700">{product.description}</p>
+      {/* Conteúdo principal - formato PDF */}
+      <div className="bg-white min-h-screen">
+        <div className="max-w-4xl mx-auto p-8 print:p-6 print:max-w-none">
+          
+          {/* Cabeçalho da Ficha */}
+          <div className="text-center border-b-2 border-gray-300 pb-6 mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 print:text-2xl">FICHA TÉCNICA DO PRODUTO</h1>
+            <p className="text-gray-600 mt-2">Produto em Processo de Importação</p>
+            <div className="flex justify-center items-center gap-4 mt-4">
+              <Badge className={`text-lg px-4 py-2 ${statusInfo.color}`}>
+                {statusInfo.icon} {statusInfo.label}
+              </Badge>
+              <p className="text-sm text-gray-500">
+                Atualizado em: {new Date(product.updatedAt).toLocaleDateString('pt-BR')}
+              </p>
+            </div>
+          </div>
+
+          {/* Informações Básicas */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            
+            {/* Coluna Esquerda - Dados Principais */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center text-lg">
+                    <Package className="h-5 w-5 mr-2 text-blue-600" />
+                    Informações Principais
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">Nome do Produto:</label>
+                    <p className="text-lg font-medium">{product.name}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Código Interno:</label>
+                      <p className="font-mono bg-gray-100 px-2 py-1 rounded">{product.internalCode}</p>
+                    </div>
+                    {product.brand && (
+                      <div>
+                        <label className="text-sm font-semibold text-gray-600">Marca:</label>
+                        <p>{product.brand}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {product.category && (
+                      <div>
+                        <label className="text-sm font-semibold text-gray-600">Categoria:</label>
+                        <p>{product.category}</p>
+                      </div>
+                    )}
+                    {product.model && (
+                      <div>
+                        <label className="text-sm font-semibold text-gray-600">Modelo:</label>
+                        <p>{product.model}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {product.description && (
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Descrição:</label>
+                      <p className="text-gray-800">{product.description}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Características Físicas */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center text-lg">
+                    <Tag className="h-5 w-5 mr-2 text-green-600" />
+                    Características Físicas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    {product.color && (
+                      <div>
+                        <label className="text-sm font-semibold text-gray-600">Cor:</label>
+                        <p>{product.color}</p>
+                      </div>
+                    )}
+                    {product.size && (
+                      <div>
+                        <label className="text-sm font-semibold text-gray-600">Tamanho:</label>
+                        <p>{product.size}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {product.material && (
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Material:</label>
+                      <p>{product.material}</p>
+                    </div>
+                  )}
+
+                  {product.variation1 && (
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Variação 1:</label>
+                      <p>{product.variation1}</p>
+                    </div>
+                  )}
+
+                  {product.variation2 && (
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Variação 2:</label>
+                      <p>{product.variation2}</p>
+                    </div>
+                  )}
+
+                  {product.reference && (
+                    <div>
+                      <label className="text-sm font-semibold text-gray-600">Referência:</label>
+                      <p>{product.reference}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Coluna Direita - Imagens */}
+            <div>
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center text-lg">
+                    <ImageIcon className="h-5 w-5 mr-2 text-purple-600" />
+                    Fotos do Produto ({images.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {images.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      {images.map((image, index) => (
+                        <div key={image.id} className="space-y-2">
+                          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                            <img 
+                              src={image.url} 
+                              alt={`${product.name} - Foto ${index + 1}`}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 text-center">
+                            Foto {image.position} - {image.originalName}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>Nenhuma foto cadastrada</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Especificações Técnicas */}
+          {product.technicalSpecifications && (
+            <Card className="mb-8">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center text-lg">
+                  <FileText className="h-5 w-5 mr-2 text-indigo-600" />
+                  Especificações Técnicas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
+                    {product.technicalSpecifications}
+                  </pre>
                 </div>
-              )}
+              </CardContent>
+            </Card>
+          )}
 
-              {product.detailedDescription && (
-                <div>
-                  <h4 className="font-medium mb-2">Descrição Detalhada</h4>
-                  <p className="text-gray-700 whitespace-pre-line">{product.detailedDescription}</p>
+          {/* Descrição Detalhada */}
+          {product.detailedDescription && (
+            <Card className="mb-8">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center text-lg">
+                  <FileText className="h-5 w-5 mr-2 text-blue-600" />
+                  Descrição Detalhada
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-gray-800 leading-relaxed">{product.detailedDescription}</p>
                 </div>
-              )}
+              </CardContent>
+            </Card>
+          )}
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {product.category && (
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Categoria</span>
-                    <p className="text-gray-900">{product.category}</p>
-                  </div>
-                )}
-                {product.model && (
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Modelo</span>
-                    <p className="text-gray-900">{product.model}</p>
-                  </div>
-                )}
-                {product.color && (
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Cor</span>
-                    <p className="text-gray-900">{product.color}</p>
-                  </div>
-                )}
-                {product.material && (
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Material</span>
-                    <p className="text-gray-900">{product.material}</p>
-                  </div>
-                )}
-                {product.hsCode && (
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Código HS</span>
-                    <p className="text-gray-900">{product.hsCode}</p>
-                  </div>
-                )}
-                {product.ipiPercentage && (
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">IPI</span>
-                    <p className="text-gray-900">{product.ipiPercentage}%</p>
-                  </div>
-                )}
-              </div>
-
-              {product.technicalSpecifications && (
-                <div>
-                  <h4 className="font-medium mb-2">Especificações Técnicas</h4>
-                  <p className="text-gray-700 whitespace-pre-line">{product.technicalSpecifications}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Supplier Information */}
-          {product.supplierId && (
+          {/* Informações Fiscais */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  Informações do Fornecedor
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center text-lg">
+                  <Globe className="h-5 w-5 mr-2 text-red-600" />
+                  Informações Fiscais
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Fornecedor</h4>
-                  <p className="text-gray-900">{product.supplierName || 'Nome não informado'}</p>
-                </div>
+                {product.hsCode && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">Código HS:</label>
+                    <p className="font-mono bg-gray-100 px-2 py-1 rounded inline-block">{product.hsCode}</p>
+                  </div>
+                )}
+
+                {product.ncmCode && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">Código NCM:</label>
+                    <p className="font-mono bg-gray-100 px-2 py-1 rounded inline-block">{product.ncmCode}</p>
+                  </div>
+                )}
+
+                {product.ipiPercentage && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">IPI:</label>
+                    <p>{product.ipiPercentage}%</p>
+                  </div>
+                )}
+
+                {product.customsDescription && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">Descrição Aduaneira:</label>
+                    <p className="text-gray-800">{product.customsDescription}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Códigos de Barras */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center text-lg">
+                  <Barcode className="h-5 w-5 mr-2 text-gray-600" />
+                  Códigos de Identificação
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {product.productEan && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">EAN:</label>
+                    <p className="font-mono bg-gray-100 px-2 py-1 rounded inline-block">{product.productEan}</p>
+                  </div>
+                )}
+
+                {product.productUpc && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">UPC:</label>
+                    <p className="font-mono bg-gray-100 px-2 py-1 rounded inline-block">{product.productUpc}</p>
+                  </div>
+                )}
+
+                {product.internalBarcode && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">Código de Barras Interno:</label>
+                    <p className="font-mono bg-gray-100 px-2 py-1 rounded inline-block">{product.internalBarcode}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Informações do Fornecedor */}
+          <Card className="mb-8">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center text-lg">
+                <Building2 className="h-5 w-5 mr-2 text-orange-600" />
+                Informações do Fornecedor
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {product.supplierName && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">Nome do Fornecedor:</label>
+                    <p className="text-lg font-medium">{product.supplierName}</p>
+                  </div>
+                )}
 
                 {product.supplierProductCode && (
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Código do Produto</span>
-                    <p className="text-gray-900">{product.supplierProductCode}</p>
+                    <label className="text-sm font-semibold text-gray-600">Código no Fornecedor:</label>
+                    <p className="font-mono bg-gray-100 px-2 py-1 rounded inline-block">{product.supplierProductCode}</p>
                   </div>
                 )}
 
                 {product.supplierProductName && (
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Nome do Produto no Fornecedor</span>
-                    <p className="text-gray-900">{product.supplierProductName}</p>
-                  </div>
-                )}
-
-                {product.supplierDescription && (
-                  <div>
-                    <h4 className="font-medium mb-2">Descrição do Fornecedor</h4>
-                    <p className="text-gray-700 whitespace-pre-line">{product.supplierDescription}</p>
+                    <label className="text-sm font-semibold text-gray-600">Nome no Fornecedor:</label>
+                    <p>{product.supplierProductName}</p>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                   {product.moq && (
                     <div>
-                      <span className="text-sm font-medium text-gray-500">MOQ</span>
-                      <p className="text-gray-900">{product.moq} unidades</p>
+                      <label className="text-sm font-semibold text-gray-600">MOQ:</label>
+                      <p className="flex items-center">
+                        <Hash className="h-4 w-4 mr-1" />
+                        {product.moq} unidades
+                      </p>
                     </div>
                   )}
+
                   {product.leadTimeDays && (
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Lead Time</span>
-                      <p className="text-gray-900">{product.leadTimeDays} dias</p>
+                      <label className="text-sm font-semibold text-gray-600">Lead Time:</label>
+                      <p className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1" />
+                        {product.leadTimeDays} dias
+                      </p>
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
 
-          {/* Notes */}
-          {product.notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Observações
+              {product.supplierDescription && (
+                <div>
+                  <label className="text-sm font-semibold text-gray-600">Descrição do Fornecedor:</label>
+                  <div className="bg-orange-50 p-4 rounded-lg mt-2">
+                    <p className="text-gray-800">{product.supplierDescription}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Embalagens */}
+          {product.hasMultiplePackages && (
+            <Card className="mb-8">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center text-lg">
+                  <Package className="h-5 w-5 mr-2 text-brown-600" />
+                  Sistema de Embalagens ({product.totalPackages} volumes)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 whitespace-pre-line">{product.notes}</p>
+                {packages.length > 0 ? (
+                  <div className="space-y-4">
+                    {packages.map((pkg) => (
+                      <div key={pkg.id} className="border rounded-lg p-4">
+                        <h4 className="font-semibold mb-2">Volume {pkg.packageNumber}</h4>
+                        {pkg.description && <p className="text-gray-700 mb-2">{pkg.description}</p>}
+                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          {pkg.weight && <p><strong>Peso:</strong> {pkg.weight}kg</p>}
+                          {pkg.length && <p><strong>Comp:</strong> {pkg.length}cm</p>}
+                          {pkg.width && <p><strong>Larg:</strong> {pkg.width}cm</p>}
+                          {pkg.height && <p><strong>Alt:</strong> {pkg.height}cm</p>}
+                        </div>
+                        {pkg.notes && (
+                          <p className="text-gray-600 text-sm mt-2 italic">{pkg.notes}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">Informações de embalagem serão adicionadas posteriormente.</p>
+                )}
               </CardContent>
             </Card>
           )}
-        </div>
 
-        {/* Right Column - Side Information */}
-        <div className="space-y-6">
-          {/* Package Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Embalagem</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-gray-500">Total de Embalagens</span>
-                <p className="text-gray-900">{product.totalPackages}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500">Múltiplas Embalagens</span>
-                <p className="text-gray-900">{product.hasMultiplePackages ? 'Sim' : 'Não'}</p>
-              </div>
-              {product.customsDescription && (
-                <div>
-                  <span className="text-sm font-medium text-gray-500">Descrição Alfandegária</span>
-                  <p className="text-gray-900">{product.customsDescription}</p>
+          {/* Observações */}
+          {product.notes && (
+            <Card className="mb-8">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center text-lg">
+                  <FileText className="h-5 w-5 mr-2 text-yellow-600" />
+                  Observações Importantes
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                  <p className="text-gray-800 whitespace-pre-wrap">{product.notes}</p>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Codes and Barcodes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Barcode className="h-5 w-5" />
-                Códigos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-gray-500">Código Interno</span>
-                <p className="text-gray-900 font-mono">{product.internalCode}</p>
-              </div>
-              {product.productEan && (
-                <div>
-                  <span className="text-sm font-medium text-gray-500">EAN</span>
-                  <p className="text-gray-900 font-mono">{product.productEan}</p>
-                </div>
-              )}
-              {product.productUpc && (
-                <div>
-                  <span className="text-sm font-medium text-gray-500">UPC</span>
-                  <p className="text-gray-900 font-mono">{product.productUpc}</p>
-                </div>
-              )}
-              {product.internalBarcode && (
-                <div>
-                  <span className="text-sm font-medium text-gray-500">Código de Barras Interno</span>
-                  <p className="text-gray-900 font-mono">{product.internalBarcode}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Rodapé */}
+          <div className="border-t-2 border-gray-300 pt-6 mt-12 text-center text-sm text-gray-500">
+            <p>Ficha Técnica gerada automaticamente pelo Sistema de Gestão de Produtos Importados</p>
+            <p>Data de Criação: {new Date(product.createdAt).toLocaleDateString('pt-BR')}</p>
+            <p>Última Atualização: {new Date(product.updatedAt).toLocaleDateString('pt-BR')}</p>
+            <p className="mt-2 font-mono text-xs">ID: {product.id}</p>
+          </div>
 
-          {/* Timeline */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Timeline
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-gray-500">Criado em</span>
-                <p className="text-gray-900">
-                  {new Date(product.createdAt).toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500">Última atualização</span>
-                <p className="text-gray-900">
-                  {new Date(product.updatedAt).toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Ações Rápidas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Link href={`/minha-area/importacoes/produtos/${productId}/editar`}>
-                <Button variant="outline" className="w-full">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Editar Produto
-                </Button>
-              </Link>
-              <Button 
-                variant="outline" 
-                className="w-full text-red-600 hover:text-red-700"
-                onClick={handleDelete}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Deletar Produto
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
-    </div>
+
+      {/* CSS para impressão */}
+      <style jsx global>{`
+        @media print {
+          body { 
+            margin: 0; 
+            font-size: 12px; 
+          }
+          .print\\:hidden { 
+            display: none !important; 
+          }
+          .print\\:p-6 { 
+            padding: 1.5rem !important; 
+          }
+          .print\\:max-w-none { 
+            max-width: none !important; 
+          }
+          .print\\:text-2xl { 
+            font-size: 1.5rem !important; 
+          }
+          * { 
+            -webkit-print-color-adjust: exact !important; 
+            color-adjust: exact !important; 
+          }
+        }
+      `}</style>
+    </>
   );
 }
