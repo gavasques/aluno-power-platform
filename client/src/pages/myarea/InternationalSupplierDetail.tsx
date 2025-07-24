@@ -118,149 +118,52 @@ interface SupplierDocument {
   description?: string;
 }
 
-// Mock data
-const mockSupplier: Supplier = {
-  id: 1,
-  name: "Shenzhen Electronics Co.",
-  country: "China",
-  city: "Shenzhen",
-  category: "Eletrônicos",
-  status: "active",
-  website: "www.shenzhen-electronics.com",
-  email: "contact@shenzhen-electronics.com",
-  phone: "+86 755 1234 5678",
-  rating: 4.8,
-  totalOrders: 45,
-  lastContact: "2025-01-20",
-  establishedYear: 2008,
-  description: "Fabricante especializado em componentes eletrônicos de alta qualidade com certificações internacionais ISO 9001 e CE."
+// Hook para carregar dados reais do fornecedor
+const useSupplierData = (supplierId: string) => {
+  const [supplier, setSupplier] = useState<Supplier | null>(null);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [communications, setCommunications] = useState<Communication[]>([]);
+  const [documents, setDocuments] = useState<SupplierDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Por enquanto, mostrar estado vazio em vez de dados falsos
+        // TODO: Implementar chamadas reais da API quando fornecedor internacional for criado
+        setSupplier(null);
+        setContacts([]);
+        setContracts([]);
+        setCommunications([]);
+        setDocuments([]);
+        
+      } catch (err) {
+        console.error('Erro ao carregar dados do fornecedor:', err);
+        setError('Erro ao carregar dados do fornecedor');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (supplierId) {
+      fetchData();
+    }
+  }, [supplierId]);
+
+  return { supplier, contacts, contracts, communications, documents, loading, error };
 };
-
-const mockContacts: Contact[] = [
-  {
-    id: 1,
-    name: "Li Wei",
-    position: "Sales Manager",
-    email: "li.wei@shenzhen-electronics.com",
-    phone: "+86 755 1234 5679",
-    whatsapp: "+86 138 0000 1234",
-    isMainContact: true
-  },
-  {
-    id: 2,
-    name: "Zhang Min",
-    position: "Export Coordinator",
-    email: "zhang.min@shenzhen-electronics.com",
-    phone: "+86 755 1234 5680",
-    isMainContact: false
-  }
-];
-
-const mockContracts: Contract[] = [
-  {
-    id: 1,
-    supplierId: 1,
-    contractNumber: "CONTR-2024-001",
-    title: "Acordo de Fornecimento Principal",
-    description: "Contrato principal para fornecimento de componentes eletrônicos",
-    contractType: "Acordo de Fornecimento",
-    status: "active",
-    startDate: "2024-01-15",
-    endDate: "2025-01-15",
-    value: 150000,
-    currency: "USD",
-    paymentTerms: "Net 30",
-    deliveryTerms: "FOB Shenzhen",
-    incoterms: "FOB",
-    documents: [],
-    notes: "Renovação automática por 12 meses",
-    createdAt: "2024-01-10",
-    updatedAt: "2024-01-15"
-  },
-  {
-    id: 2,
-    supplierId: 1,
-    contractNumber: "NDA-2023-012",
-    title: "Acordo de Confidencialidade",
-    description: "NDA para proteção de informações comerciais",
-    contractType: "NDA",
-    status: "active",
-    startDate: "2023-12-01",
-    currency: "USD",
-    documents: [],
-    createdAt: "2023-11-28",
-    updatedAt: "2023-12-01"
-  }
-];
-
-const mockCommunications: Communication[] = [
-  {
-    id: 1,
-    type: "email",
-    subject: "Cotação para novos produtos",
-    date: "2025-01-20",
-    status: "received",
-    summary: "Recebida cotação para linha de produtos eletrônicos Q1 2025"
-  },
-  {
-    id: 2,
-    type: "whatsapp",
-    subject: "Status do pedido #PO-2025-001",
-    date: "2025-01-18",
-    status: "sent",
-    summary: "Solicitado update sobre status de produção"
-  }
-];
-
-const mockDocuments: SupplierDocument[] = [
-  {
-    id: "doc-1",
-    supplierId: 1,
-    name: "Certificado ISO 9001",
-    originalName: "ISO_9001_Certificate_2024.pdf",
-    type: "application/pdf",
-    size: 1024000, // 1MB
-    url: "/api/documents/doc-1/download",
-    category: "certificate",
-    uploadedAt: "2024-01-15T10:30:00Z",
-    description: "Certificado ISO 9001:2015 válido até dezembro 2024"
-  },
-  {
-    id: "doc-2",
-    supplierId: 1,
-    name: "Licença de Exportação",
-    originalName: "Export_License_CN_2024.pdf", 
-    type: "application/pdf",
-    size: 756000, // 756KB
-    url: "/api/documents/doc-2/download",
-    category: "license",
-    uploadedAt: "2024-02-01T14:20:00Z",
-    description: "Licença de exportação válida para produtos eletrônicos"
-  },
-  {
-    id: "doc-3",
-    supplierId: 1,
-    name: "Relatório de Qualidade Q1 2024",
-    originalName: "Quality_Report_Q1_2024.xlsx",
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    size: 2048000, // 2MB
-    url: "/api/documents/doc-3/download", 
-    category: "quality",
-    uploadedAt: "2024-04-15T09:15:00Z",
-    description: "Relatório detalhado de controle de qualidade do primeiro trimestre"
-  }
-];
 
 function InternationalSupplierDetail() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Using mock data directly to avoid loading issues
-  const supplier = mockSupplier;
-  const contacts = mockContacts;
-  const contracts = mockContracts;
-  const communications = mockCommunications;
-  const documents = mockDocuments;
+  // Usar dados reais do banco de dados
+  const { supplier, contacts, contracts, communications, documents, loading, error } = useSupplierData(id || '');
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -281,6 +184,55 @@ function InternationalSupplierDetail() {
   };
 
 
+
+  // Estado de carregamento
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="flex items-center gap-4 mb-6">
+          <Link href="/minha-area/importacoes/fornecedores">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar aos Fornecedores
+            </Button>
+          </Link>
+        </div>
+        <div className="text-center py-12">
+          <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600">Carregando dados do fornecedor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Estado quando fornecedor não foi encontrado
+  if (!supplier) {
+    return (
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="flex items-center gap-4 mb-6">
+          <Link href="/minha-area/importacoes/fornecedores">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar aos Fornecedores
+            </Button>
+          </Link>
+        </div>
+        <div className="text-center py-12">
+          <Globe className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Fornecedor não encontrado</h3>
+          <p className="text-gray-600 mb-4">
+            O fornecedor internacional solicitado não foi encontrado ou você não tem permissão para visualizá-lo.
+          </p>
+          <Link href="/minha-area/importacoes/fornecedores">
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar aos Fornecedores
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -853,60 +805,11 @@ const ContractManagement = ({ supplierId }: { supplierId: number }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingContract, setEditingContract] = useState<Contract | null>(null);
 
-  // Mock data for development
-  const mockContracts: Contract[] = [
-    {
-      id: 1,
-      supplierId: supplierId,
-      contractNumber: "CNT-2024-001",
-      title: "Contrato de Fornecimento de Eletrônicos",
-      description: "Fornecimento mensal de componentes eletrônicos e dispositivos móveis",
-      contractType: "purchase",
-      status: "active",
-      startDate: "2024-01-15",
-      endDate: "2024-12-31",
-      value: 250000,
-      currency: "USD",
-      paymentTerms: "30 dias após entrega",
-      deliveryTerms: "FOB Shanghai",
-      incoterms: "FOB",
-      documents: [
-        {
-          id: "doc1",
-          name: "Contrato Principal.pdf",
-          type: "application/pdf",
-          size: 2048576,
-          url: "/documents/contract1.pdf",
-          uploadedAt: "2024-01-10"
-        }
-      ],
-      notes: "Contrato principal para fornecimento de eletrônicos",
-      createdAt: "2024-01-10",
-      updatedAt: "2024-01-10"
-    },
-    {
-      id: 2,
-      supplierId: supplierId,
-      contractNumber: "CNT-2024-002",
-      title: "Contrato de Serviços de Desenvolvimento",
-      description: "Desenvolvimento customizado de produtos eletrônicos",
-      contractType: "service",
-      status: "draft",
-      startDate: "2024-03-01",
-      value: 80000,
-      currency: "USD",
-      paymentTerms: "50% antecipado, 50% na entrega",
-      deliveryTerms: "CIF Santos",
-      incoterms: "CIF",
-      documents: [],
-      createdAt: "2024-02-15",
-      updatedAt: "2024-02-15"
-    }
-  ];
-
+  // TODO: Implementar carregamento real de contratos da API
   React.useEffect(() => {
-    setContracts(mockContracts);
-  }, []);
+    // Por enquanto mantém lista vazia até integração com API real
+    setContracts([]);
+  }, [supplierId]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {

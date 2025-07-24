@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from '@/hooks/useAuth';
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,48 +38,64 @@ interface InternationalSupplier {
   productsCount?: number;
 }
 
-// Mock data para fornecedores INTERNACIONAIS - será substituído por chamadas reais da API
-const mockInternationalSuppliers: InternationalSupplier[] = [
-  {
-    id: 1,
-    name: "Shenzhen Electronics Co.",
-    country: "China",
-    category: "Eletrônicos",
-    status: "active",
-    lastContact: "2025-01-20",
-    totalOrders: 45,
-    rating: 4.8,
-    contactsCount: 3,
-    contractsCount: 2,
-    productsCount: 120
-  },
-  {
-    id: 2,
-    name: "Mumbai Textiles Ltd.",
-    country: "India",
-    category: "Têxtil",
-    status: "active",
-    lastContact: "2025-01-18",
-    totalOrders: 23,
-    rating: 4.5,
-    contactsCount: 2,
-    contractsCount: 1,
-    productsCount: 85
-  },
-  {
-    id: 3,
-    name: "Istanbul Manufacturing",
-    country: "Turkey",
-    category: "Móveis",
-    status: "pending",
-    lastContact: "2025-01-15",
-    totalOrders: 0,
-    rating: 0,
-    contactsCount: 1,
-    contractsCount: 0,
-    productsCount: 12
-  }
-];
+// API call hook para carregar fornecedores reais do banco
+const useInternationalSuppliers = () => {
+  const { token } = useAuth();
+  const [suppliers, setSuppliers] = useState<InternationalSupplier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const fetchSuppliers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('/api/international-suppliers', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Erro ao carregar fornecedores');
+        }
+
+        const data = await response.json();
+        
+        // Transformar dados do banco para o formato esperado
+        const formattedSuppliers = (data.data || []).map((supplier: any) => ({
+          id: supplier.id,
+          name: supplier.name || 'Nome não informado',
+          country: supplier.country || 'País não informado',
+          category: supplier.category || 'Categoria não informada',
+          status: supplier.isActive ? 'active' : 'inactive',
+          lastContact: supplier.updatedAt ? new Date(supplier.updatedAt).toLocaleDateString('pt-BR') : '-',
+          totalOrders: 0, // Campo a ser implementado posteriormente
+          rating: supplier.rating || 0,
+          contactsCount: 0, // Campo a ser implementado posteriormente
+          contractsCount: 0, // Campo a ser implementado posteriormente
+          productsCount: supplier.totalProducts || 0
+        }));
+
+        setSuppliers(formattedSuppliers);
+      } catch (err) {
+        console.error('Erro ao carregar fornecedores:', err);
+        setError('Erro ao carregar fornecedores. Tente novamente.');
+        setSuppliers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSuppliers();
+  }, [token]);
+
+  return { suppliers, loading, error, refetch: () => setLoading(true) };
+};
 
 /**
  * CRM DE FORNECEDORES INTERNACIONAIS
@@ -101,8 +118,11 @@ export default function InternationalSupplierCRM() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
-  // Mock data local - sem query para evitar loading infinito
-  const suppliers = mockInternationalSuppliers.filter(supplier => {
+  // Usar dados reais do banco
+  const { suppliers: allSuppliers, loading, error } = useInternationalSuppliers();
+
+  // Filtrar fornecedores baseado na busca e status
+  const suppliers = allSuppliers.filter(supplier => {
     const matchesSearch = supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         supplier.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         supplier.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -266,7 +286,7 @@ export default function InternationalSupplierCRM() {
       {/* Suppliers Table */}
       <Card>
         <CardContent className="p-0">
-          {isLoading ? (
+          {loading ? (
             <div className="text-center py-12">
               <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
               <p className="mt-4 text-gray-600">Carregando fornecedores internacionais...</p>
