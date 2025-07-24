@@ -1,124 +1,49 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
 import { Product, InsertProduct } from "@shared/schema";
-import { useToast } from "@/hooks/use-toast";
 import { useCallback, useMemo } from "react";
+import { useCrudQuery } from "./useCrudQuery";
+import { productService } from "@/services/productService";
+import { toast } from "@/hooks/use-toast";
 
 interface UseProductsOptions {
   enabled?: boolean;
 }
 
 export function useProducts(options: UseProductsOptions = {}) {
-  const { toast } = useToast();
   const { enabled = true } = options;
 
-  const {
-    data: apiResponse,
-    isLoading,
-    error,
-    refetch
-  } = useQuery<{success: boolean, data: Product[]}, Error>({
-    queryKey: ["/api/products"],
-    enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutes - dynamic data
-    gcTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnMount: false, // Use cache when available
-    refetchOnReconnect: true, // Refresh on reconnect for fresh data
-    structuralSharing: true, // Optimize re-renders
-    retry: 2, // Reduced retry count for better performance
-  });
-
-  // Extract products array from API response
-  const products = useMemo(() => {
-    if (!apiResponse) return [];
-    
-    // Handle nested data structure: {success: true, data: {success: true, data: Product[]}}
-    if (apiResponse.success && apiResponse.data) {
-      if (Array.isArray(apiResponse.data)) {
-        return apiResponse.data;
-      }
-      // Handle nested structure
-      if (apiResponse.data.success && Array.isArray(apiResponse.data.data)) {
-        return apiResponse.data.data;
-      }
+  const crud = useCrudQuery('produtos', productService, {
+    defaultQueryOptions: { 
+      enabled,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: true,
+      retry: 2,
+    },
+    successMessages: {
+      create: "Produto criado com sucesso",
+      update: "Produto atualizado com sucesso", 
+      delete: "Produto excluído com sucesso"
+    },
+    errorMessages: {
+      create: "Erro ao criar produto",
+      update: "Erro ao atualizar produto",
+      delete: "Erro ao excluir produto"
     }
-    
-    return [];
-  }, [apiResponse]);
-
-  const createMutation = useMutation<Product, Error, InsertProduct>({
-    mutationFn: (data: InsertProduct) => 
-      apiRequest<Product>("/api/products", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      toast({
-        title: "Produto criado",
-        description: "Produto criado com sucesso",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao criar produto",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
   });
 
-  const updateMutation = useMutation<Product, Error, { id: number; data: Partial<InsertProduct> }>({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertProduct> }) =>
-      apiRequest<Product>(`/api/products/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      toast({
-        title: "Produto atualizado",
-        description: "Produto atualizado com sucesso",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao atualizar produto",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const { data: products = [], isLoading, error, refetch } = crud.useGetAll();
 
-  const deleteMutation = useMutation<void, Error, number>({
-    mutationFn: (id: number) => 
-      apiRequest(`/api/products/${id}`, {
-        method: "DELETE",
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      toast({
-        title: "Produto excluído",
-        description: "Produto excluído com sucesso",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro ao excluir produto",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const createMutation = crud.useCreate();
+  const updateMutation = crud.useUpdate();
+  const deleteMutation = crud.useDelete();
 
-  const toggleStatusMutation = useMutation<Product, Error, number>({
-    mutationFn: (id: number) => 
-      apiRequest<Product>(`/api/products/${id}/toggle-status`, {
-        method: "PATCH",
-      }),
+  const toggleStatusMutation = useMutation({
+    mutationFn: (id: number) => productService.toggleStatus(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      crud.invalidateQueries();
       toast({
         title: "Status atualizado",
         description: "Status do produto atualizado com sucesso",
@@ -196,15 +121,13 @@ export function useProducts(options: UseProductsOptions = {}) {
 
 // Hook for single product
 export function useProduct(id: number | null) {
-  const { data, isLoading, error } = useQuery<Product | null, Error>({
-    queryKey: ["/api/products", id],
-    queryFn: () => id ? apiRequest<Product>(`/api/products/${id}`) : null,
+  const crud = useCrudQuery('produtos', productService);
+  const { data: product, isLoading, error } = crud.useGetById(id || undefined, {
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
   });
 
   return {
-    product: data,
+    product,
     isLoading,
     error,
   };

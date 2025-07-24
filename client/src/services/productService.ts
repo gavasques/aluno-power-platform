@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/queryClient";
+import { BaseCrudService } from "@/lib/services/base/BaseCrudService";
 import { Product as DbProduct, InsertProduct } from "@shared/schema";
 import { 
   SalesChannel, 
@@ -10,55 +10,22 @@ import {
   ProductMetrics
 } from "@/types/core";
 
-class ProductService {
-  async getAll(search?: string): Promise<DbProduct[]> {
-    const queryParams = search ? `?search=${encodeURIComponent(search)}` : "";
-    return apiRequest<DbProduct[]>(`/api/products${queryParams}`);
-  }
-
-  async getById(id: number): Promise<DbProduct> {
-    return apiRequest<DbProduct>(`/api/products/${id}`);
-  }
-
-  async create(data: InsertProduct): Promise<DbProduct> {
-    return apiRequest<DbProduct>("/api/products", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async update(id: number, data: ProductUpdateData): Promise<DbProduct> {
-    return apiRequest<DbProduct>(`/api/products/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async delete(id: number): Promise<void> {
-    return apiRequest(`/api/products/${id}`, {
-      method: "DELETE",
-    });
+class ProductService extends BaseCrudService<DbProduct, InsertProduct, Partial<InsertProduct>> {
+  constructor() {
+    super('/api/products');
   }
 
   async toggleStatus(id: number): Promise<DbProduct> {
-    return apiRequest<DbProduct>(`/api/products/${id}/toggle-status`, {
-      method: "PATCH",
-    });
+    return this.patch<DbProduct>(`${this.endpoint}/${id}/toggle-status`);
   }
 
   async updateChannels(id: number, channels: SalesChannel[]): Promise<DbProduct> {
     const updateData: ChannelUpdateData = { channels };
-    return apiRequest<DbProduct>(`/api/products/${id}/channels`, {
-      method: "PUT",
-      body: JSON.stringify(updateData),
-    });
+    return this.put<DbProduct>(`${this.endpoint}/${id}/channels`, updateData);
   }
 
   async updateCosts(id: number, costs: ProductUpdateData): Promise<DbProduct> {
-    return apiRequest<DbProduct>(`/api/products/${id}/costs`, {
-      method: "PUT",
-      body: JSON.stringify(costs),
-    });
+    return this.put<DbProduct>(`${this.endpoint}/${id}/costs`, costs);
   }
 
   async getFiltered(filters: ProductFilterData, sort?: ProductSortData): Promise<DbProduct[]> {
@@ -81,18 +48,15 @@ class ProductService {
       params.append('sortDirection', sort.direction);
     }
 
-    return apiRequest<DbProduct[]>(`/api/products/filter?${params.toString()}`);
+    return this.get<DbProduct[]>(`${this.endpoint}/filter?${params.toString()}`);
   }
 
   async bulkUpdate(updateData: ProductBulkUpdateData): Promise<DbProduct[]> {
-    return apiRequest<DbProduct[]>("/api/products/bulk-update", {
-      method: "PUT",
-      body: JSON.stringify(updateData),
-    });
+    return this.put<DbProduct[]>(`${this.endpoint}/bulk-update`, updateData);
   }
 
   async getMetrics(): Promise<ProductMetrics> {
-    return apiRequest<ProductMetrics>("/api/products/metrics");
+    return this.get<ProductMetrics>(`${this.endpoint}/metrics`);
   }
 }
 

@@ -3,13 +3,107 @@ import { toast } from '@/hooks/use-toast';
 import { BaseCrudService } from '@/lib/services/base/BaseCrudService';
 
 /**
- * Unified CRUD Query Hook
- * Eliminates duplicate React Query configurations across the codebase
+ * 🚀 Unified CRUD Query Hook
  * 
- * Usage:
- * const productQueries = useCrudQuery('products', productService);
- * const { data: products, isLoading } = productQueries.useGetAll();
- * const createMutation = productQueries.useCreate();
+ * Este hook elimina duplicação de código entre hooks de entidades (useProducts, useSuppliers, etc.)
+ * fornecendo uma interface padronizada para operações CRUD com React Query.
+ * 
+ * ## ✨ Benefícios:
+ * - ✅ Reduz ~60% da duplicação em hooks de entidades
+ * - ✅ Padrão consistente para operações CRUD  
+ * - ✅ Configurações de cache unificadas
+ * - ✅ Mensagens de toast padronizadas
+ * - ✅ Facilita manutenção e extensão
+ * 
+ * ## 📖 Como usar:
+ * 
+ * ### 1. Básico - Hook de entidade simples:
+ * ```typescript
+ * export function useProducts() {
+ *   const crud = useCrudQuery('produtos', productService);
+ *   const { data: products = [], isLoading, error } = crud.useGetAll();
+ *   
+ *   return {
+ *     products,
+ *     isLoading,
+ *     error,
+ *     createProduct: crud.useCreate().mutateAsync,
+ *     updateProduct: crud.useUpdate().mutateAsync,
+ *     deleteProduct: crud.useDelete().mutateAsync,
+ *   };
+ * }
+ * ```
+ * 
+ * ### 2. Com configurações customizadas:
+ * ```typescript
+ * const crud = useCrudQuery('produtos', productService, {
+ *   defaultQueryOptions: {
+ *     staleTime: 10 * 60 * 1000,  // 10 minutos
+ *     enabled: userLoggedIn,
+ *   },
+ *   successMessages: {
+ *     create: "Produto criado com sucesso!",
+ *     update: "Produto atualizado!",
+ *     delete: "Produto removido!"
+ *   },
+ *   errorMessages: {
+ *     create: "Erro ao criar produto",
+ *     update: "Erro ao atualizar", 
+ *     delete: "Erro ao excluir"
+ *   }
+ * });
+ * ```
+ * 
+ * ### 3. Operações específicas:
+ * ```typescript
+ * // Buscar por ID
+ * const { data: product } = crud.useGetById(productId);
+ * 
+ * // Buscar com filtros
+ * const { data: activeProducts } = crud.useFilter({ active: true });
+ * 
+ * // Busca com texto
+ * const { data: searchResults } = crud.useSearch(searchTerm);
+ * 
+ * // Paginação
+ * const { data: paginatedData } = crud.usePagination(page, limit, filters);
+ * ```
+ * 
+ * ### 4. Mutations com callbacks customizados:
+ * ```typescript
+ * const createMutation = crud.useCreate({
+ *   onSuccess: (newProduct) => {
+ *     // Lógica customizada após sucesso
+ *     navigateToProduct(newProduct.id);
+ *   }
+ * });
+ * ```
+ * 
+ * ## ⚙️ Pré-requisitos:
+ * - Service deve estender `BaseCrudService<T, CreateT, UpdateT>`
+ * - Service deve implementar métodos básicos: getAll, getById, create, update, remove
+ * 
+ * ## 🔧 Métodos disponíveis:
+ * 
+ * ### Queries:
+ * - `useGetAll()` - Lista todos os registros
+ * - `useGetById(id)` - Busca por ID específico  
+ * - `useSearch(query)` - Busca por texto
+ * - `useFilter(filters)` - Filtra por critérios
+ * - `usePagination(page, limit, filters)` - Busca paginada
+ * - `useCount(filters)` - Conta registros
+ * 
+ * ### Mutations:
+ * - `useCreate()` - Criar novo registro
+ * - `useUpdate()` - Atualizar registro existente
+ * - `useDelete()` - Excluir registro
+ * - `useBulkCreate()` - Criar múltiplos registros
+ * - `useBulkDelete()` - Excluir múltiplos registros
+ * 
+ * ### Utilitários:
+ * - `invalidateQueries()` - Invalida cache manualmente
+ * - `prefetchAll()` - Pré-carrega dados
+ * - `prefetchById(id)` - Pré-carrega registro específico
  */
 export function useCrudQuery<T, CreateT = Partial<T>, UpdateT = Partial<T>>(
   entityKey: string,

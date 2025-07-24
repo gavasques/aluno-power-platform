@@ -1,63 +1,50 @@
 import { useState, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import type { BackgroundRemovalState } from '@/types/background-removal';
 import { validateImageForBackgroundRemoval, uploadImageForBackgroundRemoval, processBackgroundRemoval } from '@/utils/background-removal';
+import { useAsyncUpload, useAsyncProcessing } from './useAsyncOperation';
 
-const initialState: BackgroundRemovalState = {
+const initialState: Omit<BackgroundRemovalState, 'isProcessing' | 'isUploading' | 'error'> = {
   originalImage: null,
   processedImage: null,
-  isProcessing: false,
-  isUploading: false,
   hasUploadedImage: false,
-  error: null,
   uploadedImageId: null,
   processingDuration: 0,
 };
 
 export const useBackgroundRemoval = () => {
-  const [state, setState] = useState<BackgroundRemovalState>(initialState);
-  const { toast } = useToast();
+  const [state, setState] = useState(initialState);
+  
+  // Hooks especializados para upload e processamento
+  const uploadOp = useAsyncUpload({
+    loadingKey: 'background-upload',
+    successMessage: "Imagem carregada com sucesso!",
+    errorMessage: "Erro no upload"
+  });
 
-  const setIsUploading = useCallback((uploading: boolean) => {
-    setState(prev => ({ ...prev, isUploading: uploading }));
-  }, []);
-
-  const setIsProcessing = useCallback((processing: boolean) => {
-    setState(prev => ({ ...prev, isProcessing: processing }));
-  }, []);
-
-  const setError = useCallback((error: string | null) => {
-    setState(prev => ({ ...prev, error }));
-  }, []);
+  const processOp = useAsyncProcessing({
+    loadingKey: 'background-processing', 
+    successMessage: "Background removido com sucesso!",
+    errorMessage: "Erro no processamento"
+  });
 
   const uploadImage = useCallback(async (file: File) => {
     const validation = validateImageForBackgroundRemoval(file);
     if (!validation.isValid) {
-      setError(validation.error || 'Arquivo inválido');
-      toast({
-        title: "Erro na validação",
-        description: validation.error,
-        variant: "destructive",
-      });
+      uploadOp.setError(validation.error || 'Arquivo inválido');
       return false;
     }
 
-    setIsUploading(true);
-    setError(null);
-
-    try {
-      const result = await uploadImageForBackgroundRemoval(file);
+    const result = await uploadOp.execute(async () => {
+      const uploadResult = await uploadImageForBackgroundRemoval(file);
       
-      if (!result.success) {
-        setError(result.error || 'Erro no upload');
-        toast({
-          title: "Erro no upload",
-          description: result.error || 'Erro inesperado no upload',
-          variant: "destructive",
-        });
-        return false;
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Erro no upload');
       }
 
+      return uploadResult;
+    });
+
+    if (result) {
       const imageUrl = URL.createObjectURL(file);
       setState(prev => ({
         ...prev,
@@ -71,76 +58,40 @@ export const useBackgroundRemoval = () => {
         uploadedImageId: result.imageId || null,
         hasUploadedImage: true,
         processedImage: null,
-        error: null,
       }));
-
-      toast({
-        title: "Upload concluído",
-        description: "Imagem carregada com sucesso!",
-      });
-
       return true;
-    } catch (error) {
-      const errorMessage = 'Erro inesperado no upload';
-      setError(errorMessage);
-      toast({
-        title: "Erro no upload",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsUploading(false);
     }
-  }, [toast, setError, setIsUploading]);
+
+    return false;
+  }, [uploadOp]);
 
   const removeBackground = useCallback(async () => {
     if (!state.uploadedImageId) {
-      setError('Nenhuma imagem carregada');
+      processOp.setError('Nenhuma imagem carregada');
       return;
     }
 
-    setIsProcessing(true);
-    setError(null);
     const startTime = Date.now();
-
-    try {
-      const result = await processBackgroundRemoval(state.uploadedImageId);
-      const duration = Date.now() - startTime;
-
-      if (!result.success) {
-        setError(result.error || 'Erro no processamento');
-        toast({
-          title: "Erro no processamento",
-          description: result.error || 'Erro inesperado no processamento',
-          variant: "destructive",
-        });
-        return;
+    
+    const result = await processOp.execute(async () => {
+      const processResult = await processBackgroundRemoval(state.uploadedImageId!);
+      
+      if (!processResult.success) {
+        throw new Error(processResult.error || 'Erro no processamento');
       }
 
+      return processResult;
+    });
+
+    if (result) {
+      const duration = Date.now() - startTime;
       setState(prev => ({
         ...prev,
         processedImage: result.processedImageUrl || null,
         processingDuration: duration,
-        error: null,
       }));
-
-      toast({
-        title: "Background removido com sucesso!",
-        description: `Processamento concluído em ${Math.round(duration / 1000)}s`,
-      });
-    } catch (error) {
-      const errorMessage = 'Erro inesperado no processamento';
-      setError(errorMessage);
-      toast({
-        title: "Erro no processamento",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
     }
-  }, [state.uploadedImageId, toast, setError, setIsProcessing]);
+  }, [state.uploadedImageId, processOp]);
 
   const removeImage = useCallback(() => {
     if (state.originalImage?.url) {
@@ -152,26 +103,35 @@ export const useBackgroundRemoval = () => {
       processedImage: null,
       hasUploadedImage: false,
       uploadedImageId: null,
-      error: null,
     }));
-  }, [state.originalImage?.url]);
+    uploadOp.reset();
+    processOp.reset();
+  }, [state.originalImage?.url, uploadOp, processOp]);
 
   const reset = useCallback(() => {
     if (state.originalImage?.url) {
       URL.revokeObjectURL(state.originalImage.url);
     }
     setState(initialState);
-  }, [state.originalImage?.url]);
+    uploadOp.reset();
+    processOp.reset();
+  }, [state.originalImage?.url, uploadOp, processOp]);
 
   return {
-    // State
+    // State - combinando estado local com operações assíncronas
     originalImage: state.originalImage,
     processedImage: state.processedImage,
-    isProcessing: state.isProcessing,
-    isUploading: state.isUploading,
+    isProcessing: processOp.isLoading,
+    isUploading: uploadOp.isLoading,
     hasUploadedImage: state.hasUploadedImage,
-    error: state.error,
+    error: uploadOp.error || processOp.error,
     processingDuration: state.processingDuration,
+    
+    // Novos recursos do useAsyncOperation
+    shouldShowUploadLoading: uploadOp.shouldShowLoading,
+    shouldShowProcessingLoading: processOp.shouldShowLoading,
+    uploadProgress: uploadOp.progress,
+    processProgress: processOp.progress,
     
     // Actions
     uploadImage,

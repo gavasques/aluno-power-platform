@@ -1,39 +1,13 @@
-import { apiRequest } from "@/lib/queryClient";
+import { BaseCrudService } from "@/lib/services/base/BaseCrudService";
 import { Supplier, InsertSupplier } from "@shared/schema";
 
-class SupplierService {
-  async getAll(): Promise<Supplier[]> {
-    return apiRequest<Supplier[]>("/api/suppliers");
-  }
-
-  async getById(id: number): Promise<Supplier> {
-    return apiRequest<Supplier>(`/api/suppliers/${id}`);
-  }
-
-  async create(data: InsertSupplier): Promise<Supplier> {
-    return apiRequest<Supplier>("/api/suppliers", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async update(id: number, data: Partial<InsertSupplier>): Promise<Supplier> {
-    return apiRequest<Supplier>(`/api/suppliers/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async delete(id: number): Promise<void> {
-    return apiRequest(`/api/suppliers/${id}`, {
-      method: "DELETE",
-    });
+class SupplierService extends BaseCrudService<Supplier, InsertSupplier, Partial<InsertSupplier>> {
+  constructor() {
+    super('/api/suppliers');
   }
 
   async toggleVerified(id: number): Promise<Supplier> {
-    return apiRequest<Supplier>(`/api/suppliers/${id}/verify`, {
-      method: "PATCH",
-    });
+    return this.patch<Supplier>(`${this.endpoint}/${id}/verify`);
   }
 }
 

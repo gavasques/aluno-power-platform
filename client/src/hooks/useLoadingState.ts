@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { LoadingCoordinator } from '@/utils/loadingDebounce';
+import { useAsyncOperation } from './useAsyncOperation';
 
 /**
  * Hook to manage loading state with global coordination
  * Prevents duplicate loading messages across the system
+ * 
+ * Refatorado para usar useAsyncOperation como base
  */
 export function useLoadingState(key: string, initialLoading = false) {
   const [isLoading, setIsLoading] = useState(initialLoading);
@@ -26,6 +29,46 @@ export function useLoadingState(key: string, initialLoading = false) {
     setLoading: setIsLoading,
     shouldShowLoading: isLoading && !coordinator.getActiveStates().some(activeKey => activeKey !== key),
     globalActiveStates: coordinator.getActiveStates()
+  };
+}
+
+/**
+ * Nova versão baseada em useAsyncOperation - mais robusta
+ */
+export function useLoadingStateAsync(key: string, config: {
+  successMessage?: string;
+  errorMessage?: string;
+  showToasts?: boolean;
+} = {}) {
+  const { showToasts = false } = config;
+  
+  const asyncOp = useAsyncOperation({
+    loadingKey: key,
+    successMessage: config.successMessage,
+    errorMessage: config.errorMessage,
+    showSuccessToast: showToasts,
+    showErrorToast: showToasts,
+  });
+
+  return {
+    isLoading: asyncOp.isLoading,
+    error: asyncOp.error,
+    shouldShowLoading: asyncOp.shouldShowLoading,
+    globalActiveStates: asyncOp.globalActiveStates,
+    
+    // Métodos de controle
+    startLoading: () => asyncOp.execute(async () => ({})),
+    stopLoading: asyncOp.reset,
+    setError: asyncOp.setError,
+    
+    // Compatibilidade com versão anterior
+    setLoading: (loading: boolean) => loading ? 
+      asyncOp.execute(async () => ({})) : 
+      asyncOp.reset(),
+    
+    // Novos recursos
+    executeWithLoading: asyncOp.execute,
+    hasError: asyncOp.hasError,
   };
 }
 

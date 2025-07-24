@@ -1,33 +1,37 @@
-import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-
-interface ApiRequestState<T> {
-  data: T | null;
-  loading: boolean;
-  error: string | null;
-}
+import { useAsyncOperation } from './useAsyncOperation';
 
 interface UseApiRequestOptions {
   successMessage?: string;
   errorMessage?: string;
+  loadingKey?: string;
+  showToasts?: boolean;
 }
 
+/**
+ * Hook for API requests - Refatorado para usar useAsyncOperation
+ * Mantém compatibilidade com versão anterior
+ */
 export function useApiRequest<T = any>(options: UseApiRequestOptions = {}) {
-  const [state, setState] = useState<ApiRequestState<T>>({
-    data: null,
-    loading: false,
-    error: null,
-  });
+  const { 
+    successMessage, 
+    errorMessage, 
+    loadingKey,
+    showToasts = true 
+  } = options;
 
-  const { toast } = useToast();
+  const asyncOp = useAsyncOperation<Response, T>({
+    loadingKey: loadingKey || 'api-request',
+    successMessage,
+    errorMessage,
+    showSuccessToast: showToasts && !!successMessage,
+    showErrorToast: showToasts,
+  });
 
   const execute = async (
     requestFn: () => Promise<Response>,
     transform?: (data: any) => T
   ): Promise<T | null> => {
-    setState({ data: null, loading: true, error: null });
-
-    try {
+    return await asyncOp.execute(async () => {
       const response = await requestFn();
       
       if (!response.ok) {
@@ -35,39 +39,74 @@ export function useApiRequest<T = any>(options: UseApiRequestOptions = {}) {
       }
 
       const rawData = await response.json();
-      const data = transform ? transform(rawData) : rawData;
-
-      setState({ data, loading: false, error: null });
-
-      if (options.successMessage) {
-        toast({
-          title: "Sucesso",
-          description: options.successMessage,
-        });
-      }
-
-      return data;
-    } catch (error: any) {
-      const errorMessage = error.message || options.errorMessage || 'Erro inesperado';
-      setState({ data: null, loading: false, error: errorMessage });
-
-      toast({
-        title: "Erro",
-        description: errorMessage,
-        variant: "destructive",
-      });
-
-      return null;
-    }
-  };
-
-  const reset = () => {
-    setState({ data: null, loading: false, error: null });
+      return transform ? transform(rawData) : rawData;
+    });
   };
 
   return {
-    ...state,
+    // Compatibilidade com versão anterior
+    data: asyncOp.data,
+    loading: asyncOp.isLoading,
+    error: asyncOp.error,
     execute,
-    reset,
+    reset: asyncOp.reset,
+    
+    // Recursos adicionais do useAsyncOperation
+    isLoading: asyncOp.isLoading,
+    shouldShowLoading: asyncOp.shouldShowLoading,
+    hasData: asyncOp.hasData,
+    hasError: asyncOp.hasError,
+    progress: asyncOp.progress,
+    globalActiveStates: asyncOp.globalActiveStates,
+  };
+}
+
+/**
+ * Hook especializado para fetch requests
+ */
+export function useFetchRequest<T = any>(options: UseApiRequestOptions & {
+  baseUrl?: string;
+} = {}) {
+  const { baseUrl = '', ...apiOptions } = options;
+  const apiRequest = useApiRequest<T>(apiOptions);
+
+  const fetchData = async (
+    url: string,
+    init?: RequestInit,
+    transform?: (data: any) => T
+  ): Promise<T | null> => {
+    return await apiRequest.execute(
+      () => fetch(`${baseUrl}${url}`, init),
+      transform
+    );
+  };
+
+  const get = (url: string, transform?: (data: any) => T) => 
+    fetchData(url, { method: 'GET' }, transform);
+
+  const post = (url: string, body: any, transform?: (data: any) => T) =>
+    fetchData(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }, transform);
+
+  const put = (url: string, body: any, transform?: (data: any) => T) =>
+    fetchData(url, {
+      method: 'PUT', 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }, transform);
+
+  const del = (url: string, transform?: (data: any) => T) =>
+    fetchData(url, { method: 'DELETE' }, transform);
+
+  return {
+    ...apiRequest,
+    fetchData,
+    get,
+    post,
+    put,
+    delete: del,
   };
 }

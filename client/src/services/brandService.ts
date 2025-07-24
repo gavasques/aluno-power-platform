@@ -1,29 +1,21 @@
-import { apiRequest } from "@/lib/queryClient";
+import { BaseCrudService } from "@/lib/services/base/BaseCrudService";
 import { Brand } from "@shared/schema";
 
-class BrandService {
-  async getAll(): Promise<Brand[]> {
-    return apiRequest<Brand[]>("/api/brands");
+interface BrandCreateData {
+  name: string;
+}
+
+class BrandService extends BaseCrudService<Brand, BrandCreateData, BrandCreateData> {
+  constructor() {
+    super('/api/brands');
   }
 
   async create(name: string): Promise<Brand> {
-    return apiRequest<Brand>("/api/brands", {
-      method: "POST",
-      body: JSON.stringify({ name }),
-    });
+    return super.create({ name });
   }
 
   async update(id: number, name: string): Promise<Brand> {
-    return apiRequest<Brand>(`/api/brands/${id}`, {
-      method: "PUT",
-      body: JSON.stringify({ name }),
-    });
-  }
-
-  async delete(id: number): Promise<void> {
-    return apiRequest(`/api/brands/${id}`, {
-      method: "DELETE",
-    });
+    return super.update(id, { name });
   }
 }
 
