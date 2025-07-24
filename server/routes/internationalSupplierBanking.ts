@@ -196,59 +196,50 @@ router.delete("/:id", requireAuth, async (req, res) => {
       });
     }
 
-    // Excluir registros relacionados primeiro (em ordem para evitar foreign key constraints)
+    // Usar SQL direto para excluir em cascata todas as referências
+    // Isso é mais confiável que fazer um por um via ORM
+    
+    console.log(`🗑️ Iniciando exclusão em cascata do fornecedor ID: ${supplierId}`);
     
     // 1. Excluir conversas relacionadas
-    await db
-      .delete(supplierConversations)
-      .where(and(eq(supplierConversations.supplierId, supplierId), eq(supplierConversations.userId, userId)));
+    await db.execute(`DELETE FROM supplier_conversations WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    console.log(`✅ Conversas excluídas`);
 
     // 2. Excluir contatos relacionados
-    await db
-      .delete(supplierContacts)
-      .where(and(eq(supplierContacts.supplierId, supplierId), eq(supplierContacts.userId, userId)));
+    await db.execute(`DELETE FROM supplier_contacts WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    console.log(`✅ Contatos excluídos`);
 
     // 3. Excluir arquivos relacionados
-    await db
-      .delete(supplierFiles)
-      .where(and(eq(supplierFiles.supplierId, supplierId), eq(supplierFiles.userId, userId)));
+    await db.execute(`DELETE FROM supplier_files WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    console.log(`✅ Arquivos excluídos`);
 
     // 4. Excluir marcas relacionadas
-    await db
-      .delete(supplierBrands)
-      .where(and(eq(supplierBrands.supplierId, supplierId), eq(supplierBrands.userId, userId)));
+    await db.execute(`DELETE FROM supplier_brands WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    console.log(`✅ Marcas excluídas`);
 
     // 5. Excluir reviews relacionadas
-    await db
-      .delete(supplierReviews)
-      .where(and(eq(supplierReviews.supplierId, supplierId), eq(supplierReviews.userId, userId)));
+    await db.execute(`DELETE FROM supplier_reviews WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    console.log(`✅ Reviews excluídas`);
 
     // 6. Excluir produtos relacionados
-    await db
-      .delete(supplierProducts)
-      .where(and(eq(supplierProducts.supplierId, supplierId), eq(supplierProducts.userId, userId)));
+    await db.execute(`DELETE FROM supplier_products WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    console.log(`✅ Produtos do fornecedor excluídos`);
 
     // 7. Atualizar produtos que referenciam este fornecedor (definir como null)
-    await db
-      .update(products)
-      .set({ supplierId: null })
-      .where(and(eq(products.supplierId, supplierId), eq(products.userId, userId)));
+    await db.execute(`UPDATE products SET supplier_id = NULL WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    console.log(`✅ Produtos atualizados`);
 
     // 8. Excluir relações de produtos importados
-    await db
-      .delete(importedProductSuppliers)
-      .where(eq(importedProductSuppliers.supplierId, supplierId));
+    await db.execute(`DELETE FROM imported_product_suppliers WHERE supplier_id = ${supplierId}`);
+    console.log(`✅ Relações de produtos importados excluídas`);
 
     // 9. Atualizar produtos importados que referenciam este fornecedor
-    await db
-      .update(importedProducts)
-      .set({ supplierId: null })
-      .where(and(eq(importedProducts.supplierId, supplierId), eq(importedProducts.userId, userId)));
+    await db.execute(`UPDATE imported_products SET supplier_id = NULL WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    console.log(`✅ Produtos importados atualizados`);
 
     // 10. Finalmente, excluir o fornecedor
-    await db
-      .delete(suppliers)
-      .where(and(eq(suppliers.id, supplierId), eq(suppliers.userId, userId)));
+    await db.execute(`DELETE FROM suppliers WHERE id = ${supplierId} AND user_id = ${userId}`);
+    console.log(`✅ Fornecedor excluído`);
 
     res.json({
       success: true,
