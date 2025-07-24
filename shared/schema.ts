@@ -3743,5 +3743,3 @@ export const importedProductSuppliersRelations = relations(importedProductSuppli
     references: [suppliers.id],
   }),
 }));
-
-
