@@ -1,5 +1,4 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'wouter';
 import { ArrowLeft, Edit, Trash2, Package, Building2, FileText, Calendar, Tag, Barcode, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'wouter';
 
 interface ImportedProduct {
@@ -55,28 +55,52 @@ const statusConfig = {
 
 export default function ImportedProductDetail() {
   const { toast } = useToast();
+  const { token } = useAuth();
   const [, setLocation] = useLocation();
   const params = useParams();
   const productId = params.id;
 
-  // Fetch product data
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['imported-product', productId],
-    queryFn: async () => {
-      const response = await fetch(`/api/imported-products/${productId}`);
-      if (!response.ok) {
-        throw new Error('Erro ao carregar produto');
-      }
-      return response.json();
-    },
-    enabled: !!productId,
-  });
+  // States
+  const [product, setProduct] = useState<ImportedProduct | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const product: ImportedProduct | null = data?.data || null;
+  // Fetch product data usando useState + useEffect
+  useEffect(() => {
+    if (!productId || !token) return;
+
+    const fetchProduct = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch(`/api/imported-products/${productId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erro ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        setProduct(result.data);
+      } catch (err: any) {
+        console.error('[PRODUCT_DETAIL] Error:', err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [productId, token]);
 
   // Handle delete
   const handleDelete = async () => {
-    if (!product) return;
+    if (!product || !token) return;
     
     if (!confirm(`Tem certeza que deseja deletar o produto "${product.name}"?`)) {
       return;
@@ -85,6 +109,10 @@ export default function ImportedProductDetail() {
     try {
       const response = await fetch(`/api/imported-products/${productId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -106,13 +134,46 @@ export default function ImportedProductDetail() {
     }
   };
 
+  // Função para recarregar dados em caso de erro
+  const handleRetry = () => {
+    if (!productId || !token) return;
+    
+    const fetchProduct = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch(`/api/imported-products/${productId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erro ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        setProduct(result.data);
+      } catch (err: any) {
+        console.error('[PRODUCT_DETAIL] Error:', err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProduct();
+  };
+
   if (error) {
     return (
       <div className="container mx-auto py-8">
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-red-600">Erro ao carregar produto</p>
-            <Button onClick={() => refetch()} className="mt-4">
+            <p className="text-red-600">Erro ao carregar produto: {error}</p>
+            <Button onClick={handleRetry} className="mt-4">
               Tentar Novamente
             </Button>
           </CardContent>
