@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'wouter';
-import { ArrowLeft, Printer, Download, Package, Building2, FileText, Calendar, Tag, Barcode, Globe, Image as ImageIcon, Truck, Clock, Star, Hash } from 'lucide-react';
+import { ArrowLeft, Download, Package, Building2, FileText, Calendar, Tag, Barcode, Globe, Image as ImageIcon, Truck, Clock, Star, Hash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'wouter';
+import { toast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
 
 interface ImportedProduct {
   id: string;
@@ -187,14 +189,192 @@ export default function ImportedProductDetail() {
     fetchAllData();
   }, [productId, token]);
 
-  // Função para imprimir
-  const handlePrint = () => {
-    window.print();
-  };
+  // Função para gerar PDF
+  const handleDownloadPDF = async () => {
+    if (!product) return;
 
-  // Função para gerar PDF (futura implementação)
-  const handleDownloadPDF = () => {
-    alert('Funcionalidade de PDF será implementada em breve!');
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
+      let yPosition = margin;
+
+      // Configurar fonte
+      pdf.setFont('helvetica');
+
+      // Cabeçalho
+      pdf.setFontSize(18);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('FICHA TÉCNICA DO PRODUTO', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
+
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Produto em Processo de Importação', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 15;
+
+      // Status
+      const statusInfo = statusConfig[product.status];
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`Status: ${statusInfo.label}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 15;
+
+      // Linha separadora
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 10;
+
+      // Função auxiliar para adicionar seção
+      const addSection = (title: string, content: Array<{ label: string; value: string }>) => {
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(title, margin, yPosition);
+        yPosition += 8;
+
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+
+        content.forEach(item => {
+          if (item.value && item.value.trim()) {
+            if (yPosition > pageHeight - 15) {
+              pdf.addPage();
+              yPosition = margin;
+            }
+            
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`${item.label}:`, margin, yPosition);
+            pdf.setFont('helvetica', 'normal');
+            
+            const lines = pdf.splitTextToSize(item.value, contentWidth - 40);
+            pdf.text(lines, margin + 40, yPosition);
+            yPosition += lines.length * 4 + 2;
+          }
+        });
+
+        yPosition += 5;
+      };
+
+      // Informações Principais
+      addSection('INFORMAÇÕES PRINCIPAIS', [
+        { label: 'Nome do Produto', value: product.name },
+        { label: 'Código Interno', value: product.internalCode },
+        { label: 'Marca', value: product.brand || '' },
+        { label: 'Categoria', value: product.category || '' },
+        { label: 'Modelo', value: product.model || '' },
+        { label: 'Descrição', value: product.description || '' }
+      ]);
+
+      // Características Físicas
+      addSection('CARACTERÍSTICAS FÍSICAS', [
+        { label: 'Cor', value: product.color || '' },
+        { label: 'Tamanho', value: product.size || '' },
+        { label: 'Material', value: product.material || '' },
+        { label: 'Referência', value: product.reference || '' },
+        { label: 'Variação 1', value: product.variation1 || '' },
+        { label: 'Variação 2', value: product.variation2 || '' }
+      ]);
+
+      // Especificações Técnicas
+      if (product.technicalSpecifications) {
+        addSection('ESPECIFICAÇÕES TÉCNICAS', [
+          { label: 'Especificações', value: product.technicalSpecifications }
+        ]);
+      }
+
+      // Descrição Detalhada
+      if (product.detailedDescription) {
+        addSection('DESCRIÇÃO DETALHADA', [
+          { label: 'Descrição', value: product.detailedDescription }
+        ]);
+      }
+
+      // Informações Fiscais
+      addSection('INFORMAÇÕES FISCAIS', [
+        { label: 'Código HS', value: product.hsCode || '' },
+        { label: 'Código NCM', value: product.ncmCode || '' },
+        { label: 'IPI', value: product.ipiPercentage ? `${product.ipiPercentage}%` : '' },
+        { label: 'Descrição Aduaneira', value: product.customsDescription || '' }
+      ]);
+
+      // Códigos de Identificação
+      addSection('CÓDIGOS DE IDENTIFICAÇÃO', [
+        { label: 'EAN', value: product.productEan || '' },
+        { label: 'UPC', value: product.productUpc || '' },
+        { label: 'Código de Barras Interno', value: product.internalBarcode || '' }
+      ]);
+
+      // Informações do Fornecedor
+      addSection('INFORMAÇÕES DO FORNECEDOR', [
+        { label: 'Nome do Fornecedor', value: product.supplierName || '' },
+        { label: 'Código no Fornecedor', value: product.supplierProductCode || '' },
+        { label: 'Nome no Fornecedor', value: product.supplierProductName || '' },
+        { label: 'MOQ', value: product.moq ? `${product.moq} unidades` : '' },
+        { label: 'Lead Time', value: product.leadTimeDays ? `${product.leadTimeDays} dias` : '' },
+        { label: 'Descrição do Fornecedor', value: product.supplierDescription || '' }
+      ]);
+
+      // Embalagens
+      if (product.hasMultiplePackages) {
+        addSection('SISTEMA DE EMBALAGENS', [
+          { label: 'Total de Volumes', value: `${product.totalPackages} volumes` },
+          { label: 'Informações', value: packages.length > 0 ? 
+            packages.map(pkg => `Volume ${pkg.packageNumber}: ${pkg.description || 'Sem descrição'}`).join('; ') :
+            'Informações de embalagem serão adicionadas posteriormente.'
+          }
+        ]);
+      }
+
+      // Observações
+      if (product.notes) {
+        addSection('OBSERVAÇÕES IMPORTANTES', [
+          { label: 'Notas', value: product.notes }
+        ]);
+      }
+
+      // Rodapé
+      if (yPosition > pageHeight - 30) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+
+      yPosition = pageHeight - 30;
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Ficha Técnica gerada automaticamente pelo Sistema de Gestão de Produtos Importados', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 4;
+      pdf.text(`Data de Criação: ${new Date(product.createdAt).toLocaleDateString('pt-BR')}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 4;
+      pdf.text(`Última Atualização: ${new Date(product.updatedAt).toLocaleDateString('pt-BR')}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 4;
+      pdf.text(`ID: ${product.id}`, pageWidth / 2, yPosition, { align: 'center' });
+
+      // Salvar PDF
+      const fileName = `ficha-produto-${product.internalCode}-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+
+      toast({
+        title: 'PDF gerado com sucesso!',
+        description: `O arquivo ${fileName} foi baixado.`,
+      });
+
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: 'Erro ao gerar PDF',
+        description: 'Ocorreu um erro ao gerar o arquivo PDF. Tente novamente.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (error) {
@@ -244,8 +424,8 @@ export default function ImportedProductDetail() {
 
   return (
     <>
-      {/* Botões de ação - não aparecem na impressão */}
-      <div className="print:hidden bg-white border-b sticky top-0 z-10">
+      {/* Botões de ação */}
+      <div className="bg-white border-b sticky top-0 z-10">
         <div className="container mx-auto py-4 flex justify-between items-center">
           <Link href="/minha-area/importacoes/produtos">
             <Button variant="ghost" size="sm">
@@ -261,25 +441,21 @@ export default function ImportedProductDetail() {
                 Editar
               </Button>
             </Link>
-            <Button onClick={handlePrint} variant="outline" size="sm">
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimir
-            </Button>
-            <Button onClick={handleDownloadPDF} variant="outline" size="sm">
+            <Button onClick={handleDownloadPDF} variant="default" size="sm" className="bg-red-600 hover:bg-red-700">
               <Download className="h-4 w-4 mr-2" />
-              PDF
+              Gerar PDF
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Conteúdo principal - formato PDF */}
+      {/* Conteúdo principal - formato de ficha técnica */}
       <div className="bg-white min-h-screen">
-        <div className="max-w-4xl mx-auto p-8 print:p-6 print:max-w-none">
+        <div className="max-w-4xl mx-auto p-8">
           
           {/* Cabeçalho da Ficha */}
           <div className="text-center border-b-2 border-gray-300 pb-6 mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 print:text-2xl">FICHA TÉCNICA DO PRODUTO</h1>
+            <h1 className="text-3xl font-bold text-gray-900">FICHA TÉCNICA DO PRODUTO</h1>
             <p className="text-gray-600 mt-2">Produto em Processo de Importação</p>
             <div className="flex justify-center items-center gap-4 mt-4">
               <Badge className={`text-lg px-4 py-2 ${statusInfo.color}`}>
@@ -675,32 +851,6 @@ export default function ImportedProductDetail() {
 
         </div>
       </div>
-
-      {/* CSS para impressão */}
-      <style jsx global>{`
-        @media print {
-          body { 
-            margin: 0; 
-            font-size: 12px; 
-          }
-          .print\\:hidden { 
-            display: none !important; 
-          }
-          .print\\:p-6 { 
-            padding: 1.5rem !important; 
-          }
-          .print\\:max-w-none { 
-            max-width: none !important; 
-          }
-          .print\\:text-2xl { 
-            font-size: 1.5rem !important; 
-          }
-          * { 
-            -webkit-print-color-adjust: exact !important; 
-            color-adjust: exact !important; 
-          }
-        }
-      `}</style>
     </>
   );
 }
