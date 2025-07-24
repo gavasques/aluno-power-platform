@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Eye, Trash2, Package, Building2, Clock } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Eye, Trash2, Package, Building2, Clock, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -69,6 +69,7 @@ export default function ImportedProductsIndex() {
   const [data, setData] = useState<ImportedProductsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
   
   const limit = 10;
 
@@ -107,12 +108,58 @@ export default function ImportedProductsIndex() {
       
       const result = await response.json();
       setData(result);
+      
+      // Buscar primeira imagem de cada produto
+      if (result?.data?.products?.length > 0) {
+        fetchProductImages(result.data.products);
+      }
+      
       setIsLoading(false);
     } catch (err: any) {
       console.error('[IMPORTED_PRODUCTS] Error:', err);
       setError(err);
       setIsLoading(false);
     }
+  };
+
+  // Buscar primeira imagem de cada produto
+  const fetchProductImages = async (products: ImportedProduct[]) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+
+    const imagePromises = products.map(async (product) => {
+      try {
+        const response = await fetch(`/api/product-images/product/${product.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const imageData = await response.json();
+          if (imageData.success && imageData.data?.length > 0) {
+            // Pegar primeira imagem (position 1)
+            const firstImage = imageData.data.find((img: any) => img.position === 1) || imageData.data[0];
+            return { productId: product.id, imageUrl: firstImage.url };
+          }
+        }
+        return { productId: product.id, imageUrl: null };
+      } catch (error) {
+        console.error(`Erro ao buscar imagem do produto ${product.id}:`, error);
+        return { productId: product.id, imageUrl: null };
+      }
+    });
+
+    const results = await Promise.all(imagePromises);
+    const imagesMap: Record<string, string> = {};
+    results.forEach(result => {
+      if (result.imageUrl) {
+        imagesMap[result.productId] = result.imageUrl;
+      }
+    });
+    
+    setProductImages(imagesMap);
   };
 
   // Load data on component mount and when dependencies change
@@ -292,7 +339,7 @@ export default function ImportedProductsIndex() {
         </CardContent>
       </Card>
 
-      {/* Products Table */}
+      {/* Products Table - Simplified */}
       <Card>
         <CardHeader>
           <CardTitle>Lista de Produtos</CardTitle>
@@ -319,13 +366,11 @@ export default function ImportedProductsIndex() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-16">Foto</TableHead>
                     <TableHead>Produto</TableHead>
                     <TableHead>Código</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Fornecedor</TableHead>
-                    <TableHead>Embalagens</TableHead>
-                    <TableHead>MOQ</TableHead>
-                    <TableHead>Lead Time</TableHead>
+                    <TableHead>Categoria</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -333,15 +378,29 @@ export default function ImportedProductsIndex() {
                   {products.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell>
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                          {productImages[product.id] ? (
+                            <img 
+                              src={productImages[product.id]} 
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Se a imagem falhar, mostrar ícone
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.parentElement!.innerHTML = '<svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>';
+                              }}
+                            />
+                          ) : (
+                            <Package className="h-6 w-6 text-gray-400" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <div>
                           <p className="font-medium">{product.name}</p>
                           {product.brand && (
                             <p className="text-sm text-gray-600">{product.brand}</p>
-                          )}
-                          {product.category && (
-                            <Badge variant="outline" className="text-xs mt-1">
-                              {product.category}
-                            </Badge>
                           )}
                         </div>
                       </TableCell>
@@ -356,40 +415,10 @@ export default function ImportedProductsIndex() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {product.supplierName ? (
-                          <div>
-                            <p className="font-medium">{product.supplierName}</p>
-                            {product.supplierProductCode && (
-                              <p className="text-xs text-gray-600">
-                                Código: {product.supplierProductCode}
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">Não definido</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Package className="h-4 w-4 text-gray-400" />
-                          <span>{product.totalPackages}</span>
-                          {product.hasMultiplePackages && (
-                            <Badge variant="secondary" className="text-xs ml-1">
-                              Múltiplas
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {product.moq ? (
-                          <span>{product.moq} un</span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {product.leadTimeDays ? (
-                          <span>{product.leadTimeDays} dias</span>
+                        {product.category ? (
+                          <Badge variant="outline" className="text-xs">
+                            {product.category}
+                          </Badge>
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
@@ -397,12 +426,12 @@ export default function ImportedProductsIndex() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Link href={`/minha-area/importacoes/produtos/${product.id}`}>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" title="Visualizar">
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
                           <Link href={`/minha-area/importacoes/produtos/${product.id}/editar`}>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" title="Editar">
                               <Edit className="h-4 w-4" />
                             </Button>
                           </Link>
@@ -411,6 +440,7 @@ export default function ImportedProductsIndex() {
                             size="sm"
                             onClick={() => handleDelete(product.id, product.name)}
                             className="text-red-600 hover:text-red-700"
+                            title="Excluir"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
