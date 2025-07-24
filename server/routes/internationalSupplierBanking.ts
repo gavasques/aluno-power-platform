@@ -2,7 +2,19 @@ import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth";
 import { db } from "../db";
-import { suppliers, categories } from "@shared/schema";
+import { 
+  suppliers, 
+  categories, 
+  supplierFiles,
+  supplierBrands,
+  supplierReviews,
+  supplierContacts,
+  supplierConversations,
+  supplierProducts,
+  products,
+  importedProducts,
+  importedProductSuppliers
+} from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
 const router = Router();
@@ -184,14 +196,63 @@ router.delete("/:id", requireAuth, async (req, res) => {
       });
     }
 
-    // Delete the supplier
+    // Excluir registros relacionados primeiro (em ordem para evitar foreign key constraints)
+    
+    // 1. Excluir conversas relacionadas
+    await db
+      .delete(supplierConversations)
+      .where(and(eq(supplierConversations.supplierId, supplierId), eq(supplierConversations.userId, userId)));
+
+    // 2. Excluir contatos relacionados
+    await db
+      .delete(supplierContacts)
+      .where(and(eq(supplierContacts.supplierId, supplierId), eq(supplierContacts.userId, userId)));
+
+    // 3. Excluir arquivos relacionados
+    await db
+      .delete(supplierFiles)
+      .where(and(eq(supplierFiles.supplierId, supplierId), eq(supplierFiles.userId, userId)));
+
+    // 4. Excluir marcas relacionadas
+    await db
+      .delete(supplierBrands)
+      .where(and(eq(supplierBrands.supplierId, supplierId), eq(supplierBrands.userId, userId)));
+
+    // 5. Excluir reviews relacionadas
+    await db
+      .delete(supplierReviews)
+      .where(and(eq(supplierReviews.supplierId, supplierId), eq(supplierReviews.userId, userId)));
+
+    // 6. Excluir produtos relacionados
+    await db
+      .delete(supplierProducts)
+      .where(and(eq(supplierProducts.supplierId, supplierId), eq(supplierProducts.userId, userId)));
+
+    // 7. Atualizar produtos que referenciam este fornecedor (definir como null)
+    await db
+      .update(products)
+      .set({ supplierId: null })
+      .where(and(eq(products.supplierId, supplierId), eq(products.userId, userId)));
+
+    // 8. Excluir relações de produtos importados
+    await db
+      .delete(importedProductSuppliers)
+      .where(eq(importedProductSuppliers.supplierId, supplierId));
+
+    // 9. Atualizar produtos importados que referenciam este fornecedor
+    await db
+      .update(importedProducts)
+      .set({ supplierId: null })
+      .where(and(eq(importedProducts.supplierId, supplierId), eq(importedProducts.userId, userId)));
+
+    // 10. Finalmente, excluir o fornecedor
     await db
       .delete(suppliers)
       .where(and(eq(suppliers.id, supplierId), eq(suppliers.userId, userId)));
 
     res.json({
       success: true,
-      message: `Fornecedor "${existingSupplier.tradeName}" excluído com sucesso`,
+      message: `Fornecedor "${existingSupplier.tradeName}" e todos os dados relacionados foram excluídos com sucesso`,
     });
   } catch (error) {
     console.error("Error deleting supplier:", error);
