@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth";
 import { db } from "../db";
-import { suppliers } from "@shared/schema";
+import { suppliers, categories } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
 const router = Router();
@@ -17,10 +17,24 @@ router.get("/", requireAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
 
-    // Get all suppliers for this user
+    // Get all suppliers for this user with category data
     const userSuppliers = await db
-      .select()
+      .select({
+        id: suppliers.id,
+        tradeName: suppliers.tradeName,
+        corporateName: suppliers.corporateName,
+        country: suppliers.country,
+        status: suppliers.status,
+        averageRating: suppliers.averageRating,
+        createdAt: suppliers.createdAt,
+        updatedAt: suppliers.updatedAt,
+        category: {
+          id: categories.id,
+          name: categories.name
+        }
+      })
       .from(suppliers)
+      .leftJoin(categories, eq(suppliers.categoryId, categories.id))
       .where(eq(suppliers.userId, userId));
 
     res.json({

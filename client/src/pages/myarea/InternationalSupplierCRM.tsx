@@ -69,16 +69,16 @@ const useInternationalSuppliers = () => {
         // Transformar dados do banco para o formato esperado
         const formattedSuppliers = (data.data || []).map((supplier: any) => ({
           id: supplier.id,
-          name: supplier.name || 'Nome não informado',
-          country: supplier.country || 'País não informado',
-          category: supplier.category || 'Categoria não informada',
-          status: supplier.isActive ? 'active' : 'inactive',
-          lastContact: supplier.updatedAt ? new Date(supplier.updatedAt).toLocaleDateString('pt-BR') : '-',
-          totalOrders: 0, // Campo a ser implementado posteriormente
-          rating: supplier.rating || 0,
-          contactsCount: 0, // Campo a ser implementado posteriormente
-          contractsCount: 0, // Campo a ser implementado posteriormente
-          productsCount: supplier.totalProducts || 0
+          name: supplier.tradeName || supplier.corporateName || 'Nome não informado',
+          country: supplier.country || 'Brasil',
+          category: supplier.category?.name || 'Categoria não informada',
+          status: (supplier.status === 'ativo') ? 'active' : 'inactive',
+          lastContact: supplier.updatedAt ? new Date(supplier.updatedAt).toLocaleDateString('pt-BR') : 'Invalid Date',
+          totalOrders: 0,
+          rating: parseFloat(supplier.averageRating) || 0,
+          contactsCount: 0,
+          contractsCount: 0,
+          productsCount: 0
         }));
 
         setSuppliers(formattedSuppliers);
