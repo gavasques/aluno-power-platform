@@ -521,12 +521,12 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
                   <div>
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <h5 className="font-semibold text-lg">
-                          <Badge variant="secondary" className="mr-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="secondary">
                             Embalagem {pkg.packageNumber}
                           </Badge>
-                          {pkg.packageType}
-                        </h5>
+                          <h5 className="font-semibold text-lg">{pkg.packageType}</h5>
+                        </div>
                         <p className="text-sm text-gray-600">{pkg.contentsDescription}</p>
                         {pkg.packageEan && (
                           <p className="text-sm text-blue-600">EAN: {pkg.packageEan}</p>

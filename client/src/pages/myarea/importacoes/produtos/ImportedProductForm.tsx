@@ -97,10 +97,19 @@ export default function ImportedProductForm() {
       material: '',
       technicalSpecifications: '',
       ncmCode: '',
-
       hsCode: '',
-      ipiPercentage: undefined,
+      ipiPercentage: 0,
+      productEan: '',
+      productUpc: '',
+      internalBarcode: '',
       customsDescription: '',
+      supplierId: 0,
+      supplierProductCode: '',
+      supplierProductName: '',
+      supplierDescription: '',
+      moq: 0,
+      leadTimeDays: 0,
+      notes: '',
     },
   });
 
