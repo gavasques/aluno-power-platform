@@ -201,32 +201,34 @@ router.delete("/:id", requireAuth, async (req, res) => {
     
     console.log(`🗑️ Iniciando exclusão em cascata do fornecedor ID: ${supplierId}`);
     
-    // 1. Excluir conversas relacionadas
-    await db.execute(`DELETE FROM supplier_conversations WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    // Remover todas as dependências do fornecedor (sem filtrar por user_id para garantir limpeza completa)
+    
+    // 1. Excluir conversas relacionadas  
+    await db.execute(`DELETE FROM supplier_conversations WHERE supplier_id = ${supplierId}`);
     console.log(`✅ Conversas excluídas`);
 
     // 2. Excluir contatos relacionados
-    await db.execute(`DELETE FROM supplier_contacts WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    await db.execute(`DELETE FROM supplier_contacts WHERE supplier_id = ${supplierId}`);
     console.log(`✅ Contatos excluídos`);
 
     // 3. Excluir arquivos relacionados
-    await db.execute(`DELETE FROM supplier_files WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    await db.execute(`DELETE FROM supplier_files WHERE supplier_id = ${supplierId}`);
     console.log(`✅ Arquivos excluídos`);
 
     // 4. Excluir marcas relacionadas
-    await db.execute(`DELETE FROM supplier_brands WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    await db.execute(`DELETE FROM supplier_brands WHERE supplier_id = ${supplierId}`);
     console.log(`✅ Marcas excluídas`);
 
     // 5. Excluir reviews relacionadas
-    await db.execute(`DELETE FROM supplier_reviews WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    await db.execute(`DELETE FROM supplier_reviews WHERE supplier_id = ${supplierId}`);
     console.log(`✅ Reviews excluídas`);
 
     // 6. Excluir produtos relacionados
-    await db.execute(`DELETE FROM supplier_products WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    await db.execute(`DELETE FROM supplier_products WHERE supplier_id = ${supplierId}`);
     console.log(`✅ Produtos do fornecedor excluídos`);
 
     // 7. Atualizar produtos que referenciam este fornecedor (definir como null)
-    await db.execute(`UPDATE products SET supplier_id = NULL WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    await db.execute(`UPDATE products SET supplier_id = NULL WHERE supplier_id = ${supplierId}`);
     console.log(`✅ Produtos atualizados`);
 
     // 8. Excluir relações de produtos importados
@@ -234,7 +236,7 @@ router.delete("/:id", requireAuth, async (req, res) => {
     console.log(`✅ Relações de produtos importados excluídas`);
 
     // 9. Atualizar produtos importados que referenciam este fornecedor
-    await db.execute(`UPDATE imported_products SET supplier_id = NULL WHERE supplier_id = ${supplierId} AND user_id = ${userId}`);
+    await db.execute(`UPDATE imported_products SET supplier_id = NULL WHERE supplier_id = ${supplierId}`);
     console.log(`✅ Produtos importados atualizados`);
 
     // 10. Finalmente, excluir o fornecedor
