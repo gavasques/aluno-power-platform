@@ -89,45 +89,81 @@ router.post('/', requireAuth, upload.single('image'), async (req, res) => {
       });
     }
 
-    // Validar dimensões da imagem
-    const metadata = await sharp(file.path).metadata();
+    // Processar e comprimir a imagem
+    const originalPath = file.path;
+    const originalSize = file.size;
+    const compressedFilename = `compressed-${file.filename}`;
+    const compressedPath = path.join(path.dirname(originalPath), compressedFilename);
+
+    // Obter metadados da imagem original
+    const metadata = await sharp(originalPath).metadata();
     
     if (!metadata.width || !metadata.height) {
-      fs.unlinkSync(file.path); // Remover arquivo
+      fs.unlinkSync(originalPath);
       return res.status(400).json({
         success: false,
         message: 'Não foi possível obter as dimensões da imagem'
       });
     }
 
+    // Criar pipeline de processamento
+    let processedImage = sharp(originalPath);
+
+    // Redimensionar se exceder dimensões máximas
     if (metadata.width > 2000 || metadata.height > 3000) {
-      fs.unlinkSync(file.path); // Remover arquivo
-      return res.status(400).json({
-        success: false,
-        message: `Dimensões muito grandes. Máximo 2000x3000px. Recebido: ${metadata.width}x${metadata.height}px`
+      processedImage = processedImage.resize(2000, 3000, {
+        fit: 'inside',
+        withoutEnlargement: true
       });
     }
 
-    // Gerar URL para a imagem
-    const imageUrl = `/uploads/product-images/${file.filename}`;
+    // Aplicar compressão baseada no formato
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') {
+      processedImage = processedImage.jpeg({ quality: 80 });
+    } else if (file.mimetype === 'image/png') {
+      processedImage = processedImage.png({ quality: 80 });
+    } else if (file.mimetype === 'image/webp') {
+      processedImage = processedImage.webp({ quality: 80 });
+    }
+
+    // Salvar imagem comprimida
+    await processedImage.toFile(compressedPath);
+
+    // Obter metadados da imagem comprimida
+    const compressedMetadata = await sharp(compressedPath).metadata();
+    const compressedStats = await fs.promises.stat(compressedPath);
+
+    // Remover arquivo original
+    fs.unlinkSync(originalPath);
+
+    // Gerar URL para a imagem comprimida
+    const imageUrl = `/uploads/product-images/${compressedFilename}`;
+
+    // Calcular taxa de compressão
+    const compressionRatio = Math.round((1 - compressedStats.size / originalSize) * 100);
 
     // Inserir no banco de dados
     const newImage = await db.insert(productImages).values({
       productId,
-      filename: file.filename,
+      filename: compressedFilename,
       originalName: file.originalname,
       url: imageUrl,
       position: parseInt(position) || existingImages.length + 1,
-      size: file.size,
+      size: compressedStats.size,
       mimeType: file.mimetype,
-      width: metadata.width,
-      height: metadata.height,
+      width: compressedMetadata.width || 0,
+      height: compressedMetadata.height || 0,
     }).returning();
 
     res.json({
       success: true,
       data: newImage[0],
-      message: 'Imagem enviada com sucesso'
+      message: 'Imagem comprimida e enviada com sucesso',
+      compressionInfo: {
+        originalSize,
+        compressedSize: compressedStats.size,
+        compressionRatio
+      }
     });
 
   } catch (error) {
@@ -346,6 +382,60 @@ router.delete('/:imageId', requireAuth, async (req, res) => {
 
   } catch (error) {
     console.error('Erro ao excluir imagem:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno do servidor'
+    });
+  }
+});
+
+// Download de imagem
+router.get('/:imageId/download', requireAuth, async (req, res) => {
+  try {
+    const { imageId } = req.params;
+
+    // Buscar a imagem e verificar propriedade
+    const image = await db.query.productImages.findFirst({
+      where: eq(productImages.id, imageId),
+      with: {
+        product: true
+      }
+    });
+
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        message: 'Imagem não encontrada'
+      });
+    }
+
+    if (image.product.userId !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Acesso negado'
+      });
+    }
+
+    // Caminho do arquivo
+    const filePath = path.join(process.cwd(), 'uploads', 'product-images', image.filename);
+    
+    // Verificar se o arquivo existe
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Arquivo não encontrado no servidor'
+      });
+    }
+
+    // Configurar headers para download
+    res.setHeader('Content-Disposition', `attachment; filename="${image.originalName}"`);
+    res.setHeader('Content-Type', image.mimeType);
+    
+    // Enviar arquivo
+    res.sendFile(filePath);
+
+  } catch (error) {
+    console.error('Erro no download da imagem:', error);
     res.status(500).json({
       success: false,
       message: 'Erro interno do servidor'

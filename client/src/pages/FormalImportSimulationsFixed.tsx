@@ -58,6 +58,7 @@ export default function FormalImportSimulationsFixed() {
     fetchSimulations();
   }, []);
 
+  console.log('FIXED - Debug info:', {
     isLoading,
     error,
     simulationsCount: simulations.length,

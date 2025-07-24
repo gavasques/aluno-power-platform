@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Upload, X, ChevronUp, ChevronDown, Image as ImageIcon } from 'lucide-react';
+import { Plus, Upload, X, ChevronUp, ChevronDown, Image as ImageIcon, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -197,6 +197,47 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
     }
   };
 
+  // Download de imagem
+  const handleDownload = async (imageId: string, imageName: string) => {
+    if (!user?.authToken) return;
+
+    try {
+      const response = await fetch(`/api/product-images/${imageId}/download`, {
+        headers: {
+          'Authorization': `Bearer ${user.authToken}`,
+        },
+      });
+
+      if (response.ok) {
+        // Criar blob e fazer download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = imageName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        toast({
+          title: "Sucesso",
+          description: "Download iniciado",
+        });
+      } else {
+        const data = await response.json();
+        throw new Error(data.message || 'Erro no download');
+      }
+    } catch (error: any) {
+      console.error('Erro no download:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao fazer download",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Trigger file input
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -269,6 +310,23 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
         </div>
       </div>
 
+      {/* Compression Warning */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <Upload className="w-5 h-5 text-amber-600 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-medium text-amber-900">⚠️ Informações sobre compressão:</p>
+            <ul className="mt-1 text-amber-700 space-y-1">
+              <li>• As imagens são automaticamente comprimidas para economizar armazenamento</li>
+              <li>• A qualidade pode ser reduzida em até 80% do original</li>
+              <li>• Não salvamos as fotos originais, apenas as versões comprimidas</li>
+              <li>• Essas fotos são destinadas apenas para visualização simples</li>
+              <li>• Use o botão de download para obter a versão comprimida</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       {/* Upload Status */}
       {uploadingImage && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -326,6 +384,7 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
                       onClick={() => handleMove(image.id, 'up')}
                       disabled={index === 0}
                       className="p-1 h-7 w-7"
+                      title="Mover para cima"
                     >
                       <ChevronUp className="w-3 h-3" />
                     </Button>
@@ -338,8 +397,21 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
                       onClick={() => handleMove(image.id, 'down')}
                       disabled={index === images.length - 1}
                       className="p-1 h-7 w-7"
+                      title="Mover para baixo"
                     >
                       <ChevronDown className="w-3 h-3" />
+                    </Button>
+
+                    {/* Download */}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDownload(image.id, image.originalName)}
+                      className="p-1 h-7 w-7"
+                      title="Fazer download"
+                    >
+                      <Download className="w-3 h-3" />
                     </Button>
                   </div>
 
@@ -350,6 +422,7 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
                     variant="destructive"
                     onClick={() => handleDelete(image.id, image.originalName)}
                     className="p-1 h-7 w-7"
+                    title="Excluir imagem"
                   >
                     <X className="w-3 h-3" />
                   </Button>

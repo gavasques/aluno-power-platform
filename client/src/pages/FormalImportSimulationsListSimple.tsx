@@ -9,7 +9,7 @@ export default function FormalImportSimulationsListSimple() {
   const [, setLocation] = useLocation();
 
   // Direct fetch with React Query - simplified approach
-  const { data: simulations = [], isLoading, error, isError } = useQuery({
+  const { data = [], isLoading, error, isError } = useQuery({
     queryKey: ['/api/simulators/formal-import'],
     staleTime: 0,
     gcTime: 0,
@@ -18,8 +18,11 @@ export default function FormalImportSimulationsListSimple() {
     enabled: true,
   });
 
+  const simulations = Array.isArray(data) ? data : [];
+
   // Debug logging
   React.useEffect(() => {
+    console.log('SIMPLE - Debug info:', {
       isLoading, 
       isError, 
       dataLength: simulations?.length,
@@ -47,6 +50,7 @@ export default function FormalImportSimulationsListSimple() {
     }
   };
 
+  console.log('SIMPLE - Token debug:', {
     isLoading, 
     isError,
     error: error?.message || null, 

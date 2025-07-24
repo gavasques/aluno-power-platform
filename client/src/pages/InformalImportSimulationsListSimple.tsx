@@ -25,13 +25,14 @@ const InformalImportSimulationsListSimple: React.FC = () => {
   });
 
   // Extract simulations data
-  const simulations = data?.data || [];
+  const simulations = Array.isArray(data?.data) ? data.data : [];
   const simulationCount = simulations.length;
 
   // Check if we actually have finished loading
   const actuallyLoading = isLoading || isFetching;
   const hasFinishedLoading = !actuallyLoading && data;
 
+  console.log('INFORMAL - Debug info:', {
     data, 
     isLoading, 
     isFetching,
@@ -108,7 +109,7 @@ const InformalImportSimulationsListSimple: React.FC = () => {
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-6 text-center">
               <h3 className="text-lg font-semibold text-red-800 mb-2">Erro ao carregar</h3>
-              <p className="text-red-600">{String(error)}</p>
+              <p className="text-red-600">{error?.message || 'Erro desconhecido'}</p>
             </CardContent>
           </Card>
         )}
@@ -137,10 +138,10 @@ const InformalImportSimulationsListSimple: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <h3 className="text-lg font-semibold text-green-800">
-                        {simulation.nomeSimulacao || `Simulação ${simulation.id}`}
+                        {simulation?.nomeSimulacao || `Simulação ${simulation?.id || index + 1}`}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        <strong>Fornecedor:</strong> {simulation.nomeFornecedor || 'Não informado'}
+                        <strong>Fornecedor:</strong> {simulation?.nomeFornecedor || 'Não informado'}
                       </p>
                       <p className="text-sm text-gray-500">
                         <strong>Criado:</strong> {formatDate(simulation.dataCreated)}
