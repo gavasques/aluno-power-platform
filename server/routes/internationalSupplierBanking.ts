@@ -154,4 +154,52 @@ router.put("/:id/banking", requireAuth, async (req, res) => {
   }
 });
 
+// DELETE /api/international-suppliers/:id - Delete a supplier
+router.delete("/:id", requireAuth, async (req, res) => {
+  try {
+    const supplierId = parseInt(req.params.id);
+    const userId = req.user!.id;
+
+    if (isNaN(supplierId)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID do fornecedor inválido",
+      });
+    }
+
+    // Check if supplier exists and belongs to user
+    const [existingSupplier] = await db
+      .select({ 
+        id: suppliers.id,
+        tradeName: suppliers.tradeName 
+      })
+      .from(suppliers)
+      .where(and(eq(suppliers.id, supplierId), eq(suppliers.userId, userId)))
+      .limit(1);
+
+    if (!existingSupplier) {
+      return res.status(404).json({
+        success: false,
+        message: "Fornecedor não encontrado",
+      });
+    }
+
+    // Delete the supplier
+    await db
+      .delete(suppliers)
+      .where(and(eq(suppliers.id, supplierId), eq(suppliers.userId, userId)));
+
+    res.json({
+      success: true,
+      message: `Fornecedor "${existingSupplier.tradeName}" excluído com sucesso`,
+    });
+  } catch (error) {
+    console.error("Error deleting supplier:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+    });
+  }
+});
+
 export default router;

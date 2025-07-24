@@ -21,8 +21,19 @@ import {
   ArrowLeft,
   Filter,
   SortAsc,
-  Globe
+  Globe,
+  Trash2,
+  AlertTriangle
 } from "lucide-react";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription,
+  DialogFooter,
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface InternationalSupplier {
   id: number;
@@ -94,7 +105,36 @@ const useInternationalSuppliers = () => {
     fetchSuppliers();
   }, [token]);
 
-  return { suppliers, loading, error, refetch: () => setLoading(true) };
+  const deleteSupplier = async (supplierId: number) => {
+    if (!token) return { success: false, message: 'Token não encontrado' };
+
+    try {
+      const response = await fetch(`/api/international-suppliers/${supplierId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Recarregar lista após exclusão
+        setSuppliers(prevSuppliers => 
+          prevSuppliers.filter(supplier => supplier.id !== supplierId)
+        );
+        return { success: true, message: data.message || 'Fornecedor excluído com sucesso' };
+      } else {
+        return { success: false, message: data.message || 'Erro ao excluir fornecedor' };
+      }
+    } catch (err) {
+      console.error('Erro ao excluir fornecedor:', err);
+      return { success: false, message: 'Erro de conexão ao excluir fornecedor' };
+    }
+  };
+
+  return { suppliers, loading, error, refetch: () => setLoading(true), deleteSupplier };
 };
 
 /**
@@ -117,9 +157,53 @@ const useInternationalSuppliers = () => {
 export default function InternationalSupplierCRM() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [supplierToDelete, setSupplierToDelete] = useState<InternationalSupplier | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const { toast } = useToast();
 
   // Usar dados reais do banco
-  const { suppliers: allSuppliers, loading, error } = useInternationalSuppliers();
+  const { suppliers: allSuppliers, loading, error, deleteSupplier } = useInternationalSuppliers();
+
+  // Função para confirmar exclusão
+  const handleDeleteClick = (supplier: InternationalSupplier) => {
+    setSupplierToDelete(supplier);
+    setShowDeleteModal(true);
+  };
+
+  // Função para confirmar e executar exclusão
+  const handleConfirmDelete = async () => {
+    if (!supplierToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await deleteSupplier(supplierToDelete.id);
+      
+      if (result.success) {
+        toast({
+          title: "Fornecedor excluído",
+          description: result.message,
+        });
+        setShowDeleteModal(false);
+        setSupplierToDelete(null);
+      } else {
+        toast({
+          title: "Erro ao excluir",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao excluir fornecedor",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Filtrar fornecedores baseado na busca e status
   const suppliers = allSuppliers.filter(supplier => {
@@ -343,6 +427,14 @@ export default function InternationalSupplierCRM() {
                           <Button size="sm" variant="outline">
                             <MessageSquare className="w-4 h-4" />
                           </Button>
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => handleDeleteClick(supplier)}
+                            type="button"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -369,6 +461,66 @@ export default function InternationalSupplierCRM() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Confirmação de Exclusão */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              Confirmar Exclusão
+            </DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir o fornecedor{" "}
+              <span className="font-semibold text-gray-900">
+                {supplierToDelete?.name}
+              </span>
+              ?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5" />
+              <div>
+                <p className="text-sm text-red-800 font-medium">Ação irreversível</p>
+                <p className="text-sm text-red-700 mt-1">
+                  Esta ação não pode ser desfeita. Todos os dados do fornecedor serão permanentemente excluídos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteModal(false)}
+              disabled={isDeleting}
+              type="button"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              type="button"
+            >
+              {isDeleting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Excluindo...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Excluir Fornecedor
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
