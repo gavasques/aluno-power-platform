@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useParams } from 'wouter';
-import { ArrowLeft, Save, Package, Building2, FileText, Plus, X } from 'lucide-react';
+import { ArrowLeft, Save, Package, Building2, FileText, Plus, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'wouter';
 import ImportedProductSuppliersTab from '@/components/imported-products/ImportedProductSuppliersTab';
 import { PackageManager } from '@/components/imported-products/PackageManager';
+import { ProductImageManager } from '@/components/imported-products/ProductImageManager';
 
 // Validation schema
 const importedProductSchema = z.object({
@@ -836,6 +837,21 @@ export default function ImportedProductForm() {
             </CardHeader>
             <CardContent>
               <PackageManager
+                productId={productId || ''}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Product Images */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Fotos do Produto
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProductImageManager
                 productId={productId || ''}
               />
             </CardContent>

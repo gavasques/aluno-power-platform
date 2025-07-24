@@ -3604,6 +3604,25 @@ export const productNotes = pgTable("product_notes", {
   createdIdx: index("product_notes_created_idx").on(table.createdAt),
 }));
 
+// Product Images - System for managing product photos with ordering
+export const productImages = pgTable("product_images", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  productId: text("product_id").references(() => importedProducts.id).notNull(),
+  filename: text("filename").notNull(),
+  originalName: text("original_name").notNull(),
+  url: text("url").notNull(),
+  position: integer("position").notNull().default(1),
+  size: integer("size").notNull(), // File size in bytes
+  mimeType: text("mime_type").notNull(),
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  productIdx: index("product_images_product_idx").on(table.productId),
+  positionIdx: index("product_images_position_idx").on(table.productId, table.position),
+  createdIdx: index("product_images_created_idx").on(table.createdAt),
+}));
+
 // Relations for Imported Products System
 export const importedProductsRelations = relations(importedProducts, ({ one, many }) => ({
   user: one(users, {
@@ -3617,6 +3636,7 @@ export const importedProductsRelations = relations(importedProducts, ({ one, man
   packages: many(productPackages),
   files: many(productFiles),
   notes: many(productNotes),
+  images: many(productImages),
   productSuppliers: many(importedProductSuppliers),
 }));
 
@@ -3637,6 +3657,13 @@ export const productFilesRelations = relations(productFiles, ({ one }) => ({
 export const productNotesRelations = relations(productNotes, ({ one }) => ({
   product: one(importedProducts, {
     fields: [productNotes.productId],
+    references: [importedProducts.id],
+  }),
+}));
+
+export const productImagesRelations = relations(productImages, ({ one }) => ({
+  product: one(importedProducts, {
+    fields: [productImages.productId],
     references: [importedProducts.id],
   }),
 }));
@@ -3673,6 +3700,13 @@ export const insertProductNoteSchema = createInsertSchema(productNotes).omit({
 });
 export type InsertProductNote = z.infer<typeof insertProductNoteSchema>;
 export type ProductNote = typeof productNotes.$inferSelect;
+
+export const insertProductImageSchema = createInsertSchema(productImages).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertProductImage = z.infer<typeof insertProductImageSchema>;
+export type ProductImage = typeof productImages.$inferSelect;
 
 // Imported Product Suppliers - Sistema para múltiplos fornecedores por produto importado
 export const importedProductSuppliers = pgTable("imported_product_suppliers", {
