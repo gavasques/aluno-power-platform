@@ -48,13 +48,13 @@ export default function InternationalSupplierForm() {
     categoryId: undefined
   });
 
-  // Carregar categorias
+  // Carregar departamentos (categorias)
   useEffect(() => {
     if (!token) return;
 
-    const fetchCategories = async () => {
+    const fetchDepartments = async () => {
       try {
-        const response = await fetch('/api/supplier-categories', {
+        const response = await fetch('/api/departments', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -63,14 +63,14 @@ export default function InternationalSupplierForm() {
 
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.data || []);
+          setCategories(data || []);
         }
       } catch (error) {
-        console.error('Erro ao carregar categorias:', error);
+        console.error('Erro ao carregar departamentos:', error);
       }
     };
 
-    fetchCategories();
+    fetchDepartments();
   }, [token]);
 
   const handleInputChange = (field: keyof SupplierFormData, value: string | number) => {
