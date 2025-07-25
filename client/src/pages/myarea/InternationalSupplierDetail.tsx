@@ -1607,7 +1607,7 @@ const EditSupplierDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Fornecedor Internacional</DialogTitle>
           <DialogDescription>
@@ -1615,147 +1615,162 @@ const EditSupplierDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="tradeName">Exporter Name</Label>
+              <Label htmlFor="tradeName" className="text-sm font-medium">Exporter Name</Label>
               <Input
                 id="tradeName"
                 value={formData.tradeName}
                 onChange={(e) => handleInputChange('tradeName', e.target.value)}
                 placeholder="Nome do exportador"
+                className="h-11 mt-2"
               />
             </div>
             <div>
-              <Label htmlFor="corporateName">Razão Social</Label>
+              <Label htmlFor="corporateName" className="text-sm font-medium">Razão Social</Label>
               <Input
                 id="corporateName"
                 value={formData.corporateName}
                 onChange={(e) => handleInputChange('corporateName', e.target.value)}
                 placeholder="Razão social da empresa"
+                className="h-11 mt-2"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="country">País</Label>
+              <Label htmlFor="country" className="text-sm font-medium">País</Label>
               <Input
                 id="country"
                 value={formData.country}
                 onChange={(e) => handleInputChange('country', e.target.value)}
                 placeholder="País"
+                className="h-11 mt-2"
               />
             </div>
             <div>
-              <Label htmlFor="state">Estado (Província/Região Autônoma/Município Direto)</Label>
+              <Label htmlFor="state" className="text-sm font-medium">Estado (Província/Região Autônoma/Município Direto)</Label>
               <Input
                 id="state"
                 value={formData.state}
                 onChange={(e) => handleInputChange('state', e.target.value)}
                 placeholder="Estado/Província"
+                className="h-11 mt-2"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="city">Cidade (Cidade/Prefeitura)</Label>
+              <Label htmlFor="city" className="text-sm font-medium">Cidade (Cidade/Prefeitura)</Label>
               <Input
                 id="city"
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
                 placeholder="Cidade/Prefeitura"
+                className="h-11 mt-2"
               />
             </div>
             <div>
-              <Label htmlFor="neighborhood">Bairro (Distrito/Contado)</Label>
+              <Label htmlFor="neighborhood" className="text-sm font-medium">Bairro (Distrito/Contado)</Label>
               <Input
                 id="neighborhood"
                 type="text"
                 value={formData.neighborhood}
                 onChange={(e) => handleInputChange('neighborhood', e.target.value)}
                 placeholder="Distrito/Contado"
+                className="h-11 mt-2"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="address">Endereço</Label>
+            <Label htmlFor="address" className="text-sm font-medium">Endereço</Label>
             <Input
               id="address"
               value={formData.address}
               onChange={(e) => handleInputChange('address', e.target.value)}
               placeholder="Endereço completo"
+              className="h-11 mt-2"
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="phone">Telefone</Label>
+              <Label htmlFor="phone" className="text-sm font-medium">Telefone</Label>
               <Input
                 id="phone"
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 placeholder="Telefone de contato"
+                className="h-11 mt-2"
               />
             </div>
             <div>
-              <Label htmlFor="fax">FAX</Label>
-              <Input
-                id="fax"
-                value={formData.fax}
-                onChange={(e) => handleInputChange('fax', e.target.value)}
-                placeholder="Número do FAX"
-              />
-            </div>
-            <div>
-              <Label htmlFor="mobile">MOBILE</Label>
+              <Label htmlFor="mobile" className="text-sm font-medium">MOBILE</Label>
               <Input
                 id="mobile"
                 value={formData.mobile}
                 onChange={(e) => handleInputChange('mobile', e.target.value)}
                 placeholder="Telefone móvel"
+                className="h-11 mt-2"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="fax" className="text-sm font-medium">FAX</Label>
+              <Input
+                id="fax"
+                value={formData.fax}
+                onChange={(e) => handleInputChange('fax', e.target.value)}
+                placeholder="Número do FAX"
+                className="h-11 mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                placeholder="email@empresa.com"
+                className="h-11 mt-2"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              placeholder="email@empresa.com"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="website">Website</Label>
+            <Label htmlFor="website" className="text-sm font-medium">Website</Label>
             <Input
               id="website"
               value={formData.website}
               onChange={(e) => handleInputChange('website', e.target.value)}
               placeholder="www.empresa.com"
+              className="h-11 mt-2"
             />
           </div>
 
           <div>
-            <Label htmlFor="description">Descrição</Label>
+            <Label htmlFor="description" className="text-sm font-medium">Descrição</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Descrição da empresa e produtos"
-              rows={3}
+              rows={4}
+              className="mt-2 min-h-[100px]"
             />
           </div>
 
           {/* Categoria/Departamento e Tipo de Fornecedor */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <Label htmlFor="categoryId">Categoria</Label>
+              <Label htmlFor="categoryId" className="text-sm font-medium">Categoria</Label>
               <Select
                 value={formData.categoryId?.toString() || ''}
                 onValueChange={(value) => {
@@ -1763,7 +1778,7 @@ const EditSupplierDialog = ({
                   handleInputChange('categoryId', numValue || '');
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-11 mt-2">
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1777,12 +1792,12 @@ const EditSupplierDialog = ({
             </div>
 
             <div>
-              <Label htmlFor="supplierType">Tipo</Label>
+              <Label htmlFor="supplierType" className="text-sm font-medium">Tipo</Label>
               <Select
                 value={formData.supplierType}
                 onValueChange={(value) => handleInputChange('supplierType', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-11 mt-2">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1797,22 +1812,22 @@ const EditSupplierDialog = ({
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value) => handleInputChange('status', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ativo">Ativo</SelectItem>
-                <SelectItem value="inativo">Inativo</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <Label htmlFor="status" className="text-sm font-medium">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleInputChange('status', value)}
+              >
+                <SelectTrigger className="h-11 mt-2">
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ativo">Ativo</SelectItem>
+                  <SelectItem value="inativo">Inativo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <DialogFooter>
