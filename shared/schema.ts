@@ -133,6 +133,8 @@ export const suppliers = pgTable("suppliers", {
   supportEmail: text("support_email"),
   phone0800Sales: text("phone_0800_sales"),
   phone0800Support: text("phone_0800_support"),
+  fax: text("fax"),
+  mobile: text("mobile"),
   
   // Additional supplier information
   cnpj: text("cnpj"),

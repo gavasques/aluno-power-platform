@@ -1525,10 +1525,13 @@ const EditSupplierDialog = ({
     tradeName: supplier.name || '',
     corporateName: supplier.name || '',
     country: supplier.country || '',
+    state: (supplier as any).state || '',
     city: supplier.city || '',
     neighborhood: '',
     address: '',
     phone: supplier.phone || '',
+    fax: (supplier as any).fax || '',
+    mobile: (supplier as any).mobile || '',
     email: supplier.email || '',
     website: supplier.website || '',
     description: supplier.description || '',
@@ -1548,10 +1551,13 @@ const EditSupplierDialog = ({
         tradeName: supplier.name || '',
         corporateName: supplier.name || '',
         country: supplier.country || '',
+        state: (supplier as any).state || '',
         city: supplier.city || '',
         neighborhood: '',
         address: '',
         phone: supplier.phone || '',
+        fax: (supplier as any).fax || '',
+        mobile: (supplier as any).mobile || '',
         email: supplier.email || '',
         website: supplier.website || '',
         description: supplier.description || '',
@@ -1612,12 +1618,12 @@ const EditSupplierDialog = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="tradeName">Nome Fantasia</Label>
+              <Label htmlFor="tradeName">Exporter Name</Label>
               <Input
                 id="tradeName"
                 value={formData.tradeName}
                 onChange={(e) => handleInputChange('tradeName', e.target.value)}
-                placeholder="Nome fantasia da empresa"
+                placeholder="Nome do exportador"
               />
             </div>
             <div>
@@ -1642,25 +1648,36 @@ const EditSupplierDialog = ({
               />
             </div>
             <div>
-              <Label htmlFor="city">Cidade</Label>
+              <Label htmlFor="state">Estado (Província/Região Autônoma/Município Direto)</Label>
               <Input
-                id="city"
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                placeholder="Cidade"
+                id="state"
+                value={formData.state}
+                onChange={(e) => handleInputChange('state', e.target.value)}
+                placeholder="Estado/Província"
               />
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="neighborhood">Bairro</Label>
-            <Input
-              id="neighborhood"
-              type="text"
-              value={formData.neighborhood}
-              onChange={(e) => handleInputChange('neighborhood', e.target.value)}
-              placeholder="Bairro/distrito do fornecedor"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="city">Cidade (Cidade/Prefeitura)</Label>
+              <Input
+                id="city"
+                value={formData.city}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+                placeholder="Cidade/Prefeitura"
+              />
+            </div>
+            <div>
+              <Label htmlFor="neighborhood">Bairro (Distrito/Contado)</Label>
+              <Input
+                id="neighborhood"
+                type="text"
+                value={formData.neighborhood}
+                onChange={(e) => handleInputChange('neighborhood', e.target.value)}
+                placeholder="Distrito/Contado"
+              />
+            </div>
           </div>
 
           <div>
@@ -1673,7 +1690,7 @@ const EditSupplierDialog = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="phone">Telefone</Label>
               <Input
@@ -1684,15 +1701,34 @@ const EditSupplierDialog = ({
               />
             </div>
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="fax">FAX</Label>
               <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="email@empresa.com"
+                id="fax"
+                value={formData.fax}
+                onChange={(e) => handleInputChange('fax', e.target.value)}
+                placeholder="Número do FAX"
               />
             </div>
+            <div>
+              <Label htmlFor="mobile">MOBILE</Label>
+              <Input
+                id="mobile"
+                value={formData.mobile}
+                onChange={(e) => handleInputChange('mobile', e.target.value)}
+                placeholder="Telefone móvel"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              placeholder="email@empresa.com"
+            />
           </div>
 
           <div>
