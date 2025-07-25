@@ -41,7 +41,6 @@ interface InternationalSupplier {
   country: string;
   category: string;
   status: 'active' | 'inactive' | 'pending';
-  lastContact: string;
   totalOrders: number;
   rating: number;
   contactsCount?: number;
@@ -84,7 +83,6 @@ const useInternationalSuppliers = () => {
           country: supplier.country || 'Brasil',
           category: supplier.category?.name || 'Categoria não informada',
           status: (supplier.status === 'ativo') ? 'active' : 'inactive',
-          lastContact: supplier.updatedAt ? new Date(supplier.updatedAt).toLocaleDateString('pt-BR') : 'Invalid Date',
           totalOrders: 0,
           rating: parseFloat(supplier.averageRating) || 0,
           contactsCount: 0,
@@ -408,7 +406,6 @@ export default function InternationalSupplierCRM() {
                     <th className="text-left p-4 font-medium text-gray-700">País</th>
                     <th className="text-left p-4 font-medium text-gray-700">Categoria</th>
                     <th className="text-left p-4 font-medium text-gray-700">Status</th>
-                    <th className="text-left p-4 font-medium text-gray-700">Último Contato</th>
                     <th className="text-left p-4 font-medium text-gray-700">Ações</th>
                   </tr>
                 </thead>
@@ -426,9 +423,6 @@ export default function InternationalSupplierCRM() {
                       <td className="p-4 text-gray-600">{supplier.country}</td>
                       <td className="p-4 text-gray-600">{supplier.category}</td>
                       <td className="p-4">{getStatusBadge(supplier.status)}</td>
-                      <td className="p-4 text-gray-600 text-sm">
-                        {new Date(supplier.lastContact).toLocaleDateString('pt-BR')}
-                      </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <Link href={`/minha-area/importacoes/fornecedores/${supplier.id}`}>
