@@ -68,16 +68,14 @@ router.post("/", requireAuth, async (req, res) => {
         country: supplierData.country,
         state: supplierData.state,
         city: supplierData.city,
-        postalCode: supplierData.postalCode,
+        cep: supplierData.postalCode,
         address: supplierData.address,
-        phone: supplierData.phone,
-        email: supplierData.email,
+        phone0800Sales: supplierData.phone,
+        commercialEmail: supplierData.email,
         website: supplierData.website,
         description: supplierData.description,
         status: supplierData.status,
         categoryId: supplierData.categoryId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       })
       .returning();
 
@@ -126,6 +124,68 @@ router.get("/", requireAuth, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching suppliers:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+    });
+  }
+});
+
+// GET /api/international-suppliers/:id - Get specific supplier by ID
+router.get("/:id", requireAuth, async (req, res) => {
+  try {
+    const supplierId = parseInt(req.params.id);
+    const userId = req.user!.id;
+
+    if (isNaN(supplierId)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID do fornecedor inválido",
+      });
+    }
+
+    // Get specific supplier with category data
+    const [supplier] = await db
+      .select({
+        id: suppliers.id,
+        tradeName: suppliers.tradeName,
+        corporateName: suppliers.corporateName,
+        country: suppliers.country,
+        state: suppliers.state,
+        city: suppliers.city,
+        postalCode: suppliers.cep,
+        address: suppliers.address,
+        phone: suppliers.phone0800Sales,
+        email: suppliers.commercialEmail,
+        website: suppliers.website,
+        description: suppliers.description,
+        status: suppliers.status,
+        averageRating: suppliers.averageRating,
+        createdAt: suppliers.createdAt,
+        updatedAt: suppliers.updatedAt,
+        category: {
+          id: categories.id,
+          name: categories.name
+        }
+      })
+      .from(suppliers)
+      .leftJoin(categories, eq(suppliers.categoryId, categories.id))
+      .where(and(eq(suppliers.id, supplierId), eq(suppliers.userId, userId)))
+      .limit(1);
+
+    if (!supplier) {
+      return res.status(404).json({
+        success: false,
+        message: "Fornecedor não encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: supplier,
+    });
+  } catch (error) {
+    console.error("Error fetching supplier:", error);
     res.status(500).json({
       success: false,
       message: "Erro interno do servidor",

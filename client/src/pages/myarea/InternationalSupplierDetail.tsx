@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "wouter";
+import { useAuth } from '@/hooks/useAuth';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -120,6 +121,7 @@ interface SupplierDocument {
 
 // Hook para carregar dados reais do fornecedor
 const useSupplierData = (supplierId: string) => {
+  const { token } = useAuth();
   const [supplier, setSupplier] = useState<Supplier | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -130,13 +132,57 @@ const useSupplierData = (supplierId: string) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!token || !supplierId) return;
+      
       try {
         setLoading(true);
         setError(null);
         
-        // Por enquanto, mostrar estado vazio em vez de dados falsos
-        // TODO: Implementar chamadas reais da API quando fornecedor internacional for criado
-        setSupplier(null);
+        // Buscar dados do fornecedor específico
+        const response = await fetch(`/api/international-suppliers/${supplierId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Fornecedor não encontrado');
+          } else {
+            setError('Erro ao carregar dados do fornecedor');
+          }
+          setSupplier(null);
+          return;
+        }
+
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          // Transformar dados da API para o formato esperado pelo componente
+          const supplierData = data.data;
+          setSupplier({
+            id: supplierData.id,
+            name: supplierData.tradeName || supplierData.corporateName,
+            country: supplierData.country || 'Brasil',
+            city: supplierData.city || 'Não informado',
+            category: 'Internacional', // Será atualizado quando tiver category
+            status: supplierData.status === 'ativo' ? 'active' : 'inactive',
+            website: supplierData.website,
+            email: supplierData.email,
+            phone: supplierData.phone,
+            rating: parseFloat(supplierData.averageRating) || 0,
+            totalOrders: 0, // TODO: implementar quando tiver dados de pedidos
+            lastContact: supplierData.updatedAt ? new Date(supplierData.updatedAt).toLocaleDateString('pt-BR') : 'Nunca',
+            establishedYear: undefined, // TODO: adicionar campo no banco se necessário
+            description: supplierData.description
+          });
+        } else {
+          setError('Dados do fornecedor não encontrados');
+          setSupplier(null);
+        }
+        
+        // Por enquanto, inicializar outros arrays vazios até serem implementados
         setContacts([]);
         setContracts([]);
         setCommunications([]);
@@ -145,15 +191,14 @@ const useSupplierData = (supplierId: string) => {
       } catch (err) {
         console.error('Erro ao carregar dados do fornecedor:', err);
         setError('Erro ao carregar dados do fornecedor');
+        setSupplier(null);
       } finally {
         setLoading(false);
       }
     };
 
-    if (supplierId) {
-      fetchData();
-    }
-  }, [supplierId]);
+    fetchData();
+  }, [supplierId, token]);
 
   return { supplier, contacts, contracts, communications, documents, loading, error };
 };
