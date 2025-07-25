@@ -1616,27 +1616,15 @@ const EditSupplierDialog = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="tradeName" className="text-sm font-medium">Exporter Name</Label>
-              <Input
-                id="tradeName"
-                value={formData.tradeName}
-                onChange={(e) => handleInputChange('tradeName', e.target.value)}
-                placeholder="Nome do exportador"
-                className="h-11 mt-2"
-              />
-            </div>
-            <div>
-              <Label htmlFor="corporateName" className="text-sm font-medium">Razão Social</Label>
-              <Input
-                id="corporateName"
-                value={formData.corporateName}
-                onChange={(e) => handleInputChange('corporateName', e.target.value)}
-                placeholder="Razão social da empresa"
-                className="h-11 mt-2"
-              />
-            </div>
+          <div>
+            <Label htmlFor="tradeName" className="text-sm font-medium">Exporter Name</Label>
+            <Input
+              id="tradeName"
+              value={formData.tradeName}
+              onChange={(e) => handleInputChange('tradeName', e.target.value)}
+              placeholder="Nome do exportador"
+              className="h-11 mt-2"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

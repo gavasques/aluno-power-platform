@@ -1334,6 +1334,24 @@ Preferred communication style: Simple, everyday language.
   - **User Workflow Optimization**: Users can now link products during import instead of manual linking afterward, significantly improving efficiency
   - **Status**: Complete automatic linking system ready for production use with sku_vinculado field functionality
 
+- **January 25, 2025 - 6:49 PM**: ✅ INTERNATIONAL SUPPLIER FORM OPTIMIZED - LAYOUT IMPROVEMENTS AND FIELD REMOVAL
+  - **Objective Achieved**: Enhanced form layout and removed unnecessary field as requested by user
+  - **Layout Optimizations**:
+    - ✅ **Dialog Width**: Expanded from max-w-2xl to max-w-5xl for better space utilization
+    - ✅ **Field Height**: Increased all inputs to h-11 for better visibility and usability
+    - ✅ **Spacing**: Enhanced gap-6 between field groups for cleaner organization
+    - ✅ **Labels**: Standardized with text-sm font-medium and mt-2 spacing
+    - ✅ **Grid Layout**: Reorganized fields in 2-3 columns for optimal space usage
+  - **Field Removal**:
+    - ✅ **Razão Social**: Removed corporateName field as requested by user
+    - ✅ **Form Simplified**: Kept only essential Exporter Name field
+  - **UI Improvements**:
+    - Contact fields organized in logical pairs (Phone/Mobile, FAX/Email)
+    - Configuration fields (Category/Type/Status) in 3-column layout
+    - Textarea with min-h-[100px] for better description editing
+  - **User Experience**: Form now provides better space utilization with larger, more accessible fields
+  - **Status**: International supplier form optimized and simplified according to user preferences
+
 - **January 23, 2025 - 12:22 AM**: ✅ IMPORTED PRODUCT FORM ENHANCED - DATA-DRIVEN SELECT FIELDS FOR CATEGORY AND BRAND
   - **Objective Achieved**: Converted text input fields to proper data-driven select components for better UX and data consistency
   - **Category Field Enhancement**:
