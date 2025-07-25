@@ -24,6 +24,23 @@ const bankingDataSchema = z.object({
   bankingData: z.string().optional(),
 });
 
+// Supplier creation schema
+const createSupplierSchema = z.object({
+  corporateName: z.string().min(1, "Nome corporativo é obrigatório"),
+  tradeName: z.string().optional(),
+  country: z.string().min(1, "País é obrigatório"),
+  state: z.string().optional(),
+  city: z.string().optional(),
+  postalCode: z.string().optional(),
+  address: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email().optional().or(z.literal("")),
+  website: z.string().optional(),
+  description: z.string().optional(),
+  status: z.enum(["ativo", "inativo"]).default("ativo"),
+  categoryId: z.number().int().positive().optional(),
+});
+
 // GET /api/international-suppliers - Get all suppliers for the authenticated user
 router.get("/", requireAuth, async (req, res) => {
   try {

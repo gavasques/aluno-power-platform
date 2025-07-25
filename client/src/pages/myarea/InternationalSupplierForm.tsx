@@ -113,9 +113,16 @@ export default function InternationalSupplierForm() {
         body: JSON.stringify(formData)
       });
 
-      const data = await response.json();
-
       if (response.ok) {
+        // Tentar fazer parse do JSON apenas se a resposta for ok
+        let data;
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          // Se não conseguir fazer parse do JSON, considerar sucesso mesmo assim
+          console.warn('Resposta não é JSON válido, mas request foi bem-sucedido');
+        }
+
         toast({
           title: "Sucesso",
           description: "Fornecedor internacional criado com sucesso!"
@@ -124,7 +131,16 @@ export default function InternationalSupplierForm() {
         // Redirecionar para a lista de fornecedores
         navigate('/minha-area/importacoes/fornecedores');
       } else {
-        throw new Error(data.message || 'Erro ao criar fornecedor');
+        // Tentar obter a mensagem de erro
+        let errorMessage = 'Erro ao criar fornecedor';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (jsonError) {
+          // Se não conseguir fazer parse, usar mensagem padrão
+          errorMessage = `Erro ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
       console.error('Erro ao salvar fornecedor:', error);
