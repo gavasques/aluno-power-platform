@@ -206,9 +206,77 @@ const useSupplierData = (supplierId: string) => {
 function InternationalSupplierDetail() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
+  const { token } = useAuth();
 
   // Usar dados reais do banco de dados
   const { supplier, contacts, contracts, communications, documents, loading, error } = useSupplierData(id || '');
+
+  // Handler para abrir o diálogo de edição
+  const handleEditClick = () => {
+    setIsEditDialogOpen(true);
+  };
+
+  // Handler para atualizar o fornecedor
+  const handleUpdateSupplier = async (updatedData: any) => {
+    if (!supplier || !token) return;
+
+    try {
+      setIsUpdating(true);
+      
+      // Mapear dados do frontend para o formato esperado pelo backend
+      const backendData = {
+        corporateName: updatedData.corporateName,
+        tradeName: updatedData.tradeName,
+        country: updatedData.country,
+        city: updatedData.city,
+        address: updatedData.address,
+        phone: updatedData.phone,
+        email: updatedData.email,
+        website: updatedData.website,
+        description: updatedData.description,
+        status: updatedData.status === 'ativo' ? 'ativo' : 'inativo'
+      };
+      
+      const response = await fetch(`/api/international-suppliers/${supplier.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(backendData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar fornecedor');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Fornecedor atualizado",
+          description: "Os dados do fornecedor foram atualizados com sucesso.",
+        });
+        setIsEditDialogOpen(false);
+        // Recarregar a página para mostrar os dados atualizados
+        window.location.reload();
+      } else {
+        throw new Error(result.message || 'Erro ao atualizar fornecedor');
+      }
+    } catch (err) {
+      console.error('Erro ao atualizar fornecedor:', err);
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o fornecedor. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -310,7 +378,11 @@ function InternationalSupplierDetail() {
             </div>
           </div>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={handleEditClick}
+          type="button"
+        >
           <Edit className="w-4 h-4 mr-2" />
           Editar Fornecedor
         </Button>
@@ -540,6 +612,15 @@ function InternationalSupplierDetail() {
 
 
       </Tabs>
+
+      {/* Edit Supplier Dialog */}
+      <EditSupplierDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        supplier={supplier}
+        onUpdate={handleUpdateSupplier}
+        isLoading={isUpdating}
+      />
     </div>
   );
 };
@@ -1420,6 +1501,218 @@ const BankingInformation = ({ supplierId }: { supplierId: number }) => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+// Edit Supplier Dialog Component
+const EditSupplierDialog = ({ 
+  isOpen, 
+  onClose, 
+  supplier, 
+  onUpdate, 
+  isLoading 
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  supplier: Supplier;
+  onUpdate: (data: any) => void;
+  isLoading: boolean;
+}) => {
+  const [formData, setFormData] = useState({
+    tradeName: supplier.name || '',
+    corporateName: supplier.name || '',
+    country: supplier.country || '',
+    city: supplier.city || '',
+    address: '',
+    phone: supplier.phone || '',
+    email: supplier.email || '',
+    website: supplier.website || '',
+    description: supplier.description || '',
+    status: supplier.status === 'active' ? 'ativo' : 'inativo'
+  });
+
+  // Reset form data when supplier changes
+  React.useEffect(() => {
+    if (supplier) {
+      setFormData({
+        tradeName: supplier.name || '',
+        corporateName: supplier.name || '',
+        country: supplier.country || '',
+        city: supplier.city || '',
+        address: '',
+        phone: supplier.phone || '',
+        email: supplier.email || '',
+        website: supplier.website || '',
+        description: supplier.description || '',
+        status: supplier.status === 'active' ? 'ativo' : 'inativo'
+      });
+    }
+  }, [supplier]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value.toUpperCase() // Manter tudo em maiúsculo conforme preferência do usuário
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onUpdate(formData);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Editar Fornecedor Internacional</DialogTitle>
+          <DialogDescription>
+            Atualize as informações do fornecedor
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="tradeName">Nome Fantasia</Label>
+              <Input
+                id="tradeName"
+                value={formData.tradeName}
+                onChange={(e) => handleInputChange('tradeName', e.target.value)}
+                placeholder="Nome fantasia da empresa"
+              />
+            </div>
+            <div>
+              <Label htmlFor="corporateName">Razão Social</Label>
+              <Input
+                id="corporateName"
+                value={formData.corporateName}
+                onChange={(e) => handleInputChange('corporateName', e.target.value)}
+                placeholder="Razão social da empresa"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="country">País</Label>
+              <Input
+                id="country"
+                value={formData.country}
+                onChange={(e) => handleInputChange('country', e.target.value)}
+                placeholder="País"
+              />
+            </div>
+            <div>
+              <Label htmlFor="city">Cidade</Label>
+              <Input
+                id="city"
+                value={formData.city}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+                placeholder="Cidade"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="address">Endereço</Label>
+            <Input
+              id="address"
+              value={formData.address}
+              onChange={(e) => handleInputChange('address', e.target.value)}
+              placeholder="Endereço completo"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="phone">Telefone</Label>
+              <Input
+                id="phone"
+                value={formData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                placeholder="Telefone de contato"
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                placeholder="email@empresa.com"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="website">Website</Label>
+            <Input
+              id="website"
+              value={formData.website}
+              onChange={(e) => handleInputChange('website', e.target.value)}
+              placeholder="www.empresa.com"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder="Descrição da empresa e produtos"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value) => handleInputChange('status', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ativo">Ativo</SelectItem>
+                <SelectItem value="inativo">Inativo</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Alterações
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -297,6 +297,82 @@ router.put("/:id/banking", requireAuth, async (req, res) => {
   }
 });
 
+// PUT /api/international-suppliers/:id - Update a supplier
+router.put("/:id", requireAuth, async (req, res) => {
+  try {
+    const supplierId = parseInt(req.params.id);
+    const userId = req.user!.id;
+
+    if (isNaN(supplierId)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID do fornecedor inválido",
+      });
+    }
+
+    // Schema for updating supplier (all fields optional)
+    const updateSupplierSchema = createSupplierSchema.partial();
+    
+    // Validate request body
+    const validation = updateSupplierSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Dados inválidos",
+        errors: validation.error.issues,
+      });
+    }
+
+    const supplierData = validation.data;
+
+    // Check if supplier exists and belongs to user
+    const [existingSupplier] = await db
+      .select({ id: suppliers.id })
+      .from(suppliers)
+      .where(and(eq(suppliers.id, supplierId), eq(suppliers.userId, userId)))
+      .limit(1);
+
+    if (!existingSupplier) {
+      return res.status(404).json({
+        success: false,
+        message: "Fornecedor não encontrado",
+      });
+    }
+
+    // Update supplier data
+    await db
+      .update(suppliers)
+      .set({
+        ...(supplierData.corporateName && { corporateName: supplierData.corporateName }),
+        ...(supplierData.tradeName && { tradeName: supplierData.tradeName }),
+        ...(supplierData.country && { country: supplierData.country }),
+        ...(supplierData.state && { state: supplierData.state }),
+        ...(supplierData.city && { city: supplierData.city }),
+        ...(supplierData.postalCode && { cep: supplierData.postalCode }),
+        ...(supplierData.address && { address: supplierData.address }),
+        ...(supplierData.phone && { phone0800Sales: supplierData.phone }),
+        ...(supplierData.email && { commercialEmail: supplierData.email }),
+        ...(supplierData.website && { website: supplierData.website }),
+        ...(supplierData.description && { description: supplierData.description }),
+        ...(supplierData.status && { status: supplierData.status }),
+        ...(supplierData.categoryId && { categoryId: supplierData.categoryId }),
+        updatedAt: new Date(),
+      })
+      .where(and(eq(suppliers.id, supplierId), eq(suppliers.userId, userId)));
+
+    res.json({
+      success: true,
+      message: "Fornecedor atualizado com sucesso",
+    });
+  } catch (error) {
+    console.error("Error updating supplier:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+    });
+  }
+});
+
 // DELETE /api/international-suppliers/:id - Delete a supplier
 router.delete("/:id", requireAuth, async (req, res) => {
   try {
