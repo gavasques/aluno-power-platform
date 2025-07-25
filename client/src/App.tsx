@@ -57,6 +57,7 @@ const MinhaAreaIndex = lazy(() => import("./pages/MinhaAreaIndex"));
 const SimuladoresIndex = lazy(() => import("./pages/SimuladoresIndex"));
 const ImportacoesIndex = lazy(() => import("./pages/myarea/ImportacoesIndex"));
 const InternationalSupplierCRM = lazy(() => import("./pages/myarea/InternationalSupplierCRM"));
+const InternationalSupplierForm = lazy(() => import("./pages/myarea/InternationalSupplierForm"));
 const InternationalSupplierDetail = lazy(() => import("./pages/myarea/InternationalSupplierDetail"));
 
 // Imported Products Management
@@ -768,6 +769,17 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <InternationalSupplierCRM />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* International Supplier Form - Protected */}
+                          <Route path="/minha-area/importacoes/fornecedores/novo">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <InternationalSupplierForm />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

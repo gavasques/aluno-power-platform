@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from '@/hooks/useAuth';
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -162,6 +162,7 @@ export default function InternationalSupplierCRM() {
   const [isDeleting, setIsDeleting] = useState(false);
   
   const { toast } = useToast();
+  const [, navigate] = useLocation();
 
   // Usar dados reais do banco
   const { suppliers: allSuppliers, loading, error, deleteSupplier } = useInternationalSuppliers();
@@ -203,6 +204,11 @@ export default function InternationalSupplierCRM() {
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  // Função para navegar para criação de novo fornecedor
+  const handleAddSupplier = () => {
+    navigate('/minha-area/importacoes/fornecedores/novo');
   };
 
   // Filtrar fornecedores baseado na busca e status
@@ -274,7 +280,10 @@ export default function InternationalSupplierCRM() {
             </p>
           </div>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={handleAddSupplier}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Novo Fornecedor Internacional
         </Button>
@@ -382,7 +391,10 @@ export default function InternationalSupplierCRM() {
               <p className="text-gray-600 mb-4">
                 {searchTerm ? "Tente ajustar sua busca ou filtros" : "Comece adicionando seu primeiro fornecedor internacional"}
               </p>
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleAddSupplier}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Adicionar Fornecedor Internacional
               </Button>
