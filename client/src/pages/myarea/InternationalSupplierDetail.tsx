@@ -232,6 +232,7 @@ function InternationalSupplierDetail() {
         tradeName: updatedData.tradeName,
         country: updatedData.country,
         city: updatedData.city,
+        neighborhood: updatedData.neighborhood,
         address: updatedData.address,
         phone: updatedData.phone,
         email: updatedData.email,
@@ -1525,6 +1526,7 @@ const EditSupplierDialog = ({
     corporateName: supplier.name || '',
     country: supplier.country || '',
     city: supplier.city || '',
+    neighborhood: '',
     address: '',
     phone: supplier.phone || '',
     email: supplier.email || '',
@@ -1547,6 +1549,7 @@ const EditSupplierDialog = ({
         corporateName: supplier.name || '',
         country: supplier.country || '',
         city: supplier.city || '',
+        neighborhood: '',
         address: '',
         phone: supplier.phone || '',
         email: supplier.email || '',
@@ -1647,6 +1650,17 @@ const EditSupplierDialog = ({
                 placeholder="Cidade"
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="neighborhood">Bairro</Label>
+            <Input
+              id="neighborhood"
+              type="text"
+              value={formData.neighborhood}
+              onChange={(e) => handleInputChange('neighborhood', e.target.value)}
+              placeholder="Bairro/distrito do fornecedor"
+            />
           </div>
 
           <div>

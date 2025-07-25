@@ -139,6 +139,7 @@ export const suppliers = pgTable("suppliers", {
   country: text("country").default("Brasil"),
   state: text("state"),
   city: text("city"),
+  neighborhood: text("neighborhood"),
   cep: text("cep"),
   address: text("address"),
   stateRegistration: text("state_registration"),
