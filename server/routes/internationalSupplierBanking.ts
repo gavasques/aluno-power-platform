@@ -41,6 +41,60 @@ const createSupplierSchema = z.object({
   categoryId: z.number().int().positive().optional(),
 });
 
+// POST /api/international-suppliers - Create a new international supplier
+router.post("/", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+
+    // Validate request body
+    const validation = createSupplierSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Dados inválidos",
+        errors: validation.error.issues,
+      });
+    }
+
+    const supplierData = validation.data;
+
+    // Create new supplier
+    const [newSupplier] = await db
+      .insert(suppliers)
+      .values({
+        userId,
+        corporateName: supplierData.corporateName,
+        tradeName: supplierData.tradeName || supplierData.corporateName,
+        country: supplierData.country,
+        state: supplierData.state,
+        city: supplierData.city,
+        postalCode: supplierData.postalCode,
+        address: supplierData.address,
+        phone: supplierData.phone,
+        email: supplierData.email,
+        website: supplierData.website,
+        description: supplierData.description,
+        status: supplierData.status,
+        categoryId: supplierData.categoryId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    res.status(201).json({
+      success: true,
+      message: "Fornecedor internacional criado com sucesso!",
+      data: newSupplier,
+    });
+  } catch (error) {
+    console.error("Error creating supplier:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+    });
+  }
+});
+
 // GET /api/international-suppliers - Get all suppliers for the authenticated user
 router.get("/", requireAuth, async (req, res) => {
   try {

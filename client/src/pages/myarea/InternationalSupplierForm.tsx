@@ -128,8 +128,13 @@ export default function InternationalSupplierForm() {
           description: "Fornecedor internacional criado com sucesso!"
         });
         
-        // Redirecionar para a lista de fornecedores
-        navigate('/minha-area/importacoes/fornecedores');
+        // Redirecionar para o CRM completo do fornecedor recém-criado
+        if (data && data.data && data.data.id) {
+          navigate(`/minha-area/importacoes/fornecedores/${data.data.id}`);
+        } else {
+          // Fallback para a lista de fornecedores
+          navigate('/minha-area/importacoes/fornecedores');
+        }
       } else {
         // Tentar obter a mensagem de erro
         let errorMessage = 'Erro ao criar fornecedor';
