@@ -237,7 +237,9 @@ function InternationalSupplierDetail() {
         email: updatedData.email,
         website: updatedData.website,
         description: updatedData.description,
-        status: updatedData.status === 'ativo' ? 'ativo' : 'inativo'
+        status: updatedData.status === 'ativo' ? 'ativo' : 'inativo',
+        categoryId: updatedData.categoryId,
+        supplierType: updatedData.supplierType
       };
       
       const response = await fetch(`/api/international-suppliers/${supplier.id}`, {
@@ -1528,8 +1530,14 @@ const EditSupplierDialog = ({
     email: supplier.email || '',
     website: supplier.website || '',
     description: supplier.description || '',
-    status: supplier.status === 'active' ? 'ativo' : 'inativo'
+    status: supplier.status === 'active' ? 'ativo' : 'inativo',
+    categoryId: undefined as number | undefined,
+    supplierType: '' as string
   });
+
+  // State para departamentos
+  const [departments, setDepartments] = useState<any[]>([]);
+  const { token } = useAuth();
 
   // Reset form data when supplier changes
   React.useEffect(() => {
@@ -1544,15 +1552,42 @@ const EditSupplierDialog = ({
         email: supplier.email || '',
         website: supplier.website || '',
         description: supplier.description || '',
-        status: supplier.status === 'active' ? 'ativo' : 'inativo'
+        status: supplier.status === 'active' ? 'ativo' : 'inativo',
+        categoryId: undefined,
+        supplierType: ''
       });
     }
   }, [supplier]);
 
-  const handleInputChange = (field: string, value: string) => {
+  // Carregar departamentos quando o diálogo abre
+  React.useEffect(() => {
+    if (isOpen && token) {
+      const fetchDepartments = async () => {
+        try {
+          const response = await fetch('/api/departments', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setDepartments(data || []);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar departamentos:', error);
+        }
+      };
+
+      fetchDepartments();
+    }
+  }, [isOpen, token]);
+
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value.toUpperCase() // Manter tudo em maiúsculo conforme preferência do usuário
+      [field]: typeof value === 'string' ? value.toUpperCase() : value // Manter tudo em maiúsculo conforme preferência do usuário
     }));
   };
 
@@ -1665,6 +1700,53 @@ const EditSupplierDialog = ({
               placeholder="Descrição da empresa e produtos"
               rows={3}
             />
+          </div>
+
+          {/* Categoria/Departamento e Tipo de Fornecedor */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="categoryId">Categoria</Label>
+              <Select
+                value={formData.categoryId?.toString() || ''}
+                onValueChange={(value) => {
+                  const numValue = value ? parseInt(value) : undefined;
+                  handleInputChange('categoryId', numValue || '');
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id.toString()}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="supplierType">Tipo</Label>
+              <Select
+                value={formData.supplierType}
+                onValueChange={(value) => handleInputChange('supplierType', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fabricante">Fabricante</SelectItem>
+                  <SelectItem value="trading">Trading</SelectItem>
+                  <SelectItem value="despachante">Despachante</SelectItem>
+                  <SelectItem value="agente_cargas">Agente de Cargas</SelectItem>
+                  <SelectItem value="distribuidora">Distribuidora</SelectItem>
+                  <SelectItem value="importadora">Importadora</SelectItem>
+                  <SelectItem value="industria">Indústria</SelectItem>
+                  <SelectItem value="representante">Representante</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div>

@@ -39,6 +39,7 @@ const createSupplierSchema = z.object({
   description: z.string().optional(),
   status: z.enum(["ativo", "inativo"]).default("ativo"),
   categoryId: z.number().int().positive().optional(),
+  supplierType: z.string().optional(),
 });
 
 // POST /api/international-suppliers - Create a new international supplier
@@ -356,6 +357,7 @@ router.put("/:id", requireAuth, async (req, res) => {
         ...(supplierData.description && { description: supplierData.description }),
         ...(supplierData.status && { status: supplierData.status }),
         ...(supplierData.categoryId && { categoryId: supplierData.categoryId }),
+        ...(supplierData.supplierType && { supplierType: supplierData.supplierType }),
         updatedAt: new Date(),
       })
       .where(and(eq(suppliers.id, supplierId), eq(suppliers.userId, userId)));
