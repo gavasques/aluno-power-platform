@@ -21,7 +21,8 @@ import {
   Info,
   Tags,
   Globe,
-  Download
+  Download,
+  FileText
 } from "lucide-react";
 import { useApiRequest } from '@/hooks/useApiRequest';
 import { useAuth } from '@/hooks/useAuth';
@@ -230,6 +231,120 @@ export default function AmazonProductDetails() {
     }
   };
 
+  const exportToTVT = () => {
+    if (!productData) return;
+
+    const { data } = productData;
+    
+    // Gerar conteúdo do arquivo TVT
+    let tvtContent = '';
+    
+    // Título e ASIN
+    tvtContent += `TÍTULO: ${data.product_title}\n`;
+    tvtContent += `ASIN: ${data.asin}\n`;
+    tvtContent += `PAÍS: ${COUNTRIES.find(c => c.code === data.country)?.name || data.country}\n`;
+    tvtContent += `URL DO PRODUTO: ${data.product_url}\n\n`;
+    
+    // Informações básicas
+    tvtContent += `=== INFORMAÇÕES BÁSICAS ===\n`;
+    tvtContent += `Preço: ${data.product_price}\n`;
+    if (data.product_original_price && data.product_original_price !== data.product_price) {
+      tvtContent += `Preço Original: ${data.product_original_price}\n`;
+    }
+    tvtContent += `Avaliação: ${data.product_star_rating} (${data.product_num_ratings} avaliações)\n`;
+    tvtContent += `Disponibilidade: ${data.product_availability}\n`;
+    tvtContent += `Número de ofertas: ${data.product_num_offers}\n`;
+    
+    // Badges
+    const badges = [];
+    if (data.is_best_seller) badges.push('Best Seller');
+    if (data.is_amazon_choice) badges.push('Amazon Choice');
+    if (data.is_prime) badges.push('Prime');
+    if (data.climate_pledge_friendly) badges.push('Climate Pledge Friendly');
+    if (badges.length > 0) {
+      tvtContent += `Badges: ${badges.join(', ')}\n`;
+    }
+    
+    if (data.sales_volume) {
+      tvtContent += `Volume de vendas: ${data.sales_volume}\n`;
+    }
+    tvtContent += '\n';
+    
+    // Descrição
+    if (data.product_description) {
+      tvtContent += `=== DESCRIÇÃO ===\n`;
+      tvtContent += `${data.product_description}\n\n`;
+    }
+    
+    // Características do produto
+    if (data.about_product && data.about_product.length > 0) {
+      tvtContent += `=== CARACTERÍSTICAS ===\n`;
+      data.about_product.forEach((item, index) => {
+        tvtContent += `${index + 1}. ${item}\n`;
+      });
+      tvtContent += '\n';
+    }
+    
+    // Informações técnicas
+    if (data.product_information && Object.keys(data.product_information).length > 0) {
+      tvtContent += `=== ESPECIFICAÇÕES TÉCNICAS ===\n`;
+      Object.entries(data.product_information).forEach(([key, value]) => {
+        if (value && value !== 'N/A' && value !== '') {
+          tvtContent += `${key}: ${value}\n`;
+        }
+      });
+      tvtContent += '\n';
+    }
+    
+    // URLs das imagens
+    tvtContent += `=== IMAGENS ===\n`;
+    if (data.product_photo) {
+      tvtContent += `Imagem principal: ${data.product_photo}\n`;
+    }
+    
+    if (data.product_photos && data.product_photos.length > 0) {
+      tvtContent += `Imagens adicionais:\n`;
+      data.product_photos.forEach((photo, index) => {
+        tvtContent += `${index + 1}. ${photo}\n`;
+      });
+    }
+    
+    if (data.product_photos_videos && data.product_photos_videos.length > 0) {
+      const images = data.product_photos_videos.filter(item => item.type === 'image');
+      const videos = data.product_photos_videos.filter(item => item.type === 'video');
+      
+      if (images.length > 0) {
+        tvtContent += `Galeria de imagens:\n`;
+        images.forEach((item, index) => {
+          tvtContent += `${index + 1}. ${item.url}\n`;
+        });
+      }
+      
+      if (videos.length > 0) {
+        tvtContent += `\n=== VÍDEOS ===\n`;
+        videos.forEach((item, index) => {
+          tvtContent += `${index + 1}. ${item.url}\n`;
+        });
+      }
+    }
+    
+    // Criar e baixar arquivo
+    const blob = new Blob([tvtContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Amazon_${data.asin}_${data.country}.tvt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Arquivo TVT exportado!",
+      description: `Dados do produto ${data.asin} salvos em arquivo TVT.`,
+    });
+  };
+
   const renderStarRating = (rating: string) => {
     const numRating = parseFloat(rating);
     const fullStars = Math.floor(numRating);
@@ -330,6 +445,39 @@ export default function AmazonProductDetails() {
       {/* Resultados */}
       {productData && (
         <div className="space-y-6">
+          {/* Barra de Ações de Exportação */}
+          <Card className="bg-blue-50 border-blue-200">
+            <CardContent className="pt-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-semibold text-blue-900 mb-1">Exportar Dados do Produto</h3>
+                  <p className="text-sm text-blue-700">
+                    Exporte todas as informações do produto em diferentes formatos
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <Button 
+                    onClick={exportToTVT}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    size="sm"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Exportar TVT
+                  </Button>
+                  <Button 
+                    onClick={downloadAllImages}
+                    variant="outline"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    size="sm"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar Imagens
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Informações Básicas */}
           <ExpandableSection
             title="Informações Básicas"

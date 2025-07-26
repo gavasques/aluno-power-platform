@@ -783,6 +783,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 26, 2025 - 3:22 PM**: ✅ TVT FILE EXPORT FUNCTIONALITY IMPLEMENTED - AMAZON PRODUCT DETAILS ENHANCED
+  - **Objective Achieved**: Added comprehensive TVT file export feature to Amazon Product Details page
+  - **Export Functionality**: Complete product data export in text format (.tvt files)
+  - **Data Included**: Title, ASIN, country, URL, pricing, ratings, availability, badges, descriptions, features, specifications, image URLs, video URLs
+  - **User Interface**: Added blue export actions card with "Exportar TVT" and "Baixar Imagens" buttons
+  - **File Naming**: Automatic naming convention: Amazon_[ASIN]_[COUNTRY].tvt
+  - **User Experience**: One-click export with toast notification confirmation
+  - **Technical Implementation**: Client-side file generation using Blob API with UTF-8 encoding
+  - **Status**: TVT export feature fully operational and ready for user testing
+
 - **January 26, 2025 - 2:46 PM**: ✅ AMAZON KEYWORD SUGGESTIONS CREDIT COST CORRECTED - INTERFACE AND DATABASE UPDATED
   - **Objective Achieved**: Corrected Amazon Keyword Suggestions credit cost from 3 to 1 credit per use
   - **Interface Updated**: Fixed Ferramentas.tsx card display to show "1 crédito" instead of "3 créditos" 
