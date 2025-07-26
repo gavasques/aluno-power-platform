@@ -4077,7 +4077,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         method: 'GET',
         headers: {
           'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
-          'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com'
+          'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com',
+          'X-RapidAPI-App': 'default-application_10763288'
         }
       });
 
@@ -5054,6 +5055,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         headers: {
           'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
           'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com',
+          'X-RapidAPI-App': 'default-application_10763288',
           'Host': 'real-time-amazon-data.p.rapidapi.com'
         }
       });
@@ -5165,7 +5167,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         method: 'GET',
         headers: {
           'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
-          'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com'
+          'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com',
+          'X-RapidAPI-App': 'default-application_10763288'
         }
       });
 
@@ -5332,7 +5335,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           method: 'GET',
           headers: {
             'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
-            'X-RapidAPI-Host': 'dados-cnpj.p.rapidapi.com'
+            'X-RapidAPI-Host': 'dados-cnpj.p.rapidapi.com',
+            'X-RapidAPI-App': 'default-application_10763288'
           }
         });
 
