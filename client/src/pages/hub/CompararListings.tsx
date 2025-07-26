@@ -475,7 +475,7 @@ function CompararListingsContent() {
 
                   {/* CARACTERÍSTICAS PRINCIPAIS */}
                   <tr className="border-b border-gray-100">
-                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                    <td className="p-3 border-r border-gray-200 font-medium text-gray-900 bg-gray-50 sticky left-0 z-10 w-32">
                       Características
                     </td>
                     {results.map((product, index) => {
@@ -483,13 +483,13 @@ function CompararListingsContent() {
                       const asin = data.asin || asins[index] || `produto-${index}`;
                       const uniqueKey = `features-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 w-1/4 min-w-[300px] align-top">
                           {data.about_product && data.about_product.length > 0 ? (
-                            <ul className="text-sm space-y-1 text-left">
-                              {data.about_product.slice(0, 4).map((feature, i) => (
-                                <li key={`feature-${asin}-${i}`} className="flex items-start gap-1">
-                                  <span className="text-blue-500 mt-1 text-xs">•</span>
-                                  <span className="line-clamp-2">{feature}</span>
+                            <ul className="text-sm space-y-2 text-left">
+                              {data.about_product.map((feature, i) => (
+                                <li key={`feature-${asin}-${i}`} className="flex items-start gap-2">
+                                  <span className="text-blue-500 mt-1 text-xs flex-shrink-0">•</span>
+                                  <span className="leading-relaxed">{feature}</span>
                                 </li>
                               ))}
                             </ul>
@@ -503,7 +503,7 @@ function CompararListingsContent() {
 
                   {/* DESCRIÇÃO */}
                   <tr className="border-b border-gray-100">
-                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                    <td className="p-3 border-r border-gray-200 font-medium text-gray-900 bg-gray-50 sticky left-0 z-10 w-32">
                       Descrição
                     </td>
                     {results.map((product, index) => {
@@ -511,8 +511,8 @@ function CompararListingsContent() {
                       const asin = data.asin || asins[index] || `produto-${index}`;
                       const uniqueKey = `description-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
-                          <div className="text-sm text-left line-clamp-4">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 w-1/4 min-w-[300px] align-top">
+                          <div className="text-sm text-left leading-relaxed whitespace-pre-wrap">
                             {data.product_description || 'Descrição não disponível'}
                           </div>
                         </td>
@@ -522,7 +522,7 @@ function CompararListingsContent() {
 
                   {/* ESPECIFICAÇÕES TÉCNICAS COMPLETAS */}
                   <tr className="border-b border-gray-100">
-                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                    <td className="p-3 border-r border-gray-200 font-medium text-gray-900 bg-gray-50 sticky left-0 z-10 w-32">
                       Especificações Técnicas
                     </td>
                     {results.map((product, index) => {
@@ -530,9 +530,9 @@ function CompararListingsContent() {
                       const asin = data.asin || asins[index] || `produto-${index}`;
                       const uniqueKey = `specs-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 w-1/4 min-w-[300px] align-top">
                           {data.product_information && Object.keys(data.product_information).length > 0 ? (
-                            <div className="space-y-1 text-xs">
+                            <div className="space-y-2 text-xs">
                               {Object.entries(data.product_information).map(([key, value]) => (
                                 <div key={`spec-${asin}-${key}-${index}`} className="border-b border-gray-100 pb-1">
                                   <span className="font-medium text-gray-700">{key}:</span> 
