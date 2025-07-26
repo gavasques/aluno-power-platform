@@ -4076,8 +4076,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const response = await fetch(`https://real-time-amazon-data.p.rapidapi.com/product-reviews?${params}`, {
         method: 'GET',
         headers: {
-          'X-Rapidapi-Key': process.env.RAPIDAPI_KEY!,
-          'X-Rapidapi-Host': 'real-time-amazon-data.p.rapidapi.com'
+          'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
+          'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com'
         }
       });
 
