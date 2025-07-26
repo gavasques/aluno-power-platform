@@ -319,7 +319,7 @@ function CompararListingsContent() {
           </div>
 
           {/* COMPARAÇÃO LADO A LADO - TABELA COMPLETA */}
-          <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+          <div className="bg-white rounded-lg border shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 {/* HEADER - IMAGENS E TÍTULOS */}
@@ -532,7 +532,7 @@ function CompararListingsContent() {
                       return (
                         <td key={uniqueKey} className="p-4 border-r border-gray-200">
                           {data.product_information && Object.keys(data.product_information).length > 0 ? (
-                            <div className="space-y-1 text-xs max-h-40 overflow-y-auto">
+                            <div className="space-y-1 text-xs">
                               {Object.entries(data.product_information).map(([key, value]) => (
                                 <div key={`spec-${asin}-${key}-${index}`} className="border-b border-gray-100 pb-1">
                                   <span className="font-medium text-gray-700">{key}:</span> 
@@ -559,9 +559,9 @@ function CompararListingsContent() {
                       const uniqueKey = `details-${asin}-${index}-${Date.now()}`;
                       return (
                         <td key={uniqueKey} className="p-4 border-r border-gray-200">
-                          {data.product_details && Object.keys(data.product_details).length > 0 ? (
+                          {(data as any).product_details && Object.keys((data as any).product_details).length > 0 ? (
                             <div className="space-y-1 text-xs">
-                              {Object.entries(data.product_details).map(([key, value]) => (
+                              {Object.entries((data as any).product_details).map(([key, value]) => (
                                 <div key={`detail-${asin}-${key}-${index}`}>
                                   <span className="font-medium text-blue-700">{key}:</span> 
                                   <span className="text-gray-600 ml-1">{String(value)}</span>
@@ -589,7 +589,7 @@ function CompararListingsContent() {
                         <td key={uniqueKey} className="p-4 border-r border-gray-200">
                           {data.product_photos && data.product_photos.length > 0 ? (
                             <div className="space-y-2">
-                              <div className="grid grid-cols-3 gap-1 max-h-32 overflow-y-auto">
+                              <div className="grid grid-cols-3 gap-1">
                                 {data.product_photos.map((photo, photoIdx) => (
                                   <img 
                                     key={`photo-${asin}-${photoIdx}-${index}`}
@@ -624,12 +624,12 @@ function CompararListingsContent() {
                       return (
                         <td key={uniqueKey} className="p-4 border-r border-gray-200">
                           <div className="space-y-2">
-                            {data.has_video ? (
+                            {(data as any).has_video ? (
                               <div className="space-y-2">
                                 <div className="text-xs font-medium text-green-600">✅ Tem vídeo</div>
-                                {data.product_videos && data.product_videos.length > 0 && (
+                                {(data as any).product_videos && (data as any).product_videos.length > 0 && (
                                   <div className="space-y-1">
-                                    {data.product_videos.map((video, videoIdx) => (
+                                    {(data as any).product_videos.map((video: any, videoIdx: number) => (
                                       <div key={`video-${asin}-${videoIdx}-${index}`} className="text-xs border border-gray-200 p-2 rounded">
                                         <div className="font-medium">{video.title}</div>
                                         <div className="text-gray-600">
@@ -646,9 +646,9 @@ function CompararListingsContent() {
                                     ))}
                                   </div>
                                 )}
-                                {data.video_thumbnail && (
+                                {(data as any).video_thumbnail && (
                                   <img 
-                                    src={data.video_thumbnail} 
+                                    src={(data as any).video_thumbnail} 
                                     alt="Video thumbnail" 
                                     className="w-20 h-16 object-cover rounded border"
                                   />
@@ -674,15 +674,15 @@ function CompararListingsContent() {
                       const uniqueKey = `variations-${asin}-${index}-${Date.now()}`;
                       return (
                         <td key={uniqueKey} className="p-4 border-r border-gray-200">
-                          {data.product_variations && Object.keys(data.product_variations).length > 0 ? (
+                          {(data as any).product_variations && Object.keys((data as any).product_variations).length > 0 ? (
                             <div className="space-y-2">
-                              {Object.entries(data.product_variations).map(([variationType, variations]) => (
+                              {Object.entries((data as any).product_variations).map(([variationType, variations]) => (
                                 <div key={`vartype-${asin}-${variationType}-${index}`} className="border border-gray-200 p-2 rounded">
                                   <div className="text-xs font-medium text-purple-700 mb-1">
                                     {variationType.toUpperCase()}:
                                   </div>
                                   <div className="grid grid-cols-2 gap-1">
-                                    {Array.isArray(variations) && variations.map((variation, varIdx) => (
+                                    {Array.isArray(variations) && variations.map((variation: any, varIdx: number) => (
                                       <div key={`var-${asin}-${varIdx}-${index}`} className="text-xs border border-gray-100 p-1 rounded">
                                         <div className="font-medium">{variation.value}</div>
                                         <div className="text-gray-600">ASIN: {variation.asin}</div>
@@ -723,36 +723,36 @@ function CompararListingsContent() {
                         <td key={uniqueKey} className="p-4 border-r border-gray-200">
                           <div className="space-y-1">
                             <div className="flex flex-wrap gap-1">
-                              {data.is_best_seller && (
+                              {(data as any).is_best_seller && (
                                 <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">
                                   🏆 Best Seller
                                 </span>
                               )}
-                              {data.is_amazon_choice && (
+                              {(data as any).is_amazon_choice && (
                                 <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
                                   ⭐ Amazon's Choice
                                 </span>
                               )}
-                              {data.is_prime && (
+                              {(data as any).is_prime && (
                                 <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
                                   📦 Prime
                                 </span>
                               )}
-                              {data.climate_pledge_friendly && (
+                              {(data as any).climate_pledge_friendly && (
                                 <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
                                   🌱 Climate Pledge
                                 </span>
                               )}
                             </div>
                             <div className="space-y-1 text-xs">
-                              {data.has_aplus && (
+                              {(data as any).has_aplus && (
                                 <div className="text-green-600">✅ Tem conteúdo A+</div>
                               )}
-                              {data.has_brandstory && (
+                              {(data as any).has_brandstory && (
                                 <div className="text-green-600">✅ Tem Brand Story</div>
                               )}
-                              {data.sales_volume && (
-                                <div className="text-gray-600">Volume de vendas: {data.sales_volume}</div>
+                              {(data as any).sales_volume && (
+                                <div className="text-gray-600">Volume de vendas: {(data as any).sales_volume}</div>
                               )}
                             </div>
                           </div>
@@ -783,11 +783,11 @@ function CompararListingsContent() {
                             {data.product_information?.["Disponível para compra desde"] && (
                               <div><span className="font-medium">Disponível desde:</span> {data.product_information["Disponível para compra desde"]}</div>
                             )}
-                            {data.all_product_variations && Object.keys(data.all_product_variations).length > 0 && (
+                            {(data as any).all_product_variations && Object.keys((data as any).all_product_variations).length > 0 && (
                               <div className="border-t border-gray-200 pt-2">
                                 <span className="font-medium">ASINs das Variações:</span>
                                 <div className="mt-1 space-y-1">
-                                  {Object.entries(data.all_product_variations).map(([varAsin, varDetails]) => (
+                                  {Object.entries((data as any).all_product_variations).map(([varAsin, varDetails]) => (
                                     <div key={`codes-var-${asin}-${varAsin}-${index}`} className="text-gray-600">
                                       {varAsin}: {Object.values(varDetails || {}).join(', ')}
                                     </div>
@@ -812,12 +812,12 @@ function CompararListingsContent() {
                       const uniqueKey = `rating-dist-${asin}-${index}-${Date.now()}`;
                       return (
                         <td key={uniqueKey} className="p-4 border-r border-gray-200">
-                          {data.rating_distribution && Object.keys(data.rating_distribution).length > 0 ? (
+                          {(data as any).rating_distribution && Object.keys((data as any).rating_distribution).length > 0 ? (
                             <div className="space-y-1">
-                              {Object.entries(data.rating_distribution).map(([stars, count]) => (
+                              {Object.entries((data as any).rating_distribution).map(([stars, count]) => (
                                 <div key={`rating-${asin}-${stars}-${index}`} className="flex items-center justify-between text-xs">
                                   <span>{stars} ⭐</span>
-                                  <span className="font-medium">{count} avaliações</span>
+                                  <span className="font-medium">{String(count)} avaliações</span>
                                 </div>
                               ))}
                             </div>
@@ -846,11 +846,11 @@ function CompararListingsContent() {
                                 <span className="font-medium">Categoria:</span> {data.category.name}
                               </div>
                             )}
-                            {data.category_path && data.category_path.length > 0 && (
+                            {(data as any).category_path && (data as any).category_path.length > 0 && (
                               <div>
                                 <span className="font-medium">Caminho:</span>
                                 <div className="mt-1 space-y-1">
-                                  {data.category_path.map((cat, catIdx) => (
+                                  {(data as any).category_path.map((cat: any, catIdx: number) => (
                                     <div key={`cat-${asin}-${catIdx}-${index}`} className="text-gray-600 pl-2">
                                       {catIdx + 1}. {cat.name}
                                     </div>
