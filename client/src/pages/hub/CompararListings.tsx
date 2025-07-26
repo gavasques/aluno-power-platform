@@ -82,6 +82,11 @@ function CompararListingsContent() {
       setError("Insira pelo menos 2 ASINs válidos para comparar");
       return;
     }
+    
+    if (validAsins.length > 5) {
+      setError("Máximo de 5 ASINs permitidos para comparação");
+      return;
+    }
 
     // Verificar créditos necessários
     const creditsNeeded = validAsins.length;
@@ -251,7 +256,9 @@ function CompararListingsContent() {
           </div>
 
           <div className="space-y-3">
-            <label className="block text-sm font-medium">ASINs dos Produtos</label>
+            <label className="block text-sm font-medium">
+              ASINs dos Produtos ({asins.length}/5)
+            </label>
             <div className="text-xs text-gray-600 bg-blue-50 p-2 rounded-md">
               💡 <strong>Dica:</strong> Alguns ASINs podem retornar dados vazios da API externa. 
               Os ASINs padrão (B0D6TXJG28, B0CYD2QH4F) foram testados e funcionam corretamente.
@@ -277,16 +284,22 @@ function CompararListingsContent() {
               </div>
             ))}
 
-            {asins.length < 5 && (
+            <div className="space-y-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleAddAsin}
+                disabled={asins.length >= 5}
                 className="w-full"
               >
-                Adicionar mais um produto
+                {asins.length >= 5 ? "Limite máximo atingido (5 produtos)" : "Adicionar mais um produto"}
               </Button>
-            )}
+              {asins.length >= 5 && (
+                <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded-md text-center">
+                  Limite máximo de 5 ASINs para comparação
+                </div>
+              )}
+            </div>
           </div>
 
           {error && (
