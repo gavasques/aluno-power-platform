@@ -1,52 +1,53 @@
 import { useState } from "react";
-import { Package, Search, Download, Copy, ExternalLink, Star, DollarSign, Eye, Heart, MessageSquare, Globe, Truck, Shield } from "lucide-react";
+import { Package, Search, Download, Star, DollarSign, Globe, Truck, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CopyButton } from "@/components/common/CopyButton";
 import { useToast } from "@/hooks/use-toast";
 import { useCreditSystem } from "@/hooks/useCreditSystem";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
 import { useAuth } from "@/hooks/useAuth";
 
-interface ProductData {
-  asin: string;
-  title: string;
-  brand: string;
-  price: string;
-  originalPrice?: string;
-  discount?: string;
-  rating: number;
-  reviewCount: number;
-  availability: string;
-  prime: boolean;
-  images: string[];
-  bulletPoints: string[];
-  description: string;
-  specifications: Record<string, string>;
-  variations?: Array<{
-    name: string;
-    values: string[];
-    images?: string[];
-  }>;
-  videos?: string[];
-  category: string;
-  seller: string;
-  shippingInfo: string;
-  warranty: string;
-  keywords: string[];
+interface AmazonProductResponse {
+  status: string;
+  data: {
+    asin: string;
+    country: string;
+    product_title: string;
+    product_photo: string;
+    product_photos: string[];
+    product_url: string;
+    product_price: string;
+    product_original_price: string;
+    product_star_rating: string;
+    product_num_ratings: number;
+    product_availability: string;
+    product_num_offers: number;
+    is_best_seller: boolean;
+    is_amazon_choice: boolean;
+    is_prime: boolean;
+    climate_pledge_friendly: boolean;
+    sales_volume: string;
+    product_description: string;
+    about_product: string[];
+    product_information: Record<string, any>;
+    delivery: string;
+    primary_delivery_time: string;
+    category: {
+      name: string;
+    };
+    product_byline: string;
+  };
 }
 
 function CompararListingsContent() {
   const [asins, setAsins] = useState<string[]>(["", ""]);
   const [country, setCountry] = useState("BR");
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<ProductData[]>([]);
+  const [results, setResults] = useState<AmazonProductResponse[]>([]);
   const [error, setError] = useState("");
   const { toast } = useToast();
   const { checkCredits } = useCreditSystem();
@@ -71,19 +72,25 @@ function CompararListingsContent() {
     setAsins(newAsins);
   };
 
-  const handleSearch = async () => {
-    const validAsins = asins.filter(asin => asin.trim());
+  const validateAsin = (asin: string): boolean => {
+    return /^[A-Z0-9]{10}$/i.test(asin);
+  };
 
+  const handleSearch = async () => {
+    const validAsins = asins.filter(asin => asin.trim() && validateAsin(asin.trim()));
+    
     if (validAsins.length < 2) {
-      setError("Insira pelo menos 2 ASINs para comparar");
+      setError("Insira pelo menos 2 ASINs válidos para comparar");
       return;
     }
 
-    const creditCheck = await checkCredits("tools.compare_listings");
+    // Verificar créditos necessários
+    const creditsNeeded = validAsins.length;
+    const creditCheck = await checkCredits('tools.product_details', creditsNeeded);
     if (!creditCheck.canProcess) {
       toast({
         title: "Créditos insuficientes",
-        description: `Você precisa de ${creditCheck.requiredCredits} créditos, mas tem apenas ${creditCheck.currentBalance}`,
+        description: `Você precisa de ${creditsNeeded} créditos para esta operação. Saldo atual: ${creditCheck.currentBalance}`,
         variant: "destructive",
       });
       return;
@@ -105,27 +112,36 @@ function CompararListingsContent() {
         });
 
         if (!response.ok) {
-          throw new Error(`Erro ao buscar produto ${asin}`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`Erro ao buscar produto ${asin}: ${errorData.error || response.statusText}`);
         }
 
-        return response.json();
+        const data = await response.json();
+        
+        // Verificar se a resposta contém dados válidos
+        if (!data || data.status !== 'OK' || !data.data) {
+          throw new Error(`Produto ${asin} não encontrado ou dados inválidos`);
+        }
+
+        return data;
       });
 
-      const responses = await Promise.all(promises);
-      setResults(responses);
-
-      toast({
-        title: "Sucesso!",
-        description: `${validAsins.length} produtos comparados com sucesso`,
-      });
-
+      const productsData = await Promise.all(promises);
+      const validProducts = productsData.filter(product => product && product.data);
+      
+      setResults(validProducts);
+      
+      if (validProducts.length === 0) {
+        setError("Nenhum produto válido foi encontrado. Verifique os ASINs e tente novamente.");
+      } else {
+        toast({
+          title: "Produtos encontrados!",
+          description: `${validProducts.length} produto(s) carregado(s) com sucesso`,
+        });
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao buscar produtos");
-      toast({
-        title: "Erro",
-        description: "Erro ao buscar informações dos produtos",
-        variant: "destructive",
-      });
+      console.error('Erro na busca:', err);
+      setError(err instanceof Error ? err.message : "Erro desconhecido ao buscar produtos");
     } finally {
       setLoading(false);
     }
@@ -135,39 +151,38 @@ function CompararListingsContent() {
     if (results.length === 0) return;
 
     let content = "COMPARAÇÃO DE PRODUTOS AMAZON\n";
-    content += "=" .repeat(50) + "\n\n";
+    content += "=".repeat(50) + "\n\n";
 
     results.forEach((product, index) => {
-      content += `PRODUTO ${index + 1}: ${product.title}\n`;
+      const data = product.data;
+      content += `PRODUTO ${index + 1}: ${data.product_title || 'N/A'}\n`;
       content += "-".repeat(30) + "\n";
-      content += `ASIN: ${product.asin}\n`;
-      content += `Marca: ${product.brand}\n`;
-      content += `Preço: ${product.price}\n`;
-      content += `Avaliação: ${product.rating}/5 (${product.reviewCount} avaliações)\n`;
-      content += `Disponibilidade: ${product.availability}\n`;
-      content += `Prime: ${product.prime ? 'Sim' : 'Não'}\n`;
-      content += `Categoria: ${product.category}\n`;
-      content += `Vendedor: ${product.seller}\n\n`;
+      content += `ASIN: ${data.asin}\n`;
+      content += `Marca: ${data.product_byline || 'N/A'}\n`;
+      content += `Preço: ${data.product_price || 'N/A'}\n`;
+      content += `Avaliação: ${data.product_star_rating || 'N/A'}/5 (${data.product_num_ratings || 0} avaliações)\n`;
+      content += `Disponibilidade: ${data.product_availability || 'N/A'}\n`;
+      content += `Prime: ${data.is_prime ? 'Sim' : 'Não'}\n`;
+      content += `Categoria: ${data.category?.name || 'N/A'}\n`;
+      content += `Best Seller: ${data.is_best_seller ? 'Sim' : 'Não'}\n`;
+      content += `Amazon Choice: ${data.is_amazon_choice ? 'Sim' : 'Não'}\n\n`;
 
-      if (product.bulletPoints?.length > 0) {
+      if (data.about_product?.length > 0) {
         content += "CARACTERÍSTICAS:\n";
-        product.bulletPoints.forEach(point => {
+        data.about_product.forEach(point => {
           content += `• ${point}\n`;
         });
         content += "\n";
       }
 
-      if (product.variations && product.variations.length > 0) {
-        content += "VARIAÇÕES:\n";
-        product.variations.forEach(variation => {
-          content += `${variation.name}: ${variation.values.join(', ')}\n`;
-        });
-        content += "\n";
+      if (data.product_description) {
+        content += "DESCRIÇÃO:\n";
+        content += `${data.product_description}\n\n`;
       }
 
-      if (product.specifications && Object.keys(product.specifications).length > 0) {
+      if (data.product_information && Object.keys(data.product_information).length > 0) {
         content += "ESPECIFICAÇÕES:\n";
-        Object.entries(product.specifications).forEach(([key, value]) => {
+        Object.entries(data.product_information).forEach(([key, value]) => {
           content += `${key}: ${value}\n`;
         });
         content += "\n";
@@ -289,152 +304,174 @@ function CompararListingsContent() {
 
       {results.length > 0 && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Comparação de Produtos</h2>
-            <Button onClick={exportToTxt} variant="outline">
-              <Download className="h-4 w-4 mr-2" />
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Resultados da Comparação ({results.length} produtos)
+            </h2>
+            <Button onClick={exportToTxt} variant="outline" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
               Exportar TXT
             </Button>
           </div>
 
+          {/* Exibição lado a lado para comparação */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {results.map((product, index) => (
-              <Card key={product.asin} className="h-fit">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <Badge variant="secondary">Produto {index + 1}</Badge>
-                    <CopyButton text={product.asin} />
-                  </div>
-                  <CardTitle className="text-lg line-clamp-2">
-                    {product.title}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>ASIN: {product.asin}</span>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  {product.images && product.images.length > 0 && (
-                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                      <img
-                        src={product.images[0]}
-                        alt={product.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-
-                  <Tabs defaultValue="basic" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="basic">Básico</TabsTrigger>
-                      <TabsTrigger value="details">Detalhes</TabsTrigger>
-                      <TabsTrigger value="specs">Specs</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="basic" className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        <span className="font-medium">{product.price}</span>
-                        {product.originalPrice && (
-                          <span className="text-sm text-gray-500 line-through">
-                            {product.originalPrice}
-                          </span>
-                        )}
-                        {product.discount && (
-                          <Badge variant="destructive" className="text-xs">
-                            -{product.discount}
-                          </Badge>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        <span>{product.rating}/5</span>
-                        <span className="text-sm text-gray-500">
-                          ({product.reviewCount} avaliações)
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        <span className="text-sm">{product.availability}</span>
-                        {product.prime && (
-                          <Badge className="text-xs">Prime</Badge>
-                        )}
-                      </div>
-
-                      <div className="text-sm">
-                        <span className="font-medium">Marca:</span> {product.brand}
-                      </div>
-
-                      <div className="text-sm">
-                        <span className="font-medium">Categoria:</span> {product.category}
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="details" className="space-y-3">
-                      {product.bulletPoints && product.bulletPoints.length > 0 && (
-                        <div>
-                          <h4 className="font-medium mb-2">Características:</h4>
-                          <ul className="space-y-1 text-sm">
-                            {product.bulletPoints.slice(0, 5).map((point, i) => (
-                              <li key={i} className="flex items-start gap-2">
-                                <span className="text-blue-500 mt-1">•</span>
-                                <span className="line-clamp-2">{point}</span>
-                              </li>
-                            ))}
-                          </ul>
+            {results.map((product, index) => {
+              const data = product.data;
+              return (
+                <Card key={`product-${data.asin}-${index}`} className="overflow-hidden">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary">Produto {index + 1}</Badge>
+                          <Badge variant="outline">{country}</Badge>
                         </div>
-                      )}
+                        <CardTitle className="text-lg line-clamp-2 mb-2">
+                          {data.product_title || 'Título não disponível'}
+                        </CardTitle>
+                        <div className="text-sm text-gray-600 mb-3">
+                          ASIN: {data.asin}
+                        </div>
+                        {data.product_photo && (
+                          <img 
+                            src={data.product_photo} 
+                            alt={data.product_title || 'Produto'} 
+                            className="w-full h-48 object-cover rounded-md mb-3"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
 
-                      {product.variations && product.variations.length > 0 && (
-                        <div>
-                          <h4 className="font-medium mb-2">Variações:</h4>
+                  <CardContent>
+                    <Tabs defaultValue="overview" className="w-full">
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+                        <TabsTrigger value="details">Detalhes</TabsTrigger>
+                        <TabsTrigger value="specs">Especificações</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="overview" className="space-y-3 mt-4">
+                        <div className="grid grid-cols-1 gap-3">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-green-600" />
+                            <span className="font-semibold text-lg text-green-600">
+                              {data.product_price || 'Preço não disponível'}
+                            </span>
+                            {data.product_original_price && data.product_original_price !== data.product_price && (
+                              <span className="text-sm text-gray-500 line-through">
+                                {data.product_original_price}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                            <span className="font-medium">{data.product_star_rating || 'N/A'}</span>
+                            <span className="text-sm text-gray-600">
+                              ({(data.product_num_ratings || 0).toLocaleString()} avaliações)
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            <span className="text-sm">{data.product_availability || 'N/A'}</span>
+                            {data.is_prime && (
+                              <Badge className="text-xs bg-blue-600">Prime</Badge>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap gap-1">
+                            {data.is_best_seller && (
+                              <Badge className="text-xs bg-orange-600">Best Seller</Badge>
+                            )}
+                            {data.is_amazon_choice && (
+                              <Badge className="text-xs bg-green-600">Amazon's Choice</Badge>
+                            )}
+                            {data.climate_pledge_friendly && (
+                              <Badge className="text-xs bg-emerald-600">Climate Pledge Friendly</Badge>
+                            )}
+                          </div>
+
+                          <div className="text-sm">
+                            <span className="font-medium">Marca:</span> {data.product_byline || 'N/A'}
+                          </div>
+
+                          <div className="text-sm">
+                            <span className="font-medium">Categoria:</span> {data.category?.name || 'N/A'}
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="details" className="space-y-3">
+                        {data.about_product && data.about_product.length > 0 && (
+                          <div>
+                            <h4 className="font-medium mb-2">Características:</h4>
+                            <ul className="space-y-1 text-sm">
+                              {data.about_product.slice(0, 5).map((point, i) => (
+                                <li key={`feature-${data.asin}-${i}`} className="flex items-start gap-2">
+                                  <span className="text-blue-500 mt-1">•</span>
+                                  <span className="line-clamp-2">{point}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {data.product_description && (
+                          <div>
+                            <h4 className="font-medium mb-2">Descrição:</h4>
+                            <p className="text-sm text-gray-600 line-clamp-3">
+                              {data.product_description}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="text-sm space-y-1">
+                          <div><span className="font-medium">Entrega:</span> {data.delivery || 'N/A'}</div>
+                          <div><span className="font-medium">Vendas:</span> {data.sales_volume || 'N/A'}</div>
+                          <div><span className="font-medium">Ofertas:</span> {data.product_num_offers || 0}</div>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="specs" className="space-y-3">
+                        {data.product_information && Object.keys(data.product_information).length > 0 ? (
                           <div className="space-y-2">
-                            {product.variations.map((variation, i) => (
-                              <div key={i} className="text-sm">
-                                <span className="font-medium">{variation.name}:</span>{" "}
-                                {variation.values.slice(0, 3).join(", ")}
-                                {variation.values.length > 3 && "..."}
+                            {Object.entries(data.product_information).slice(0, 8).map(([key, value]) => (
+                              <div key={`spec-${data.asin}-${key}`} className="text-sm">
+                                <span className="font-medium">{key}:</span> {String(value)}
                               </div>
                             ))}
                           </div>
-                        </div>
-                      )}
+                        ) : (
+                          <div className="text-sm text-gray-500">
+                            Especificações não disponíveis
+                          </div>
+                        )}
 
-                      <div className="text-sm">
-                        <span className="font-medium">Vendedor:</span> {product.seller}
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="specs" className="space-y-3">
-                      {product.specifications && Object.keys(product.specifications).length > 0 ? (
-                        <div className="space-y-2">
-                          {Object.entries(product.specifications).slice(0, 8).map(([key, value]) => (
-                            <div key={key} className="text-sm">
-                              <span className="font-medium">{key}:</span> {value}
-                            </div>
-                          ))}
+                        <div className="pt-2 border-t">
+                          <div className="text-sm space-y-1">
+                            <div><span className="font-medium">URL do Produto:</span></div>
+                            <a 
+                              href={data.product_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-xs break-all"
+                            >
+                              Ver no Amazon
+                            </a>
+                          </div>
                         </div>
-                      ) : (
-                        <div className="text-sm text-gray-500">
-                          Especificações não disponíveis
-                        </div>
-                      )}
-
-                      <div className="pt-2 border-t">
-                        <div className="text-sm">
-                          <span className="font-medium">Garantia:</span> {product.warranty || "Não informado"}
-                        </div>
-                        <div className="text-sm">
-                          <span className="font-medium">Envio:</span> {product.shippingInfo || "Não informado"}
-                        </div>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
-            ))}
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}
