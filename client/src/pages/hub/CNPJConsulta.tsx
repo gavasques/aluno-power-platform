@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Search, Building, Users, MapPin, Phone, Mail, Calendar, DollarSign, FileText, ChevronDown, ChevronRight } from 'lucide-react';
 import { useApiRequest } from '@/hooks/useApiRequest';
+import { useAuth } from '@/hooks/useAuth';
 import { CNPJInput, validateCNPJ } from '@/components/common/CNPJInput';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CreditCostButton } from '@/components/CreditCostButton';
@@ -113,6 +114,7 @@ export default function CNPJConsulta() {
   const { balance: userBalance } = useUserCreditBalance();
   const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
   const { toast } = useToast();
+  const { token } = useAuth();
 
   const handleSubmit = async () => {
     if (!validateCNPJ(cnpj)) return;
@@ -125,7 +127,12 @@ export default function CNPJConsulta() {
     }
 
     const data = await execute(
-      () => fetch(`/api/cnpj-consulta?cnpj=${cnpj}`),
+      () => fetch(`/api/cnpj-consulta?cnpj=${cnpj}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }),
     );
 
     if (data) {
