@@ -41,7 +41,7 @@ export function useCreditSystem() {
    */
   const checkCredits = async (featureCode: string): Promise<CreditCheckResult> => {
     try {
-      const dashboardResponse = await fetch('/api/dashboard/summary', {
+      const dashboardResponse = await fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
@@ -52,7 +52,7 @@ export function useCreditSystem() {
       }
 
       const data = await dashboardResponse.json();
-      const currentBalance = data.user?.creditBalance || 0;
+      const currentBalance = parseFloat(data.user?.credits || '0');
       const requiredCredits = getFeatureCost(featureCode);
       const canProcessResult = canProcess(featureCode, currentBalance);
 

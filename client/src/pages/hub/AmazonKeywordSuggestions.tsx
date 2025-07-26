@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Tag } from 'lucide-react';
+import { Search, Tag, CreditCard } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,12 +8,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useApiRequest } from '@/hooks/useApiRequest';
 import { useAuth } from '@/hooks/useAuth';
-import { CreditCostButton } from '@/components/CreditCostButton';
-import { useUserCreditBalance } from '@/hooks/useUserCredits';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CopyButton } from '@/components/common/CopyButton';
-import { useCreditSystem } from '@/hooks/useCreditSystem';
 import { useToast } from '@/hooks/use-toast';
 
 interface KeywordSuggestionsData {
@@ -39,18 +36,20 @@ export default function AmazonKeywordSuggestions() {
   const { execute, loading, error } = useApiRequest<KeywordSuggestionsData>({
     successMessage: 'Sugestões carregadas com sucesso!',
   });
-  const { balance: userBalance } = useUserCreditBalance();
-  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
   const { toast } = useToast();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const handleSearch = async () => {
     if (!keyword.trim()) return;
 
-    // Verificar créditos primeiro
-    const creditCheck = await checkCredits(FEATURE_CODE);
-    if (!creditCheck.canProcess) {
-      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
+    // Verificar créditos simples
+    const userCredits = parseFloat(user?.credits || '0');
+    if (userCredits < 1) {
+      toast({
+        title: "Créditos insuficientes",
+        description: "Você precisa de pelo menos 1 crédito para usar esta ferramenta.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -67,20 +66,6 @@ export default function AmazonKeywordSuggestions() {
     if (data?.suggestions) {
       setSuggestions(data.suggestions);
       setIsExpanded(true);
-      
-      // Registrar log de uso com dedução automática de créditos
-      await logAIGeneration({
-        featureCode: FEATURE_CODE,
-        provider: 'amazon',
-        model: 'keyword-suggestions',
-        prompt: `Sugestões de palavras-chave para: ${keyword}`,
-        response: `${data.suggestions.length} sugestões encontradas`,
-        inputTokens: 0,
-        outputTokens: 0,
-        totalTokens: 0,
-        cost: 0,
-        duration: 0
-      });
     }
   };
 
@@ -122,16 +107,18 @@ export default function AmazonKeywordSuggestions() {
             />
           </div>
 
-          <CreditCostButton
-            featureName="tools.keyword_suggestions"
-            userBalance={userBalance}
-            onProcess={handleSearch}
+          <Button
+            onClick={handleSearch}
             disabled={loading || !keyword.trim()}
             className="w-full"
           >
             <Search className="mr-2 h-4 w-4" />
             {loading ? 'Buscando...' : 'Buscar Sugestões'}
-          </CreditCostButton>
+            <Badge variant="secondary" className="ml-2">
+              <CreditCard className="h-3 w-3 mr-1" />
+              1 crédito
+            </Badge>
+          </Button>
 
           {loading && <LoadingSpinner message="Buscando sugestões..." />}
           

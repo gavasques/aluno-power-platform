@@ -16,12 +16,17 @@ export function useUserCredits() {
   const { user, isAuthenticated } = useAuth();
   
   return useQuery<UserCreditsResponse>({
-    queryKey: ['/api/dashboard/summary'],
+    queryKey: ['/api/auth/me'],
     enabled: !!user && isAuthenticated,
     staleTime: 30 * 1000, // 30 segundos
     gcTime: 60 * 1000, // 1 minuto
-    select: (data) => ({
-      credits: data.credits
+    select: (data: any) => ({
+      credits: {
+        current: parseFloat(data?.user?.credits || '0'),
+        totalEarned: 0,
+        totalSpent: 0,
+        usageThisMonth: '0'
+      }
     })
   });
 }
