@@ -783,15 +783,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **January 26, 2025 - 3:22 PM**: ✅ TVT FILE EXPORT FUNCTIONALITY IMPLEMENTED - AMAZON PRODUCT DETAILS ENHANCED
-  - **Objective Achieved**: Added comprehensive TVT file export feature to Amazon Product Details page
-  - **Export Functionality**: Complete product data export in text format (.tvt files)
+- **January 26, 2025 - 3:22 PM**: ✅ TXT FILE EXPORT FUNCTIONALITY IMPLEMENTED - AMAZON PRODUCT DETAILS ENHANCED
+  - **Objective Achieved**: Added comprehensive TXT file export feature to Amazon Product Details page
+  - **Export Functionality**: Complete product data export in text format (.txt files)
   - **Data Included**: Title, ASIN, country, URL, pricing, ratings, availability, badges, descriptions, features, specifications, image URLs, video URLs
-  - **User Interface**: Added blue export actions card with "Exportar TVT" and "Baixar Imagens" buttons
-  - **File Naming**: Automatic naming convention: Amazon_[ASIN]_[COUNTRY].tvt
+  - **User Interface**: Added blue export actions card with "Exportar TXT" and "Baixar Imagens" buttons
+  - **File Naming**: Automatic naming convention: Amazon_[ASIN]_[COUNTRY].txt
   - **User Experience**: One-click export with toast notification confirmation
   - **Technical Implementation**: Client-side file generation using Blob API with UTF-8 encoding
-  - **Status**: TVT export feature fully operational and ready for user testing
+  - **Status**: TXT export feature fully operational and ready for user testing
 
 - **January 26, 2025 - 2:46 PM**: ✅ AMAZON KEYWORD SUGGESTIONS CREDIT COST CORRECTED - INTERFACE AND DATABASE UPDATED
   - **Objective Achieved**: Corrected Amazon Keyword Suggestions credit cost from 3 to 1 credit per use

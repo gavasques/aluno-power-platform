@@ -333,15 +333,15 @@ export default function AmazonProductDetails() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Amazon_${data.asin}_${data.country}.tvt`;
+    link.download = `Amazon_${data.asin}_${data.country}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
     toast({
-      title: "Arquivo TVT exportado!",
-      description: `Dados do produto ${data.asin} salvos em arquivo TVT.`,
+      title: "Arquivo TXT exportado!",
+      description: `Dados do produto ${data.asin} salvos em arquivo TXT.`,
     });
   };
 
@@ -462,7 +462,7 @@ export default function AmazonProductDetails() {
                     size="sm"
                   >
                     <FileText className="h-4 w-4 mr-2" />
-                    Exportar TVT
+                    Exportar TXT
                   </Button>
                   <Button 
                     onClick={downloadAllImages}
