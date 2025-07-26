@@ -18,8 +18,8 @@ export function useUserCredits() {
   return useQuery<UserCreditsResponse>({
     queryKey: ['/api/auth/me'],
     enabled: !!user && isAuthenticated,
-    staleTime: 30 * 1000, // 30 segundos
-    gcTime: 60 * 1000, // 1 minuto
+    staleTime: 0, // Sempre buscar dados frescos para créditos
+    gcTime: 5 * 1000, // 5 segundos apenas
     select: (data: any) => ({
       credits: {
         current: parseFloat(data?.user?.credits || '0'),

@@ -12,6 +12,7 @@ import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CopyButton } from '@/components/common/CopyButton';
 import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
 
 interface KeywordSuggestionsData {
   meta: {
@@ -66,6 +67,16 @@ export default function AmazonKeywordSuggestions() {
     if (data?.suggestions) {
       setSuggestions(data.suggestions);
       setIsExpanded(true);
+      
+      // Invalidar cache para forçar recarregamento dos créditos
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      queryClient.refetchQueries({ queryKey: ['/api/auth/me'] });
+      
+      toast({
+        title: "Sucesso!",
+        description: `${data.suggestions.length} sugestões encontradas. 1 crédito deduzido.`,
+        variant: "default",
+      });
     }
   };
 
