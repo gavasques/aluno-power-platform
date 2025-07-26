@@ -43,7 +43,7 @@ interface AmazonProductResponse {
 }
 
 function CompararListingsContent() {
-  const [asins, setAsins] = useState<string[]>(["B0D6TXJG28", "B0CYD2QH4F"]);
+  const [asins, setAsins] = useState<string[]>(["", ""]);
   const [country, setCountry] = useState("BR");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<AmazonProductResponse[]>([]);

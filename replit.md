@@ -783,6 +783,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 26, 2025 - 7:00 PM**: ✅ AMAZON LISTINGS COMPARATOR CREDIT SYSTEM UPDATED - 5 CREDITS PER COMPARISON IMPLEMENTED
+  - **Objective Achieved**: Updated credit system to consume exactly 5 credits per comparison regardless of number of products
+  - **Credit System Changes**:
+    - ✅ **Database Configuration**: Updated feature_costs table with cost_per_use = 5 for 'tools.compare_listings'
+    - ✅ **Interface Update**: Card in Ferramentas.tsx now displays "5 créditos" correctly
+    - ✅ **Dedicated API Route**: Created /api/amazon-compare-listings route with proper credit deduction
+    - ✅ **Frontend Integration**: Updated CompararListings.tsx to use new dedicated route
+    - ✅ **Credit Validation**: Validates 5 credits availability before API calls
+  - **User Experience Improvements**:
+    - ✅ **Clean Interface**: Removed pre-filled default ASINs for cleaner user experience
+    - ✅ **Fixed Cost**: 5 credits consumed per comparison regardless of 2-5 products compared
+    - ✅ **Proper Validation**: Credit check before execution with clear error messages
+  - **Technical Implementation**: Single API call for all products instead of individual calls per ASIN
+  - **Status**: Credit system aligned - tool now properly consumes 5 credits per comparison operation
+
 - **January 26, 2025 - 6:40 PM**: ✅ AMAZON PRODUCT COMPARATOR COMPREHENSIVE ENHANCEMENT COMPLETED - FULL DATA DISPLAY IMPLEMENTED
   - **Objective Achieved**: Complete expansion of Amazon product comparison table to show ALL available product information without limitations
   - **Comprehensive Data Display**:
