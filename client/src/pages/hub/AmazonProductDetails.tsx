@@ -947,12 +947,14 @@ export default function AmazonProductDetails() {
                                 {/* Thumbnail da variação */}
                                 {variation.photo && (
                                   <div className="mb-2">
-                                    <img
-                                      src={variation.photo}
-                                      alt={variation.value || `Variação ${index + 1}`}
-                                      className="w-full h-24 object-cover rounded border"
-                                      onClick={() => window.open(variation.photo, '_blank')}
-                                    />
+                                    <div className="aspect-square w-full bg-gray-100 rounded border overflow-hidden">
+                                      <img
+                                        src={variation.photo}
+                                        alt={variation.value || `Variação ${index + 1}`}
+                                        className="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform"
+                                        onClick={() => window.open(variation.photo, '_blank')}
+                                      />
+                                    </div>
                                   </div>
                                 )}
                                 
