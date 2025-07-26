@@ -5045,6 +5045,111 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Amazon Compare Listings API
+  app.post('/api/amazon-compare-listings', requireAuth, async (req, res) => {
+    try {
+      const { asins, country } = req.body;
+      const userId = req.user?.id;
+
+      if (!asins || !Array.isArray(asins) || asins.length < 2) {
+        return res.status(400).json({ 
+          error: 'Campos obrigatórios: asins (array com pelo menos 2 ASINs), country' 
+        });
+      }
+
+      if (asins.length > 5) {
+        return res.status(400).json({ 
+          error: 'Máximo de 5 ASINs permitidos para comparação' 
+        });
+      }
+
+      // Validar todos os ASINs
+      for (const asin of asins) {
+        if (!/^[A-Z0-9]{10}$/i.test(asin)) {
+          return res.status(400).json({ 
+            error: `ASIN inválido: ${asin}. Deve ter 10 caracteres alfanuméricos.` 
+          });
+        }
+      }
+
+      // Descontar 5 créditos ANTES da chamada da API
+      try {
+        const creditsDeducted = await CreditService.deductCredits(userId, 'tools.compare_listings');
+        console.log(`✅ [CREDIT] Successfully deducted ${creditsDeducted} credits for tools.compare_listings - User: ${userId}`);
+      } catch (creditError) {
+        console.error(`❌ [CREDIT] Failed to deduct credits:`, creditError);
+        return res.status(402).json({ 
+          error: 'Créditos insuficientes',
+          details: creditError.message 
+        });
+      }
+
+      // Fazer chamadas para todos os ASINs
+      const results = await Promise.all(
+        asins.map(async (asin) => {
+          try {
+            const response = await fetch(`https://real-time-amazon-data.p.rapidapi.com/product-details?asin=${asin}&country=${country}`, {
+              method: 'GET',
+              headers: {
+                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
+                'X-RapidAPI-Host': 'real-time-amazon-data.p.rapidapi.com',
+                'X-RapidAPI-App': 'default-application_10763288',
+                'Host': 'real-time-amazon-data.p.rapidapi.com'
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error(`API Error for ${asin}: ${response.status} ${response.statusText}`);
+            }
+
+            return await response.json();
+          } catch (error) {
+            console.error(`❌ [AMAZON_COMPARE] Error fetching ${asin}:`, error);
+            return { 
+              status: 'ERROR', 
+              asin, 
+              error: error.message 
+            };
+          }
+        })
+      );
+
+      console.log(`✅ [AMAZON_COMPARE] Comparação concluída - ${asins.length} produtos`);
+
+      // Log da comparação na tabela ai_generation_logs
+      try {
+        await LoggingService.saveApiLog(
+          userId, 
+          'tools.compare_listings',
+          `Amazon Compare Listings: ASINs ${asins.join(', ')}, Country ${country}`,
+          JSON.stringify(results),
+          'rapidapi',
+          'real-time-amazon-data',
+          0,
+          0,
+          5 // 5 créditos usados
+        );
+      } catch (logError) {
+        console.error('❌ Erro ao salvar log de API:', logError);
+      }
+
+      res.json({ 
+        success: true,
+        results,
+        asins,
+        country,
+        totalProducts: results.length
+      });
+
+    } catch (error) {
+      console.error('❌ [AMAZON_COMPARE] Erro na comparação:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        details: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
   // Amazon Product Details API
   app.post('/api/amazon-product-details', requireAuth, async (req, res) => {
     try {

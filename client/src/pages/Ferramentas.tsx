@@ -105,7 +105,7 @@ const ferramentas = [
     href: "/ferramentas/comparar-listings",
     icon: Package,
     category: "Amazon",
-    credits: 2,
+    credits: 5,
     permission: "tools.compare_listings"
   },
   {

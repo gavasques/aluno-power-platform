@@ -88,9 +88,9 @@ function CompararListingsContent() {
       return;
     }
 
-    // Verificar créditos necessários
-    const creditsNeeded = validAsins.length;
-    const creditCheck = await checkCredits('tools.product_details');
+    // Verificar créditos necessários - ferramenta de comparação custa 5 créditos fixos
+    const creditsNeeded = 5;
+    const creditCheck = await checkCredits('tools.compare_listings');
     if (!creditCheck.canProcess) {
       toast({
         title: "Créditos insuficientes",
@@ -105,32 +105,30 @@ function CompararListingsContent() {
     setResults([]);
 
     try {
-      const promises = validAsins.map(async (asin) => {
-        const response = await fetch('/api/amazon-product-details', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ asin: asin.trim(), country })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(`Erro ao buscar produto ${asin}: ${errorData.error || response.statusText}`);
-        }
-
-        const data = await response.json();
-        
-        // Verificar se a resposta contém dados válidos
-        if (!data || data.status !== 'OK') {
-          throw new Error(`Produto ${asin} não encontrado ou dados inválidos`);
-        }
-
-        return data;
+      const response = await fetch('/api/amazon-compare-listings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          asins: validAsins.map(asin => asin.trim()), 
+          country 
+        })
       });
 
-      const productsData = await Promise.all(promises);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Erro na comparação: ${errorData.error || response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success || !data.results) {
+        throw new Error('Erro na resposta da comparação');
+      }
+
+      const productsData = data.results;
       console.log('Dados recebidos da API:', productsData);
       
       setResults(productsData);
