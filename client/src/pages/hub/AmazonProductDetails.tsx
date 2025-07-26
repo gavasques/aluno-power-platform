@@ -759,30 +759,76 @@ export default function AmazonProductDetails() {
               isExpanded={expandedSections.videos}
               onToggle={() => toggleSection('videos')}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {productData.data.product_photos_videos
-                  .filter(item => item.type === 'video')
-                  .map((video, index) => (
-                    <div key={index} className="relative bg-gray-100 rounded-lg overflow-hidden">
-                      <video
-                        src={video.url}
-                        controls
-                        className="w-full h-48 object-cover"
-                        preload="metadata"
-                      >
-                        Seu navegador não suporta o elemento de vídeo.
-                      </video>
-                      <div className="absolute top-2 right-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.open(video.url, '_blank')}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-gray-600">
+                    {productData.data.product_photos_videos.filter(item => item.type === 'video').length} vídeo(s) disponível(is)
+                  </p>
+                  <Button 
+                    onClick={() => {
+                      productData.data.product_photos_videos
+                        .filter(item => item.type === 'video')
+                        .forEach((video, index) => {
+                          setTimeout(() => {
+                            window.open(video.url, '_blank');
+                          }, index * 200);
+                        });
+                    }} 
+                    size="sm"
+                    variant="outline"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Abrir Todos
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {productData.data.product_photos_videos
+                    .filter(item => item.type === 'video')
+                    .map((video, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+                          <video
+                            src={video.url}
+                            controls
+                            className="w-full h-48 object-cover"
+                            preload="metadata"
+                            poster={video.thumbnail || undefined}
+                          >
+                            Seu navegador não suporta o elemento de vídeo.
+                          </video>
+                          <div className="absolute top-2 right-2 flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = video.url;
+                                link.download = `video_${productData.data.asin}_${index + 1}.mp4`;
+                                link.click();
+                              }}
+                              title="Baixar vídeo"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(video.url, '_blank')}
+                              title="Abrir em nova aba"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          <p>Vídeo {index + 1}</p>
+                          {video.duration && <p>Duração: {video.duration}</p>}
+                          {video.title && <p className="font-medium">{video.title}</p>}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                </div>
               </div>
             </ExpandableSection>
           )}
@@ -795,36 +841,89 @@ export default function AmazonProductDetails() {
               isExpanded={expandedSections.variations}
               onToggle={() => toggleSection('variations')}
             >
-              <div className="space-y-4">
+              <div className="space-y-6">
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    <Info className="h-4 w-4 inline mr-2" />
+                    Este produto possui {Object.keys(productData.data.product_variations).length} tipo(s) de variação disponível(is)
+                  </p>
+                </div>
+
                 {Object.entries(productData.data.product_variations).map(([variationType, variations]) => (
-                  <div key={variationType} className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-3 capitalize">
-                      {variationType.replace(/_/g, ' ')}
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
+                  <div key={variationType} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-gray-900 text-lg capitalize flex items-center gap-2">
+                        <Tags className="h-5 w-5 text-blue-600" />
+                        {variationType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </h4>
+                      <Badge variant="secondary" className="text-xs">
+                        {Array.isArray(variations) ? variations.length : 
+                         typeof variations === 'object' && variations !== null ? Object.keys(variations).length : 1} opção(ões)
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-3">
                       {Array.isArray(variations) ? (
-                        variations.map((variation, index) => (
-                          <Badge key={index} variant="outline" className="text-sm">
-                            {String(variation)}
-                          </Badge>
-                        ))
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                          {variations.map((variation, index) => (
+                            <div key={index} className="relative group">
+                              <Badge 
+                                variant="outline" 
+                                className="text-sm w-full justify-center py-2 hover:bg-blue-50 transition-colors cursor-pointer"
+                                title={`Opção ${index + 1}: ${String(variation)}`}
+                              >
+                                {String(variation)}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
                       ) : typeof variations === 'object' && variations !== null ? (
-                        Object.entries(variations).map(([key, value]) => (
-                          <div key={key} className="flex flex-col gap-1">
-                            <span className="text-xs text-gray-600 font-medium">{key}:</span>
-                            <Badge variant="outline" className="text-sm">
-                              {String(value)}
-                            </Badge>
-                          </div>
-                        ))
+                        <div className="space-y-2">
+                          {Object.entries(variations).map(([key, value]) => (
+                            <div key={key} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                              <span className="text-sm font-medium text-gray-700 capitalize">
+                                {key.replace(/_/g, ' ')}:
+                              </span>
+                              <Badge variant="outline" className="text-sm">
+                                {String(value)}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
                       ) : (
                         <Badge variant="outline" className="text-sm">
                           {String(variations)}
                         </Badge>
                       )}
                     </div>
+
+                    {/* Informações adicionais sobre a variação */}
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <p className="text-xs text-gray-500">
+                        Tipo de variação: <span className="font-medium">{variationType}</span>
+                        {Array.isArray(variations) && variations.length > 5 && (
+                          <span className="ml-2 text-blue-600">• Múltiplas opções disponíveis</span>
+                        )}
+                      </p>
+                    </div>
                   </div>
                 ))}
+
+                {/* Resumo das variações */}
+                <div className="bg-gray-50 p-4 rounded-lg border">
+                  <h5 className="font-medium text-gray-900 mb-2">Resumo das Variações</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                    {Object.entries(productData.data.product_variations).map(([type, vars]) => (
+                      <div key={type} className="flex justify-between">
+                        <span className="text-gray-600 capitalize">{type.replace(/_/g, ' ')}:</span>
+                        <span className="font-medium">
+                          {Array.isArray(vars) ? `${vars.length} opções` : 
+                           typeof vars === 'object' && vars !== null ? `${Object.keys(vars).length} atributos` : '1 opção'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </ExpandableSection>
           )}
