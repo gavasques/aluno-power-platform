@@ -390,6 +390,60 @@ export default function AmazonProductDetails() {
       tvtContent += '\n';
     }
 
+    // Variações do Produto
+    if (data.variants && data.variants.length > 0) {
+      tvtContent += `=== VARIAÇÕES DO PRODUTO ===\n`;
+      data.variants.forEach((variant, index) => {
+        tvtContent += `Variação ${index + 1}:\n`;
+        if (variant.asin) tvtContent += `  ASIN: ${variant.asin}\n`;
+        if (variant.value) tvtContent += `  Nome: ${variant.value}\n`;
+        if (variant.photo) tvtContent += `  Imagem: ${variant.photo}\n`;
+        if (variant.price) tvtContent += `  Preço: ${variant.price}\n`;
+        if (variant.link) tvtContent += `  Link: ${variant.link}\n`;
+        tvtContent += '\n';
+      });
+    }
+
+    // Vídeo do Produto
+    if (data.product_video) {
+      tvtContent += `=== VÍDEO DO PRODUTO ===\n`;
+      tvtContent += `URL do Vídeo: ${data.product_video}\n\n`;
+    }
+
+    // Imagens do Produto
+    if (data.product_photos && data.product_photos.length > 0) {
+      tvtContent += `=== IMAGENS DO PRODUTO ===\n`;
+      data.product_photos.forEach((photo, index) => {
+        tvtContent += `Imagem ${index + 1}: ${photo}\n`;
+      });
+      tvtContent += '\n';
+    }
+
+    // Características Adicionais
+    if (data.feature_bullets && data.feature_bullets.length > 0) {
+      tvtContent += `=== CARACTERÍSTICAS DESTACADAS ===\n`;
+      data.feature_bullets.forEach((bullet, index) => {
+        tvtContent += `${index + 1}. ${bullet}\n`;
+      });
+      tvtContent += '\n';
+    }
+
+    // Informações de Envio
+    if (data.delivery) {
+      tvtContent += `=== INFORMAÇÕES DE ENVIO ===\n`;
+      tvtContent += `${data.delivery}\n\n`;
+    }
+
+    // Categoria e Rankings
+    if (data.categories && data.categories.length > 0) {
+      tvtContent += `=== CATEGORIAS ===\n`;
+      data.categories.forEach((category, index) => {
+        tvtContent += `${index + 1}. ${category.name}\n`;
+        if (category.link) tvtContent += `   Link: ${category.link}\n`;
+      });
+      tvtContent += '\n';
+    }
+
     // Criar e baixar arquivo
     const blob = new Blob([tvtContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
