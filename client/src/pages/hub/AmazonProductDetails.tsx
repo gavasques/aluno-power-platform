@@ -56,6 +56,8 @@ interface ProductData {
     is_amazon_choice: boolean;
     is_prime: boolean;
     climate_pledge_friendly: boolean;
+    has_aplus: boolean;
+    has_brandstory: boolean;
     sales_volume: string;
     product_description: string;
     about_product: string[];
@@ -153,7 +155,8 @@ export default function AmazonProductDetails() {
     videos: false,
     ranking: false,
     variations: false,
-    ratings: false
+    ratings: false,
+    category: false
   });
 
   const { execute, loading, error } = useApiRequest<ProductData>({
@@ -269,6 +272,8 @@ export default function AmazonProductDetails() {
     if (data.is_amazon_choice) badges.push('Amazon Choice');
     if (data.is_prime) badges.push('Prime');
     if (data.climate_pledge_friendly) badges.push('Climate Pledge Friendly');
+    if (data.has_aplus) badges.push('A+ Content');
+    if (data.has_brandstory) badges.push('Brand Story');
     if (badges.length > 0) {
       tvtContent += `Badges: ${badges.join(', ')}\n`;
     }
@@ -334,6 +339,55 @@ export default function AmazonProductDetails() {
           tvtContent += `${index + 1}. ${item.url}\n`;
         });
       }
+    }
+
+    // Categoria e Hierarquia
+    if (data.category || (data.category_path && data.category_path.length > 0)) {
+      tvtContent += `\n=== CATEGORIA ===\n`;
+      if (data.category) {
+        tvtContent += `Categoria Principal: ${data.category.name}\n`;
+      }
+      if (data.category_path && data.category_path.length > 0) {
+        tvtContent += `Caminho da Categoria: ${data.category_path.map(cat => cat.name).join(' > ')}\n`;
+        tvtContent += `Links das Categorias:\n`;
+        data.category_path.forEach((cat, index) => {
+          tvtContent += `${index + 1}. ${cat.name}: ${cat.link}\n`;
+        });
+      }
+      tvtContent += '\n';
+    }
+
+    // Variações do Produto
+    if (data.product_variations && Object.keys(data.product_variations).length > 0) {
+      tvtContent += `=== VARIAÇÕES DO PRODUTO ===\n`;
+      Object.entries(data.product_variations).forEach(([variationType, variations]) => {
+        tvtContent += `${variationType.replace(/_/g, ' ').toUpperCase()}:\n`;
+        if (Array.isArray(variations)) {
+          variations.forEach((variation, index) => {
+            tvtContent += `${index + 1}. ${variation}\n`;
+          });
+        } else if (typeof variations === 'object' && variations !== null) {
+          Object.entries(variations).forEach(([key, value]) => {
+            tvtContent += `- ${key}: ${value}\n`;
+          });
+        } else {
+          tvtContent += `- ${variations}\n`;
+        }
+        tvtContent += '\n';
+      });
+    }
+
+    // Distribuição de Avaliações
+    if (data.rating_distribution && Object.keys(data.rating_distribution).length > 0) {
+      tvtContent += `=== DISTRIBUIÇÃO DE AVALIAÇÕES ===\n`;
+      const total = Object.values(data.rating_distribution).reduce((sum, val) => sum + val, 0);
+      Object.entries(data.rating_distribution)
+        .sort(([a], [b]) => parseInt(b) - parseInt(a))
+        .forEach(([rating, count]) => {
+          const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : '0.0';
+          tvtContent += `${rating} estrelas: ${count.toLocaleString()} avaliações (${percentage}%)\n`;
+        });
+      tvtContent += '\n';
     }
 
     // Criar e baixar arquivo
@@ -547,6 +601,18 @@ export default function AmazonProductDetails() {
                         Climate Pledge Friendly
                       </Badge>
                     )}
+                    {productData.data.has_aplus && (
+                      <Badge variant="outline" className="text-blue-700 border-blue-300 bg-blue-50">
+                        <Star className="h-3 w-3 mr-1" />
+                        A+ Content
+                      </Badge>
+                    )}
+                    {productData.data.has_brandstory && (
+                      <Badge variant="outline" className="text-purple-700 border-purple-300 bg-purple-50">
+                        <Award className="h-3 w-3 mr-1" />
+                        Brand Story
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -679,6 +745,163 @@ export default function AmazonProductDetails() {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                )}
+              </div>
+            </ExpandableSection>
+          )}
+
+          {/* Vídeos */}
+          {productData.data.product_photos_videos?.filter(item => item.type === 'video').length > 0 && (
+            <ExpandableSection
+              title="Vídeos do Produto"
+              icon={Video}
+              isExpanded={expandedSections.videos}
+              onToggle={() => toggleSection('videos')}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {productData.data.product_photos_videos
+                  .filter(item => item.type === 'video')
+                  .map((video, index) => (
+                    <div key={index} className="relative bg-gray-100 rounded-lg overflow-hidden">
+                      <video
+                        src={video.url}
+                        controls
+                        className="w-full h-48 object-cover"
+                        preload="metadata"
+                      >
+                        Seu navegador não suporta o elemento de vídeo.
+                      </video>
+                      <div className="absolute top-2 right-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(video.url, '_blank')}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </ExpandableSection>
+          )}
+
+          {/* Variações do Produto */}
+          {productData.data.product_variations && Object.keys(productData.data.product_variations).length > 0 && (
+            <ExpandableSection
+              title="Variações do Produto"
+              icon={Palette}
+              isExpanded={expandedSections.variations}
+              onToggle={() => toggleSection('variations')}
+            >
+              <div className="space-y-4">
+                {Object.entries(productData.data.product_variations).map(([variationType, variations]) => (
+                  <div key={variationType} className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-3 capitalize">
+                      {variationType.replace(/_/g, ' ')}
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.isArray(variations) ? (
+                        variations.map((variation, index) => (
+                          <Badge key={index} variant="outline" className="text-sm">
+                            {String(variation)}
+                          </Badge>
+                        ))
+                      ) : typeof variations === 'object' && variations !== null ? (
+                        Object.entries(variations).map(([key, value]) => (
+                          <div key={key} className="flex flex-col gap-1">
+                            <span className="text-xs text-gray-600 font-medium">{key}:</span>
+                            <Badge variant="outline" className="text-sm">
+                              {String(value)}
+                            </Badge>
+                          </div>
+                        ))
+                      ) : (
+                        <Badge variant="outline" className="text-sm">
+                          {String(variations)}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ExpandableSection>
+          )}
+
+          {/* Avaliações e Distribuição */}
+          {productData.data.rating_distribution && Object.keys(productData.data.rating_distribution).length > 0 && (
+            <ExpandableSection
+              title="Distribuição de Avaliações"
+              icon={BarChart}
+              isExpanded={expandedSections.ratings}
+              onToggle={() => toggleSection('ratings')}
+            >
+              <div className="space-y-3">
+                {Object.entries(productData.data.rating_distribution)
+                  .sort(([a], [b]) => parseInt(b) - parseInt(a))
+                  .map(([rating, count]) => {
+                    const total = Object.values(productData.data.rating_distribution).reduce((sum, val) => sum + val, 0);
+                    const percentage = total > 0 ? (count / total) * 100 : 0;
+                    
+                    return (
+                      <div key={rating} className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 min-w-[60px]">
+                          <span className="text-sm font-medium">{rating}</span>
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        </div>
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-yellow-400 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <div className="text-sm text-gray-600 min-w-[80px] text-right">
+                          {count.toLocaleString()} ({percentage.toFixed(1)}%)
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </ExpandableSection>
+          )}
+
+          {/* Categoria e Hierarquia */}
+          {(productData.data.category || productData.data.category_path?.length > 0) && (
+            <ExpandableSection
+              title="Categoria e Hierarquia"
+              icon={TrendingUp}
+              isExpanded={expandedSections.category}
+              onToggle={() => toggleSection('category')}
+            >
+              <div className="space-y-4">
+                {productData.data.category && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Categoria Principal:</h4>
+                    <Badge variant="outline" className="text-sm">
+                      {productData.data.category.name}
+                    </Badge>
+                  </div>
+                )}
+
+                {productData.data.category_path && productData.data.category_path.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Caminho da Categoria:</h4>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {productData.data.category_path.map((cat, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          {index > 0 && <span className="text-gray-400">/</span>}
+                          <a
+                            href={cat.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 text-sm underline"
+                          >
+                            {cat.name}
+                          </a>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
