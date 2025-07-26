@@ -21,7 +21,7 @@ export function useWebSocket() {
     // WebSocket connections disabled for stability
     logger.debug('🔌 [WS_CLIENT] WebSocket connections disabled');
     return;
-    
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
     // Ensure proper URL format for WebSocket connection
@@ -191,10 +191,10 @@ export function useWebSocket() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host;
       const wsUrl = `${protocol}//${host}/ws`;
-      
+
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
-      
+
       ws.onopen = () => setIsConnected(true);
       ws.onclose = () => setIsConnected(false);
       ws.onerror = () => setIsConnected(false);

@@ -16,9 +16,9 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
       authorization: req.headers.authorization ? 'Bearer ' + req.headers.authorization.substring(7, 17) + '...' : 'missing',
       'user-agent': req.headers['user-agent']?.substring(0, 50) + '...'
     });
-    
+
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log('🔍 [AUTH] Missing or invalid authorization header');
       return res.status(401).json({ error: 'Authentication required - please login again' });
@@ -26,7 +26,7 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
 
     const token = authHeader.substring(7);
     console.log('🔍 [AUTH] Extracted token:', token.substring(0, 10) + '...');
-    
+
     if (!token || token === 'null' || token === 'undefined') {
       console.log('🔍 [AUTH] Invalid token format');
       return res.status(401).json({ error: 'Authentication required - please login again' });
@@ -35,7 +35,7 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
     // Validate JWT token
     const decoded = AuthService.verifyToken(token);
     console.log('🔍 [AUTH] Token validation result:', decoded ? 'valid' : 'invalid');
-    
+
     if (!decoded || !decoded.userId) {
       console.log('🔍 [AUTH] Token validation failed');
       return res.status(401).json({ error: 'Authentication required - please login again' });
@@ -43,7 +43,7 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
 
     // Get user from database
     const user = await AuthService.getUserById(decoded.userId);
-    
+
     if (!user || !user.isActive) {
       console.log('🔍 [AUTH] User not found or inactive:', { userId: decoded.userId, userFound: !!user, isActive: user?.isActive });
       return res.status(401).json({ error: 'Authentication required - please login again' });

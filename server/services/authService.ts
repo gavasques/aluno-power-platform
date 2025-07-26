@@ -45,7 +45,7 @@ export class AuthService {
   static recordFailedAttempt(email: string): void {
     const now = new Date();
     const attempts = failedAttempts.get(email) || { count: 0, lastAttempt: now };
-    
+
     // Reset if outside window
     const windowStart = new Date(now.getTime() - this.ATTEMPT_WINDOW_MINUTES * 60000);
     if (attempts.lastAttempt < windowStart) {
@@ -98,27 +98,27 @@ export class AuthService {
   // Enhanced password strength requirements
   static validatePasswordStrength(password: string): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
+
     if (password.length < 12) {
       errors.push('Password must be at least 12 characters long');
     }
-    
+
     if (password.length > 128) {
       errors.push('Password must be less than 128 characters');
     }
-    
+
     if (!/[A-Z]/.test(password)) {
       errors.push('Password must contain at least one uppercase letter');
     }
-    
+
     if (!/[a-z]/.test(password)) {
       errors.push('Password must contain at least one lowercase letter');
     }
-    
+
     if (!/[0-9]/.test(password)) {
       errors.push('Password must contain at least one number');
     }
-    
+
     if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
       errors.push('Password must contain at least one special character');
     }
@@ -128,7 +128,7 @@ export class AuthService {
     if (commonPasswords.some(weak => password.toLowerCase().includes(weak))) {
       errors.push('Cannot contain common weak patterns');
     }
-    
+
     return {
       valid: errors.length === 0,
       errors
@@ -180,9 +180,9 @@ export class AuthService {
     if (!passwordValidation.valid) {
       throw new Error(`Password validation failed: ${passwordValidation.errors.join(', ')}`);
     }
-    
+
     const hashedPassword = await this.hashPassword(userData.password);
-    
+
     const [user] = await db
       .insert(users)
       .values({
@@ -232,7 +232,7 @@ export class AuthService {
       }
 
       const user = await this.authenticateUserByEmail(credentials.email, credentials.password);
-      
+
       if (!user) {
         throw AuthError.invalidCredentials();
       }
@@ -241,7 +241,7 @@ export class AuthService {
       const jwtToken = this.generateToken(user.id);
 
       console.log('AUTH - Successful login for:', this.maskEmail(credentials.email));
-      
+
       return AuthError.createResponse({
         user: this.sanitizeUser(user),
         token: jwtToken
@@ -268,7 +268,7 @@ export class AuthService {
 
       // Check if user already exists
       const existingUser = await this.getUserByEmail(userData.email);
-      
+
       if (existingUser) {
         throw AuthError.userExists();
       }
@@ -299,14 +299,14 @@ export class AuthService {
   // Legacy method - kept for backward compatibility
   static async authenticateUserByEmail(email: string, password: string): Promise<User | null> {
     console.log('🔍 AUTH SERVICE - Searching for user by email:', email);
-    
+
     // Check if account is locked
     const lockStatus = this.isAccountLocked(email);
     if (lockStatus.locked) {
       console.log('🔍 AUTH SERVICE - Account locked', { email, minutesRemaining: lockStatus.minutesRemaining });
       throw AuthError.accountLocked(lockStatus.minutesRemaining);
     }
-    
+
     const [user] = await db
       .select()
       .from(users)
@@ -333,7 +333,7 @@ export class AuthService {
 
     console.log('🔍 AUTH SERVICE - Comparing passwords for user:', user.email);
     const isValidPassword = await this.comparePassword(password, user.password);
-    
+
     console.log('🔍 AUTH SERVICE - Password comparison result:', {
       email: user.email,
       isValidPassword
@@ -426,7 +426,7 @@ export class AuthService {
           });
           return session.user;
         }
-        
+
         // Only try decrypting if the token looks encrypted (contains base64 characters like + or /)
         if (session.session.sessionToken.includes('+') || session.session.sessionToken.includes('/')) {
           try {
