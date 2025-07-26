@@ -85,7 +85,7 @@ function CompararListingsContent() {
 
     // Verificar créditos necessários
     const creditsNeeded = validAsins.length;
-    const creditCheck = await checkCredits('tools.product_details', creditsNeeded);
+    const creditCheck = await checkCredits('tools.product_details');
     if (!creditCheck.canProcess) {
       toast({
         title: "Créditos insuficientes",
@@ -208,7 +208,7 @@ function CompararListingsContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <div className="w-screen min-h-screen bg-gray-50 px-1 py-3">
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
           <Package className="h-8 w-8" />
@@ -219,14 +219,14 @@ function CompararListingsContent() {
         </p>
       </div>
 
-      <Card className="mb-6">
+      <Card className="mb-6 w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
             Buscar Produtos
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 w-full">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <label className="block text-sm font-medium mb-2">País</label>
@@ -319,13 +319,13 @@ function CompararListingsContent() {
           </div>
 
           {/* COMPARAÇÃO LADO A LADO - TABELA COMPLETA */}
-          <div className="bg-white rounded-lg border shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
+          <div className="bg-white rounded-lg border shadow-sm w-full overflow-hidden">
+            <div className="overflow-x-auto" style={{maxWidth: '100vw'}}>
+              <table className="w-full border-collapse table-auto" style={{minWidth: '100vw'}}>
                 {/* HEADER - IMAGENS E TÍTULOS */}
                 <thead className="bg-gray-50">
                   <tr>
-                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 min-w-[120px]">
+                    <td className="p-3 border-r border-gray-200 font-medium text-gray-900 w-32 bg-gray-50 sticky left-0 z-20">
                       Campo
                     </td>
                     {results.map((product, index) => {
@@ -333,7 +333,7 @@ function CompararListingsContent() {
                       const asin = data.asin || asins[index] || `produto-${index}`;
                       const uniqueKey = `header-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={uniqueKey} className="p-4 border-r border-gray-200 text-center min-w-[300px]">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 text-center w-1/4 min-w-[280px]">
                           <div className="space-y-3">
                             <div className="text-sm font-medium text-gray-600">Produto {index + 1}</div>
                             {data.product_photo ? (
@@ -371,7 +371,7 @@ function CompararListingsContent() {
                 <tbody>
                   {/* PREÇO */}
                   <tr className="border-b border-gray-100">
-                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                    <td className="p-3 border-r border-gray-200 font-medium text-gray-900 bg-gray-50 sticky left-0 z-10 w-32">
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-green-600" />
                         Preço
