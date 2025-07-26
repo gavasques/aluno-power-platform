@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Package, Search, Download, Star, DollarSign, Globe, Truck, Award } from "lucide-react";
+import { Package, Search, Download, Star, DollarSign, ExternalLink, Award, Truck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useCreditSystem } from "@/hooks/useCreditSystem";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
@@ -215,7 +214,7 @@ function CompararListingsContent() {
           Comparar Listings Amazon
         </h1>
         <p className="text-sm sm:text-base text-gray-600">
-          Compare informações detalhadas entre múltiplos produtos Amazon usando ASINs
+          Compare informações detalhadas entre múltiplos produtos Amazon lado a lado
         </p>
       </div>
 
@@ -306,7 +305,7 @@ function CompararListingsContent() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-900">
-              Resultados da Comparação ({results.length} produtos)
+              Comparação lado a lado ({results.length} produtos)
             </h2>
             <Button onClick={exportToTxt} variant="outline" className="flex items-center gap-2">
               <Download className="h-4 w-4" />
@@ -314,164 +313,260 @@ function CompararListingsContent() {
             </Button>
           </div>
 
-          {/* Exibição lado a lado para comparação */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {results.map((product, index) => {
-              const data = product.data;
-              return (
-                <Card key={`product-${data.asin}-${index}`} className="overflow-hidden">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="secondary">Produto {index + 1}</Badge>
-                          <Badge variant="outline">{country}</Badge>
-                        </div>
-                        <CardTitle className="text-lg line-clamp-2 mb-2">
-                          {data.product_title || 'Título não disponível'}
-                        </CardTitle>
-                        <div className="text-sm text-gray-600 mb-3">
-                          ASIN: {data.asin}
-                        </div>
-                        {data.product_photo && (
-                          <img 
-                            src={data.product_photo} 
-                            alt={data.product_title || 'Produto'} 
-                            className="w-full h-48 object-cover rounded-md mb-3"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        )}
+          {/* COMPARAÇÃO LADO A LADO - TABELA COMPLETA */}
+          <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                {/* HEADER - IMAGENS E TÍTULOS */}
+                <thead className="bg-gray-50">
+                  <tr>
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 min-w-[120px]">
+                      Campo
+                    </td>
+                    {results.map((product, index) => {
+                      const data = product.data;
+                      return (
+                        <td key={`header-${data.asin}`} className="p-4 border-r border-gray-200 text-center min-w-[300px]">
+                          <div className="space-y-3">
+                            <div className="text-sm font-medium text-gray-600">Produto {index + 1}</div>
+                            {data.product_photo && (
+                              <img 
+                                src={data.product_photo} 
+                                alt={data.product_title || 'Produto'} 
+                                className="w-24 h-24 object-cover rounded-md mx-auto"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            )}
+                            <div className="text-sm font-semibold line-clamp-2">
+                              {data.product_title || 'Título não disponível'}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              ASIN: {data.asin}
+                            </div>
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                
+                <tbody>
+                  {/* PREÇO */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-green-600" />
+                        Preço
                       </div>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent>
-                    <Tabs defaultValue="overview" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-                        <TabsTrigger value="details">Detalhes</TabsTrigger>
-                        <TabsTrigger value="specs">Especificações</TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value="overview" className="space-y-3 mt-4">
-                        <div className="grid grid-cols-1 gap-3">
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4 text-green-600" />
-                            <span className="font-semibold text-lg text-green-600">
-                              {data.product_price || 'Preço não disponível'}
-                            </span>
+                    </td>
+                    {results.map((product) => {
+                      const data = product.data;
+                      return (
+                        <td key={`price-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                          <div className="space-y-1">
+                            <div className="text-lg font-bold text-green-600">
+                              {data.product_price || 'N/A'}
+                            </div>
                             {data.product_original_price && data.product_original_price !== data.product_price && (
-                              <span className="text-sm text-gray-500 line-through">
+                              <div className="text-sm text-gray-500 line-through">
                                 {data.product_original_price}
-                              </span>
+                              </div>
                             )}
                           </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
 
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                            <span className="font-medium">{data.product_star_rating || 'N/A'}</span>
-                            <span className="text-sm text-gray-600">
-                              ({(data.product_num_ratings || 0).toLocaleString()} avaliações)
-                            </span>
+                  {/* AVALIAÇÃO */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        Avaliação
+                      </div>
+                    </td>
+                    {results.map((product) => {
+                      const data = product.data;
+                      return (
+                        <td key={`rating-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                              <span className="font-medium">{data.product_star_rating || 'N/A'}</span>
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {(data.product_num_ratings || 0).toLocaleString()} avaliações
+                            </div>
                           </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
 
-                          <div className="flex items-center gap-2">
-                            <Package className="h-4 w-4" />
-                            <span className="text-sm">{data.product_availability || 'N/A'}</span>
-                            {data.is_prime && (
-                              <Badge className="text-xs bg-blue-600">Prime</Badge>
-                            )}
+                  {/* DISPONIBILIDADE */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        Disponibilidade
+                      </div>
+                    </td>
+                    {results.map((product) => {
+                      const data = product.data;
+                      return (
+                        <td key={`availability-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                          <div className="space-y-2">
+                            <div className="text-sm">{data.product_availability || 'N/A'}</div>
+                            <div className="flex flex-wrap justify-center gap-1">
+                              {data.is_prime && <Badge className="text-xs bg-blue-600">Prime</Badge>}
+                              {data.is_best_seller && <Badge className="text-xs bg-orange-600">Best Seller</Badge>}
+                              {data.is_amazon_choice && <Badge className="text-xs bg-green-600">Amazon's Choice</Badge>}
+                            </div>
                           </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
 
-                          <div className="flex flex-wrap gap-1">
-                            {data.is_best_seller && (
-                              <Badge className="text-xs bg-orange-600">Best Seller</Badge>
-                            )}
-                            {data.is_amazon_choice && (
-                              <Badge className="text-xs bg-green-600">Amazon's Choice</Badge>
-                            )}
-                            {data.climate_pledge_friendly && (
-                              <Badge className="text-xs bg-emerald-600">Climate Pledge Friendly</Badge>
-                            )}
+                  {/* MARCA E CATEGORIA */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Marca / Categoria
+                    </td>
+                    {results.map((product) => {
+                      const data = product.data;
+                      return (
+                        <td key={`brand-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                          <div className="space-y-1 text-sm">
+                            <div><strong>Marca:</strong> {data.product_byline || 'N/A'}</div>
+                            <div><strong>Categoria:</strong> {data.category?.name || 'N/A'}</div>
                           </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
 
-                          <div className="text-sm">
-                            <span className="font-medium">Marca:</span> {data.product_byline || 'N/A'}
-                          </div>
-
-                          <div className="text-sm">
-                            <span className="font-medium">Categoria:</span> {data.category?.name || 'N/A'}
-                          </div>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="details" className="space-y-3">
-                        {data.about_product && data.about_product.length > 0 && (
-                          <div>
-                            <h4 className="font-medium mb-2">Características:</h4>
-                            <ul className="space-y-1 text-sm">
-                              {data.about_product.slice(0, 5).map((point, i) => (
-                                <li key={`feature-${data.asin}-${i}`} className="flex items-start gap-2">
-                                  <span className="text-blue-500 mt-1">•</span>
-                                  <span className="line-clamp-2">{point}</span>
+                  {/* CARACTERÍSTICAS PRINCIPAIS */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Características
+                    </td>
+                    {results.map((product) => {
+                      const data = product.data;
+                      return (
+                        <td key={`features-${data.asin}`} className="p-4 border-r border-gray-200">
+                          {data.about_product && data.about_product.length > 0 ? (
+                            <ul className="text-sm space-y-1 text-left">
+                              {data.about_product.slice(0, 4).map((feature, i) => (
+                                <li key={`feature-${data.asin}-${i}`} className="flex items-start gap-1">
+                                  <span className="text-blue-500 mt-1 text-xs">•</span>
+                                  <span className="line-clamp-2">{feature}</span>
                                 </li>
                               ))}
                             </ul>
-                          </div>
-                        )}
+                          ) : (
+                            <div className="text-sm text-gray-500 text-center">N/A</div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
 
-                        {data.product_description && (
-                          <div>
-                            <h4 className="font-medium mb-2">Descrição:</h4>
-                            <p className="text-sm text-gray-600 line-clamp-3">
-                              {data.product_description}
-                            </p>
+                  {/* DESCRIÇÃO */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Descrição
+                    </td>
+                    {results.map((product) => {
+                      const data = product.data;
+                      return (
+                        <td key={`description-${data.asin}`} className="p-4 border-r border-gray-200">
+                          <div className="text-sm text-left line-clamp-4">
+                            {data.product_description || 'Descrição não disponível'}
                           </div>
-                        )}
+                        </td>
+                      );
+                    })}
+                  </tr>
 
-                        <div className="text-sm space-y-1">
-                          <div><span className="font-medium">Entrega:</span> {data.delivery || 'N/A'}</div>
-                          <div><span className="font-medium">Vendas:</span> {data.sales_volume || 'N/A'}</div>
-                          <div><span className="font-medium">Ofertas:</span> {data.product_num_offers || 0}</div>
-                        </div>
-                      </TabsContent>
+                  {/* ESPECIFICAÇÕES */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Especificações
+                    </td>
+                    {results.map((product) => {
+                      const data = product.data;
+                      return (
+                        <td key={`specs-${data.asin}`} className="p-4 border-r border-gray-200">
+                          {data.product_information && Object.keys(data.product_information).length > 0 ? (
+                            <div className="space-y-1 text-sm text-left">
+                              {Object.entries(data.product_information).slice(0, 5).map(([key, value]) => (
+                                <div key={`spec-${data.asin}-${key}`}>
+                                  <strong>{key}:</strong> {String(value)}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-500 text-center">N/A</div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
 
-                      <TabsContent value="specs" className="space-y-3">
-                        {data.product_information && Object.keys(data.product_information).length > 0 ? (
-                          <div className="space-y-2">
-                            {Object.entries(data.product_information).slice(0, 8).map(([key, value]) => (
-                              <div key={`spec-${data.asin}-${key}`} className="text-sm">
-                                <span className="font-medium">{key}:</span> {String(value)}
-                              </div>
-                            ))}
+                  {/* ENTREGA E VENDAS */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4" />
+                        Entrega / Vendas
+                      </div>
+                    </td>
+                    {results.map((product) => {
+                      const data = product.data;
+                      return (
+                        <td key={`delivery-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                          <div className="space-y-1 text-sm">
+                            <div><strong>Entrega:</strong> {data.delivery || 'N/A'}</div>
+                            <div><strong>Vendas:</strong> {data.sales_volume || 'N/A'}</div>
+                            <div><strong>Ofertas:</strong> {data.product_num_offers || 0}</div>
                           </div>
-                        ) : (
-                          <div className="text-sm text-gray-500">
-                            Especificações não disponíveis
-                          </div>
-                        )}
+                        </td>
+                      );
+                    })}
+                  </tr>
 
-                        <div className="pt-2 border-t">
-                          <div className="text-sm space-y-1">
-                            <div><span className="font-medium">URL do Produto:</span></div>
-                            <a 
-                              href={data.product_url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline text-xs break-all"
-                            >
-                              Ver no Amazon
-                            </a>
-                          </div>
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  {/* LINK PARA AMAZON */}
+                  <tr>
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <ExternalLink className="h-4 w-4" />
+                        Ver Produto
+                      </div>
+                    </td>
+                    {results.map((product) => {
+                      const data = product.data;
+                      return (
+                        <td key={`link-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                          <a 
+                            href={data.product_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-600 hover:underline text-sm"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Ver no Amazon
+                          </a>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
