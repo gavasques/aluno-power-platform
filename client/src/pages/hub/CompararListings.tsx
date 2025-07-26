@@ -118,7 +118,7 @@ function CompararListingsContent() {
         const data = await response.json();
         
         // Verificar se a resposta contém dados válidos
-        if (!data || data.status !== 'OK' || !data.data) {
+        if (!data || data.status !== 'OK') {
           throw new Error(`Produto ${asin} não encontrado ou dados inválidos`);
         }
 
@@ -126,16 +126,16 @@ function CompararListingsContent() {
       });
 
       const productsData = await Promise.all(promises);
-      const validProducts = productsData.filter(product => product && product.data);
+      console.log('Dados recebidos da API:', productsData);
       
-      setResults(validProducts);
+      setResults(productsData);
       
-      if (validProducts.length === 0) {
+      if (productsData.length === 0) {
         setError("Nenhum produto válido foi encontrado. Verifique os ASINs e tente novamente.");
       } else {
         toast({
-          title: "Produtos encontrados!",
-          description: `${validProducts.length} produto(s) carregado(s) com sucesso`,
+          title: "Busca concluída!",
+          description: `${productsData.length} produto(s) processado(s)`,
         });
       }
     } catch (err) {
@@ -153,10 +153,11 @@ function CompararListingsContent() {
     content += "=".repeat(50) + "\n\n";
 
     results.forEach((product, index) => {
-      const data = product.data;
-      content += `PRODUTO ${index + 1}: ${data.product_title || 'N/A'}\n`;
+      const data = product.data || {};
+      const asin = data.asin || asins[index] || `produto-${index}`;
+      content += `PRODUTO ${index + 1}: ${data.product_title || 'Título não disponível'}\n`;
       content += "-".repeat(30) + "\n";
-      content += `ASIN: ${data.asin}\n`;
+      content += `ASIN: ${asin}\n`;
       content += `Marca: ${data.product_byline || 'N/A'}\n`;
       content += `Preço: ${data.product_price || 'N/A'}\n`;
       content += `Avaliação: ${data.product_star_rating || 'N/A'}/5 (${data.product_num_ratings || 0} avaliações)\n`;
@@ -324,12 +325,13 @@ function CompararListingsContent() {
                       Campo
                     </td>
                     {results.map((product, index) => {
-                      const data = product.data;
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`header-${data.asin}`} className="p-4 border-r border-gray-200 text-center min-w-[300px]">
+                        <td key={`header-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center min-w-[300px]">
                           <div className="space-y-3">
                             <div className="text-sm font-medium text-gray-600">Produto {index + 1}</div>
-                            {data.product_photo && (
+                            {data.product_photo ? (
                               <img 
                                 src={data.product_photo} 
                                 alt={data.product_title || 'Produto'} 
@@ -338,13 +340,22 @@ function CompararListingsContent() {
                                   e.currentTarget.style.display = 'none';
                                 }}
                               />
+                            ) : (
+                              <div className="w-24 h-24 bg-gray-200 rounded-md mx-auto flex items-center justify-center">
+                                <Package className="h-8 w-8 text-gray-400" />
+                              </div>
                             )}
                             <div className="text-sm font-semibold line-clamp-2">
                               {data.product_title || 'Título não disponível'}
                             </div>
                             <div className="text-xs text-gray-500">
-                              ASIN: {data.asin}
+                              ASIN: {asin}
                             </div>
+                            {!data.product_title && (
+                              <div className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded">
+                                Dados não carregados
+                              </div>
+                            )}
                           </div>
                         </td>
                       );
@@ -361,10 +372,11 @@ function CompararListingsContent() {
                         Preço
                       </div>
                     </td>
-                    {results.map((product) => {
-                      const data = product.data;
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`price-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={`price-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-1">
                             <div className="text-lg font-bold text-green-600">
                               {data.product_price || 'N/A'}
@@ -388,10 +400,11 @@ function CompararListingsContent() {
                         Avaliação
                       </div>
                     </td>
-                    {results.map((product) => {
-                      const data = product.data;
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`rating-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={`rating-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-1">
                             <div className="flex items-center justify-center gap-1">
                               <Star className="h-4 w-4 text-yellow-500 fill-current" />
@@ -414,10 +427,11 @@ function CompararListingsContent() {
                         Disponibilidade
                       </div>
                     </td>
-                    {results.map((product) => {
-                      const data = product.data;
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`availability-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={`availability-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-2">
                             <div className="text-sm">{data.product_availability || 'N/A'}</div>
                             <div className="flex flex-wrap justify-center gap-1">
@@ -436,10 +450,11 @@ function CompararListingsContent() {
                     <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
                       Marca / Categoria
                     </td>
-                    {results.map((product) => {
-                      const data = product.data;
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`brand-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={`brand-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-1 text-sm">
                             <div><strong>Marca:</strong> {data.product_byline || 'N/A'}</div>
                             <div><strong>Categoria:</strong> {data.category?.name || 'N/A'}</div>
@@ -454,14 +469,15 @@ function CompararListingsContent() {
                     <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
                       Características
                     </td>
-                    {results.map((product) => {
-                      const data = product.data;
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`features-${data.asin}`} className="p-4 border-r border-gray-200">
+                        <td key={`features-${asin}-${index}`} className="p-4 border-r border-gray-200">
                           {data.about_product && data.about_product.length > 0 ? (
                             <ul className="text-sm space-y-1 text-left">
                               {data.about_product.slice(0, 4).map((feature, i) => (
-                                <li key={`feature-${data.asin}-${i}`} className="flex items-start gap-1">
+                                <li key={`feature-${asin}-${i}`} className="flex items-start gap-1">
                                   <span className="text-blue-500 mt-1 text-xs">•</span>
                                   <span className="line-clamp-2">{feature}</span>
                                 </li>
@@ -480,10 +496,11 @@ function CompararListingsContent() {
                     <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
                       Descrição
                     </td>
-                    {results.map((product) => {
-                      const data = product.data;
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`description-${data.asin}`} className="p-4 border-r border-gray-200">
+                        <td key={`description-${asin}-${index}`} className="p-4 border-r border-gray-200">
                           <div className="text-sm text-left line-clamp-4">
                             {data.product_description || 'Descrição não disponível'}
                           </div>
@@ -497,14 +514,15 @@ function CompararListingsContent() {
                     <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
                       Especificações
                     </td>
-                    {results.map((product) => {
-                      const data = product.data;
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`specs-${data.asin}`} className="p-4 border-r border-gray-200">
+                        <td key={`specs-${asin}-${index}`} className="p-4 border-r border-gray-200">
                           {data.product_information && Object.keys(data.product_information).length > 0 ? (
                             <div className="space-y-1 text-sm text-left">
                               {Object.entries(data.product_information).slice(0, 5).map(([key, value]) => (
-                                <div key={`spec-${data.asin}-${key}`}>
+                                <div key={`spec-${asin}-${key}-${index}`}>
                                   <strong>{key}:</strong> {String(value)}
                                 </div>
                               ))}
@@ -525,10 +543,11 @@ function CompararListingsContent() {
                         Entrega / Vendas
                       </div>
                     </td>
-                    {results.map((product) => {
-                      const data = product.data;
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`delivery-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={`delivery-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-1 text-sm">
                             <div><strong>Entrega:</strong> {data.delivery || 'N/A'}</div>
                             <div><strong>Vendas:</strong> {data.sales_volume || 'N/A'}</div>
@@ -547,19 +566,24 @@ function CompararListingsContent() {
                         Ver Produto
                       </div>
                     </td>
-                    {results.map((product) => {
-                      const data = product.data;
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
                       return (
-                        <td key={`link-${data.asin}`} className="p-4 border-r border-gray-200 text-center">
-                          <a 
-                            href={data.product_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-blue-600 hover:underline text-sm"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            Ver no Amazon
-                          </a>
+                        <td key={`link-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
+                          {data.product_url ? (
+                            <a 
+                              href={data.product_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-blue-600 hover:underline text-sm"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              Ver no Amazon
+                            </a>
+                          ) : (
+                            <div className="text-sm text-gray-500">N/A</div>
+                          )}
                         </td>
                       );
                     })}
