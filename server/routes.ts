@@ -5224,7 +5224,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   });
 
   // Amazon Keyword Suggestions API
-  app.get('/api/amazon-keyword-suggestions', async (req: Request, res: Response) => {
+  app.get('/api/amazon-keyword-suggestions', requireAuth, async (req: Request, res: Response) => {
     try {
       const { prefix, region = 'BR' } = req.query;
       
@@ -5241,7 +5241,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         {
           headers: {
             'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
-            'X-RapidAPI-Host': 'amazon-data-scraper141.p.rapidapi.com'
+            'X-RapidAPI-Host': 'amazon-data-scraper141.p.rapidapi.com',
+            'X-RapidAPI-App': 'default-application_10763288'
           }
         }
       );
@@ -5266,7 +5267,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           'amazon-data-scraper141',
           0, // duration
           0, // sem custo da API
-          3 // 3 créditos conforme tabela feature_costs (tools.keyword_suggestions)
+          1 // 1 crédito conforme solicitado pelo usuário
         );
       } catch (logError) {
         console.error('❌ Erro ao salvar log de API:', logError);
