@@ -490,7 +490,7 @@ export default function AmazonProductDetails() {
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
           <Package className="h-8 w-8" />
-          Detalhes do Produto Amazon
+          Comparar Listings
         </h1>
         <p className="text-sm sm:text-base text-gray-600">
           Busque informações detalhadas de qualquer produto Amazon usando o ASIN

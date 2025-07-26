@@ -91,7 +91,7 @@ const ferramentas = [
     permission: "tools.keyword_report"
   },
   {
-    title: "Detalhes do Produto",
+    title: "Comparar Listings",
     description: "Obtenha informações detalhadas de produtos Amazon",
     href: "/ferramentas/produto-detalhes",
     icon: Package,
