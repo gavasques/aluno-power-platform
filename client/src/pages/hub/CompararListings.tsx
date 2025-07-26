@@ -520,10 +520,10 @@ function CompararListingsContent() {
                     })}
                   </tr>
 
-                  {/* ESPECIFICAÇÕES */}
+                  {/* ESPECIFICAÇÕES TÉCNICAS COMPLETAS */}
                   <tr className="border-b border-gray-100">
                     <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
-                      Especificações
+                      Especificações Técnicas
                     </td>
                     {results.map((product, index) => {
                       const data = product.data || {};
@@ -532,16 +532,341 @@ function CompararListingsContent() {
                       return (
                         <td key={uniqueKey} className="p-4 border-r border-gray-200">
                           {data.product_information && Object.keys(data.product_information).length > 0 ? (
-                            <div className="space-y-1 text-sm text-left">
-                              {Object.entries(data.product_information).slice(0, 5).map(([key, value]) => (
-                                <div key={`spec-${asin}-${key}-${index}`}>
-                                  <strong>{key}:</strong> {String(value)}
+                            <div className="space-y-1 text-xs max-h-40 overflow-y-auto">
+                              {Object.entries(data.product_information).map(([key, value]) => (
+                                <div key={`spec-${asin}-${key}-${index}`} className="border-b border-gray-100 pb-1">
+                                  <span className="font-medium text-gray-700">{key}:</span> 
+                                  <span className="text-gray-600 ml-1">{String(value)}</span>
                                 </div>
                               ))}
                             </div>
                           ) : (
                             <div className="text-sm text-gray-500 text-center">N/A</div>
                           )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {/* DETALHES DO PRODUTO */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Detalhes do Produto
+                    </td>
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `details-${asin}-${index}-${Date.now()}`;
+                      return (
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                          {data.product_details && Object.keys(data.product_details).length > 0 ? (
+                            <div className="space-y-1 text-xs">
+                              {Object.entries(data.product_details).map(([key, value]) => (
+                                <div key={`detail-${asin}-${key}-${index}`}>
+                                  <span className="font-medium text-blue-700">{key}:</span> 
+                                  <span className="text-gray-600 ml-1">{String(value)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-500 text-center">N/A</div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {/* TODAS AS IMAGENS */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Galeria de Imagens
+                    </td>
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `images-${asin}-${index}-${Date.now()}`;
+                      return (
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                          {data.product_photos && data.product_photos.length > 0 ? (
+                            <div className="space-y-2">
+                              <div className="grid grid-cols-3 gap-1 max-h-32 overflow-y-auto">
+                                {data.product_photos.map((photo, photoIdx) => (
+                                  <img 
+                                    key={`photo-${asin}-${photoIdx}-${index}`}
+                                    src={photo} 
+                                    alt={`Imagem ${photoIdx + 1}`}
+                                    className="w-12 h-12 object-cover rounded border cursor-pointer hover:scale-110 transition-transform"
+                                    onClick={() => window.open(photo, '_blank')}
+                                  />
+                                ))}
+                              </div>
+                              <div className="text-xs text-gray-600">
+                                Total: {data.product_photos.length} imagens
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-500 text-center">Sem imagens</div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {/* VÍDEOS */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Vídeos do Produto
+                    </td>
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `videos-${asin}-${index}-${Date.now()}`;
+                      return (
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                          <div className="space-y-2">
+                            {data.has_video ? (
+                              <div className="space-y-2">
+                                <div className="text-xs font-medium text-green-600">✅ Tem vídeo</div>
+                                {data.product_videos && data.product_videos.length > 0 && (
+                                  <div className="space-y-1">
+                                    {data.product_videos.map((video, videoIdx) => (
+                                      <div key={`video-${asin}-${videoIdx}-${index}`} className="text-xs border border-gray-200 p-2 rounded">
+                                        <div className="font-medium">{video.title}</div>
+                                        <div className="text-gray-600">
+                                          Resolução: {video.video_width}x{video.video_height}
+                                        </div>
+                                        {video.thumbnail_url && (
+                                          <img 
+                                            src={video.thumbnail_url} 
+                                            alt="Thumbnail" 
+                                            className="w-16 h-12 object-cover rounded mt-1"
+                                          />
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                {data.video_thumbnail && (
+                                  <img 
+                                    src={data.video_thumbnail} 
+                                    alt="Video thumbnail" 
+                                    className="w-20 h-16 object-cover rounded border"
+                                  />
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-sm text-gray-500 text-center">Sem vídeos</div>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {/* VARIAÇÕES DO PRODUTO */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Variações Disponíveis
+                    </td>
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `variations-${asin}-${index}-${Date.now()}`;
+                      return (
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                          {data.product_variations && Object.keys(data.product_variations).length > 0 ? (
+                            <div className="space-y-2">
+                              {Object.entries(data.product_variations).map(([variationType, variations]) => (
+                                <div key={`vartype-${asin}-${variationType}-${index}`} className="border border-gray-200 p-2 rounded">
+                                  <div className="text-xs font-medium text-purple-700 mb-1">
+                                    {variationType.toUpperCase()}:
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-1">
+                                    {Array.isArray(variations) && variations.map((variation, varIdx) => (
+                                      <div key={`var-${asin}-${varIdx}-${index}`} className="text-xs border border-gray-100 p-1 rounded">
+                                        <div className="font-medium">{variation.value}</div>
+                                        <div className="text-gray-600">ASIN: {variation.asin}</div>
+                                        {variation.photo && (
+                                          <img 
+                                            src={variation.photo} 
+                                            alt={variation.value}
+                                            className="w-8 h-8 object-cover rounded mt-1"
+                                          />
+                                        )}
+                                        <div className={`text-xs ${variation.is_available ? 'text-green-600' : 'text-red-600'}`}>
+                                          {variation.is_available ? '✅ Disponível' : '❌ Indisponível'}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-500 text-center">Sem variações</div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {/* BADGES E CERTIFICAÇÕES */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Badges e Certificações
+                    </td>
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `badges-${asin}-${index}-${Date.now()}`;
+                      return (
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                          <div className="space-y-1">
+                            <div className="flex flex-wrap gap-1">
+                              {data.is_best_seller && (
+                                <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">
+                                  🏆 Best Seller
+                                </span>
+                              )}
+                              {data.is_amazon_choice && (
+                                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                                  ⭐ Amazon's Choice
+                                </span>
+                              )}
+                              {data.is_prime && (
+                                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                                  📦 Prime
+                                </span>
+                              )}
+                              {data.climate_pledge_friendly && (
+                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                                  🌱 Climate Pledge
+                                </span>
+                              )}
+                            </div>
+                            <div className="space-y-1 text-xs">
+                              {data.has_aplus && (
+                                <div className="text-green-600">✅ Tem conteúdo A+</div>
+                              )}
+                              {data.has_brandstory && (
+                                <div className="text-green-600">✅ Tem Brand Story</div>
+                              )}
+                              {data.sales_volume && (
+                                <div className="text-gray-600">Volume de vendas: {data.sales_volume}</div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {/* EAN E CÓDIGOS */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Códigos e Identificação
+                    </td>
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `codes-${asin}-${index}-${Date.now()}`;
+                      return (
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                          <div className="space-y-1 text-xs">
+                            <div><span className="font-medium">ASIN:</span> {data.asin || 'N/A'}</div>
+                            {data.product_information?.EAN && (
+                              <div><span className="font-medium">EAN:</span> {data.product_information.EAN}</div>
+                            )}
+                            {data.product_information?.["Número do modelo"] && (
+                              <div><span className="font-medium">Modelo:</span> {data.product_information["Número do modelo"]}</div>
+                            )}
+                            {data.product_information?.["Disponível para compra desde"] && (
+                              <div><span className="font-medium">Disponível desde:</span> {data.product_information["Disponível para compra desde"]}</div>
+                            )}
+                            {data.all_product_variations && Object.keys(data.all_product_variations).length > 0 && (
+                              <div className="border-t border-gray-200 pt-2">
+                                <span className="font-medium">ASINs das Variações:</span>
+                                <div className="mt-1 space-y-1">
+                                  {Object.entries(data.all_product_variations).map(([varAsin, varDetails]) => (
+                                    <div key={`codes-var-${asin}-${varAsin}-${index}`} className="text-gray-600">
+                                      {varAsin}: {Object.values(varDetails || {}).join(', ')}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {/* DISTRIBUIÇÃO DE AVALIAÇÕES */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Distribuição de Avaliações
+                    </td>
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `rating-dist-${asin}-${index}-${Date.now()}`;
+                      return (
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                          {data.rating_distribution && Object.keys(data.rating_distribution).length > 0 ? (
+                            <div className="space-y-1">
+                              {Object.entries(data.rating_distribution).map(([stars, count]) => (
+                                <div key={`rating-${asin}-${stars}-${index}`} className="flex items-center justify-between text-xs">
+                                  <span>{stars} ⭐</span>
+                                  <span className="font-medium">{count} avaliações</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-500 text-center">N/A</div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {/* RANKING E CATEGORIA */}
+                  <tr className="border-b border-gray-100">
+                    <td className="p-4 border-r border-gray-200 font-medium text-gray-900 bg-gray-50">
+                      Ranking e Categoria
+                    </td>
+                    {results.map((product, index) => {
+                      const data = product.data || {};
+                      const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `ranking-${asin}-${index}-${Date.now()}`;
+                      return (
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
+                          <div className="space-y-2 text-xs">
+                            {data.category && (
+                              <div>
+                                <span className="font-medium">Categoria:</span> {data.category.name}
+                              </div>
+                            )}
+                            {data.category_path && data.category_path.length > 0 && (
+                              <div>
+                                <span className="font-medium">Caminho:</span>
+                                <div className="mt-1 space-y-1">
+                                  {data.category_path.map((cat, catIdx) => (
+                                    <div key={`cat-${asin}-${catIdx}-${index}`} className="text-gray-600 pl-2">
+                                      {catIdx + 1}. {cat.name}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {data.product_information?.["Ranking dos mais vendidos"] && (
+                              <div className="border-t border-gray-200 pt-2">
+                                <span className="font-medium text-purple-700">Ranking:</span>
+                                <div className="text-gray-600 mt-1">
+                                  {data.product_information["Ranking dos mais vendidos"]}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </td>
                       );
                     })}
