@@ -1,4 +1,3 @@
-
 import { Router, Route, Switch } from "wouter";
 import { ThemeProvider } from "@/components/theme-provider"
 import { AdminLayout } from "./components/layout/AdminLayout";
@@ -46,6 +45,7 @@ const AdvancedInfographicGenerator = lazy(() => import("./pages/agents/AdvancedI
 const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtractor"));
 const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
 const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
+import CompararListings from './pages/hub/CompararListings';
 const CNPJConsulta = lazy(() => import("./pages/hub/CNPJConsulta"));
 const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSuggestions"));
 const Tools = lazy(() => import("./pages/hub/Tools"));
@@ -137,7 +137,7 @@ function App() {
   // Initialize optimized loading systems
   const { loadRouteSpecificFonts } = useFontLoader();
   const { preloadCriticalIcons } = useOptimizedIcons();
-  
+
   // Phase 2 Performance Optimizations - moved inside CombinedProvider
   // useQueryMemoryOptimization();
   // useBackgroundSync();
@@ -145,7 +145,7 @@ function App() {
   useEffect(() => {
     // Initialize basic optimizations (not user-dependent)
     preloadCriticalIcons();
-    
+
     // Load fonts based on current route
     const currentPath = window.location.pathname;
     loadRouteSpecificFonts(currentPath);
@@ -161,20 +161,20 @@ function App() {
               <CombinedProvider>
                             <Switch>
                           <Route path="/login" component={LoginNew} />
-                          
+
                           {/* Password Recovery Routes */}
                           <Route path="/forgot-password">
                             <Suspense fallback={<PageLoader />}>
                               <ForgotPassword />
                             </Suspense>
                           </Route>
-                          
+
                           <Route path="/reset-password">
                             <Suspense fallback={<PageLoader />}>
                               <ResetPassword />
                             </Suspense>
                           </Route>
-                          
+
                           <Route path="/phone-verification">
                             <Suspense fallback={<PageLoader />}>
                               <PhoneVerification />
@@ -187,7 +187,7 @@ function App() {
                               <TermsOfService />
                             </Suspense>
                           </Route>
-                          
+
                           <Route path="/politica-de-privacidade">
                             <Suspense fallback={<PageLoader />}>
                               <PrivacyPolicy />
@@ -204,7 +204,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/hub">
                             <ProtectedRoute>
                               <Layout>
@@ -225,7 +225,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/ferramentas/background-removal">
                             <ProtectedRoute>
                               <Layout>
@@ -235,7 +235,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/ferramentas/amazon-ads-editor">
                             <ProtectedRoute>
                               <Layout>
@@ -256,7 +256,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agentes/amazon-negative-reviews">
                             <ProtectedRoute>
                               <Layout>
@@ -266,7 +266,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agentes/amazon-customer-service/resultado/:sessionId">
                             <ProtectedRoute>
                               <Layout>
@@ -276,7 +276,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agentes/amazon-customer-service">
                             <ProtectedRoute>
                               <Layout>
@@ -286,7 +286,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents/amazon-listings-optimizer-new">
                             <ProtectedRoute>
                               <Layout>
@@ -296,7 +296,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents/amazon-listings-optimizer/result">
                             <ProtectedRoute>
                               <Layout>
@@ -306,7 +306,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents/amazon-listings-optimizer">
                             <ProtectedRoute>
                               <Layout>
@@ -316,7 +316,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents/agent-amazon-product-photography">
                             <ProtectedRoute>
                               <Layout>
@@ -326,7 +326,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents/agent-lifestyle-with-model">
                             <ProtectedRoute>
                               <Layout>
@@ -336,7 +336,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents/agent-infographic-generator">
                             <ProtectedRoute>
                               <Layout>
@@ -346,7 +346,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents/advanced-infographic-generator">
                             <ProtectedRoute>
                               <Layout>
@@ -356,7 +356,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents/html-description-generator">
                             <ProtectedRoute>
                               <Suspense fallback={<PageLoader />}>
@@ -364,7 +364,7 @@ function App() {
                               </Suspense>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents/bullet-points-generator">
                             <ProtectedRoute>
                               <Suspense fallback={<PageLoader />}>
@@ -372,7 +372,7 @@ function App() {
                               </Suspense>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           {/* SPECIFIC ROUTES BEFORE GENERIC */}
                           <Route path="/agents/amazon-customer-service">
                             <ProtectedRoute>
@@ -383,14 +383,14 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agents">
                             {() => {
                               window.location.href = '/agentes';
                               return null;
                             }}
                           </Route>
-                          
+
                           <Route path="/agentes">
                             <ProtectedRoute>
                               <Layout>
@@ -400,7 +400,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
 
 
                           {/* Detail routes with Layout - Protected */}
@@ -415,7 +415,7 @@ function App() {
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
+
                           <Route path="/hub/parceiros/:id">
                             {(params) => (
                               <ProtectedRoute>
@@ -427,7 +427,7 @@ function App() {
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
+
                           <Route path="/hub/ferramentas/:id">
                             {(params) => (
                               <ProtectedRoute>
@@ -439,7 +439,7 @@ function App() {
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
+
                           <Route path="/hub/fornecedores/:id">
                             {(params) => (
                               <ProtectedRoute>
@@ -451,9 +451,9 @@ function App() {
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
 
-                          
+
+
                           <Route path="/hub/prompts-ia/:id">
                             {(params) => (
                               <ProtectedRoute>
@@ -475,7 +475,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/ferramentas/relatorio-keywords">
                             <ProtectedRoute>
                               <Layout>
@@ -485,7 +485,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/ferramentas/produto-detalhes">
                             <ProtectedRoute>
                               <Layout>
@@ -495,7 +495,16 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+              <Route path="/ferramentas/comparar-listings">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <CompararListings />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
                           <Route path="/ferramentas/consulta-cnpj">
                             <ProtectedRoute>
                               <Layout>
@@ -505,7 +514,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/ferramentas/keyword-suggestions">
                             <ProtectedRoute>
                               <Layout>
@@ -515,7 +524,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/ferramentas/background-removal-pro">
                             <ProtectedRoute>
                               <Layout>
@@ -525,7 +534,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/ferramentas/logo-generator-pro">
                             <ProtectedRoute>
                               <Layout>
@@ -535,7 +544,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/ferramentas/ultra-melhorador-pro">
                             <ProtectedRoute>
                               <Layout>
@@ -545,7 +554,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/ferramentas/upscale-pro">
                             <ProtectedRoute>
                               <Layout>
@@ -555,7 +564,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/hub/parceiros">
                             <ProtectedRoute>
                               <Layout>
@@ -565,7 +574,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/hub/fornecedores">
                             <ProtectedRoute>
                               <Layout>
@@ -575,7 +584,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/hub/ferramentas">
                             <ProtectedRoute>
                               <Layout>
@@ -585,9 +594,9 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
 
-                          
+
+
                           <Route path="/hub/materiais">
                             <ProtectedRoute>
                               <Layout>
@@ -597,7 +606,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/hub/descricao-html">
                             {() => {
                               // Redirect to the new agent route
@@ -613,56 +622,56 @@ function App() {
                               return null;
                             }}
                           </Route>
-                          
+
                           <Route path="/ai/background-removal">
                             {() => {
                               window.location.href = '/ferramentas/background-removal';
                               return null;
                             }}
                           </Route>
-                          
+
                           <Route path="/hub/amazon-reviews">
                             {() => {
                               window.location.href = '/ferramentas/amazon-reviews';
                               return null;
                             }}
                           </Route>
-                          
+
                           <Route path="/hub/relatorio-keywords">
                             {() => {
                               window.location.href = '/ferramentas/relatorio-keywords';
                               return null;
                             }}
                           </Route>
-                          
+
                           <Route path="/ferramentas/picsart-background-removal">
                             {() => {
                               window.location.href = '/ferramentas/background-removal-pro';
                               return null;
                             }}
                           </Route>
-                          
+
                           <Route path="/hub/produto-detalhes">
                             {() => {
                               window.location.href = '/ferramentas/produto-detalhes';
                               return null;
                             }}
                           </Route>
-                          
+
                           <Route path="/hub/consulta-cnpj">
                             {() => {
                               window.location.href = '/ferramentas/consulta-cnpj';
                               return null;
                             }}
                           </Route>
-                          
+
                           <Route path="/hub/keyword-suggestions">
                             {() => {
                               window.location.href = '/ferramentas/keyword-suggestions';
                               return null;
                             }}
                           </Route>
-                          
+
 
 
                           <Route path="/hub/:section">
@@ -868,7 +877,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/simuladores/simplificado">
                             <ProtectedRoute>
                               <Layout>
@@ -933,7 +942,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           {/* Product Import/Export - Protected */}
                           <Route path="/minha-area/importacao-exportacao">
                             <ProtectedRoute>
@@ -944,10 +953,10 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           {/* Legacy Product Management Routes - REMOVED */}
                           {/* All product management now handled by PRODUTOS PRO system */}
-                          
+
                           <Route path="/minha-area/:section/:id?/:action?">
                             {(params) => (
                               <ProtectedRoute>
@@ -975,7 +984,7 @@ function App() {
 
                           {/* Admin routes - Protected with admin requirement */}
 
-                          
+
                           <Route path="/admin/agents/providers">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
@@ -985,7 +994,7 @@ function App() {
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/admin/usuarios">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
@@ -995,7 +1004,7 @@ function App() {
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/admin/usuarios/:id/editar">
                             {(params) => (
                               <ProtectedRoute requireAdmin>
@@ -1007,7 +1016,7 @@ function App() {
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
+
                           <Route path="/admin/usuarios/novo">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
@@ -1017,7 +1026,7 @@ function App() {
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/admin/usuarios/grupos/:id">
                             {(params) => (
                               <ProtectedRoute requireAdmin>
@@ -1029,7 +1038,7 @@ function App() {
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
+
                           <Route path="/admin/usuarios/grupos/novo">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
@@ -1039,23 +1048,24 @@ function App() {
                               </AdminLayout>
                             </ProtectedRoute>
                           </Route>
-                          
 
-                          
 
-                          
+
+
+
                           <Route path="/admin/conteudo/:subsection?/:id?/:action?">
                             {(params) => (
                               <ProtectedRoute requireAdmin>
                                 <AdminLayout>
                                   <Suspense fallback={<PageLoader />}>
-                                    <ContentManagement />
+                                    <```text
+ContentManagement />
                                   </Suspense>
                                 </AdminLayout>
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
+
                           <Route path="/admin/:section/:subsection?/:id?/:action?">
                             {(params) => (
                               <ProtectedRoute requireAdmin>
@@ -1067,7 +1077,7 @@ function App() {
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
+
                           <Route path="/admin">
                             <ProtectedRoute requireAdmin>
                               <AdminLayout>
@@ -1079,7 +1089,7 @@ function App() {
                           </Route>
 
                           {/* Main user routes - Protected with permissions */}
-                          
+
                           <Route path="/noticias">
                             <ProtectedRoute>
                               <Layout>
@@ -1089,7 +1099,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/novidades">
                             <ProtectedRoute>
                               <Layout>
@@ -1099,7 +1109,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/fornecedores">
                             <ProtectedRoute>
                               <Layout>
@@ -1109,7 +1119,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
 
 
                           {/* Home route - Protected */}
@@ -1133,7 +1143,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agentes/amazon-negative-reviews/result">
                             <ProtectedRoute>
                               <Layout>
@@ -1143,7 +1153,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agentes/amazon-customer-service">
                             <ProtectedRoute>
                               <Layout>
@@ -1153,7 +1163,7 @@ function App() {
                               </Layout>
                             </ProtectedRoute>
                           </Route>
-                          
+
                           <Route path="/agentes/amazon-customer-service/result">
                             <ProtectedRoute>
                               <Layout>
@@ -1176,7 +1186,7 @@ function App() {
                               </ProtectedRoute>
                             )}
                           </Route>
-                          
+
                           {/* FALLBACK REDIRECT FOR OLD /agents/:id ROUTES */}
                           <Route path="/agents/:id">
                             {(params) => {

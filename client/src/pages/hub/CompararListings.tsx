@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Package, Search, Download, Copy, ExternalLink, Star, DollarSign, Eye, Heart, MessageSquare, Globe, Truck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CopyButton } from "@/components/common/CopyButton";
 import { useToast } from "@/hooks/use-toast";
 import { useCreditSystem } from "@/hooks/useCreditSystem";
+import { PermissionGuard } from "@/components/guards/PermissionGuard";
 
 interface ProductData {
   asin: string;
@@ -41,7 +41,7 @@ interface ProductData {
   keywords: string[];
 }
 
-export default function CompararListings() {
+function CompararListingsContent() {
   const [asins, setAsins] = useState<string[]>(["", ""]);
   const [country, setCountry] = useState("BR");
   const [loading, setLoading] = useState(false);
@@ -71,7 +71,7 @@ export default function CompararListings() {
 
   const handleSearch = async () => {
     const validAsins = asins.filter(asin => asin.trim());
-    
+
     if (validAsins.length < 2) {
       setError("Insira pelo menos 2 ASINs para comparar");
       return;
@@ -248,7 +248,7 @@ export default function CompararListings() {
                 )}
               </div>
             ))}
-            
+
             {asins.length < 5 && (
               <Button
                 type="button"
@@ -430,5 +430,13 @@ export default function CompararListings() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CompararListings() {
+  return (
+    <PermissionGuard requiredPermission="tools.compare_listings">
+      <CompararListingsContent />
+    </PermissionGuard>
   );
 }

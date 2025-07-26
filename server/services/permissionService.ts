@@ -239,11 +239,12 @@ export class PermissionService {
       { code: 'tools.amazon_reviews', name: 'Amazon Reviews', category: 'Ferramentas', sortOrder: 5 },
       { code: 'tools.keyword_report', name: 'Relatório de Keywords', category: 'Ferramentas', sortOrder: 6 },
       { code: 'tools.product_details', name: 'Detalhes do Produto', category: 'Ferramentas', sortOrder: 7 },
-      { code: 'tools.cnpj_lookup', name: 'Consulta CNPJ', category: 'Ferramentas', sortOrder: 8 },
-      { code: 'tools.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Ferramentas', sortOrder: 9 },
-      { code: 'tools.logo_generation_pro', name: 'Gerador de Logomarcas PRO', category: 'Ferramentas', sortOrder: 10 },
-      { code: 'tools.upscale_pro', name: 'Upscale PRO', category: 'Ferramentas', sortOrder: 11 },
-      { code: 'tools.ultra_enhance_pro', name: 'Ultra Melhorador PRO', category: 'Ferramentas', sortOrder: 12 },
+      { code: 'tools.compare_listings', name: 'Comparar Listings Amazon', category: 'Ferramentas', sortOrder: 8 },
+      { code: 'tools.cnpj_lookup', name: 'Consulta CNPJ', category: 'Ferramentas', sortOrder: 9 },
+      { code: 'tools.keyword_suggestions', name: 'Amazon Keywords Suggestions', category: 'Ferramentas', sortOrder: 10 },
+      { code: 'tools.logo_generation_pro', name: 'Gerador de Logomarcas PRO', category: 'Ferramentas', sortOrder: 11 },
+      { code: 'tools.upscale_pro', name: 'Upscale PRO', category: 'Ferramentas', sortOrder: 12 },
+      { code: 'tools.ultra_enhance_pro', name: 'Ultra Melhorador PRO', category: 'Ferramentas', sortOrder: 13 },
       
       // Agentes IA
       { code: 'agents.access', name: 'Acesso aos Agentes', category: 'Agentes', sortOrder: 1 },

@@ -133,7 +133,7 @@ const categories = ["Todos", "Imagem", "Design", "Amazon", "Empresas"];
 export default function Ferramentas() {
   const { hasAccess, isLoading } = usePermissions();
   const { toast } = useToast();
-  
+
 
 
   const handleAccessDenied = (toolName: string) => {
@@ -178,7 +178,7 @@ export default function Ferramentas() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {ferramentas.map((ferramenta) => {
           const hasPermission = hasAccess(ferramenta.permission);
-          
+
           if (hasPermission) {
             return (
               <Link key={ferramenta.href} href={ferramenta.href}>
