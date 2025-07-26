@@ -5255,7 +5255,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  app.post('/api/amazon-keywords/search', async (req, res) => {
+  app.post('/api/amazon-keywords/search', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
     try {
       const {
         query,
@@ -5321,7 +5321,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       // Log da consulta na tabela ai_generation_logs usando LoggingService
       try {
         await LoggingService.saveApiLog(
-          2, // userId admin por enquanto
+          req.user?.id || 2, // userId do usuário autenticado
           'amazon-keyword-search',
           `Amazon Keyword Search: Query "${query}", Page ${page}, Country ${country}`,
           JSON.stringify({

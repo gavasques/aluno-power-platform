@@ -16,6 +16,7 @@ import { CreditCostButton } from '@/components/CreditCostButton';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
 import { useCreditSystem } from '@/hooks/useCreditSystem';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 // Types
 interface Product {
@@ -93,6 +94,7 @@ export default function KeywordSearchReport() {
   const { balance: userBalance } = useUserCreditBalance();
   const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
   const { toast } = useToast();
+  const { token } = useAuth();
 
   const updateSearchParam = (key: string, value: any) => {
     setSearchParams(prev => ({ ...prev, [key]: value }));
@@ -102,7 +104,10 @@ export default function KeywordSearchReport() {
     const data = await execute(
       () => fetch('/api/amazon-keywords/search', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           ...searchParams,
           page,
