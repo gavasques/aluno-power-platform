@@ -752,7 +752,7 @@ export default function AmazonProductDetails() {
           )}
 
           {/* Vídeos */}
-          {productData.data.product_photos_videos?.filter(item => item.type === 'video').length > 0 && (
+          {(productData.data.product_videos?.length > 0 || productData.data.user_uploaded_videos?.length > 0) && (
             <ExpandableSection
               title="Vídeos do Produto"
               icon={Video}
@@ -762,17 +762,19 @@ export default function AmazonProductDetails() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <p className="text-sm text-gray-600">
-                    {productData.data.product_photos_videos.filter(item => item.type === 'video').length} vídeo(s) disponível(is)
+                    {(productData.data.product_videos?.length || 0) + (productData.data.user_uploaded_videos?.length || 0)} vídeo(s) disponível(is)
                   </p>
                   <Button 
                     onClick={() => {
-                      productData.data.product_photos_videos
-                        .filter(item => item.type === 'video')
-                        .forEach((video, index) => {
-                          setTimeout(() => {
-                            window.open(video.url, '_blank');
-                          }, index * 200);
-                        });
+                      const allVideos = [
+                        ...(productData.data.product_videos || []),
+                        ...(productData.data.user_uploaded_videos || [])
+                      ];
+                      allVideos.forEach((video, index) => {
+                        setTimeout(() => {
+                          window.open(video.video_url, '_blank');
+                        }, index * 200);
+                      });
                     }} 
                     size="sm"
                     variant="outline"
@@ -783,51 +785,125 @@ export default function AmazonProductDetails() {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {productData.data.product_photos_videos
-                    .filter(item => item.type === 'video')
-                    .map((video, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="relative bg-gray-100 rounded-lg overflow-hidden">
-                          <video
-                            src={video.url}
-                            controls
-                            className="w-full h-48 object-cover"
-                            preload="metadata"
-                            poster={video.thumbnail || undefined}
-                          >
-                            Seu navegador não suporta o elemento de vídeo.
-                          </video>
-                          <div className="absolute top-2 right-2 flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                const link = document.createElement('a');
-                                link.href = video.url;
-                                link.download = `video_${productData.data.asin}_${index + 1}.mp4`;
-                                link.click();
-                              }}
-                              title="Baixar vídeo"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => window.open(video.url, '_blank')}
-                              title="Abrir em nova aba"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
+                  {/* Vídeos oficiais do produto */}
+                  {productData.data.product_videos?.map((video, index) => (
+                    <div key={`official-${index}`} className="space-y-2">
+                      <div className="relative bg-gray-100 rounded-lg overflow-hidden group">
+                        <div className="relative">
+                          <img
+                            src={video.thumbnail_url}
+                            alt={video.title || `Vídeo ${index + 1}`}
+                            className="w-full h-48 object-cover cursor-pointer"
+                            onClick={() => window.open(video.video_url, '_blank')}
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                            <div className="bg-red-600 rounded-full p-3 opacity-80 group-hover:opacity-100 transition-opacity">
+                              <Video className="h-6 w-6 text-white" />
+                            </div>
                           </div>
                         </div>
-                        <div className="text-xs text-gray-500">
-                          <p>Vídeo {index + 1}</p>
-                          {video.duration && <p>Duração: {video.duration}</p>}
-                          {video.title && <p className="font-medium">{video.title}</p>}
+                        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const link = document.createElement('a');
+                              link.href = video.video_url;
+                              link.download = `video_${productData.data.asin}_${index + 1}.mp4`;
+                              link.click();
+                            }}
+                            title="Baixar vídeo"
+                            className="bg-white/90 hover:bg-white"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(video.video_url, '_blank');
+                            }}
+                            title="Abrir em nova aba"
+                            className="bg-white/90 hover:bg-white"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
-                    ))}
+                      <div className="text-xs text-gray-600">
+                        <p className="font-medium text-sm">{video.title || `Vídeo ${index + 1}`}</p>
+                        <p>ID: {video.id}</p>
+                        {video.video_width && video.video_height && (
+                          <p>Resolução: {video.video_width}x{video.video_height}</p>
+                        )}
+                        <Badge variant="outline" className="text-xs mt-1">
+                          Vídeo Oficial
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Vídeos enviados por usuários */}
+                  {productData.data.user_uploaded_videos?.map((video, index) => (
+                    <div key={`user-${index}`} className="space-y-2">
+                      <div className="relative bg-gray-100 rounded-lg overflow-hidden group">
+                        <div className="relative">
+                          <img
+                            src={video.thumbnail_url || '/placeholder.svg'}
+                            alt={video.title || `Vídeo do usuário ${index + 1}`}
+                            className="w-full h-48 object-cover cursor-pointer"
+                            onClick={() => window.open(video.video_url, '_blank')}
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                            <div className="bg-blue-600 rounded-full p-3 opacity-80 group-hover:opacity-100 transition-opacity">
+                              <Video className="h-6 w-6 text-white" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const link = document.createElement('a');
+                              link.href = video.video_url;
+                              link.download = `user_video_${productData.data.asin}_${index + 1}.mp4`;
+                              link.click();
+                            }}
+                            title="Baixar vídeo"
+                            className="bg-white/90 hover:bg-white"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(video.video_url, '_blank');
+                            }}
+                            title="Abrir em nova aba"
+                            className="bg-white/90 hover:bg-white"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        <p className="font-medium text-sm">{video.title || `Vídeo do usuário ${index + 1}`}</p>
+                        {video.id && <p>ID: {video.id}</p>}
+                        {video.video_width && video.video_height && (
+                          <p>Resolução: {video.video_width}x{video.video_height}</p>
+                        )}
+                        <Badge variant="outline" className="text-xs mt-1 border-blue-300 text-blue-700">
+                          Vídeo do Usuário
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </ExpandableSection>
@@ -864,16 +940,57 @@ export default function AmazonProductDetails() {
 
                     <div className="space-y-3">
                       {Array.isArray(variations) ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                           {variations.map((variation, index) => (
                             <div key={index} className="relative group">
-                              <Badge 
-                                variant="outline" 
-                                className="text-sm w-full justify-center py-2 hover:bg-blue-50 transition-colors cursor-pointer"
-                                title={`Opção ${index + 1}: ${String(variation)}`}
-                              >
-                                {String(variation)}
-                              </Badge>
+                              <div className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer bg-white">
+                                {/* Thumbnail da variação */}
+                                {variation.photo && (
+                                  <div className="mb-2">
+                                    <img
+                                      src={variation.photo}
+                                      alt={variation.value || `Variação ${index + 1}`}
+                                      className="w-full h-24 object-cover rounded border"
+                                      onClick={() => window.open(variation.photo, '_blank')}
+                                    />
+                                  </div>
+                                )}
+                                
+                                {/* Nome da variação */}
+                                <div className="text-center">
+                                  <p className="text-sm font-medium text-gray-900 mb-1">
+                                    {variation.value || `Opção ${index + 1}`}
+                                  </p>
+                                  
+                                  {/* ASIN e disponibilidade */}
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-gray-500 font-mono">
+                                      ASIN: {variation.asin}
+                                    </p>
+                                    <Badge 
+                                      variant={variation.is_available ? "default" : "destructive"}
+                                      className="text-xs"
+                                    >
+                                      {variation.is_available ? "Disponível" : "Indisponível"}
+                                    </Badge>
+                                  </div>
+                                </div>
+
+                                {/* Botão para ver produto */}
+                                {variation.asin && (
+                                  <div className="mt-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="w-full text-xs"
+                                      onClick={() => window.open(`https://www.amazon.com.br/dp/${variation.asin}`, '_blank')}
+                                    >
+                                      <ExternalLink className="h-3 w-3 mr-1" />
+                                      Ver Produto
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -909,14 +1026,35 @@ export default function AmazonProductDetails() {
                   </div>
                 ))}
 
+                {/* Todas as variações do produto */}
+                {productData.data.all_product_variations && Object.keys(productData.data.all_product_variations).length > 0 && (
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <h5 className="font-medium text-gray-900 mb-2">Mapeamento Completo de Variações</h5>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                      {Object.entries(productData.data.all_product_variations).map(([asin, attributes]) => (
+                        <div key={asin} className="flex items-center justify-between p-2 bg-white rounded border">
+                          <span className="text-gray-600 font-mono text-xs">{asin}:</span>
+                          <div className="flex flex-wrap gap-1">
+                            {Object.entries(attributes).map(([attr, value]) => (
+                              <Badge key={attr} variant="outline" className="text-xs">
+                                {String(value)}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Resumo das variações */}
-                <div className="bg-gray-50 p-4 rounded-lg border">
-                  <h5 className="font-medium text-gray-900 mb-2">Resumo das Variações</h5>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h5 className="font-medium text-blue-900 mb-2">Resumo das Variações</h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                     {Object.entries(productData.data.product_variations).map(([type, vars]) => (
                       <div key={type} className="flex justify-between">
-                        <span className="text-gray-600 capitalize">{type.replace(/_/g, ' ')}:</span>
-                        <span className="font-medium">
+                        <span className="text-blue-700 capitalize">{type.replace(/_/g, ' ')}:</span>
+                        <span className="font-medium text-blue-900">
                           {Array.isArray(vars) ? `${vars.length} opções` : 
                            typeof vars === 'object' && vars !== null ? `${Object.keys(vars).length} atributos` : '1 opção'}
                         </span>
