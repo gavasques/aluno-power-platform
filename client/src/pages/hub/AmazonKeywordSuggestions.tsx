@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useApiRequest } from '@/hooks/useApiRequest';
+import { useAuth } from '@/hooks/useAuth';
 import { CreditCostButton } from '@/components/CreditCostButton';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
@@ -41,6 +42,7 @@ export default function AmazonKeywordSuggestions() {
   const { balance: userBalance } = useUserCreditBalance();
   const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
   const { toast } = useToast();
+  const { token } = useAuth();
 
   const handleSearch = async () => {
     if (!keyword.trim()) return;
@@ -53,7 +55,12 @@ export default function AmazonKeywordSuggestions() {
     }
 
     const data = await execute(
-      () => fetch(`/api/amazon-keyword-suggestions?prefix=${encodeURIComponent(keyword)}&region=${selectedCountry}`),
+      () => fetch(`/api/amazon-keyword-suggestions?prefix=${encodeURIComponent(keyword)}&region=${selectedCountry}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }),
       (response) => response.data
     );
 

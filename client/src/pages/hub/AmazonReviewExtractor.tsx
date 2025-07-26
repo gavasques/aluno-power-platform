@@ -60,7 +60,7 @@ const extractOrValidateASIN = (input: string): string | null => {
 const FEATURE_CODE = 'tools.amazon_reviews';
 
 export default function AmazonReviewExtractor() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [urlInput, setUrlInput] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('BR');
   const [state, setState] = useState<ExtractorState>({
@@ -112,7 +112,10 @@ export default function AmazonReviewExtractor() {
     const data = await execute(
       () => fetch('/api/amazon-reviews/extract', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           asin,
           page,

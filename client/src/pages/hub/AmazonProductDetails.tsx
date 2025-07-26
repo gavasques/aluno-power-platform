@@ -24,6 +24,7 @@ import {
   Download
 } from "lucide-react";
 import { useApiRequest } from '@/hooks/useApiRequest';
+import { useAuth } from '@/hooks/useAuth';
 import { CreditCostButton } from '@/components/CreditCostButton';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
@@ -141,6 +142,7 @@ export default function AmazonProductDetails() {
   const { balance: userBalance } = useUserCreditBalance();
   const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
   const { toast } = useToast();
+  const { token } = useAuth();
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -166,7 +168,10 @@ export default function AmazonProductDetails() {
     const data = await execute(
       () => fetch('/api/amazon-product-details', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ asin, country })
       })
     );
