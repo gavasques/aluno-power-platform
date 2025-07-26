@@ -96,7 +96,7 @@ const ferramentas = [
     href: "/ferramentas/produto-detalhes",
     icon: Package,
     category: "Amazon",
-    credits: 3,
+    credits: 1,
     permission: "tools.product_details"
   },
   {

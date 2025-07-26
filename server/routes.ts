@@ -5031,9 +5031,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   });
 
   // Amazon Product Details API
-  app.post('/api/amazon-product-details', async (req, res) => {
+  app.post('/api/amazon-product-details', requireAuth, async (req, res) => {
     try {
       const { asin, country } = req.body;
+      const userId = req.user?.id;
 
       if (!asin || !country) {
         return res.status(400).json({ 
@@ -5045,6 +5046,18 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       if (!/^[A-Z0-9]{10}$/i.test(asin)) {
         return res.status(400).json({ 
           error: 'ASIN inválido. Deve ter 10 caracteres alfanuméricos.' 
+        });
+      }
+
+      // Descontar créditos ANTES da chamada da API
+      try {
+        const creditsDeducted = await CreditService.deductCredits(userId, 'tools.product_details');
+        console.log(`✅ [CREDIT] Successfully deducted ${creditsDeducted} credits for tools.product_details - User: ${userId}`);
+      } catch (creditError) {
+        console.error(`❌ [CREDIT] Failed to deduct credits:`, creditError);
+        return res.status(402).json({ 
+          error: 'Créditos insuficientes',
+          details: creditError.message 
         });
       }
 
@@ -5072,14 +5085,15 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         // Log da consulta na tabela ai_generation_logs usando LoggingService
         try {
           await LoggingService.saveApiLog(
-            2, // userId admin
-            'amazon-product-details',
+            userId, 
+            'tools.product_details',
             `Amazon Product Details: ASIN ${asin}, Country ${country}`,
             JSON.stringify(data),
             'rapidapi',
             'real-time-amazon-data',
             0, // duration
-            0 // sem custo
+            0, // sem custo
+            1 // creditsUsed (já foram descontados acima)
           );
         } catch (logError) {
           console.error('❌ Erro ao salvar log de API:', logError);
@@ -5088,9 +5102,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         // Log da busca de produto (manter existente)
         try {
           await db.insert(toolUsageLogs).values({
-            userId: 2, // ID do usuário admin padrão
-            userName: 'Guilherme Vasques',
-            userEmail: 'gavasques@gmail.com',
+            userId: userId,
+            userName: req.user?.name || 'Unknown',
+            userEmail: req.user?.email || 'unknown@email.com',
             toolName: 'Detalhes do Produto Amazon',
             keyword: asin,
             country: country,

@@ -180,19 +180,8 @@ export default function AmazonProductDetails() {
     if (data?.status === 'OK' && data.data) {
       setProductData(data);
       
-      // Registrar log de uso com dedução automática de créditos
-      await logAIGeneration({
-        featureCode: FEATURE_CODE,
-        provider: 'amazon',
-        model: 'product-details',
-        prompt: `Busca de produto ASIN: ${asin}`,
-        response: `Produto encontrado: ${data.data.product_title}`,
-        inputTokens: 0,
-        outputTokens: 0,
-        totalTokens: 0,
-        cost: 0,
-        duration: 0
-      });
+      // Créditos já são descontados automaticamente no backend via CreditService
+      // Apenas precisamos registrar que o produto foi encontrado para o usuário
     }
   };
 
