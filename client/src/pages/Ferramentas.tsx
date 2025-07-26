@@ -91,13 +91,22 @@ const ferramentas = [
     permission: "tools.keyword_report"
   },
   {
-    title: "Comparar Listings",
+    title: "Detalhes do Produto",
     description: "Obtenha informações detalhadas de produtos Amazon",
     href: "/ferramentas/produto-detalhes",
     icon: Package,
     category: "Amazon",
     credits: 1,
     permission: "tools.product_details"
+  },
+  {
+    title: "Comparar Listings Amazon",
+    description: "Compare informações detalhadas entre múltiplos produtos Amazon",
+    href: "/ferramentas/comparar-listings",
+    icon: Package,
+    category: "Amazon",
+    credits: 2,
+    permission: "tools.compare_listings"
   },
   {
     title: "Consulta de CNPJ",

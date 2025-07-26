@@ -490,7 +490,7 @@ export default function AmazonProductDetails() {
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
           <Package className="h-8 w-8" />
-          Comparar Listings
+          Detalhes do Produto Amazon
         </h1>
         <p className="text-sm sm:text-base text-gray-600">
           Busque informações detalhadas de qualquer produto Amazon usando o ASIN
@@ -837,7 +837,7 @@ export default function AmazonProductDetails() {
                     Abrir Todos
                   </Button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Vídeos oficiais do produto */}
                   {productData.data.product_videos?.map((video, index) => (
@@ -1011,13 +1011,13 @@ export default function AmazonProductDetails() {
                                     </div>
                                   </div>
                                 )}
-                                
+
                                 {/* Nome da variação */}
                                 <div className="text-center">
                                   <p className="text-sm font-medium text-gray-900 mb-1">
                                     {variation.value || `Opção ${index + 1}`}
                                   </p>
-                                  
+
                                   {/* ASIN e disponibilidade */}
                                   <div className="space-y-1">
                                     <p className="text-xs text-gray-500 font-mono">
@@ -1136,7 +1136,7 @@ export default function AmazonProductDetails() {
                   .map(([rating, count]) => {
                     const total = Object.values(productData.data.rating_distribution).reduce((sum, val) => sum + val, 0);
                     const percentage = total > 0 ? (count / total) * 100 : 0;
-                    
+
                     return (
                       <div key={rating} className="flex items-center gap-3">
                         <div className="flex items-center gap-1 min-w-[60px]">
