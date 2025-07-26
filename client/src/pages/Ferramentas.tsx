@@ -114,7 +114,7 @@ const ferramentas = [
     href: "/ferramentas/keyword-suggestions",
     icon: Tag,
     category: "Amazon",
-    credits: 3,
+    credits: 1,
     permission: "tools.keyword_suggestions"
   }
 ];
@@ -122,7 +122,7 @@ const ferramentas = [
 const categories = ["Todos", "Imagem", "Design", "Amazon", "Empresas"];
 
 export default function Ferramentas() {
-  const { hasAccess, isLoading, userFeatures } = usePermissions();
+  const { hasAccess, isLoading } = usePermissions();
   const { toast } = useToast();
   
 

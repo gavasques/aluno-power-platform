@@ -783,6 +783,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 26, 2025 - 2:46 PM**: ✅ AMAZON KEYWORD SUGGESTIONS CREDIT COST CORRECTED - INTERFACE AND DATABASE UPDATED
+  - **Objective Achieved**: Corrected Amazon Keyword Suggestions credit cost from 3 to 1 credit per use
+  - **Interface Updated**: Fixed Ferramentas.tsx card display to show "1 crédito" instead of "3 créditos" 
+  - **Credit System Enhanced**: Implemented real-time credit updates with cache invalidation after tool usage
+  - **TypeScript Fixed**: Removed unused userFeatures property from PermissionContext
+  - **Database Verified**: Confirmed feature_costs table already has correct cost_per_use = 1
+  - **User Experience**: Tool now correctly displays 1 credit cost and deducts accordingly
+  - **Status**: Credit cost alignment complete - UI matches actual functionality
+
 - **January 26, 2025 - 9:37 AM**: ✅ RAPIDAPI AUTHENTICATION STANDARDIZATION COMPLETED - ALL ENDPOINTS CONFIGURED
   - **Objective Achieved**: Standardized X-RapidAPI-App header across all RapidAPI endpoints per user request
   - **Endpoints Updated**:
@@ -2789,7 +2798,7 @@ Preferred communication style: Simple, everyday language.
   - **Real-Time Cost Integration with Feature Costs**:
     - ✅ **CNPJ Consulta**: 1 credit per use (tools.cnpj_lookup) ✓ UPDATED
     - ✅ **Amazon Reviews Extractor**: 5 credits per use (tools.amazon_reviews) ✓ UPDATED  
-    - ✅ **Amazon Keyword Suggestions**: 3 credits per use (tools.keyword_suggestions) ✓ UPDATED
+    - ✅ **Amazon Keyword Suggestions**: 1 credit per use (tools.keyword_suggestions) ✓ UPDATED
     - ✅ **Amazon Keyword Search**: 3 credits per use (tools.keyword_report) ✓ UPDATED
     - ✅ **Background Removal**: 1 credit per use (tools.background_removal) ✓ READY
     - ✅ **Image Upscale**: 2 credits per use (tools.image_upscale) ✓ READY
