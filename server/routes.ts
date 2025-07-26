@@ -5235,17 +5235,19 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
 
       console.log(`🔍 [KEYWORD_SUGGESTIONS] Buscando sugestões para: "${prefix}" na região: ${region}`);
+      console.log(`🔍 [KEYWORD_SUGGESTIONS] API URL: https://amazon-data-scraper141.p.rapidapi.com/v1/keywords/suggestions`);
+      console.log(`🔍 [KEYWORD_SUGGESTIONS] RapidAPI Key presente: ${!!process.env.RAPIDAPI_KEY}`);
 
-      const response = await fetch(
-        `https://amazon-data-scraper141.p.rapidapi.com/v1/keywords/suggestions?prefix=${encodeURIComponent(prefix)}&region=${region}`,
-        {
-          headers: {
-            'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
-            'X-RapidAPI-Host': 'amazon-data-scraper141.p.rapidapi.com',
-            'X-RapidAPI-App': 'default-application_10763288'
-          }
+      const apiUrl = `https://amazon-data-scraper141.p.rapidapi.com/v1/keywords/suggestions?prefix=${encodeURIComponent(prefix)}&region=${region}`;
+      console.log(`🔍 [KEYWORD_SUGGESTIONS] URL completa: ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
+          'X-RapidAPI-Host': 'amazon-data-scraper141.p.rapidapi.com',
+          'X-RapidAPI-App': 'default-application_10763288'
         }
-      );
+      });
 
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
