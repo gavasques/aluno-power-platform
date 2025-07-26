@@ -12,6 +12,7 @@ import { CopyButton } from "@/components/common/CopyButton";
 import { useToast } from "@/hooks/use-toast";
 import { useCreditSystem } from "@/hooks/useCreditSystem";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ProductData {
   asin: string;
@@ -49,6 +50,7 @@ function CompararListingsContent() {
   const [error, setError] = useState("");
   const { toast } = useToast();
   const { checkCredits } = useCreditSystem();
+  const { token } = useAuth();
 
   const handleAddAsin = () => {
     if (asins.length < 5) {
@@ -93,11 +95,11 @@ function CompararListingsContent() {
 
     try {
       const promises = validAsins.map(async (asin) => {
-        const response = await fetch('/api/tools/amazon-product-details', {
+        const response = await fetch('/api/amazon-product-details', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({ asin: asin.trim(), country })
         });
