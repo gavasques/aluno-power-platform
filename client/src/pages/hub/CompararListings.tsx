@@ -253,7 +253,7 @@ function CompararListingsContent() {
           <div className="space-y-3">
             <label className="block text-sm font-medium">ASINs dos Produtos</label>
             {asins.map((asin, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={`asin-input-${index}`} className="flex gap-2">
                 <Input
                   placeholder={`ASIN do produto ${index + 1} (ex: B07ZPK1BL8)`}
                   value={asin}
@@ -327,8 +327,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `header-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`header-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center min-w-[300px]">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 text-center min-w-[300px]">
                           <div className="space-y-3">
                             <div className="text-sm font-medium text-gray-600">Produto {index + 1}</div>
                             {data.product_photo ? (
@@ -375,8 +376,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `price-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`price-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-1">
                             <div className="text-lg font-bold text-green-600">
                               {data.product_price || 'N/A'}
@@ -403,8 +405,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `rating-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`rating-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-1">
                             <div className="flex items-center justify-center gap-1">
                               <Star className="h-4 w-4 text-yellow-500 fill-current" />
@@ -430,8 +433,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `availability-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`availability-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-2">
                             <div className="text-sm">{data.product_availability || 'N/A'}</div>
                             <div className="flex flex-wrap justify-center gap-1">
@@ -453,8 +457,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `brand-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`brand-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-1 text-sm">
                             <div><strong>Marca:</strong> {data.product_byline || 'N/A'}</div>
                             <div><strong>Categoria:</strong> {data.category?.name || 'N/A'}</div>
@@ -472,8 +477,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `features-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`features-${asin}-${index}`} className="p-4 border-r border-gray-200">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
                           {data.about_product && data.about_product.length > 0 ? (
                             <ul className="text-sm space-y-1 text-left">
                               {data.about_product.slice(0, 4).map((feature, i) => (
@@ -499,8 +505,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `description-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`description-${asin}-${index}`} className="p-4 border-r border-gray-200">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
                           <div className="text-sm text-left line-clamp-4">
                             {data.product_description || 'Descrição não disponível'}
                           </div>
@@ -517,8 +524,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `specs-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`specs-${asin}-${index}`} className="p-4 border-r border-gray-200">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200">
                           {data.product_information && Object.keys(data.product_information).length > 0 ? (
                             <div className="space-y-1 text-sm text-left">
                               {Object.entries(data.product_information).slice(0, 5).map(([key, value]) => (
@@ -546,8 +554,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `delivery-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`delivery-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 text-center">
                           <div className="space-y-1 text-sm">
                             <div><strong>Entrega:</strong> {data.delivery || 'N/A'}</div>
                             <div><strong>Vendas:</strong> {data.sales_volume || 'N/A'}</div>
@@ -569,8 +578,9 @@ function CompararListingsContent() {
                     {results.map((product, index) => {
                       const data = product.data || {};
                       const asin = data.asin || asins[index] || `produto-${index}`;
+                      const uniqueKey = `link-${asin}-${index}-${Date.now()}`;
                       return (
-                        <td key={`link-${asin}-${index}`} className="p-4 border-r border-gray-200 text-center">
+                        <td key={uniqueKey} className="p-4 border-r border-gray-200 text-center">
                           {data.product_url ? (
                             <a 
                               href={data.product_url} 
