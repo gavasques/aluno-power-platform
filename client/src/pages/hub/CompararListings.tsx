@@ -48,7 +48,7 @@ function CompararListingsContent() {
   const [results, setResults] = useState<ProductData[]>([]);
   const [error, setError] = useState("");
   const { toast } = useToast();
-  const { checkAndDeductCredits } = useCreditSystem();
+  const { checkCredits } = useCreditSystem();
 
   const handleAddAsin = () => {
     if (asins.length < 5) {
@@ -77,8 +77,15 @@ function CompararListingsContent() {
       return;
     }
 
-    const canProceed = await checkAndDeductCredits("tools.compare_listings", validAsins.length);
-    if (!canProceed) return;
+    const creditCheck = await checkCredits("tools.compare_listings");
+    if (!creditCheck.canProcess) {
+      toast({
+        title: "Créditos insuficientes",
+        description: `Você precisa de ${creditCheck.requiredCredits} créditos, mas tem apenas ${creditCheck.currentBalance}`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -148,7 +155,7 @@ function CompararListingsContent() {
         content += "\n";
       }
 
-      if (product.variations?.length > 0) {
+      if (product.variations && product.variations.length > 0) {
         content += "VARIAÇÕES:\n";
         product.variations.forEach(variation => {
           content += `${variation.name}: ${variation.values.join(', ')}\n`;
@@ -435,7 +442,7 @@ function CompararListingsContent() {
 
 export default function CompararListings() {
   return (
-    <PermissionGuard requiredPermission="tools.compare_listings">
+    <PermissionGuard featureCode="tools.compare_listings">
       <CompararListingsContent />
     </PermissionGuard>
   );
