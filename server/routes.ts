@@ -1,6 +1,20 @@
-import type { Express } from "express";
+import type { Express, Request as ExpressRequest, Response as ExpressResponse } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
+
+// Extended Request interface with user property
+interface AuthenticatedRequest extends ExpressRequest {
+  user?: any;
+  body: any;
+}
+
+// Global extensions for session storage
+declare global {
+  var customerServiceSessions: Map<string, any>;
+  var negativeReviewsSessions: Map<string, any>;
+  var asinResearchSessions: Map<string, any>;
+  var supplierAnalysisSessions: Map<string, any>;
+}
 import { WebSocketServer, WebSocket } from "ws";
 import bcryptjs from "bcryptjs";
 import multer from "multer";
@@ -11,7 +25,7 @@ import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
 import os from "os";
-import { aiGenerationLogs } from "../shared/schema";
+
 import { LoggingService } from "./services/loggingService";
 import { CreditService } from "./services/creditService";
 import userProfileRoutes from "./routes/user/profile";
@@ -2080,8 +2094,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const response = await anthropic.messages.create({
         model: agent.model || 'claude-sonnet-4-20250514',
-        max_tokens: parseInt(agent.maxTokens) || 4000,
-        temperature: parseFloat(agent.temperature) || 0.7,
+        max_tokens: parseInt(String(agent.maxTokens)) || 4000,
+        temperature: parseFloat(String(agent.temperature)) || 0.7,
         messages: [
           {
             role: 'user',
@@ -2207,7 +2221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Process negative reviews response
-  app.post('/api/agents/amazon-negative-reviews/process', requireAuth, async (req: Request, res: Response) => {
+  app.post('/api/agents/amazon-negative-reviews/process', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
     try {
       const user = req.user;
       if (!user) {
@@ -2271,8 +2285,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const response = await anthropic.messages.create({
         model: agent.model || 'claude-sonnet-4-20250514',
-        max_tokens: parseInt(agent.maxTokens) || 4000,
-        temperature: parseFloat(agent.temperature) || 0.7,
+        max_tokens: parseInt(String(agent.maxTokens)) || 4000,
+        temperature: parseFloat(String(agent.temperature)) || 0.7,
         messages: [
           {
             role: 'user',
@@ -2368,7 +2382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get negative reviews session status
-  app.get('/api/agents/amazon-negative-reviews/sessions/:sessionId', requireAuth, async (req: Request, res: Response) => {
+  app.get('/api/agents/amazon-negative-reviews/sessions/:sessionId', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
     try {
       const { sessionId } = req.params;
       
@@ -4921,13 +4935,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     try {
       // Simple count queries with proper error handling
       const usersResult = await db.execute('SELECT COUNT(*) as count FROM users');
-      const totalUsers = Number(usersResult.rows[0]?.count) || 0;
+      const totalUsers = parseInt(String(usersResult.rows[0]?.count)) || 0;
 
       const agentsResult = await db.execute('SELECT COUNT(*) as count FROM agents');
-      const totalAgents = Number(agentsResult.rows[0]?.count) || 0;
+      const totalAgents = parseInt(String(agentsResult.rows[0]?.count)) || 0;
 
       const videosResult = await db.execute('SELECT COUNT(*) as count FROM youtube_videos');
-      const totalVideos = Number(videosResult.rows[0]?.count) || 0;
+      const totalVideos = parseInt(String(videosResult.rows[0]?.count)) || 0;
 
       // Count content from each table separately
       const materialsResult = await db.execute('SELECT COUNT(*) as count FROM materials');
@@ -4936,14 +4950,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const suppliersResult = await db.execute('SELECT COUNT(*) as count FROM suppliers');
       
       const totalContent = 
-        Number(materialsResult.rows[0]?.count || 0) +
-        Number(toolsResult.rows[0]?.count || 0) +
-        Number(partnersResult.rows[0]?.count || 0) +
-        Number(suppliersResult.rows[0]?.count || 0);
+        parseInt(String(materialsResult.rows[0]?.count || 0)) +
+        parseInt(String(toolsResult.rows[0]?.count || 0)) +
+        parseInt(String(partnersResult.rows[0]?.count || 0)) +
+        parseInt(String(suppliersResult.rows[0]?.count || 0));
 
       // Recent/active counts (simplified)
       const activeAgentsResult = await db.execute('SELECT COUNT(*) as count FROM agents WHERE is_active = true');
-      const activeAgents = Number(activeAgentsResult.rows[0]?.count) || 0;
+      const activeAgents = parseInt(String(activeAgentsResult.rows[0]?.count)) || 0;
 
       // Recent activity data
       const recentActivity = [
@@ -5242,7 +5256,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   });
 
   // Amazon Keyword Suggestions API
-  app.get('/api/amazon-keyword-suggestions', requireAuth, async (req: Request, res: Response) => {
+  app.get('/api/amazon-keyword-suggestions', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
     try {
       const { prefix, region = 'BR' } = req.query;
       

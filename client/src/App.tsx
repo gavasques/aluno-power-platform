@@ -1058,8 +1058,7 @@ function App() {
                               <ProtectedRoute requireAdmin>
                                 <AdminLayout>
                                   <Suspense fallback={<PageLoader />}>
-                                    <```text
-ContentManagement />
+                                    <ContentManagement />
                                   </Suspense>
                                 </AdminLayout>
                               </ProtectedRoute>
