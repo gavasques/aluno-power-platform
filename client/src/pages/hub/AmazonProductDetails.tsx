@@ -22,7 +22,10 @@ import {
   Tags,
   Globe,
   Download,
-  FileText
+  FileText,
+  TrendingUp, 
+  Palette, 
+  BarChart
 } from "lucide-react";
 import { useApiRequest } from '@/hooks/useApiRequest';
 import { useAuth } from '@/hooks/useAuth';
@@ -61,6 +64,19 @@ interface ProductData {
       url: string;
       type: string;
     }>;
+    product_byline: string;
+    product_byline_link: string;
+    delivery: string;
+    primary_delivery_time: string;
+    category: {
+      name: string;
+    };
+    category_path: Array<{
+      name: string;
+      link: string;
+    }>;
+    product_variations: Record<string, any>;
+    rating_distribution: Record<string, number>;
   };
 }
 
@@ -134,7 +150,10 @@ export default function AmazonProductDetails() {
     description: false,
     specifications: false,
     images: false,
-    videos: false
+    videos: false,
+    ranking: false,
+    variations: false,
+    ratings: false
   });
 
   const { execute, loading, error } = useApiRequest<ProductData>({
@@ -179,7 +198,7 @@ export default function AmazonProductDetails() {
 
     if (data?.status === 'OK' && data.data) {
       setProductData(data);
-      
+
       // Créditos já são descontados automaticamente no backend via CreditService
       // Apenas precisamos registrar que o produto foi encontrado para o usuário
     }
@@ -203,7 +222,7 @@ export default function AmazonProductDetails() {
         const imageUrl = productData.data.product_photos[i];
         const response = await fetch(imageUrl);
         const blob = await response.blob();
-        
+
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -212,7 +231,7 @@ export default function AmazonProductDetails() {
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-        
+
         await new Promise(resolve => setTimeout(resolve, 200));
       }
     } catch (error) {
@@ -224,16 +243,16 @@ export default function AmazonProductDetails() {
     if (!productData) return;
 
     const { data } = productData;
-    
+
     // Gerar conteúdo do arquivo TVT
     let tvtContent = '';
-    
+
     // Título e ASIN
     tvtContent += `TÍTULO: ${data.product_title}\n`;
     tvtContent += `ASIN: ${data.asin}\n`;
     tvtContent += `PAÍS: ${COUNTRIES.find(c => c.code === data.country)?.name || data.country}\n`;
     tvtContent += `URL DO PRODUTO: ${data.product_url}\n\n`;
-    
+
     // Informações básicas
     tvtContent += `=== INFORMAÇÕES BÁSICAS ===\n`;
     tvtContent += `Preço: ${data.product_price}\n`;
@@ -243,7 +262,7 @@ export default function AmazonProductDetails() {
     tvtContent += `Avaliação: ${data.product_star_rating} (${data.product_num_ratings} avaliações)\n`;
     tvtContent += `Disponibilidade: ${data.product_availability}\n`;
     tvtContent += `Número de ofertas: ${data.product_num_offers}\n`;
-    
+
     // Badges
     const badges = [];
     if (data.is_best_seller) badges.push('Best Seller');
@@ -253,18 +272,18 @@ export default function AmazonProductDetails() {
     if (badges.length > 0) {
       tvtContent += `Badges: ${badges.join(', ')}\n`;
     }
-    
+
     if (data.sales_volume) {
       tvtContent += `Volume de vendas: ${data.sales_volume}\n`;
     }
     tvtContent += '\n';
-    
+
     // Descrição
     if (data.product_description) {
       tvtContent += `=== DESCRIÇÃO ===\n`;
       tvtContent += `${data.product_description}\n\n`;
     }
-    
+
     // Características do produto
     if (data.about_product && data.about_product.length > 0) {
       tvtContent += `=== CARACTERÍSTICAS ===\n`;
@@ -273,7 +292,7 @@ export default function AmazonProductDetails() {
       });
       tvtContent += '\n';
     }
-    
+
     // Informações técnicas
     if (data.product_information && Object.keys(data.product_information).length > 0) {
       tvtContent += `=== ESPECIFICAÇÕES TÉCNICAS ===\n`;
@@ -284,31 +303,31 @@ export default function AmazonProductDetails() {
       });
       tvtContent += '\n';
     }
-    
+
     // URLs das imagens
     tvtContent += `=== IMAGENS ===\n`;
     if (data.product_photo) {
       tvtContent += `Imagem principal: ${data.product_photo}\n`;
     }
-    
+
     if (data.product_photos && data.product_photos.length > 0) {
       tvtContent += `Imagens adicionais:\n`;
       data.product_photos.forEach((photo, index) => {
         tvtContent += `${index + 1}. ${photo}\n`;
       });
     }
-    
+
     if (data.product_photos_videos && data.product_photos_videos.length > 0) {
       const images = data.product_photos_videos.filter(item => item.type === 'image');
       const videos = data.product_photos_videos.filter(item => item.type === 'video');
-      
+
       if (images.length > 0) {
         tvtContent += `Galeria de imagens:\n`;
         images.forEach((item, index) => {
           tvtContent += `${index + 1}. ${item.url}\n`;
         });
       }
-      
+
       if (videos.length > 0) {
         tvtContent += `\n=== VÍDEOS ===\n`;
         videos.forEach((item, index) => {
@@ -316,7 +335,7 @@ export default function AmazonProductDetails() {
         });
       }
     }
-    
+
     // Criar e baixar arquivo
     const blob = new Blob([tvtContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -327,7 +346,7 @@ export default function AmazonProductDetails() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    
+
     toast({
       title: "Arquivo TXT exportado!",
       description: `Dados do produto ${data.asin} salvos em arquivo TXT.`,
@@ -338,7 +357,7 @@ export default function AmazonProductDetails() {
     const numRating = parseFloat(rating);
     const fullStars = Math.floor(numRating);
     const hasHalfStar = numRating % 1 >= 0.5;
-    
+
     return (
       <div className="flex items-center gap-1">
         {[...Array(5)].map((_, i) => (
@@ -398,7 +417,7 @@ export default function AmazonProductDetails() {
                 ASIN é o código único de 10 caracteres do produto na Amazon
               </p>
             </div>
-            
+
             <div className="w-full sm:w-48">
               <Label htmlFor="country">País</Label>
               <CountrySelector
@@ -407,7 +426,7 @@ export default function AmazonProductDetails() {
                 placeholder="Selecione o país"
               />
             </div>
-            
+
             <div className="flex items-end">
               <CreditCostButton
                 featureName="tools.product_lookup"
@@ -479,20 +498,20 @@ export default function AmazonProductDetails() {
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 break-words leading-tight">
                   {productData.data.product_title}
                 </h3>
-                
+
                 <div className="space-y-2 sm:space-y-3">
                   <div className="flex items-start sm:items-center gap-2 flex-wrap">
                     <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0 mt-0.5 sm:mt-0" />
-                    <span className="text-sm">ASIN: </span>
+                    <span className="text-sm">ASIN: </span> 
                     <strong className="text-sm font-mono break-all">{productData.data.asin}</strong>
                   </div>
-                  
+
                   <div className="flex items-start sm:items-center gap-2 flex-wrap">
                     <Globe className="h-4 w-4 text-gray-500 flex-shrink-0 mt-0.5 sm:mt-0" />
                     <span className="text-sm">País: </span>
                     <strong className="text-sm">{COUNTRIES.find(c => c.code === productData.data.country)?.name}</strong>
                   </div>
-                  
+
                   {productData.data.product_star_rating && (
                     <div className="flex items-start sm:items-center gap-2 flex-wrap">
                       <div className="flex items-center gap-1">
@@ -503,7 +522,7 @@ export default function AmazonProductDetails() {
                       </span>
                     </div>
                   )}
-                  
+
                   <div className="flex flex-wrap gap-2 mt-3">
                     {productData.data.is_best_seller && (
                       <Badge variant="destructive" className="flex items-center gap-1">
@@ -531,7 +550,7 @@ export default function AmazonProductDetails() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-center">
                 {productData.data.product_photo && (
                   <img 
@@ -542,9 +561,9 @@ export default function AmazonProductDetails() {
                 )}
               </div>
             </div>
-            
+
             <Separator className="my-4" />
-            
+
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div>
                 <strong>Disponibilidade:</strong> {productData.data.product_availability}
@@ -558,7 +577,7 @@ export default function AmazonProductDetails() {
                 </div>
               )}
             </div>
-            
+
             <div className="mt-4">
               <Button variant="outline" size="sm" asChild>
                 <a href={productData.data.product_url} target="_blank" rel="noopener noreferrer">
@@ -583,7 +602,7 @@ export default function AmazonProductDetails() {
                   {formatPrice(productData.data.product_price)}
                 </p>
               </div>
-              
+
               {productData.data.product_original_price && (
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="text-sm font-medium text-gray-600 mb-1">Preço Original</h4>
@@ -612,7 +631,7 @@ export default function AmazonProductDetails() {
                   Baixar Todas
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {productData.data.product_photos.map((photo, index) => (
                   <div key={index} className="relative group">
@@ -648,7 +667,7 @@ export default function AmazonProductDetails() {
                     </p>
                   </div>
                 )}
-                
+
                 {productData.data.about_product?.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-2">Características:</h4>
