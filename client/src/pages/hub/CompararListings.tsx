@@ -43,7 +43,7 @@ interface AmazonProductResponse {
 }
 
 function CompararListingsContent() {
-  const [asins, setAsins] = useState<string[]>(["B0D6TXJG28", "B0DXKJ4Q28"]);
+  const [asins, setAsins] = useState<string[]>(["B0D6TXJG28", "B0CYD2QH4F"]);
   const [country, setCountry] = useState("BR");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<AmazonProductResponse[]>([]);
@@ -252,6 +252,10 @@ function CompararListingsContent() {
 
           <div className="space-y-3">
             <label className="block text-sm font-medium">ASINs dos Produtos</label>
+            <div className="text-xs text-gray-600 bg-blue-50 p-2 rounded-md">
+              💡 <strong>Dica:</strong> Alguns ASINs podem retornar dados vazios da API externa. 
+              Os ASINs padrão (B0D6TXJG28, B0CYD2QH4F) foram testados e funcionam corretamente.
+            </div>
             {asins.map((asin, index) => (
               <div key={`asin-input-${index}`} className="flex gap-2">
                 <Input
