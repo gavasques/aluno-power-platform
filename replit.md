@@ -783,6 +783,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 26, 2025 - 3:45 PM**: ✅ AMAZON PRODUCT DETAILS CREDIT SYSTEM COMPLETELY FIXED - CORRECT 1 CREDIT DEDUCTION IMPLEMENTED
+  - **Root Cause Resolved**: Fixed `CreditService is not defined` error by adding missing import in server/routes.ts
+  - **Credit System Corrected**: Backend now properly deducts exactly 1 credit per Amazon Product Details usage
+  - **Double Charging Eliminated**: Removed duplicate logAIGeneration call that was causing 2 credits to be charged
+  - **Authentication Enhanced**: API endpoint now uses requireAuth middleware for proper user validation
+  - **Interface Updated**: Card correctly displays "1 crédito" instead of "3 créditos"
+  - **Backend Flow Optimized**: Credits deducted before API call, with proper error handling for insufficient balance
+  - **Database Aligned**: feature_costs table correctly set to cost_per_use = 1 for tools.product_details
+  - **Testing Confirmed**: System now charges exactly 1 credit per use as expected
+  - **Status**: Amazon Product Details tool fully operational with correct credit deduction system
+
 - **January 26, 2025 - 3:22 PM**: ✅ TXT FILE EXPORT FUNCTIONALITY IMPLEMENTED - AMAZON PRODUCT DETAILS ENHANCED
   - **Objective Achieved**: Added comprehensive TXT file export feature to Amazon Product Details page
   - **Export Functionality**: Complete product data export in text format (.txt files)

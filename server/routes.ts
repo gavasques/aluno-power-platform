@@ -13,6 +13,7 @@ import path from "path";
 import os from "os";
 import { aiGenerationLogs } from "../shared/schema";
 import { LoggingService } from "./services/loggingService";
+import { CreditService } from "./services/creditService";
 import userProfileRoutes from "./routes/user/profile";
 import picsartRoutes from "./routes/picsart";
 import { productSupplierRoutes } from "./routes/productSupplierRoutes";
