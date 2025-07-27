@@ -101,7 +101,9 @@ const BackgroundRemovalTool: React.FC = () => {
       logger.debug('✅ [BACKGROUND_REMOVAL] Processing completed successfully');
       return data;
     },
-    onSuccess: async (data) => {
+    onSuccess: async (response) => {
+      // O servidor retorna {success: true, data: {...}}
+      const data = response.data || response;
       setResult(data);
       setProcessingProgress(100);
 
