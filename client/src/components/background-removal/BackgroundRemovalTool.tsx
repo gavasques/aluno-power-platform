@@ -32,13 +32,10 @@ import ProcessingStatusComponent from './ProcessingStatusComponent';
 import ImageDownloadComponent from './ImageDownloadComponent';
 
 interface BackgroundRemovalParams {
-  output_type: 'cutout' | 'mask';
+  output_type: 'cutout';
   bg_blur: string;
   scale: 'fit' | 'fill' | 'auto';
   auto_center: 'true' | 'false';
-  stroke_size: string;
-  stroke_color: string;
-  stroke_opacity: string;
   shadow: 'disabled' | 'enabled';
   shadow_opacity: string;
   shadow_blur: string;
@@ -56,7 +53,7 @@ interface ProcessingResult {
   totalTime: number;
 }
 
-const FEATURE_CODE = 'tools.picsart_background_removal';
+const FEATURE_CODE = 'tools.background_removal';
 
 const BackgroundRemovalTool: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string>('');
@@ -66,9 +63,6 @@ const BackgroundRemovalTool: React.FC = () => {
     bg_blur: '0',
     scale: 'fit',
     auto_center: 'false',
-    stroke_size: '0',
-    stroke_color: 'FFFFFF',
-    stroke_opacity: '100',
     shadow: 'disabled',
     shadow_opacity: '20',
     shadow_blur: '50',
@@ -224,9 +218,6 @@ const BackgroundRemovalTool: React.FC = () => {
       bg_blur: '0',
       scale: 'fit',
       auto_center: 'false',
-      stroke_size: '0',
-      stroke_color: 'FFFFFF',
-      stroke_opacity: '100',
       shadow: 'disabled',
       shadow_opacity: '20',
       shadow_blur: '50',
@@ -346,22 +337,6 @@ const BackgroundRemovalTool: React.FC = () => {
                 
                 <TabsContent value="basic" className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Tipo de Saída</Label>
-                    <Select
-                      value={parameters.output_type}
-                      onValueChange={(value) => handleParameterChange('output_type', value as 'cutout' | 'mask')}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cutout">Recorte (Cutout)</SelectItem>
-                        <SelectItem value="mask">Máscara (Mask)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
                     <Label>Formato de Saída</Label>
                     <Select
                       value={parameters.format}
@@ -411,41 +386,6 @@ const BackgroundRemovalTool: React.FC = () => {
                     <Slider
                       value={[parseInt(parameters.bg_blur)]}
                       onValueChange={(value) => handleParameterChange('bg_blur', value[0].toString())}
-                      max={100}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Tamanho da Borda: {parameters.stroke_size}</Label>
-                    <Slider
-                      value={[parseInt(parameters.stroke_size)]}
-                      onValueChange={(value) => handleParameterChange('stroke_size', value[0].toString())}
-                      max={50}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Cor da Borda</Label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="color"
-                        value={`#${parameters.stroke_color}`}
-                        onChange={(e) => handleParameterChange('stroke_color', e.target.value.replace('#', ''))}
-                        className="h-10 w-20 rounded border border-gray-300"
-                      />
-                      <span className="text-sm text-gray-600">#{parameters.stroke_color}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Opacidade da Borda: {parameters.stroke_opacity}%</Label>
-                    <Slider
-                      value={[parseInt(parameters.stroke_opacity)]}
-                      onValueChange={(value) => handleParameterChange('stroke_opacity', value[0].toString())}
                       max={100}
                       step={1}
                       className="w-full"

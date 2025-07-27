@@ -146,7 +146,13 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
   const startTime = Date.now();
   
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not authenticated'
+      });
+    }
     let imageData: string;
     let fileName: string;
 
@@ -177,7 +183,7 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
     const validation = backgroundRemovalSchema.safeParse({
       imageData,
       fileName,
-      parameters: req.body.parameters ? JSON.parse(req.body.parameters) : {}
+      parameters: typeof req.body.parameters === 'string' ? JSON.parse(req.body.parameters) : (req.body.parameters || {})
     });
 
     if (!validation.success) {
@@ -328,11 +334,11 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
     // Log the failed usage
     try {
       await db.insert(aiImgGenerationLogs).values({
-        userId,
+        userId: userId,
         provider: 'picsart',
         model: 'removebg',
         feature: 'background_removal',
-        originalImageName: fileName,
+        originalImageName: fileName || 'unknown',
         prompt: 'Background removal processing',
         status: 'failed',
         errorMessage: error instanceof Error ? error.message : 'Unknown error',
