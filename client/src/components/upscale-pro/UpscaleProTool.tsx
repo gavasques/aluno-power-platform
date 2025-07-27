@@ -136,7 +136,16 @@ export function UpscaleProTool() {
         throw new Error(errorData.error || 'Erro no processamento da imagem');
       }
 
-      const result: ProcessingResult = await response.json();
+      const responseData = await response.json();
+      
+      // The backend returns data within a "data" wrapper
+      const result: ProcessingResult = {
+        success: responseData.success,
+        processedImageData: responseData.data.processedImageData,
+        processedImageUrl: responseData.data.processedImageUrl,
+        sessionId: responseData.data.sessionId,
+        duration: responseData.data.duration || responseData.processingTime
+      };
       
       setResult(result);
 
@@ -173,47 +182,105 @@ export function UpscaleProTool() {
     }
   };
 
-  const downloadResult = () => {
+  const downloadResult = async () => {
     if (!result || !selectedFile) return;
 
     try {
-      // Convert base64 to blob
-      const base64Data = result.processedImageData.replace(/^data:image\/[a-z]+;base64,/, '');
-      const binaryData = atob(base64Data);
-      const bytes = new Uint8Array(binaryData.length);
+      console.log('🎨 Iniciando download da imagem processada...');
       
-      for (let i = 0; i < binaryData.length; i++) {
-        bytes[i] = binaryData.charCodeAt(i);
-      }
+      let downloadUrl = '';
+      let fileName = '';
       
-      const blob = new Blob([bytes], { type: `image/${parameters.format.toLowerCase()}` });
-      const url = URL.createObjectURL(blob);
-      
-      // Create download link
-      const link = document.createElement('a');
-      link.href = url;
-      
+      // Determine the file extension
       const originalName = selectedFile.name.replace(/\.[^/.]+$/, '');
       const extension = parameters.format.toLowerCase() === 'jpg' ? 'jpg' : parameters.format.toLowerCase();
-      link.download = `${originalName}_upscale_${parameters.upscale_factor}x.${extension}`;
+      fileName = `${originalName}_upscale_${parameters.upscale_factor}x.${extension}`;
+      
+      // Try to use the external URL first if available
+      if (result.processedImageUrl && result.processedImageUrl.startsWith('http')) {
+        console.log('🎨 Usando URL externa para download:', result.processedImageUrl);
+        
+        try {
+          const response = await fetch(result.processedImageUrl);
+          if (response.ok) {
+            const blob = await response.blob();
+            downloadUrl = URL.createObjectURL(blob);
+          } else {
+            throw new Error('Falha ao baixar da URL externa');
+          }
+        } catch (urlError) {
+          console.warn('⚠️ Falha no download da URL externa, tentando base64...', urlError);
+          // Fallback to base64 conversion
+        }
+      }
+      
+      // If external URL failed or not available, use base64 data
+      if (!downloadUrl && result.processedImageData) {
+        console.log('🎨 Convertendo dados base64 para blob...');
+        
+        let base64Data = result.processedImageData;
+        
+        // Check if it's a complete data URL or just base64 data
+        if (base64Data.startsWith('data:image/')) {
+          base64Data = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+        }
+        
+        try {
+          // Convert base64 to blob using fetch (more reliable)
+          const response = await fetch(`data:image/${extension};base64,${base64Data}`);
+          const blob = await response.blob();
+          downloadUrl = URL.createObjectURL(blob);
+        } catch (base64Error) {
+          console.error('❌ Erro na conversão base64:', base64Error);
+          throw new Error('Falha na conversão dos dados da imagem');
+        }
+      }
+      
+      if (!downloadUrl) {
+        throw new Error('Nenhuma fonte de dados disponível para download');
+      }
+      
+      // Create and trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = fileName;
+      link.style.display = 'none';
       
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      URL.revokeObjectURL(url);
+      // Clean up
+      setTimeout(() => {
+        URL.revokeObjectURL(downloadUrl);
+      }, 1000);
       
       toast({
         title: 'Download iniciado',
-        description: 'Sua imagem ampliada está sendo baixada',
+        description: `Sua imagem ampliada (${fileName}) está sendo baixada`,
       });
+      
+      console.log('✅ Download iniciado com sucesso:', fileName);
+      
     } catch (error) {
-      console.error('Download error:', error);
-      toast({
-        title: 'Erro no download',
-        description: 'Não foi possível baixar a imagem',
-        variant: 'destructive',
-      });
+      console.error('❌ Download error:', error);
+      
+      // Fallback: open in new tab
+      if (result.processedImageUrl && result.processedImageUrl.startsWith('http')) {
+        console.log('🔄 Abrindo imagem em nova aba como fallback...');
+        window.open(result.processedImageUrl, '_blank');
+        
+        toast({
+          title: 'Download alternativo',
+          description: 'Imagem aberta em nova aba. Use "Salvar como..." para baixar',
+        });
+      } else {
+        toast({
+          title: 'Erro no download',
+          description: error instanceof Error ? error.message : 'Não foi possível baixar a imagem',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
