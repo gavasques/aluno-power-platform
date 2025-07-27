@@ -352,6 +352,38 @@ Comentário: ${comment}
             </Button>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Máximo de páginas por produto</label>
+              <Input
+                type="number"
+                min="1"
+                max="50"
+                value={state.totalPages}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 10;
+                  setState(prev => ({ ...prev, totalPages: Math.max(1, Math.min(50, value)) }));
+                }}
+                disabled={state.isExtracting}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                O extrator para automaticamente após 2 páginas consecutivas vazias (mesmo antes do limite)
+              </p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Estimativa de reviews</label>
+              <div className="p-3 bg-muted/50 rounded-md">
+                <p className="text-sm">
+                  Até <span className="font-semibold">{state.urls.length * state.totalPages * 10}</span> reviews
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  ({state.urls.length} produtos × {state.totalPages} páginas × ~10 reviews/página)
+                </p>
+              </div>
+            </div>
+          </div>
+
           {state.urls.length > 0 && (
             <div className="space-y-2">
               <h3 className="font-medium">Produtos para extração:</h3>
