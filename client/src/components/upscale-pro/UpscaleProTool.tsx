@@ -137,16 +137,18 @@ export function UpscaleProTool() {
       }
 
       const responseData = await response.json();
+      console.log('🔍 Response data received:', responseData);
       
       // The backend returns data within a "data" wrapper
       const result: ProcessingResult = {
         success: responseData.success,
-        processedImageData: responseData.data.processedImageData,
-        processedImageUrl: responseData.data.processedImageUrl,
-        sessionId: responseData.data.sessionId,
-        duration: responseData.data.duration || responseData.processingTime
+        processedImageData: responseData.data?.processedImageData,
+        processedImageUrl: responseData.data?.processedImageUrl,
+        sessionId: responseData.data?.sessionId,
+        duration: responseData.data?.duration || responseData.processingTime
       };
       
+      console.log('🎨 Processed result:', result);
       setResult(result);
 
       // Registrar log de uso com dedução automática de créditos
@@ -432,7 +434,7 @@ export function UpscaleProTool() {
           )}
 
           {/* Result */}
-          {result && result.processedImageData && (
+          {result && (result.processedImageData || result.processedImageUrl) && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-green-600">
                 <Check className="w-5 h-5" />
@@ -451,7 +453,7 @@ export function UpscaleProTool() {
                 <div>
                   <Label className="text-sm font-medium">Imagem Ampliada ({parameters.upscale_factor}x)</Label>
                   <img
-                    src={result.processedImageData}
+                    src={result.processedImageData || result.processedImageUrl}
                     alt="Processed"
                     className="w-full max-h-48 object-contain border rounded-lg mt-2"
                   />
