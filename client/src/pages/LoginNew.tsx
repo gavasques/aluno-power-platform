@@ -345,15 +345,8 @@ export default function LoginNew() {
         <title>Login - Core Guilherme Vasques</title>
         <meta name="description" content="Acesse a plataforma completa de inteligência artificial para Amazon FBA e e-commerce. Transforme seu negócio na Amazon." />
       </Helmet>
-      <div className="login-container-optimized bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-        {/* Animated background glow effects */}
-        <div className="absolute inset-0">
-          {/* Orb 1 - simplified */}
-          <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-gradient-to-r from-blue-400/15 to-indigo-400/15 rounded-full blur-3xl animate-pulse-slow" />
-          
-          {/* Orb 2 - simplified */}
-          <div className="absolute bottom-1/4 right-1/3 w-64 h-64 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-2xl animate-float" />
-        </div>
+      <div className="login-container-optimized bg-white relative overflow-hidden">
+
         
         <div className="relative z-10 flex">
           {/* Left Column - Login Form */}
