@@ -38,7 +38,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -53,7 +53,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             id="email"
             type="email"
             placeholder="seu@email.com"
-            className="pl-10"
+            className="pl-10 h-10"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
@@ -70,7 +70,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             id="password"
             type="password"
             placeholder="••••••••"
-            className="pl-10"
+            className="pl-10 h-10"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isSubmitting}

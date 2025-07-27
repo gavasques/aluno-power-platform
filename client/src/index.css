@@ -56,6 +56,36 @@
   .no-spin {
     -moz-appearance: textfield;
   }
+
+  /* Classes para login otimizado - ETAPA 1 */
+  .login-container-optimized {
+    min-height: 85vh;
+    max-height: 100vh;
+  }
+
+  @media (min-width: 1024px) {
+    .login-container-optimized {
+      min-height: 100vh;
+    }
+  }
+
+  .login-card-responsive {
+    max-width: 20rem; /* 320px */
+  }
+
+  @media (min-width: 1024px) {
+    .login-card-responsive {
+      max-width: 28rem; /* 448px */
+    }
+  }
+
+  .login-background-minimal {
+    /* Background simplificado - apenas 2 orbs */
+  }
+
+  .login-form-compact {
+    /* Espaçamentos reduzidos */
+  }
 }
 
 /* Optimized Font Loading Strategy */

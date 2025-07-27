@@ -346,30 +346,20 @@ export default function LoginNew() {
         <meta name="description" content="Acesse a plataforma completa de inteligência artificial para Amazon FBA e e-commerce. Transforme seu negócio na Amazon." />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+      <div className="login-container-optimized bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
         {/* Animated background glow effects */}
         <div className="absolute inset-0">
-          {/* Main glow orb - animated */}
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl animate-pulse-slow" />
+          {/* Orb 1 - simplified */}
+          <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-gradient-to-r from-blue-400/15 to-indigo-400/15 rounded-full blur-3xl animate-pulse-slow" />
           
-          {/* Secondary glow orb - animated */}
-          <div className="absolute bottom-1/4 right-1/3 w-80 h-80 bg-gradient-to-r from-purple-400/15 to-pink-400/15 rounded-full blur-3xl animate-float" />
-          
-          {/* Tertiary small glow */}
-          <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full blur-2xl animate-pulse-slow" style={{animationDelay: '2s'}} />
-          
-          {/* Subtle grid pattern overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_70%)]" />
-          <div className="absolute inset-0 opacity-30" style={{
-            backgroundImage: `radial-gradient(circle at 25px 25px, rgba(59, 130, 246, 0.1) 2px, transparent 0)`,
-            backgroundSize: '50px 50px'
-          }} />
+          {/* Orb 2 - simplified */}
+          <div className="absolute bottom-1/4 right-1/3 w-64 h-64 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-2xl animate-float" />
         </div>
         
         <div className="relative z-10 flex">
           {/* Left Column - Login Form */}
-          <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-12">
-            <div className="w-full max-w-md">
+          <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
+            <div className="w-full login-card-responsive">
               {/* Premium Badge */}
               <div className="flex justify-center mb-8">
                 <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
@@ -396,7 +386,7 @@ export default function LoginNew() {
               </div>
 
               {/* Login Card */}
-              <Card className="shadow-2xl border border-white/30 bg-white/90 backdrop-blur-md">
+              <Card className="shadow-xl border border-white/30 bg-white/90 backdrop-blur-sm login-form-compact">
                 <CardHeader className="pb-4">
                   <div className="text-center">
                     <h2 className="text-xl font-semibold text-gray-900">Fazer Login</h2>
@@ -404,7 +394,7 @@ export default function LoginNew() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Email Field */}
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-sm font-medium text-gray-700">
