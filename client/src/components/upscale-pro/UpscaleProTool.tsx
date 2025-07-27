@@ -149,6 +149,8 @@ export function UpscaleProTool() {
       };
       
       console.log('🎨 Processed result:', result);
+      console.log('🖼️ Image data length:', result.processedImageData?.length);
+      console.log('🔗 Image URL:', result.processedImageUrl);
       setResult(result);
 
       // Registrar log de uso com dedução automática de créditos
@@ -452,11 +454,34 @@ export function UpscaleProTool() {
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Imagem Ampliada ({parameters.upscale_factor}x)</Label>
-                  <img
-                    src={result.processedImageData || result.processedImageUrl}
-                    alt="Processed"
-                    className="w-full max-h-48 object-contain border rounded-lg mt-2"
-                  />
+                  {result.processedImageData ? (
+                    <img
+                      src={result.processedImageData.startsWith('data:') 
+                        ? result.processedImageData 
+                        : `data:image/png;base64,${result.processedImageData}`}
+                      alt="Processed"
+                      className="w-full max-h-48 object-contain border rounded-lg mt-2"
+                      onError={(e) => {
+                        console.error('❌ Erro ao carregar imagem base64');
+                        // Fallback para URL se base64 falhar
+                        if (result.processedImageUrl) {
+                          console.log('🔄 Tentando carregar da URL:', result.processedImageUrl);
+                          e.currentTarget.src = result.processedImageUrl;
+                        }
+                      }}
+                    />
+                  ) : result.processedImageUrl ? (
+                    <img
+                      src={result.processedImageUrl}
+                      alt="Processed"
+                      className="w-full max-h-48 object-contain border rounded-lg mt-2"
+                      onError={() => console.error('❌ Erro ao carregar imagem da URL')}
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-100 border rounded-lg mt-2 flex items-center justify-center">
+                      <p className="text-gray-500">Imagem não disponível</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
