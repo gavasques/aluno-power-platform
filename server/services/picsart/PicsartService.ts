@@ -442,17 +442,39 @@ export class PicsartService {
           console.error(`❌ [PICSART] Invalid characters found: ${invalidChars.slice(0, 10).join(', ')}`);
         }
         
-        // Try to clean the base64 string by removing invalid characters
-        const cleanedBase64 = base64.replace(/[^A-Za-z0-9+/=]/g, '');
-        console.log(`🔧 [PICSART] Attempting to use cleaned base64 string (${cleanedBase64.length} chars)`);
+        // Try to decode HTML entities first (this is the root cause!)
+        console.log(`🔧 [PICSART] Attempting HTML entity decoding...`);
+        let decodedBase64 = base64
+          .replace(/&#x2F;/g, '/')
+          .replace(/&#x3D;/g, '=')
+          .replace(/&#x2B;/g, '+')
+          .replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => {
+            return String.fromCharCode(parseInt(hex, 16));
+          })
+          .replace(/&#(\d+);/g, (match, dec) => {
+            return String.fromCharCode(parseInt(dec, 10));
+          })
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&apos;/g, "'");
         
-        if (cleanedBase64.length > 0 && /^[A-Za-z0-9+/]*={0,2}$/.test(cleanedBase64)) {
-          console.log(`✅ [PICSART] Cleaned base64 string is valid, proceeding...`);
-          // Use the cleaned base64 for further processing
-        } else {
-          throw new Error('Invalid base64 format - could not clean');
+        console.log(`🔧 [PICSART] After HTML decoding: ${decodedBase64.length} chars`);
+        console.log(`🔧 [PICSART] HTML decoded first 100: ${decodedBase64.substring(0, 100)}`);
+        
+        // If HTML decoding didn't work, try simple character removal
+        if (!base64Regex.test(decodedBase64)) {
+          console.log(`🔧 [PICSART] HTML decoding failed, trying simple character removal...`);
+          decodedBase64 = decodedBase64.replace(/[^A-Za-z0-9+/=]/g, '');
         }
-        base64 = cleanedBase64;
+        
+        if (decodedBase64.length > 0 && /^[A-Za-z0-9+/]*={0,2}$/.test(decodedBase64)) {
+          console.log(`✅ [PICSART] Successfully decoded/cleaned base64 string, proceeding...`);
+          base64 = decodedBase64;
+        } else {
+          throw new Error('Invalid base64 format - could not decode HTML entities or clean');
+        }
       }
       
       let buffer: Buffer;
