@@ -343,9 +343,17 @@ export class PicsartService {
       
       console.log(`📤 [PICSART] Uploading image file: ${fileName} (${imageBuffer.length} bytes)`);
 
+      // Enhanced debugging for image buffer validation
+      console.log(`🔍 [PICSART] File buffer first 20 bytes: ${Array.from(imageBuffer.slice(0, 20)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' ')}`);
+      console.log(`🔍 [PICSART] File buffer first 20 chars as string: ${imageBuffer.slice(0, 20).toString()}`);
+      
       // Validate the image buffer
       const validation = this.validateImageBuffer(imageBuffer);
+      console.log(`🔍 [PICSART] Image validation result: ${JSON.stringify(validation)}`);
+      
       if (!validation.isValid) {
+        console.error(`❌ [PICSART] Image validation failed - buffer starts with: ${Array.from(imageBuffer.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' ')}`);
+        console.error(`❌ [PICSART] Expected JPEG signature: 0xff 0xd8, PNG signature: 0x89 0x50 0x4e 0x47`);
         throw new Error(`Invalid image format. File appears to be corrupted or not a valid image.`);
       }
       
