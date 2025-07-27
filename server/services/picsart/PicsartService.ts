@@ -304,8 +304,22 @@ export class PicsartService {
       // Create FormData for multipart/form-data with direct file upload
       const formData = new FormData();
       
-      // Create a Blob from the buffer for FormData
-      const blob = new Blob([imageBuffer], { type: 'image/jpeg' });
+      // Detect proper mime type for the file
+      const fileExtension = path.extname(fileName).toLowerCase();
+      let mimeType = 'image/jpeg'; // default
+      
+      if (fileExtension === '.png') {
+        mimeType = 'image/png';
+      } else if (fileExtension === '.webp') {
+        mimeType = 'image/webp';
+      } else if (['.jpg', '.jpeg'].includes(fileExtension)) {
+        mimeType = 'image/jpeg';
+      }
+      
+      console.log(`📤 [PICSART] Using mime type: ${mimeType} for file: ${fileName}`);
+      
+      // Create a Blob from the buffer with correct mime type
+      const blob = new Blob([imageBuffer], { type: mimeType });
       formData.append('image', blob, fileName);
       formData.append('output_type', 'cutout');
       formData.append('format', 'PNG');
@@ -357,19 +371,42 @@ export class PicsartService {
     try {
       console.log(`📤 [PICSART] Starting image upload for user ${userId}, file: ${fileName}`);
       
-      // Remove data URL prefix if present
+      // Extract mime type and remove data URL prefix
+      const mimeMatch = base64Data.match(/^data:image\/([a-z]+);base64,/);
+      const mimeType = mimeMatch ? mimeMatch[1] : 'jpeg';
       const base64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+      
+      console.log(`📤 [PICSART] Detected mime type: ${mimeType}`);
       console.log(`📤 [PICSART] Base64 data length: ${base64.length}`);
       
       const buffer = Buffer.from(base64, 'base64');
       console.log(`📤 [PICSART] Buffer size: ${buffer.length} bytes`);
+      
+      // Validate image format
+      if (!['jpeg', 'jpg', 'png', 'webp'].includes(mimeType.toLowerCase())) {
+        throw new Error(`Unsupported image format: ${mimeType}. Supported formats: JPG, PNG, WEBP`);
+      }
+
+      // Ensure proper file extension based on mime type
+      const ext = path.extname(fileName);
+      if (!ext) {
+        const extension = mimeType === 'png' ? '.png' : '.jpg';
+        fileName = `${fileName}${extension}`;
+      }
+      
+      // Normalize file extension based on detected mime type
+      if (mimeType === 'png' && !['.png'].includes(ext.toLowerCase())) {
+        fileName = fileName.replace(/\.[^/.]+$/, '.png');
+      } else if (mimeType === 'jpeg' && !['.jpg', '.jpeg'].includes(ext.toLowerCase())) {
+        fileName = fileName.replace(/\.[^/.]+$/, '.jpg');
+      }
 
       // Generate unique filename
       const timestamp = Date.now();
       const randomId = crypto.randomBytes(8).toString('hex');
-      const extension = fileName.split('.').pop() || 'png';
+      const extension = fileName.split('.').pop() || (mimeType === 'png' ? 'png' : 'jpg');
       const uniqueFileName = `picsart_${userId}_${timestamp}_${randomId}.${extension}`;
-      console.log(`📤 [PICSART] Generated filename: ${uniqueFileName}`);
+      console.log(`📤 [PICSART] Generated filename: ${uniqueFileName} (original: ${fileName})`);
 
       // In a real implementation, you would upload to cloud storage (S3, Cloudinary, etc.)
       // For now, we'll save to the uploads directory

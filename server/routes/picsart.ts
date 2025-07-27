@@ -306,52 +306,56 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
     console.error(`❌ [PICSART] Background removal failed after ${totalDuration}ms:`, error);
     
     // Refund credits if processing failed
-    try {
-      const toolConfig = await picsartService.getToolConfig('background_removal');
-      if (toolConfig) {
-        const creditsNeeded = parseFloat(toolConfig.costPerUse);
-        const userCredits = await db.select({ credits: users.credits })
-          .from(users)
-          .where(eq(users.id, userId))
-          .limit(1);
-        
-        if (userCredits.length) {
-          const currentCredits = parseFloat(userCredits[0].credits || '0');
-          await db.update(users)
-            .set({ 
-              credits: (currentCredits + creditsNeeded).toString(),
-              updatedAt: new Date()
-            })
-            .where(eq(users.id, userId));
+    if (userId) {
+      try {
+        const toolConfig = await picsartService.getToolConfig('background_removal');
+        if (toolConfig) {
+          const creditsNeeded = parseFloat(toolConfig.costPerUse);
+          const userCredits = await db.select({ credits: users.credits })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
           
-          console.log(`💰 [PICSART] Credits refunded: ${creditsNeeded} (${currentCredits} → ${currentCredits + creditsNeeded})`);
+          if (userCredits.length) {
+            const currentCredits = parseFloat(userCredits[0].credits || '0');
+            await db.update(users)
+              .set({ 
+                credits: (currentCredits + creditsNeeded).toString(),
+                updatedAt: new Date()
+              })
+              .where(eq(users.id, userId));
+            
+            console.log(`💰 [PICSART] Credits refunded: ${creditsNeeded} (${currentCredits} → ${currentCredits + creditsNeeded})`);
+          }
         }
+      } catch (refundError) {
+        console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
       }
-    } catch (refundError) {
-      console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
     }
 
     // Log the failed usage
-    try {
-      await db.insert(aiImgGenerationLogs).values({
-        userId: userId,
-        provider: 'picsart',
-        model: 'removebg',
-        feature: 'background_removal',
-        originalImageName: fileName || 'unknown',
-        prompt: 'Background removal processing',
-        status: 'failed',
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        cost: '0',
-        creditsUsed: '0',
-        duration: totalDuration,
-        metadata: JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-          processingTime: totalDuration
-        })
-      });
-    } catch (logError) {
-      console.error(`❌ [PICSART] Failed to log failed usage:`, logError);
+    if (userId) {
+      try {
+        await db.insert(aiImgGenerationLogs).values({
+          userId: userId,
+          provider: 'picsart',
+          model: 'removebg',
+          feature: 'background_removal',
+          originalImageName: fileName || 'unknown',
+          prompt: 'Background removal processing',
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          cost: '0',
+          creditsUsed: '0',
+          duration: totalDuration,
+          metadata: JSON.stringify({
+            error: error instanceof Error ? error.message : 'Unknown error',
+            processingTime: totalDuration
+          })
+        });
+      } catch (logError) {
+        console.error(`❌ [PICSART] Failed to log failed usage:`, logError);
+      }
     }
     
     res.status(500).json({
