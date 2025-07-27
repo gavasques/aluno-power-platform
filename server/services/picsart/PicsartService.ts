@@ -280,28 +280,39 @@ export class PicsartService {
    * Validate image file signature to ensure it's a valid image
    */
   private validateImageBuffer(buffer: Buffer): { isValid: boolean; detectedFormat: string } {
-    // Check for common image file signatures
-    const signatures = {
-      'image/jpeg': [
-        [0xFF, 0xD8, 0xFF], // JPEG
-      ],
-      'image/png': [
-        [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], // PNG
-      ],
-      'image/webp': [
-        [0x52, 0x49, 0x46, 0x46], // WEBP (RIFF)
-      ]
-    };
+    if (buffer.length < 4) {
+      return { isValid: false, detectedFormat: 'unknown' };
+    }
 
-    for (const [format, sigs] of Object.entries(signatures)) {
-      for (const sig of sigs) {
-        if (buffer.length >= sig.length) {
-          const match = sig.every((byte, index) => buffer[index] === byte);
-          if (match) {
-            return { isValid: true, detectedFormat: format };
-          }
-        }
-      }
+    // JPEG: Starts with FF D8 and ends with FF D9
+    if (buffer[0] === 0xFF && buffer[1] === 0xD8) {
+      return { isValid: true, detectedFormat: 'image/jpeg' };
+    }
+
+    // PNG: 89 50 4E 47 0D 0A 1A 0A
+    if (buffer.length >= 8 && 
+        buffer[0] === 0x89 && buffer[1] === 0x50 && 
+        buffer[2] === 0x4E && buffer[3] === 0x47 &&
+        buffer[4] === 0x0D && buffer[5] === 0x0A && 
+        buffer[6] === 0x1A && buffer[7] === 0x0A) {
+      return { isValid: true, detectedFormat: 'image/png' };
+    }
+
+    // WEBP: RIFF....WEBP
+    if (buffer.length >= 12 && 
+        buffer[0] === 0x52 && buffer[1] === 0x49 && 
+        buffer[2] === 0x46 && buffer[3] === 0x46 &&
+        buffer[8] === 0x57 && buffer[9] === 0x45 && 
+        buffer[10] === 0x42 && buffer[11] === 0x50) {
+      return { isValid: true, detectedFormat: 'image/webp' };
+    }
+
+    // GIF: GIF87a or GIF89a
+    if (buffer.length >= 6 && 
+        buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 &&
+        ((buffer[3] === 0x38 && buffer[4] === 0x37 && buffer[5] === 0x61) ||
+         (buffer[3] === 0x38 && buffer[4] === 0x39 && buffer[5] === 0x61))) {
+      return { isValid: true, detectedFormat: 'image/gif' };
     }
 
     return { isValid: false, detectedFormat: 'unknown' };
@@ -413,9 +424,16 @@ export class PicsartService {
       const buffer = Buffer.from(base64, 'base64');
       console.log(`📤 [PICSART] Buffer size: ${buffer.length} bytes`);
       
+      // Debug: Log first few bytes of the buffer to understand the issue
+      const firstBytes = Array.from(buffer.slice(0, 16)).map(b => `0x${b.toString(16).padStart(2, '0')}`).join(' ');
+      console.log(`🔍 [PICSART] Buffer first 16 bytes: ${firstBytes}`);
+      
       // Validate image buffer using file signature
       const validation = this.validateImageBuffer(buffer);
+      console.log(`🔍 [PICSART] Validation result:`, validation);
+      
       if (!validation.isValid) {
+        console.error(`❌ [PICSART] Image validation failed. Buffer size: ${buffer.length}, First bytes: ${firstBytes}`);
         throw new Error(`Invalid image format. File appears to be corrupted or not a valid image.`);
       }
       
@@ -425,14 +443,15 @@ export class PicsartService {
       const detectedType = validation.detectedFormat.split('/')[1]; // Extract 'jpeg', 'png', etc.
       
       // Validate image format
-      if (!['jpeg', 'png', 'webp'].includes(detectedType.toLowerCase())) {
-        throw new Error(`Unsupported image format: ${detectedType}. Supported formats: JPG, PNG, WEBP`);
+      if (!['jpeg', 'png', 'webp', 'gif'].includes(detectedType.toLowerCase())) {
+        throw new Error(`Unsupported image format: ${detectedType}. Supported formats: JPG, PNG, WEBP, GIF`);
       }
 
       // Ensure proper file extension based on detected format
       const ext = path.extname(fileName);
       const properExtension = detectedType === 'png' ? '.png' : 
-                             detectedType === 'webp' ? '.webp' : '.jpg';
+                             detectedType === 'webp' ? '.webp' : 
+                             detectedType === 'gif' ? '.gif' : '.jpg';
       
       if (!ext) {
         fileName = `${fileName}${properExtension}`;
