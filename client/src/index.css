@@ -59,24 +59,42 @@
 
   /* Classes para login otimizado - ETAPA 1 */
   .login-container-optimized {
-    min-height: 85vh;
-    max-height: 100vh;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
   }
 
-  @media (min-width: 1024px) {
+  @media (max-height: 800px) {
     .login-container-optimized {
-      min-height: 100vh;
+      min-height: auto;
+      padding: 1rem 0;
+      align-items: flex-start;
     }
   }
 
   .login-card-responsive {
-    max-width: 20rem; /* 320px */
+    max-width: 18rem; /* 288px - mais compacto */
+    width: 100%;
   }
 
   @media (min-width: 1024px) {
     .login-card-responsive {
-      max-width: 28rem; /* 448px */
+      max-width: 24rem; /* 384px - reduzido de 448px */
     }
+  }
+
+  .login-form-compact {
+    /* Cards menores e mais organizados */
+  }
+
+  .login-form-compact .space-y-4 > * + * {
+    margin-top: 0.75rem; /* 12px - reduzido de 16px */
+  }
+
+  .login-form-compact .space-y-6 > * + * {
+    margin-top: 1rem; /* 16px - reduzido de 24px */
   }
 
   .login-background-minimal {
