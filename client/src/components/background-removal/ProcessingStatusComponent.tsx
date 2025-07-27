@@ -46,7 +46,7 @@ const ProcessingStatusComponent: React.FC<ProcessingStatusComponentProps> = ({
       case 'idle':
         return {
           icon: Clock,
-          title: 'Aguardando',
+          title: 'Pronto para processar',
           color: 'text-gray-500',
           bgColor: 'bg-gray-50',
           badge: 'secondary' as const,

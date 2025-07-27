@@ -284,6 +284,11 @@ const BackgroundRemovalTool: React.FC = () => {
             status={getProcessingStatus()}
             progress={processingProgress}
             fileName={fileName}
+            message={getProcessingStatus() === 'idle' ? 
+              selectedImage ? 
+                'Imagem carregada. Clique em "Remover Fundo" para processar' : 
+                'Selecione uma imagem para começar' 
+              : undefined}
           />
 
           {/* Action Buttons */}
