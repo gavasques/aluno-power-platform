@@ -418,7 +418,7 @@ export class PicsartService {
       // Extract mime type and remove data URL prefix
       const mimeMatch = base64Data.match(/^data:image\/([a-z]+);base64,/);
       const mimeType = mimeMatch ? mimeMatch[1] : 'jpeg';
-      const base64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+      let base64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
       
       console.log(`📤 [PICSART] Detected mime type: ${mimeType}`);
       console.log(`📤 [PICSART] Clean base64 data length: ${base64.length}`);
