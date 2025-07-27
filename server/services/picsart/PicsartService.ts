@@ -412,6 +412,8 @@ export class PicsartService {
   ): Promise<string> {
     try {
       console.log(`📤 [PICSART] Starting image upload for user ${userId}, file: ${fileName}`);
+      console.log(`📤 [PICSART] Raw base64Data length: ${base64Data.length}`);
+      console.log(`📤 [PICSART] Base64Data starts with: ${base64Data.substring(0, 50)}...`);
       
       // Extract mime type and remove data URL prefix
       const mimeMatch = base64Data.match(/^data:image\/([a-z]+);base64,/);
@@ -419,7 +421,8 @@ export class PicsartService {
       const base64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
       
       console.log(`📤 [PICSART] Detected mime type: ${mimeType}`);
-      console.log(`📤 [PICSART] Base64 data length: ${base64.length}`);
+      console.log(`📤 [PICSART] Clean base64 data length: ${base64.length}`);
+      console.log(`📤 [PICSART] Clean base64 starts with: ${base64.substring(0, 50)}...`);
       
       const buffer = Buffer.from(base64, 'base64');
       console.log(`📤 [PICSART] Buffer size: ${buffer.length} bytes`);
