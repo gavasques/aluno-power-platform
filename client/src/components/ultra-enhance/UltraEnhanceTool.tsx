@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkles, Download, Upload, Zap, Star, ArrowUp, Image as ImageIcon, Clock, CreditCard, CheckCircle, XCircle } from 'lucide-react';
+import { Sparkles, Download, Upload, Zap, Star, Image as ImageIcon, Clock, CreditCard, CheckCircle, XCircle } from 'lucide-react';
 import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 
 interface UltraEnhanceParams {
@@ -23,12 +23,20 @@ interface UltraEnhanceResult {
   duration: number;
 }
 
+interface ProcessingResult {
+  success: boolean;
+  processedImageData?: string;
+  processedImageUrl?: string;
+  sessionId?: string;
+  duration?: number;
+}
+
 export function UltraEnhanceTool() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [result, setResult] = useState<UltraEnhanceResult | null>(null);
+  const [result, setResult] = useState<ProcessingResult | null>(null);
   const [parameters, setParameters] = useState<UltraEnhanceParams>({
     upscale_factor: 2,
     format: 'JPG'
@@ -92,6 +100,12 @@ export function UltraEnhanceTool() {
     setError(null);
 
     try {
+      console.log('🚀 Iniciando processamento Ultra Enhance:', {
+        fileName: selectedFile.name,
+        fileSize: selectedFile.size,
+        parameters
+      });
+
       const formData = new FormData();
       formData.append('image', selectedFile);
       formData.append('upscale_factor', parameters.upscale_factor.toString());
@@ -111,33 +125,73 @@ export function UltraEnhanceTool() {
       const response = await fetch('/api/picsart/ultra-enhance', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: formData
+        body: formData,
       });
 
       clearInterval(progressInterval);
       setProgress(100);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || 'Erro na API');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro no processamento da imagem');
       }
 
-      const data = await response.json();
+      const responseData = await response.json();
+      console.log('🔍 Response data received:', responseData);
       
-      if (data.success) {
-        setResult(data.data);
-        toast({
-          title: "Sucesso!",
-          description: `Imagem melhorada com sucesso! Factor: ${parameters.upscale_factor}x`,
-        });
-      } else {
-        throw new Error(data.error || 'Erro desconhecido');
+      // The backend returns data within a "data" wrapper
+      const result: ProcessingResult = {
+        success: responseData.success,
+        processedImageData: responseData.data?.processedImageData,
+        processedImageUrl: responseData.data?.processedImageUrl,
+        sessionId: responseData.data?.sessionId,
+        duration: responseData.data?.duration || responseData.processingTime
+      };
+      
+      console.log('🎨 Processed result:', result);
+      console.log('🖼️ Image data length:', result.processedImageData?.length);
+      console.log('🔗 Image URL:', result.processedImageUrl);
+      setResult(result);
+
+      // Registrar log de uso com dedução automática de créditos
+      const logResponse = await fetch('/api/ai-generation-logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          userId: 2, // Placeholder - should come from auth context
+          provider: 'picsart',
+          model: 'ultra-enhance-ai',
+          prompt: `Ultra Enhance de imagem ${parameters.upscale_factor}x formato ${parameters.format}`,
+          response: 'Imagem ampliada com sucesso',
+          promptCharacters: 50,
+          responseCharacters: 27,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          cost: 0,
+          duration: result.duration || 0,
+          creditsUsed: 0,
+          feature: 'tools.ultra_enhance'
+        })
+      });
+
+      if (logResponse.ok) {
+        const logData = await logResponse.json();
+        console.log('💾 Log AI salvo - Feature: tools.ultra_enhance, Créditos: 4, Usuário: 2');
       }
+
+      toast({
+        title: "Sucesso!",
+        description: `Imagem melhorada com sucesso! Factor: ${parameters.upscale_factor}x`,
+      });
 
     } catch (error) {
-      console.error('Ultra enhance error:', error);
+      console.error('❌ Ultra enhance error:', error);
       setError(error instanceof Error ? error.message : 'Erro desconhecido');
       toast({
         title: "Erro",
@@ -153,12 +207,47 @@ export function UltraEnhanceTool() {
   const downloadProcessedImage = () => {
     if (!result) return;
 
+    console.log('📥 Iniciando download da imagem processada...');
+    console.log('🔍 Dados disponíveis:', {
+      hasProcessedImageData: !!result.processedImageData,
+      hasProcessedImageUrl: !!result.processedImageUrl,
+      dataLength: result.processedImageData?.length,
+      url: result.processedImageUrl
+    });
+
     const link = document.createElement('a');
-    link.href = `data:image/${parameters.format.toLowerCase()};base64,${result.processedImageData}`;
-    link.download = `enhanced_${parameters.upscale_factor}x_${selectedFile?.name || 'image'}.${parameters.format.toLowerCase()}`;
+    
+    if (result.processedImageData) {
+      // Usar dados base64 se disponíveis
+      const imageData = result.processedImageData.startsWith('data:') 
+        ? result.processedImageData 
+        : `data:image/${parameters.format.toLowerCase()};base64,${result.processedImageData}`;
+      link.href = imageData;
+      console.log('💾 Download usando dados base64');
+    } else if (result.processedImageUrl) {
+      // Fallback para URL se base64 não estiver disponível
+      link.href = result.processedImageUrl;
+      console.log('💾 Download usando URL externa');
+    } else {
+      console.error('❌ Nenhum dado de imagem disponível para download');
+      toast({
+        title: "Erro no Download",
+        description: "Imagem processada não está disponível",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    link.download = `ultra_enhanced_${parameters.upscale_factor}x_${selectedFile?.name || 'image'}.${parameters.format.toLowerCase()}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    console.log('✅ Download iniciado com sucesso');
+    toast({
+      title: "Download Iniciado",
+      description: `Imagem melhorada ${parameters.upscale_factor}x baixada com sucesso`,
+    });
   };
 
   const resetTool = () => {
@@ -173,23 +262,27 @@ export function UltraEnhanceTool() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2">
-          <Sparkles className="w-8 h-8 text-primary" />
-          <h1 className="text-3xl font-bold">Ultra Melhorador PRO</h1>
-        </div>
-        <p className="text-muted-foreground">
-          Melhore e amplie suas imagens com IA de última geração
-        </p>
-        <div className="flex items-center justify-center gap-2">
-          <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-            <CreditCard className="w-3 h-3 mr-1" />
-            4 créditos por uso
-          </Badge>
-        </div>
-      </div>
+    <div className="max-w-4xl mx-auto p-6">
+      {/* Header Card */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="w-6 h-6 text-muted-foreground" />
+              <h2 className="text-2xl font-bold text-foreground">Ultra Melhorador PRO</h2>
+            </div>
+            <p className="text-muted-foreground">
+              Melhore e amplie suas imagens com IA de última geração
+            </p>
+            <div className="flex items-center justify-center gap-2">
+              <Badge variant="secondary">
+                <CreditCard className="w-3 h-3 mr-1" />
+                4 créditos por uso
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -363,14 +456,37 @@ export function UltraEnhanceTool() {
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                       <Star className="w-4 h-4 text-yellow-500" />
-                      Imagem Melhorada
+                      Imagem Melhorada ({parameters.upscale_factor}x)
                     </Label>
                     <div className="border rounded-lg overflow-hidden">
-                      <img
-                        src={`data:image/${parameters.format.toLowerCase()};base64,${result.processedImageData}`}
-                        alt="Enhanced"
-                        className="w-full h-auto max-h-60 object-contain"
-                      />
+                      {result.processedImageData ? (
+                        <img
+                          src={result.processedImageData.startsWith('data:') 
+                            ? result.processedImageData 
+                            : `data:image/${parameters.format.toLowerCase()};base64,${result.processedImageData}`}
+                          alt="Enhanced"
+                          className="w-full h-auto max-h-60 object-contain"
+                          onError={(e) => {
+                            console.error('❌ Erro ao carregar imagem base64');
+                            // Fallback para URL se base64 falhar
+                            if (result.processedImageUrl) {
+                              console.log('🔄 Tentando carregar da URL:', result.processedImageUrl);
+                              e.currentTarget.src = result.processedImageUrl;
+                            }
+                          }}
+                        />
+                      ) : result.processedImageUrl ? (
+                        <img
+                          src={result.processedImageUrl}
+                          alt="Enhanced"
+                          className="w-full h-auto max-h-60 object-contain"
+                          onError={() => console.error('❌ Erro ao carregar imagem da URL')}
+                        />
+                      ) : (
+                        <div className="w-full h-60 bg-gray-100 border rounded-lg flex items-center justify-center">
+                          <p className="text-gray-500">Imagem não disponível</p>
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                       <div className="flex items-center gap-2">
