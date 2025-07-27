@@ -304,21 +304,21 @@ export function UpscaleProTool() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <Card className="border-0 shadow-xl">
+      <Card>
         <CardHeader className="text-center pb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <ZoomIn className="w-6 h-6 text-blue-600" />
+            <ZoomIn className="w-6 h-6 text-muted-foreground" />
             <CardTitle className="text-2xl">Upscale PRO</CardTitle>
           </div>
           <CardDescription className="text-lg">
             Amplie suas imagens até 8x com qualidade profissional
           </CardDescription>
           <div className="flex items-center justify-center gap-2 mt-4">
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+            <Badge variant="secondary">
               <CreditCard className="w-3 h-3 mr-1" />
               4 créditos por uso
             </Badge>
-            <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+            <Badge variant="secondary">
               <Sparkles className="w-3 h-3 mr-1" />
               Ampliação até 8x
             </Badge>
@@ -333,7 +333,7 @@ export function UpscaleProTool() {
             </Label>
             
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onClick={() => document.getElementById('file-upload')?.click()}
@@ -345,18 +345,18 @@ export function UpscaleProTool() {
                     alt="Preview"
                     className="max-w-xs max-h-48 mx-auto rounded-lg shadow-md"
                   />
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {selectedFile?.name} ({(selectedFile?.size || 0 / 1024 / 1024).toFixed(1)} MB)
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto" />
+                  <Upload className="w-12 h-12 text-muted-foreground mx-auto" />
                   <div>
-                    <p className="text-lg font-medium text-gray-900">
+                    <p className="text-lg font-medium text-foreground">
                       Clique para fazer upload ou arraste a imagem aqui
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       PNG, JPG, WEBP até 10MB
                     </p>
                   </div>
@@ -465,7 +465,7 @@ export function UpscaleProTool() {
             <Button
               onClick={processImage}
               disabled={!selectedFile || isProcessing}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="flex-1"
             >
               {isProcessing ? (
                 <>
@@ -501,7 +501,7 @@ export function UpscaleProTool() {
           </div>
 
           {/* Info */}
-          <div className="text-center text-sm text-gray-500 space-y-1">
+          <div className="text-center text-sm text-muted-foreground space-y-1">
             <p>• Ampliação máxima: 8x • Formatos suportados: PNG, JPG, WEBP</p>
             <p>• Tamanho máximo: 10MB • Custo: 4 créditos por processamento</p>
           </div>
