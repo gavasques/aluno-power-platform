@@ -783,6 +783,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 27, 2025 - 6:39 PM**: ✅ FERRAMENTAS DESNECESSÁRIAS REMOVIDAS - UPSCALE SIMPLES E REMOVER BACKGROUND BÁSICO EXCLUÍDOS
+  - **Objetivo Alcançado**: Remoção de ferramentas redundantes da página Ferramentas conforme solicitação do usuário
+  - **Ferramentas Removidas**:
+    - ✅ **Upscale de Imagem**: Versão básica com 2 créditos (tools.image_upscale)
+    - ✅ **Remover Background**: Versão simples com 1 crédito (tools.background_removal)
+  - **Ferramentas Mantidas**: Apenas versões PRO com funcionalidades superiores
+  - **Interface Atualizada**: Página Ferramentas com cards reorganizados
+  - **Status**: Sistema de ferramentas otimizado, mantendo apenas versões profissionais para melhor experiência do usuário
+
 - **January 27, 2025 - 6:20 PM**: ✅ BASE64 DATA CORRUPTION ISSUE RESOLVED - FALLBACK VALIDATION SYSTEM IMPLEMENTED
   - **Root Cause Identified**: Base64 data corruption occurring during decoding process (invalid bytes 0x75 0xab 0x5a 0x8a instead of proper image headers)
   - **Solution Implemented**: 

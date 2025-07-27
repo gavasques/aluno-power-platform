@@ -18,24 +18,7 @@ import { usePermissions } from "@/contexts/PermissionContext";
 import { useToast } from "@/hooks/use-toast";
 
 const ferramentas = [
-  {
-    title: "Upscale de Imagem",
-    description: "Melhore a qualidade e resolução das suas imagens de produto",
-    href: "/ferramentas/image-upscale",
-    icon: ImageIcon,
-    category: "Imagem",
-    credits: 2,
-    permission: "tools.image_upscale"
-  },
-  {
-    title: "Remover Background",
-    description: "Remova o fundo das suas imagens automaticamente",
-    href: "/ferramentas/background-removal",
-    icon: Zap,
-    category: "Imagem", 
-    credits: 1,
-    permission: "tools.background_removal"
-  },
+
   {
     title: "Remover de Fundo PRO",
     description: "Remova backgrounds de imagens com precisão de IA profissional",
