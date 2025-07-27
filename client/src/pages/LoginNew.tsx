@@ -730,8 +730,8 @@ export default function LoginNew() {
                   Transforme seu negócio na <span className="text-blue-600">Amazon</span>
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  Mais de 10 agentes de IA especializados para otimizar suas vendas, 
-                  criar conteúdo profissional e automatizar processos complexos.
+                  Ferramentas especializados para otimizar suas vendas, 
+                  criar conteúdo profissional e melhorar processos complexos.
                 </p>
               </div>
 
