@@ -172,6 +172,7 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
       fileName = req.body.fileName || 'image.png';
       
       console.log(`📤 [PICSART] Received base64 data: ${fileName}`);
+      console.log(`📤 [PICSART] Base64 data length: ${imageData.length}, starts with: ${imageData.substring(0, 100)}...`);
     } else {
       return res.status(400).json({
         success: false,

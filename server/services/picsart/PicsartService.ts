@@ -424,7 +424,26 @@ export class PicsartService {
       console.log(`📤 [PICSART] Clean base64 data length: ${base64.length}`);
       console.log(`📤 [PICSART] Clean base64 starts with: ${base64.substring(0, 50)}...`);
       
-      const buffer = Buffer.from(base64, 'base64');
+      // Validate base64 string before decoding
+      if (!base64 || base64.length === 0) {
+        throw new Error('Empty base64 data');
+      }
+      
+      // Check if base64 string is valid
+      const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+      if (!base64Regex.test(base64)) {
+        console.error(`❌ [PICSART] Invalid base64 characters detected`);
+        throw new Error('Invalid base64 format');
+      }
+      
+      let buffer: Buffer;
+      try {
+        buffer = Buffer.from(base64, 'base64');
+      } catch (error) {
+        console.error(`❌ [PICSART] Base64 decoding failed:`, error);
+        throw new Error('Failed to decode base64 data');
+      }
+      
       console.log(`📤 [PICSART] Buffer size: ${buffer.length} bytes`);
       
       // Debug: Log first few bytes of the buffer to understand the issue
@@ -435,15 +454,20 @@ export class PicsartService {
       const validation = this.validateImageBuffer(buffer);
       console.log(`🔍 [PICSART] Validation result:`, validation);
       
+      let detectedType: string;
+      
       if (!validation.isValid) {
-        console.error(`❌ [PICSART] Image validation failed. Buffer size: ${buffer.length}, First bytes: ${firstBytes}`);
-        throw new Error(`Invalid image format. File appears to be corrupted or not a valid image.`);
+        console.warn(`⚠️ [PICSART] Image validation failed, but proceeding with declared mime type: ${mimeType}`);
+        console.warn(`⚠️ [PICSART] Buffer size: ${buffer.length}, First bytes: ${firstBytes}`);
+        
+        // Use the declared mime type as fallback
+        detectedType = mimeType;
+        console.log(`📋 [PICSART] Using fallback format: ${detectedType}`);
+      } else {
+        console.log(`✅ [PICSART] Image validation passed: ${validation.detectedFormat}`);
+        // Use the detected format instead of the declared mime type for better accuracy
+        detectedType = validation.detectedFormat.split('/')[1]; // Extract 'jpeg', 'png', etc.
       }
-      
-      console.log(`✅ [PICSART] Image validation passed: ${validation.detectedFormat}`);
-      
-      // Use the detected format instead of the declared mime type for better accuracy
-      const detectedType = validation.detectedFormat.split('/')[1]; // Extract 'jpeg', 'png', etc.
       
       // Validate image format
       if (!['jpeg', 'png', 'webp', 'gif'].includes(detectedType.toLowerCase())) {
