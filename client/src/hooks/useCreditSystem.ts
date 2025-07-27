@@ -41,19 +41,41 @@ export function useCreditSystem() {
    */
   const checkCredits = async (featureCode: string): Promise<CreditCheckResult> => {
     try {
-      const dashboardResponse = await fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      // Primeiro, tentar obter o saldo de créditos
+      let currentBalance = 0;
+      
+      if (user?.credits) {
+        // Se já temos o saldo no contexto do usuário
+        currentBalance = parseFloat(user.credits.toString());
+      } else {
+        // Fazer requisição para obter dados atualizados
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+          throw new Error('Token de autenticação não encontrado');
         }
-      });
 
-      if (!dashboardResponse.ok) {
-        throw new Error('Erro ao verificar créditos');
+        const dashboardResponse = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!dashboardResponse.ok) {
+          throw new Error(`Erro HTTP ${dashboardResponse.status}: ${dashboardResponse.statusText}`);
+        }
+
+        const data = await dashboardResponse.json();
+        currentBalance = parseFloat(data.user?.credits || '0');
       }
 
-      const data = await dashboardResponse.json();
-      const currentBalance = parseFloat(data.user?.credits || '0');
+      // Obter custo da feature
       const requiredCredits = getFeatureCost(featureCode);
+      if (requiredCredits === 0) {
+        logger.warn(`Feature '${featureCode}' não encontrada ou sem custo definido`);
+      }
+
+      // Verificar se pode processar
       const canProcessResult = canProcess(featureCode, currentBalance);
 
       return {
@@ -64,13 +86,18 @@ export function useCreditSystem() {
           ? `✅ Créditos suficientes (${currentBalance})` 
           : `❌ Créditos insuficientes. Necessário: ${canProcessResult.requiredCredits}, Atual: ${currentBalance}`
       };
-    } catch (error) {
-      logger.error('Erro ao verificar créditos:', error);
+    } catch (error: any) {
+      logger.error('Erro ao verificar créditos:', {
+        error: error.message || error,
+        featureCode,
+        userId: user?.id
+      });
+      
       return {
         canProcess: false,
         requiredCredits: 0,
         currentBalance: 0,
-        message: 'Erro ao verificar saldo de créditos'
+        message: `Erro ao verificar saldo de créditos: ${error.message || 'Erro desconhecido'}`
       };
     }
   };
@@ -147,16 +174,35 @@ export function useCreditSystem() {
   /**
    * Mostra toast de erro na verificação de créditos
    */
-  const showCreditCheckErrorToast = () => {
+  const showCreditCheckErrorToast = (errorMessage?: string) => {
     toast({
       variant: "destructive",
       title: "❌ Erro ao verificar créditos",
-      description: "Não foi possível verificar seu saldo de créditos."
+      description: errorMessage || "Não foi possível verificar seu saldo de créditos. Tente novamente."
     });
+  };
+
+  /**
+   * Verifica créditos e exibe toast automaticamente em caso de erro ou insuficiência
+   */
+  const checkCreditsWithToast = async (featureCode: string): Promise<boolean> => {
+    const result = await checkCredits(featureCode);
+    
+    if (!result.canProcess) {
+      if (result.message?.includes('Erro ao verificar')) {
+        showCreditCheckErrorToast(result.message);
+      } else {
+        showInsufficientCreditsToast(result.requiredCredits, result.currentBalance);
+      }
+      return false;
+    }
+    
+    return true;
   };
 
   return {
     checkCredits,
+    checkCreditsWithToast,
     logAIGeneration,
     showInsufficientCreditsToast,
     showCreditCheckErrorToast,
