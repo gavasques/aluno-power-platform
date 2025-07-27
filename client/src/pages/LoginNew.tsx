@@ -361,47 +361,47 @@ export default function LoginNew() {
           <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
             <div className="w-full login-card-responsive">
               {/* Premium Badge */}
-              <div className="flex justify-center mb-4">
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">
-                  <Shield className="w-3 h-3 mr-1.5" />
+              <div className="flex justify-center mb-8">
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                  <Shield className="w-4 h-4 mr-2" />
                   Plataforma Premium
                 </span>
               </div>
 
               {/* Logo and Title */}
-              <div className="text-center mb-6">
-                <div className="flex justify-center mb-4">
+              <div className="text-center mb-8">
+                <div className="flex justify-center mb-6">
                   <img 
                     src={logoPath} 
                     alt="Guilherme Vasques Logo" 
-                    className="h-12 w-auto"
+                    className="h-16 w-auto"
                   />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
                   Core Guilherme Vasques
                 </h1>
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600">
                   Plataforma completa de inteligência artificial para Amazon FBA e e-commerce
                 </p>
               </div>
 
               {/* Login Card */}
-              <Card className="shadow-lg border border-white/30 bg-white/90 backdrop-blur-sm login-form-compact">
-                <CardHeader className="pb-3">
+              <Card className="shadow-xl border border-white/30 bg-white/90 backdrop-blur-sm login-form-compact">
+                <CardHeader className="pb-4">
                   <div className="text-center">
-                    <h2 className="text-lg font-semibold text-gray-900">Fazer Login</h2>
-                    <p className="text-gray-600 mt-0.5 text-sm">Acesse sua conta para continuar</p>
+                    <h2 className="text-xl font-semibold text-gray-900">Fazer Login</h2>
+                    <p className="text-gray-600 mt-1">Acesse sua conta para continuar</p>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Email Field */}
-                    <div className="space-y-1.5">
-                      <Label htmlFor="email" className="text-xs font-medium text-gray-700">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                         Email
                       </Label>
                       <div className="relative">
-                        <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+                        <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                         <Input
                           id="email"
                           name="email"
@@ -409,7 +409,7 @@ export default function LoginNew() {
                           placeholder="seu@email.com"
                           value={formData.email}
                           onChange={handleChange}
-                          className={`pl-9 h-9 text-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 ${
+                          className={`pl-10 h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 ${
                             errors.email ? 'border-red-500' : ''
                           }`}
                           disabled={isLoading}
@@ -421,12 +421,12 @@ export default function LoginNew() {
                     </div>
 
                     {/* Password Field */}
-                    <div className="space-y-1.5">
-                      <Label htmlFor="password" className="text-xs font-medium text-gray-700">
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-sm font-medium text-gray-700">
                         Senha
                       </Label>
                       <div className="relative">
-                        <Lock className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                         <Input
                           id="password"
                           name="password"
@@ -434,7 +434,7 @@ export default function LoginNew() {
                           placeholder="••••••••"
                           value={formData.password}
                           onChange={handleChange}
-                          className={`pl-9 pr-9 h-9 text-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 ${
+                          className={`pl-10 pr-10 h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 ${
                             errors.password ? 'border-red-500' : ''
                           }`}
                           disabled={isLoading}
@@ -442,9 +442,9 @@ export default function LoginNew() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
+                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
                       </div>
                       {errors.password && (
@@ -455,7 +455,7 @@ export default function LoginNew() {
                     {/* Submit Button */}
                     <Button
                       type="submit"
-                      className="w-full h-9 text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -470,8 +470,8 @@ export default function LoginNew() {
                   </form>
 
                   {/* Footer Links */}
-                  <div className="mt-4 text-center space-y-2">
-                    <div className="flex flex-col gap-1.5">
+                  <div className="mt-6 text-center space-y-3">
+                    <div className="flex flex-col gap-2">
                       <button 
                         type="button"
                         onClick={() => setIsForgotPasswordCodeModalOpen(true)}
