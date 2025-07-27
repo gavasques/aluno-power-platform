@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 import { Sparkles } from "lucide-react";
 import { ImageUploader } from "@/components/ai/ImageUploader";
@@ -48,8 +49,8 @@ const UpscaleControls = ({
             }`}
           >
             <div className="text-center space-y-1">
-              <div className="font-medium">{option.label}</div>
-              <div className="text-sm text-muted-foreground">{option.time}</div>
+              <div className="font-medium">{option.value}x</div>
+              <div className="text-sm text-muted-foreground">{option.description}</div>
               
             </div>
           </button>
@@ -101,13 +102,27 @@ export default function ImageUpscale() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <AIPageHeader 
-        icon={Sparkles}
-        title="Upscale de Imagens com IA"
-        description="Aumente a resolução das suas imagens usando inteligência artificial avançada. Ideal para melhorar fotos para impressão ou uso profissional."
-        gradient={true}
-      />
+    <div className="max-w-4xl mx-auto p-6">
+      {/* Header Card */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="w-6 h-6 text-muted-foreground" />
+              <h2 className="text-2xl font-bold text-foreground">Upscale de Imagem</h2>
+            </div>
+            <p className="text-muted-foreground">
+              Aumente a resolução das suas imagens usando inteligência artificial
+            </p>
+            <div className="flex items-center justify-center gap-2">
+              <Badge variant="secondary">
+                <Sparkles className="w-3 h-3 mr-1" />
+                2 créditos por uso
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <PermissionGuard 
         featureCode="tools.image_upscale"
@@ -122,7 +137,7 @@ export default function ImageUpscale() {
           processingColor="blue"
         />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Coluna Esquerda: Upload e Controles */}
         <div className="space-y-6">
           {/* Upload da Imagem */}
@@ -178,8 +193,8 @@ export default function ImageUpscale() {
               }}
               originalImage={{
                 id: uploadedImage.id,
-                url: uploadedImage.url,
                 name: uploadedImage.metadata.fileName,
+                url: uploadedImage.url,
               }}
               scale={processedImage.metadata?.scale || scale}
             />

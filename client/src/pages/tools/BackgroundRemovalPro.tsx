@@ -14,9 +14,9 @@ const BackgroundRemovalPro: React.FC = () => {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
@@ -29,19 +29,16 @@ const BackgroundRemovalPro: React.FC = () => {
                 <ArrowLeft className="h-4 w-4" />
                 Voltar às Ferramentas
               </Button>
-              <div className="h-6 w-px bg-gray-300" />
-              <h1 className="text-xl font-semibold text-gray-900">
+              <div className="h-6 w-px bg-border" />
+              <h1 className="text-xl font-semibold">
                 Remover de Fundo PRO
               </h1>
-              <div className="ml-4 flex items-center gap-2 text-sm text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
-                <span className="font-medium">2 créditos por uso</span>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Tool */}
       <div className="py-8">
         <BackgroundRemovalTool />
       </div>

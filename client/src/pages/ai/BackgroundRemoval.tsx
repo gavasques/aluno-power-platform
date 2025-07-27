@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Scissors } from "lucide-react";
 import { ImageUploader } from "@/components/ai/ImageUploader";
 import { BackgroundRemovalResult } from "@/components/ai/BackgroundRemovalResult";
@@ -28,7 +29,7 @@ const BackgroundRemovalControls = ({
 }) => (
   <div className="space-y-4">
     <div className="text-sm text-muted-foreground space-y-2">
-      <p>• Tempo estimado: {BACKGROUND_REMOVAL_CONFIG.estimatedTime}</p>
+      <p>• Tempo estimado: {BACKGROUND_REMOVAL_CONFIG.ESTIMATED_PROCESSING_TIME}</p>
       <p>• Formato de saída: PNG transparente</p>
     </div>
 
@@ -73,12 +74,27 @@ export default function BackgroundRemoval() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <AIPageHeader 
-        icon={Scissors}
-        title="Remover Background com IA"
-        description="Remova automaticamente o fundo de suas imagens usando inteligência artificial avançada. Ideal para fotos de produtos, retratos e criação de conteúdo profissional."
-      />
+    <div className="max-w-4xl mx-auto p-6">
+      {/* Header Card */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Scissors className="w-6 h-6 text-muted-foreground" />
+              <h2 className="text-2xl font-bold text-foreground">Remover Background</h2>
+            </div>
+            <p className="text-muted-foreground">
+              Remova automaticamente o fundo de suas imagens usando inteligência artificial
+            </p>
+            <div className="flex items-center justify-center gap-2">
+              <Badge variant="secondary">
+                <Scissors className="w-3 h-3 mr-1" />
+                1 crédito por uso
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <PermissionGuard 
         featureCode="tools.background_removal"
@@ -93,7 +109,7 @@ export default function BackgroundRemoval() {
           processingColor="purple"
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Coluna Esquerda: Upload e Controles */}
           <div className="space-y-6">
             {/* Upload da Imagem */}
@@ -141,7 +157,7 @@ export default function BackgroundRemoval() {
               originalImage={uploadedImage.url}
               processedImage={processedImage}
               processingDuration={processedImage.metadata?.processingTime}
-              originalFileName={uploadedImage.metadata.fileName}
+              originalFileName={uploadedImage.metadata?.fileName || 'image'}
             />
           ) : (
             <Card className="h-full min-h-[400px] flex items-center justify-center">

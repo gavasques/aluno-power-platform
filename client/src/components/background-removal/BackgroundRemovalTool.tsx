@@ -12,6 +12,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Sparkles, Settings, Palette, Download } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -234,31 +235,30 @@ const BackgroundRemovalTool: React.FC = () => {
   }, [handleImageRemove, processImageMutation]);
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full">
-            <Sparkles className="h-8 w-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Remover de Fundo PRO
-            </h1>
-            <p className="text-gray-600">
-              Remova backgrounds de imagens com precisão profissional usando inteligência artificial
+    <div className="max-w-4xl mx-auto p-6">
+      {/* Header Card */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="w-6 h-6 text-muted-foreground" />
+              <h2 className="text-2xl font-bold text-foreground">Remover de Fundo PRO</h2>
+            </div>
+            <p className="text-muted-foreground">
+              Remova backgrounds de imagens com precisão profissional usando IA
             </p>
+            <div className="flex items-center justify-center gap-2">
+              <Badge variant="secondary">
+                <Sparkles className="w-3 h-3 mr-1" />
+                2 créditos por uso
+              </Badge>
+            </div>
           </div>
-        </div>
-        
-        <div className="flex items-center justify-center gap-2 text-sm text-purple-600 bg-purple-50 px-4 py-2 rounded-full w-fit mx-auto">
-          <Sparkles className="h-4 w-4" />
-          <span className="font-medium">2 créditos por uso</span>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column - Image Upload and Processing */}
         <div className="space-y-6">
           {/* Image Upload */}
@@ -293,12 +293,12 @@ const BackgroundRemovalTool: React.FC = () => {
                 <Button
                   onClick={handleStartProcessing}
                   disabled={!selectedImage || processImageMutation.isPending}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                  className="w-full"
                   size="lg"
                 >
                   {processImageMutation.isPending ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
                       Processando...
                     </>
                   ) : (
