@@ -109,31 +109,51 @@ export default function AmazonReviewExtractor() {
   };
 
   const fetchReviews = async (asin: string, page: number): Promise<ReviewData[]> => {
-    const data = await execute(
-      () => fetch('/api/amazon-reviews/extract', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          asin,
-          page,
-          country: selectedCountry,
-          sort_by: 'MOST_RECENT'
+    try {
+      const data = await execute(
+        () => fetch('/api/amazon-reviews/extract', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            asin,
+            page,
+            country: selectedCountry,
+            sort_by: 'MOST_RECENT'
+          })
         })
-      })
-    );
+      );
 
-    if (data?.status === 'OK') {
-      return data.data.reviews.map((review: any) => ({
-        review_title: review.review_title || '',
-        review_star_rating: review.review_star_rating || '',
-        review_comment: review.review_comment || ''
-      }));
+      // Verificar se a resposta foi bem-sucedida
+      if (data?.status === 'OK' && data?.data?.reviews) {
+        const reviews = data.data.reviews;
+        
+        // Se reviews é um array válido, mapear os dados
+        if (Array.isArray(reviews)) {
+          return reviews.map((review: any) => ({
+            review_title: review.review_title || '',
+            review_star_rating: review.review_star_rating || '',
+            review_comment: review.review_comment || ''
+          }));
+        }
+      }
+      
+      // Se chegou aqui, não há reviews disponíveis nesta página
+      return [];
+      
+    } catch (error: any) {
+      console.error(`🔍 [FETCHREVIEWS] Erro ao buscar reviews - ASIN: ${asin}, Página: ${page}:`, error.message);
+      
+      // Se o erro indica que não há mais reviews (404, ou fim dos dados), retornar array vazio
+      if (error.message.includes('404') || error.message.includes('Erro 400')) {
+        return [];
+      }
+      
+      // Para outros erros, propagar a exceção
+      throw error;
     }
-    
-    throw new Error('Falha na extração de reviews');
   };
 
   const extractReviews = async () => {
@@ -155,10 +175,10 @@ export default function AmazonReviewExtractor() {
     }));
 
     try {
-      const totalOperations = state.urls.length * state.totalPages;
-      let currentOperation = 0;
       const allReviews: ReviewData[] = [];
       const errors: string[] = [];
+      let totalPagesProcessed = 0;
+      let totalPagesEstimated = state.urls.length * 3; // Estimativa inicial mais conservadora
 
       for (const url of state.urls) {
         const asin = extractOrValidateASIN(url);
@@ -169,25 +189,54 @@ export default function AmazonReviewExtractor() {
 
         setState(prev => ({ ...prev, currentProduct: asin }));
 
-        for (let page = 1; page <= state.totalPages; page++) {
+        let page = 1;
+        let consecutiveEmptyPages = 0;
+        const MAX_CONSECUTIVE_EMPTY = 2;
+        const MAX_PAGES_PER_PRODUCT = state.totalPages;
+
+        while (page <= MAX_PAGES_PER_PRODUCT && consecutiveEmptyPages < MAX_CONSECUTIVE_EMPTY) {
           try {
             setState(prev => ({ ...prev, currentPage: page }));
             
             const reviews = await fetchReviews(asin, page);
-            allReviews.push(...reviews);
+            
+            if (reviews.length === 0) {
+              consecutiveEmptyPages++;
+              console.log(`📭 [EXTRACTOR] Página ${page} vazia para ${asin} (${consecutiveEmptyPages}/${MAX_CONSECUTIVE_EMPTY})`);
+            } else {
+              consecutiveEmptyPages = 0; // Reset contador se encontrar reviews
+              allReviews.push(...reviews);
+              console.log(`✅ [EXTRACTOR] ${reviews.length} reviews extraídos da página ${page} - ${asin}`);
+            }
             
             // Delay para evitar rate limiting
             await new Promise(resolve => setTimeout(resolve, 1000));
             
           } catch (error: any) {
             errors.push(`Erro página ${page} - ASIN ${asin}: ${error.message}`);
+            console.error(`❌ [EXTRACTOR] Erro página ${page} - ${asin}:`, error.message);
+            consecutiveEmptyPages++;
           }
 
-          currentOperation++;
+          totalPagesProcessed++;
+          
+          // Atualizar estimativa de progresso dinamicamente
+          if (consecutiveEmptyPages >= MAX_CONSECUTIVE_EMPTY) {
+            // Se atingiu o limite de páginas vazias, ajustar estimativa total
+            const remainingUrls = state.urls.length - (state.urls.indexOf(url) + 1);
+            totalPagesEstimated = totalPagesProcessed + (remainingUrls * page);
+          }
+
           setState(prev => ({ 
             ...prev, 
-            progress: (currentOperation / totalOperations) * 100 
+            progress: Math.min((totalPagesProcessed / totalPagesEstimated) * 100, 99)
           }));
+
+          page++;
+        }
+
+        if (consecutiveEmptyPages >= MAX_CONSECUTIVE_EMPTY) {
+          console.log(`🔚 [EXTRACTOR] Finalizou extração para ${asin} - ${consecutiveEmptyPages} páginas vazias consecutivas`);
         }
       }
 
@@ -198,6 +247,8 @@ export default function AmazonReviewExtractor() {
         isExtracting: false,
         progress: 100
       }));
+
+      console.log(`🎉 [EXTRACTOR] Concluído! Total: ${allReviews.length} reviews de ${state.urls.length} produtos`);
 
       // Registrar log de uso com dedução automática de créditos
       await logAIGeneration({
@@ -213,7 +264,14 @@ export default function AmazonReviewExtractor() {
         duration: 0
       });
 
+      // Exibir toast de sucesso
+      toast({
+        title: "Extração concluída!",
+        description: `${allReviews.length} reviews extraídos de ${state.urls.length} produtos`,
+      });
+
     } catch (error: any) {
+      console.error('❌ [EXTRACTOR] Erro geral:', error);
       setState(prev => ({
         ...prev,
         isExtracting: false,
@@ -345,11 +403,28 @@ Comentário: ${comment}
             <div className="space-y-4">
               <div className="flex justify-between text-sm">
                 <span>Progresso da extração</span>
-                <span>{Math.round(state.progress)}%</span>
+                <span>
+                  {Math.round(state.progress)}%
+                  {state.progress >= 99 && state.progress < 100 && (
+                    <span className="ml-2 text-orange-600 dark:text-orange-400">
+                      (Finalizando...)
+                    </span>
+                  )}
+                </span>
               </div>
               <Progress value={state.progress} />
-              <div className="text-sm text-muted-foreground">
-                Produto atual: {state.currentProduct} | Página: {state.currentPage}/{state.totalPages}
+              <div className="text-sm text-muted-foreground space-y-1">
+                <div>
+                  Produto atual: <span className="font-mono">{state.currentProduct}</span>
+                </div>
+                <div>
+                  Página: {state.currentPage}
+                  {state.extractedReviews.length > 0 && (
+                    <span className="ml-4 text-green-600 dark:text-green-400">
+                      • {state.extractedReviews.length} reviews coletados
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
