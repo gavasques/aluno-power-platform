@@ -345,7 +345,6 @@ export default function LoginNew() {
         <title>Login - Core Guilherme Vasques</title>
         <meta name="description" content="Acesse a plataforma completa de inteligência artificial para Amazon FBA e e-commerce. Transforme seu negócio na Amazon." />
       </Helmet>
-
       <div className="login-container-optimized bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
         {/* Animated background glow effects */}
         <div className="absolute inset-0">
@@ -377,9 +376,7 @@ export default function LoginNew() {
                     className="h-16 w-auto"
                   />
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Core Guilherme Vasques
-                </h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Plataforma Core.</h1>
                 <p className="text-gray-600">
                   Plataforma completa de inteligência artificial para Amazon FBA e e-commerce
                 </p>
