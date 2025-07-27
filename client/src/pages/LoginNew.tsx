@@ -359,13 +359,7 @@ export default function LoginNew() {
           {/* Left Column - Login Form */}
           <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
             <div className="w-full login-card-responsive">
-              {/* Premium Badge */}
-              <div className="flex justify-center mb-8">
-                <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
-                  <Shield className="w-4 h-4 mr-2" />
-                  Plataforma Premium
-                </span>
-              </div>
+              
 
               {/* Logo and Title */}
               <div className="text-center mb-8">
