@@ -720,9 +720,6 @@ export default function LoginNew() {
 
               {/* Main Title - No background */}
               <div className="mb-12">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  Transforme seu negócio na <span className="text-blue-600">Amazon</span>
-                </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
                   Ferramentas especializados para otimizar suas vendas, 
                   criar conteúdo profissional e melhorar processos complexos.
