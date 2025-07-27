@@ -144,9 +144,11 @@ router.get('/tools', requireAuth, async (req, res) => {
  */
 router.post('/background-removal', requireAuth, upload.single('image'), async (req, res) => {
   const startTime = Date.now();
+  let userId: number | undefined;
+  let fileName: string = 'unknown';
   
   try {
-    const userId = req.user?.id;
+    userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -154,7 +156,6 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
       });
     }
     let imageData: string;
-    let fileName: string;
 
     // Handle file upload or base64 data
     if (req.file) {
@@ -373,7 +374,13 @@ router.post('/background-removal', requireAuth, upload.single('image'), async (r
  */
 router.get('/sessions', requireAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not authenticated'
+      });
+    }
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
 
@@ -416,7 +423,7 @@ router.get('/sessions/:id', requireAuth, async (req, res) => {
     }
 
     // Ensure user owns the session
-    if (session.userId !== req.user.id && req.user.role !== 'admin') {
+    if (session.userId !== req.user?.id && req.user?.role !== 'admin') {
       return res.status(403).json({
         success: false,
         error: 'Access denied'
@@ -444,9 +451,16 @@ router.get('/sessions/:id', requireAuth, async (req, res) => {
  */
 router.post('/logo-generation', requireAuth, async (req, res) => {
   const startTime = Date.now();
+  let userId: number | undefined;
   
   try {
-    const userId = req.user.id;
+    userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not authenticated'
+      });
+    }
     console.log(`🎨 [PICSART] Logo generation request from user ${userId}`);
     
     // Validate request body
@@ -574,56 +588,59 @@ router.post('/logo-generation', requireAuth, async (req, res) => {
     
   } catch (error) {
     const totalDuration = Date.now() - startTime;
-    const userId = req.user.id; // Re-declare userId for error handling scope
     console.error(`❌ [PICSART] Logo generation failed after ${totalDuration}ms:`, error);
     
     // Refund credits if processing failed
-    try {
-      const toolConfig = await picsartService.getToolConfig('logo_generation');
-      if (toolConfig) {
-        const creditsNeeded = parseFloat(toolConfig.costPerUse);
-        const userCredits = await db.select({ credits: users.credits })
-          .from(users)
-          .where(eq(users.id, userId))
-          .limit(1);
+    if (userId) {
+      try {
+        const toolConfig = await picsartService.getToolConfig('logo_generation');
+        if (toolConfig) {
+          const creditsNeeded = parseFloat(toolConfig.costPerUse);
+          const userCredits = await db.select({ credits: users.credits })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
         
-        if (userCredits.length) {
-          const currentCredits = parseFloat(userCredits[0].credits || '0');
-          await db.update(users)
-            .set({ 
-              credits: (currentCredits + creditsNeeded).toString(),
-              updatedAt: new Date()
-            })
-            .where(eq(users.id, userId));
-          
-          console.log(`💰 [PICSART] Credits refunded: ${creditsNeeded} (${currentCredits} → ${currentCredits + creditsNeeded})`);
+          if (userCredits.length) {
+            const currentCredits = parseFloat(userCredits[0].credits || '0');
+            await db.update(users)
+              .set({ 
+                credits: (currentCredits + creditsNeeded).toString(),
+                updatedAt: new Date()
+              })
+              .where(eq(users.id, userId));
+            
+            console.log(`💰 [PICSART] Credits refunded: ${creditsNeeded} (${currentCredits} → ${currentCredits + creditsNeeded})`);
+          }
         }
+      } catch (refundError) {
+        console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
       }
-    } catch (refundError) {
-      console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
     }
     
     // Log the failed usage
-    try {
-      await db.insert(aiImgGenerationLogs).values({
-        userId,
-        provider: 'picsart',
-        model: 'logo-gen-v1',
-        feature: 'logo_generation',
-        originalImageName: `logo_${req.body.brandName}_${Date.now()}`,
-        prompt: `Brand: ${req.body.brandName}, Business: ${req.body.businessDescription}`,
-        status: 'failed',
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        cost: '0',
-        creditsUsed: '0',
-        duration: totalDuration,
-        metadata: JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-          processingTime: totalDuration
-        })
-      });
-    } catch (logError) {
-      console.error(`❌ [PICSART] Failed to log failed usage:`, logError);
+    if (userId) {
+      try {
+        await db.insert(aiImgGenerationLogs).values({
+          userId,
+          provider: 'picsart',
+          model: 'logo-gen-v1',
+          feature: 'logo_generation',
+          originalImageName: `logo_${req.body.brandName}_${Date.now()}`,
+          prompt: `Brand: ${req.body.brandName}, Business: ${req.body.businessDescription}`,
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          cost: '0',
+          creditsUsed: '0',
+          duration: totalDuration,
+          metadata: JSON.stringify({
+            error: error instanceof Error ? error.message : 'Unknown error',
+            processingTime: totalDuration
+          })
+        });
+      } catch (logError) {
+        console.error(`❌ [PICSART] Failed to log failed usage:`, logError);
+      }
     }
     
     res.status(500).json({
@@ -641,7 +658,13 @@ router.post('/logo-generation', requireAuth, async (req, res) => {
  */
 router.get('/logo-history', requireAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not authenticated'
+      });
+    }
     const page = parseInt(req.query.page as string) || 1;
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
     const search = req.query.search as string;
@@ -697,7 +720,8 @@ router.get('/logo-history', requireAuth, async (req, res) => {
       let logoUrls: string[] = [];
       
       try {
-        parsedMetadata = JSON.parse(item.metadata || '{}');
+        const metadataStr = typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata || {});
+        parsedMetadata = JSON.parse(metadataStr);
         logoUrls = (parsedMetadata as any).logoUrls || [];
       } catch (e) {
         console.warn('Failed to parse metadata:', e);
@@ -756,7 +780,13 @@ router.get('/logo-history', requireAuth, async (req, res) => {
  */
 router.get('/stats', requireAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not authenticated'
+      });
+    }
     const stats = await picsartService.getUserStats(userId);
     
     res.json({
@@ -780,9 +810,16 @@ router.get('/stats', requireAuth, async (req, res) => {
  */
 router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, res) => {
   const startTime = Date.now();
+  let userId: number | undefined;
   
   try {
-    const userId = req.user.id;
+    userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not authenticated'
+      });
+    }
     console.log(`🎨 [PICSART] Ultra enhance request from user ${userId}`);
     
     // Check if image was uploaded
@@ -915,15 +952,16 @@ router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, r
     console.error(`❌ [PICSART] Ultra enhance error after ${totalDuration}ms:`, error);
     
     // Refund credits on failure
-    try {
-      const toolConfig = await picsartService.getToolConfig('ultra_enhance');
-      if (toolConfig) {
-        const creditsToRefund = parseFloat(toolConfig.costPerUse);
-        
-        const userCredits = await db.select({ credits: users.credits })
-          .from(users)
-          .where(eq(users.id, req.user.id))
-          .limit(1);
+    if (userId) {
+      try {
+        const toolConfig = await picsartService.getToolConfig('ultra_enhance');
+        if (toolConfig) {
+          const creditsToRefund = parseFloat(toolConfig.costPerUse);
+          
+          const userCredits = await db.select({ credits: users.credits })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
         
         if (userCredits.length) {
           const currentCredits = parseFloat(userCredits[0].credits || '0');
@@ -933,13 +971,14 @@ router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, r
               credits: (currentCredits + creditsToRefund).toString(),
               updatedAt: new Date()
             })
-            .where(eq(users.id, req.user.id));
+            .where(eq(users.id, userId));
           
           console.log(`💰 [PICSART] Credits refunded: ${creditsToRefund} (${currentCredits} → ${currentCredits + creditsToRefund})`);
         }
+        }
+      } catch (refundError) {
+        console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
       }
-    } catch (refundError) {
-      console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
     }
     
     return res.status(500).json({
@@ -957,9 +996,16 @@ router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, r
  */
 router.post('/upscale-pro/process', requireAuth, upload.single('image'), async (req, res) => {
   const startTime = Date.now();
+  let userId: number | undefined;
   
   try {
-    const userId = req.user.id;
+    userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not authenticated'
+      });
+    }
     console.log(`🎨 [PICSART] Upscale PRO request from user ${userId}`);
     
     // Check if image was uploaded
@@ -1092,31 +1138,33 @@ router.post('/upscale-pro/process', requireAuth, upload.single('image'), async (
     console.error(`❌ [PICSART] Upscale PRO error after ${totalDuration}ms:`, error);
     
     // Refund credits on failure
-    try {
-      const toolConfig = await picsartService.getToolConfig('upscale_pro');
-      if (toolConfig) {
-        const creditsToRefund = parseFloat(toolConfig.costPerUse);
-        
-        const userCredits = await db.select({ credits: users.credits })
-          .from(users)
-          .where(eq(users.id, req.user.id))
-          .limit(1);
-        
-        if (userCredits.length) {
-          const currentCredits = parseFloat(userCredits[0].credits || '0');
+    if (userId) {
+      try {
+        const toolConfig = await picsartService.getToolConfig('upscale_pro');
+        if (toolConfig) {
+          const creditsToRefund = parseFloat(toolConfig.costPerUse);
           
-          await db.update(users)
-            .set({ 
-              credits: (currentCredits + creditsToRefund).toString(),
-              updatedAt: new Date()
-            })
-            .where(eq(users.id, req.user.id));
-          
-          console.log(`💰 [PICSART] Credits refunded: ${creditsToRefund} (${currentCredits} → ${currentCredits + creditsToRefund})`);
+          const userCredits = await db.select({ credits: users.credits })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
+        
+          if (userCredits.length) {
+            const currentCredits = parseFloat(userCredits[0].credits || '0');
+            
+            await db.update(users)
+              .set({ 
+                credits: (currentCredits + creditsToRefund).toString(),
+                updatedAt: new Date()
+              })
+              .where(eq(users.id, userId));
+            
+            console.log(`💰 [PICSART] Credits refunded: ${creditsToRefund} (${currentCredits} → ${currentCredits + creditsToRefund})`);
+          }
         }
+      } catch (refundError) {
+        console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
       }
-    } catch (refundError) {
-      console.error(`❌ [PICSART] Failed to refund credits:`, refundError);
     }
     
     return res.status(500).json({
