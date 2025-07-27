@@ -432,8 +432,27 @@ export class PicsartService {
       // Check if base64 string is valid
       const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
       if (!base64Regex.test(base64)) {
-        console.error(`❌ [PICSART] Invalid base64 characters detected`);
-        throw new Error('Invalid base64 format');
+        console.error(`❌ [PICSART] Invalid base64 characters detected in string of length ${base64.length}`);
+        console.error(`❌ [PICSART] First 100 chars: ${base64.substring(0, 100)}`);
+        console.error(`❌ [PICSART] Last 100 chars: ${base64.substring(base64.length - 100)}`);
+        
+        // Find invalid characters
+        const invalidChars = base64.match(/[^A-Za-z0-9+/=]/g);
+        if (invalidChars) {
+          console.error(`❌ [PICSART] Invalid characters found: ${invalidChars.slice(0, 10).join(', ')}`);
+        }
+        
+        // Try to clean the base64 string by removing invalid characters
+        const cleanedBase64 = base64.replace(/[^A-Za-z0-9+/=]/g, '');
+        console.log(`🔧 [PICSART] Attempting to use cleaned base64 string (${cleanedBase64.length} chars)`);
+        
+        if (cleanedBase64.length > 0 && /^[A-Za-z0-9+/]*={0,2}$/.test(cleanedBase64)) {
+          console.log(`✅ [PICSART] Cleaned base64 string is valid, proceeding...`);
+          // Use the cleaned base64 for further processing
+        } else {
+          throw new Error('Invalid base64 format - could not clean');
+        }
+        base64 = cleanedBase64;
       }
       
       let buffer: Buffer;
