@@ -277,6 +277,37 @@ export class PicsartService {
   }
 
   /**
+   * Validate image file signature to ensure it's a valid image
+   */
+  private validateImageBuffer(buffer: Buffer): { isValid: boolean; detectedFormat: string } {
+    // Check for common image file signatures
+    const signatures = {
+      'image/jpeg': [
+        [0xFF, 0xD8, 0xFF], // JPEG
+      ],
+      'image/png': [
+        [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], // PNG
+      ],
+      'image/webp': [
+        [0x52, 0x49, 0x46, 0x46], // WEBP (RIFF)
+      ]
+    };
+
+    for (const [format, sigs] of Object.entries(signatures)) {
+      for (const sig of sigs) {
+        if (buffer.length >= sig.length) {
+          const match = sig.every((byte, index) => buffer[index] === byte);
+          if (match) {
+            return { isValid: true, detectedFormat: format };
+          }
+        }
+      }
+    }
+
+    return { isValid: false, detectedFormat: 'unknown' };
+  }
+
+  /**
    * Process background removal with direct file upload
    */
   async processBackgroundRemoval(
@@ -301,31 +332,30 @@ export class PicsartService {
       
       console.log(`📤 [PICSART] Uploading image file: ${fileName} (${imageBuffer.length} bytes)`);
 
+      // Validate the image buffer
+      const validation = this.validateImageBuffer(imageBuffer);
+      if (!validation.isValid) {
+        throw new Error(`Invalid image format. File appears to be corrupted or not a valid image.`);
+      }
+      
+      console.log(`✅ [PICSART] Image validation passed: ${validation.detectedFormat}`);
+
       // Create FormData for multipart/form-data with direct file upload
       const formData = new FormData();
       
-      // Detect proper mime type for the file
-      const fileExtension = path.extname(fileName).toLowerCase();
-      let mimeType = 'image/jpeg'; // default
-      
-      if (fileExtension === '.png') {
-        mimeType = 'image/png';
-      } else if (fileExtension === '.webp') {
-        mimeType = 'image/webp';
-      } else if (['.jpg', '.jpeg'].includes(fileExtension)) {
-        mimeType = 'image/jpeg';
-      }
+      // Use detected mime type from validation
+      const mimeType = validation.detectedFormat;
       
       console.log(`📤 [PICSART] Using mime type: ${mimeType} for file: ${fileName}`);
       
-      // Create a Blob from the buffer with correct mime type
-      const blob = new Blob([imageBuffer], { type: mimeType });
-      formData.append('image', blob, fileName);
-      formData.append('output_type', 'cutout');
-      formData.append('format', 'PNG');
+      // Create a proper File object instead of Blob for better compatibility
+      const file = new File([imageBuffer], fileName, { type: mimeType });
+      formData.append('image', file);
+      formData.append('output_type', params.output_type || 'cutout');
+      formData.append('format', params.format || 'PNG');
       
-      // Only add safe, validated parameters
-      const safeParams = ['output_type', 'format'];
+      // Add additional safe parameters
+      const safeParams = ['bg_blur', 'scale', 'auto_center', 'stroke_size', 'stroke_color', 'stroke_opacity', 'shadow', 'shadow_opacity', 'shadow_blur'];
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null && safeParams.includes(key)) {
           formData.append(key, String(value));
@@ -343,6 +373,7 @@ export class PicsartService {
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.error(`❌ [PICSART] API Error Response:`, errorText);
         throw new Error(`Picsart API error: ${response.status} - ${errorText}`);
       }
 
@@ -382,29 +413,38 @@ export class PicsartService {
       const buffer = Buffer.from(base64, 'base64');
       console.log(`📤 [PICSART] Buffer size: ${buffer.length} bytes`);
       
-      // Validate image format
-      if (!['jpeg', 'jpg', 'png', 'webp'].includes(mimeType.toLowerCase())) {
-        throw new Error(`Unsupported image format: ${mimeType}. Supported formats: JPG, PNG, WEBP`);
-      }
-
-      // Ensure proper file extension based on mime type
-      const ext = path.extname(fileName);
-      if (!ext) {
-        const extension = mimeType === 'png' ? '.png' : '.jpg';
-        fileName = `${fileName}${extension}`;
+      // Validate image buffer using file signature
+      const validation = this.validateImageBuffer(buffer);
+      if (!validation.isValid) {
+        throw new Error(`Invalid image format. File appears to be corrupted or not a valid image.`);
       }
       
-      // Normalize file extension based on detected mime type
-      if (mimeType === 'png' && !['.png'].includes(ext.toLowerCase())) {
-        fileName = fileName.replace(/\.[^/.]+$/, '.png');
-      } else if (mimeType === 'jpeg' && !['.jpg', '.jpeg'].includes(ext.toLowerCase())) {
-        fileName = fileName.replace(/\.[^/.]+$/, '.jpg');
+      console.log(`✅ [PICSART] Image validation passed: ${validation.detectedFormat}`);
+      
+      // Use the detected format instead of the declared mime type for better accuracy
+      const detectedType = validation.detectedFormat.split('/')[1]; // Extract 'jpeg', 'png', etc.
+      
+      // Validate image format
+      if (!['jpeg', 'png', 'webp'].includes(detectedType.toLowerCase())) {
+        throw new Error(`Unsupported image format: ${detectedType}. Supported formats: JPG, PNG, WEBP`);
+      }
+
+      // Ensure proper file extension based on detected format
+      const ext = path.extname(fileName);
+      const properExtension = detectedType === 'png' ? '.png' : 
+                             detectedType === 'webp' ? '.webp' : '.jpg';
+      
+      if (!ext) {
+        fileName = `${fileName}${properExtension}`;
+      } else if (ext.toLowerCase() !== properExtension) {
+        // Replace extension with the correct one based on actual format
+        fileName = fileName.replace(/\.[^/.]+$/, properExtension);
       }
 
       // Generate unique filename
       const timestamp = Date.now();
       const randomId = crypto.randomBytes(8).toString('hex');
-      const extension = fileName.split('.').pop() || (mimeType === 'png' ? 'png' : 'jpg');
+      const extension = properExtension.substring(1); // Remove the dot
       const uniqueFileName = `picsart_${userId}_${timestamp}_${randomId}.${extension}`;
       console.log(`📤 [PICSART] Generated filename: ${uniqueFileName} (original: ${fileName})`);
 
