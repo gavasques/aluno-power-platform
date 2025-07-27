@@ -488,6 +488,26 @@ export class PicsartService {
       let buffer: Buffer;
       try {
         buffer = Buffer.from(base64, 'base64');
+        console.log(`✅ [PICSART] Base64 decoded successfully: ${buffer.length} bytes`);
+        console.log(`🔍 [PICSART] Decoded buffer first 20 bytes: ${Array.from(buffer.slice(0, 20)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' ')}`);
+        
+        // Look for JPEG signature within the buffer in case there's corruption at the start
+        const jpegSignatureIndex = buffer.indexOf(Buffer.from([0xFF, 0xD8]));
+        if (jpegSignatureIndex > 0) {
+          console.log(`🔧 [PICSART] Found JPEG signature at index ${jpegSignatureIndex}, removing ${jpegSignatureIndex} corrupted bytes from start`);
+          buffer = buffer.slice(jpegSignatureIndex);
+          console.log(`✅ [PICSART] Buffer cleaned, new size: ${buffer.length} bytes, starts with: ${Array.from(buffer.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' ')}`);
+        }
+        
+        // Look for PNG signature within the buffer
+        const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+        const pngSignatureIndex = buffer.indexOf(pngSignature);
+        if (pngSignatureIndex > 0) {
+          console.log(`🔧 [PICSART] Found PNG signature at index ${pngSignatureIndex}, removing ${pngSignatureIndex} corrupted bytes from start`);
+          buffer = buffer.slice(pngSignatureIndex);
+          console.log(`✅ [PICSART] Buffer cleaned, new size: ${buffer.length} bytes, starts with: ${Array.from(buffer.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' ')}`);
+        }
+        
       } catch (error) {
         console.error(`❌ [PICSART] Base64 decoding failed:`, error);
         throw new Error('Failed to decode base64 data');
