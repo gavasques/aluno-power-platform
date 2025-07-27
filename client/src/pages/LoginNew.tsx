@@ -720,6 +720,10 @@ export default function LoginNew() {
 
               {/* Main Title - No background */}
               <div className="mb-12">
+                <p className="text-xl text-gray-600 leading-relaxed">
+                  Ferramentas especializados para otimizar suas vendas, 
+                  criar conteúdo profissional e melhorar processos complexos.
+                </p>
               </div>
 
               {/* Features Grid - Floating Cards */}
