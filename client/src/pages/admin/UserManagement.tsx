@@ -39,13 +39,13 @@ const UserManagement = memo(() => {
 
   // Users query
   const { data: users, isLoading } = useQuery<User[]>({
-    queryKey: ['/api/users'],
+    queryKey: ['/api/admin/users'],
     staleTime: 2 * 60 * 1000,
   });
 
   // Permission groups query
   const { data: groupsResponse } = useQuery({
-    queryKey: ['/api/permissions/groups'],
+    queryKey: ['/api/admin/permissions/groups'],
     staleTime: 2 * 60 * 1000,
   });
 
@@ -54,7 +54,7 @@ const UserManagement = memo(() => {
   // Mutations for user actions
   const toggleUserStatus = useMutation({
     mutationFn: async ({ userId, isActive }: { userId: number; isActive: boolean }) => {
-      const response = await fetch(`/api/users/${userId}`, {
+      const response = await fetch(`/api/admin/users/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive })
@@ -63,14 +63,14 @@ const UserManagement = memo(() => {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
     }
   });
 
   const deleteUser = useMutation({
     mutationFn: async (userId: number) => {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`/api/users/${userId}`, { 
+      const response = await fetch(`/api/admin/users/${userId}`, { 
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -88,7 +88,7 @@ const UserManagement = memo(() => {
         title: "Usuário deletado",
         description: data.message,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
     },
     onError: (error: Error) => {
       toast({
@@ -121,7 +121,7 @@ const UserManagement = memo(() => {
         title: "Usuários de teste deletados",
         description: data.message,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
     },
     onError: (error: Error) => {
       toast({

@@ -50,14 +50,14 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
 
   // Fetch user data for editing
   const { data: user, isLoading } = useQuery({
-    queryKey: ['/api/users', userId],
+    queryKey: ['/api/admin/users', userId],
     enabled: !isNewUser,
     staleTime: 2 * 60 * 1000,
   });
 
   // Fetch available permission groups
   const { data: groupsResponse } = useQuery({
-    queryKey: ['/api/permissions/groups'],
+    queryKey: ['/api/admin/permissions/groups'],
     staleTime: 5 * 60 * 1000,
   });
 
@@ -65,7 +65,7 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
 
   // Fetch user groups for editing
   const { data: userGroups } = useQuery({
-    queryKey: ['/api/users', userId, 'groups'],
+    queryKey: ['/api/admin/users', userId, 'groups'],
     enabled: !isNewUser,
     staleTime: 2 * 60 * 1000,
   });
@@ -87,8 +87,8 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
   // Save user mutation
   const saveUser = useMutation({
     mutationFn: async (data: UserForm) => {
-      const url = isNewUser ? '/api/users' : `/api/users/${userId}`;
-      const method = isNewUser ? 'POST' : 'PUT';
+      const url = isNewUser ? '/api/admin/users' : `/api/admin/users/${userId}`;
+      const method = isNewUser ? 'POST' : 'PATCH';
       
       const response = await fetch(url, {
         method,
@@ -104,7 +104,7 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       setLocation('/admin/usuarios');
     },
     onError: (error: any) => {

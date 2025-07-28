@@ -104,7 +104,7 @@ export function registerModularRoutes(app: Express): void {
   app.use('/api/admin', adminDashboardRoutes);
   
   // Admin Users Management Routes
-  app.use('/api', adminUsersRoutes);
+  app.use('/api/admin', adminUsersRoutes);
 
   // Audit Routes - Security Logging and Monitoring
   app.use('/api/audit', auditRoutes);
