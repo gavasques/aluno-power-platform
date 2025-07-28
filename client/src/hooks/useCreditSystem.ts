@@ -1,10 +1,12 @@
 /**
  * Hook unificado para sistema de créditos
  * Previne inconsistências e duplicação de código
+ * Otimizado para usar cache unificado ao invés de fetch manual
  */
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGetFeatureCost, useCanProcessFeature } from "@/hooks/useFeatureCosts";
+import { useUnifiedUserProfile } from "@/hooks/useUnifiedUserProfile";
 import { logger } from "@/utils/logger";
 import { queryClient } from "@/lib/queryClient";
 
@@ -35,38 +37,28 @@ export function useCreditSystem() {
   const { user } = useAuth();
   const { getFeatureCost } = useGetFeatureCost();
   const { canProcess } = useCanProcessFeature();
+  const { data: userProfile } = useUnifiedUserProfile();
 
   /**
    * Verifica se o usuário tem créditos suficientes
+   * Otimizado para usar cache unificado ao invés de fetch manual
    */
   const checkCredits = async (featureCode: string): Promise<CreditCheckResult> => {
     try {
-      // Primeiro, tentar obter o saldo de créditos
+      // Usar dados do cache unificado ao invés de fetch manual
       let currentBalance = 0;
       
-      if (user?.credits) {
-        // Se já temos o saldo no contexto do usuário
+      if (userProfile?.credits?.current !== undefined) {
+        // Usar dados do cache unificado (preferencial)
+        currentBalance = userProfile.credits.current;
+      } else if (user?.credits) {
+        // Fallback para contexto do usuário
         currentBalance = parseFloat(user.credits.toString());
       } else {
-        // Fazer requisição para obter dados atualizados
-        const token = localStorage.getItem('auth_token');
-        if (!token) {
-          throw new Error('Token de autenticação não encontrado');
-        }
-
-        const dashboardResponse = await fetch('/api/auth/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!dashboardResponse.ok) {
-          throw new Error(`Erro HTTP ${dashboardResponse.status}: ${dashboardResponse.statusText}`);
-        }
-
-        const data = await dashboardResponse.json();
-        currentBalance = parseFloat(data.user?.credits || '0');
+        // Último recurso - tentar refetch dos dados
+        await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+        const cachedData = queryClient.getQueryData(['/api/auth/me']) as any;
+        currentBalance = parseFloat(cachedData?.user?.credits || '0');
       }
 
       // Obter custo da feature
@@ -145,10 +137,12 @@ export function useCreditSystem() {
       logger.debug(`💾 Log AI salvo - Feature: ${params.featureCode}, Créditos: ${requiredCredits}, Usuário: ${user.id}`);
       
       // Invalidar cache de créditos para atualizar o saldo na interface
+      // Otimizado para usar cache unificado
       try {
+        await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
         await queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
+        // Remove deprecated cache keys
         await queryClient.invalidateQueries({ queryKey: ['/api/credits/balance'] });
-        await queryClient.refetchQueries({ queryKey: ['/api/dashboard/summary'] });
       } catch (cacheError) {
         console.error('❌ Error invalidating cache:', cacheError);
       }

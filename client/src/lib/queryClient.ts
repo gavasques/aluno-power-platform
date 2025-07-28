@@ -1,5 +1,88 @@
 import { QueryClient } from '@tanstack/react-query';
 
+// Strategic Cache Configuration Constants
+export const CACHE_STRATEGIES = {
+  // Static data - rarely changes
+  STATIC_DATA: {
+    staleTime: 60 * 60 * 1000, // 1 hour
+    gcTime: 4 * 60 * 60 * 1000, // 4 hours
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  },
+  
+  // Semi-static data - types, categories, etc.
+  SEMI_STATIC: {
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
+    refetchInterval: 10 * 60 * 1000, // Background refresh every 10 minutes
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: false,
+  },
+  
+  // User data - moderately dynamic
+  USER_DATA: {
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchInterval: 5 * 60 * 1000, // Background refresh every 5 minutes
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: false,
+  },
+  
+  // Dynamic data - frequently changes
+  DYNAMIC_DATA: {
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
+  },
+  
+  // Real-time data - always fresh
+  REAL_TIME: {
+    staleTime: 0,
+    gcTime: 30 * 1000, // 30 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+  }
+} as const;
+
+// Helper function to get cache strategy for specific endpoints
+export function getCacheStrategy(endpoint: string) {
+  // Static data patterns
+  if (endpoint.includes('/types') || 
+      endpoint.includes('/categories') ||
+      endpoint.includes('/feature-costs') ||
+      endpoint.includes('/config')) {
+    return CACHE_STRATEGIES.STATIC_DATA;
+  }
+  
+  // User profile and auth data
+  if (endpoint.includes('/auth/me') || 
+      endpoint.includes('/user/profile')) {
+    return CACHE_STRATEGIES.USER_DATA;
+  }
+  
+  // Semi-static data
+  if (endpoint.includes('/suppliers') ||
+      endpoint.includes('/materials') ||
+      endpoint.includes('/tools') ||
+      endpoint.includes('/news/published') ||
+      endpoint.includes('/updates/published')) {
+    return CACHE_STRATEGIES.SEMI_STATIC;
+  }
+  
+  // Dynamic data for products and user-specific content
+  if (endpoint.includes('/products') ||
+      endpoint.includes('/credits') ||
+      endpoint.includes('/dashboard')) {
+    return CACHE_STRATEGIES.DYNAMIC_DATA;
+  }
+  
+  // Default strategy
+  return {
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
+  };
+}
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

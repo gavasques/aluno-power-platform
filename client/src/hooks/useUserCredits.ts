@@ -1,5 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
+/**
+ * @deprecated Use useOptimizedUserCredits from useUnifiedUserProfile instead
+ * This hook now delegates to the optimized unified approach to prevent duplicate API calls
+ */
+import { useOptimizedUserCredits, useOptimizedUserCreditBalance } from './useUnifiedUserProfile';
 
 interface UserCreditsData {
   current: number;
@@ -12,35 +15,28 @@ interface UserCreditsResponse {
   credits: UserCreditsData;
 }
 
-export function useUserCredits() {
-  const { user, isAuthenticated } = useAuth();
+/**
+ * @deprecated Use useOptimizedUserCredits instead
+ * Legacy wrapper for backward compatibility
+ */
+export function useUserCredits(): { data: UserCreditsResponse | undefined; isLoading: boolean; error: any } {
+  const { credits, isLoading, error } = useOptimizedUserCredits();
   
-  return useQuery<UserCreditsResponse>({
-    queryKey: ['/api/auth/me'],
-    enabled: !!user && isAuthenticated,
-    staleTime: 0, // Sempre buscar dados frescos para créditos
-    gcTime: 5 * 1000, // 5 segundos apenas
-    select: (data: any) => ({
-      credits: {
-        current: parseFloat(data?.user?.credits || '0'),
-        totalEarned: 0,
-        totalSpent: 0,
-        usageThisMonth: '0'
-      }
-    })
-  });
+  return {
+    data: credits ? { credits } : undefined,
+    isLoading,
+    error
+  };
 }
 
+/**
+ * @deprecated Use useOptimizedUserCreditBalance instead
+ * Legacy wrapper for backward compatibility
+ */
 export function useUserCreditBalance(): {
   balance: number;
   isLoading: boolean;
   error: any;
 } {
-  const { data, isLoading, error } = useUserCredits();
-  
-  return {
-    balance: data?.credits?.current || 0,
-    isLoading,
-    error
-  };
+  return useOptimizedUserCreditBalance();
 }
