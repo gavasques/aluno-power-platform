@@ -1,4 +1,4 @@
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,11 @@ import {
   Shield, 
   UserX,
   UserCheck,
-  Settings
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -30,18 +34,52 @@ interface User {
   groupNames?: string[];
 }
 
+interface PaginatedUsersResponse {
+  users: User[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalUsers: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
 const UserManagement = memo(() => {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState<'users' | 'groups'>('users');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10); // Fixed page size
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Users query
-  const { data: users, isLoading } = useQuery<User[]>({
-    queryKey: ['/api/admin/users'],
-    staleTime: 2 * 60 * 1000,
+  // Debounced search to avoid too many API calls
+  const debouncedSearchTerm = useMemo(() => {
+    const timer = setTimeout(() => searchTerm, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Users query with pagination and search
+  const { data: usersResponse, isLoading } = useQuery<PaginatedUsersResponse>({
+    queryKey: ['/api/admin/users', currentPage, pageSize, searchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: pageSize.toString(),
+        ...(searchTerm && { search: searchTerm })
+      });
+      
+      const response = await fetch(`/api/admin/users?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch users');
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    keepPreviousData: true, // Keep previous data while loading new page
   });
+
+  const users = usersResponse?.users || [];
+  const pagination = usersResponse?.pagination;
 
   // Permission groups query
   const { data: groupsResponse } = useQuery({
@@ -132,16 +170,39 @@ const UserManagement = memo(() => {
     }
   });
 
-  // Filtered users
-  const filteredUsers = useMemo(() => {
-    if (!users) return [];
-    
-    return users.filter(user => 
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [users, searchTerm]);
+  // Reset to first page when search term changes
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  }, []);
+
+  // Pagination handlers
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handleFirstPage = useCallback(() => {
+    setCurrentPage(1);
+  }, []);
+
+  const handleLastPage = useCallback(() => {
+    if (pagination?.totalPages) {
+      setCurrentPage(pagination.totalPages);
+    }
+  }, [pagination?.totalPages]);
+
+  const handlePrevPage = useCallback(() => {
+    setCurrentPage(prev => Math.max(1, prev - 1));
+  }, []);
+
+  const handleNextPage = useCallback(() => {
+    setCurrentPage(prev => {
+      if (pagination?.totalPages) {
+        return Math.min(pagination.totalPages, prev + 1);
+      }
+      return prev;
+    });
+  }, [pagination?.totalPages]);
 
   const handleToggleStatus = (userId: number, currentStatus: boolean) => {
     if (window.confirm(`${currentStatus ? 'Desativar' : 'Ativar'} este usuário?`)) {
@@ -237,20 +298,27 @@ const UserManagement = memo(() => {
                 <Input
                   placeholder="Buscar usuários..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   className="pl-10"
                 />
               </div>
               <div className="text-sm text-gray-500">
-                {filteredUsers.length} usuário{filteredUsers.length !== 1 ? 's' : ''}
+                {pagination ? (
+                  <>
+                    {pagination.totalUsers} usuário{pagination.totalUsers !== 1 ? 's' : ''} 
+                    {searchTerm && ` (página ${pagination.currentPage} de ${pagination.totalPages})`}
+                  </>
+                ) : (
+                  '0 usuários'
+                )}
               </div>
             </div>
 
             {/* Users List */}
             <AdminCard title="Lista de Usuários">
               <div className="space-y-4">
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user) => (
+                {users.length > 0 ? (
+                  users.map((user) => (
                     <div key={user.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50/50">
                       <div className="flex items-center space-x-4">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -313,6 +381,75 @@ const UserManagement = memo(() => {
                   </div>
                 )}
               </div>
+              
+              {/* Pagination Controls */}
+              {pagination && pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="text-sm text-gray-500">
+                    Mostrando {Math.min((currentPage - 1) * pageSize + 1, pagination.totalUsers)} - {Math.min(currentPage * pageSize, pagination.totalUsers)} de {pagination.totalUsers} usuários
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleFirstPage}
+                      disabled={!pagination.hasPrevPage}
+                      title="Primeira página"
+                    >
+                      <ChevronsLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePrevPage}
+                      disabled={!pagination.hasPrevPage}
+                      title="Página anterior"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    <div className="flex items-center space-x-1">
+                      {/* Show page numbers around current page */}
+                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                        const startPage = Math.max(1, currentPage - 2);
+                        const page = startPage + i;
+                        if (page > pagination.totalPages) return null;
+                        
+                        return (
+                          <Button
+                            key={page}
+                            variant={page === currentPage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageChange(page)}
+                            className="min-w-[32px]"
+                          >
+                            {page}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNextPage}
+                      disabled={!pagination.hasNextPage}
+                      title="Próxima página"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLastPage}
+                      disabled={!pagination.hasNextPage}
+                      title="Última página"
+                    >
+                      <ChevronsRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </AdminCard>
           </>
         )}
