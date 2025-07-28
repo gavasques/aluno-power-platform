@@ -1,14 +1,14 @@
 
 import DepartmentsManagerRefactored from "@/components/admin/cadastros/DepartmentsManagerRefactored";
 
-import SupplierTypesManager from "@/components/admin/cadastros/SupplierTypesManager";
-import PartnerTypesManager from "@/components/admin/cadastros/PartnerTypesManager";
-import PromptTypesManager from "@/components/admin/cadastros/PromptTypesManager";
-import MaterialTypesManager from "@/components/admin/cadastros/MaterialTypesManager";
+import SupplierTypesManagerOptimized from "@/components/admin/cadastros/SupplierTypesManagerOptimized";
+import PartnerTypesManagerOptimized from "@/components/admin/cadastros/PartnerTypesManagerOptimized";
+import PromptTypesManagerOptimized from "@/components/admin/cadastros/PromptTypesManagerOptimized";
+import MaterialTypesManagerOptimized from "@/components/admin/cadastros/MaterialTypesManagerOptimized";
 import MaterialCategoriesManager from "@/components/admin/materials/MaterialCategoriesManager";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import CadastrosOverview from "@/components/admin/cadastros/CadastrosOverview";
-import ToolTypesManager from "@/components/admin/cadastros/ToolTypesManager";
+import ToolTypesManagerOptimized from "@/components/admin/cadastros/ToolTypesManagerOptimized";
 
 import PromptsAIManager from "@/components/admin/cadastros/PromptsAIManager";
 
@@ -23,17 +23,17 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
         return <DepartmentsManagerRefactored />;
 
       case "tipos-fornecedor":
-        return <SupplierTypesManager />;
+        return <SupplierTypesManagerOptimized />;
       case "tipos-parceiro":
-        return <PartnerTypesManager />;
+        return <PartnerTypesManagerOptimized />;
       case "tipos-prompts-ia":
-        return <PromptTypesManager />;
+        return <PromptTypesManagerOptimized />;
       case "tipos-materiais":
-        return <MaterialTypesManager />;
+        return <MaterialTypesManagerOptimized />;
       case "categorias-materiais":
         return <MaterialCategoriesManager />;
       case "tipos-ferramentas":
-        return <ToolTypesManager />;
+        return <ToolTypesManagerOptimized />;
       case "parceiros":
         return <PartnersManager />;
 
