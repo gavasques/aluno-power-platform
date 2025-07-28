@@ -26,7 +26,7 @@ import {
 import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { formatBRL } from "@/utils/pricingCalculations";
 import { useState } from "react";
-import { ProductSupplierManager } from "@/components/product/ProductSupplierManager";
+import { ProductSupplierManagerRefactored } from "@/components/product/ProductSupplierManagerRefactored";
 
 interface ProductBasicDataTabProps {
   form: UseFormReturn<any>;
@@ -733,7 +733,7 @@ export default function ProductBasicDataTab({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ProductSupplierManager 
+            <ProductSupplierManagerRefactored 
               productId={parseInt(productId)}
               productName={form.getValues("name") || "Produto"}
             />

@@ -1,4 +1,4 @@
-import { UltraEnhanceTool } from '@/components/ultra-enhance/UltraEnhanceTool';
+import { UltraEnhanceToolRefactored } from '@/components/ultra-enhance/UltraEnhanceToolRefactored';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -36,7 +36,7 @@ export default function UltraMelhoradorPro() {
 
       {/* Main Tool */}
       <div className="py-8">
-        <UltraEnhanceTool />
+        <UltraEnhanceToolRefactored />
       </div>
 
     </div>

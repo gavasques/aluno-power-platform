@@ -1,5 +1,5 @@
 
-import DepartmentsManager from "@/components/admin/cadastros/DepartmentsManager";
+import DepartmentsManagerRefactored from "@/components/admin/cadastros/DepartmentsManagerRefactored";
 
 import SupplierTypesManager from "@/components/admin/cadastros/SupplierTypesManager";
 import PartnerTypesManager from "@/components/admin/cadastros/PartnerTypesManager";
@@ -20,7 +20,7 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
   const renderContent = () => {
     switch (subsection) {
       case "departamentos":
-        return <DepartmentsManager />;
+        return <DepartmentsManagerRefactored />;
 
       case "tipos-fornecedor":
         return <SupplierTypesManager />;
