@@ -61,7 +61,7 @@ const UserEdit = memo(({ params }: UserEditProps = {}) => {
     staleTime: 5 * 60 * 1000,
   });
 
-  const groups = groupsResponse?.groups || [];
+  const groups = (groupsResponse as any)?.groups || [];
 
   // Fetch user groups for editing
   const { data: userGroups } = useQuery({

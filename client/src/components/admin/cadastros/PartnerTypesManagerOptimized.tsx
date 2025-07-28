@@ -95,7 +95,10 @@ const partnerTypesConfig: BaseTypesManagerConfig<PartnerTypeItem> = {
 };
 
 const PartnerTypesManagerOptimized: React.FC = () => {
-  return <BaseTypesManager<PartnerTypeItem> config={partnerTypesConfig} />;
+  const TypedBaseTypesManager = BaseTypesManager as React.ComponentType<{
+    config: BaseTypesManagerConfig<PartnerTypeItem>;
+  }>;
+  return <TypedBaseTypesManager config={partnerTypesConfig} />;
 };
 
 export default PartnerTypesManagerOptimized;
