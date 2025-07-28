@@ -93,7 +93,7 @@ interface BaseTypesManagerProps<T extends BaseItem> {
   config: BaseTypesManagerConfig<T>;
 }
 
-const BaseTypesManager = memo(<T extends BaseItem>({ config }: BaseTypesManagerProps<T>) => {
+const BaseTypesManagerImpl = memo(<T extends BaseItem>({ config }: BaseTypesManagerProps<T>) => {
   const {
     title,
     entityName,
@@ -433,7 +433,7 @@ const BaseTypesManager = memo(<T extends BaseItem>({ config }: BaseTypesManagerP
             )}
             {!isLoading && filteredAndSortedItems.length === 0 && (
               <div className="text-muted-foreground px-4 py-8 text-center">
-                {emptyMessage || `Nenhum${filteredAndSortedItems.length === 1 ? '' : 's'} ${entityName} encontrado${filteredAndSortedItems.length === 1 ? '' : 's'}.`}
+                {emptyMessage || `Nenhum ${entityName} encontrado.`}
               </div>
             )}
             {!isLoading && filteredAndSortedItems.map((item) => 
@@ -444,8 +444,12 @@ const BaseTypesManager = memo(<T extends BaseItem>({ config }: BaseTypesManagerP
       </CardContent>
     </Card>
   );
-}) as <T extends BaseItem>(props: BaseTypesManagerProps<T>) => React.ReactElement;
+});
 
-BaseTypesManager.displayName = 'BaseTypesManager';
+// Create typed component with proper displayName
+const BaseTypesManager = BaseTypesManagerImpl as <T extends BaseItem>(props: BaseTypesManagerProps<T>) => React.ReactElement;
+
+// Add displayName to the component for debugging
+(BaseTypesManager as any).displayName = 'BaseTypesManager';
 
 export default BaseTypesManager;
