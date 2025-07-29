@@ -179,7 +179,7 @@ export default function ImportedProductDetail() {
         }
         
       } catch (err: any) {
-        console.error('[PRODUCT_DETAIL] Error:', err);
+
         setError(err.message);
       } finally {
         setIsLoading(false);
@@ -486,7 +486,7 @@ export default function ImportedProductDetail() {
               startY += imageHeight + 20;
             }
           } catch (error) {
-            console.warn(`Erro ao adicionar imagem ${i + 1}:`, error);
+
             // Continuar sem a imagem em caso de erro
           }
         }
@@ -533,7 +533,7 @@ export default function ImportedProductDetail() {
       });
 
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
+
       toast({
         title: 'Erro ao gerar PDF',
         description: 'Ocorreu um erro ao gerar o arquivo PDF. Tente novamente.',

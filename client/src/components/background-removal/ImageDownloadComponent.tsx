@@ -106,7 +106,7 @@ const ImageDownloadComponent: React.FC<ImageDownloadComponentProps> = ({
       });
 
     } catch (error) {
-      console.error('❌ [IMAGE_DOWNLOAD] Download failed:', error);
+
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       setDownloadError(`Erro no download: ${errorMessage}`);
       
@@ -158,7 +158,7 @@ const ImageDownloadComponent: React.FC<ImageDownloadComponentProps> = ({
       }
 
     } catch (error) {
-      console.error('❌ [IMAGE_DOWNLOAD] Copy failed:', error);
+
       
       toast({
         title: "Erro na cópia",

@@ -70,8 +70,7 @@ export default function ProductSupplierManagerRefactored({
     queryKey: [`/api/products/${productId}/suppliers`],
     queryFn: async () => {
       const response = await apiRequest(`/api/products/${productId}/suppliers`);
-      if (response?.data) {
-      }
+      // Return data directly
       return response;
     },
     staleTime: 0, // Always fetch fresh data
@@ -112,7 +111,7 @@ export default function ProductSupplierManagerRefactored({
       setSupplierToDelete(null);
     },
     onError: (error: any) => {
-      console.error('🔍 ProductSupplierManagerRefactored - Delete error:', error);
+
       toast({
         title: 'Erro ao remover fornecedor',
         description: error.message || 'Ocorreu um erro ao remover o fornecedor.',
@@ -196,7 +195,7 @@ export default function ProductSupplierManagerRefactored({
     try {
       await deleteSupplierMutation.mutateAsync(supplierToDelete.id);
     } catch (error) {
-      console.error('Error deleting supplier:', error);
+
     }
   };
 

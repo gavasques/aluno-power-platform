@@ -148,7 +148,7 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
       }
       onSuccess();
     } catch (error) {
-      console.error('Error saving supplier:', error);
+
     }
   };
 
@@ -161,7 +161,7 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
   };
 
   // Available suppliers for selection (exclude already linked ones when adding)
-  const availableSuppliers = suppliers.filter(s => 
+  const availableSuppliers = suppliers.filter((s: any) => 
     isEditing || !hasSupplier(s.id)
   );
 
@@ -172,7 +172,7 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
     }
     
     const searchLower = searchTerm.toLowerCase();
-    return availableSuppliers.filter(supplier => 
+    return availableSuppliers.filter((supplier: any) => 
       supplier.tradeName.toLowerCase().includes(searchLower) ||
       supplier.corporateName.toLowerCase().includes(searchLower) ||
       (supplier.description && supplier.description.toLowerCase().includes(searchLower))
@@ -246,7 +246,7 @@ export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
                         </FormControl>
                         <SelectContent>
                           {filteredSuppliers.length > 0 ? (
-                            filteredSuppliers.map((supplier) => (
+                            filteredSuppliers.map((supplier: any) => (
                               <SelectItem key={supplier.id} value={supplier.id.toString()}>
                                 <div className="flex items-center gap-2">
                                   {supplier.logo && (

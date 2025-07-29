@@ -66,7 +66,7 @@ export default function InternationalSupplierForm() {
           setCategories(data || []);
         }
       } catch (error) {
-        console.error('Erro ao carregar departamentos:', error);
+
       }
     };
 
@@ -120,7 +120,7 @@ export default function InternationalSupplierForm() {
           data = await response.json();
         } catch (jsonError) {
           // Se não conseguir fazer parse do JSON, considerar sucesso mesmo assim
-          console.warn('Resposta não é JSON válido, mas request foi bem-sucedido');
+
         }
 
         toast({
@@ -148,7 +148,7 @@ export default function InternationalSupplierForm() {
         throw new Error(errorMessage);
       }
     } catch (error: any) {
-      console.error('Erro ao salvar fornecedor:', error);
+
       toast({
         title: "Erro",
         description: error.message || "Erro inesperado ao criar fornecedor",

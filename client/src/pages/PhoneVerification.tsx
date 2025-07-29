@@ -59,7 +59,7 @@ export default function PhoneVerification() {
         }
       }
     } catch (error) {
-      console.error('Error loading phone status:', error);
+
       toast({
         title: "Erro",
         description: "Erro ao carregar informações do telefone",
@@ -109,7 +109,7 @@ export default function PhoneVerification() {
         }
       }
     } catch (error) {
-      console.error('Error sending verification:', error);
+
       toast({
         title: "Erro",
         description: "Erro de conexão. Tente novamente.",
@@ -162,7 +162,7 @@ export default function PhoneVerification() {
         }
       }
     } catch (error) {
-      console.error('Error verifying code:', error);
+
       toast({
         title: "Erro",
         description: "Erro de conexão. Tente novamente.",

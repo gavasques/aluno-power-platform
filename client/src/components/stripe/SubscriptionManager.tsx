@@ -56,7 +56,7 @@ export default function SubscriptionManager() {
       setShowCancelConfirm(false);
       
     } catch (error) {
-      console.error('Erro ao cancelar assinatura:', error);
+
       toast({
         title: "Erro no cancelamento",
         description: "Não foi possível cancelar a assinatura. Tente novamente ou entre em contato com o suporte.",
@@ -88,7 +88,7 @@ export default function SubscriptionManager() {
       window.open(url, '_blank');
       
     } catch (error) {
-      console.error('Erro ao acessar portal:', error);
+
       toast({
         title: "Erro no portal",
         description: "Não foi possível acessar o portal de cobrança. Tente novamente.",

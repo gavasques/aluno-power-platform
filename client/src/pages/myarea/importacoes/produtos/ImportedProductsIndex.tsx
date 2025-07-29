@@ -102,7 +102,7 @@ export default function ImportedProductsIndex() {
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[IMPORTED_PRODUCTS] Error response:', errorText);
+
         throw new Error(`Erro ${response.status}: ${errorText}`);
       }
       
@@ -116,7 +116,7 @@ export default function ImportedProductsIndex() {
       
       setIsLoading(false);
     } catch (err: any) {
-      console.error('[IMPORTED_PRODUCTS] Error:', err);
+
       setError(err);
       setIsLoading(false);
     }
@@ -146,7 +146,7 @@ export default function ImportedProductsIndex() {
         }
         return { productId: product.id, imageUrl: null };
       } catch (error) {
-        console.error(`Erro ao buscar imagem do produto ${product.id}:`, error);
+
         return { productId: product.id, imageUrl: null };
       }
     });
@@ -231,7 +231,7 @@ export default function ImportedProductsIndex() {
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
 
   if (error) {
-    console.error('[IMPORTED_PRODUCTS] Render error:', error);
+
     return (
       <div className="container mx-auto py-8">
         <Card>

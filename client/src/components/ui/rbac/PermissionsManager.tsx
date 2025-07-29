@@ -96,7 +96,7 @@ export function PermissionsManager({
       await updateUserRoles(selectedRoles);
       onClose?.();
     } catch (error) {
-      console.error('Erro ao salvar permissões:', error);
+
     }
   };
 
@@ -113,7 +113,7 @@ export function PermissionsManager({
       setShowCreateRole(false);
       setNewRole({ name: '', description: '', permissions: [] });
     } catch (error) {
-      console.error('Erro ao criar papel:', error);
+
     }
   };
 

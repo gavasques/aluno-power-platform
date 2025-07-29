@@ -133,7 +133,7 @@ export default function ImportedProductForm() {
       setExistingProduct(data);
     })
     .catch(error => {
-      console.error('Erro ao carregar produto:', error);
+
       setExistingProduct(null);
     })
     .finally(() => {
@@ -167,7 +167,7 @@ export default function ImportedProductForm() {
       setDepartments(Array.isArray(data) ? data : []);
     })
     .catch(error => {
-      console.error('Erro ao carregar departments:', error);
+
       setDepartments([]);
     })
     .finally(() => {
@@ -191,7 +191,7 @@ export default function ImportedProductForm() {
       setBrands(Array.isArray(data) ? data : []);
     })
     .catch(error => {
-      console.error('Erro ao carregar brands:', error);
+
       setBrands([]);
     })
     .finally(() => {
@@ -302,7 +302,7 @@ export default function ImportedProductForm() {
             setExistingProduct(data);
           })
           .catch(error => {
-            console.error('Erro ao recarregar produto:', error);
+
           })
           .finally(() => {
             setIsLoadingProduct(false);

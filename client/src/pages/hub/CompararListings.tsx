@@ -129,7 +129,7 @@ function CompararListingsContent() {
       }
 
       const productsData = data.results;
-      console.log('Dados recebidos da API:', productsData);
+
       
       setResults(productsData);
       
@@ -142,7 +142,7 @@ function CompararListingsContent() {
         });
       }
     } catch (err) {
-      console.error('Erro na busca:', err);
+
       setError(err instanceof Error ? err.message : "Erro desconhecido ao buscar produtos");
     } finally {
       setLoading(false);

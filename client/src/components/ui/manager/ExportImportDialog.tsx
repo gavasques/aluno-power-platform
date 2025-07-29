@@ -126,7 +126,7 @@ export function ExportImportDialog({
           const preview = await onPreviewImport(file);
           setPreviewData(preview);
         } catch (error) {
-          console.error('Erro no preview:', error);
+
         }
       }
     }

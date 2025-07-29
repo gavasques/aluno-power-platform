@@ -107,7 +107,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
         }
       }
     } catch (error) {
-      console.error('Erro ao carregar dados:', error);
+
       toast({
         title: "Erro",
         description: "Erro ao carregar dados dos fornecedores",
@@ -189,7 +189,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
       });
       
     } catch (error) {
-      console.error('Erro ao adicionar fornecedor:', error);
+
       toast({
         title: "Erro",
         description: "Erro interno do servidor",
@@ -225,7 +225,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
         });
       }
     } catch (error) {
-      console.error('Erro ao atualizar fornecedor:', error);
+
       toast({
         title: "Erro",
         description: "Erro interno do servidor",
@@ -273,7 +273,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
         }
       }
     } catch (error) {
-      console.error('Erro ao remover fornecedor:', error);
+
       toast({
         title: "Erro",
         description: "Erro interno do servidor",
@@ -328,7 +328,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
         });
 
         if (!response.ok) {
-          console.error(`Erro ao salvar fornecedor ${supplier.supplierTradeName}`);
+
           return false;
         }
       }
@@ -336,7 +336,7 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
       setTempSuppliers([]);
       return true;
     } catch (error) {
-      console.error('Erro ao salvar fornecedores temporários:', error);
+
       return false;
     }
   };

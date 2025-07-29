@@ -115,7 +115,7 @@ export default function LoginNew() {
         });
       }
     } catch (error: any) {
-      console.error('Login error:', error);
+
       toast({
         variant: "destructive",
         title: "Erro no login",
@@ -195,7 +195,7 @@ export default function LoginNew() {
       // Always redirect to verification since phone is mandatory
       setLocation('/phone-verification');
     } catch (error: any) {
-      console.error('Register error:', error);
+
       toast({
         title: "Erro no cadastro",
         description: error.response?.data?.message || "Erro interno do servidor",
@@ -260,7 +260,7 @@ export default function LoginNew() {
         }
       }
     } catch (error: any) {
-      console.error('Forgot password error:', error);
+
       toast({
         variant: "destructive",
         title: "Erro",
@@ -330,7 +330,7 @@ export default function LoginNew() {
         });
       }
     } catch (error: any) {
-      console.error('Reset password error:', error);
+
       toast({
         variant: "destructive",
         title: "Erro",

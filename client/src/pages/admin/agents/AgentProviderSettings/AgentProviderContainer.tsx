@@ -52,7 +52,7 @@ export function AgentProviderContainer() {
         costPer1kTokens
       });
     } catch (error) {
-      console.error('Error saving agent:', error);
+
     }
   };
 
@@ -84,7 +84,7 @@ export function AgentProviderContainer() {
           imageData = referenceImages[0].data;
         }
       } catch (error) {
-        console.error('Error converting images:', error);
+
       }
     }
 

@@ -223,7 +223,7 @@ export default function InvestimentosROIRefactored() {
         description: "Arquivo CSV gerado com sucesso!"
       });
     } catch (error) {
-      console.error('Erro ao exportar CSV:', error);
+
       toast({
         title: "Erro",
         description: "Não foi possível exportar o CSV.",
@@ -342,7 +342,7 @@ export default function InvestimentosROIRefactored() {
         description: "Arquivo PDF gerado com sucesso!"
       });
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
+
       toast({
         title: "Erro",
         description: "Não foi possível gerar o PDF.",

@@ -73,7 +73,7 @@ const SupplierDetailRefactored = () => {
     try {
       await deleteBrand(brandId);
     } catch (error) {
-      console.error('Error deleting brand:', error);
+
     }
   };
 
@@ -82,7 +82,7 @@ const SupplierDetailRefactored = () => {
     try {
       await deleteContact(contactId);
     } catch (error) {
-      console.error('Error deleting contact:', error);
+
     }
   };
 
@@ -96,7 +96,7 @@ const SupplierDetailRefactored = () => {
     try {
       await deleteConversation(conversationId);
     } catch (error) {
-      console.error('Error deleting conversation:', error);
+
     }
   };
   

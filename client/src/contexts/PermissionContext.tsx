@@ -38,7 +38,7 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
       setPermissionCache(new Map());
     } catch (error) {
       // Silently handle permission errors to prevent blocking dashboard
-      console.warn('Could not load user features, continuing with empty permissions');
+
       setFeatures([]);
     } finally {
       setIsLoading(false);
@@ -78,7 +78,7 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
       return result;
     } catch (error) {
       // Silently handle permission check errors to prevent blocking features
-      console.warn(`Could not check access for feature: ${featureCode}, defaulting to false`);
+
       return false;
     }
   };

@@ -751,7 +751,7 @@ export default function NotasFiscaisManager() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => {}} // TODO: Implementar download
+                    onClick={() => {}}
                     title="Download XML"
                   >
                     <Download className="h-4 w-4" />

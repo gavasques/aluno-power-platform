@@ -50,7 +50,7 @@ export function NotificationSystem({ className }: NotificationSystemProps) {
         })));
       }
     } catch (error) {
-      console.error('Error loading notifications:', error);
+
       // Show empty state on error
       setNotifications([]);
     }
@@ -68,7 +68,7 @@ export function NotificationSystem({ className }: NotificationSystemProps) {
         )
       );
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+
     }
   };
 
@@ -82,7 +82,7 @@ export function NotificationSystem({ className }: NotificationSystemProps) {
         prev.map(n => ({ ...n, read: true }))
       );
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+
     }
   };
 
@@ -96,7 +96,7 @@ export function NotificationSystem({ className }: NotificationSystemProps) {
         prev.filter(n => n.id !== notificationId)
       );
     } catch (error) {
-      console.error('Error deleting notification:', error);
+
     }
   };
 

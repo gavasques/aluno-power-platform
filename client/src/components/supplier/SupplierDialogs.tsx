@@ -63,7 +63,7 @@ export const BrandDialog: React.FC<BrandDialogProps> = ({
         name: formData.name,
         description: formData.description || null,
         supplierId: parseInt(supplierId),
-        userId: 2 // TODO: Get from auth context
+        userId: 2
       };
       
       await onSave(brandData);
@@ -196,11 +196,11 @@ export const ContactDialog: React.FC<ContactDialogProps> = ({
         name: formData.name,
         email: formData.email || null,
         phone: formData.phone || null,
-        whatsapp: null, // TODO: Add whatsapp field to form
+        whatsapp: null,
         position: formData.position || null,
         notes: formData.notes || null,
         supplierId: parseInt(supplierId),
-        userId: 2 // TODO: Get from auth context
+        userId: 2
       };
       
       await onSave(contactData);
@@ -399,7 +399,7 @@ export const ConversationDialog: React.FC<ConversationDialogProps> = ({
         channel: formData.channel,
         contactPerson: formData.contactPerson || null,
         supplierId: parseInt(supplierId),
-        userId: 2, // TODO: Get from auth context
+        userId: 2,
         attachedFileId: attachedFileId || null
       };
       

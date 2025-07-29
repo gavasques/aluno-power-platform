@@ -391,7 +391,7 @@ export default function FormalImportSimulator() {
           body: JSON.stringify(data)
         });
       } catch (error) {
-        console.error('Calculate mutation error:', error);
+
         throw error;
       }
     },
@@ -405,7 +405,7 @@ export default function FormalImportSimulator() {
       }));
     },
     onError: (error) => {
-      console.error('Erro no cálculo:', error);
+
       toast({
         title: "Erro no cálculo",
         description: "Verifique os dados e tente novamente",
@@ -430,7 +430,7 @@ export default function FormalImportSimulator() {
           });
         }
       } catch (error) {
-        console.error('Save mutation error:', error);
+
         throw error;
       }
     },
@@ -466,7 +466,7 @@ export default function FormalImportSimulator() {
       }, 1000);
     },
     onError: (error) => {
-      console.error('Erro ao salvar simulação:', error);
+
       toast({
         title: "Erro ao salvar",
         description: "Verifique os dados e tente novamente",
@@ -489,7 +489,7 @@ export default function FormalImportSimulator() {
       
       calculateMutation.mutate(simulation);
     } catch (error) {
-      console.error('Erro ao iniciar cálculo:', error);
+
       toast({
         title: "Erro",
         description: "Erro inesperado ao calcular",
@@ -521,7 +521,7 @@ export default function FormalImportSimulator() {
       
       saveMutation.mutate(simulation);
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+
       toast({
         title: "Erro",
         description: "Erro inesperado ao salvar",
@@ -538,7 +538,7 @@ export default function FormalImportSimulator() {
       };
       saveMutation.mutate(completedSimulation);
     } catch (error) {
-      console.error('Erro ao concluir simulação:', error);
+
       toast({
         title: "Erro",
         description: "Erro ao concluir simulação",
@@ -569,7 +569,7 @@ export default function FormalImportSimulator() {
       }, 1000);
     },
     onError: (error) => {
-      console.error('Erro ao excluir simulação:', error);
+
       toast({
         title: "Erro ao excluir",
         description: "Não foi possível excluir a simulação",

@@ -81,7 +81,7 @@ export function LazyLoader({
             loadTime: performance.now() - startTime
           }));
 
-          console.error('💥 [LAZY_LOAD_ERROR] Failed to load component:', error);
+
         }
       }
     };
@@ -151,7 +151,7 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('💥 [LAZY_ERROR_BOUNDARY] Component error:', error, errorInfo);
+
   }
 
   render() {
@@ -199,7 +199,7 @@ export function useComponentPreloader(routes: Array<{
           try {
             await route.importFn();
           } catch (error) {
-            console.warn(`⚠️ [PRELOAD_WARN] Failed to preload ${route.path}:`, error);
+
           }
         }, delay);
       }

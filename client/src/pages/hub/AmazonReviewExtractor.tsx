@@ -144,7 +144,7 @@ export default function AmazonReviewExtractor() {
       return [];
       
     } catch (error: any) {
-      console.error(`🔍 [FETCHREVIEWS] Erro ao buscar reviews - ASIN: ${asin}, Página: ${page}:`, error.message);
+
       
       // Se o erro indica que não há mais reviews (404, ou fim dos dados), retornar array vazio
       if (error.message.includes('404') || error.message.includes('Erro 400')) {
@@ -202,11 +202,11 @@ export default function AmazonReviewExtractor() {
             
             if (reviews.length === 0) {
               consecutiveEmptyPages++;
-              console.log(`📭 [EXTRACTOR] Página ${page} vazia para ${asin} (${consecutiveEmptyPages}/${MAX_CONSECUTIVE_EMPTY})`);
+
             } else {
               consecutiveEmptyPages = 0; // Reset contador se encontrar reviews
               allReviews.push(...reviews);
-              console.log(`✅ [EXTRACTOR] ${reviews.length} reviews extraídos da página ${page} - ${asin}`);
+
             }
             
             // Delay para evitar rate limiting
@@ -214,7 +214,7 @@ export default function AmazonReviewExtractor() {
             
           } catch (error: any) {
             errors.push(`Erro página ${page} - ASIN ${asin}: ${error.message}`);
-            console.error(`❌ [EXTRACTOR] Erro página ${page} - ${asin}:`, error.message);
+
             consecutiveEmptyPages++;
           }
 
@@ -236,7 +236,7 @@ export default function AmazonReviewExtractor() {
         }
 
         if (consecutiveEmptyPages >= MAX_CONSECUTIVE_EMPTY) {
-          console.log(`🔚 [EXTRACTOR] Finalizou extração para ${asin} - ${consecutiveEmptyPages} páginas vazias consecutivas`);
+
         }
       }
 
@@ -248,7 +248,7 @@ export default function AmazonReviewExtractor() {
         progress: 100
       }));
 
-      console.log(`🎉 [EXTRACTOR] Concluído! Total: ${allReviews.length} reviews de ${state.urls.length} produtos`);
+
 
       // Registrar log de uso com dedução automática de créditos
       await logAIGeneration({
@@ -271,7 +271,7 @@ export default function AmazonReviewExtractor() {
       });
 
     } catch (error: any) {
-      console.error('❌ [EXTRACTOR] Erro geral:', error);
+
       setState(prev => ({
         ...prev,
         isExtracting: false,

@@ -189,7 +189,7 @@ const useSupplierData = (supplierId: string) => {
         setDocuments([]);
         
       } catch (err) {
-        console.error('Erro ao carregar dados do fornecedor:', err);
+
         setError('Erro ao carregar dados do fornecedor');
         setSupplier(null);
       } finally {
@@ -270,7 +270,7 @@ function InternationalSupplierDetail() {
         throw new Error(result.message || 'Erro ao atualizar fornecedor');
       }
     } catch (err) {
-      console.error('Erro ao atualizar fornecedor:', err);
+
       toast({
         title: "Erro ao atualizar",
         description: "Não foi possível atualizar o fornecedor. Tente novamente.",
@@ -1368,7 +1368,7 @@ const BankingInformation = ({ supplierId }: { supplierId: number }) => {
         setBankingData(data.bankingData || "");
       }
     } catch (error) {
-      console.error("Error fetching banking data:", error);
+
     } finally {
       setIsLoading(false);
     }
@@ -1585,7 +1585,7 @@ const EditSupplierDialog = ({
             setDepartments(data || []);
           }
         } catch (error) {
-          console.error('Erro ao carregar departamentos:', error);
+
         }
       };
 

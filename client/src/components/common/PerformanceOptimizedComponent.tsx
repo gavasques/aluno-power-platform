@@ -66,7 +66,7 @@ export function PerformanceOptimizedComponent<T extends Record<string, any>>({
       metrics.averageRenderTime = metrics.totalRenderTime / metrics.renderCount;
 
       if (renderTime > 16.67) { // Slower than 60fps
-        console.warn(`🐌 [SLOW_RENDER] Component render took ${renderTime.toFixed(2)}ms (> 16.67ms)`);
+
       }
 
       if (enableMemoProfiling && metrics.renderCount % 10 === 0) {
@@ -225,7 +225,7 @@ export function useRenderProfiler(componentName: string, enabled: boolean = fals
         totalRenderTime.current += renderTime;
 
         if (renderTime > 16.67) {
-          console.warn(`🐌 [${componentName}] Slow render: ${renderTime.toFixed(2)}ms`);
+
         }
 
         if (renderCount.current % 5 === 0) {

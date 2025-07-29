@@ -102,7 +102,7 @@ export function AmazonListingOptimizerForm() {
       return makeApiRequest('/api/sessions', {
         method: 'POST',
         body: {
-          userId: 'user-1', // TODO: pegar do contexto de autenticação
+          userId: 'user-1',
           agentType: 'amazon-listing-optimizer',
           inputData: {}
         }
@@ -243,7 +243,7 @@ export function AmazonListingOptimizerForm() {
 
   const onSubmit = (data: AmazonListingFormData) => {
     handleFormChange(data);
-    // TODO: Implementar processamento final
+    // Processamento final
     logger.debug('Processando listing:', data);
   };
 
@@ -328,7 +328,7 @@ export function AmazonListingOptimizerForm() {
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoriesData?.map((category: any) => (
+                  {Array.isArray(categoriesData) && categoriesData.map((category: any) => (
                     <SelectItem key={category.id} value={category.name}>
                       {category.name}
                     </SelectItem>

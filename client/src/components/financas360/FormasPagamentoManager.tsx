@@ -53,8 +53,7 @@ export default function FormasPagamentoManager() {
   const { data: formas = [], isLoading, error } = useQuery({
     queryKey: ['financas360-formas-pagamento'],
     queryFn: async () => {
-      console.log('Fetching formas de pagamento...');
-      console.log('Token:', token ? 'presente' : 'ausente');
+
       
       const response = await fetch('/api/financas360/formas-pagamento', {
         headers: {
@@ -62,15 +61,14 @@ export default function FormasPagamentoManager() {
         }
       });
       
-      console.log('Formas response status:', response.status);
+
       
       if (!response.ok) {
         throw new Error('Erro ao carregar formas de pagamento');
       }
       
       const result = await response.json();
-      console.log('Formas result data:', result.data);
-      console.log('Formas array length:', result.data?.length);
+
       return result.data;
     },
     enabled: !!token && !authLoading
@@ -265,7 +263,7 @@ export default function FormasPagamentoManager() {
     return colors[tipo as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
-  console.log('FormasPagamentoManager render - isLoading:', isLoading, 'error:', error, 'formas:', formas, 'formas.length:', formas?.length);
+
 
   if (authLoading || isLoading) {
     return (

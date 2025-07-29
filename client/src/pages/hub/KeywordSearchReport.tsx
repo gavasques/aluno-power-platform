@@ -163,7 +163,7 @@ export default function KeywordSearchReport() {
         })
       });
     } catch (logError) {
-      console.warn('Erro ao salvar log da busca:', logError);
+
     }
 
     try {
@@ -243,11 +243,10 @@ export default function KeywordSearchReport() {
   };
 
   const downloadXLSX = () => {
-    console.log('🔍 [DOWNLOAD] Iniciando download XLSX...');
-    console.log('🔍 [DOWNLOAD] Produtos disponíveis:', state.products.length);
+
     
     if (state.products.length === 0) {
-      console.log('❌ [DOWNLOAD] Nenhum produto disponível para download');
+
       toast({
         title: "Erro no Download",
         description: "Nenhum produto encontrado para exportar.",
@@ -277,7 +276,7 @@ export default function KeywordSearchReport() {
         'URL da Imagem': product.product_photo
       }));
 
-      console.log('🔍 [DOWNLOAD] WorkbookData criado:', workbookData.length, 'itens');
+
 
       const worksheet = XLSX.utils.json_to_sheet(workbookData);
       const workbook = XLSX.utils.book_new();
@@ -292,23 +291,23 @@ export default function KeywordSearchReport() {
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório de Produtos');
       
       const fileName = `relatorio_keywords_${searchParams.query.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
-      console.log('🔍 [DOWNLOAD] Nome do arquivo:', fileName);
+
       
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
-      console.log('🔍 [DOWNLOAD] Blob criado:', blob.size, 'bytes');
+
       
       saveAs(blob, fileName);
       
-      console.log('✅ [DOWNLOAD] Download iniciado com sucesso!');
+
       toast({
         title: "Download Iniciado",
         description: `Arquivo ${fileName} está sendo baixado.`,
       });
       
     } catch (error) {
-      console.error('❌ [DOWNLOAD] Erro no download:', error);
+
       toast({
         title: "Erro no Download",
         description: "Falha ao gerar arquivo XLSX. Tente novamente.",

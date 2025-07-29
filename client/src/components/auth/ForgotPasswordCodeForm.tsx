@@ -52,7 +52,7 @@ export function ForgotPasswordCodeForm({ onBack }: ForgotPasswordCodeFormProps) 
 
       setStep('code');
     } catch (error) {
-      console.error('Error sending code:', error);
+
       toast({
         title: 'Erro',
         description: error instanceof Error ? error.message : 'Erro interno do servidor',
@@ -95,7 +95,7 @@ export function ForgotPasswordCodeForm({ onBack }: ForgotPasswordCodeFormProps) 
 
       setStep('password');
     } catch (error) {
-      console.error('Error verifying code:', error);
+
       toast({
         title: 'Erro',
         description: error instanceof Error ? error.message : 'Código inválido ou expirado',
@@ -147,7 +147,7 @@ export function ForgotPasswordCodeForm({ onBack }: ForgotPasswordCodeFormProps) 
 
       onBack();
     } catch (error) {
-      console.error('Error resetting password:', error);
+
       toast({
         title: 'Erro',
         description: error instanceof Error ? error.message : 'Erro interno do servidor',
