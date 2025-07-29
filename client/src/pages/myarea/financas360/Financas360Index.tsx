@@ -59,454 +59,431 @@ export default function Financas360Index() {
     setActiveView(previousView);
   };
 
-  // Views dos managers individuais
-  if (activeView === 'empresas') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar aos Cadastros Base
-          </Button>
-        </div>
-        <EmpresasManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'canais') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar aos Cadastros Base
-          </Button>
-        </div>
-        <CanaisManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'bancos') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar aos Cadastros Base
-          </Button>
-        </div>
-        <BancosManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'contas-bancarias') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar aos Cadastros Base
-          </Button>
-        </div>
-        <ContasBancariasManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'formas-pagamento') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar aos Cadastros Base
-          </Button>
-        </div>
-        <FormasPagamentoManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'parceiros') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar aos Cadastros Base
-          </Button>
-        </div>
-        <ParceirosManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'canais-pagamento') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar aos Cadastros Base
-          </Button>
-        </div>
-        <CanaisPagamentoManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'estrutura-dre') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar aos Cadastros Base
-          </Button>
-        </div>
-        <EstruturaDREManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'lancamentos') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar ao Dashboard
-          </Button>
-        </div>
-        <LancamentosManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'notas-fiscais') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar ao Dashboard
-          </Button>
-        </div>
-        <NotasFiscaisManager />
-      </div>
-    );
-  }
-
-  if (activeView === 'devolucoes') {
-    return (
-      <div>
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-            className="mb-4"
-          >
-            ← Voltar ao Dashboard
-          </Button>
-        </div>
-        <DevolucaesManager />
-      </div>
-    );
-  }
-
-  // View da página de Cadastros Base
-  if (activeView === 'cadastros-base') {
-    const cadastrosCards = [
-      {
-        title: 'Empresas',
-        description: 'Gerenciar dados das empresas do grupo',
-        icon: Building2,
-        action: () => navigateTo('empresas'),
-        color: 'bg-blue-50 text-blue-600',
-        badge: 'Básico'
-      },
-      {
-        title: 'Canais',
-        description: 'Configurar canais de vendas e operações',
-        icon: Hash,
-        action: () => navigateTo('canais'),
-        color: 'bg-purple-50 text-purple-600',  
-        badge: 'Básico'
-      },
-      {
-        title: 'Bancos',
-        description: 'Cadastro de instituições bancárias',
-        icon: Landmark,
-        action: () => navigateTo('bancos'),
-        color: 'bg-green-50 text-green-600',
-        badge: 'Básico'
-      },
-      {
-        title: 'Contas Bancárias',
-        description: 'Gerenciar contas e saldos bancários',
-        icon: CreditCard,
-        action: () => navigateTo('contas-bancarias'),
-        color: 'bg-indigo-50 text-indigo-600',
-        badge: 'Essencial'
-      },
-      {
-        title: 'Formas de Pagamento',
-        description: 'Configurar métodos de pagamento',
-        icon: Receipt,
-        action: () => navigateTo('formas-pagamento'),
-        color: 'bg-orange-50 text-orange-600',
-        badge: 'Essencial'
-      },
-      {
-        title: 'Parceiros',
-        description: 'Cadastro de clientes e fornecedores',
-        icon: Users,
-        action: () => navigateTo('parceiros'),
-        color: 'bg-cyan-50 text-cyan-600',
-        badge: 'Essencial'
-      },
-      {
-        title: 'Canais de Pagamento',
-        description: 'Gateways e processadores de pagamento',
-        icon: ArrowLeftRight,
-        action: () => navigateTo('canais-pagamento'),
-        color: 'bg-pink-50 text-pink-600',
-        badge: 'Avançado'
-      },
-      {
-        title: 'Estrutura DRE',
-        description: 'Configurar estrutura de relatórios',
-        icon: BarChart3,
-        action: () => navigateTo('estrutura-dre'),
-        color: 'bg-teal-50 text-teal-600',
-        badge: 'Avançado'
-      }
-    ];
-
-    return (
-      <div className="container mx-auto p-6 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-50 p-3 rounded-full">
-              <Settings className="h-8 w-8 text-blue-600" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-foreground">Cadastros Base</h1>
-              <p className="text-muted-foreground text-lg">8 Módulos</p>
-            </div>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={goBack}
-          >
-            ← Voltar ao Dashboard
-          </Button>
-        </div>
-
-        {/* Cadastros Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {cadastrosCards.map((card, index) => {
-            const IconComponent = card.icon;
-            return (
-              <Card 
-                key={index} 
-                className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-primary/20"
-                onClick={card.action}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-xl ${card.color}`}>
-                      <IconComponent className="h-6 w-6" />
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {card.badge}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
-                    {card.title}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {card.description}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  // Dashboard principal - simplificado
+  // Cards dos cadastros base
   const mainCards = [
     {
-      title: 'Cadastros Base',
-      description: 'Configurar empresas, canais, bancos e estruturas base do sistema',
-      icon: Settings,
-      action: () => navigateTo('cadastros-base'),
+      title: 'Empresas',
+      description: 'Cadastro das empresas do grupo com dados fiscais completos',
+      icon: Building2,
       color: 'bg-blue-50 text-blue-600',
-      badge: '8 Módulos'
+      badge: 'Base',
+      action: () => navigateTo('empresas')
+    },
+    {
+      title: 'Canais',
+      description: 'Canais de vendas, compras e prestação de serviços',
+      icon: Hash,
+      color: 'bg-emerald-50 text-emerald-600',
+      badge: 'Base',
+      action: () => navigateTo('canais')
+    },
+    {
+      title: 'Bancos',
+      description: 'Cadastro de instituições bancárias e financeiras',
+      icon: Landmark,
+      color: 'bg-purple-50 text-purple-600',
+      badge: 'Base',
+      action: () => navigateTo('bancos')
+    },
+    {
+      title: 'Contas Bancárias',
+      description: 'Contas correntes, poupança e investimentos',
+      icon: CreditCard,
+      color: 'bg-orange-50 text-orange-600',
+      badge: 'Base',
+      action: () => navigateTo('contas-bancarias')
+    },
+    {
+      title: 'Formas de Pagamento',
+      description: 'Métodos de pagamento e recebimento',
+      icon: Receipt,
+      color: 'bg-red-50 text-red-600',
+      badge: 'Base',
+      action: () => navigateTo('formas-pagamento')
+    },
+    {
+      title: 'Parceiros',
+      description: 'Clientes, fornecedores e prestadores de serviços',
+      icon: Users,
+      color: 'bg-cyan-50 text-cyan-600',
+      badge: 'Base',
+      action: () => navigateTo('parceiros')
+    },
+    {
+      title: 'Canais de Pagamento',
+      description: 'Integração com gateways e processadores',
+      icon: ArrowLeftRight,
+      color: 'bg-indigo-50 text-indigo-600',
+      badge: 'Base',
+      action: () => navigateTo('canais-pagamento')
+    },
+    {
+      title: 'Estrutura DRE',
+      description: 'Estrutura contábil do Demonstrativo de Resultados',
+      icon: BarChart3,
+      color: 'bg-teal-50 text-teal-600',
+      badge: 'Base',
+      action: () => navigateTo('estrutura-dre')
     }
   ];
 
+  // Cards das operações
   const operacoesCards = [
     {
       title: 'Lançamentos',
-      description: 'Controle de receitas e despesas',
+      description: 'Lançamentos financeiros de receitas e despesas',
       icon: FileText,
-      action: () => navigateTo('lancamentos'),
-      color: 'bg-emerald-50 text-emerald-600',
-      badge: 'Principal'
+      color: 'bg-green-50 text-green-600',
+      badge: 'Operação',
+      action: () => navigateTo('lancamentos')
     },
     {
       title: 'Notas Fiscais',
-      description: 'Gestão de documentos fiscais',
+      description: 'Controle de documentos fiscais de entrada e saída',
       icon: FileCheck,
-      action: () => navigateTo('notas-fiscais'),
       color: 'bg-amber-50 text-amber-600',
-      badge: 'Fiscal'
+      badge: 'Operação',
+      action: () => navigateTo('notas-fiscais')
     },
     {
       title: 'Devoluções',
-      description: 'Controle de devoluções e estornos',
+      description: 'Gestão de devoluções de clientes e fornecedores',
       icon: RefreshCw,
-      action: () => navigateTo('devolucoes'),
-      color: 'bg-red-50 text-red-600',
-      badge: 'Especial'
+      color: 'bg-rose-50 text-rose-600',
+      badge: 'Operação',
+      action: () => navigateTo('devolucoes')
     }
   ];
 
-  return (
-    <div className="container mx-auto p-6 space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-3">
-          <div className="bg-blue-50 p-3 rounded-full">
-            <Calculator className="h-8 w-8 text-blue-600" />
+  // Render component content based on active view
+  const renderContent = () => {
+    switch (activeView) {
+      case 'empresas':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Empresas</h1>
+                <p className="text-muted-foreground mt-2">Gestão das empresas do grupo</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar aos Cadastros Base
+              </Button>
+            </div>
+            <EmpresasManager />
           </div>
-          <h1 className="text-4xl font-bold text-foreground">Finanças360</h1>
-        </div>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Sistema completo de gestão financeira empresarial com controle de receitas, despesas, 
-          documentos fiscais e relatórios gerenciais integrados.
-        </p>
-      </div>
+        );
 
-      {/* Cadastros Base Section */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <Settings className="h-6 w-6 text-blue-600" />
-          <h2 className="text-2xl font-bold text-foreground">Configurações Base</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mainCards.map((card, index) => {
-            const IconComponent = card.icon;
-            return (
-              <Card 
-                key={index} 
-                className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-primary/20"
-                onClick={card.action}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-xl ${card.color}`}>
-                      <IconComponent className="h-6 w-6" />
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {card.badge}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
-                    {card.title}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {card.description}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
+      case 'canais':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Canais</h1>
+                <p className="text-muted-foreground mt-2">Canais de vendas, compras e serviços</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar aos Cadastros Base
+              </Button>
+            </div>
+            <CanaisManager />
+          </div>
+        );
 
-      {/* Operações Section */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <FileText className="h-6 w-6 text-emerald-600" />
-          <h2 className="text-2xl font-bold text-foreground">Operações Financeiras</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {operacoesCards.map((card, index) => {
-            const IconComponent = card.icon;
-            return (
-              <Card 
-                key={index} 
-                className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-primary/20"
-                onClick={card.action}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-xl ${card.color}`}>
-                      <IconComponent className="h-6 w-6" />
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {card.badge}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
-                    {card.title}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {card.description}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
+      case 'bancos':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Bancos</h1>
+                <p className="text-muted-foreground mt-2">Instituições bancárias e financeiras</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar aos Cadastros Base
+              </Button>
+            </div>
+            <BancosManager />
+          </div>
+        );
+
+      case 'contas-bancarias':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Contas Bancárias</h1>
+                <p className="text-muted-foreground mt-2">Contas correntes, poupança e investimentos</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar aos Cadastros Base
+              </Button>
+            </div>
+            <ContasBancariasManager />
+          </div>
+        );
+
+      case 'formas-pagamento':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Formas de Pagamento</h1>
+                <p className="text-muted-foreground mt-2">Métodos de pagamento e recebimento</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar aos Cadastros Base
+              </Button>
+            </div>
+            <FormasPagamentoManager />
+          </div>
+        );
+
+      case 'parceiros':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Parceiros</h1>
+                <p className="text-muted-foreground mt-2">Clientes, fornecedores e prestadores</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar aos Cadastros Base
+              </Button>
+            </div>
+            <ParceirosManager />
+          </div>
+        );
+
+      case 'canais-pagamento':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Canais de Pagamento</h1>
+                <p className="text-muted-foreground mt-2">Gateways e processadores de pagamento</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar aos Cadastros Base
+              </Button>
+            </div>
+            <CanaisPagamentoManager />
+          </div>
+        );
+
+      case 'estrutura-dre':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Estrutura DRE</h1>
+                <p className="text-muted-foreground mt-2">Estrutura do Demonstrativo de Resultados</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar aos Cadastros Base
+              </Button>
+            </div>
+            <EstruturaDREManager />
+          </div>
+        );
+
+      case 'lancamentos':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Lançamentos</h1>
+                <p className="text-muted-foreground mt-2">Lançamentos de receitas e despesas</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar ao Dashboard
+              </Button>
+            </div>
+            <LancamentosManager />
+          </div>
+        );
+
+      case 'notas-fiscais':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Notas Fiscais</h1>
+                <p className="text-muted-foreground mt-2">Documentos fiscais de entrada e saída</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar ao Dashboard
+              </Button>
+            </div>
+            <NotasFiscaisManager />
+          </div>
+        );
+
+      case 'devolucoes':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Devoluções</h1>
+                <p className="text-muted-foreground mt-2">Devoluções de clientes e fornecedores</p>
+              </div>
+              <Button variant="outline" onClick={goBack}>
+                ← Voltar ao Dashboard
+              </Button>
+            </div>
+            <DevolucaesManager />
+          </div>
+        );
+
+      case 'cadastros-base':
+        return (
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Cadastros Base</h1>
+                <p className="text-muted-foreground mt-2">Configurações fundamentais do sistema financeiro</p>
+              </div>
+              <Button variant="outline" onClick={() => setActiveView('dashboard')}>
+                ← Voltar ao Dashboard
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mainCards.map((card, index) => {
+                const IconComponent = card.icon;
+                return (
+                  <Card 
+                    key={index} 
+                    className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-primary/20"
+                    onClick={card.action}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className={`p-3 rounded-xl ${card.color}`}>
+                          <IconComponent className="h-6 w-6" />
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {card.badge}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
+                        {card.title}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {card.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        );
+
+      default: // dashboard
+        return (
+          <div className="space-y-12">
+            {/* Header */}
+            <div className="text-center space-y-4">
+              <div className="inline-flex items-center gap-3 px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+                <Calculator className="h-4 w-4" />
+                Finanças360
+              </div>
+              <h1 className="text-4xl font-bold text-foreground">Sistema Financeiro Empresarial</h1>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Sistema completo de gestão financeira empresarial com controle de receitas, despesas, 
+                documentos fiscais e relatórios gerenciais integrados.
+              </p>
+            </div>
+
+            {/* Cadastros Base Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <Settings className="h-6 w-6 text-blue-600" />
+                <h2 className="text-2xl font-bold text-foreground">Configurações Base</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {mainCards.map((card, index) => {
+                  const IconComponent = card.icon;
+                  return (
+                    <Card 
+                      key={index} 
+                      className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-primary/20"
+                      onClick={card.action}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className={`p-3 rounded-xl ${card.color}`}>
+                            <IconComponent className="h-6 w-6" />
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {card.badge}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
+                          {card.title}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {card.description}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Operações Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <FileText className="h-6 w-6 text-emerald-600" />
+                <h2 className="text-2xl font-bold text-foreground">Operações Financeiras</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {operacoesCards.map((card, index) => {
+                  const IconComponent = card.icon;
+                  return (
+                    <Card 
+                      key={index} 
+                      className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-primary/20"
+                      onClick={card.action}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className={`p-3 rounded-xl ${card.color}`}>
+                            <IconComponent className="h-6 w-6" />
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {card.badge}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
+                          {card.title}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {card.description}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {renderContent()}
     </div>
   );
 }
