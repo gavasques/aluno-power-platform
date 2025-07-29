@@ -1546,6 +1546,9 @@ export const insertGeneratedImageSchema = createInsertSchema(generatedImages);
 export type InsertGeneratedImage = z.infer<typeof insertGeneratedImageSchema>;
 export type GeneratedImage = typeof generatedImages.$inferSelect;
 
+// Export Finanças360 tables and types
+export * from './schema/financas360';
+
 // Insert schemas for AI image generation logs
 export const insertAiImgGenerationLogSchema = createInsertSchema(aiImgGenerationLogs);
 export type InsertAiImgGenerationLog = z.infer<typeof insertAiImgGenerationLogSchema>;
