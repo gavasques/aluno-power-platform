@@ -25,7 +25,14 @@ import {
 import EmpresasManager from '@/components/financas360/EmpresasManager';
 import CanaisManager from '@/components/financas360/CanaisManager';
 import BancosManager from '@/components/financas360/BancosManager';
+import ContasBancariasManager from '@/components/financas360/ContasBancariasManager';
+import FormasPagamentoManager from '@/components/financas360/FormasPagamentoManager';
+import ParceirosManager from '@/components/financas360/ParceirosManager';
+import CanaisPagamentoManager from '@/components/financas360/CanaisPagamentoManager';
+import EstruturaDREManager from '@/components/financas360/EstruturaDREManager';
 import LancamentosManager from '@/components/financas360/LancamentosManager';
+import NotasFiscaisManager from '@/components/financas360/NotasFiscaisManager';
+import DevolucaesManager from '@/components/financas360/DevolucaesManager';
 
 const Financas360Index = () => {
   const [activeView, setActiveView] = useState<string>('dashboard');
@@ -82,6 +89,91 @@ const Financas360Index = () => {
     );
   }
 
+  if (activeView === 'contas-bancarias') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <ContasBancariasManager />
+      </div>
+    );
+  }
+
+  if (activeView === 'formas-pagamento') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <FormasPagamentoManager />
+      </div>
+    );
+  }
+
+  if (activeView === 'parceiros') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <ParceirosManager />
+      </div>
+    );
+  }
+
+  if (activeView === 'canais-pagamento') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <CanaisPagamentoManager />
+      </div>
+    );
+  }
+
+  if (activeView === 'estrutura-dre') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <EstruturaDREManager />
+      </div>
+    );
+  }
+
   if (activeView === 'lancamentos') {
     return (
       <div>
@@ -98,6 +190,42 @@ const Financas360Index = () => {
       </div>
     );
   }
+
+  if (activeView === 'notas-fiscais') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <NotasFiscaisManager />
+      </div>
+    );
+  }
+
+  if (activeView === 'devolucoes') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <DevolucaesManager />
+      </div>
+    );
+  }
+
+
   const cadastrosCards = [
     {
       title: 'Empresas',
@@ -127,7 +255,7 @@ const Financas360Index = () => {
       title: 'Contas Bancárias',
       description: 'Gerenciar contas e saldos bancários',
       icon: CreditCard,
-      path: '/minha-area/financas360/cadastros/contas-bancarias',
+      action: () => setActiveView('contas-bancarias'),
       color: 'bg-indigo-50 text-indigo-600',
       badge: 'Essencial'
     },
@@ -135,7 +263,7 @@ const Financas360Index = () => {
       title: 'Formas de Pagamento',
       description: 'Configurar métodos de pagamento',
       icon: Receipt,
-      path: '/minha-area/financas360/cadastros/formas-pagamento',
+      action: () => setActiveView('formas-pagamento'),
       color: 'bg-orange-50 text-orange-600',
       badge: 'Essencial'
     },
@@ -143,7 +271,7 @@ const Financas360Index = () => {
       title: 'Parceiros',
       description: 'Cadastro de clientes e fornecedores',
       icon: Users,
-      path: '/minha-area/financas360/cadastros/parceiros',
+      action: () => setActiveView('parceiros'),
       color: 'bg-cyan-50 text-cyan-600',
       badge: 'Essencial'
     },
@@ -151,7 +279,7 @@ const Financas360Index = () => {
       title: 'Canais de Pagamento',
       description: 'Gateways e processadores de pagamento',
       icon: ArrowLeftRight,
-      path: '/minha-area/financas360/cadastros/canais-pagamento',
+      action: () => setActiveView('canais-pagamento'),
       color: 'bg-pink-50 text-pink-600',
       badge: 'Avançado'
     },
@@ -159,7 +287,7 @@ const Financas360Index = () => {
       title: 'Estrutura DRE',
       description: 'Configurar estrutura de relatórios',
       icon: BarChart3,
-      path: '/minha-area/financas360/cadastros/estrutura-dre',
+      action: () => setActiveView('estrutura-dre'),
       color: 'bg-teal-50 text-teal-600',
       badge: 'Avançado'
     }
@@ -178,7 +306,7 @@ const Financas360Index = () => {
       title: 'Notas Fiscais',
       description: 'Gestão de documentos fiscais',
       icon: FileCheck,
-      path: '/minha-area/financas360/operacoes/notas-fiscais',
+      action: () => setActiveView('notas-fiscais'),
       color: 'bg-amber-50 text-amber-600',
       badge: 'Fiscal'
     },
@@ -186,7 +314,7 @@ const Financas360Index = () => {
       title: 'Devoluções',
       description: 'Controle de devoluções e estornos',
       icon: RefreshCw,
-      path: '/minha-area/financas360/operacoes/devolucoes',
+      action: () => setActiveView('devolucoes'),
       color: 'bg-red-50 text-red-600',
       badge: 'Especial'
     }
