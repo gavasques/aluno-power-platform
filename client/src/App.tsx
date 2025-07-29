@@ -60,6 +60,9 @@ const InternationalSupplierCRM = lazy(() => import("./pages/myarea/International
 const InternationalSupplierForm = lazy(() => import("./pages/myarea/InternationalSupplierForm"));
 const InternationalSupplierDetail = lazy(() => import("./pages/myarea/InternationalSupplierDetail"));
 
+// Finanças360 Module
+const Financas360Index = lazy(() => import("./pages/myarea/financas360/Financas360Index"));
+
 // Imported Products Management
 const ImportedProductsIndex = lazy(() => import("./pages/myarea/importacoes/produtos/ImportedProductsIndex"));
 const ImportedProductForm = lazy(() => import("./pages/myarea/importacoes/produtos/ImportedProductForm"));
@@ -767,6 +770,17 @@ function App() {
                               <Layout>
                                 <Suspense fallback={<PageLoader />}>
                                   <ImportacoesIndex />
+                                </Suspense>
+                              </Layout>
+                            </ProtectedRoute>
+                          </Route>
+
+                          {/* Finanças360 Index - Protected */}
+                          <Route path="/minha-area/financas360">
+                            <ProtectedRoute>
+                              <Layout>
+                                <Suspense fallback={<PageLoader />}>
+                                  <Financas360Index />
                                 </Suspense>
                               </Layout>
                             </ProtectedRoute>

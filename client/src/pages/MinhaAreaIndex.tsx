@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet, Zap, Ship } from "lucide-react";
+import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet, Zap, Ship, Calculator } from "lucide-react";
 
 interface MinhaAreaItem {
   id: string;
@@ -73,6 +73,15 @@ const minhaAreaItems: MinhaAreaItem[] = [
     description: "Ferramentas completas para gestão de importações, PO, documentos e compliance",
     href: "/minha-area/importacoes",
     icon: Ship,
+    category: "Gestão",
+    isNew: true,
+  },
+  {
+    id: "financas360",
+    title: "Finanças360",
+    description: "Sistema completo de gestão financeira com controle de receitas, despesas e relatórios",
+    href: "/minha-area/financas360",
+    icon: Calculator,
     category: "Gestão",
     isNew: true,
   },
