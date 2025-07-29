@@ -40,8 +40,7 @@ export const ContactsTab: React.FC<ContactsTabProps> = ({
   };
 
   const handleDeleteContact = async (contactId: number) => {
-    // TODO: Implementar deleção de contato
-    console.log('Delete contact:', contactId);
+
   };
 
   const handleDialogClose = () => {

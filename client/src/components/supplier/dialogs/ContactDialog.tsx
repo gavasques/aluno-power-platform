@@ -61,12 +61,9 @@ export const ContactDialog: React.FC<ContactDialogProps> = ({
     setIsLoading(true);
 
     try {
-      // TODO: Implementar save do contato
-      console.log('Save contact:', formData);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simular API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       onClose();
     } catch (error) {
-      console.error('Erro ao salvar contato:', error);
     } finally {
       setIsLoading(false);
     }

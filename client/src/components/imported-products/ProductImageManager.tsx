@@ -50,7 +50,6 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
         setImages(data.data || []);
       }
     } catch (error) {
-      console.error('Erro ao carregar imagens:', error);
     }
   };
 
@@ -60,10 +59,8 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
 
   // Upload de nova imagem
   const handleUpload = async (file: File) => {
-    console.log('🚀 Iniciando upload para produto:', productId);
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      console.error('❌ Token não encontrado');
       return;
     }
 
@@ -104,7 +101,6 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
       formData.append('productId', productId);
       formData.append('position', (images.length + 1).toString());
 
-      console.log('📡 Enviando requisição para /api/product-images');
       const response = await fetch('/api/product-images', {
         method: 'POST',
         headers: {
@@ -113,9 +109,7 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
         body: formData,
       });
 
-      console.log('📨 Resposta recebida:', response.status);
       const data = await response.json();
-      console.log('📄 Dados da resposta:', data);
 
       if (response.ok) {
         toast({
@@ -124,11 +118,9 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
         });
         await loadImages();
       } else {
-        console.error('❌ Erro no upload:', data);
         throw new Error(data.message || 'Erro no upload');
       }
     } catch (error: any) {
-      console.error('Erro no upload:', error);
       toast({
         title: "Erro no upload",
         description: error.message || "Erro ao enviar imagem",
@@ -165,7 +157,6 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
         throw new Error(data.message || 'Erro ao mover imagem');
       }
     } catch (error: any) {
-      console.error('Erro ao mover imagem:', error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao reordenar imagem",
@@ -202,7 +193,6 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
         throw new Error(data.message || 'Erro ao excluir imagem');
       }
     } catch (error: any) {
-      console.error('Erro ao excluir imagem:', error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao excluir imagem",
@@ -244,7 +234,6 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
         throw new Error(data.message || 'Erro no download');
       }
     } catch (error: any) {
-      console.error('Erro no download:', error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao fazer download",
@@ -255,17 +244,14 @@ export const ProductImageManager = ({ productId, className = "" }: ProductImageM
 
   // Trigger file input
   const triggerFileInput = () => {
-    console.log('🖱️ Triggerando input de arquivo...');
     fileInputRef.current?.click();
   };
 
   // Handle file selection
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    console.log('📁 Arquivos selecionados:', files?.length || 0);
     if (files && files.length > 0) {
       Array.from(files).forEach(file => {
-        console.log('📤 Iniciando upload de:', file.name, 'Tamanho:', file.size);
         handleUpload(file);
       });
     }

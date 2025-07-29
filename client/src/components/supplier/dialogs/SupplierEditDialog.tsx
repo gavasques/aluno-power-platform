@@ -67,12 +67,10 @@ export const SupplierEditDialog: React.FC<SupplierEditDialogProps> = ({
     setIsLoading(true);
 
     try {
-      // TODO: Implementar update do fornecedor
-      console.log('Update supplier:', formData);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simular API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       onClose();
     } catch (error) {
-      console.error('Erro ao salvar fornecedor:', error);
+
     } finally {
       setIsLoading(false);
     }

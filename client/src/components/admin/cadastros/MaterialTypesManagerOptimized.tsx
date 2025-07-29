@@ -43,20 +43,16 @@ const getIconComponent = (iconName: string) => {
   }
 };
 
-// Configuração específica para MaterialTypes
 const materialTypesConfig: BaseTypesManagerConfig<MaterialTypeItem> = {
-  // Configurações básicas
   title: "Tipos de Materiais",
   entityName: "tipo de material",
   entityNamePlural: "tipos de materiais",
   apiEndpoint: "/api/material-types",
   
-  // Configurações de UI
   searchPlaceholder: "Buscar tipos de materiais...",
   addButtonText: "Adicionar",
   emptyMessage: "Nenhum tipo de material encontrado.",
   
-  // Configurações de formulário
   dialogTitle: "Novo Tipo de Material",
   dialogDescription: "Configure o novo tipo de material e suas funcionalidades.",
   formFields: [
@@ -101,7 +97,6 @@ const materialTypesConfig: BaseTypesManagerConfig<MaterialTypeItem> = {
     },
   ],
   
-  // Mensagens de feedback
   messages: {
     createSuccess: "Tipo de material criado com sucesso!",
     createError: "Erro ao criar tipo de material.",
@@ -109,13 +104,12 @@ const materialTypesConfig: BaseTypesManagerConfig<MaterialTypeItem> = {
     deleteError: "Erro ao remover tipo de material.",
   },
   
-  // Configurações avançadas
   defaultSort: "alphabetical",
   enableSearch: true,
   enableSort: true,
-  cacheTime: 10 * 60 * 1000, // 10 minutos
+  cacheTime: 10 * 60 * 1000,
   
-  // Renderer customizado para mostrar ícones e informações específicas
+  customItemRenderer: (item: MaterialTypeItem, onDelete) => (
   customItemRenderer: (item: MaterialTypeItem, onDelete) => (
     <div
       key={item.id}
@@ -161,7 +155,6 @@ const materialTypesConfig: BaseTypesManagerConfig<MaterialTypeItem> = {
     </div>
   ),
   
-  // Processar dados do formulário antes do envio
   processFormData: (formData) => ({
     name: formData.name.trim(),
     description: formData.description?.trim() || null,

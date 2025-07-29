@@ -137,7 +137,6 @@ export function UpscaleProTool() {
       }
 
       const responseData = await response.json();
-      console.log('🔍 Response data received:', responseData);
       
       // The backend returns data within a "data" wrapper
       const result: ProcessingResult = {
@@ -148,9 +147,6 @@ export function UpscaleProTool() {
         duration: responseData.data?.duration || responseData.processingTime
       };
       
-      console.log('🎨 Processed result:', result);
-      console.log('🖼️ Image data length:', result.processedImageData?.length);
-      console.log('🔗 Image URL:', result.processedImageUrl);
       setResult(result);
 
       // Registrar log de uso com dedução automática de créditos
@@ -173,7 +169,6 @@ export function UpscaleProTool() {
       });
 
     } catch (error) {
-      console.error('Processing error:', error);
       setError(error instanceof Error ? error.message : 'Erro desconhecido');
       toast({
         title: 'Erro no processamento',
@@ -190,7 +185,6 @@ export function UpscaleProTool() {
     if (!result || !selectedFile) return;
 
     try {
-      console.log('🎨 Iniciando download da imagem processada...');
       
       let downloadUrl = '';
       let fileName = '';
@@ -202,7 +196,6 @@ export function UpscaleProTool() {
       
       // Try to use the external URL first if available
       if (result.processedImageUrl && result.processedImageUrl.startsWith('http')) {
-        console.log('🎨 Usando URL externa para download:', result.processedImageUrl);
         
         try {
           const response = await fetch(result.processedImageUrl);
@@ -213,14 +206,12 @@ export function UpscaleProTool() {
             throw new Error('Falha ao baixar da URL externa');
           }
         } catch (urlError) {
-          console.warn('⚠️ Falha no download da URL externa, tentando base64...', urlError);
           // Fallback to base64 conversion
         }
       }
       
       // If external URL failed or not available, use base64 data
       if (!downloadUrl && result.processedImageData) {
-        console.log('🎨 Convertendo dados base64 para blob...');
         
         let base64Data = result.processedImageData;
         
@@ -235,7 +226,6 @@ export function UpscaleProTool() {
           const blob = await response.blob();
           downloadUrl = URL.createObjectURL(blob);
         } catch (base64Error) {
-          console.error('❌ Erro na conversão base64:', base64Error);
           throw new Error('Falha na conversão dos dados da imagem');
         }
       }
@@ -264,14 +254,11 @@ export function UpscaleProTool() {
         description: `Sua imagem ampliada (${fileName}) está sendo baixada`,
       });
       
-      console.log('✅ Download iniciado com sucesso:', fileName);
       
     } catch (error) {
-      console.error('❌ Download error:', error);
       
       // Fallback: open in new tab
       if (result.processedImageUrl && result.processedImageUrl.startsWith('http')) {
-        console.log('🔄 Abrindo imagem em nova aba como fallback...');
         window.open(result.processedImageUrl, '_blank');
         
         toast({
@@ -462,10 +449,8 @@ export function UpscaleProTool() {
                       alt="Processed"
                       className="w-full max-h-48 object-contain border rounded-lg mt-2"
                       onError={(e) => {
-                        console.error('❌ Erro ao carregar imagem base64');
                         // Fallback para URL se base64 falhar
                         if (result.processedImageUrl) {
-                          console.log('🔄 Tentando carregar da URL:', result.processedImageUrl);
                           e.currentTarget.src = result.processedImageUrl;
                         }
                       }}
@@ -475,7 +460,6 @@ export function UpscaleProTool() {
                       src={result.processedImageUrl}
                       alt="Processed"
                       className="w-full max-h-48 object-contain border rounded-lg mt-2"
-                      onError={() => console.error('❌ Erro ao carregar imagem da URL')}
                     />
                   ) : (
                     <div className="w-full h-48 bg-gray-100 border rounded-lg mt-2 flex items-center justify-center">
