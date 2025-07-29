@@ -1,120 +1,101 @@
-
 export interface Supplier {
-  id: string;
-  tradeName: string; // Nome Fantasia
-  corporateName: string; // Razão Social
-  category: SupplierCategory;
-  departments: SupplierDepartment[]; // Departamentos que atende
-  brands: SupplierBrand[]; // Marcas que o fornecedor trabalha
-  notes: string; // Observações
-  email: string;
-  mainContact: string; // Contato Principal
-  phone: string;
-  whatsapp: string;
-  contacts: SupplierContact[];
-  files: SupplierFile[]; // Arquivos do fornecedor
-  commercialTerms: string;
-  logo?: string;
-  isVerified: boolean;
-  averageRating: number;
-  totalReviews: number;
-  reviews: SupplierReview[];
+  id: number;
+  name: string;
+  country: string;
+  city: string;
+  category: string;
+  status: 'active' | 'inactive' | 'pending';
+  website?: string;
+  email?: string;
+  phone?: string;
+  rating: number;
+  totalOrders: number;
+  lastContact: string;
+  establishedYear?: number;
+  description?: string;
+}
+
+export interface Contract {
+  id: number;
+  supplierId: number;
+  contractNumber: string;
+  title: string;
+  description?: string;
+  contractType: string;
+  status: 'draft' | 'active' | 'expired' | 'terminated';
+  startDate?: string;
+  endDate?: string;
+  value?: number;
+  currency: string;
+  paymentTerms?: string;
+  deliveryTerms?: string;
+  incoterms?: string;
+  documents: ContractDocument[];
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface SupplierCategory {
+export interface ContractDocument {
   id: string;
   name: string;
-  description: string;
-  icon: string;
-}
-
-export interface SupplierDepartment {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export interface SupplierBrand {
-  id: string;
-  name: string;
-  description: string;
-  website?: string;
-  logo?: string;
-  category: string;
-  notes: string;
-}
-
-export interface SupplierContact {
-  id: string;
-  name: string;
-  role: string; // Função
-  phone: string;
-  whatsapp: string;
-  email: string;
-  notes: string; // Observações
-}
-
-export interface SupplierFile {
-  id: string;
-  name: string;
-  description: string;
-  type: 'catalog' | 'price_sheet' | 'presentation' | 'certificate' | 'other';
-  fileUrl: string;
+  type: string;
+  size: number;
+  url: string;
   uploadedAt: string;
-  size: number; // em bytes
+  description?: string;
 }
 
-export interface SupplierReview {
+export interface Contact {
+  id: number;
+  name: string;
+  position: string;
+  email: string;
+  phone?: string;
+  whatsapp?: string;
+  isMainContact: boolean;
+}
+
+export interface Communication {
+  id: number;
+  type: 'email' | 'whatsapp' | 'phone' | 'meeting';
+  subject: string;
+  date: string;
+  status: 'sent' | 'received' | 'pending';
+  summary: string;
+}
+
+export interface SupplierDocument {
   id: string;
-  supplierId: string;
-  userId: string;
-  userName: string;
-  rating: number; // 1 a 5 estrelas
-  comment: string;
-  photos: string[]; // URLs das fotos
-  createdAt: string;
-  isApproved: boolean;
+  supplierId: number;
+  name: string;
+  originalName: string;
+  type: string;
+  size: number;
+  url: string;
+  category: 'certificate' | 'license' | 'contract' | 'quality' | 'other';
+  uploadedAt: string;
+  description?: string;
 }
 
-export const SUPPLIER_CATEGORIES: SupplierCategory[] = [
-  { id: '1', name: 'Fabricantes', icon: 'Factory', description: 'Empresas que fabricam produtos' },
-  { id: '2', name: 'Distribuidores', icon: 'Truck', description: 'Empresas que distribuem produtos' },
-  { id: '3', name: 'Importadores', icon: 'Globe', description: 'Empresas que importam produtos' },
-  { id: '4', name: 'Representantes', icon: 'Users', description: 'Representantes comerciais' },
-  { id: '5', name: 'Atacadistas', icon: 'Package', description: 'Vendas em grande quantidade' },
-  { id: '6', name: 'Dropshipping', icon: 'Send', description: 'Fornecedores de dropshipping' },
-];
+export interface SupplierFormData {
+  corporateName: string;
+  tradeName: string;
+  email: string;
+  phone: string;
+  website: string;
+  country: string;
+  state: string;
+  city: string;
+  address: string;
+  postalCode: string;
+  supplierType: string;
+  status: string;
+  averageRating: number;
+  description: string;
+}
 
-export const SUPPLIER_DEPARTMENTS: SupplierDepartment[] = [
-  { id: '1', name: 'Eletrônicos', description: 'Produtos eletrônicos e tecnologia' },
-  { id: '2', name: 'Casa e Jardim', description: 'Produtos para casa e jardim' },
-  { id: '3', name: 'Moda e Beleza', description: 'Roupas, calçados e cosméticos' },
-  { id: '4', name: 'Automotivo', description: 'Peças e acessórios automotivos' },
-  { id: '5', name: 'Esportes', description: 'Artigos esportivos e fitness' },
-  { id: '6', name: 'Infantil', description: 'Produtos para bebês e crianças' },
-  { id: '7', name: 'Alimentício', description: 'Alimentos e bebidas' },
-  { id: '8', name: 'Construção', description: 'Material de construção e ferramentas' },
-];
-
-export const BRAND_CATEGORIES = [
-  'Eletrônicos',
-  'Moda e Vestuário',
-  'Casa e Jardim',
-  'Automotivo',
-  'Esportes e Fitness',
-  'Beleza e Cuidados',
-  'Alimentício',
-  'Infantil',
-  'Construção e Ferramentas',
-  'Outros'
-];
-
-export const FILE_TYPES = [
-  { value: 'catalog', label: 'Catálogo de Produtos' },
-  { value: 'price_sheet', label: 'Planilha de Preços' },
-  { value: 'presentation', label: 'Apresentação' },
-  { value: 'certificate', label: 'Certificados' },
-  { value: 'other', label: 'Outros' },
-];
+export type SupplierStatus = 'active' | 'inactive' | 'pending';
+export type ContractStatus = 'draft' | 'active' | 'expired' | 'terminated';
+export type CommunicationType = 'email' | 'whatsapp' | 'phone' | 'meeting';
+export type DocumentCategory = 'certificate' | 'license' | 'contract' | 'quality' | 'other';
