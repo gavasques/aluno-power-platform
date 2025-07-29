@@ -100,6 +100,9 @@ export interface AppPresentationProps {
 
 // Route Definition Constants
 export interface RouteDefinitions {
+  // Main Routes
+  MAIN_ROUTES: RouteConfig[];
+  
   // Authentication Routes
   AUTH_ROUTES: RouteConfig[];
   

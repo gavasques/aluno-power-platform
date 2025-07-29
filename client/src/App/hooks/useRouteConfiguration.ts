@@ -129,6 +129,11 @@ const lazyComponents = {
 export function useRouteConfiguration(): UseRouteConfigurationReturn {
   
   const routeDefinitions: RouteDefinitions = useMemo(() => ({
+    // Main Routes
+    MAIN_ROUTES: [
+      { path: '/', component: lazyComponents.MinhaAreaIndex, isProtected: true },
+    ],
+    
     // Authentication Routes (Public)
     AUTH_ROUTES: [
       { path: '/login', component: lazyComponents.LoginNew, isProtected: false },
@@ -253,6 +258,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
   }), []);
 
   const routeGroups: RouteGroup[] = useMemo(() => [
+    { name: 'Main', routes: routeDefinitions.MAIN_ROUTES, description: 'Main application routes' },
     { name: 'Authentication', routes: routeDefinitions.AUTH_ROUTES, description: 'Login and authentication pages' },
     { name: 'Administration', routes: routeDefinitions.ADMIN_ROUTES, description: 'Admin panel routes', prefix: '/admin' },
     { name: 'Hub', routes: routeDefinitions.HUB_ROUTES, description: 'Hub resources and content', prefix: '/hub' },
