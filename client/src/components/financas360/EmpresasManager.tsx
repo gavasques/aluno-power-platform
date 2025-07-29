@@ -49,7 +49,7 @@ interface EmpresaFormData {
 }
 
 export default function EmpresasManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
   const [formData, setFormData] = useState<EmpresaFormData>({
@@ -95,7 +95,7 @@ export default function EmpresasManager() {
       console.log('Empresas array length:', result.data?.length);
       return result.data;
     },
-    enabled: !!token // Só executa se o token estiver presente
+    enabled: !!token && !authLoading // Aguarda autenticação completa
   });
 
   // Create empresa mutation
@@ -265,9 +265,9 @@ export default function EmpresasManager() {
     return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
   };
 
-  console.log('EmpresasManager render - isLoading:', isLoading, 'error:', error, 'empresas:', empresas, 'empresas.length:', empresas?.length);
+  console.log('EmpresasManager render - authLoading:', authLoading, 'isLoading:', isLoading, 'error:', error, 'empresas:', empresas, 'empresas.length:', empresas?.length);
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

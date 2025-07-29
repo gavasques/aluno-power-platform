@@ -39,7 +39,7 @@ const CORES_PREDEFINIDAS = [
 ];
 
 export default function CanaisManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCanal, setEditingCanal] = useState<Canal | null>(null);
   const [formData, setFormData] = useState<CanalFormData>({
@@ -77,7 +77,7 @@ export default function CanaisManager() {
       console.log('Canais array length:', result.data?.length);
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Create canal mutation
@@ -241,9 +241,9 @@ export default function CanaisManager() {
     return tipos[tipo as keyof typeof tipos] || tipo;
   };
 
-  console.log('CanaisManager render - isLoading:', isLoading, 'error:', error, 'canais:', canais, 'canais.length:', canais?.length);
+  console.log('CanaisManager render - authLoading:', authLoading, 'isLoading:', isLoading, 'error:', error, 'canais:', canais, 'canais.length:', canais?.length);
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

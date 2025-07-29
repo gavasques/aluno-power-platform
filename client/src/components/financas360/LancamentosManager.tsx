@@ -47,7 +47,7 @@ interface Empresa {
 }
 
 export default function LancamentosManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLancamento, setEditingLancamento] = useState<Lancamento | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -84,7 +84,7 @@ export default function LancamentosManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Fetch lancamentos
@@ -104,7 +104,7 @@ export default function LancamentosManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Filter lancamentos
@@ -312,7 +312,7 @@ export default function LancamentosManager() {
       .reduce((sum: number, l: Lancamento) => sum + l.valor, 0);
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

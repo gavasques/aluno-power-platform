@@ -27,7 +27,7 @@ interface BancoFormData {
 }
 
 export default function BancosManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBanco, setEditingBanco] = useState<Banco | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,7 +58,7 @@ export default function BancosManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Filter bancos based on search term
@@ -218,7 +218,7 @@ export default function BancosManager() {
     }
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

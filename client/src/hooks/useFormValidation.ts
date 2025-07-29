@@ -1,12 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface ValidationRule {
   required?: boolean;
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  custom?: (value: string) => boolean;
+  custom?: (value: any) => string | null;
   message?: string;
+  email?: boolean;
+  cnpj?: boolean;
+  cpf?: boolean;
+  phone?: boolean;
+  cep?: boolean;
+  min?: number;
+  max?: number;
 }
 
 export interface ValidationRules {
@@ -19,34 +26,144 @@ export interface ValidationErrors {
 
 export function useFormValidation(initialData: any = {}, rules: ValidationRules = {}) {
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isValid, setIsValid] = useState(false);
 
-  const validateField = (fieldName: string, value: string): string => {
+  // Validação de CNPJ
+  const validateCNPJ = (cnpj: string): boolean => {
+    const cleaned = cnpj.replace(/\D/g, '');
+    if (cleaned.length !== 14) return false;
+    
+    const digits = cleaned.split('').map(Number);
+    
+    // Primeiro dígito verificador
+    let sum = 0;
+    const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    for (let i = 0; i < 12; i++) {
+      sum += digits[i] * weights1[i];
+    }
+    const digit1 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    
+    // Segundo dígito verificador
+    sum = 0;
+    const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    for (let i = 0; i < 13; i++) {
+      sum += digits[i] * weights2[i];
+    }
+    const digit2 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    
+    return digits[12] === digit1 && digits[13] === digit2;
+  };
+
+  // Validação de CPF
+  const validateCPF = (cpf: string): boolean => {
+    const cleaned = cpf.replace(/\D/g, '');
+    if (cleaned.length !== 11) return false;
+    
+    const digits = cleaned.split('').map(Number);
+    
+    // Primeiro dígito verificador
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += digits[i] * (10 - i);
+    }
+    const digit1 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    
+    // Segundo dígito verificador
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += digits[i] * (11 - i);
+    }
+    const digit2 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    
+    return digits[9] === digit1 && digits[10] === digit2;
+  };
+
+  const validateField = useCallback((fieldName: string, value: any): string => {
     const rule = rules[fieldName];
     if (!rule) return '';
 
-    if (rule.required && (!value || value.trim() === '')) {
-      return rule.message || `${fieldName} é obrigatório`;
+    // Required
+    if (rule.required && (!value || value.toString().trim() === '')) {
+      return rule.message || 'Este campo é obrigatório';
     }
 
-    if (rule.minLength && value.length < rule.minLength) {
-      return rule.message || `${fieldName} deve ter pelo menos ${rule.minLength} caracteres`;
+    // Se não é obrigatório e está vazio, não valida outros rules
+    if (!rule.required && (!value || value.toString().trim() === '')) {
+      return '';
     }
 
-    if (rule.maxLength && value.length > rule.maxLength) {
-      return rule.message || `${fieldName} deve ter no máximo ${rule.maxLength} caracteres`;
+    const stringValue = value?.toString() || '';
+
+    // MinLength
+    if (rule.minLength && stringValue.length < rule.minLength) {
+      return rule.message || `Deve ter pelo menos ${rule.minLength} caracteres`;
     }
 
-    if (rule.pattern && !rule.pattern.test(value)) {
-      return rule.message || `${fieldName} tem formato inválido`;
+    // MaxLength
+    if (rule.maxLength && stringValue.length > rule.maxLength) {
+      return rule.message || `Deve ter no máximo ${rule.maxLength} caracteres`;
     }
 
-    if (rule.custom && !rule.custom(value)) {
-      return rule.message || `${fieldName} é inválido`;
+    // Pattern
+    if (rule.pattern && !rule.pattern.test(stringValue)) {
+      return rule.message || 'Formato inválido';
+    }
+
+    // Email
+    if (rule.email) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(stringValue)) {
+        return rule.message || 'Email inválido';
+      }
+    }
+
+    // CNPJ
+    if (rule.cnpj && !validateCNPJ(stringValue)) {
+      return rule.message || 'CNPJ inválido';
+    }
+
+    // CPF
+    if (rule.cpf && !validateCPF(stringValue)) {
+      return rule.message || 'CPF inválido';
+    }
+
+    // Phone
+    if (rule.phone) {
+      const cleanPhone = stringValue.replace(/\D/g, '');
+      if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+        return rule.message || 'Telefone inválido';
+      }
+    }
+
+    // CEP
+    if (rule.cep) {
+      const cepPattern = /^\d{5}-?\d{3}$/;
+      if (!cepPattern.test(stringValue)) {
+        return rule.message || 'CEP inválido';
+      }
+    }
+
+    // Min/Max para números
+    if (typeof value === 'number') {
+      if (rule.min !== undefined && value < rule.min) {
+        return rule.message || `Valor deve ser maior ou igual a ${rule.min}`;
+      }
+      if (rule.max !== undefined && value > rule.max) {
+        return rule.message || `Valor deve ser menor ou igual a ${rule.max}`;
+      }
+    }
+
+    // Custom validation
+    if (rule.custom) {
+      const customError = rule.custom(value);
+      if (customError) {
+        return rule.message || customError;
+      }
     }
 
     return '';
-  };
+  }, [rules]);
 
   const validateForm = (data: any): ValidationErrors => {
     const newErrors: ValidationErrors = {};
@@ -91,6 +208,26 @@ export function useFormValidation(initialData: any = {}, rules: ValidationRules 
     });
   };
 
+  // Marcar campo como tocado
+  const touchField = useCallback((fieldName: string) => {
+    setTouched(prev => ({
+      ...prev,
+      [fieldName]: true
+    }));
+  }, []);
+
+  // Verificar se um campo tem erro e foi tocado
+  const getFieldError = useCallback((fieldName: string): string | null => {
+    return touched[fieldName] ? errors[fieldName] || null : null;
+  }, [errors, touched]);
+
+  // Reset de validação
+  const resetValidation = useCallback(() => {
+    setErrors({});
+    setTouched({});
+    setIsValid(false);
+  }, []);
+
   // Auto-validate when initialData changes
   useEffect(() => {
     if (initialData && Object.keys(rules).length > 0) {
@@ -100,6 +237,7 @@ export function useFormValidation(initialData: any = {}, rules: ValidationRules 
 
   return {
     errors,
+    touched,
     isValid,
     validate,
     validateField,
@@ -107,6 +245,10 @@ export function useFormValidation(initialData: any = {}, rules: ValidationRules 
     validateForm,
     clearErrors,
     clearFieldError,
-    clearError: clearFieldError
+    clearError: clearFieldError,
+    touchField,
+    getFieldError,
+    resetValidation,
+    hasErrors: Object.keys(errors).length > 0
   };
 }
