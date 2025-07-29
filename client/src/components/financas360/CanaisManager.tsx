@@ -13,30 +13,22 @@ import { Plus, Edit, Trash2, Hash, Palette } from 'lucide-react';
 interface Canal {
   id: number;
   nome: string;
-  tipo: 'vendas' | 'compras' | 'ambos';
+  tipo: 'vendas' | 'compras' | 'servicos';
   descricao?: string;
   cor: string;
-  ativo: boolean;
-  configuracoes: {
-    comissao?: number;
-    prazoEntrega?: number;
-    observacoes?: string;
-  };
+  icone: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  createdBy: number;
 }
 
 interface CanalFormData {
   nome: string;
-  tipo: 'vendas' | 'compras' | 'ambos';
+  tipo: 'vendas' | 'compras' | 'servicos';  
   descricao?: string;
   cor: string;
-  ativo: boolean;
-  configuracoes: {
-    comissao?: number;
-    prazoEntrega?: number;
-    observacoes?: string;
-  };
+  icone: string;
 }
 
 const CORES_PREDEFINIDAS = [
@@ -55,12 +47,7 @@ export default function CanaisManager() {
     tipo: 'vendas',
     descricao: '',
     cor: '#3b82f6',
-    ativo: true,
-    configuracoes: {
-      comissao: 0,
-      prazoEntrega: 0,
-      observacoes: ''
-    }
+    icone: 'ShoppingCart'
   });
 
   const { toast } = useToast();
@@ -207,12 +194,7 @@ export default function CanaisManager() {
       tipo: 'vendas',
       descricao: '',
       cor: '#3b82f6',
-      ativo: true,
-      configuracoes: {
-        comissao: 0,
-        prazoEntrega: 0,
-        observacoes: ''
-      }
+      icone: 'ShoppingCart'
     });
   };
 
@@ -233,8 +215,7 @@ export default function CanaisManager() {
       tipo: canal.tipo,
       descricao: canal.descricao || '',
       cor: canal.cor,
-      ativo: canal.ativo,
-      configuracoes: canal.configuracoes
+      icone: canal.icone
     });
     setIsDialogOpen(true);
   };
@@ -255,7 +236,7 @@ export default function CanaisManager() {
     const tipos = {
       vendas: 'Vendas',
       compras: 'Compras',
-      ambos: 'Ambos'
+      servicos: 'Serviços'
     };
     return tipos[tipo as keyof typeof tipos] || tipo;
   };
@@ -394,59 +375,28 @@ export default function CanaisManager() {
                 <h3 className="text-lg font-semibold mb-4">Configurações</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="comissao">Comissão (%)</Label>
-                    <Input
-                      id="comissao"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      max="100"
-                      value={formData.configuracoes.comissao || ''}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        configuracoes: {
-                          ...prev.configuracoes,
-                          comissao: parseFloat(e.target.value) || 0
-                        }
-                      }))}
-                      placeholder="0.00"
-                    />
+                    <Label htmlFor="icone">Ícone</Label>
+                    <Select 
+                      value={formData.icone} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, icone: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um ícone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ShoppingCart">🛒 Carrinho</SelectItem>
+                        <SelectItem value="Store">🏪 Loja</SelectItem>
+                        <SelectItem value="Package">📦 Pacote</SelectItem>
+                        <SelectItem value="Settings">⚙️ Configurações</SelectItem>
+                        <SelectItem value="Users">👥 Usuários</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="prazoEntrega">Prazo de Entrega (dias)</Label>
-                    <Input
-                      id="prazoEntrega"
-                      type="number"
-                      min="0"
-                      value={formData.configuracoes.prazoEntrega || ''}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        configuracoes: {
-                          ...prev.configuracoes,
-                          prazoEntrega: parseInt(e.target.value) || 0
-                        }
-                      }))}
-                      placeholder="0"
-                    />
-                  </div>
+
                 </div>
                 
-                <div className="mt-4">
-                  <Label htmlFor="observacoes">Observações</Label>
-                  <Input
-                    id="observacoes"
-                    value={formData.configuracoes.observacoes || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      configuracoes: {
-                        ...prev.configuracoes,
-                        observacoes: e.target.value
-                      }
-                    }))}
-                    placeholder="Observações adicionais sobre o canal"
-                  />
-                </div>
+
               </div>
 
               {/* Status */}
@@ -454,8 +404,8 @@ export default function CanaisManager() {
                 <input
                   type="checkbox"
                   id="ativo"
-                  checked={formData.ativo}
-                  onChange={(e) => setFormData(prev => ({ ...prev, ativo: e.target.checked }))}
+                  checked={true}
+                  onChange={() => {}}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <Label htmlFor="ativo">Canal ativo</Label>
@@ -530,11 +480,11 @@ export default function CanaisManager() {
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Status:</span>
                   <span className={`px-2 py-1 rounded-full text-xs ${
-                    canal.ativo 
+                    canal.isActive 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {canal.ativo ? 'Ativo' : 'Inativo'}
+                    {canal.isActive ? 'Ativo' : 'Inativo'}
                   </span>
                 </div>
                 

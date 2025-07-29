@@ -126,8 +126,8 @@ export default function EstruturaDREManager() {
   // Filter estruturas
   const filtrarEstrutura = (estruturas: EstruturaDRE[], searchTerm: string, tipoFilter: string): EstruturaDRE[] => {
     return estruturas.filter(estrutura => {
-      const searchMatch = estrutura.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         estrutura.codigo.toLowerCase().includes(searchTerm.toLowerCase());
+      const searchMatch = estrutura.nome?.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
+                         estrutura.codigo?.toLowerCase().includes(searchTerm?.toLowerCase() || '');
       
       const tipoMatch = tipoFilter === 'all' || estrutura.tipo === tipoFilter;
       
