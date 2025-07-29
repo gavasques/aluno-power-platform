@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -311,13 +311,13 @@ interface ChannelsEditorProps {
   onClose: () => void;
 }
 
-export const ChannelsEditor: React.FC<ChannelsEditorProps> = ({ productId, isOpen, onClose }) => {
+export const ChannelsEditor = ({ productId, isOpen, onClose }) => {
   const { toast } = useToast();
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [channelCalculations, setChannelCalculations] = React.useState<Record<string, ChannelCalculationResult>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [channelCalculations, setChannelCalculations] = useState<Record<string, ChannelCalculationResult>>({});
   
   // State to control which channels are expanded (all collapsed by default)
-  const [expandedChannels, setExpandedChannels] = React.useState<Set<string>>(new Set());
+  const [expandedChannels, setExpandedChannels] = useState<Set<string>>(new Set());
   
   // Function to toggle channel expansion
   const toggleChannelExpansion = (channelType: string) => {

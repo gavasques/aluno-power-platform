@@ -1,8 +1,8 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, Users, Wrench, Package, BrainCircuit } from "lucide-react";
 import { useRoute, useLocation } from "wouter";
@@ -15,15 +15,13 @@ import MaterialsManagerRefactored from "@/components/admin/materials/MaterialsMa
 import SuppliersManager from "@/components/admin/conteudo/SuppliersManager";
 import SupplierForm from "@/components/admin/conteudo/SupplierForm";
 import SupplierDetail from "@/components/admin/conteudo/SupplierDetail";
-import { MaterialForm } from "@/components/admin/materials/MaterialForm";
-import { MaterialViewer } from "@/components/user/materials/MaterialViewer";
+
 import PromptsAIManager from "@/components/admin/cadastros/PromptsAIManager";
 import PromptForm from "@/components/admin/cadastros/PromptForm";
 import { NewsCenter } from "./content/NewsCenter";
 import { UpdatesCenter } from "./content/UpdatesCenter";
 
 const ContentManagement = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [match, params] = useRoute('/admin/conteudo/:subsection?/:id?/:action?');
   const [, setLocation] = useLocation();
   const { partners } = usePartners();

@@ -9,7 +9,7 @@
  * - DIP: Depends on abstractions through hooks
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -52,7 +52,7 @@ interface ProductSupplierFormProps {
   isOpen: boolean;
 }
 
-export const ProductSupplierForm: React.FC<ProductSupplierFormProps> = ({
+export const ProductSupplierForm = ({
   productId,
   supplier,
   onSuccess,
