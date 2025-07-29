@@ -131,7 +131,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
   const routeDefinitions: RouteDefinitions = useMemo(() => ({
     // Main Routes
     MAIN_ROUTES: [
-      { path: '/', component: lazyComponents.MinhaAreaIndex, isProtected: true },
+      { path: '/', component: lazyComponents.UserDashboard, isProtected: true },
     ],
     
     // Authentication Routes (Public)
