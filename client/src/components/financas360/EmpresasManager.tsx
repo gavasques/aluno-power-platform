@@ -88,20 +88,27 @@ export default function EmpresasManager() {
   const queryClient = useQueryClient();
 
   // Fetch empresas
-  const { data: empresas = [], isLoading } = useQuery({
+  const { data: empresas = [], isLoading, error } = useQuery({
     queryKey: ['financas360-empresas'],
     queryFn: async () => {
+      console.log('Fetching empresas...');
+      const token = localStorage.getItem('token');
+      console.log('Token:', token ? 'presente' : 'ausente');
+      
       const response = await fetch('/api/financas360/empresas', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
+      
+      console.log('Response status:', response.status);
       
       if (!response.ok) {
         throw new Error('Erro ao carregar empresas');
       }
       
       const result = await response.json();
+      console.log('Result data:', result.data);
       return result.data;
     }
   });
@@ -286,6 +293,23 @@ export default function EmpresasManager() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Carregando empresas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">❌</div>
+          <p className="text-red-600">Erro ao carregar empresas: {error.message}</p>
+          <Button 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['financas360-empresas'] })}
+            className="mt-4"
+          >
+            Tentar Novamente
+          </Button>
         </div>
       </div>
     );
