@@ -57,6 +57,7 @@ interface ModelConfig {
   inputCostPer1M: number;
   outputCostPer1M: number;
   maxTokens: number;
+  recommended?: boolean;
 }
 
 interface ProviderStatus {
@@ -684,7 +685,7 @@ export default function AgentProviderSettings() {
                       step={0.1}
                       value={[formData.temperature]}
                       onValueChange={(value) => 
-                        setFormData(prev => ({ ...prev, temperature: value[0] }))
+                        setFormData((prev: typeof formData) => ({ ...prev, temperature: value[0] }))
                       }
                       className={`w-full ${!supportsTemperature ? "opacity-50 pointer-events-none" : ""}`}
                       disabled={!supportsTemperature}
@@ -1216,7 +1217,7 @@ export default function AgentProviderSettings() {
                                 <SelectItem value="none">
                                   <span className="text-gray-500">Nenhuma coleção selecionada</span>
                                 </SelectItem>
-                                {collections.map(collection => (
+                                {Array.isArray(collections) && collections.map((collection: any) => (
                                   <SelectItem key={collection.id} value={collection.id.toString()}>
                                     {collection.name}
                                   </SelectItem>

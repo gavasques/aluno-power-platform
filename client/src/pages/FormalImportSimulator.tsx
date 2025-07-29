@@ -388,14 +388,14 @@ export default function FormalImportSimulator() {
       try {
         return await apiRequest(`/api/simulators/formal-import/calculate`, {
           method: 'POST',
-          body: data
+          body: JSON.stringify(data)
         });
       } catch (error) {
         console.error('Calculate mutation error:', error);
         throw error;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setSimulation(prev => ({
         ...prev,
         produtos: data?.produtos || prev.produtos || [],
@@ -421,12 +421,12 @@ export default function FormalImportSimulator() {
         if (simulationId) {
           return await apiRequest(`/api/simulators/formal-import/${simulationId}`, {
             method: 'PUT',
-            body: data
+            body: JSON.stringify(data)
           });
         } else {
           return await apiRequest(`/api/simulators/formal-import`, {
             method: 'POST',
-            body: data
+            body: JSON.stringify(data)
           });
         }
       } catch (error) {
@@ -437,7 +437,7 @@ export default function FormalImportSimulator() {
     onSuccess: async (data) => {
       toast({
         title: "Simulação salva com sucesso!",
-        description: `Código: ${data.codigoSimulacao || data.nome}`
+        description: `Código: ${(data as any)?.codigoSimulacao || (data as any)?.nome || 'Simulação'}`
       });
       
       // Registrar log de uso com dedução automática de créditos apenas para novas simulações
@@ -609,10 +609,10 @@ export default function FormalImportSimulator() {
           
           // Calcular CBM automaticamente quando dimensões mudarem
           if (['comprimento', 'largura', 'altura', 'quantidade'].includes(field)) {
-            const comp = parseFloat(updatedProduct.comprimento) || 0;
-            const larg = parseFloat(updatedProduct.largura) || 0;
-            const alt = parseFloat(updatedProduct.altura) || 0;
-            const quant = parseFloat(updatedProduct.quantidade) || 0;
+            const comp = parseFloat(updatedProduct.comprimento.toString()) || 0;
+            const larg = parseFloat(updatedProduct.largura.toString()) || 0;
+            const alt = parseFloat(updatedProduct.altura.toString()) || 0;
+            const quant = parseFloat(updatedProduct.quantidade.toString()) || 0;
             
             const cbmUnitario = comp > 0 && larg > 0 && alt > 0 ? (comp * larg * alt) / 1000000 : 0;
             const cbmTotal = cbmUnitario * quant;
