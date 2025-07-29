@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FC, FormEvent } from 'react';
 import { usePartners } from '@/contexts/PartnersContext';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
@@ -34,7 +34,7 @@ interface PartnerFormProps {
   onClose: () => void;
 }
 
-const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
+const PartnerForm: FC<PartnerFormProps> = ({ partner, onClose }) => {
   const { addPartner, updatePartner } = usePartners();
   const { toast } = useToast();
   const isEditing = !!partner;
@@ -56,7 +56,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ partner, onClose }) => {
     isVerified: partner?.isVerified || false,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.partnerTypeId) {

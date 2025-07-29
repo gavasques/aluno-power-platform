@@ -1,4 +1,5 @@
 
+import { FC } from "react";
 import BaseTypesManager, { type BaseItem, type BaseTypesManagerConfig } from '@/components/admin/base/BaseTypesManager';
 import { Wrench } from 'lucide-react';
 import type { ToolType } from '@shared/schema';
@@ -94,7 +95,7 @@ const toolTypesConfig: BaseTypesManagerConfig<ToolTypeItem> = {
   }),
 };
 
-const ToolTypesManagerOptimized: React.FC = () => {
+const ToolTypesManagerOptimized: FC = () => {
   return <BaseTypesManager<ToolTypeItem> config={toolTypesConfig} />;
 };
 

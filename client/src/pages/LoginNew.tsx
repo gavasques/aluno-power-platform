@@ -3,7 +3,7 @@
  * Features professional design with Guilherme Vasques branding
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, ReactNode, FormEvent, ChangeEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
@@ -21,7 +21,7 @@ import { ForgotPasswordCodeForm } from '@/components/auth/ForgotPasswordCodeForm
 import logoPath from '@assets/Asset 14-8_1752953662731.png';
 
 interface FeatureCardProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   description: string;
   color: string;
@@ -76,7 +76,7 @@ export default function LoginNew() {
   });
   const [resetPasswordErrors, setResetPasswordErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrors({});
 
@@ -124,7 +124,7 @@ export default function LoginNew() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
@@ -133,7 +133,7 @@ export default function LoginNew() {
     }
   };
 
-  const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRegisterChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setRegisterData(prev => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
@@ -142,7 +142,7 @@ export default function LoginNew() {
     }
   };
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setRegisterErrors({});
 
@@ -210,7 +210,7 @@ export default function LoginNew() {
   };
 
   // Handle forgot password
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const handleForgotPassword = async (e: FormEvent) => {
     e.preventDefault();
     setForgotPasswordErrors({});
 
@@ -270,7 +270,7 @@ export default function LoginNew() {
   };
 
   // Handle reset password
-  const handleResetPassword = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: FormEvent) => {
     e.preventDefault();
     setResetPasswordErrors({});
 

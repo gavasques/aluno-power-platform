@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FC, KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ interface BulletPointEditorProps {
   onChange: (items: string[]) => void;
 }
 
-export const BulletPointEditor: React.FC<BulletPointEditorProps> = ({
+export const BulletPointEditor: FC<BulletPointEditorProps> = ({
   label,
   placeholder,
   items,
@@ -30,7 +30,7 @@ export const BulletPointEditor: React.FC<BulletPointEditorProps> = ({
     onChange(items.filter((_, i) => i !== index));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       addItem();

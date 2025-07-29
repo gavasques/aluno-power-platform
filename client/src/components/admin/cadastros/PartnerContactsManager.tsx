@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FC, FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ interface PartnerContactsManagerProps {
   partnerId: number;
 }
 
-export const PartnerContactsManager: React.FC<PartnerContactsManagerProps> = ({ partnerId }) => {
+export const PartnerContactsManager: FC<PartnerContactsManagerProps> = ({ partnerId }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<PartnerContact | null>(null);
   const [formData, setFormData] = useState<Partial<InsertPartnerContact>>({
@@ -117,7 +117,7 @@ export const PartnerContactsManager: React.FC<PartnerContactsManagerProps> = ({ 
     setIsDialogOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     
     if (!formData.area || !formData.name) {

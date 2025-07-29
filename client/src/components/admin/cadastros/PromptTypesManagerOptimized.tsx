@@ -1,4 +1,5 @@
 
+import { FC } from "react";
 import BaseTypesManager, { type BaseItem, type BaseTypesManagerConfig } from '@/components/admin/base/BaseTypesManager';
 import { MessageSquare } from 'lucide-react';
 import type { PromptType } from '@shared/schema';
@@ -94,7 +95,7 @@ const promptTypesConfig: BaseTypesManagerConfig<PromptTypeItem> = {
   }),
 };
 
-const PromptTypesManagerOptimized: React.FC = () => {
+const PromptTypesManagerOptimized: FC = () => {
   return <BaseTypesManager<PromptTypeItem> config={promptTypesConfig} />;
 };
 
