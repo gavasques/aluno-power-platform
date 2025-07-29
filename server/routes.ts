@@ -39,6 +39,8 @@ import importedProductsRoutes from "./routes/importedProducts";
 import importedProductSuppliersRoutes from "./routes/importedProductSuppliers";
 import productPackagesRoutes from "./routes/productPackages";
 import productImagesRoutes from "./routes/productImages";
+import { financas360Router } from "./routes/financas360";
+import { financas360OperationsRouter } from "./routes/financas360-operations";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -7230,10 +7232,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     app.use('/api/imported-products', importedProductSuppliersRoutes);
     app.use('/api/product-packages', productPackagesRoutes);
     app.use('/api/product-images', productImagesRoutes);
+    app.use('/api/financas360', financas360Router);
+    app.use('/api/financas360', financas360OperationsRouter);
     console.log('✅ [PERFORMANCE] Performance monitoring routes registered');
     console.log('✅ [IMPORTED_PRODUCT_SUPPLIERS] Routes registered successfully');
     console.log('✅ [PRODUCT_PACKAGES] Product packages routes registered successfully');
     console.log('✅ [PRODUCT_IMAGES] Product images routes registered successfully');
+    console.log('✅ [FINANCAS360] All Finanças360 routes registered successfully');
   } catch (error) {
     console.error('❌ [PERFORMANCE] Performance routes failed:', error);
   }
