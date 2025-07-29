@@ -1,235 +1,109 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
+// Canal Manager refatorado - Seguindo princípios SOLID e DRY
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { Plus, Edit, Trash2, Hash, Palette } from 'lucide-react';
+import { Hash } from 'lucide-react';
+import { BaseManager, useFormState, CardActions, StatusBadge, FormActions } from './common/BaseManager';
+import { useCanais } from '@/hooks/useFinancas360Api';
+import type { Canal, CanalInsert } from '@/types/financas360';
+import { TIPOS_CANAL, CORES_PREDEFINIDAS, ICONES_DISPONIVEIS } from '@/types/financas360';
 
-interface Canal {
-  id: number;
-  nome: string;
-  tipo: 'vendas' | 'compras' | 'servicos';
-  descricao?: string;
-  cor: string;
-  icone: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: number;
-}
-
-interface CanalFormData {
-  nome: string;
-  tipo: 'vendas' | 'compras' | 'servicos';  
-  descricao?: string;
-  cor: string;
-  icone: string;
-}
-
-const CORES_PREDEFINIDAS = [
-  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
-  '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
-  '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-  '#ec4899', '#f43f5e'
-];
+// Estado inicial do formulário
+const initialFormState: CanalInsert = {
+  nome: '',
+  tipo: 'vendas',
+  descricao: '',
+  cor: '#3b82f6',
+  icone: 'ShoppingCart',
+  isActive: true
+};
 
 export default function CanaisManager() {
-  const { token, isLoading: authLoading } = useAuth();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCanal, setEditingCanal] = useState<Canal | null>(null);
-  const [formData, setFormData] = useState<CanalFormData>({
-    nome: '',
-    tipo: 'vendas',
-    descricao: '',
-    cor: '#3b82f6',
-    icone: 'ShoppingCart'
-  });
+  const api = useCanais();
 
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  // Fetch canais
-  const { data: canais = [], isLoading, error } = useQuery({
-    queryKey: ['financas360-canais'],
-    queryFn: async () => {
-      console.log('Fetching canais...');
-      console.log('Token:', token ? 'presente' : 'ausente');
-      
-      const response = await fetch('/api/financas360/canais', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      console.log('Canais response status:', response.status);
-      
-      if (!response.ok) {
-        throw new Error('Erro ao carregar canais');
-      }
-      
-      const result = await response.json();
-      console.log('Canais result data:', result.data);
-      console.log('Canais array length:', result.data?.length);
-      return result.data;
-    },
-    enabled: !!token && !authLoading
-  });
-
-  // Create canal mutation
-  const createMutation = useMutation({
-    mutationFn: async (data: CanalFormData) => {
-      const response = await fetch('/api/financas360/canais', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao criar canal');
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financas360-canais'] });
-      setIsDialogOpen(false);
-      resetForm();
-      toast({
-        title: 'Sucesso',
-        description: 'Canal criado com sucesso!'
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Erro',
-        description: error.message,
-        variant: 'destructive'
-      });
-    }
-  });
-
-  // Update canal mutation
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<CanalFormData> }) => {
-      const response = await fetch(`/api/financas360/canais/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao atualizar canal');
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financas360-canais'] });
-      setIsDialogOpen(false);
-      setEditingCanal(null);
-      resetForm();
-      toast({
-        title: 'Sucesso',
-        description: 'Canal atualizado com sucesso!'
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Erro',
-        description: error.message,
-        variant: 'destructive'
-      });
-    }
-  });
-
-  // Delete canal mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`/api/financas360/canais/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao excluir canal');
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financas360-canais'] });
-      toast({
-        title: 'Sucesso',
-        description: 'Canal excluído com sucesso!'
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Erro',
-        description: error.message,
-        variant: 'destructive'
-      });
-    }
-  });
-
-  const resetForm = () => {
-    setFormData({
-      nome: '',
-      tipo: 'vendas',
-      descricao: '',
-      cor: '#3b82f6',
-      icone: 'ShoppingCart'
-    });
+  // Adaptadores para compatibilidade de tipos
+  const handleCreate = (data: CanalInsert) => {
+    api.create(data);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (editingCanal) {
-      updateMutation.mutate({ id: editingCanal.id, data: formData });
-    } else {
-      createMutation.mutate(formData);
-    }
-  };
-
-  const openEditDialog = (canal: Canal) => {
-    setEditingCanal(canal);
-    setFormData({
-      nome: canal.nome,
-      tipo: canal.tipo,
-      descricao: canal.descricao || '',
-      cor: canal.cor,
-      icone: canal.icone
-    });
-    setIsDialogOpen(true);
-  };
-
-  const openCreateDialog = () => {
-    setEditingCanal(null);
-    resetForm();
-    setIsDialogOpen(true);
+  const handleUpdate = (id: number, data: Partial<CanalInsert>) => {
+    api.update({ id, data });
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Tem certeza que deseja excluir este canal?')) {
-      deleteMutation.mutate(id);
-    }
+    api.remove(id);
+  };
+
+  // Função para renderizar o formulário
+  const renderForm = (editingItem: Canal | null, onSubmit: (data: CanalInsert) => void, onClose: () => void) => {
+    return <CanalForm editingItem={editingItem} onSubmit={onSubmit} onClose={onClose} />;
+  };
+
+  // Função para renderizar a lista
+  const renderList = (items: Canal[], onEdit: (item: Canal) => void, onDelete: (id: number) => void) => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.map((canal) => (
+          <CanalCard
+            key={canal.id}
+            canal={canal}
+            onEdit={() => onEdit(canal)}
+            onDelete={() => onDelete(canal.id)}
+            isDeleting={api.isDeleting}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <BaseManager
+      title="Canais"
+      icon={<Hash className="h-6 w-6 text-blue-600" />}
+      entityName="Canal"
+      data={api.data}
+      isLoading={api.isLoading}
+      error={api.error}
+      isCreating={api.isCreating}
+      isUpdating={api.isUpdating}
+      isDeleting={api.isDeleting}
+      onCreate={handleCreate}
+      onUpdate={handleUpdate}
+      onDelete={handleDelete}
+      onRefetch={api.refetch}
+      renderForm={renderForm}
+      renderList={renderList}
+      searchFields={['nome', 'descricao']}
+    />
+  );
+}
+
+// Componente do formulário
+interface CanalFormProps {
+  editingItem: Canal | null;
+  onSubmit: (data: CanalInsert) => void;
+  onClose: () => void;
+}
+
+function CanalForm({ editingItem, onSubmit, onClose }: CanalFormProps) {
+  const { formData, updateField, resetForm } = useFormState<CanalInsert>(
+    editingItem ? {
+      nome: editingItem.nome,
+      tipo: editingItem.tipo,
+      descricao: editingItem.descricao || '',
+      cor: editingItem.cor,
+      icone: editingItem.icone,
+      isActive: editingItem.isActive
+    } : initialFormState
+  );
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+    resetForm();
+    onClose();
   };
 
   const getTipoLabel = (tipo: string) => {
@@ -241,287 +115,189 @@ export default function CanaisManager() {
     return tipos[tipo as keyof typeof tipos] || tipo;
   };
 
-  console.log('CanaisManager render - authLoading:', authLoading, 'isLoading:', isLoading, 'error:', error, 'canais:', canais, 'canais.length:', canais?.length);
-
-  if (authLoading || isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando canais...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="text-red-600 mb-4">❌</div>
-          <p className="text-red-600">Erro ao carregar canais: {error.message}</p>
-          <Button 
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['financas360-canais'] })}
-            className="mt-4"
-          >
-            Tentar Novamente
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Hash className="h-6 w-6 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Canais</h1>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Dados Básicos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="nome">Nome *</Label>
+          <Input
+            id="nome"
+            value={formData.nome}
+            onChange={(e) => updateField('nome', e.target.value)}
+            placeholder="Ex: Loja Online, Marketplace, etc."
+            required
+          />
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreateDialog} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Novo Canal
-            </Button>
-          </DialogTrigger>
-          
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingCanal ? 'Editar Canal' : 'Novo Canal'}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Dados Básicos */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="nome">Nome *</Label>
-                  <Input
-                    id="nome"
-                    value={formData.nome}
-                    onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                    placeholder="Ex: Loja Online, Marketplace, etc."
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="tipo">Tipo *</Label>
-                  <Select
-                    value={formData.tipo}
-                    onValueChange={(value: 'vendas' | 'compras' | 'ambos') => 
-                      setFormData(prev => ({ ...prev, tipo: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="vendas">Vendas</SelectItem>
-                      <SelectItem value="compras">Compras</SelectItem>
-                      <SelectItem value="ambos">Ambos</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="descricao">Descrição</Label>
-                <Input
-                  id="descricao"
-                  value={formData.descricao}
-                  onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
-                  placeholder="Descrição opcional do canal"
-                />
-              </div>
-
-              {/* Cor */}
-              <div>
-                <Label>Cor do Canal</Label>
-                <div className="flex items-center gap-3 mt-2">
-                  <div
-                    className="w-10 h-10 rounded-lg border-2 border-gray-300 flex-shrink-0"
-                    style={{ backgroundColor: formData.cor }}
-                  />
-                  <div className="flex flex-wrap gap-2">
-                    {CORES_PREDEFINIDAS.map(cor => (
-                      <button
-                        key={cor}
-                        type="button"
-                        className={`w-8 h-8 rounded-lg border-2 transition-transform hover:scale-110 ${
-                          formData.cor === cor ? 'border-gray-900' : 'border-gray-300'
-                        }`}
-                        style={{ backgroundColor: cor }}
-                        onClick={() => setFormData(prev => ({ ...prev, cor }))}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <Input
-                    type="color"
-                    value={formData.cor}
-                    onChange={(e) => setFormData(prev => ({ ...prev, cor: e.target.value }))}
-                    className="w-20 h-10"
-                  />
-                </div>
-              </div>
-
-              {/* Configurações */}
-              <div className="border-t pt-4">
-                <h3 className="text-lg font-semibold mb-4">Configurações</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="icone">Ícone</Label>
-                    <Select 
-                      value={formData.icone} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, icone: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um ícone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ShoppingCart">🛒 Carrinho</SelectItem>
-                        <SelectItem value="Store">🏪 Loja</SelectItem>
-                        <SelectItem value="Package">📦 Pacote</SelectItem>
-                        <SelectItem value="Settings">⚙️ Configurações</SelectItem>
-                        <SelectItem value="Users">👥 Usuários</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-
-                </div>
-                
-
-              </div>
-
-              {/* Status */}
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="ativo"
-                  checked={true}
-                  onChange={() => {}}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <Label htmlFor="ativo">Canal ativo</Label>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {createMutation.isPending || updateMutation.isPending ? 'Salvando...' : 'Salvar'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Lista de Canais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {canais.map((canal: Canal) => (
-          <Card key={canal.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3 flex-1">
-                  <div
-                    className="w-4 h-4 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: canal.cor }}
-                  />
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{canal.nome}</CardTitle>
-                    {canal.descricao && (
-                      <p className="text-sm text-gray-600 mt-1">{canal.descricao}</p>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex gap-1 ml-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openEditDialog(canal)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(canal.id)}
-                    disabled={deleteMutation.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="pt-0">
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Tipo:</span>
-                  <span className="capitalize">{getTipoLabel(canal.tipo)}</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Status:</span>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    canal.isActive 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {canal.isActive ? 'Ativo' : 'Inativo'}
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Descrição:</span>
-                  <span className="text-gray-600 text-sm">{canal.descricao || 'Sem descrição'}</span>
-                </div>
-                
-                {canal.cor && (
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Cor:</span>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-4 h-4 rounded border" 
-                        style={{ backgroundColor: canal.cor }}
-                      ></div>
-                      <span className="text-xs text-gray-500">{canal.cor}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {canais.length === 0 && (
-        <div className="text-center py-12">
-          <Hash className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum canal cadastrado</h3>
-          <p className="text-gray-600 mb-6">Comece criando seu primeiro canal.</p>
-          <Button onClick={openCreateDialog}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Canal
-          </Button>
+        <div>
+          <Label htmlFor="tipo">Tipo *</Label>
+          <Select
+            value={formData.tipo}
+            onValueChange={(value: 'vendas' | 'compras' | 'servicos') => 
+              updateField('tipo', value)
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TIPOS_CANAL.map(tipo => (
+                <SelectItem key={tipo} value={tipo}>
+                  {getTipoLabel(tipo)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      )}
-    </div>
+      </div>
+
+      <div>
+        <Label htmlFor="descricao">Descrição</Label>
+        <Input
+          id="descricao"
+          value={formData.descricao}
+          onChange={(e) => updateField('descricao', e.target.value)}
+          placeholder="Descrição opcional do canal"
+        />
+      </div>
+
+      {/* Cor */}
+      <div>
+        <Label>Cor do Canal</Label>
+        <div className="flex items-center gap-3 mt-2">
+          <div
+            className="w-10 h-10 rounded-lg border-2 border-gray-300 flex-shrink-0"
+            style={{ backgroundColor: formData.cor }}
+          />
+          <div className="flex flex-wrap gap-2">
+            {CORES_PREDEFINIDAS.map(cor => (
+              <button
+                key={cor}
+                type="button"
+                className={`w-8 h-8 rounded-lg border-2 transition-transform hover:scale-110 ${
+                  formData.cor === cor ? 'border-gray-900' : 'border-gray-300'
+                }`}
+                style={{ backgroundColor: cor }}
+                onClick={() => updateField('cor', cor)}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="mt-2">
+          <Input
+            type="color"
+            value={formData.cor}
+            onChange={(e) => updateField('cor', e.target.value)}
+            className="w-20 h-10"
+          />
+        </div>
+      </div>
+
+      {/* Ícone */}
+      <div>
+        <Label htmlFor="icone">Ícone</Label>
+        <Select 
+          value={formData.icone} 
+          onValueChange={(value) => updateField('icone', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione um ícone" />
+          </SelectTrigger>
+          <SelectContent>
+            {ICONES_DISPONIVEIS.map(icone => (
+              <SelectItem key={icone.value} value={icone.value}>
+                {icone.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Status */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="ativo"
+          checked={formData.isActive}
+          onChange={(e) => updateField('isActive', e.target.checked)}
+          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <Label htmlFor="ativo">Canal ativo</Label>
+      </div>
+
+      <FormActions
+        onCancel={onClose}
+        onSubmit={() => handleSubmit({} as React.FormEvent)}
+        isSubmitting={false}
+      />
+    </form>
+  );
+}
+
+// Componente do card do canal
+interface CanalCardProps {
+  canal: Canal;
+  onEdit: () => void;
+  onDelete: () => void;
+  isDeleting: boolean;
+}
+
+function CanalCard({ canal, onEdit, onDelete, isDeleting }: CanalCardProps) {
+  const getTipoLabel = (tipo: string) => {
+    const tipos = {
+      vendas: 'Vendas',
+      compras: 'Compras',
+      servicos: 'Serviços'
+    };
+    return tipos[tipo as keyof typeof tipos] || tipo;
+  };
+
+  return (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3 flex-1">
+            <div
+              className="w-4 h-4 rounded-full flex-shrink-0"
+              style={{ backgroundColor: canal.cor }}
+            />
+            <div className="flex-1">
+              <CardTitle className="text-lg">{canal.nome}</CardTitle>
+              {canal.descricao && (
+                <p className="text-sm text-gray-600 mt-1">{canal.descricao}</p>
+              )}
+            </div>
+          </div>
+          
+          <CardActions
+            onEdit={onEdit}
+            onDelete={onDelete}
+            isDeleting={isDeleting}
+          />
+        </div>
+      </CardHeader>
+      
+      <CardContent className="pt-0">
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Tipo:</span>
+            <span className="capitalize">{getTipoLabel(canal.tipo)}</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Status:</span>
+            <StatusBadge isActive={canal.isActive} />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Criado:</span>
+            <span className="text-gray-500">
+              {new Date(canal.createdAt).toLocaleDateString('pt-BR')}
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
