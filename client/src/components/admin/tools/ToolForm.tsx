@@ -1,10 +1,10 @@
-import React from 'react';
+import { FC, FormEvent, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ToolFormTabs } from './ToolFormTabs';
 import type { ToolFormProps } from './ToolFormTypes';
 
-export const ToolForm: React.FC<ToolFormProps> = ({
+export const ToolForm: FC<ToolFormProps> = ({
   formData,
   setFormData,
   onSubmit,
@@ -13,11 +13,11 @@ export const ToolForm: React.FC<ToolFormProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [currentFeature, setCurrentFeature] = React.useState("");
-  const [currentPro, setCurrentPro] = React.useState("");
-  const [currentCon, setCurrentCon] = React.useState("");
+  const [currentFeature, setCurrentFeature] = useState("");
+  const [currentPro, setCurrentPro] = useState("");
+  const [currentCon, setCurrentCon] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
   };

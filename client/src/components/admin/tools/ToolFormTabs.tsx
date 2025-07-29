@@ -1,4 +1,4 @@
-import React from 'react';
+import { FC, Dispatch, SetStateAction } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -14,7 +14,7 @@ import type { Tool as DbTool } from '@shared/schema';
 
 interface ToolFormTabsProps {
   formData: ToolFormData;
-  setFormData: React.Dispatch<React.SetStateAction<ToolFormData>>;
+  setFormData: Dispatch<SetStateAction<ToolFormData>>;
   editingTool: DbTool | null;
   toolTypes: Array<{ id: number; name: string }>;
   currentFeature: string;
@@ -25,7 +25,7 @@ interface ToolFormTabsProps {
   setCurrentCon: (value: string) => void;
 }
 
-export const ToolFormTabs: React.FC<ToolFormTabsProps> = ({
+export const ToolFormTabs: FC<ToolFormTabsProps> = ({
   formData,
   setFormData,
   editingTool,

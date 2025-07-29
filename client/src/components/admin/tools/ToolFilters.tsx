@@ -1,10 +1,10 @@
-import React from 'react';
+import { FC } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
 import type { ToolFiltersProps } from './ToolFormTypes';
 
-export const ToolFilters: React.FC<ToolFiltersProps> = ({
+export const ToolFilters: FC<ToolFiltersProps> = ({
   searchTerm,
   selectedType,
   toolTypes,

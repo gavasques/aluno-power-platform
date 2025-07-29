@@ -1,11 +1,11 @@
-import React from 'react';
+import { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2, Star, Wrench, Image as ImageIcon } from 'lucide-react';
 import type { ToolListProps } from './ToolFormTypes';
 
-export const ToolList: React.FC<ToolListProps> = ({
+export const ToolList: FC<ToolListProps> = ({
   tools,
   toolTypes,
   onEdit,
