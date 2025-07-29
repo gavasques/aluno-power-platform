@@ -17,23 +17,19 @@ interface Empresa {
   cnpj: string;
   inscricaoEstadual?: string;
   inscricaoMunicipal?: string;
-  tipo: 'vendas' | 'compras' | 'servicos';
   endereco: {
     cep: string;
     logradouro: string;
-    numero: string;
-    complemento?: string;
-    bairro: string;
     cidade: string;
-    uf: string;
+    estado: string;
   };
-  contato: {
-    telefone?: string;
-    email?: string;
-    responsavel?: string;
-  };
+  telefone?: string;
+  email?: string;
+  logoUrl?: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  createdBy: number;
 }
 
 interface EmpresaFormData {
@@ -42,21 +38,14 @@ interface EmpresaFormData {
   cnpj: string;
   inscricaoEstadual?: string;
   inscricaoMunicipal?: string;
-  tipo: 'vendas' | 'compras' | 'servicos';
   endereco: {
     cep: string;
     logradouro: string;
-    numero: string;
-    complemento?: string;
-    bairro: string;
     cidade: string;
-    uf: string;
+    estado: string;
   };
-  contato: {
-    telefone?: string;
-    email?: string;
-    responsavel?: string;
-  };
+  telefone?: string;
+  email?: string;
 }
 
 export default function EmpresasManager() {
@@ -69,21 +58,14 @@ export default function EmpresasManager() {
     cnpj: '',
     inscricaoEstadual: '',
     inscricaoMunicipal: '',
-    tipo: 'vendas',
     endereco: {
       cep: '',
       logradouro: '',
-      numero: '',
-      complemento: '',
-      bairro: '',
       cidade: '',
-      uf: ''
+      estado: ''
     },
-    contato: {
-      telefone: '',
-      email: '',
-      responsavel: ''
-    }
+    telefone: '',
+    email: ''
   });
 
   const { toast } = useToast();
@@ -230,21 +212,14 @@ export default function EmpresasManager() {
       cnpj: '',
       inscricaoEstadual: '',
       inscricaoMunicipal: '',
-      tipo: 'vendas',
       endereco: {
         cep: '',
         logradouro: '',
-        numero: '',
-        complemento: '',
-        bairro: '',
         cidade: '',
-        uf: ''
+        estado: ''
       },
-      contato: {
-        telefone: '',
-        email: '',
-        responsavel: ''
-      }
+      telefone: '',
+      email: ''
     });
   };
 
@@ -266,9 +241,9 @@ export default function EmpresasManager() {
       cnpj: empresa.cnpj,
       inscricaoEstadual: empresa.inscricaoEstadual || '',
       inscricaoMunicipal: empresa.inscricaoMunicipal || '',
-      tipo: empresa.tipo,
       endereco: empresa.endereco,
-      contato: empresa.contato
+      telefone: empresa.telefone || '',
+      email: empresa.email || ''
     });
     setIsDialogOpen(true);
   };
@@ -374,22 +349,13 @@ export default function EmpresasManager() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="tipo">Tipo *</Label>
-                  <Select
-                    value={formData.tipo}
-                    onValueChange={(value: 'vendas' | 'compras' | 'servicos') => 
-                      setFormData(prev => ({ ...prev, tipo: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="vendas">Vendas</SelectItem>
-                      <SelectItem value="compras">Compras</SelectItem>
-                      <SelectItem value="servicos">Serviços</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="telefone">Telefone</Label>
+                  <Input
+                    id="telefone"
+                    value={formData.telefone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
+                    placeholder="(00) 00000-0000"
+                  />
                 </div>
                 
                 <div>
@@ -402,11 +368,12 @@ export default function EmpresasManager() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="inscricaoMunicipal">Inscrição Municipal</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
-                    id="inscricaoMunicipal"
-                    value={formData.inscricaoMunicipal}
-                    onChange={(e) => setFormData(prev => ({ ...prev, inscricaoMunicipal: e.target.value }))}
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   />
                 </div>
               </div>
@@ -443,44 +410,6 @@ export default function EmpresasManager() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="numero">Número *</Label>
-                    <Input
-                      id="numero"
-                      value={formData.endereco.numero}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        endereco: { ...prev.endereco, numero: e.target.value }
-                      }))}
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="complemento">Complemento</Label>
-                    <Input
-                      id="complemento"
-                      value={formData.endereco.complemento}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        endereco: { ...prev.endereco, complemento: e.target.value }
-                      }))}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="bairro">Bairro *</Label>
-                    <Input
-                      id="bairro"
-                      value={formData.endereco.bairro}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        endereco: { ...prev.endereco, bairro: e.target.value }
-                      }))}
-                      required
-                    />
-                  </div>
-                  
-                  <div>
                     <Label htmlFor="cidade">Cidade *</Label>
                     <Input
                       id="cidade"
@@ -494,64 +423,23 @@ export default function EmpresasManager() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="uf">UF *</Label>
+                    <Label htmlFor="estado">Estado *</Label>
                     <Input
-                      id="uf"
-                      value={formData.endereco.uf}
+                      id="estado"
+                      value={formData.endereco.estado}
                       onChange={(e) => setFormData(prev => ({
                         ...prev,
-                        endereco: { ...prev.endereco, uf: e.target.value }
+                        endereco: { ...prev.endereco, estado: e.target.value }
                       }))}
                       maxLength={2}
+                      placeholder="SP"
                       required
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Contato */}
-              <div className="border-t pt-4">
-                <h3 className="text-lg font-semibold mb-4">Contato</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="telefone">Telefone</Label>
-                    <Input
-                      id="telefone"
-                      value={formData.contato.telefone}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        contato: { ...prev.contato, telefone: e.target.value }
-                      }))}
-                      placeholder="(00) 00000-0000"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.contato.email}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        contato: { ...prev.contato, email: e.target.value }
-                      }))}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="responsavel">Responsável</Label>
-                    <Input
-                      id="responsavel"
-                      value={formData.contato.responsavel}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        contato: { ...prev.contato, responsavel: e.target.value }
-                      }))}
-                    />
-                  </div>
-                </div>
-              </div>
+
 
               <div className="flex justify-end gap-3 pt-4 border-t">
                 <Button 
@@ -612,21 +500,17 @@ export default function EmpresasManager() {
                   <span className="font-medium">CNPJ:</span> {formatCNPJ(empresa.cnpj)}
                 </div>
                 <div>
-                  <span className="font-medium">Tipo:</span>{' '}
-                  <span className="capitalize">{empresa.tipo}</span>
-                </div>
-                <div>
                   <span className="font-medium">Cidade:</span>{' '}
-                  {empresa.endereco.cidade}/{empresa.endereco.uf}
+                  {empresa.endereco.cidade}/{empresa.endereco.estado}
                 </div>
-                {empresa.contato.email && (
+                {empresa.email && (
                   <div>
-                    <span className="font-medium">Email:</span> {empresa.contato.email}
+                    <span className="font-medium">Email:</span> {empresa.email}
                   </div>
                 )}
-                {empresa.contato.telefone && (
+                {empresa.telefone && (
                   <div>
-                    <span className="font-medium">Telefone:</span> {empresa.contato.telefone}
+                    <span className="font-medium">Telefone:</span> {empresa.telefone}
                   </div>
                 )}
               </div>
