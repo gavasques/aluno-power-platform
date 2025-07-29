@@ -83,7 +83,8 @@ export default function LancamentosManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Fetch lancamentos
@@ -102,7 +103,8 @@ export default function LancamentosManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Filter lancamentos

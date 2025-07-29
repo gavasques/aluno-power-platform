@@ -57,7 +57,8 @@ export default function BancosManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Filter bancos based on search term

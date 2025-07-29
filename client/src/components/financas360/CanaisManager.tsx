@@ -82,7 +82,8 @@ export default function CanaisManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Create canal mutation

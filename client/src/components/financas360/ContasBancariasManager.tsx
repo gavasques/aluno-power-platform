@@ -93,7 +93,8 @@ export default function ContasBancariasManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Fetch bancos
@@ -112,7 +113,8 @@ export default function ContasBancariasManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Fetch contas bancárias
@@ -131,7 +133,8 @@ export default function ContasBancariasManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Filter contas

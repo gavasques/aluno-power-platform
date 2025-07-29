@@ -93,7 +93,8 @@ export default function DevolucaesManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Fetch devoluções
@@ -112,7 +113,8 @@ export default function DevolucaesManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Filter devoluções

@@ -98,7 +98,8 @@ export default function NotasFiscaisManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Fetch parceiros
@@ -117,7 +118,8 @@ export default function NotasFiscaisManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Fetch notas fiscais
@@ -136,7 +138,8 @@ export default function NotasFiscaisManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Filter notas

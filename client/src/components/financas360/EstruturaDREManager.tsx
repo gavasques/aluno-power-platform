@@ -79,7 +79,8 @@ export default function EstruturaDREManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Organizar estruturas em árvore

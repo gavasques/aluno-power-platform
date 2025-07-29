@@ -98,7 +98,8 @@ export default function ParceirosManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Filter parceiros

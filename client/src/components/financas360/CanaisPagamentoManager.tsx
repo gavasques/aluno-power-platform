@@ -94,7 +94,8 @@ export default function CanaisPagamentoManager() {
       
       const result = await response.json();
       return result.data;
-    }
+    },
+    enabled: !!token
   });
 
   // Filter canais
