@@ -59,7 +59,7 @@ interface Parceiro {
 }
 
 export default function NotasFiscaisManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingNota, setEditingNota] = useState<NotaFiscal | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,7 +99,7 @@ export default function NotasFiscaisManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Fetch parceiros
@@ -119,7 +119,7 @@ export default function NotasFiscaisManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Fetch notas fiscais
@@ -139,7 +139,7 @@ export default function NotasFiscaisManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Filter notas
@@ -373,7 +373,7 @@ export default function NotasFiscaisManager() {
       .reduce((sum: number, nota: NotaFiscal) => sum + nota.valorTotal, 0);
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

@@ -54,7 +54,7 @@ interface ParceiroFormData {
 }
 
 export default function ParceirosManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingParceiro, setEditingParceiro] = useState<Parceiro | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,7 +99,7 @@ export default function ParceirosManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Filter parceiros
@@ -323,7 +323,7 @@ export default function ParceirosManager() {
     return filteredParceiros.filter((p: Parceiro) => p.tipo === tipo && p.ativo).length;
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

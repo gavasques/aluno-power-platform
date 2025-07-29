@@ -42,7 +42,7 @@ interface EstruturaDREFormData {
 }
 
 export default function EstruturaDREManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEstrutura, setEditingEstrutura] = useState<EstruturaDRE | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,7 +80,7 @@ export default function EstruturaDREManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Organizar estruturas em árvore
@@ -448,7 +448,7 @@ export default function EstruturaDREManager() {
 
   const contasPai = getContasPai(estruturasOrganizadas, editingEstrutura?.id);
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

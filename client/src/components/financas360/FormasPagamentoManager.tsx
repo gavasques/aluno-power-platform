@@ -33,7 +33,7 @@ interface FormaPagamentoFormData {
 }
 
 export default function FormasPagamentoManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingForma, setEditingForma] = useState<FormaPagamento | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,7 +73,7 @@ export default function FormasPagamentoManager() {
       console.log('Formas array length:', result.data?.length);
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Filter formas
@@ -267,7 +267,7 @@ export default function FormasPagamentoManager() {
 
   console.log('FormasPagamentoManager render - isLoading:', isLoading, 'error:', error, 'formas:', formas, 'formas.length:', formas?.length);
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

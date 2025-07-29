@@ -57,7 +57,7 @@ interface Banco {
 }
 
 export default function ContasBancariasManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingConta, setEditingConta] = useState<ContaBancaria | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -94,7 +94,7 @@ export default function ContasBancariasManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Fetch bancos
@@ -114,7 +114,7 @@ export default function ContasBancariasManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Fetch contas bancárias
@@ -134,7 +134,7 @@ export default function ContasBancariasManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Filter contas
@@ -327,7 +327,7 @@ export default function ContasBancariasManager() {
       .reduce((sum: number, conta: ContaBancaria) => sum + conta.saldoAtual, 0);
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

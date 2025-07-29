@@ -52,7 +52,7 @@ interface CanalPagamentoFormData {
 }
 
 export default function CanaisPagamentoManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCanal, setEditingCanal] = useState<CanalPagamento | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,7 +95,7 @@ export default function CanaisPagamentoManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Filter canais
@@ -318,7 +318,7 @@ export default function CanaisPagamentoManager() {
     }));
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">

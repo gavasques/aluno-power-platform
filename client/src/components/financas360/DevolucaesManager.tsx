@@ -57,7 +57,7 @@ interface NotaFiscal {
 }
 
 export default function DevolucaesManager() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDevolucao, setEditingDevolucao] = useState<Devolucao | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -94,7 +94,7 @@ export default function DevolucaesManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Fetch devoluções
@@ -114,7 +114,7 @@ export default function DevolucaesManager() {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!token
+    enabled: !!token && !authLoading
   });
 
   // Filter devoluções
@@ -341,7 +341,7 @@ export default function DevolucaesManager() {
       .reduce((sum: number, devolucao: Devolucao) => sum + devolucao.valorDevolvido, 0);
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
