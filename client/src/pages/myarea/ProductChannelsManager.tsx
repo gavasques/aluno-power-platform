@@ -4,7 +4,7 @@
  * Following all 13 optimization principles
  */
 
-import React from 'react';
+
 import { useParams, useLocation } from 'wouter';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';

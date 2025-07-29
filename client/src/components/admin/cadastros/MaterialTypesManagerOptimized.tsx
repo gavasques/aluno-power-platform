@@ -1,4 +1,4 @@
-import React from 'react';
+
 import BaseTypesManager, { type BaseItem, type BaseTypesManagerConfig } from '@/components/admin/base/BaseTypesManager';
 import { FileText, Video, Youtube, FileSpreadsheet, Image, Globe, Code2 } from 'lucide-react';
 import type { MaterialType } from '@shared/schema';

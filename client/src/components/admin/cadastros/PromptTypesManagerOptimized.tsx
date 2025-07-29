@@ -1,4 +1,4 @@
-import React from 'react';
+
 import BaseTypesManager, { type BaseItem, type BaseTypesManagerConfig } from '@/components/admin/base/BaseTypesManager';
 import { MessageSquare } from 'lucide-react';
 import type { PromptType } from '@shared/schema';

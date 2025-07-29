@@ -1,4 +1,4 @@
-import React from 'react';
+
 import BaseTypesManager, { type BaseItem, type BaseTypesManagerConfig } from '@/components/admin/base/BaseTypesManager';
 import { Wrench } from 'lucide-react';
 import type { ToolType } from '@shared/schema';

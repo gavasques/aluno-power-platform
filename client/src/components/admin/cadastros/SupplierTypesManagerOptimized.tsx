@@ -1,4 +1,4 @@
-import React from 'react';
+
 import BaseTypesManager, { type BaseItem, type BaseTypesManagerConfig } from '@/components/admin/base/BaseTypesManager';
 import { Truck } from 'lucide-react';
 import type { SupplierType } from '@shared/schema';
