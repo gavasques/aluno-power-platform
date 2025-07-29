@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, Trash2, Building2 } from 'lucide-react';
 
 interface Empresa {
@@ -59,6 +60,7 @@ interface EmpresaFormData {
 }
 
 export default function EmpresasManager() {
+  const { token } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
   const [formData, setFormData] = useState<EmpresaFormData>({
@@ -92,8 +94,7 @@ export default function EmpresasManager() {
     queryKey: ['financas360-empresas'],
     queryFn: async () => {
       console.log('Fetching empresas...');
-      const token = localStorage.getItem('token');
-      console.log('Token:', token ? 'presente' : 'ausente');
+      console.log('Token from Auth Context:', token ? 'presente' : 'ausente');
       
       const response = await fetch('/api/financas360/empresas', {
         headers: {
@@ -110,7 +111,8 @@ export default function EmpresasManager() {
       const result = await response.json();
       console.log('Result data:', result.data);
       return result.data;
-    }
+    },
+    enabled: !!token // Só executa se o token estiver presente
   });
 
   // Create empresa mutation
@@ -120,7 +122,7 @@ export default function EmpresasManager() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -157,7 +159,7 @@ export default function EmpresasManager() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -194,7 +196,7 @@ export default function EmpresasManager() {
       const response = await fetch(`/api/financas360/empresas/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
