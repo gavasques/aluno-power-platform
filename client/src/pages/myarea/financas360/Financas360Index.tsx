@@ -48,6 +48,16 @@ type ActiveView =
 
 export default function Financas360Index() {
   const [activeView, setActiveView] = useState<ActiveView>('dashboard');
+  const [previousView, setPreviousView] = useState<ActiveView>('dashboard');
+
+  const navigateTo = (view: ActiveView) => {
+    setPreviousView(activeView);
+    setActiveView(view);
+  };
+
+  const goBack = () => {
+    setActiveView(previousView);
+  };
 
   // Views dos managers individuais
   if (activeView === 'empresas') {
@@ -56,7 +66,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('cadastros-base')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar aos Cadastros Base
@@ -73,7 +83,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('cadastros-base')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar aos Cadastros Base
@@ -90,7 +100,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('cadastros-base')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar aos Cadastros Base
@@ -107,7 +117,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('cadastros-base')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar aos Cadastros Base
@@ -124,7 +134,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('cadastros-base')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar aos Cadastros Base
@@ -141,7 +151,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('cadastros-base')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar aos Cadastros Base
@@ -158,7 +168,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('cadastros-base')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar aos Cadastros Base
@@ -175,7 +185,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('cadastros-base')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar aos Cadastros Base
@@ -192,7 +202,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('dashboard')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar ao Dashboard
@@ -209,7 +219,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('dashboard')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar ao Dashboard
@@ -226,7 +236,7 @@ export default function Financas360Index() {
         <div className="mb-4">
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('dashboard')}
+            onClick={goBack}
             className="mb-4"
           >
             ← Voltar ao Dashboard
@@ -244,7 +254,7 @@ export default function Financas360Index() {
         title: 'Empresas',
         description: 'Gerenciar dados das empresas do grupo',
         icon: Building2,
-        action: () => setActiveView('empresas'),
+        action: () => navigateTo('empresas'),
         color: 'bg-blue-50 text-blue-600',
         badge: 'Básico'
       },
@@ -252,7 +262,7 @@ export default function Financas360Index() {
         title: 'Canais',
         description: 'Configurar canais de vendas e operações',
         icon: Hash,
-        action: () => setActiveView('canais'),
+        action: () => navigateTo('canais'),
         color: 'bg-purple-50 text-purple-600',  
         badge: 'Básico'
       },
@@ -260,7 +270,7 @@ export default function Financas360Index() {
         title: 'Bancos',
         description: 'Cadastro de instituições bancárias',
         icon: Landmark,
-        action: () => setActiveView('bancos'),
+        action: () => navigateTo('bancos'),
         color: 'bg-green-50 text-green-600',
         badge: 'Básico'
       },
@@ -268,7 +278,7 @@ export default function Financas360Index() {
         title: 'Contas Bancárias',
         description: 'Gerenciar contas e saldos bancários',
         icon: CreditCard,
-        action: () => setActiveView('contas-bancarias'),
+        action: () => navigateTo('contas-bancarias'),
         color: 'bg-indigo-50 text-indigo-600',
         badge: 'Essencial'
       },
@@ -276,7 +286,7 @@ export default function Financas360Index() {
         title: 'Formas de Pagamento',
         description: 'Configurar métodos de pagamento',
         icon: Receipt,
-        action: () => setActiveView('formas-pagamento'),
+        action: () => navigateTo('formas-pagamento'),
         color: 'bg-orange-50 text-orange-600',
         badge: 'Essencial'
       },
@@ -284,7 +294,7 @@ export default function Financas360Index() {
         title: 'Parceiros',
         description: 'Cadastro de clientes e fornecedores',
         icon: Users,
-        action: () => setActiveView('parceiros'),
+        action: () => navigateTo('parceiros'),
         color: 'bg-cyan-50 text-cyan-600',
         badge: 'Essencial'
       },
@@ -292,7 +302,7 @@ export default function Financas360Index() {
         title: 'Canais de Pagamento',
         description: 'Gateways e processadores de pagamento',
         icon: ArrowLeftRight,
-        action: () => setActiveView('canais-pagamento'),
+        action: () => navigateTo('canais-pagamento'),
         color: 'bg-pink-50 text-pink-600',
         badge: 'Avançado'
       },
@@ -300,7 +310,7 @@ export default function Financas360Index() {
         title: 'Estrutura DRE',
         description: 'Configurar estrutura de relatórios',
         icon: BarChart3,
-        action: () => setActiveView('estrutura-dre'),
+        action: () => navigateTo('estrutura-dre'),
         color: 'bg-teal-50 text-teal-600',
         badge: 'Avançado'
       }
@@ -321,7 +331,7 @@ export default function Financas360Index() {
           </div>
           <Button 
             variant="outline" 
-            onClick={() => setActiveView('dashboard')}
+            onClick={goBack}
           >
             ← Voltar ao Dashboard
           </Button>
@@ -369,7 +379,7 @@ export default function Financas360Index() {
       title: 'Cadastros Base',
       description: 'Configurar empresas, canais, bancos e estruturas base do sistema',
       icon: Settings,
-      action: () => setActiveView('cadastros-base'),
+      action: () => navigateTo('cadastros-base'),
       color: 'bg-blue-50 text-blue-600',
       badge: '8 Módulos'
     }
@@ -380,7 +390,7 @@ export default function Financas360Index() {
       title: 'Lançamentos',
       description: 'Controle de receitas e despesas',
       icon: FileText,
-      action: () => setActiveView('lancamentos'),
+      action: () => navigateTo('lancamentos'),
       color: 'bg-emerald-50 text-emerald-600',
       badge: 'Principal'
     },
@@ -388,7 +398,7 @@ export default function Financas360Index() {
       title: 'Notas Fiscais',
       description: 'Gestão de documentos fiscais',
       icon: FileCheck,
-      action: () => setActiveView('notas-fiscais'),
+      action: () => navigateTo('notas-fiscais'),
       color: 'bg-amber-50 text-amber-600',
       badge: 'Fiscal'
     },
@@ -396,7 +406,7 @@ export default function Financas360Index() {
       title: 'Devoluções',
       description: 'Controle de devoluções e estornos',
       icon: RefreshCw,
-      action: () => setActiveView('devolucoes'),
+      action: () => navigateTo('devolucoes'),
       color: 'bg-red-50 text-red-600',
       badge: 'Especial'
     }
