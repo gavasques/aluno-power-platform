@@ -50,7 +50,7 @@ const UserManagement = memo(() => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState<'users' | 'groups'>('users');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10); // Fixed page size
+  const pageSize = 10; // Fixed page size
   const queryClient = useQueryClient();
   const { toast } = useToast();
 

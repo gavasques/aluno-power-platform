@@ -63,7 +63,7 @@ export default function AdvancedInfographicGenerator() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
-  const [effortLevel] = useState('high');
+  const effortLevel = 'high';
 
   // Fetch categories for dropdown
   const { data: departments = [] } = useQuery<any[]>({

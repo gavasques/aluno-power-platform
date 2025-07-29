@@ -104,7 +104,7 @@ export const SupplierProductsTabSimple: React.FC<SupplierProductsTabSimpleProps>
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(50);
+  const pageSize = 50;
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [productToDelete, setProductToDelete] = useState<any>(null);
 
