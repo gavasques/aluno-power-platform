@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Search, RefreshCw } from 'lucide-react';
 import { useDeleteConfirmation } from '@/hooks/useFinancas360Api';
 import { LoadingState, ErrorState, EmptyState as UIEmptyState } from '@/components/ui/states';
+import { useModalState, CrudModal } from '@/components/ui/modals';
 
 // Interface para props do componente base
 export interface BaseManagerProps<T> {
