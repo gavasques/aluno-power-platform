@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, Trash2, Hash, Search, ChevronRight, ChevronDown } from 'lucide-react';
 
 interface EstruturaDRE {
@@ -41,6 +42,7 @@ interface EstruturaDREFormData {
 }
 
 export default function EstruturaDREManager() {
+  const { token } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEstrutura, setEditingEstrutura] = useState<EstruturaDRE | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,7 +69,7 @@ export default function EstruturaDREManager() {
     queryFn: async () => {
       const response = await fetch('/api/financas360/estrutura-dre', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -150,7 +152,7 @@ export default function EstruturaDREManager() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -187,7 +189,7 @@ export default function EstruturaDREManager() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -224,7 +226,7 @@ export default function EstruturaDREManager() {
       const response = await fetch(`/api/financas360/estrutura-dre/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

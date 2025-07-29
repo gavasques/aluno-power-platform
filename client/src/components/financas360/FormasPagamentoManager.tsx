@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, Trash2, Receipt, Search } from 'lucide-react';
 
 interface FormaPagamento {
@@ -37,6 +38,7 @@ interface FormaPagamentoFormData {
 }
 
 export default function FormasPagamentoManager() {
+  const { token } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingForma, setEditingForma] = useState<FormaPagamento | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,7 +63,7 @@ export default function FormasPagamentoManager() {
     queryFn: async () => {
       const response = await fetch('/api/financas360/formas-pagamento', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -88,7 +90,7 @@ export default function FormasPagamentoManager() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -125,7 +127,7 @@ export default function FormasPagamentoManager() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -162,7 +164,7 @@ export default function FormasPagamentoManager() {
       const response = await fetch(`/api/financas360/formas-pagamento/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

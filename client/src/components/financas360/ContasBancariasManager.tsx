@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, Trash2, CreditCard, Search, Eye, EyeOff } from 'lucide-react';
 
 interface ContaBancaria {
@@ -56,6 +57,7 @@ interface Banco {
 }
 
 export default function ContasBancariasManager() {
+  const { token } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingConta, setEditingConta] = useState<ContaBancaria | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,7 +83,7 @@ export default function ContasBancariasManager() {
     queryFn: async () => {
       const response = await fetch('/api/financas360/empresas', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -100,7 +102,7 @@ export default function ContasBancariasManager() {
     queryFn: async () => {
       const response = await fetch('/api/financas360/bancos', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -119,7 +121,7 @@ export default function ContasBancariasManager() {
     queryFn: async () => {
       const response = await fetch('/api/financas360/contas-bancarias', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -147,7 +149,7 @@ export default function ContasBancariasManager() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -184,7 +186,7 @@ export default function ContasBancariasManager() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -221,7 +223,7 @@ export default function ContasBancariasManager() {
       const response = await fetch(`/api/financas360/contas-bancarias/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

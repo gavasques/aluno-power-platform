@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, Trash2, ArrowLeftRight, Search, Zap, CreditCard, Link } from 'lucide-react';
 
 interface CanalPagamento {
@@ -51,6 +52,7 @@ interface CanalPagamentoFormData {
 }
 
 export default function CanaisPagamentoManager() {
+  const { token } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCanal, setEditingCanal] = useState<CanalPagamento | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -82,7 +84,7 @@ export default function CanaisPagamentoManager() {
     queryFn: async () => {
       const response = await fetch('/api/financas360/canais-pagamento', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -113,7 +115,7 @@ export default function CanaisPagamentoManager() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -150,7 +152,7 @@ export default function CanaisPagamentoManager() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -187,7 +189,7 @@ export default function CanaisPagamentoManager() {
       const response = await fetch(`/api/financas360/canais-pagamento/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Edit, Trash2, RefreshCw, Search, AlertCircle } from 'lucide-react';
 
 interface Devolucao {
@@ -56,6 +57,7 @@ interface NotaFiscal {
 }
 
 export default function DevolucaesManager() {
+  const { token } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDevolucao, setEditingDevolucao] = useState<Devolucao | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,7 +83,7 @@ export default function DevolucaesManager() {
     queryFn: async () => {
       const response = await fetch('/api/financas360/notas-fiscais', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -100,7 +102,7 @@ export default function DevolucaesManager() {
     queryFn: async () => {
       const response = await fetch('/api/financas360/devolucoes', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -132,7 +134,7 @@ export default function DevolucaesManager() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -169,7 +171,7 @@ export default function DevolucaesManager() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -206,7 +208,7 @@ export default function DevolucaesManager() {
       const response = await fetch(`/api/financas360/devolucoes/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
