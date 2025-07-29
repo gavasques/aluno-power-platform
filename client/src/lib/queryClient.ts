@@ -94,7 +94,7 @@ export const queryClient = new QueryClient({
       networkMode: 'online',
       // Enhanced performance optimizations
       structuralSharing: true,
-      notifyOnChangeProps: 'tracked', // Only notify when specific props change
+      // notifyOnChangeProps: 'tracked', // Only notify when specific props change - disabled for compatibility
       // Optimize retry logic for better performance
       retry: (failureCount, error) => {
         // Don't retry 4xx errors (client errors)
