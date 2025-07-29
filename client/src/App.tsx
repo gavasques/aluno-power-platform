@@ -44,7 +44,7 @@ const InfographicGenerator = lazy(() => import("./pages/agents/infographic-gener
 const AdvancedInfographicGenerator = lazy(() => import("./pages/agents/AdvancedInfographicGenerator"));
 const AmazonReviewExtractor = lazy(() => import("./pages/hub/AmazonReviewExtractor"));
 const KeywordSearchReport = lazy(() => import("./pages/hub/KeywordSearchReport"));
-const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails"));
+const AmazonProductDetails = lazy(() => import("./pages/hub/AmazonProductDetails/AmazonProductDetailsRefactored"));
 import CompararListings from './pages/hub/CompararListings';
 const CNPJConsulta = lazy(() => import("./pages/hub/CNPJConsulta"));
 const AmazonKeywordSuggestions = lazy(() => import("./pages/hub/AmazonKeywordSuggestions"));
