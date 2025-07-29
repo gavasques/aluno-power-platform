@@ -13,28 +13,23 @@ import { Plus, Edit, Trash2, Receipt, Search } from 'lucide-react';
 interface FormaPagamento {
   id: number;
   nome: string;
-  tipo: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'transferencia' | 'boleto' | 'cheque' | 'outros';
-  descricao?: string;
-  ativa: boolean;
-  configuracoes: {
-    prazoRecebimento?: number;
-    taxa?: number;
-    observacoes?: string;
-  };
+  tipo: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'transferencia' | 'boleto';
+  taxaPercentual: string;
+  taxaFixa: string;
+  prazoRecebimento: number;
+  contaBancariaId: number | null;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 interface FormaPagamentoFormData {
   nome: string;
-  tipo: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'transferencia' | 'boleto' | 'cheque' | 'outros';
-  descricao?: string;
-  ativa: boolean;
-  configuracoes: {
-    prazoRecebimento?: number;
-    taxa?: number;
-    observacoes?: string;
-  };
+  tipo: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'transferencia' | 'boleto';
+  taxaPercentual: string;
+  taxaFixa: string;
+  prazoRecebimento: number;
+  contaBancariaId: number | null;
 }
 
 export default function FormasPagamentoManager() {
@@ -45,33 +40,37 @@ export default function FormasPagamentoManager() {
   const [formData, setFormData] = useState<FormaPagamentoFormData>({
     nome: '',
     tipo: 'dinheiro',
-    descricao: '',
-    ativa: true,
-    configuracoes: {
-      prazoRecebimento: 0,
-      taxa: 0,
-      observacoes: ''
-    }
+    taxaPercentual: '0.00',
+    taxaFixa: '0.00',
+    prazoRecebimento: 0,
+    contaBancariaId: null
   });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch formas de pagamento
-  const { data: formas = [], isLoading } = useQuery({
+  const { data: formas = [], isLoading, error } = useQuery({
     queryKey: ['financas360-formas-pagamento'],
     queryFn: async () => {
+      console.log('Fetching formas de pagamento...');
+      console.log('Token:', token ? 'presente' : 'ausente');
+      
       const response = await fetch('/api/financas360/formas-pagamento', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
+      console.log('Formas response status:', response.status);
+      
       if (!response.ok) {
         throw new Error('Erro ao carregar formas de pagamento');
       }
       
       const result = await response.json();
+      console.log('Formas result data:', result.data);
+      console.log('Formas array length:', result.data?.length);
       return result.data;
     },
     enabled: !!token
@@ -196,13 +195,10 @@ export default function FormasPagamentoManager() {
     setFormData({
       nome: '',
       tipo: 'dinheiro',
-      descricao: '',
-      ativa: true,
-      configuracoes: {
-        prazoRecebimento: 0,
-        taxa: 0,
-        observacoes: ''
-      }
+      taxaPercentual: '0.00',
+      taxaFixa: '0.00',
+      prazoRecebimento: 0,
+      contaBancariaId: null
     });
   };
 
@@ -221,9 +217,10 @@ export default function FormasPagamentoManager() {
     setFormData({
       nome: forma.nome,
       tipo: forma.tipo,
-      descricao: forma.descricao || '',
-      ativa: forma.ativa,
-      configuracoes: forma.configuracoes
+      taxaPercentual: forma.taxaPercentual,
+      taxaFixa: forma.taxaFixa,
+      prazoRecebimento: forma.prazoRecebimento,
+      contaBancariaId: forma.contaBancariaId
     });
     setIsDialogOpen(true);
   };
@@ -268,12 +265,31 @@ export default function FormasPagamentoManager() {
     return colors[tipo as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
+  console.log('FormasPagamentoManager render - isLoading:', isLoading, 'error:', error, 'formas:', formas, 'formas.length:', formas?.length);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Carregando formas de pagamento...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">❌</div>
+          <p className="text-red-600">Erro ao carregar formas de pagamento: {error.message}</p>
+          <Button 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['financas360-formas-pagamento'] })}
+            className="mt-4"
+          >
+            Tentar Novamente
+          </Button>
         </div>
       </div>
     );
@@ -358,13 +374,10 @@ export default function FormasPagamentoManager() {
                       id="prazoRecebimento"
                       type="number"
                       min="0"
-                      value={formData.configuracoes.prazoRecebimento || ''}
+                      value={formData.prazoRecebimento || ''}
                       onChange={(e) => setFormData(prev => ({
                         ...prev,
-                        configuracoes: {
-                          ...prev.configuracoes,
-                          prazoRecebimento: parseInt(e.target.value) || 0
-                        }
+                        prazoRecebimento: parseInt(e.target.value) || 0
                       }))}
                       placeholder="0"
                     />
@@ -379,13 +392,10 @@ export default function FormasPagamentoManager() {
                       step="0.01"
                       min="0"
                       max="100"
-                      value={formData.configuracoes.taxa || ''}
+                      value={formData.taxaPercentual || ''}
                       onChange={(e) => setFormData(prev => ({
                         ...prev,
-                        configuracoes: {
-                          ...prev.configuracoes,
-                          taxa: parseFloat(e.target.value) || 0
-                        }
+                        taxaPercentual: e.target.value
                       }))}
                       placeholder="0.00"
                     />
@@ -394,18 +404,18 @@ export default function FormasPagamentoManager() {
                 </div>
                 
                 <div className="mt-4">
-                  <Label htmlFor="observacoes">Observações</Label>
+                  <Label htmlFor="taxaFixa">Taxa Fixa (R$)</Label>
                   <Input
-                    id="observacoes"
-                    value={formData.configuracoes.observacoes || ''}
+                    id="taxaFixa"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.taxaFixa || ''}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
-                      configuracoes: {
-                        ...prev.configuracoes,
-                        observacoes: e.target.value
-                      }
+                      taxaFixa: e.target.value
                     }))}
-                    placeholder="Observações sobre a forma de pagamento"
+                    placeholder="0.00"
                   />
                 </div>
               </div>
@@ -497,31 +507,32 @@ export default function FormasPagamentoManager() {
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Status:</span>
                   <span className={`px-2 py-1 rounded-full text-xs ${
-                    forma.ativa 
+                    forma.isActive 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {forma.ativa ? 'Ativa' : 'Inativa'}
+                    {forma.isActive ? 'Ativa' : 'Inativa'}
                   </span>
                 </div>
                 
-                {forma.configuracoes.prazoRecebimento && forma.configuracoes.prazoRecebimento > 0 && (
+                {forma.prazoRecebimento && forma.prazoRecebimento > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Prazo:</span>
-                    <span>{forma.configuracoes.prazoRecebimento} dias</span>
+                    <span>{forma.prazoRecebimento} dias</span>
                   </div>
                 )}
                 
-                {forma.configuracoes.taxa && forma.configuracoes.taxa > 0 && (
+                {forma.taxaPercentual && parseFloat(forma.taxaPercentual) > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Taxa:</span>
-                    <span>{forma.configuracoes.taxa}%</span>
+                    <span className="font-medium">Taxa %:</span>
+                    <span>{forma.taxaPercentual}%</span>
                   </div>
                 )}
                 
-                {forma.configuracoes.observacoes && (
-                  <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                    <span className="font-medium">Obs:</span> {forma.configuracoes.observacoes}
+                {forma.taxaFixa && parseFloat(forma.taxaFixa) > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Taxa Fixa:</span>
+                    <span>R$ {forma.taxaFixa}</span>
                   </div>
                 )}
               </div>

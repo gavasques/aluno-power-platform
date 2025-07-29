@@ -67,20 +67,27 @@ export default function CanaisManager() {
   const queryClient = useQueryClient();
 
   // Fetch canais
-  const { data: canais = [], isLoading } = useQuery({
+  const { data: canais = [], isLoading, error } = useQuery({
     queryKey: ['financas360-canais'],
     queryFn: async () => {
+      console.log('Fetching canais...');
+      console.log('Token:', token ? 'presente' : 'ausente');
+      
       const response = await fetch('/api/financas360/canais', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
+      console.log('Canais response status:', response.status);
+      
       if (!response.ok) {
         throw new Error('Erro ao carregar canais');
       }
       
       const result = await response.json();
+      console.log('Canais result data:', result.data);
+      console.log('Canais array length:', result.data?.length);
       return result.data;
     },
     enabled: !!token
@@ -253,12 +260,31 @@ export default function CanaisManager() {
     return tipos[tipo as keyof typeof tipos] || tipo;
   };
 
+  console.log('CanaisManager render - isLoading:', isLoading, 'error:', error, 'canais:', canais, 'canais.length:', canais?.length);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Carregando canais...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">❌</div>
+          <p className="text-red-600">Erro ao carregar canais: {error.message}</p>
+          <Button 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['financas360-canais'] })}
+            className="mt-4"
+          >
+            Tentar Novamente
+          </Button>
         </div>
       </div>
     );
@@ -512,17 +538,21 @@ export default function CanaisManager() {
                   </span>
                 </div>
                 
-                {canal.configuracoes.comissao && canal.configuracoes.comissao > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Comissão:</span>
-                    <span>{canal.configuracoes.comissao}%</span>
-                  </div>
-                )}
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Descrição:</span>
+                  <span className="text-gray-600 text-sm">{canal.descricao || 'Sem descrição'}</span>
+                </div>
                 
-                {canal.configuracoes.prazoEntrega && canal.configuracoes.prazoEntrega > 0 && (
+                {canal.cor && (
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Prazo:</span>
-                    <span>{canal.configuracoes.prazoEntrega} dias</span>
+                    <span className="font-medium">Cor:</span>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-4 h-4 rounded border" 
+                        style={{ backgroundColor: canal.cor }}
+                      ></div>
+                      <span className="text-xs text-gray-500">{canal.cor}</span>
+                    </div>
                   </div>
                 )}
               </div>

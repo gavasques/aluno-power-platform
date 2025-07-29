@@ -92,6 +92,7 @@ export default function EmpresasManager() {
       
       const result = await response.json();
       console.log('Result data:', result.data);
+      console.log('Empresas array length:', result.data?.length);
       return result.data;
     },
     enabled: !!token // Só executa se o token estiver presente
@@ -263,6 +264,8 @@ export default function EmpresasManager() {
   const formatCNPJ = (cnpj: string) => {
     return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
   };
+
+  console.log('EmpresasManager render - isLoading:', isLoading, 'error:', error, 'empresas:', empresas, 'empresas.length:', empresas?.length);
 
   if (isLoading) {
     return (
