@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,32 +17,109 @@ import {
   RefreshCw,
   Calculator,
   TrendingUp,
-  Settings
+  Settings,
+  Hash
 } from 'lucide-react';
 
+// Import dos managers
+import EmpresasManager from '@/components/financas360/EmpresasManager';
+import CanaisManager from '@/components/financas360/CanaisManager';
+import BancosManager from '@/components/financas360/BancosManager';
+import LancamentosManager from '@/components/financas360/LancamentosManager';
+
 const Financas360Index = () => {
+  const [activeView, setActiveView] = useState<string>('dashboard');
+
+  // Se uma view específica está ativa, renderiza o componente correspondente
+  if (activeView === 'empresas') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <EmpresasManager />
+      </div>
+    );
+  }
+
+  if (activeView === 'canais') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <CanaisManager />
+      </div>
+    );
+  }
+
+  if (activeView === 'bancos') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <BancosManager />
+      </div>
+    );
+  }
+
+  if (activeView === 'lancamentos') {
+    return (
+      <div>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('dashboard')}
+            className="mb-4"
+          >
+            ← Voltar ao Dashboard
+          </Button>
+        </div>
+        <LancamentosManager />
+      </div>
+    );
+  }
   const cadastrosCards = [
     {
       title: 'Empresas',
       description: 'Gerenciar dados das empresas do grupo',
       icon: Building2,
-      path: '/minha-area/financas360/cadastros/empresas',
+      action: () => setActiveView('empresas'),
       color: 'bg-blue-50 text-blue-600',
       badge: 'Básico'
     },
     {
       title: 'Canais',
       description: 'Configurar canais de vendas e operações',
-      icon: Palette,
-      path: '/minha-area/financas360/cadastros/canais',
-      color: 'bg-purple-50 text-purple-600',
+      icon: Hash,
+      action: () => setActiveView('canais'),
+      color: 'bg-purple-50 text-purple-600',  
       badge: 'Básico'
     },
     {
       title: 'Bancos',
       description: 'Cadastro de instituições bancárias',
       icon: Landmark,
-      path: '/minha-area/financas360/cadastros/bancos',
+      action: () => setActiveView('bancos'),
       color: 'bg-green-50 text-green-600',
       badge: 'Básico'
     },
@@ -93,7 +170,7 @@ const Financas360Index = () => {
       title: 'Lançamentos',
       description: 'Controle de receitas e despesas',
       icon: FileText,
-      path: '/minha-area/financas360/operacoes/lancamentos',
+      action: () => setActiveView('lancamentos'),
       color: 'bg-emerald-50 text-emerald-600',
       badge: 'Principal'
     },
@@ -200,26 +277,52 @@ const Financas360Index = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {cadastrosCards.map((card) => (
-            <Link key={card.title} href={card.path}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-2 rounded-lg ${card.color}`}>
-                      <card.icon className="h-5 w-5" />
+            <div key={card.title}>
+              {card.action ? (
+                <Card 
+                  className="hover:shadow-lg transition-shadow cursor-pointer h-full"
+                  onClick={card.action}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className={`p-2 rounded-lg ${card.color}`}>
+                        <card.icon className="h-5 w-5" />
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {card.badge}
+                      </Badge>
                     </div>
-                    <Badge variant="outline" className="text-xs">
-                      {card.badge}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-lg">{card.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {card.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+                    <CardTitle className="text-lg">{card.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      {card.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Link href={card.path}>
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className={`p-2 rounded-lg ${card.color}`}>
+                          <card.icon className="h-5 w-5" />
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {card.badge}
+                        </Badge>
+                      </div>
+                      <CardTitle className="text-lg">{card.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        {card.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )}
+            </div>
           ))}
         </div>
       </section>
@@ -234,29 +337,58 @@ const Financas360Index = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {operacoesCards.map((card) => (
-            <Link key={card.title} href={card.path}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-lg ${card.color}`}>
-                      <card.icon className="h-6 w-6" />
+            <div key={card.title}>
+              {card.action ? (
+                <Card 
+                  className="hover:shadow-lg transition-shadow cursor-pointer h-full"
+                  onClick={card.action}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className={`p-3 rounded-lg ${card.color}`}>
+                        <card.icon className="h-6 w-6" />
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {card.badge}
+                      </Badge>
                     </div>
-                    <Badge variant="outline" className="text-xs">
-                      {card.badge}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-xl">{card.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {card.description}
-                  </p>
-                  <Button variant="outline" size="sm" className="w-full">
-                    Acessar Módulo
-                  </Button>
-                </CardContent>
-              </Card>
-            </Link>
+                    <CardTitle className="text-xl">{card.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {card.description}
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      Acessar Módulo
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Link href={card.path}>
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className={`p-3 rounded-lg ${card.color}`}>
+                          <card.icon className="h-6 w-6" />
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {card.badge}
+                        </Badge>
+                      </div>
+                      <CardTitle className="text-xl">{card.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {card.description}
+                      </p>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Acessar Módulo
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )}
+            </div>
           ))}
         </div>
       </section>
