@@ -99,3 +99,43 @@ export type SupplierStatus = 'active' | 'inactive' | 'pending';
 export type ContractStatus = 'draft' | 'active' | 'expired' | 'terminated';
 export type CommunicationType = 'email' | 'whatsapp' | 'phone' | 'meeting';
 export type DocumentCategory = 'certificate' | 'license' | 'contract' | 'quality' | 'other';
+
+// Constantes para formulários
+export const SUPPLIER_CATEGORIES = [
+  'Eletrônicos',
+  'Roupas e Acessórios',
+  'Casa e Jardim',
+  'Saúde e Beleza',
+  'Esportes',
+  'Brinquedos',
+  'Livros',
+  'Automotivo',
+  'Outros'
+] as const;
+
+export const SUPPLIER_DEPARTMENTS = [
+  'Vendas',
+  'Suporte',
+  'Logística',
+  'Qualidade',
+  'Financeiro',
+  'Desenvolvimento'
+] as const;
+
+export const FILE_TYPES = [
+  'catalogo',
+  'preco',
+  'certificacao',
+  'contrato',
+  'manual',
+  'outro'
+] as const;
+
+export interface SupplierFile {
+  id: string;
+  name: string;
+  type: typeof FILE_TYPES[number];
+  url: string;
+  size: number;
+  uploadedAt: string;
+}

@@ -1,11 +1,8 @@
 /**
- * Componentes de Estado Reutilizáveis
+ * Estados Reutilizáveis - Fase 1 DRY Refatoração
  * 
- * Este módulo centraliza todos os componentes de estado (loading, error, empty)
- * eliminando duplicação de código em todo o projeto.
- * 
- * Uso:
- * import { LoadingState, ErrorState, EmptyState } from '@/components/ui/states';
+ * Sistema centralizado para eliminar duplicação de código
+ * em estados de loading, error e empty
  */
 
 // Loading States
@@ -54,37 +51,3 @@ export const StateComponents = {
   NetworkErrorState,
   ValidationErrorState
 } as const;
-
-export const renderAsyncState = (
-  isLoading: boolean,
-  error: string | null,
-  data: any[],
-  options?: {
-    loadingMessage?: string;
-    emptyTitle?: string;
-    emptyDescription?: string;
-    onRetry?: () => void;
-    onCreate?: () => void;
-  }
-) => {
-  if (isLoading) {
-    return <LoadingState message={options?.loadingMessage} />;
-  }
-  
-  if (error) {
-    return <ErrorState error={error} onRetry={options?.onRetry} />;
-  }
-  
-  if (data.length === 0) {
-    return (
-      <EmptyState
-        title={options?.emptyTitle}
-        description={options?.emptyDescription}
-        onAction={options?.onCreate}
-        variant="create"
-      />
-    );
-  }
-  
-  return null;
-};

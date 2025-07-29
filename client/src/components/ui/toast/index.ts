@@ -16,7 +16,7 @@ export {
   type ToastType,
   type ToastOptions,
   type LoadingToastOptions
-} from '@/lib/services/ToastService';
+} from '../../../lib/services/ToastService';
 
 // Hooks especializados
 export {
@@ -24,7 +24,7 @@ export {
   useAsyncToast,
   useFormToast,
   useUploadToast
-} from '@/hooks/useToast';
+} from '../../../hooks/useToast';
 
 // Provider
 export { ToastProvider } from './ToastProvider';

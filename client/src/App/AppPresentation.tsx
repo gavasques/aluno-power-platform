@@ -12,6 +12,7 @@ import React from 'react';
 import { Router, Route, Switch } from "wouter";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { ToastProvider } from '@/components/ui/toast';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { AuthProvider } from "../contexts/AuthContext";
@@ -69,9 +70,15 @@ export function AppPresentation({
     <QueryClientProvider client={queryClient}>
       <Router>
         <ThemeProvider>
-          <HelmetProvider>
-            <AuthProvider>
-              <CombinedProvider>
+          <ToastProvider 
+            theme="system" 
+            position="top-right" 
+            richColors 
+            closeButton
+          >
+            <HelmetProvider>
+              <AuthProvider>
+                <CombinedProvider>
                 <Switch>
                   {/* Render all routes dynamically */}
                   {allRoutes.map((route) => (
@@ -106,10 +113,11 @@ export function AppPresentation({
                     )}
                   </Route>
                 </Switch>
-                <Toaster />
-              </CombinedProvider>
-            </AuthProvider>
-          </HelmetProvider>
+                  <Toaster />
+                </CombinedProvider>
+              </AuthProvider>
+            </HelmetProvider>
+          </ToastProvider>
         </ThemeProvider>
       </Router>
     </QueryClientProvider>
