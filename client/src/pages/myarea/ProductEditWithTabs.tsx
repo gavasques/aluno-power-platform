@@ -126,7 +126,7 @@ const ProductEditWithTabs: React.FC = () => {
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ['/api/products', id],
     queryFn: async () => {
-      const response = await apiRequest(`/api/products/${id}`);
+      const response = await apiRequest(`/api/products/${id}`) as { data: Product };
       return response.data;
     },
     enabled: !!id,

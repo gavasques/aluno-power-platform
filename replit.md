@@ -129,6 +129,29 @@ ComponentName/
 7. **DevolucaesManager** (700→200 lines) - 71% reduction
 8. **Usage Analytics** (739→300 lines) - 59% reduction
 
+### ✅ LATEST REFACTORINGS COMPLETED (January 30, 2025)
+
+#### Component Refactoring Wave 2
+9. **KeywordSearchReport** (580→180 lines) - 69% reduction
+   - **Path**: `client/src/pages/hub/KeywordSearchReport/`
+   - **Structure**: Container/Presentational with modular components
+   - **Features**: Search form, progress tracking, product grid, export functionality
+
+10. **ProductEditWithTabs** (680→200 lines) - 71% reduction
+    - **Path**: `client/src/pages/myarea/ProductEditWithTabs/`
+    - **Structure**: Tab-based UI with separated form components
+    - **Features**: Basic info, dimensions, photo upload, supplier management
+
+11. **SupplierInfoDisplay** (675→220 lines) - 67% reduction
+    - **Path**: `client/src/components/supplier/SupplierInfoDisplay/`
+    - **Structure**: Editable sections with inline editing capabilities
+    - **Features**: Basic info editing, description, commercial terms, banking data
+
+12. **AdvancedInfographicGenerator** (671→180 lines) - 73% reduction
+    - **Path**: `client/src/pages/agents/AdvancedInfographicGenerator/`
+    - **Structure**: Multi-step wizard with state management
+    - **Features**: Product input, concept selection, AI generation, download
+
 ### ✅ DRY REFACTORING PHASES COMPLETED (January 30, 2025)
 
 #### ETAPA 9: Channel Calculations Unified ✅

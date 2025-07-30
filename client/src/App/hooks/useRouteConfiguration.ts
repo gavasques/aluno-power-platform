@@ -51,7 +51,7 @@ const lazyComponents = {
   // Tools
   Ferramentas: lazy(() => import('../../pages/Ferramentas')),
   AmazonReviewExtractor: lazy(() => import('../../pages/hub/AmazonReviewExtractor')),
-  KeywordSearchReport: lazy(() => import('../../pages/hub/KeywordSearchReport')),
+  KeywordSearchReport: lazy(() => import('../../pages/hub/KeywordSearchReport/KeywordSearchRefactored')),
   AmazonProductDetails: lazy(() => import('../../pages/hub/AmazonProductDetails/AmazonProductDetailsRefactored')),
   CompararListings: lazy(() => import('../../pages/hub/CompararListings')),
   CNPJConsulta: lazy(() => import('../../pages/hub/CNPJConsulta')),
