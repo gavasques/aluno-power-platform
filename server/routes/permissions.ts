@@ -136,8 +136,6 @@ permissionRoutes.get("/groups/:groupId", requireAuth, async (req: Request, res: 
       .where(eq(permissionGroups.id, groupId))
       .limit(1);
     
-    console.log(`🔍 [DEBUG] Query result:`, groupResult);
-    
     if (!groupResult[0]) {
       console.log(`❌ [DEBUG] Group ${groupId} not found in permission_groups table`);
       return res.status(404).json({ error: "Group not found" });
@@ -166,9 +164,9 @@ permissionRoutes.get("/groups/:groupId", requireAuth, async (req: Request, res: 
       permissions
     };
     
-    console.log(`✅ [DEBUG] Found group:`, group);
-
-    res.json({ group: group[0] });
+    console.log(`✅ [DEBUG] Found group with ${permissions.length} permissions`);
+    
+    res.status(200).json({ group });
   } catch (error) {
     console.error("Error getting group:", error);
     res.status(500).json({ error: "Failed to get group" });
