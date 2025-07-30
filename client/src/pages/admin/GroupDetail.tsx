@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -102,40 +102,13 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
   const group: GroupData | undefined = groupResponse?.group;
   const features: PermissionCategory = featuresResponse?.features || {};
   const memberCount = membersResponse?.users?.length || 0;
-
   const isLoading = groupLoading || featuresLoading;
 
-  if (isLoading) {
-    return (
-      <AdminStandardLayout title="Carregando..." showBackButton>
-        <AdminLoader />
-      </AdminStandardLayout>
-    );
-  }
-
-  if (!group) {
-    return (
-      <AdminStandardLayout title="Grupo não encontrado" showBackButton>
-        <AdminCard>
-          <div className="text-center py-8">
-            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Grupo não encontrado</h3>
-            <p className="text-gray-600 mb-4">O grupo solicitado não existe ou foi removido.</p>
-            <Button onClick={() => setLocation('/admin/usuarios')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar para Gestão de Usuários
-            </Button>
-          </div>
-        </AdminCard>
-      </AdminStandardLayout>
-    );
-  }
-
   // Get all permissions that the group has
-  const groupPermissions = Array.isArray(group.permissions) ? group.permissions : [];
+  const groupPermissions = Array.isArray(group?.permissions) ? group.permissions : [];
   
-  // Create a map of categories and their permissions
-  const permissionsByCategory = React.useMemo(() => {
+  // Create a map of categories and their permissions - MUST be called before any returns
+  const permissionsByCategory = useMemo(() => {
     const categories: { [category: string]: { granted: PermissionFeature[], denied: PermissionFeature[] } } = {};
     
     Object.entries(features).forEach(([category, categoryFeatures]) => {
@@ -160,6 +133,34 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
     
     return categories;
   }, [features, groupPermissions]);
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <AdminStandardLayout title="Carregando..." showBackButton>
+        <AdminLoader />
+      </AdminStandardLayout>
+    );
+  }
+
+  // Handle not found state
+  if (!group) {
+    return (
+      <AdminStandardLayout title="Grupo não encontrado" showBackButton>
+        <AdminCard>
+          <div className="text-center py-8">
+            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Grupo não encontrado</h3>
+            <p className="text-gray-600 mb-4">O grupo solicitado não existe ou foi removido.</p>
+            <Button onClick={() => setLocation('/admin/usuarios')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar para Gestão de Usuários
+            </Button>
+          </div>
+        </AdminCard>
+      </AdminStandardLayout>
+    );
+  }
 
   return (
     <AdminStandardLayout 
