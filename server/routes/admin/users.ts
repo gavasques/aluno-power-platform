@@ -19,8 +19,8 @@ router.get('/users', enhancedAuth, async (req, res) => {
     const search = req.query.search as string;
     const offset = (page - 1) * limit;
 
-    // Build the query
-    let query = db
+    // Build the base query with search filter
+    const baseQuery = db
       .select({
         id: users.id,
         username: users.username,
@@ -33,28 +33,26 @@ router.get('/users', enhancedAuth, async (req, res) => {
       })
       .from(users);
 
-    // Add search filter if provided
-    if (search) {
-      query = query.where(
-        or(
-          ilike(users.name, `%${search}%`),
-          ilike(users.email, `%${search}%`),
-          ilike(users.username, `%${search}%`)
-        )
-      );
-    }
+    // Build where condition if search is provided
+    const whereCondition = search ? or(
+      ilike(users.name, `%${search}%`),
+      ilike(users.email, `%${search}%`),
+      ilike(users.username, `%${search}%`)
+    ) : undefined;
 
-    // Get total count for pagination
+    // Get total count for pagination with same filter
     const totalCountResult = await db
       .select({ count: count() })
-      .from(users);
+      .from(users)
+      .where(whereCondition);
     const totalUsers = totalCountResult[0].count;
 
     // Get paginated users
-    const allUsers = await query
+    const query = baseQuery;
+    const allUsers = await (whereCondition ? query.where(whereCondition) : query)
       .limit(limit)
       .offset(offset)
-      .orderBy(users.createdAt, 'desc');
+      .orderBy(users.createdAt);
 
     // Calculate pagination
     const totalPages = Math.ceil(totalUsers / limit);

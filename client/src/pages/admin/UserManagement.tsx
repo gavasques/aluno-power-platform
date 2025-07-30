@@ -70,12 +70,18 @@ const UserManagement = memo(() => {
         ...(searchTerm && { search: searchTerm })
       });
       
-      const response = await fetch(`/api/admin/users?${params}`);
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/admin/users?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch users');
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes cache
-    keepPreviousData: true, // Keep previous data while loading new page
+    placeholderData: (previousData) => previousData, // Updated from keepPreviousData
   });
 
   const users = usersResponse?.users || [];
@@ -84,6 +90,17 @@ const UserManagement = memo(() => {
   // Permission groups query
   const { data: groupsResponse } = useQuery({
     queryKey: ['/api/admin/permissions/groups'],
+    queryFn: async () => {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('/api/admin/permissions/groups', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch groups');
+      return response.json();
+    },
     staleTime: 2 * 60 * 1000,
   });
 
@@ -92,9 +109,13 @@ const UserManagement = memo(() => {
   // Mutations for user actions
   const toggleUserStatus = useMutation({
     mutationFn: async ({ userId, isActive }: { userId: number; isActive: boolean }) => {
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ isActive })
       });
       if (!response.ok) throw new Error('Failed to update user status');
