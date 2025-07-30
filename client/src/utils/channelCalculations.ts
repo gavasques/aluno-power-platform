@@ -293,7 +293,7 @@ export const calculateChannelProfitability = (
   };
 };
 
-import { formatters } from '@/lib/utils/formatters';
+import { formatters } from '@/lib/utils/unifiedFormatters';
 
 // Format currency for Brazilian display
 export const formatCurrency = formatters.currency;

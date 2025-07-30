@@ -253,10 +253,8 @@ export const FileList: React.FC<FileListProps> = ({
   isLoading = false 
 }) => {
   const formatFileSize = (bytes: number) => {
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    if (bytes === 0) return '0 Byte';
-    const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)).toString());
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    const { formatFileSize: unifiedFormatFileSize } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatFileSize(bytes);
   };
 
   const formatDate = (date: string | Date) => {

@@ -209,7 +209,6 @@ export class PicsartService {
     const sessionId = crypto.randomUUID();
     
     const sessionData: InsertPicsartSession = {
-      id: sessionId,
       userId: options.userId,
       tool: options.tool,
       status: 'processing',
@@ -583,7 +582,7 @@ export class PicsartService {
       
       console.log(`📤 [PICSART] Uploaded image: ${fileUrl}`);
       return fileUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ [PICSART] Image upload failed:', error);
       console.error('❌ [PICSART] Error details:', {
         name: error.name,

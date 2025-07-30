@@ -41,10 +41,8 @@ export default function FormalImportSimulationsListSimple() {
 
   const formatCurrency = (value: number) => {
     try {
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }).format(value || 0);
+      const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+      return unifiedFormatCurrency(value || 0);
     } catch {
       return 'R$ 0,00';
     }

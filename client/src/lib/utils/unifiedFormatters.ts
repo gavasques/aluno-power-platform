@@ -309,6 +309,14 @@ export function formatCompactNumber(value: number, locale: string = 'pt-BR'): st
   }).format(value);
 }
 
+/**
+ * Format CBM (Cubic Meters) with appropriate precision
+ * Replaces formatCBM functions in formal import utilities
+ */
+export function formatCBM(value: number, decimals: number = 6): string {
+  return `${value.toFixed(decimals)} m³`;
+}
+
 // Utility object for easy importing
 export const Formatters = {
   currency: formatCurrency,
@@ -323,6 +331,7 @@ export const Formatters = {
   fileSize: formatFileSize,
   relativeTime: formatRelativeTime,
   compactNumber: formatCompactNumber,
+  cbm: formatCBM,
   truncateText,
   capitalizeWords,
 };
@@ -342,9 +351,17 @@ export const Utils = {
   debounce,
 };
 
+// Legacy alias for backward compatibility
+export const formatters = {
+  currency: formatCurrency,
+  percentage: formatPercentage,
+  number: formatBrazilianNumber,
+};
+
 export default {
   ...Formatters,
   ...Parsers,
   ...Generators,
   ...Utils,
+};
 };

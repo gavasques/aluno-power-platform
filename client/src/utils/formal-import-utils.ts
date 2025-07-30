@@ -1,26 +1,23 @@
 import { Product, Tax, Expense } from '@/types/formal-import';
 
-// Funções de formatação memoizadas
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value);
-};
+import { formatCurrency } from '@/lib/utils/unifiedFormatters';
+
+// Re-export unified formatter
+export { formatCurrency };
 
 export const formatUSD = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(value);
+  const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+  return unifiedFormatCurrency(value, 'USD', 'en-US');
 };
 
 export const formatPercentage = (value: number): string => {
-  return `${((value || 0) * 100).toFixed(2)}%`;
+  const { formatPercentage: unifiedFormatPercentage } = require('@/lib/utils/unifiedFormatters');
+  return unifiedFormatPercentage(value);
 };
 
 export const formatCBM = (value: number): string => {
-  return `${value.toFixed(6)} m³`;
+  const { formatCBM: unifiedFormatCBM } = require('@/lib/utils/unifiedFormatters');
+  return unifiedFormatCBM(value);
 };
 
 // Funções de cálculo otimizadas

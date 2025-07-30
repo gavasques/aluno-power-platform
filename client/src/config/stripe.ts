@@ -51,7 +51,7 @@ export const STRIPE_CONFIG = {
   ]
 };
 
-import { formatters } from '@/lib/utils/formatters';
+import { formatters } from '@/lib/utils/unifiedFormatters';
 
 // Formatter para moeda brasileira
 export const formatCurrency = formatters.currency;

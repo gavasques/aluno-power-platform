@@ -1,7 +1,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Compress, FileImage, Zap } from "lucide-react";
+import { Archive, FileImage, Zap } from "lucide-react";
 
 interface CompressionInfoProps {
   originalSize: number;
@@ -19,11 +19,8 @@ export function CompressionInfo({
   className,
 }: CompressionInfoProps) {
   const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    const { formatFileSize } = require('@/lib/utils/unifiedFormatters');
+    return formatFileSize(bytes);
   };
 
   const getCompressionColor = (ratio: number): string => {
@@ -36,7 +33,7 @@ export function CompressionInfo({
   return (
     <Card className={`p-3 space-y-2 ${className}`}>
       <div className="flex items-center gap-2">
-        <Compress className="h-4 w-4 text-blue-600" />
+        <Archive className="h-4 w-4 text-blue-600" />
         <span className="text-sm font-medium">Compressão Aplicada</span>
         {format && (
           <Badge variant="outline" className="text-xs">

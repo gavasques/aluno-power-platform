@@ -217,7 +217,7 @@ export function calculateAllChannels(
   return results;
 }
 
-import { formatCurrency as formatCurrencyUtil, formatPercentage as formatPercentageUtil } from '@/lib/utils/formatters';
+import { formatCurrency as formatCurrencyUtil, formatPercentage as formatPercentageUtil } from '@/lib/utils/unifiedFormatters';
 
 /**
  * Format currency for display

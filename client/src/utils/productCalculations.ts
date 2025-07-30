@@ -71,7 +71,7 @@ export function calculateChannelResults(
   };
 }
 
-import { formatCurrency as formatCurrencyUtil, formatPercentage as formatPercentageUtil } from '@/lib/utils/formatters';
+import { formatCurrency as formatCurrencyUtil, formatPercentage as formatPercentageUtil } from '@/lib/utils/unifiedFormatters';
 
 export function formatCurrency(value: number): string {
   return formatCurrencyUtil(value);

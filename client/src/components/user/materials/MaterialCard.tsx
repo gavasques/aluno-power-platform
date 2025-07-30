@@ -24,9 +24,8 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({
 
   const formatFileSize = (bytes: number | null) => {
     if (!bytes) return null;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    const { formatFileSize: unifiedFormatFileSize } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatFileSize(bytes);
   };
 
   const getThumbnail = () => {

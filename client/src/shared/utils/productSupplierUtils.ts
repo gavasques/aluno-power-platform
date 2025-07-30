@@ -49,10 +49,8 @@ export class ProductSupplierUtils {
    * Formats currency for display
    */
   static formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
+    const { formatCurrency } = require('@/lib/utils/unifiedFormatters');
+    return formatCurrency(value);
   }
 
   /**

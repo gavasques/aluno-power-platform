@@ -1269,7 +1269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const amazonListingService = new AmazonListingService();
       const result = await amazonListingService.processStep1_AnalysisReviews(sessionId);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing step 1 (Analysis):', error);
       res.status(500).json({ error: error.message || 'Failed to process analysis step' });
     }
@@ -1283,7 +1283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const amazonListingService = new AmazonListingService();
       const result = await amazonListingService.processStep2_GenerateTitles(sessionId);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing step 2 (Titles):', error);
       res.status(500).json({ error: error.message || 'Failed to generate titles' });
     }
@@ -1297,7 +1297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const amazonListingService = new AmazonListingService();
       const result = await amazonListingService.processStep3_BulletPoints(sessionId);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing step 3 (Bullet Points):', error);
       res.status(500).json({ error: error.message || 'Failed to generate bullet points' });
     }
@@ -1311,7 +1311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const amazonListingService = new AmazonListingService();
       const result = await amazonListingService.processStep4_Description(sessionId);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing step 4 (Description):', error);
       res.status(500).json({ error: error.message || 'Failed to generate description' });
     }

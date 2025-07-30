@@ -64,21 +64,18 @@ export const FormalImportSimulatorContainer = ({ simulationId }: FormalImportSim
 
   // Funções de formatação
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+    const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatCurrency(value);
   };
 
   const formatUSD = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
+    const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatCurrency(value, 'USD', 'en-US');
   };
 
   const formatPercentage = (value: number) => {
-    return `${((value || 0) * 100).toFixed(2)}%`;
+    const { formatPercentage: unifiedFormatPercentage } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatPercentage(value);
   };
 
   // Cálculos derivados

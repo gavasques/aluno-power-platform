@@ -518,10 +518,8 @@ export const calculateGrowthRate = (current: number, previous: number): number =
 };
 
 export const formatCurrency = (value: number, currency: string = 'BRL'): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency
-  }).format(value);
+  const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+  return unifiedFormatCurrency(value);
 };
 
 export const formatPercentage = (value: number): string => {

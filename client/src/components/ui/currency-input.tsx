@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input } from './input';
-import { formatters } from '@/lib/utils/formatters';
+import { formatCurrency } from '@/lib/utils/unifiedFormatters';
 
 interface CurrencyInputProps {
   value: number;

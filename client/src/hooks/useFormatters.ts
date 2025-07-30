@@ -3,12 +3,15 @@
  * Elimina duplicação das funções de formatação nos managers
  */
 
-import { formatters } from '@/lib/utils/formatters';
+import { formatters } from '@/lib/utils/unifiedFormatters';
 
 export function useFormatters() {
   return {
     // Formatações monetárias
-    currency: formatters.currency,
+    currency: (value: number | string | null | undefined, options?: any): string => {
+      const { formatCurrency } = require('@/lib/utils/unifiedFormatters');
+      return formatCurrency(value, options);
+    },
     
     // Formatações de data
     date: (dateString: string | null | undefined): string => {
@@ -69,7 +72,7 @@ export function useFormatters() {
       };
 
       const config = statusConfig || defaultConfig;
-      return config[status] || { label: status, color: 'bg-gray-100 text-gray-800' };
+      return config[status as keyof typeof config] || { label: status, color: 'bg-gray-100 text-gray-800' };
     },
 
     // Formatações de tipo
@@ -85,14 +88,20 @@ export function useFormatters() {
       };
 
       const config = tipoConfig || defaultConfig;
-      return config[tipo] || tipo;
+      return config[tipo as keyof typeof config] || tipo;
     },
 
     // Formatação de percentual
-    percentage: formatters.percentage,
+    percentage: (value: number | string | null | undefined, options?: any): string => {
+      const { formatPercentage } = require('@/lib/utils/unifiedFormatters');
+      return formatPercentage(value, options);
+    },
 
     // Formatação de números
-    number: formatters.number,
+    number: (value: number | string | null | undefined, decimals?: number): string => {
+      const { formatBrazilianNumber } = require('@/lib/utils/unifiedFormatters');
+      return formatBrazilianNumber(value, decimals);
+    },
 
     // Formatação de boolean para string
     boolean: (value: boolean | null | undefined, trueLabel = 'Sim', falseLabel = 'Não'): string => {

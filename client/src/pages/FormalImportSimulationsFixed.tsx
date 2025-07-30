@@ -76,10 +76,8 @@ export default function FormalImportSimulationsFixed() {
   const formatCurrency = (value: any) => {
     if (!value || isNaN(Number(value))) return 'R$ 0,00';
     try {
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }).format(Number(value));
+      const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+      return unifiedFormatCurrency(Number(value));
     } catch {
       return 'R$ 0,00';
     }

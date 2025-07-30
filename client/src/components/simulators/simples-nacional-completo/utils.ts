@@ -1,6 +1,6 @@
 import { MesSimulacao, FaixaAliquota, ValidationResult, NovoMesForm } from './types';
 import { ANEXO_I_FAIXAS, ANEXO_II_FAIXAS, VALIDATION_PATTERNS } from './constants';
-import { formatters } from '@/lib/utils/formatters';
+import { formatters } from '@/lib/utils/unifiedFormatters';
 
 export const formatCurrency = formatters.currency;
 export const formatPercentage = (value: number): string => {

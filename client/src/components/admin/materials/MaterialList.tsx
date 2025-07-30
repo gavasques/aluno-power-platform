@@ -40,9 +40,8 @@ export const MaterialList: React.FC<MaterialListProps> = ({
 
   const formatFileSize = (bytes: number | null) => {
     if (!bytes) return '-';
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    const { formatFileSize: unifiedFormatFileSize } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatFileSize(bytes);
   };
 
   return (

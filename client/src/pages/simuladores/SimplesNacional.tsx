@@ -11,31 +11,21 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useCreditSystem } from '@/hooks/useCreditSystem';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
+import { formatCurrency } from '@/lib/utils/unifiedFormatters';
 
 const FEATURE_CODE = 'simulators.simples_nacional';
 
 // Formatação brasileira de números com formato específico R$ X.XXX.XXXX,XX
 const formatBrazilianNumber = (value: number, decimals: number = 2): string => {
-  return value.toLocaleString('pt-BR', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
-  });
-};
-
-const formatCurrency = (value: number): string => {
-  return `R$ ${value.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
+  const { formatBrazilianNumber: unifiedFormatBrazilianNumber } = require('@/lib/utils/unifiedFormatters');
+  return unifiedFormatBrazilianNumber(value, decimals);
 };
 
 // Formatação para campos de entrada de moeda
 const formatCurrencyInput = (value: number): string => {
   if (value === 0) return '';
-  return `R$ ${value.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
+  const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+  return unifiedFormatCurrency(value);
 };
 
 // Converte string de moeda para número
@@ -48,10 +38,8 @@ const parseCurrencyInput = (value: string): number => {
 };
 
 const formatPercent = (value: number): string => {
-  return (value * 100).toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }) + '%';
+  const { formatPercentage: unifiedFormatPercentage } = require('@/lib/utils/unifiedFormatters');
+  return unifiedFormatPercentage(value);
 };
 
 // Tabela de faixas do Simples Nacional

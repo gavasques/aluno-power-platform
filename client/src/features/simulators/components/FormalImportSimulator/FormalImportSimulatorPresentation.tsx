@@ -95,21 +95,13 @@ export const FormalImportSimulatorPresentation = ({
 
   // ===== UTILITY FUNCTIONS =====
   const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
+    const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatCurrency(value);
   };
 
   const formatUSD = (value: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
+    const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatCurrency(value, 'USD', 'en-US');
   };
 
   // ===== ACTIONS =====

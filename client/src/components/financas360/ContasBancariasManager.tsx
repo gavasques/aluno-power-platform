@@ -306,10 +306,8 @@ export default function ContasBancariasManager() {
   };
 
   const formatCurrency = (value: number) => {
-    return value.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
+    const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatCurrency(value);
   };
 
   const getTipoLabel = (tipo: string) => {

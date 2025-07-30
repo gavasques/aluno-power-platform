@@ -248,7 +248,8 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
   };
 
   const formatNumber = (value: string) => {
-    return value.replace(/[^0-9.,]/g, '').replace(',', '.');
+    const { sanitizeNumericInput } = require('@/lib/utils/unifiedFormatters');
+    return sanitizeNumericInput(value).toString();
   };
 
   if (loading) {

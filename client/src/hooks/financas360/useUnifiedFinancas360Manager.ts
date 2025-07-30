@@ -239,18 +239,18 @@ export function useUnifiedFinancas360Manager<
  */
 export const useFinancas360Formatters = () => {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+    const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatCurrency(value);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    const { formatDate: unifiedFormatDate } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatDate(new Date(dateString));
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR');
+    const { formatDateTime: unifiedFormatDateTime } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatDateTime(new Date(dateString));
   };
 
   const formatStatus = (status: string) => {

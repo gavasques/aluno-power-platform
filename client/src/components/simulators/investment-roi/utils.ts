@@ -1,5 +1,5 @@
 import { GiroCalculado } from './types';
-import { formatters } from '@/lib/utils/formatters';
+import { formatters } from '@/lib/utils/unifiedFormatters';
 
 /**
  * Currency and number formatting utilities

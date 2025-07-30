@@ -1,6 +1,6 @@
 // Utility functions for Informal Import Simulation
 import { SimulacaoCompleta, ValidationResult, ValidationError, CalculatedResults } from './types';
-import { formatters } from '@/lib/utils/formatters';
+import { formatters } from '@/lib/utils/unifiedFormatters';
 
 // Dynamic imports for PDF generation
 let jsPDF: any;
@@ -20,10 +20,8 @@ const loadPDFLibraries = async () => {
  */
 export const formatBrazilianNumber = (value: number, decimals: number = 2): string => {
   if (value === 0) return '';
-  return value.toLocaleString('pt-BR', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
-  });
+  const { formatBrazilianNumber: unifiedFormatBrazilianNumber } = require('@/lib/utils/unifiedFormatters');
+  return unifiedFormatBrazilianNumber(value, decimals);
 };
 
 export const formatCurrency = formatters.currency;

@@ -82,7 +82,7 @@ export class ProductController extends BaseController {
             res.set('X-Performance-Metrics', JSON.stringify(result.performance));
           }
           ResponseHandler.success(res, result);
-        } catch (optimizationError) {
+        } catch (optimizationError: any) {
           console.warn('⚠️ [PRODUCTS] Optimization failed, falling back to storage:', optimizationError.message);
           // Fallback to original storage method
           const products = await storage.getProducts();
@@ -132,12 +132,12 @@ export class ProductController extends BaseController {
       // CRITICAL DEBUG: Check exactly what ResponseHandler.success is sending
       console.log('🔍 [CRITICAL DEBUG] About to send via ResponseHandler.success');
       console.log('🔍 [CRITICAL DEBUG] Product channels being sent:', product.channels);
-      console.log('🔍 [CRITICAL DEBUG] SITE_PROPRIO channel:', product.channels?.find((ch: any) => ch.type === 'SITE_PROPRIO'));
-      console.log('🔍 [CRITICAL DEBUG] AMAZON_FBA channel:', product.channels?.find((ch: any) => ch.type === 'AMAZON_FBA'));
+      console.log('🔍 [CRITICAL DEBUG] SITE_PROPRIO channel:', product.channels?.find?.((ch: any) => ch.type === 'SITE_PROPRIO'));
+      console.log('🔍 [CRITICAL DEBUG] AMAZON_FBA channel:', product.channels?.find?.((ch: any) => ch.type === 'AMAZON_FBA'));
       
       ResponseHandler.success(res, product);
     } catch (error) {
-      this.handleError(res, error, 'Failed to fetch product');
+      this.handleError(error, res, 'Failed to fetch product');
     }
   }
 
@@ -263,7 +263,7 @@ export class ProductController extends BaseController {
       
       ResponseHandler.noContent(res);
     } catch (error) {
-      this.handleError(res, error, 'Failed to delete product');
+      this.handleError(error, res, 'Failed to delete product');
     }
   }
 
@@ -286,7 +286,7 @@ export class ProductController extends BaseController {
       ResponseHandler.success(res, history);
     } catch (error) {
       console.error('Error fetching cost history:', error);
-      this.handleError(res, error, 'Failed to fetch cost history');
+      this.handleError(error, res, 'Failed to fetch cost history');
     }
   }
 
@@ -301,7 +301,7 @@ export class ProductController extends BaseController {
       const products = await storage.searchProducts(query);
       ResponseHandler.success(res, products);
     } catch (error) {
-      this.handleError(res, error, 'Failed to search products');
+      this.handleError(error, res, 'Failed to search products');
     }
   }
 

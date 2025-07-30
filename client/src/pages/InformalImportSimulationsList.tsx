@@ -57,6 +57,7 @@ const InformalImportSimulationsList: React.FC = () => {
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   // Debug logs
+  console.log('InformalImportSimulationsList Debug:', {
     apiResponse,
     simulations,
     totalItems,
@@ -66,6 +67,7 @@ const InformalImportSimulationsList: React.FC = () => {
   });
   
   // Additional debug for data extraction
+  console.log('Data extraction debug:', {
     hasApiResponse: !!apiResponse,
     apiResponseType: typeof apiResponse,
     apiResponseKeys: apiResponse ? Object.keys(apiResponse) : 'none',
@@ -142,10 +144,8 @@ const InformalImportSimulationsList: React.FC = () => {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+    const { formatCurrency: unifiedFormatCurrency } = require('@/lib/utils/unifiedFormatters');
+    return unifiedFormatCurrency(value);
   };
 
   const formatDate = (dateString: string) => {

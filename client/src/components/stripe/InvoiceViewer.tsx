@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Invoice } from '@/types/stripe';
-import { formatters } from '@/lib/utils/formatters';
+import { formatters } from '@/lib/utils/unifiedFormatters';
 
 export const InvoiceViewer: React.FC = () => {
   const { data: invoicesData, isLoading } = useQuery({
