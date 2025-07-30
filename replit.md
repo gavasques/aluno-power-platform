@@ -207,6 +207,14 @@ YOUTUBE_API_KEY=your_youtube_key
 ## 🔒 Security Updates
 
 ### Latest Security Patches Applied
+- **January 30, 2025**: Fixed critical SQL injection vulnerability in DatabaseOptimizer
+  - **Location**: `server/utils/DatabaseOptimizer.ts` (line 373)
+  - **Issue**: Used `sql.raw()` for table statistics updates violating Drizzle coding standards
+  - **Fix**: Replaced `sql.raw(\`ANALYZE ${table}\`)` with `sql\`ANALYZE ${sql.identifier(table)}\``
+  - **Impact**: Enforced framework conventions and improved type safety
+  - **Status**: ✅ Fixed - Database operations now follow Drizzle best practices
+  - **Action Required**: Test application thoroughly before deployment
+
 - **January 30, 2025**: Fixed critical SQL injection vulnerability in supplier deletion cascade
   - **Location**: `server/routes/internationalSupplierBanking.ts` (lines 428-464)
   - **Issue**: Raw SQL queries using string interpolation vulnerable to SQL injection

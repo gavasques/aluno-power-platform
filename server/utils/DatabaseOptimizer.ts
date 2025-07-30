@@ -370,7 +370,7 @@ export class DatabaseOptimizer {
     
     for (const table of tables) {
       try {
-        await db.execute(sql.raw(`ANALYZE ${table}`));
+        await db.execute(sql`ANALYZE ${sql.identifier(table)}`);
         console.log(`✅ Statistics updated for ${table}`);
       } catch (error: any) {
         console.error(`❌ Error analyzing ${table}: ${error.message}`);
