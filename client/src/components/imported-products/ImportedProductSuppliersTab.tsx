@@ -60,11 +60,58 @@ const ImportedProductSuppliersTab = forwardRef<ImportedProductSuppliersTabRef, I
   });
 
   // Carregar dados inicial
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      if (!token) {
+        return;
+      }
+      
+      // Carregar fornecedores do CRM de importação
+      const suppliersResponse = await fetch('/api/international-suppliers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (suppliersResponse.ok) {
+        const suppliersData = await suppliersResponse.json();
+        // A API retorna {success: true, data: [...]}
+        setSuppliers(suppliersData?.data || []);
+      }
+
+      // Carregar fornecedores do produto apenas se não estiver em modo temporário
+      if (productId && productId !== '') {
+        const productSuppliersResponse = await fetch(`/api/imported-products/${productId}/suppliers`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (productSuppliersResponse.ok) {
+          const productSuppliersData = await productSuppliersResponse.json();
+          setProductSuppliers(productSuppliersData.data || []);
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar dados dos fornecedores",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [productId, token, toast]);
+
   useEffect(() => {
     if (token) {
       loadData();
     }
-  }, [productId, token]);
+  }, [loadData]);
 
   useEffect(() => {
     setIsTemporaryMode(!productId || productId === '');
