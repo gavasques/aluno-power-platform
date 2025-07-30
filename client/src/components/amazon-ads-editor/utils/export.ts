@@ -1,7 +1,8 @@
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { AmazonAdsRow, ValidationError, ChangeHistory, FileStats } from './types';
-import { AmazonAdsValidator, formatCurrency, formatPercentage } from './validation';
+import { AmazonAdsValidator } from './validation';
+import { formatCurrency, formatPercentage } from '@/lib/utils/unifiedFormatters';
 
 export class AmazonAdsExporter {
   
