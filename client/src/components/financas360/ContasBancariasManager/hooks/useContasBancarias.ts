@@ -2,115 +2,97 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import type { ContaBancaria, ContaBancariaForm, ContasBancariasState } from '../types';
+import type { ContaBancaria, PixChave, ContasBancariasState } from '../types';
 
-const defaultFormData: ContaBancariaForm = {
-  empresaId: 0,
-  bankName: '',
-  accountType: '',
-  agency: '',
-  account: '',
-  accountDigit: '',
-  pixKey: '',
-  pixKeyType: '',
-  initialBalance: 0,
-  isActive: true,
-  observations: ''
+const defaultFormData: Partial<ContaBancaria> = {
+  banco: '',
+  agencia: '',
+  conta: '',
+  digito: '',
+  tipo: 'corrente',
+  titular: '',
+  documento: '',
+  saldoAtual: 0,
+  saldoInicial: 0,
+  pixChaves: [],
+  ativo: true,
+  descricao: '',
+  observacoes: ''
 };
 
 export const useContasBancarias = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [state, setState] = useState<Omit<ContasBancariasState, 'contas' | 'loading' | 'error'>>({
-    editingId: null,
-    deletingId: null,
-    showForm: false,
-    formData: defaultFormData,
+  const [state, setState] = useState<Omit<ContasBancariasState, 'contas' | 'filteredContas' | 'loading' | 'error'>>({
     searchTerm: '',
-    filterActive: 'all',
-    filterBank: ''
+    filterTipo: '',
+    filterBanco: '',
+    showInactive: false,
+    selectedConta: null,
+    isEditing: false,
+    isCreating: false,
+    formData: defaultFormData
   });
 
-  // Fetch contas bancárias
-  const { data: contas = [], isLoading: loading, error } = useQuery<ContaBancaria[]>({
-    queryKey: ['/api/contas-bancarias'],
+  // Fetch contas
+  const { data: contas = [], isLoading, error } = useQuery<ContaBancaria[]>({
+    queryKey: ['/api/financas360/contas-bancarias'],
     queryFn: async () => {
-      const response = await apiRequest('/api/contas-bancarias');
+      const response = await apiRequest('/api/financas360/contas-bancarias');
       return response.data;
-    },
-  });
-
-  // Fetch empresas for dropdown
-  const { data: empresas = [] } = useQuery({
-    queryKey: ['/api/empresas'],
-    staleTime: 60000,
+    }
   });
 
   // Filter contas based on search and filters
   const filteredContas = useMemo(() => {
     return contas.filter(conta => {
       const matchesSearch = !state.searchTerm || 
-        conta.bankName.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-        conta.account.includes(state.searchTerm) ||
-        conta.agency.includes(state.searchTerm);
+        conta.banco.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        conta.titular.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        conta.conta.includes(state.searchTerm);
 
-      const matchesActiveFilter = state.filterActive === 'all' ||
-        (state.filterActive === 'active' && conta.isActive) ||
-        (state.filterActive === 'inactive' && !conta.isActive);
+      const matchesTipo = !state.filterTipo || conta.tipo === state.filterTipo;
+      const matchesBanco = !state.filterBanco || conta.banco === state.filterBanco;
+      const matchesActive = state.showInactive || conta.ativo;
 
-      const matchesBankFilter = !state.filterBank || 
-        conta.bankName.toLowerCase().includes(state.filterBank.toLowerCase());
-
-      return matchesSearch && matchesActiveFilter && matchesBankFilter;
+      return matchesSearch && matchesTipo && matchesBanco && matchesActive;
     });
-  }, [contas, state.searchTerm, state.filterActive, state.filterBank]);
+  }, [contas, state.searchTerm, state.filterTipo, state.filterBanco, state.showInactive]);
 
-  // Create mutation
-  const createMutation = useMutation({
-    mutationFn: async (data: ContaBancariaForm) => {
-      return apiRequest('/api/contas-bancarias', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+  // Create/Update mutation
+  const saveMutation = useMutation({
+    mutationFn: async (data: Partial<ContaBancaria>) => {
+      if (state.isEditing && state.selectedConta) {
+        return apiRequest(`/api/financas360/contas-bancarias/${state.selectedConta.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+      } else {
+        return apiRequest('/api/financas360/contas-bancarias', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contas-bancarias'] });
-      setState(prev => ({ ...prev, showForm: false, formData: defaultFormData }));
+      queryClient.invalidateQueries({ queryKey: ['/api/financas360/contas-bancarias'] });
+      setState(prev => ({
+        ...prev,
+        isEditing: false,
+        isCreating: false,
+        selectedConta: null,
+        formData: defaultFormData
+      }));
       toast({
         title: "Sucesso",
-        description: "Conta bancária criada com sucesso!",
+        description: state.isEditing ? "Conta atualizada com sucesso!" : "Conta criada com sucesso!",
       });
     },
     onError: (error: any) => {
       toast({
         title: "Erro",
-        description: error.message || "Erro ao criar conta bancária.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: async (data: ContaBancariaForm) => {
-      return apiRequest(`/api/contas-bancarias/${state.editingId}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contas-bancarias'] });
-      setState(prev => ({ ...prev, showForm: false, formData: defaultFormData, editingId: null }));
-      toast({
-        title: "Sucesso",
-        description: "Conta bancária atualizada com sucesso!",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro",
-        description: error.message || "Erro ao atualizar conta bancária.",
+        description: error.message || "Erro ao salvar conta bancária.",
         variant: "destructive",
       });
     },
@@ -119,13 +101,17 @@ export const useContasBancarias = () => {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/contas-bancarias/${id}`, {
+      return apiRequest(`/api/financas360/contas-bancarias/${id}`, {
         method: 'DELETE',
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contas-bancarias'] });
-      setState(prev => ({ ...prev, deletingId: null }));
+      queryClient.invalidateQueries({ queryKey: ['/api/financas360/contas-bancarias'] });
+      setState(prev => ({
+        ...prev,
+        selectedConta: null,
+        isEditing: false
+      }));
       toast({
         title: "Sucesso",
         description: "Conta bancária excluída com sucesso!",
@@ -137,104 +123,126 @@ export const useContasBancarias = () => {
         description: error.message || "Erro ao excluir conta bancária.",
         variant: "destructive",
       });
-      setState(prev => ({ ...prev, deletingId: null }));
     },
   });
 
-  const handleAdd = useCallback(() => {
+  const refreshContas = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['/api/financas360/contas-bancarias'] });
+  }, [queryClient]);
+
+  const searchContas = useCallback((term: string) => {
+    setState(prev => ({ ...prev, searchTerm: term }));
+  }, []);
+
+  const filterByTipo = useCallback((tipo: string) => {
+    setState(prev => ({ ...prev, filterTipo: tipo }));
+  }, []);
+
+  const filterByBanco = useCallback((banco: string) => {
+    setState(prev => ({ ...prev, filterBanco: banco }));
+  }, []);
+
+  const toggleShowInactive = useCallback(() => {
+    setState(prev => ({ ...prev, showInactive: !prev.showInactive }));
+  }, []);
+
+  const selectConta = useCallback((conta: ContaBancaria | null) => {
+    setState(prev => ({ ...prev, selectedConta: conta }));
+  }, []);
+
+  const startEditing = useCallback((conta: ContaBancaria) => {
     setState(prev => ({
       ...prev,
-      showForm: true,
-      editingId: null,
+      selectedConta: conta,
+      isEditing: true,
+      isCreating: false,
+      formData: { ...conta }
+    }));
+  }, []);
+
+  const startCreating = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      selectedConta: null,
+      isEditing: false,
+      isCreating: true,
       formData: defaultFormData
     }));
   }, []);
 
-  const handleEdit = useCallback((conta: ContaBancaria) => {
-    setState(prev => ({
-      ...prev,
-      showForm: true,
-      editingId: conta.id,
-      formData: {
-        empresaId: conta.empresaId,
-        bankName: conta.bankName,
-        accountType: conta.accountType,
-        agency: conta.agency,
-        account: conta.account,
-        accountDigit: conta.accountDigit || '',
-        pixKey: conta.pixKey || '',
-        pixKeyType: conta.pixKeyType || '',
-        initialBalance: conta.initialBalance,
-        isActive: conta.isActive,
-        observations: conta.observations || ''
-      }
-    }));
-  }, []);
-
-  const handleDelete = useCallback(async (id: number) => {
-    setState(prev => ({ ...prev, deletingId: id }));
-    await deleteMutation.mutateAsync(id);
-  }, [deleteMutation]);
-
-  const handleSave = useCallback(async () => {
-    if (state.editingId) {
-      await updateMutation.mutateAsync(state.formData);
-    } else {
-      await createMutation.mutateAsync(state.formData);
-    }
-  }, [state.editingId, state.formData, updateMutation, createMutation]);
-
-  const handleCancel = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      showForm: false,
-      editingId: null,
-      formData: defaultFormData
-    }));
-  }, []);
-
-  const updateFormField = useCallback((field: keyof ContaBancariaForm, value: any) => {
+  const updateFormField = useCallback((field: keyof ContaBancaria, value: any) => {
     setState(prev => ({
       ...prev,
       formData: { ...prev.formData, [field]: value }
     }));
   }, []);
 
-  const updateSearch = useCallback((term: string) => {
-    setState(prev => ({ ...prev, searchTerm: term }));
+  const addPixChave = useCallback((chave: Omit<PixChave, 'id'>) => {
+    setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        pixChaves: [
+          ...(prev.formData.pixChaves || []),
+          { ...chave, id: Date.now() }
+        ]
+      }
+    }));
   }, []);
 
-  const updateFilter = useCallback((filter: 'all' | 'active' | 'inactive') => {
-    setState(prev => ({ ...prev, filterActive: filter }));
+  const removePixChave = useCallback((index: number) => {
+    setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        pixChaves: (prev.formData.pixChaves || []).filter((_, i) => i !== index)
+      }
+    }));
   }, []);
 
-  const updateBankFilter = useCallback((bank: string) => {
-    setState(prev => ({ ...prev, filterBank: bank }));
-  }, []);
+  const saveConta = useCallback(async () => {
+    await saveMutation.mutateAsync(state.formData);
+  }, [state.formData, saveMutation]);
 
-  const refreshData = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['/api/contas-bancarias'] });
-  }, [queryClient]);
+  const deleteConta = useCallback(async (id: number) => {
+    await deleteMutation.mutateAsync(id);
+  }, [deleteMutation]);
+
+  const cancelEditing = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      isEditing: false,
+      isCreating: false,
+      selectedConta: null,
+      formData: defaultFormData
+    }));
+  }, []);
 
   return {
-    contas: filteredContas,
-    empresas,
-    loading,
-    error,
-    state,
-    isUpdating: createMutation.isPending || updateMutation.isPending,
-    isDeleting: deleteMutation.isPending,
+    state: {
+      ...state,
+      contas,
+      filteredContas,
+      loading: isLoading,
+      error: error?.message || null
+    },
     actions: {
-      handleAdd,
-      handleEdit,
-      handleDelete,
-      handleSave,
-      handleCancel,
+      refreshContas,
+      searchContas,
+      filterByTipo,
+      filterByBanco,
+      toggleShowInactive,
+      selectConta,
+      startEditing,
+      startCreating,
       updateFormField,
-      updateSearch,
-      updateFilter,
-      updateBankFilter,
-      refreshData
-    }
+      addPixChave,
+      removePixChave,
+      saveConta,
+      deleteConta,
+      cancelEditing
+    },
+    isSaving: saveMutation.isPending,
+    isDeleting: deleteMutation.isPending
   };
 };

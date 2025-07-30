@@ -1,53 +1,88 @@
-export interface ProductData {
-  name: string;
-  description: string;
+export interface ProductInfo {
+  productName: string;
   category: string;
+  description: string;
   targetAudience: string;
-  effortLevel: 'normal' | 'high';
+  keyFeatures: string[];
+  price: string;
+  benefits: string[];
 }
 
-export interface ConceptData {
-  id: string;
+export interface ConceptInfo {
   title: string;
-  subtitle: string;
-  focusType: string;
-  keyPoints: string[];
-  colorPalette: Record<string, string>;
-  layoutSpecs: Record<string, any>;
-  recommended: boolean;
+  description: string;
+  style: string;
+  colorScheme: string;
+  layout: string;
+  elements: string[];
 }
 
-export interface InfographicSession {
-  step: 'input' | 'concepts' | 'prompt' | 'generating' | 'completed';
-  productData?: ProductData;
-  analysisId?: string;
-  concepts?: ConceptData[];
-  selectedConceptId?: string;
-  generationId?: string;
-  finalImageUrl?: string;
-  imageFile?: File;
-}
-
-export interface InfographicState {
-  session: InfographicSession;
+export interface AdvancedInfographicState {
+  currentStep: 'product' | 'concept' | 'generation' | 'preview';
+  productInfo: ProductInfo;
+  conceptInfo: ConceptInfo;
+  generatedContent: string | null;
+  generatedImageUrl: string | null;
   loading: boolean;
-  uploadedImage: File | null;
-  imagePreview: string | null;
-  showProcessingModal: boolean;
-  formData: {
-    productName: string;
-    description: string;
-    category: string;
-    targetAudience: string;
-  };
+  error: string | null;
+  progress: number;
 }
 
-export interface InfographicActions {
-  handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFormSubmit: () => Promise<void>;
-  handleConceptSelect: (conceptId: string) => void;
+export interface AdvancedInfographicActions {
+  updateProductInfo: (field: keyof ProductInfo, value: any) => void;
+  updateConceptInfo: (field: keyof ConceptInfo, value: any) => void;
+  nextStep: () => void;
+  previousStep: () => void;
+  goToStep: (step: AdvancedInfographicState['currentStep']) => void;
   generateInfographic: () => Promise<void>;
-  resetSession: () => void;
-  updateFormField: (field: keyof InfographicState['formData'], value: string) => void;
-  downloadImage: () => void;
+  downloadInfographic: () => void;
+  resetGenerator: () => void;
 }
+
+export const INFOGRAPHIC_STYLES = [
+  'Moderno e Minimalista',
+  'Colorido e Vibrante',
+  'Profissional e Corporativo',
+  'Criativo e Artístico',
+  'Tecnológico e Futurista',
+  'Elegante e Sofisticado'
+];
+
+export const COLOR_SCHEMES = [
+  'Azul e Branco',
+  'Verde e Dourado',
+  'Roxo e Rosa',
+  'Laranja e Amarelo',
+  'Vermelho e Preto',
+  'Tons de Cinza',
+  'Multicolorido'
+];
+
+export const LAYOUT_OPTIONS = [
+  'Vertical (Stories)',
+  'Horizontal (Banner)',
+  'Quadrado (Post)',
+  'Infográfico Longo',
+  'Comparativo',
+  'Timeline'
+];
+
+export const CATEGORIES = [
+  'Eletrônicos',
+  'Casa e Jardim',
+  'Moda e Acessórios',
+  'Esportes e Lazer',
+  'Saúde e Beleza',
+  'Automotivo',
+  'Brinquedos',
+  'Alimentos',
+  'Tecnologia',
+  'Outros'
+];
+
+export const STEP_CONFIG = [
+  { id: 'product', title: 'Informações do Produto', description: 'Defina os detalhes do produto' },
+  { id: 'concept', title: 'Conceito Visual', description: 'Escolha o estilo e layout' },
+  { id: 'generation', title: 'Geração', description: 'Criando seu infográfico' },
+  { id: 'preview', title: 'Resultado', description: 'Visualize e baixe' }
+];

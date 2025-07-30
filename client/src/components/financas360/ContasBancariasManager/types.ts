@@ -1,73 +1,89 @@
 export interface ContaBancaria {
   id: number;
-  userId: number;
-  empresaId: number;
-  bankName: string;
-  accountType: string;
-  agency: string;
-  account: string;
-  accountDigit?: string;
-  pixKey?: string;
-  pixKeyType?: string;
-  initialBalance: number;
-  currentBalance?: number;
-  isActive: boolean;
-  observations?: string;
+  banco: string;
+  agencia: string;
+  conta: string;
+  digito?: string;
+  tipo: 'corrente' | 'poupanca' | 'investimento';
+  titular: string;
+  documento: string;
+  saldoAtual: number;
+  saldoInicial: number;
+  pixChaves: PixChave[];
+  ativo: boolean;
+  descricao?: string;
+  observacoes?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ContaBancariaForm {
-  empresaId: number;
-  bankName: string;
-  accountType: string;
-  agency: string;
-  account: string;
-  accountDigit: string;
-  pixKey: string;
-  pixKeyType: string;
-  initialBalance: number;
-  isActive: boolean;
-  observations: string;
+export interface PixChave {
+  id: number;
+  tipo: 'cpf' | 'cnpj' | 'email' | 'telefone' | 'chave_aleatoria';
+  chave: string;
+  ativo: boolean;
 }
 
 export interface ContasBancariasState {
   contas: ContaBancaria[];
+  filteredContas: ContaBancaria[];
   loading: boolean;
   error: string | null;
-  editingId: number | null;
-  deletingId: number | null;
-  showForm: boolean;
-  formData: ContaBancariaForm;
   searchTerm: string;
-  filterActive: 'all' | 'active' | 'inactive';
-  filterBank: string;
+  filterTipo: string;
+  filterBanco: string;
+  showInactive: boolean;
+  selectedConta: ContaBancaria | null;
+  isEditing: boolean;
+  isCreating: boolean;
+  formData: Partial<ContaBancaria>;
 }
 
 export interface ContasBancariasActions {
-  handleAdd: () => void;
-  handleEdit: (conta: ContaBancaria) => void;
-  handleDelete: (id: number) => void;
-  handleSave: () => Promise<void>;
-  handleCancel: () => void;
-  updateFormField: (field: keyof ContaBancariaForm, value: any) => void;
-  updateSearch: (term: string) => void;
-  updateFilter: (filter: 'all' | 'active' | 'inactive') => void;
-  updateBankFilter: (bank: string) => void;
-  refreshData: () => void;
+  refreshContas: () => void;
+  searchContas: (term: string) => void;
+  filterByTipo: (tipo: string) => void;
+  filterByBanco: (banco: string) => void;
+  toggleShowInactive: () => void;
+  selectConta: (conta: ContaBancaria | null) => void;
+  startEditing: (conta: ContaBancaria) => void;
+  startCreating: () => void;
+  updateFormField: (field: keyof ContaBancaria, value: any) => void;
+  addPixChave: (chave: Omit<PixChave, 'id'>) => void;
+  removePixChave: (index: number) => void;
+  saveConta: () => Promise<void>;
+  deleteConta: (id: number) => Promise<void>;
+  cancelEditing: () => void;
 }
 
-export const ACCOUNT_TYPES = [
-  { value: 'checking', label: 'Conta Corrente' },
-  { value: 'savings', label: 'Conta Poupança' },
-  { value: 'business', label: 'Conta Empresarial' },
-  { value: 'investment', label: 'Conta Investimento' }
+export const BANCOS_PRINCIPAIS = [
+  'Banco do Brasil',
+  'Bradesco',
+  'Caixa Econômica Federal',
+  'Itaú',
+  'Santander',
+  'BTG Pactual',
+  'Inter',
+  'Nubank',
+  'PicPay',
+  'C6 Bank',
+  'Safra',
+  'Sicoob',
+  'Sicredi',
+  'Banco Original',
+  'Outro'
 ];
 
-export const PIX_KEY_TYPES = [
+export const TIPOS_CONTA = [
+  { value: 'corrente', label: 'Conta Corrente' },
+  { value: 'poupanca', label: 'Poupança' },
+  { value: 'investimento', label: 'Investimento' }
+];
+
+export const TIPOS_PIX = [
   { value: 'cpf', label: 'CPF' },
   { value: 'cnpj', label: 'CNPJ' },
   { value: 'email', label: 'E-mail' },
-  { value: 'phone', label: 'Telefone' },
-  { value: 'random', label: 'Chave Aleatória' }
+  { value: 'telefone', label: 'Telefone' },
+  { value: 'chave_aleatoria', label: 'Chave Aleatória' }
 ];

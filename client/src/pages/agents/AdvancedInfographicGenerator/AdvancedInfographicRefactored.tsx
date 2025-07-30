@@ -3,6 +3,6 @@
  * Refactored from 671-line monolithic component to modular architecture
  * Follows Container/Presentational pattern established in replit.md
  */
-import { InfographicContainer } from './InfographicContainer';
+import { AdvancedInfographicContainer } from './AdvancedInfographicContainer';
 
-export default InfographicContainer;
+export default AdvancedInfographicContainer;

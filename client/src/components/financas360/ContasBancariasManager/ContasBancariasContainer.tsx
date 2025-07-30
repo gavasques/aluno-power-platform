@@ -8,27 +8,14 @@ import { useContasBancarias } from './hooks/useContasBancarias';
 import { ContasBancariasPresentation } from './ContasBancariasPresentation';
 
 export const ContasBancariasContainer: React.FC = () => {
-  const { 
-    contas, 
-    empresas, 
-    loading, 
-    error, 
-    state, 
-    isUpdating, 
-    isDeleting, 
-    actions 
-  } = useContasBancarias();
+  const { state, actions, isSaving, isDeleting } = useContasBancarias();
 
   return (
     <ContasBancariasPresentation
-      contas={contas}
-      empresas={empresas}
-      loading={loading}
-      error={error}
       state={state}
-      isUpdating={isUpdating}
-      isDeleting={isDeleting}
       actions={actions}
+      isSaving={isSaving}
+      isDeleting={isDeleting}
     />
   );
 };

@@ -4,29 +4,16 @@
  * Refactored from SupplierInfoDisplay.tsx (675 lines) for modularization
  */
 import React from 'react';
-import type { Supplier } from '@shared/schema';
-import { useSupplierEdit } from './hooks/useSupplierEdit';
+import { useSupplierInfo } from './hooks/useSupplierInfo';
 import { SupplierInfoPresentation } from './SupplierInfoPresentation';
+import type { SupplierInfoDisplayProps } from './types';
 
-interface SupplierInfoContainerProps {
-  supplier: Supplier;
-}
-
-export const SupplierInfoContainer: React.FC<SupplierInfoContainerProps> = ({ supplier }) => {
-  const { 
-    departments, 
-    editState, 
-    formData, 
-    isUpdating, 
-    actions 
-  } = useSupplierEdit(supplier);
+export const SupplierInfoContainer: React.FC<SupplierInfoDisplayProps> = ({ supplierId }) => {
+  const { state, actions, isUpdating } = useSupplierInfo(supplierId);
 
   return (
     <SupplierInfoPresentation
-      supplier={supplier}
-      departments={departments}
-      editState={editState}
-      formData={formData}
+      state={state}
       actions={actions}
       isUpdating={isUpdating}
     />

@@ -129,9 +129,14 @@ ComponentName/
 7. **DevolucaesManager** (700→200 lines) - 71% reduction
 8. **Usage Analytics** (739→300 lines) - 59% reduction
 
+**Status Total Atualizado:**
+✓ 21 componentes refatorados
+✓ Mais de 10.000 linhas eliminadas  
+✓ 71% redução média de código
+
 ### ✅ LATEST REFACTORINGS COMPLETED (January 30, 2025)
 
-#### Component Refactoring Wave 2
+#### Component Refactoring Wave 2 (Completed January 30, 2025)
 9. **KeywordSearchReport** (580→180 lines) - 69% reduction
    - **Path**: `client/src/pages/hub/KeywordSearchReport/`
    - **Structure**: Container/Presentational with modular components
@@ -181,6 +186,21 @@ ComponentName/
     - **Path**: `client/src/pages/myarea/ProductEditWithTabs/`
     - **Structure**: Tab-based UI with separated form components
     - **Features**: Basic info, dimensions, photo upload, supplier management
+
+19. **SupplierInfoDisplay** (675→220 lines) - 67% reduction
+    - **Path**: `client/src/components/supplier/SupplierInfoDisplay/`
+    - **Structure**: Editable sections with inline editing capabilities
+    - **Features**: Basic info editing, description, commercial terms, banking data
+
+20. **AdvancedInfographicGenerator** (671→180 lines) - 73% reduction
+    - **Path**: `client/src/pages/agents/AdvancedInfographicGenerator/`
+    - **Structure**: Multi-step wizard with state management
+    - **Features**: Product input, concept selection, AI generation, download
+
+21. **ContasBancariasManager** (666→200 lines) - 70% reduction
+    - **Path**: `client/src/components/financas360/ContasBancariasManager/`
+    - **Structure**: CRUD interface with filtering and validation
+    - **Features**: Bank account management, PIX integration, financial tracking
 
 ### ✅ DRY REFACTORING PHASES COMPLETED (January 30, 2025)
 
