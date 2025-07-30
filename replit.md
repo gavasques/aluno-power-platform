@@ -167,6 +167,16 @@ ComponentName/
     - **Structure**: Product-supplier relationship management with sorting
     - **Features**: Supplier assignment, cost tracking, lead time management, main supplier designation
 
+16. **InfographicGenerator** (644→180 lines) - 72% reduction
+    - **Path**: `client/src/pages/agents/infographic-generator/`
+    - **Structure**: Multi-step wizard with form, generating, and preview states
+    - **Features**: Product infographic creation, color customization, layout options, download functionality
+
+17. **SupplierForm** (640→200 lines) - 69% reduction
+    - **Path**: `client/src/components/admin/conteudo/SupplierForm/`
+    - **Structure**: Comprehensive supplier management form with validation
+    - **Features**: Basic info, contact details, ratings, status management, create/edit modes
+
 ### ✅ DRY REFACTORING PHASES COMPLETED (January 30, 2025)
 
 #### ETAPA 9: Channel Calculations Unified ✅
