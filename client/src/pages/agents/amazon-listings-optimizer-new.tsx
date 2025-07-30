@@ -369,97 +369,56 @@ Comentário: ${comment}
       }
       
       const submitData = {
-        nomeProduto: formData.productName,
-        marca: formData.brand,
-        categoria: formData.category,
+        productName: formData.productName,
+        brand: formData.brand,
+        category: formData.category,
         keywords: formData.keywords,
         longTailKeywords: formData.longTailKeywords,
-        principaisCaracteristicas: formData.features,
-        publicoAlvo: formData.targetAudience,
-        reviewsData: reviewsData
+        features: formData.features,
+        targetAudience: formData.targetAudience,
+        reviewsData: reviewsData,
+        format: 'text'
       };
-      
-      // 1. Criar sessão
-      const sessionResponse = await fetch('/api/amazon-sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idUsuario: 'user-1' })
-      });
-      
-      if (!sessionResponse.ok) {
-        throw new Error('Erro ao criar sessão');
-      }
-      
-      const sessionData = await sessionResponse.json();
-      const sessionId = sessionData.session.id;
-      
-      // 2. Salvar dados do produto
-      const dataResponse = await fetch(`/api/amazon-sessions/${sessionId}/data`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submitData)
-      });
-      
-      if (!dataResponse.ok) {
-        throw new Error('Erro ao salvar dados do produto');
-      }
-      
-      // 3. Processar Etapa 1 (Análise)
-      const step1Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step1`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (!step1Response.ok) {
-        throw new Error('Erro na análise das avaliações');
-      }
-      
-      // 4. Processar Etapa 2 (Títulos)
-      const step2Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step2`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (!step2Response.ok) {
-        throw new Error('Erro na geração de títulos');
-      }
 
-      // 5. Processar Etapa 3 (Bullet Points)
-      const step3Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step3`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      console.log('Enviando dados para processamento:', submitData);
       
-      if (!step3Response.ok) {
-        throw new Error('Erro na geração de bullet points');
-      }
+      // Usar a API simplificada que funciona conforme logs
+      const response = await execute({
+        url: '/api/agents/amazon-listings-optimizer/process',
+        method: 'POST',
+        data: submitData,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-      // 6. Processar Etapa 4 (Descrição)
-      const step4Response = await fetch(`/api/amazon-sessions/${sessionId}/process-step4`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (!step4Response.ok) {
-        throw new Error('Erro na geração de descrição');
+      if (response.success) {
+        // Log da geração para o sistema de créditos
+        await logAIGeneration({
+          feature: FEATURE_CODE,
+          provider: response.provider || 'openai',
+          model: response.model || 'gpt-4o',
+          inputTokens: response.tokensUsed?.input || 0,
+          outputTokens: response.tokensUsed?.output || 0,
+          totalTokens: response.tokensUsed?.total || 0,
+          cost: response.cost || 0,
+          processingTime: response.processingTime || 0
+        });
+
+        // Redirecionar para a página de resultados com os dados
+        const searchParams = new URLSearchParams({
+          data: JSON.stringify({
+            input: submitData,
+            output: response,
+            timestamp: Date.now()
+          })
+        });
+        
+        navigate(`/agents/amazon-listings-optimizer/result?${searchParams.toString()}`);
+      } else {
+        throw new Error(response.error || 'Erro no processamento');
       }
-      
-      // 7. Registrar log de uso com dedução automática de créditos
-      await logAIGeneration({
-        featureCode: FEATURE_CODE,
-        provider: 'openai',
-        model: 'gpt-4o-mini',
-        prompt: `Produto: ${formData.productName}`,
-        response: 'Listagem otimizada gerada',
-        inputTokens: 0,
-        outputTokens: 0,
-        totalTokens: 0,
-        cost: 0,
-        duration: 0
-      });
-      
-      // 9. Navegar para resultados
-      navigate(`/agents/amazon-listings-optimizer/result?session=${sessionId}`);
       
     } catch (error) {
       console.error("Error processing:", error);
