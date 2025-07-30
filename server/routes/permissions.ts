@@ -118,6 +118,7 @@ permissionRoutes.get("/groups/:groupId", requireAuth, async (req: Request, res: 
     }
 
     const groupId = parseInt(req.params.groupId);
+    console.log(`🔍 [DEBUG] Looking for group with ID: ${groupId}`);
     
     // Get group from user_groups table
     const group = await db
@@ -133,9 +134,14 @@ permissionRoutes.get("/groups/:groupId", requireAuth, async (req: Request, res: 
       .where(eq(userGroups.id, groupId))
       .limit(1);
     
+    console.log(`🔍 [DEBUG] Query result:`, group);
+    
     if (!group[0]) {
+      console.log(`❌ [DEBUG] Group ${groupId} not found in user_groups table`);
       return res.status(404).json({ error: "Group not found" });
     }
+    
+    console.log(`✅ [DEBUG] Found group:`, group[0]);
 
     res.json({ group: group[0] });
   } catch (error) {
