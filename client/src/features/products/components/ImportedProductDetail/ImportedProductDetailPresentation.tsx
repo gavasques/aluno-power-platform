@@ -22,7 +22,35 @@ import { ProductPackagesTable } from '../ProductPackagesTable/ProductPackagesTab
 import { ProductImageModal } from '../ProductImageModal/ProductImageModal';
 
 // Import types and utilities
-import { ProductDetailView, ProductImage, STATUS_CONFIG } from '../../types';
+import { ProductDetailView, ProductImage } from '../../types';
+
+// Status configuration - temporary local definition
+const STATUS_CONFIG = {
+  active: {
+    label: 'Ativo',
+    color: 'bg-green-100 text-green-800',
+    bgColor: 'bg-green-50',
+    textColor: 'text-green-700'
+  },
+  inactive: {
+    label: 'Inativo',
+    color: 'bg-red-100 text-red-800',
+    bgColor: 'bg-red-50',
+    textColor: 'text-red-700'
+  },
+  draft: {
+    label: 'Rascunho',
+    color: 'bg-yellow-100 text-yellow-800',
+    bgColor: 'bg-yellow-50',
+    textColor: 'text-yellow-700'
+  },
+  archived: {
+    label: 'Arquivado',
+    color: 'bg-gray-100 text-gray-800',
+    bgColor: 'bg-gray-50',
+    textColor: 'text-gray-700'
+  }
+} as const;
 
 // ===== COMPONENT PROPS TYPES =====
 interface ProductProps {
