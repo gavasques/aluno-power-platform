@@ -48,7 +48,7 @@ function getFileCategory(mimetype: string): string {
 // Validate file extension matches MIME type
 function validateFileExtension(filename: string, mimetype: string): boolean {
   const ext = path.extname(filename).toLowerCase();
-  const allowedExts = ALLOWED_FILE_TYPES[mimetype];
+  const allowedExts = ALLOWED_FILE_TYPES[mimetype as keyof typeof ALLOWED_FILE_TYPES];
   return allowedExts ? allowedExts.includes(ext) : false;
 }
 
@@ -101,7 +101,7 @@ export function createSecureUpload(options: {
 
     // Check file size based on category
     const category = getFileCategory(file.mimetype);
-    const categoryMaxSize = MAX_FILE_SIZES[category] || maxFileSize;
+    const categoryMaxSize = MAX_FILE_SIZES[category as keyof typeof MAX_FILE_SIZES] || maxFileSize;
     
     // Note: Size check happens after upload in multer, this is just for the category lookup
     (req as any).maxFileSize = Math.min(categoryMaxSize, maxFileSize);

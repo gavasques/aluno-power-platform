@@ -367,9 +367,9 @@ export class PicsartService {
       
       console.log(`📤 [PICSART] Using mime type: ${mimeType} for file: ${fileName}`);
       
-      // Create a proper File object instead of Blob for better compatibility
-      const file = new File([imageBuffer], fileName, { type: mimeType });
-      formData.append('image', file);
+      // Create a proper Blob object from Buffer for better compatibility with FormData
+      const blob = new Blob([imageBuffer], { type: mimeType });
+      formData.append('image', blob, fileName);
       formData.append('output_type', params.output_type || 'cutout');
       formData.append('format', params.format || 'PNG');
       
@@ -746,11 +746,9 @@ export class PicsartService {
             type: mimeType
           };
           
-          // Append as stream with proper options
-          formData.append('reference_image', buffer, {
-            filename: `reference.${extension}`,
-            contentType: mimeType
-          });
+          // Create a proper Blob from Buffer and append with filename
+          const referenceBlob = new Blob([buffer], { type: mimeType });
+          formData.append('reference_image', referenceBlob, `reference.${extension}`);
           
           console.log(`📎 [PICSART] Reference image attached: ${mimeType}, ${buffer.length} bytes`);
         } catch (imageError) {
