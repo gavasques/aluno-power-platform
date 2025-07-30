@@ -1,63 +1,86 @@
-import type { Supplier, Department } from '@shared/schema';
-
-export interface SupplierEditState {
-  editingBasic: boolean;
-  editingDescription: boolean;
-  editingAdditionalInfo: boolean;
-  editingCommercialTerms: boolean;
-  editingBankingData: boolean;
+export interface SupplierInfo {
+  id: number;
+  tradeName: string;
+  corporateName: string;
+  description: string;
+  country: string;
+  category: string;
+  commercialEmail: string;
+  supportEmail: string;
+  whatsappNumber: string;
+  phone: string;
+  website: string;
+  linkedin: string;
+  instagram: string;
+  youtube: string;
+  paymentTerms: string;
+  minimumOrder: string;
+  deliveryTime: string;
+  certifications: string;
+  qualityRating: number;
+  communicationRating: number;
+  deliveryRating: number;
+  priceRating: number;
+  overallRating: number;
+  internalNotes: string;
+  isActive: boolean;
+  isPremium: boolean;
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface SupplierFormData {
-  basic: {
-    tradeName: string;
-    corporateName: string;
-    cnpj: string;
-    categoryId: number | null;
-    supplierType: string;
-    country: string;
-    state: string;
-    city: string;
-    cep: string;
-    address: string;
-    stateRegistration: string;
-    municipalRegistration: string;
-  };
-  description: {
-    description: string;
-  };
-  additionalInfo: {
-    additionalInfo: string;
-  };
-  commercialTerms: {
-    paymentTerm: string;
-    deliveryTerm: string;
-  };
-  bankingData: {
-    bankingData: string;
-  };
+export interface SupplierContact {
+  id: number;
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  whatsapp: string;
+  notes: string;
 }
 
-export interface SupplierInfoActions {
-  setEditingSection: (section: keyof SupplierEditState, value: boolean) => void;
-  updateFormData: (section: keyof SupplierFormData, data: any) => void;
-  saveSection: (section: keyof SupplierFormData) => Promise<void>;
+export interface BankingInfo {
+  bankName: string;
+  accountHolder: string;
+  accountNumber: string;
+  routingNumber: string;
+  swiftCode: string;
+  address: string;
 }
 
-export interface SupplierInfoPresentationProps {
-  supplier: Supplier;
-  departments: Department[];
-  editState: SupplierEditState;
-  formData: SupplierFormData;
-  actions: SupplierInfoActions;
-  isUpdating: boolean;
+export interface SupplierInfoDisplayState {
+  supplier: SupplierInfo | null;
+  contacts: SupplierContact[];
+  bankingInfo: BankingInfo | null;
+  loading: boolean;
+  error: string | null;
+  editingSection: string | null;
+  formData: any;
 }
 
-export const COUNTRIES = [
-  'Brasil', 'China', 'Taiwan', 'Hong Kong', 'Índia', 
-  'Turquia', 'Argentina', 'Paraguai', 'Outro'
-];
+export interface SupplierInfoDisplayActions {
+  startEditing: (section: string) => void;
+  cancelEditing: () => void;
+  saveChanges: () => Promise<void>;
+  updateFormField: (field: string, value: any) => void;
+  refreshData: () => void;
+}
 
-export const SUPPLIER_TYPES = [
-  'distribuidora', 'importadora', 'fabricante', 'indústria', 'representante'
-];
+export interface SupplierInfoDisplayProps {
+  supplierId: number;
+}
+
+export const EDITABLE_SECTIONS = {
+  BASIC: 'basic',
+  CONTACT: 'contact',
+  COMMERCIAL: 'commercial',
+  BANKING: 'banking'
+} as const;
+
+export const RATING_LABELS = {
+  qualityRating: 'Qualidade',
+  communicationRating: 'Comunicação',
+  deliveryRating: 'Entrega',
+  priceRating: 'Preço'
+};

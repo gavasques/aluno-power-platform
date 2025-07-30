@@ -1,34 +1,21 @@
 /**
  * CONTAINER: ProductEditContainer
- * Manages business logic and state for product editing functionality
+ * Manages business logic and state for product editing with tabs
  * Refactored from ProductEditWithTabs.tsx (680 lines) for modularization
  */
 import React from 'react';
 import { useProductEdit } from './hooks/useProductEdit';
 import { ProductEditPresentation } from './ProductEditPresentation';
+import type { ProductEditWithTabsProps } from './types';
 
-export const ProductEditContainer: React.FC = () => {
-  const { 
-    form, 
-    product, 
-    suppliers, 
-    state, 
-    isLoading, 
-    error, 
-    isUpdating, 
-    actions 
-  } = useProductEdit();
+export const ProductEditContainer: React.FC<ProductEditWithTabsProps> = ({ productId }) => {
+  const { state, actions } = useProductEdit(productId);
 
   return (
     <ProductEditPresentation
-      form={form}
-      product={product}
-      suppliers={suppliers}
       state={state}
-      isLoading={isLoading}
-      error={error}
-      isUpdating={isUpdating}
       actions={actions}
+      isEditing={!!productId}
     />
   );
 };

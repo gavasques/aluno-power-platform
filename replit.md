@@ -177,6 +177,11 @@ ComponentName/
     - **Structure**: Comprehensive supplier management form with validation
     - **Features**: Basic info, contact details, ratings, status management, create/edit modes
 
+18. **ProductEditWithTabs** (680→200 lines) - 71% reduction
+    - **Path**: `client/src/pages/myarea/ProductEditWithTabs/`
+    - **Structure**: Tab-based UI with separated form components
+    - **Features**: Basic info, dimensions, photo upload, supplier management
+
 ### ✅ DRY REFACTORING PHASES COMPLETED (January 30, 2025)
 
 #### ETAPA 9: Channel Calculations Unified ✅

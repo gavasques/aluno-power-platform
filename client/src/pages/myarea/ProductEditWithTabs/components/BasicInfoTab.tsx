@@ -1,252 +1,182 @@
 import React, { memo } from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { UseFormReturn } from 'react-hook-form';
-import type { ProductFormData } from '../types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Package, X } from 'lucide-react';
+import { PRODUCT_CATEGORIES, type ProductFormData } from '../types';
 
 interface BasicInfoTabProps {
-  form: UseFormReturn<ProductFormData>;
-  suppliers: any[];
+  formData: ProductFormData;
+  onFieldChange: (field: keyof ProductFormData, value: any) => void;
+  onArrayFieldChange: (field: 'tags' | 'additionalImages', value: string[]) => void;
 }
 
-export const BasicInfoTab = memo<BasicInfoTabProps>(({ form, suppliers }) => {
+export const BasicInfoTab = memo<BasicInfoTabProps>(({
+  formData,
+  onFieldChange,
+  onArrayFieldChange
+}) => {
+  const [newTag, setNewTag] = React.useState('');
+
+  const addTag = () => {
+    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+      onArrayFieldChange('tags', [...formData.tags, newTag.trim()]);
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    onArrayFieldChange('tags', formData.tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleTagKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Basic Information */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Informações Básicas</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome do Produto *</FormLabel>
-                <FormControl>
-                  <Input placeholder="Digite o nome do produto..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="w-5 h-5" />
+            Informações Básicas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome do Produto *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => onFieldChange('name', e.target.value)}
+                placeholder="Nome do produto"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="sku">SKU</Label>
+              <Input
+                id="sku"
+                value={formData.sku}
+                onChange={(e) => onFieldChange('sku', e.target.value)}
+                placeholder="Código do produto"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="brand">Marca</Label>
+              <Input
+                id="brand"
+                value={formData.brand}
+                onChange={(e) => onFieldChange('brand', e.target.value)}
+                placeholder="Marca do produto"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="model">Modelo</Label>
+              <Input
+                id="model"
+                value={formData.model}
+                onChange={(e) => onFieldChange('model', e.target.value)}
+                placeholder="Modelo do produto"
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="category">Categoria *</Label>
+              <Select value={formData.category} onValueChange={(value) => onFieldChange('category', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => onFieldChange('description', e.target.value)}
+              placeholder="Descrição detalhada do produto..."
+              rows={4}
+            />
+          </div>
+
+          {/* Tags Section */}
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            <div className="flex gap-2">
+              <Input
+                id="tags"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyPress={handleTagKeyPress}
+                placeholder="Digite uma tag e pressione Enter"
+                className="flex-1"
+              />
+            </div>
+            {formData.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    {tag}
+                    <X 
+                      className="w-3 h-3 cursor-pointer" 
+                      onClick={() => removeTag(tag)}
+                    />
+                  </Badge>
+                ))}
+              </div>
             )}
-          />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="sku"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>SKU</FormLabel>
-                <FormControl>
-                  <Input placeholder="Código SKU..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="ean"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Código EAN</FormLabel>
-                <FormControl>
-                  <Input placeholder="Código de barras EAN..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="brand"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Marca</FormLabel>
-                <FormControl>
-                  <Input placeholder="Marca do produto..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoria</FormLabel>
-                <FormControl>
-                  <Input placeholder="Categoria do produto..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="supplierId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fornecedor</FormLabel>
-                <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o fornecedor" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {suppliers?.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id.toString()}>
-                        {supplier.tradeName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </div>
-
-      {/* Codes Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Códigos Internos</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="freeCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Código Livre</FormLabel>
-                <FormControl>
-                  <Input placeholder="Código livre..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="supplierCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Código do Fornecedor</FormLabel>
-                <FormControl>
-                  <Input placeholder="Código do fornecedor..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="internalCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Código Interno</FormLabel>
-                <FormControl>
-                  <Input placeholder="Código interno..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </div>
-
-      {/* Description */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Descrição</h3>
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição do Produto</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Descreva o produto..." 
-                  className="min-h-[100px]"
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="bulletPoints"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Pontos Destacados</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="• Primeira característica&#10;• Segunda característica&#10;• Terceira característica" 
-                  className="min-h-[100px]"
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="observations"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Observações</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Observações internas..." 
-                  className="min-h-[80px]"
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Status */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Status</h3>
-        <FormField
-          control={form.control}
-          name="active"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+          {/* Status Switches */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-base">Produto Ativo</FormLabel>
+                <Label className="text-base">Produto Ativo</Label>
                 <div className="text-sm text-muted-foreground">
-                  Produto disponível para uso no sistema
+                  Produto disponível para venda
                 </div>
               </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
+              <Switch
+                checked={formData.isActive}
+                onCheckedChange={(checked) => onFieldChange('isActive', checked)}
+              />
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <Label className="text-base">Produto em Destaque</Label>
+                <div className="text-sm text-muted-foreground">
+                  Destacar produto na loja
+                </div>
+              </div>
+              <Switch
+                checked={formData.isFeatured}
+                onCheckedChange={(checked) => onFieldChange('isFeatured', checked)}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 });
