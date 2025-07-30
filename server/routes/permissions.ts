@@ -7,7 +7,8 @@ import {
   permissionGroups, 
   systemFeatures, 
   groupPermissions,
-  userPermissionGroups 
+  userPermissionGroups,
+  userGroups
 } from "@shared/schema";
 
 export const permissionRoutes = Router();
@@ -117,14 +118,26 @@ permissionRoutes.get("/groups/:groupId", requireAuth, async (req: Request, res: 
     }
 
     const groupId = parseInt(req.params.groupId);
-    const groups = await PermissionService.getGroups();
-    const group = groups.find(g => g.id === groupId);
     
-    if (!group) {
+    // Get group from user_groups table
+    const group = await db
+      .select({
+        id: userGroups.id,
+        name: userGroups.name,
+        description: userGroups.description,
+        permissions: userGroups.permissions,
+        isActive: userGroups.isActive,
+        createdAt: userGroups.createdAt,
+      })
+      .from(userGroups)
+      .where(eq(userGroups.id, groupId))
+      .limit(1);
+    
+    if (!group[0]) {
       return res.status(404).json({ error: "Group not found" });
     }
 
-    res.json({ group });
+    res.json({ group: group[0] });
   } catch (error) {
     console.error("Error getting group:", error);
     res.status(500).json({ error: "Failed to get group" });

@@ -29,6 +29,7 @@ const lazyComponents = {
   UserManagement: lazy(() => import('../../pages/admin/UserManagement')),
   UserEdit: lazy(() => import('../../pages/admin/UserEdit')),
   GroupEdit: lazy(() => import('../../pages/admin/GroupEdit')),
+  GroupDetail: lazy(() => import('../../pages/admin/GroupDetail')),
   ContentManagement: lazy(() => import('../../pages/admin/ContentManagement')),
   AgentProviderSettings: lazy(() => import('../../pages/admin/agents/AgentProviderSettings')),
   
@@ -150,6 +151,8 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/admin/usuarios', component: lazyComponents.UserManagement, isProtected: true, layout: 'admin' },
       { path: '/admin/users/:id/edit', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/usuarios/:id/edit', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
+      { path: '/admin/usuarios/grupos/:id', component: lazyComponents.GroupDetail, isProtected: true, layout: 'admin' },
+      { path: '/admin/usuarios/grupos/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/groups/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/content', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
       { path: '/admin/agents', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' }
