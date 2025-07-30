@@ -95,7 +95,6 @@ export default function AmazonListingsOptimizerNew() {
   const { user, token } = useAuth();
   const { execute } = useApiRequest();
   const { logAIGeneration, checkCredits, showInsufficientCreditsToast } = useCreditSystem();
-
   const FEATURE_CODE = 'agents.amazon_listing';
 
   // Helper functions para extração Amazon
@@ -382,18 +381,25 @@ Comentário: ${comment}
 
       console.log('Enviando dados para processamento:', submitData);
       
-      // Usar a API simplificada que funciona conforme logs
-      const response = await execute({
-        url: '/api/agents/amazon-listings-optimizer/process',
+      // Fazer chamada direta da API
+      const apiResponse = await fetch('/api/agents/amazon-listings-optimizer/process', {
         method: 'POST',
-        data: submitData,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify(submitData)
       });
 
-      if (response.success) {
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erro HTTP ${apiResponse.status}`);
+      }
+
+      const response = await apiResponse.json();
+      console.log('Response from API:', response);
+
+      if (response && response.success) {
         // Log da geração para o sistema de créditos
         await logAIGeneration({
           feature: FEATURE_CODE,
