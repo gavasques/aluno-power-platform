@@ -5364,10 +5364,15 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       // Consulta na API real
       try {
+        const rapidApiKey = process.env.RAPIDAPI_KEY;
+        if (!rapidApiKey) {
+          throw new Error('RAPIDAPI_KEY environment variable not configured');
+        }
+
         const response = await fetch(`https://dados-cnpj.p.rapidapi.com/buscar-base.php?cnpj=${cnpjNumbers}`, {
           method: 'GET',
           headers: {
-            'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
+            'X-RapidAPI-Key': rapidApiKey,
             'X-RapidAPI-Host': 'dados-cnpj.p.rapidapi.com',
             'X-RapidAPI-App': process.env.RAPIDAPI_APP || 'default-application_10763288'
           }
