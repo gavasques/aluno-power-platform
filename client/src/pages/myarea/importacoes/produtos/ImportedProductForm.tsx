@@ -18,7 +18,7 @@
  * - Gerenciamento avançado de imagens
  */
 
-import { ImportedProductFormContainer } from '../../../../features/imported-products/components/ImportedProductForm/ImportedProductFormContainer';
+import { ImportedProductFormContainer } from '@/features/imported-products/components/ImportedProductForm/ImportedProductFormContainer';
 
 export default function ImportedProductForm() {
   return <ImportedProductFormContainer />;
