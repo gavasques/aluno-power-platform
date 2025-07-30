@@ -147,7 +147,9 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/admin', component: lazyComponents.AdminDashboard, isProtected: true, layout: 'admin' },
       { path: '/admin/dashboard', component: lazyComponents.Admin, isProtected: true, layout: 'admin' },
       { path: '/admin/users', component: lazyComponents.UserManagement, isProtected: true, layout: 'admin' },
+      { path: '/admin/usuarios', component: lazyComponents.UserManagement, isProtected: true, layout: 'admin' },
       { path: '/admin/users/:id/edit', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
+      { path: '/admin/usuarios/:id/edit', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/groups/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/content', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
       { path: '/admin/agents', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' }
