@@ -3,7 +3,7 @@
  * Handles WhatsApp phone verification flow
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -32,11 +32,7 @@ export default function PhoneVerification() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    loadPhoneStatus();
-  }, []);
-
-  const loadPhoneStatus = async () => {
+  const loadPhoneStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/phone/status');
       
@@ -66,7 +62,11 @@ export default function PhoneVerification() {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadPhoneStatus();
+  }, [loadPhoneStatus]);
 
   const handleSendVerification = async (e: React.FormEvent) => {
     e.preventDefault();

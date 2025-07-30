@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, useCallback, FormEvent } from "react";
 import { useRoute, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -75,17 +75,27 @@ const SupplierForm = () => {
 
   // Carregar departamentos
   useEffect(() => {
+    const abortController = new AbortController();
+    
     const fetchDepartments = async () => {
       try {
-        const response = await fetch('/api/departments');
+        const response = await fetch('/api/departments', {
+          signal: abortController.signal
+        });
         const data = await response.json();
         setDepartments(data);
-      } catch (error) {
-        logger.error('Erro ao carregar departamentos:', error);
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          logger.error('Erro ao carregar departamentos:', error);
+        }
       }
     };
 
     fetchDepartments();
+    
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   // Carregar dados do fornecedor se estiver editando

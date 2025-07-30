@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,120 +8,44 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
 import { Upload, CheckCircle, ArrowRight, Image, Download, ArrowLeft } from 'lucide-react';
 import { PermissionGuard } from '@/components/guards/PermissionGuard';
 import Layout from '@/components/layout/Layout';
 import { Link } from 'wouter';
-import { useCreditSystem } from '@/hooks/useCreditSystem';
 import { LoadingSpinner, ButtonLoader } from '@/components/common/LoadingSpinner';
 
-interface ProductData {
-  name: string;
-  description: string;
-  category: string;
-  targetAudience: string;
-  effortLevel: 'normal' | 'high';
-}
-
-interface ConceptData {
-  id: string;
-  title: string;
-  subtitle: string;
-  focusType: string;
-  keyPoints: string[];
-  colorPalette: Record<string, string>;
-  layoutSpecs: Record<string, any>;
-  recommended: boolean;
-}
-
-interface InfographicSession {
-  step: 'input' | 'concepts' | 'prompt' | 'generating' | 'completed';
-  productData?: ProductData;
-  analysisId?: string;
-  concepts?: ConceptData[];
-  selectedConceptId?: string;
-  generationId?: string;
-  finalImageUrl?: string;
-  imageFile?: File;
-}
+import { useInfographicGenerator } from './hooks';
+import type { ProductData } from './types';
 
 export default function AdvancedInfographicGenerator() {
-  const { toast } = useToast();
-  const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
-
-  const FEATURE_CODE = 'agents.infographic_generator';
-  const [session, setSession] = useState<InfographicSession>({ step: 'input' });
-  const [loading, setLoading] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [showProcessingModal, setShowProcessingModal] = useState(false);
-  
-  // Form state
-  const [productName, setProductName] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [targetAudience, setTargetAudience] = useState('');
-  const effortLevel = 'high';
-
-  // Fetch categories for dropdown
-  const { data: departments = [] } = useQuery<any[]>({
-    queryKey: ['/api/departments'],
-    enabled: true
-  });
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 25 * 1024 * 1024) {
-        toast({
-          title: "Arquivo muito grande",
-          description: "A imagem deve ter no máximo 25MB",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setUploadedImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+  const {
+    state,
+    departments,
+    actions: {
+      handleImageUpload,
+      removeImage,
+      updateFormField,
+      analyzeProduct,
+      resetForm,
+      setLoading,
+      setShowProcessingModal,
+      advanceStep
     }
+  } = useInfographicGenerator();
+
+  // Helper function to handle form submission
+  const handleAnalyzeProduct = () => {
+    const productData: ProductData = {
+      name: state.form.productName,
+      description: state.form.description,
+      category: state.form.category,
+      targetAudience: state.form.targetAudience,
+      effortLevel: 'high'
+    };
+
+    analyzeProduct(productData);
   };
 
-  const removeImage = () => {
-    setUploadedImage(null);
-    setImagePreview(null);
-  };
-
-  // Helper function to get auth token
-  const getAuthToken = () => {
-    return localStorage.getItem('auth_token') || localStorage.getItem('token') || localStorage.getItem('authToken') || '';
-  };
-
-  // Step 1: Analyze product and generate concepts
-  const analyzeProduct = async (productData: ProductData) => {
-    // Verificar créditos primeiro
-    const creditCheck = await checkCredits(FEATURE_CODE);
-    if (!creditCheck.canProcess) {
-      showInsufficientCreditsToast(creditCheck.requiredCredits, creditCheck.currentBalance);
-      return;
-    }
-
-    setLoading(true);
-    toast({
-      title: "Analisando produto...",
-      description: "Aguarde, estamos analisando os dados e a foto do produto com IA"
-    });
-    
-    try {
-      const token = getAuthToken();
-      if (!token) {
-        throw new Error('Token de autenticação não encontrado. Faça login novamente.');
-      }
 
       const response = await fetch('/api/infographics/analyze', {
         method: 'POST',

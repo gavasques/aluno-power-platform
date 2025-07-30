@@ -1,88 +1,63 @@
-export interface ProductInfo {
-  productName: string;
+/**
+ * Types para AdvancedInfographicGenerator
+ * Centralizando tipos para melhor organização
+ */
+
+export interface ProductData {
+  name: string;
+  description: string;
   category: string;
-  description: string;
   targetAudience: string;
-  keyFeatures: string[];
-  price: string;
-  benefits: string[];
+  effortLevel: 'normal' | 'high';
 }
 
-export interface ConceptInfo {
+export interface ConceptData {
+  id: string;
   title: string;
-  description: string;
-  style: string;
-  colorScheme: string;
-  layout: string;
-  elements: string[];
+  subtitle: string;
+  focusType: string;
+  keyPoints: string[];
+  colorPalette: Record<string, string>;
+  layoutSpecs: Record<string, any>;
+  recommended: boolean;
 }
 
-export interface AdvancedInfographicState {
-  currentStep: 'product' | 'concept' | 'generation' | 'preview';
-  productInfo: ProductInfo;
-  conceptInfo: ConceptInfo;
-  generatedContent: string | null;
-  generatedImageUrl: string | null;
-  loading: boolean;
-  error: string | null;
-  progress: number;
+export interface InfographicSession {
+  step: 'input' | 'concepts' | 'prompt' | 'generating' | 'completed';
+  productData?: ProductData;
+  analysisId?: string;
+  concepts?: ConceptData[];
+  selectedConceptId?: string;
+  generationId?: string;
+  finalImageUrl?: string;
+  imageFile?: File;
 }
 
-export interface AdvancedInfographicActions {
-  updateProductInfo: (field: keyof ProductInfo, value: any) => void;
-  updateConceptInfo: (field: keyof ConceptInfo, value: any) => void;
-  nextStep: () => void;
-  previousStep: () => void;
-  goToStep: (step: AdvancedInfographicState['currentStep']) => void;
-  generateInfographic: () => Promise<void>;
-  downloadInfographic: () => void;
-  resetGenerator: () => void;
+// Estado unificado para o componente
+export interface InfographicState {
+  ui: {
+    loading: boolean;
+    showProcessingModal: boolean;
+  };
+  session: InfographicSession;
+  form: {
+    productName: string;
+    description: string;
+    category: string;
+    targetAudience: string;
+  };
+  upload: {
+    file: File | null;
+    preview: string | null;
+  };
 }
 
-export const INFOGRAPHIC_STYLES = [
-  'Moderno e Minimalista',
-  'Colorido e Vibrante',
-  'Profissional e Corporativo',
-  'Criativo e Artístico',
-  'Tecnológico e Futurista',
-  'Elegante e Sofisticado'
-];
-
-export const COLOR_SCHEMES = [
-  'Azul e Branco',
-  'Verde e Dourado',
-  'Roxo e Rosa',
-  'Laranja e Amarelo',
-  'Vermelho e Preto',
-  'Tons de Cinza',
-  'Multicolorido'
-];
-
-export const LAYOUT_OPTIONS = [
-  'Vertical (Stories)',
-  'Horizontal (Banner)',
-  'Quadrado (Post)',
-  'Infográfico Longo',
-  'Comparativo',
-  'Timeline'
-];
-
-export const CATEGORIES = [
-  'Eletrônicos',
-  'Casa e Jardim',
-  'Moda e Acessórios',
-  'Esportes e Lazer',
-  'Saúde e Beleza',
-  'Automotivo',
-  'Brinquedos',
-  'Alimentos',
-  'Tecnologia',
-  'Outros'
-];
-
-export const STEP_CONFIG = [
-  { id: 'product', title: 'Informações do Produto', description: 'Defina os detalhes do produto' },
-  { id: 'concept', title: 'Conceito Visual', description: 'Escolha o estilo e layout' },
-  { id: 'generation', title: 'Geração', description: 'Criando seu infográfico' },
-  { id: 'preview', title: 'Resultado', description: 'Visualize e baixe' }
-];
+// Actions para o reducer
+export type InfographicAction =
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_SHOW_PROCESSING_MODAL'; payload: boolean }
+  | { type: 'UPDATE_FORM_FIELD'; field: keyof InfographicState['form']; value: string }
+  | { type: 'SET_UPLOAD'; payload: { file: File | null; preview: string | null } }
+  | { type: 'UPDATE_SESSION'; payload: Partial<InfographicSession> }
+  | { type: 'ADVANCE_STEP'; payload: InfographicSession['step'] }
+  | { type: 'RESET_FORM' };

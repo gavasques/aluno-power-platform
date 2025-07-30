@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Bell, X, Info, AlertTriangle, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,16 +30,7 @@ export function NotificationSystem({ className }: NotificationSystemProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    loadNotifications();
-  }, []);
-
-  useEffect(() => {
-    const count = notifications.filter(n => !n.read).length;
-    setUnreadCount(count);
-  }, [notifications]);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     try {
       const response = await fetch('/api/notifications');
       if (response.ok) {
@@ -54,7 +45,16 @@ export function NotificationSystem({ className }: NotificationSystemProps) {
       // Show empty state on error
       setNotifications([]);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
+
+  useEffect(() => {
+    const count = notifications.filter(n => !n.read).length;
+    setUnreadCount(count);
+  }, [notifications]);
 
   const markAsRead = async (notificationId: string) => {
     try {
