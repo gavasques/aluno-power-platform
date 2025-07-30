@@ -10,7 +10,11 @@ import {
   CheckCircle2,
   Sparkles,
   Info,
-  X
+  X,
+  Plus,
+  MessageSquare,
+  Trash2,
+  Download
 } from "lucide-react";
 import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { apiRequest } from "@/lib/queryClient";
@@ -43,8 +47,16 @@ export default function AmazonListingsOptimizerNew() {
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [reviewsTab, setReviewsTab] = useState<"upload" | "text">("upload");
+  const [reviewsTab, setReviewsTab] = useState<"upload" | "text" | "extract">("upload");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  
+  // Estado para extração de reviews
+  const [extractState, setExtractState] = useState({
+    urls: [] as Array<{ id: string; asin: string; country: string }>,
+    extractedReviews: [] as any[],
+    isExtracting: false,
+    errors: [] as string[]
+  });
 
   // Buscar departamentos da API
   const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
@@ -66,6 +78,116 @@ export default function AmazonListingsOptimizerNew() {
 
   const removeFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  // Funções para extração de reviews
+  const addExtractUrl = () => {
+    setExtractState(prev => ({
+      ...prev,
+      urls: [...prev.urls, { id: crypto.randomUUID(), asin: '', country: 'BR' }]
+    }));
+  };
+
+  const updateExtractUrl = (id: string, field: 'asin' | 'country', value: string) => {
+    setExtractState(prev => ({
+      ...prev,
+      urls: prev.urls.map(url => 
+        url.id === id ? { ...url, [field]: value } : url
+      )
+    }));
+  };
+
+  const removeExtractUrl = (id: string) => {
+    setExtractState(prev => ({
+      ...prev,
+      urls: prev.urls.filter(url => url.id !== id)
+    }));
+  };
+
+  const extractReviews = async () => {
+    if (extractState.urls.filter(u => u.asin).length === 0) {
+      toast({
+        title: "Erro",
+        description: "Adicione pelo menos um ASIN para extrair reviews",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setExtractState(prev => ({ ...prev, isExtracting: true, errors: [] }));
+    const allReviews: any[] = [];
+
+    try {
+      for (const url of extractState.urls) {
+        if (!url.asin) continue;
+
+        try {
+          const response = await fetch('/api/amazon-reviews/extract', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              asin: url.asin.toUpperCase(),
+              country: url.country,
+              page: 1,
+              sort_by: 'MOST_RECENT'
+            })
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Erro ao extrair reviews');
+          }
+
+          const data = await response.json();
+          if (data.reviews) {
+            allReviews.push(...data.reviews.map((review: any) => ({
+              ...review,
+              asin: url.asin,
+              country: url.country
+            })));
+          }
+        } catch (error: any) {
+          setExtractState(prev => ({
+            ...prev,
+            errors: [...prev.errors, `ASIN ${url.asin}: ${error.message}`]
+          }));
+        }
+      }
+
+      if (allReviews.length > 0) {
+        // Converter reviews para formato de texto
+        const reviewsText = allReviews.map((review, index) => {
+          return `=== REVIEW ${index + 1} ===
+Título: ${review.review_title || 'Sem título'}
+Avaliação: ${review.review_star_rating || 'Sem avaliação'} estrelas
+Comentário: ${review.review_comment || 'Sem comentário'}
+`;
+        }).join('\n');
+
+        // Atualizar o campo de reviews com os dados extraídos
+        handleInputChange("reviewsData", reviewsText);
+        
+        setExtractState(prev => ({
+          ...prev,
+          extractedReviews: allReviews,
+          isExtracting: false
+        }));
+
+        toast({
+          title: "Extração concluída!",
+          description: `${allReviews.length} reviews extraídos com sucesso`,
+        });
+
+        // Mudar para aba de texto para mostrar os reviews
+        setReviewsTab("text");
+      }
+    } catch (error: any) {
+      setExtractState(prev => ({
+        ...prev,
+        isExtracting: false,
+        errors: [...prev.errors, `Erro geral: ${error.message}`]
+      }));
+    }
   };
 
   const { toast } = useToast();
@@ -200,7 +322,9 @@ export default function AmazonListingsOptimizerNew() {
   };
 
   const isFormValid = formData.productName && formData.brand && formData.category && 
-    (reviewsTab === "text" ? formData.reviewsData : uploadedFiles.length > 0);
+    (reviewsTab === "text" ? formData.reviewsData : 
+     reviewsTab === "upload" ? uploadedFiles.length > 0 :
+     extractState.extractedReviews.length > 0);
 
   return (
     <Layout>
@@ -294,7 +418,7 @@ export default function AmazonListingsOptimizerNew() {
                         <SelectContent>
                           {isDepartmentsLoading ? (
                             <SelectItem value="loading" disabled>Carregando categorias...</SelectItem>
-                          ) : departments?.length > 0 ? (
+                          ) : departments && departments.length > 0 ? (
                             departments.map((dept: any) => (
                               <SelectItem key={dept.id} value={dept.name}>
                                 {dept.name}
@@ -375,10 +499,11 @@ export default function AmazonListingsOptimizerNew() {
                   {/* Reviews Data */}
                   <div>
                     <Label>Dados das Avaliações dos Concorrentes *</Label>
-                    <Tabs value={reviewsTab} onValueChange={(value) => setReviewsTab(value as "upload" | "text")}>
-                      <TabsList className="grid w-full grid-cols-2">
+                    <Tabs value={reviewsTab} onValueChange={(value) => setReviewsTab(value as "upload" | "text" | "extract")}>
+                      <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="upload">Upload de Arquivos</TabsTrigger>
                         <TabsTrigger value="text">Texto Manual</TabsTrigger>
+                        <TabsTrigger value="extract">Extrair da Amazon</TabsTrigger>
                       </TabsList>
                       
                       <TabsContent value="upload" className="space-y-4">
@@ -441,6 +566,114 @@ export default function AmazonListingsOptimizerNew() {
                         <div className="flex justify-between text-xs text-gray-500 mt-1">
                           <span></span>
                           <span>{formData.reviewsData.length}/8000</span>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="extract" className="space-y-4">
+                        <div className="space-y-4">
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <p className="text-sm text-blue-700">
+                              Extraia avaliações diretamente da Amazon usando o ASIN dos produtos concorrentes.
+                            </p>
+                          </div>
+
+                          {/* Lista de ASINs */}
+                          <div className="space-y-3">
+                            {extractState.urls.map((url) => (
+                              <div key={url.id} className="flex gap-3">
+                                <div className="flex-1">
+                                  <Input
+                                    placeholder="ASIN (ex: B08N5WRWNW)"
+                                    value={url.asin}
+                                    onChange={(e) => updateExtractUrl(url.id, 'asin', e.target.value.toUpperCase())}
+                                    disabled={extractState.isExtracting}
+                                    maxLength={10}
+                                  />
+                                </div>
+                                <Select
+                                  value={url.country}
+                                  onValueChange={(value) => updateExtractUrl(url.id, 'country', value)}
+                                  disabled={extractState.isExtracting}
+                                >
+                                  <SelectTrigger className="w-[120px]">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="BR">Brasil</SelectItem>
+                                    <SelectItem value="US">EUA</SelectItem>
+                                    <SelectItem value="UK">Reino Unido</SelectItem>
+                                    <SelectItem value="DE">Alemanha</SelectItem>
+                                    <SelectItem value="ES">Espanha</SelectItem>
+                                    <SelectItem value="FR">França</SelectItem>
+                                    <SelectItem value="IT">Itália</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => removeExtractUrl(url.id)}
+                                  disabled={extractState.isExtracting}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Botão adicionar */}
+                          <Button
+                            variant="outline"
+                            onClick={addExtractUrl}
+                            disabled={extractState.isExtracting || extractState.urls.length >= 5}
+                            className="w-full"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Adicionar ASIN (máx. 5)
+                          </Button>
+
+                          {/* Erros */}
+                          {extractState.errors.length > 0 && (
+                            <Alert variant="destructive">
+                              <AlertCircle className="h-4 w-4" />
+                              <AlertDescription>
+                                <div className="space-y-1">
+                                  {extractState.errors.map((error, index) => (
+                                    <p key={index} className="text-sm">{error}</p>
+                                  ))}
+                                </div>
+                              </AlertDescription>
+                            </Alert>
+                          )}
+
+                          {/* Reviews extraídos */}
+                          {extractState.extractedReviews.length > 0 && (
+                            <Alert>
+                              <CheckCircle2 className="h-4 w-4" />
+                              <AlertDescription>
+                                {extractState.extractedReviews.length} reviews extraídos com sucesso!
+                                Os dados foram adicionados automaticamente.
+                              </AlertDescription>
+                            </Alert>
+                          )}
+
+                          {/* Botão extrair */}
+                          <Button
+                            onClick={extractReviews}
+                            disabled={extractState.isExtracting || extractState.urls.filter(u => u.asin).length === 0}
+                            className="w-full"
+                          >
+                            {extractState.isExtracting ? (
+                              <>
+                                <ButtonLoader />
+                                Extraindo Reviews...
+                              </>
+                            ) : (
+                              <>
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Extrair Reviews
+                              </>
+                            )}
+                          </Button>
                         </div>
                       </TabsContent>
                     </Tabs>
