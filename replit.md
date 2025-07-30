@@ -152,6 +152,21 @@ ComponentName/
     - **Structure**: Multi-step wizard with state management
     - **Features**: Product input, concept selection, AI generation, download
 
+13. **ContasBancariasManager** (666→200 lines) - 70% reduction
+    - **Path**: `client/src/components/financas360/ContasBancariasManager/`
+    - **Structure**: CRUD interface with filtering and validation
+    - **Features**: Bank account management, PIX integration, financial tracking
+
+14. **PackageManager** (654→180 lines) - 72% reduction
+    - **Path**: `client/src/components/imported-products/PackageManager/`
+    - **Structure**: Package tracking system with status management
+    - **Features**: Import tracking, cost calculation, delivery monitoring
+
+15. **ImportedProductSuppliersTab** (641→180 lines) - 72% reduction
+    - **Path**: `client/src/components/imported-products/ImportedProductSuppliersTab/`
+    - **Structure**: Product-supplier relationship management with sorting
+    - **Features**: Supplier assignment, cost tracking, lead time management, main supplier designation
+
 ### ✅ DRY REFACTORING PHASES COMPLETED (January 30, 2025)
 
 #### ETAPA 9: Channel Calculations Unified ✅
