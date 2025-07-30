@@ -14,7 +14,8 @@ import {
   Plus,
   MessageSquare,
   Trash2,
-  Download
+  Download,
+  ExternalLink
 } from "lucide-react";
 import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { apiRequest } from "@/lib/queryClient";
@@ -34,10 +35,8 @@ import Layout from "@/components/layout/Layout";
 import { useCreditSystem } from '@/hooks/useCreditSystem';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
 import { Progress } from '@/components/ui/progress';
-import { ExternalLink, MessageSquare, CheckCircle2, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/UserContext';
 import { useApiRequest } from '@/hooks/useApiRequest';
-import { ButtonLoader } from '@/components/ui/button-loader';
 
 export default function AmazonListingsOptimizerNew() {
   const [location, navigate] = useLocation();
@@ -65,18 +64,6 @@ export default function AmazonListingsOptimizerNew() {
     isExtracting: false,
     progress: 0,
     currentPage: 1,
-    totalPages: 10,
-    currentProduct: '',
-    errors: [] as string[]
-  });
-  
-  // Estado para extração de reviews
-  const [extractState, setExtractState] = useState({
-    products: [] as Array<{ url: string; country: string; maxPages: number }>,
-    extractedReviews: [] as any[],
-    isExtracting: false,
-    progress: 0,
-    currentPage: 0,
     totalPages: 10,
     currentProduct: '',
     errors: [] as string[]

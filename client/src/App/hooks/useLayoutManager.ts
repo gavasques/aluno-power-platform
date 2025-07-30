@@ -43,36 +43,28 @@ export function useLayoutManager(): UseLayoutManagerReturn {
     component: ComponentType<any>,
     layoutType: LayoutType = 'default',
     isProtected: boolean = true
-  ) => {
+  ): React.ReactNode => {
     const LayoutComponent = getLayoutComponent(layoutType);
     const ComponentToRender = component;
 
     // Create the component tree
-    let renderedComponent = React.createElement(
+    const wrappedComponent = React.createElement(
       Suspense,
       { fallback: React.createElement(PageLoader) },
       React.createElement(ComponentToRender)
     );
 
-    // Wrap with layout if specified
-    if (LayoutComponent) {
-      renderedComponent = React.createElement(
-        LayoutComponent,
-        {},
-        renderedComponent
-      );
-    }
+    // Apply layout wrapper if specified
+    const layoutWrapped = LayoutComponent 
+      ? React.createElement(LayoutComponent, { children: wrappedComponent })
+      : wrappedComponent;
 
-    // Wrap with protection if needed
-    if (isProtected) {
-      renderedComponent = React.createElement(
-        ProtectedRoute,
-        {},
-        renderedComponent
-      );
-    }
+    // Apply protection wrapper if needed
+    const finalComponent = isProtected 
+      ? React.createElement(ProtectedRoute, { children: layoutWrapped })
+      : layoutWrapped;
 
-    return renderedComponent;
+    return finalComponent;
   };
 
   return {

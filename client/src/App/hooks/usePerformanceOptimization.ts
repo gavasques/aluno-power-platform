@@ -63,13 +63,6 @@ export function usePerformanceOptimization(): UsePerformanceOptimizationReturn {
 
   return {
     isReady,
-    config,
-    performance: {
-      queryOptimization: null, 
-      backgroundSync: null,    
-      fontLoader: null,        
-      iconOptimization: null   
-    },
     initializeOptimizations,
     getOptimizationStatus
   };
