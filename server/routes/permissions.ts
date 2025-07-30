@@ -120,28 +120,53 @@ permissionRoutes.get("/groups/:groupId", requireAuth, async (req: Request, res: 
     const groupId = parseInt(req.params.groupId);
     console.log(`🔍 [DEBUG] Looking for group with ID: ${groupId}`);
     
-    // Get group from user_groups table
-    const group = await db
+    // Get group from permission_groups table
+    const groupResult = await db
       .select({
-        id: userGroups.id,
-        name: userGroups.name,
-        description: userGroups.description,
-        permissions: userGroups.permissions,
-        isActive: userGroups.isActive,
-        createdAt: userGroups.createdAt,
+        id: permissionGroups.id,
+        name: permissionGroups.name,
+        description: permissionGroups.description,
+        code: permissionGroups.code,
+        priority: permissionGroups.priority,
+        isActive: permissionGroups.isActive,
+        isSystem: permissionGroups.isSystem,
+        createdAt: permissionGroups.createdAt,
       })
-      .from(userGroups)
-      .where(eq(userGroups.id, groupId))
+      .from(permissionGroups)
+      .where(eq(permissionGroups.id, groupId))
       .limit(1);
     
-    console.log(`🔍 [DEBUG] Query result:`, group);
+    console.log(`🔍 [DEBUG] Query result:`, groupResult);
     
-    if (!group[0]) {
-      console.log(`❌ [DEBUG] Group ${groupId} not found in user_groups table`);
+    if (!groupResult[0]) {
+      console.log(`❌ [DEBUG] Group ${groupId} not found in permission_groups table`);
       return res.status(404).json({ error: "Group not found" });
     }
     
-    console.log(`✅ [DEBUG] Found group:`, group[0]);
+    // Get group permissions
+    const groupPermissionsResult = await db
+      .select({
+        featureCode: systemFeatures.code,
+        featureName: systemFeatures.name,
+        featureCategory: systemFeatures.category,
+        hasAccess: groupPermissions.hasAccess,
+      })
+      .from(groupPermissions)
+      .innerJoin(systemFeatures, eq(groupPermissions.featureId, systemFeatures.id))
+      .where(and(
+        eq(groupPermissions.groupId, groupId),
+        eq(groupPermissions.hasAccess, true)
+      ));
+    
+    // Build permissions array in the format expected by the frontend
+    const permissions = groupPermissionsResult.map(p => p.featureCode);
+    
+    const group = {
+      ...groupResult[0],
+      permissions
+    };
+    
+    console.log(`✅ [DEBUG] Found group:`, group);
 
     res.json({ group: group[0] });
   } catch (error) {
